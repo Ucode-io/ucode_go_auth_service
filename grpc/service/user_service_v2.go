@@ -92,6 +92,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	}, nil
 }
 
+//
 func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetUserList--->", logger.Any("req", req))
 

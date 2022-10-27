@@ -27,11 +27,11 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// if len(req.Password) < 6 {
-	// 	err := errors.New("invalid password")
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
+	if len(req.Password) < 6 {
+		err := errors.New("invalid password")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	data, err := s.services.LoginService().Login(ctx, &object_builder_service.LoginRequest{
 		Password:      req.Password,
 		Login:         req.Username,
@@ -170,7 +170,13 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	slugs["cashbox_transaction"] = 1
 	slugs["query"] = 1
 	slugs["event"] = 1
+	slugs["event-log"] = 1
 	slugs["permission-upsert"] = 1
+	slugs["custom-event"] = 1
+	slugs["excel"] = 1
+	slugs["field-permission"] = 1
+	slugs["function"] = 1
+	slugs["invoke_function"] = 1
 
 	if _, ok := slugs[tableSlug]; ok {
 		tableSlug = "app"
@@ -206,7 +212,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if session.ClientTypeId != "7959710a-ada3-4781-9732-f3884f700e16" || clientName.(string) != "ADMIN" {
+	if session.ClientTypeId != "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d" || clientName.(string) != "ADMIN" {
 		resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: "record_permission",
 			Data:      structPb,
@@ -353,16 +359,17 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	// // TODO - Delete all old sessions & refresh token has this function too
 	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.LoginData.UserId)
 	if err != nil {
-		s.log.Error("!!!SessionAndTokenGenerator--->", logger.Error(err))
+		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("SessionAndTokenGenerator--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
+	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
 
 	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
 	if err != nil {
-		s.log.Error("!!!SessionAndTokenGenerator--->", logger.Error(err))
+		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
 	input.LoginData.Sessions = userSessionList.Sessions
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
@@ -376,13 +383,13 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 	})
 	if err != nil {
-		s.log.Error("!!!SessionAndTokenGenerator--->", logger.Error(err))
+		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
 	if err != nil {
-		s.log.Error("!!!SessionAndTokenGenerator--->", logger.Error(err))
+		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if input.Tables == nil {
@@ -404,15 +411,16 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!SessionAndTokenGenerator--->", logger.Error(err))
+		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!SessionAndTokenGenerator--->", logger.Error(err))
+		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
 	input.LoginData.Token = &pb.Token{
 		AccessToken:      accessToken,
 		RefreshToken:     refreshToken,
@@ -421,6 +429,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		ExpiresAt:        session.ExpiresAt,
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
+
 	return input.LoginData, nil
 }
 
@@ -428,7 +437,7 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 
 	rowsAffected, err := s.strg.Session().UpdateByRoleId(ctx, input)
 	if err != nil {
-		s.log.Error("!!!UpdateSessionsByRoleId--->", logger.Error(err))
+		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	s.log.Info("UpdateByRoleId--->UpdateByRoleId", logger.Any("rowsAffected", rowsAffected))

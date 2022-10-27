@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -10,7 +11,6 @@ import (
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -192,7 +192,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 	}
 
 	resp, err := h.services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
-		PhoneNumber: body.Data["phone_number"].(string),
+		PhoneNumber: body.Data["phone"].(string),
 		ClientType:  "PATIENT",
 	})
 	if err != nil {

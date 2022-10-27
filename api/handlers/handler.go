@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"strconv"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
-	"strconv"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 

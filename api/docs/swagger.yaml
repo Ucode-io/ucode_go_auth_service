@@ -794,6 +794,8 @@ definitions:
       client_type:
         $ref: '#/definitions/auth_service.ClientType'
         type: object
+      login_table_slug:
+        type: string
       permissions:
         items:
           $ref: '#/definitions/auth_service.RecordPermission'
@@ -1075,6 +1077,8 @@ definitions:
       client_type:
         $ref: '#/definitions/object_builder_service.ClientType'
         type: object
+      login_table_slug:
+        type: string
       permissions:
         items:
           $ref: '#/definitions/object_builder_service.RecordPermission'

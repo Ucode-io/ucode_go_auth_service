@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"net"
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/storage/postgres"
-	"net"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 
@@ -60,8 +59,6 @@ func main() {
 			log.Panic("grpcServer.Serve", logger.Error(err))
 		}
 	}()
-	fmt.Println("sms port", cfg.SmsGRPCPort)
-	fmt.Println("sms host", cfg.AuthServiceHost)
 	h := handlers.NewHandler(cfg, log, svcs)
 
 	r := api.SetUpRouter(h, cfg)

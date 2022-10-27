@@ -8,6 +8,7 @@ import (
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	res := &pb.V2LoginResponse{}
 	res.UserId = data.UserId
+	res.LoginTableSlug = data.LoginTableSlug
 	tables := make([]*pb.Table, 0, len(data.ClientType.Tables))
 	for _, v := range data.ClientType.Tables {
 		table := &pb.Table{}
@@ -58,8 +59,4 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		ProjectId:        data.Role.ProjectId,
 	}
 	return res
-}
-
-func TokenGenerator(input *pbObject.V2LoginResponse) (*pb.V2LoginResponse, error) {
-	return nil, nil
 }

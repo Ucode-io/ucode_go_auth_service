@@ -8233,6 +8233,9 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/auth_service.ClientType"
                 },
+                "login_table_slug": {
+                    "type": "string"
+                },
                 "permissions": {
                     "type": "array",
                     "items": {
@@ -8658,6 +8661,9 @@ var doc = `{
                 "client_type": {
                     "type": "object",
                     "$ref": "#/definitions/object_builder_service.ClientType"
+                },
+                "login_table_slug": {
+                    "type": "string"
                 },
                 "permissions": {
                     "type": "array",

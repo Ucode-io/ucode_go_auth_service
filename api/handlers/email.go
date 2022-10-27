@@ -3,13 +3,13 @@ package handlers
 import (
 	"context"
 	"errors"
+	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -115,10 +115,6 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	if !body.Data.UserFound {
-		h.handleResponse(c, http.OK, "User verified but not found")
-		return
-	}
 	if c.Param("otp") != "1212" {
 		resp, err := h.services.EmailServie().GetEmailByID(
 			c.Request.Context(),
@@ -130,11 +126,14 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		
 		if resp.Otp != c.Param("otp") {
 			h.handleResponse(c, http.InvalidArgument, "Неверный код подверждения")
 			return
 		}
+	}
+	if !body.Data.UserFound {
+		h.handleResponse(c, http.OK, "User verified but not found")
+		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
@@ -190,8 +189,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	}
 
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
-		Email: body.Data["email"].(string),
-		ClientType:  "PATIENT",
+		Email:      body.Data["email"].(string),
+		ClientType: "PATIENT",
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())

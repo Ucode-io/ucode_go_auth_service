@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"errors"
-	"ucode/ucode_go_auth_service/api/http"
 	"strings"
+	"ucode/ucode_go_auth_service/api/http"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
@@ -52,6 +52,10 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	} else if httpErrorStr == "invalid username" {
 		err := errors.New("Неверное имя пользователя")
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	} else if httpErrorStr == "invalid password" {
+		err := errors.New("Неверное пароль")
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	} else if err != nil {
