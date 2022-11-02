@@ -118,3 +118,5 @@ func (r *permissionScopeRepo) HasAccess(ctx context.Context, roleID, clientPlatf
 
 	return false, nil
 }
+
+// just comment
