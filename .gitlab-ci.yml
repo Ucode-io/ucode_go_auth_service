@@ -3,8 +3,9 @@ include:
 
 stages:
   - build
-  # - deploy
-  # - rollback
+  - migrate
+  - deploy
+  - rollback
 
 build-staging:
   stage: build
@@ -13,19 +14,30 @@ build-staging:
     ENV_TAG: test
   only:
     - staging
-# deploy-staging:
-#   stage: deploy
-#   extends: .deploy_template
-#   variables:
-#     NAMESPACE: test
-#     KUBECONFIGJSON: $KUBECONFIG
-#   only:
-#     - staging
 
-# rollback-staging:
-#   stage: rollback
-#   extends: .rollback_template
-#   variables:
-#     NAMESPACE: test
-#     KUBECONFIGJSON: $KUBECONFIG
-#   when: manual
+migrate-staging:
+  stage: migrate
+  extends: .migrate_template
+  variables:
+    PATH_MIGRATION: migrations/postgres
+    POSTGRES_LINK: $UCODE_AUTH_SERVICE_TESTDB
+  only:
+    - staging
+
+deploy-staging:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    NAMESPACE: test
+    VALUES_FILE: .helm/values-test.yml
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
+  only:
+    - staging
+
+rollback-staging:
+  stage: rollback
+  extends: .rollback_template
+  variables:
+    NAMESPACE: test
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
+  when: manual
