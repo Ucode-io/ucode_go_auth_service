@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"time"
+	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -42,6 +43,8 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	fmt.Println("appPermission ::::", data.AppPermissions)
 
 	expiresAt, err := time.Parse(config.DatabaseTimeLayout, "2023-01-28T06:23:33.952Z")
 	if err != nil {

@@ -50,7 +50,22 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		permission.TableSlug = v.TableSlug
 		permissions = append(permissions, permission)
 	}
+
+	appPermissions := make([]*pb.RecordPermission, 0, len(data.Permissions))
+	for _, v := range data.AppPermissions {
+		appPermission := &pb.RecordPermission{}
+		appPermission.ClientTypeId = v.ClientTypeId
+		appPermission.Id = v.Guid
+		appPermission.Read = v.Read
+		appPermission.Write = v.Write
+		appPermission.Delete = v.Delete
+		appPermission.Update = v.Update
+		appPermission.RoleId = v.RoleId
+		appPermission.TableSlug = v.TableSlug
+		appPermissions = append(appPermissions, appPermission)
+	}
 	res.Permissions = permissions
+	res.AppPermissions = appPermissions
 	res.Role = &pb.Role{
 		Id:               data.Role.Guid,
 		ClientTypeId:     data.Role.ClientTypeId,

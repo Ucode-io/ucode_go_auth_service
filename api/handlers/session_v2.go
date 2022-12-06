@@ -63,7 +63,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("resp ::::", resp.AppPermissions)
+
 	h.handleResponse(c, http.Created, resp)
 }
 
