@@ -1,4 +1,4 @@
-FROM golang:1.16 as builder
+FROM golang:1.18 as builder
 
 #
 RUN mkdir -p $GOPATH/src/gitlab.udevs.io/ucode/ucode_go_auth_service 
