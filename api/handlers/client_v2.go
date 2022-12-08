@@ -11,7 +11,7 @@ import (
 )
 
 // V2CreateClientPlatform godoc
-// @ID create_client_platform
+// @ID create_client_platform_v2
 // @Router /v2/client-platform [POST]
 // @Summary Create ClientPlatform
 // @Description Create ClientPlatform
@@ -45,7 +45,7 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 }
 
 // V2GetClientPlatformList godoc
-// @ID get_client_platform_list
+// @ID get_client_platform_list_v2
 // @Router /v2/client-platform [GET]
 // @Summary Get ClientPlatform List
 // @Description  Get ClientPlatform List
@@ -89,7 +89,7 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 }
 
 // V2GetClientPlatformByID godoc
-// @ID get_client_platform_by_id
+// @ID get_client_platform_by_id_v2
 // @Router /v2/client-platform/{client-platform-id} [GET]
 // @Summary Get ClientPlatform By ID
 // @Description Get ClientPlatform By ID
@@ -124,7 +124,7 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 }
 
 // v2GetClientPlatformByID godoc
-// @ID get_client_platform_detailed_by_id
+// @ID get_client_platform_detailed_by_id_v2
 // @Router /v2/client-platform-detailed/{client-platform-id} [GET]
 // @Summary Get ClientPlatform By ID Detailed
 // @Description Get ClientPlatform By ID Detailed
@@ -159,7 +159,7 @@ func (h *Handler) V2GetClientPlatformByIDDetailed(c *gin.Context) {
 }
 
 // V2UpdateClientPlatform godoc
-// @ID update_client_platform
+// @ID update_client_platform_v2
 // @Router /v2/client-platform [PUT]
 // @Summary Update ClientPlatform
 // @Description Update ClientPlatform
@@ -193,7 +193,7 @@ func (h *Handler) V2UpdateClientPlatform(c *gin.Context) {
 }
 
 // V2DeleteClientPlatform godoc
-// @ID delete_client_platform
+// @ID delete_client_platform_v2
 // @Router /v2/client-platform/{client-platform-id} [DELETE]
 // @Summary Delete ClientPlatform
 // @Description Get ClientPlatform
@@ -228,14 +228,14 @@ func (h *Handler) V2DeleteClientPlatform(c *gin.Context) {
 }
 
 // V2CreateClientType godoc
-// @ID create_client_type
+// @ID create_client_type_v2
 // @Router /v2/client-type [POST]
 // @Summary Create ClientType
 // @Description Create ClientType
 // @Tags V2_ClientType
 // @Accept json
 // @Produce json
-// @Param client-type body models.CreateClientTypeRequest true "CreateClientTypeRequestBody"
+// @Param client-type body auth_service.CreateClientTypeRequest true "CreateClientTypeRequestBody"
 // @Success 201 {object} http.Response{data=auth_service.CommonMessage} "ClientType data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -262,7 +262,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 }
 
 // V2GetClientTypeList godoc
-// @ID get_client_type_list
+// @ID get_client_type_list_v2
 // @Router /v2/client-type [GET]
 // @Summary Get ClientType List
 // @Description  Get ClientType List
@@ -306,7 +306,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 }
 
 // V2GetClientTypeByID godoc
-// @ID get_client_type_by_id
+// @ID get_client_type_by_id_v2
 // @Router /v2/client-type/{client-type-id} [GET]
 // @Summary Get ClientType By ID
 // @Description Get ClientType By ID
@@ -341,14 +341,14 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 }
 
 // V2UpdateClientType godoc
-// @ID update_client_type
+// @ID update_client_type_v2
 // @Router /v2/client-type [PUT]
 // @Summary Update ClientType
 // @Description Update ClientType
 // @Tags V2_ClientType
 // @Accept json
 // @Produce json
-// @Param client-type body models.UpdateClientTypeRequest true "UpdateClientTypeRequestBody"
+// @Param client-type body auth_service.UpdateClientTypeRequest true "UpdateClientTypeRequestBody"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientType data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -375,7 +375,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 }
 
 // V2DeleteClientType godoc
-// @ID delete_client_type
+// @ID delete_client_type_v2
 // @Router /v2/client-type/{client-type-id} [DELETE]
 // @Summary Delete ClientType
 // @Description Get ClientType
@@ -410,7 +410,7 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 }
 
 // V2AddClient godoc
-// @ID create_client
+// @ID create_client_v2
 // @Router /v2/client [POST]
 // @Summary Create Client
 // @Description Create Client
@@ -444,7 +444,7 @@ func (h *Handler) V2AddClient(c *gin.Context) {
 }
 
 // V2GetClientMatrix godoc
-// @ID get_client_matrix
+// @ID get_client_matrix_v2
 // @Router /v2/client/{project-id} [GET]
 // @Summary Get Client Matrix
 // @Description Get Client Matrix
@@ -474,7 +474,7 @@ func (h *Handler) V2GetClientMatrix(c *gin.Context) {
 }
 
 // V2UpdateClient godoc
-// @ID update_client
+// @ID update_client_v2
 // @Router /v2/client [PUT]
 // @Summary Update Client
 // @Description Update Client
@@ -508,7 +508,7 @@ func (h *Handler) V2UpdateClient(c *gin.Context) {
 }
 
 // V2RemoveClient godoc
-// @ID remove_client
+// @ID remove_client_v2
 // @Router /v2/client [DELETE]
 // @Summary Delete Client
 // @Description Get Client
@@ -552,7 +552,7 @@ func (h *Handler) V2RemoveClient(c *gin.Context) {
 }
 
 // V2AddRelation godoc
-// @ID create_relation
+// @ID create_relation_v2
 // @Router /v2/relation [POST]
 // @Summary Create Relation
 // @Description Create Relation
@@ -586,7 +586,7 @@ func (h *Handler) V2AddRelation(c *gin.Context) {
 }
 
 // V2UpdateRelation godoc
-// @ID update_relation
+// @ID update_relation_v2
 // @Router /v2/relation [PUT]
 // @Summary Update Relation
 // @Description Update Relation
@@ -620,7 +620,7 @@ func (h *Handler) V2UpdateRelation(c *gin.Context) {
 }
 
 // V2RemoveRelation godoc
-// @ID delete_relation
+// @ID delete_relation_v2
 // @Router /v2/relation/{relation-id} [DELETE]
 // @Summary Delete Relation
 // @Description Get Relation
@@ -655,7 +655,7 @@ func (h *Handler) V2RemoveRelation(c *gin.Context) {
 }
 
 // V2AddUserInfoField godoc
-// @ID create_user_info_field
+// @ID create_user_info_field_v2
 // @Router /v2/user-info-field [POST]
 // @Summary Create UserInfoField
 // @Description Create UserInfoField
@@ -689,7 +689,7 @@ func (h *Handler) V2AddUserInfoField(c *gin.Context) {
 }
 
 // V2UpdateUserInfoField godoc
-// @ID update_user_info_field
+// @ID update_user_info_field_v2
 // @Router /v2/user-info-field [PUT]
 // @Summary Update UserInfoField
 // @Description Update UserInfoField
@@ -723,7 +723,7 @@ func (h *Handler) V2UpdateUserInfoField(c *gin.Context) {
 }
 
 // V2RemoveUserInfoField godoc
-// @ID delete_user_info_field
+// @ID delete_user_info_field_v2
 // @Router /v2/user-info-field/{user-info-field-id} [DELETE]
 // @Summary Delete UserInfoField
 // @Description Get UserInfoField

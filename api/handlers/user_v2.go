@@ -11,7 +11,7 @@ import (
 )
 
 // V2CreateUser godoc
-// @ID create_user
+// @ID create_user_v2
 // @Router /v2/user [POST]
 // @Summary Create User
 // @Description Create User
@@ -45,7 +45,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 }
 
 // V2GetUserList godoc
-// @ID get_user_list
+// @ID get_user_list_v2
 // @Router /v2/user [GET]
 // @Summary Get User List
 // @Description  Get User List
@@ -95,7 +95,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 }
 
 // V2GetUserByID godoc
-// @ID get_user_by_id
+// @ID get_user_by_id_v2
 // @Router /v2/user/{user-id} [GET]
 // @Summary Get User By ID
 // @Description Get User By ID
@@ -130,7 +130,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 }
 
 // V2UpdateUser godoc
-// @ID update_user
+// @ID update_user_v2
 // @Router /v2/user [PUT]
 // @Summary Update User
 // @Description Update User
@@ -164,7 +164,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 }
 
 // V2DeleteUser godoc
-// @ID delete_user
+// @ID delete_user_v2
 // @Router /v2/user/{user-id} [DELETE]
 // @Summary Delete User
 // @Description Get User

@@ -11,7 +11,7 @@ import (
 )
 
 // V2AddRole godoc
-// @ID create_role
+// @ID create_role_v2
 // @Router /v2/role [POST]
 // @Summary Create Role
 // @Description Create Role
@@ -45,7 +45,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 }
 
 // V2GetRoleById godoc
-// @ID get_role_by_id
+// @ID get_role_by_id_v2
 // @Router /v2/role/{role-id} [GET]
 // @Summary Get Role By ID
 // @Description Get Role By ID
@@ -76,7 +76,7 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 }
 
 // V2GetRolesList godoc
-// @ID get_roles_list
+// @ID get_roles_list_v2
 // @Router /v2/role [GET]
 // @Summary Get Roles List
 // @Description  Get Roles List
@@ -122,7 +122,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 }
 
 // V2UpdateRole godoc
-// @ID update_role
+// @ID update_role_v2
 // @Router /v2/role [PUT]
 // @Summary Update Role
 // @Description Update Role
@@ -156,7 +156,7 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 }
 
 // V2RemoveRole godoc
-// @ID delete_role
+// @ID delete_role_v2
 // @Router /v2/role/{role-id} [DELETE]
 // @Summary Delete Role
 // @Description Get Role
@@ -191,7 +191,7 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 }
 
 // V2CreatePermission godoc
-// @ID create_permission
+// @ID create_permission_v2
 // @Router /v2/permission [POST]
 // @Summary Create Permission
 // @Description Create Permission
@@ -225,7 +225,7 @@ func (h *Handler) V2CreatePermission(c *gin.Context) {
 }
 
 // V2GetPermissionList godoc
-// @ID get_permission_list
+// @ID get_permission_list_v2
 // @Router /v2/permission [GET]
 // @Summary Get Permission List
 // @Description  Get Permission List
@@ -269,7 +269,7 @@ func (h *Handler) V2GetPermissionList(c *gin.Context) {
 }
 
 // V2GetPermissionByID godoc
-// @ID get_permission_by_id
+// @ID get_permission_by_id_v2
 // @Router /v2/permission/{permission-id} [GET]
 // @Summary Get Permission By ID
 // @Description Get Permission By ID
@@ -304,7 +304,7 @@ func (h *Handler) V2GetPermissionByID(c *gin.Context) {
 }
 
 // V2UpdatePermission godoc
-// @ID update_permission
+// @ID update_permission_v2
 // @Router /v2/permission [PUT]
 // @Summary Update Permission
 // @Description Update Permission
@@ -338,7 +338,7 @@ func (h *Handler) V2UpdatePermission(c *gin.Context) {
 }
 
 // V2DeletePermission godoc
-// @ID delete_permission
+// @ID delete_permission_v2
 // @Router /v2/permission/{permission-id} [DELETE]
 // @Summary Delete Permission
 // @Description Get Permission
@@ -373,7 +373,7 @@ func (h *Handler) V2DeletePermission(c *gin.Context) {
 }
 
 // V2GetScopesList godoc
-// @ID get_scopes_list
+// @ID get_scopes_list_v2
 // @Router /v2/scope [GET]
 // @Summary Get Scopes List
 // @Description  Get Scopes List
@@ -429,7 +429,7 @@ func (h *Handler) V2GetScopesList(c *gin.Context) {
 }
 
 // V2AddPermissionScope godoc
-// @ID add_permission_scope
+// @ID add_permission_scope_v2
 // @Router /v2/permission-scope [POST]
 // @Summary Create PermissionScope
 // @Description Create PermissionScope
@@ -463,7 +463,7 @@ func (h *Handler) V2AddPermissionScope(c *gin.Context) {
 }
 
 // V2RemovePermissionScope godoc
-// @ID delete_permission_scope
+// @ID delete_permission_scope_v2
 // @Router /v2/permission-scope [DELETE]
 // @Summary Delete PermissionScope
 // @Description Get PermissionScope
@@ -497,7 +497,7 @@ func (h *Handler) V2RemovePermissionScope(c *gin.Context) {
 }
 
 // V2AddRolePermission godoc
-// @ID add_role_permission
+// @ID add_role_permission_v2
 // @Router /v2/role-permission [POST]
 // @Summary Create RolePermission
 // @Description Create RolePermission
@@ -531,7 +531,7 @@ func (h *Handler) V2AddRolePermission(c *gin.Context) {
 }
 
 // V2RemoveRolePermission godoc
-// @ID delete_role_permission
+// @ID delete_role_permission_v2
 // @Router /v2/role-permission [DELETE]
 // @Summary Delete RolePermission
 // @Description Get RolePermission

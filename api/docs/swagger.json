@@ -3,8 +3,7 @@
     "info": {
         "description": "This is a api gateway",
         "termsOfService": "https://udevs.io",
-        "contact": {},
-        "license": {}
+        "contact": {}
     },
     "paths": {
         "/client": {
@@ -45,6 +44,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -114,6 +131,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -161,6 +196,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -236,6 +289,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -293,6 +364,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -362,6 +451,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -419,6 +526,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -488,6 +613,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -533,6 +676,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -608,6 +769,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -665,6 +844,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.ClientType"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -734,6 +931,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -797,6 +1012,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -842,6 +1075,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -900,6 +1151,254 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.GetClientMatrixResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/company": {
+            "put": {
+                "description": "Update Company",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Update Company",
+                "operationId": "update_company",
+                "parameters": [
+                    {
+                        "description": "UpdateCompanyRequestBody",
+                        "name": "company",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.UpdateCompanyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Register Company",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Register Company",
+                "operationId": "create_company",
+                "parameters": [
+                    {
+                        "description": "RegisterCompanyRequestBody",
+                        "name": "company",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.RegisterCompanyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/company/{company-id}": {
+            "delete": {
+                "description": "Get Company",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Remove Company",
+                "operationId": "remove_company",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "company-id",
+                        "name": "company-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -1010,6 +1509,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1102,6 +1619,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1159,6 +1694,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.Integration"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -1228,6 +1781,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1273,6 +1844,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -1337,6 +1926,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1391,6 +1998,24 @@
                 "responses": {
                     "201": {
                         "description": "Add Session To Integration Response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -1477,6 +2102,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1529,6 +2172,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -1595,6 +2256,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1644,6 +2323,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -1719,6 +2416,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1782,6 +2497,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1839,6 +2572,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -1910,6 +2661,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1957,6 +2726,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -2021,6 +2808,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2066,6 +2871,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -2132,6 +2955,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2192,6 +3033,405 @@
                 }
             }
         },
+        "/project": {
+            "get": {
+                "description": "Get Project List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get Project List",
+                "operationId": "get_project_list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetProjectListResponseBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.GetProjectListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update Project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Update Project",
+                "operationId": "update_project",
+                "parameters": [
+                    {
+                        "description": "UpdateProjectRequestBody",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.UpdateProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Project data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.Project"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create Project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Create Project",
+                "operationId": "create_project",
+                "parameters": [
+                    {
+                        "description": "CreateProjectRequestBody",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.CreateProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Project data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.Project"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/project/{project-id}": {
+            "get": {
+                "description": "Get Project By ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get Project By ID",
+                "operationId": "get_project_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ProjectBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.Project"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Get Project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Delete Project",
+                "operationId": "delete_project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/refresh": {
             "put": {
                 "description": "Refresh Token",
@@ -2230,6 +3470,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -2308,6 +3566,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2380,6 +3656,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2439,6 +3733,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -2508,6 +3820,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2555,6 +3885,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -2636,6 +3984,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2699,6 +4065,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2756,6 +4140,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -2827,6 +4229,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2874,6 +4294,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -2934,6 +4372,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.AddRolePermissionsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3003,6 +4459,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3048,6 +4522,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -3142,6 +4634,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3201,6 +4711,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3272,6 +4800,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3331,6 +4877,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.Role"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3403,6 +4967,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.Role"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3501,6 +5083,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3564,6 +5164,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3621,6 +5239,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -3692,6 +5328,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3755,6 +5409,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3802,6 +5474,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -3868,6 +5558,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3915,6 +5623,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -3981,6 +5707,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4030,6 +5774,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -4094,6 +5856,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4140,6 +5920,24 @@
                     "204": {
                         "description": ""
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4174,7 +5972,7 @@
                     "V2_Client"
                 ],
                 "summary": "Update Client",
-                "operationId": "update_client",
+                "operationId": "update_client_v2",
                 "parameters": [
                     {
                         "description": "UpdateClientRequestBody",
@@ -4199,6 +5997,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4237,7 +6053,7 @@
                     "V2_Client"
                 ],
                 "summary": "Create Client",
-                "operationId": "create_client",
+                "operationId": "create_client_v2",
                 "parameters": [
                     {
                         "description": "AddClientRequestBody",
@@ -4262,6 +6078,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4300,7 +6134,7 @@
                     "V2_Client"
                 ],
                 "summary": "Delete Client",
-                "operationId": "remove_client",
+                "operationId": "remove_client_v2",
                 "parameters": [
                     {
                         "description": "RemoveClientBody",
@@ -4315,6 +6149,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -4350,7 +6202,7 @@
                     "V2_ClientPlatform"
                 ],
                 "summary": "Get ClientPlatform List",
-                "operationId": "get_client_platform_list",
+                "operationId": "get_client_platform_list_v2",
                 "parameters": [
                     {
                         "type": "integer",
@@ -4390,6 +6242,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4422,7 +6292,7 @@
                     "V2_ClientPlatform"
                 ],
                 "summary": "Update ClientPlatform",
-                "operationId": "update_client_platform",
+                "operationId": "update_client_platform_v2",
                 "parameters": [
                     {
                         "description": "UpdateClientPlatformRequestBody",
@@ -4447,6 +6317,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4485,7 +6373,7 @@
                     "V2_ClientPlatform"
                 ],
                 "summary": "Create ClientPlatform",
-                "operationId": "create_client_platform",
+                "operationId": "create_client_platform_v2",
                 "parameters": [
                     {
                         "description": "CreateClientPlatformRequestBody",
@@ -4510,6 +6398,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4550,7 +6456,7 @@
                     "V2_ClientPlatform"
                 ],
                 "summary": "Get ClientPlatform By ID Detailed",
-                "operationId": "get_client_platform_detailed_by_id",
+                "operationId": "get_client_platform_detailed_by_id_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -4573,6 +6479,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4613,7 +6537,7 @@
                     "V2_ClientPlatform"
                 ],
                 "summary": "Get ClientPlatform By ID",
-                "operationId": "get_client_platform_by_id",
+                "operationId": "get_client_platform_by_id_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -4636,6 +6560,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4674,7 +6616,7 @@
                     "V2_ClientPlatform"
                 ],
                 "summary": "Delete ClientPlatform",
-                "operationId": "delete_client_platform",
+                "operationId": "delete_client_platform_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -4687,6 +6629,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -4722,7 +6682,7 @@
                     "V2_ClientType"
                 ],
                 "summary": "Get ClientType List",
-                "operationId": "get_client_type_list",
+                "operationId": "get_client_type_list_v2",
                 "parameters": [
                     {
                         "type": "integer",
@@ -4762,6 +6722,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4794,7 +6772,7 @@
                     "V2_ClientType"
                 ],
                 "summary": "Update ClientType",
-                "operationId": "update_client_type",
+                "operationId": "update_client_type_v2",
                 "parameters": [
                     {
                         "description": "UpdateClientTypeRequestBody",
@@ -4802,7 +6780,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateClientTypeRequest"
+                            "$ref": "#/definitions/auth_service.UpdateClientTypeRequest"
                         }
                     }
                 ],
@@ -4819,6 +6797,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4857,7 +6853,7 @@
                     "V2_ClientType"
                 ],
                 "summary": "Create ClientType",
-                "operationId": "create_client_type",
+                "operationId": "create_client_type_v2",
                 "parameters": [
                     {
                         "description": "CreateClientTypeRequestBody",
@@ -4865,7 +6861,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateClientTypeRequest"
+                            "$ref": "#/definitions/auth_service.CreateClientTypeRequest"
                         }
                     }
                 ],
@@ -4882,6 +6878,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4922,7 +6936,7 @@
                     "V2_ClientType"
                 ],
                 "summary": "Get ClientType By ID",
-                "operationId": "get_client_type_by_id",
+                "operationId": "get_client_type_by_id_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -4945,6 +6959,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -4983,7 +7015,7 @@
                     "V2_ClientType"
                 ],
                 "summary": "Delete ClientType",
-                "operationId": "delete_client_type",
+                "operationId": "delete_client_type_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -4996,6 +7028,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -5031,7 +7081,7 @@
                     "V2_Client"
                 ],
                 "summary": "Get Client Matrix",
-                "operationId": "get_client_matrix",
+                "operationId": "get_client_matrix_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -5054,6 +7104,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5125,6 +7193,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5159,7 +7245,7 @@
                     "V2_Permission"
                 ],
                 "summary": "Get Permission List",
-                "operationId": "get_permission_list",
+                "operationId": "get_permission_list_v2",
                 "parameters": [
                     {
                         "type": "integer",
@@ -5199,6 +7285,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5231,7 +7335,7 @@
                     "V2_Permission"
                 ],
                 "summary": "Update Permission",
-                "operationId": "update_permission",
+                "operationId": "update_permission_v2",
                 "parameters": [
                     {
                         "description": "UpdatePermissionRequestBody",
@@ -5256,6 +7360,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5294,7 +7416,7 @@
                     "V2_Permission"
                 ],
                 "summary": "Create Permission",
-                "operationId": "create_permission",
+                "operationId": "create_permission_v2",
                 "parameters": [
                     {
                         "description": "CreatePermissionRequestBody",
@@ -5319,6 +7441,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5359,7 +7499,7 @@
                     "V2_PermissionScope"
                 ],
                 "summary": "Create PermissionScope",
-                "operationId": "add_permission_scope",
+                "operationId": "add_permission_scope_v2",
                 "parameters": [
                     {
                         "description": "AddPermissionScopeRequestBody",
@@ -5384,6 +7524,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5422,7 +7580,7 @@
                     "V2_PermissionScope"
                 ],
                 "summary": "Delete PermissionScope",
-                "operationId": "delete_permission_scope",
+                "operationId": "delete_permission_scope_v2",
                 "parameters": [
                     {
                         "description": "PermissionScopePrimaryKeyBody",
@@ -5437,6 +7595,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -5472,7 +7648,7 @@
                     "V2_Permission"
                 ],
                 "summary": "Get Permission By ID",
-                "operationId": "get_permission_by_id",
+                "operationId": "get_permission_by_id_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -5495,6 +7671,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5533,7 +7727,7 @@
                     "V2_Permission"
                 ],
                 "summary": "Delete Permission",
-                "operationId": "delete_permission",
+                "operationId": "delete_permission_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -5546,6 +7740,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -5612,6 +7824,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5646,7 +7876,7 @@
                     "V2_Relation"
                 ],
                 "summary": "Update Relation",
-                "operationId": "update_relation",
+                "operationId": "update_relation_v2",
                 "parameters": [
                     {
                         "description": "UpdateRelationRequestBody",
@@ -5671,6 +7901,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5709,7 +7957,7 @@
                     "V2_Relation"
                 ],
                 "summary": "Create Relation",
-                "operationId": "create_relation",
+                "operationId": "create_relation_v2",
                 "parameters": [
                     {
                         "description": "AddRelationRequestBody",
@@ -5734,6 +7982,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5774,7 +8040,7 @@
                     "V2_Relation"
                 ],
                 "summary": "Delete Relation",
-                "operationId": "delete_relation",
+                "operationId": "delete_relation_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -5787,6 +8053,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -5822,7 +8106,7 @@
                     "V2_Role"
                 ],
                 "summary": "Get Roles List",
-                "operationId": "get_roles_list",
+                "operationId": "get_roles_list_v2",
                 "parameters": [
                     {
                         "type": "integer",
@@ -5868,6 +8152,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5900,7 +8202,7 @@
                     "V2_Role"
                 ],
                 "summary": "Update Role",
-                "operationId": "update_role",
+                "operationId": "update_role_v2",
                 "parameters": [
                     {
                         "description": "UpdateRoleRequestBody",
@@ -5925,6 +8227,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5963,7 +8283,7 @@
                     "V2_Role"
                 ],
                 "summary": "Create Role",
-                "operationId": "create_role",
+                "operationId": "create_role_v2",
                 "parameters": [
                     {
                         "description": "AddRoleRequestBody",
@@ -5988,6 +8308,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6028,7 +8366,7 @@
                     "V2_RolePermission"
                 ],
                 "summary": "Create RolePermission",
-                "operationId": "add_role_permission",
+                "operationId": "add_role_permission_v2",
                 "parameters": [
                     {
                         "description": "AddRolePermissionRequestBody",
@@ -6053,6 +8391,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6091,7 +8447,7 @@
                     "V2_RolePermission"
                 ],
                 "summary": "Delete RolePermission",
-                "operationId": "delete_role_permission",
+                "operationId": "delete_role_permission_v2",
                 "parameters": [
                     {
                         "description": "RolePermissionPrimaryKeyBody",
@@ -6106,6 +8462,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -6141,7 +8515,7 @@
                     "V2_Role"
                 ],
                 "summary": "Get Role By ID",
-                "operationId": "get_role_by_id",
+                "operationId": "get_role_by_id_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -6164,6 +8538,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6202,7 +8594,7 @@
                     "V2_Role"
                 ],
                 "summary": "Delete Role",
-                "operationId": "delete_role",
+                "operationId": "delete_role_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -6215,6 +8607,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -6250,7 +8660,7 @@
                     "V2_Scope"
                 ],
                 "summary": "Get Scopes List",
-                "operationId": "get_scopes_list",
+                "operationId": "get_scopes_list_v2",
                 "parameters": [
                     {
                         "type": "integer",
@@ -6309,6 +8719,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6343,7 +8771,7 @@
                     "V2_User"
                 ],
                 "summary": "Get User List",
-                "operationId": "get_user_list",
+                "operationId": "get_user_list_v2",
                 "parameters": [
                     {
                         "type": "integer",
@@ -6401,6 +8829,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6433,7 +8879,7 @@
                     "V2_User"
                 ],
                 "summary": "Update User",
-                "operationId": "update_user",
+                "operationId": "update_user_v2",
                 "parameters": [
                     {
                         "description": "UpdateUserRequestBody",
@@ -6458,6 +8904,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6496,7 +8960,7 @@
                     "V2_User"
                 ],
                 "summary": "Create User",
-                "operationId": "create_user",
+                "operationId": "create_user_v2",
                 "parameters": [
                     {
                         "description": "CreateUserRequestBody",
@@ -6521,6 +8985,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6561,7 +9043,7 @@
                     "V2_UserInfoField"
                 ],
                 "summary": "Update UserInfoField",
-                "operationId": "update_user_info_field",
+                "operationId": "update_user_info_field_v2",
                 "parameters": [
                     {
                         "description": "UpdateUserInfoFieldRequestBody",
@@ -6586,6 +9068,24 @@
                                     "properties": {
                                         "data": {
                                             "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -6624,7 +9124,7 @@
                     "V2_UserInfoField"
                 ],
                 "summary": "Create UserInfoField",
-                "operationId": "create_user_info_field",
+                "operationId": "create_user_info_field_v2",
                 "parameters": [
                     {
                         "description": "AddUserInfoFieldRequestBody",
@@ -6649,6 +9149,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6689,7 +9207,7 @@
                     "V2_UserInfoField"
                 ],
                 "summary": "Delete UserInfoField",
-                "operationId": "delete_user_info_field",
+                "operationId": "delete_user_info_field_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -6702,6 +9220,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -6737,7 +9273,7 @@
                     "V2_User"
                 ],
                 "summary": "Get User By ID",
-                "operationId": "get_user_by_id",
+                "operationId": "get_user_by_id_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -6760,6 +9296,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6798,7 +9352,7 @@
                     "V2_User"
                 ],
                 "summary": "Delete User",
-                "operationId": "delete_user",
+                "operationId": "delete_user_v2",
                 "parameters": [
                     {
                         "type": "string",
@@ -6811,6 +9365,24 @@
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "500": {
                         "description": "Server Error",
@@ -6846,7 +9418,7 @@
                     "Email"
                 ],
                 "summary": "Verify",
-                "operationId": "verify",
+                "operationId": "verify_email",
                 "parameters": [
                     {
                         "type": "string",
@@ -6885,6 +9457,24 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -6970,6 +9560,24 @@
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7006,7 +9614,6 @@
                     "type": "integer"
                 },
                 "login_table": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.LoginTable"
                 },
                 "login_value": {
@@ -7224,7 +9831,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "string"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "table_slug": {
                     "type": "string"
@@ -7235,7 +9842,6 @@
             "type": "object",
             "properties": {
                 "client_type": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.ClientType"
                 },
                 "relations": {
@@ -7340,6 +9946,20 @@
                     "type": "string"
                 },
                 "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.CreateProjectRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -7457,6 +10077,20 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/auth_service.Session"
+                    }
+                }
+            }
+        },
+        "auth_service.GetProjectListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Project"
                     }
                 }
             }
@@ -7668,6 +10302,29 @@
                 }
             }
         },
+        "auth_service.Project": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.RecordPermission": {
             "type": "object",
             "properties": {
@@ -7701,6 +10358,34 @@
             "type": "object",
             "properties": {
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.RegisterCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "user_info": {
+                    "$ref": "#/definitions/auth_service.RegisterCompanyRequest_RegisterUserInfo"
+                }
+            }
+        },
+        "auth_service.RegisterCompanyRequest_RegisterUserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }
@@ -7832,7 +10517,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "string"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -7907,7 +10592,6 @@
                     "type": "integer"
                 },
                 "login_table": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.LoginTable"
                 },
                 "login_value": {
@@ -7956,6 +10640,17 @@
                 }
             }
         },
+        "auth_service.UpdateCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.UpdatePermissionRequest": {
             "type": "object",
             "properties": {
@@ -7969,6 +10664,20 @@
                     "type": "string"
                 },
                 "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.UpdateProjectRequest": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -8207,11 +10916,9 @@
             "type": "object",
             "properties": {
                 "client_platform": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.ClientPlatform"
                 },
                 "client_type": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.ClientType"
                 },
                 "login_table_slug": {
@@ -8224,7 +10931,6 @@
                     }
                 },
                 "role": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.Role"
                 },
                 "sessions": {
@@ -8234,7 +10940,6 @@
                     }
                 },
                 "token": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.Token"
                 },
                 "user_found": {
@@ -8255,7 +10960,6 @@
                     }
                 },
                 "token": {
-                    "type": "object",
                     "$ref": "#/definitions/auth_service.Token"
                 }
             }
@@ -8335,40 +11039,12 @@
         "http.Response": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object"
-                },
+                "data": {},
                 "description": {
                     "type": "string"
                 },
                 "status": {
                     "type": "string"
-                }
-            }
-        },
-        "models.CreateClientTypeRequest": {
-            "type": "object",
-            "properties": {
-                "confirm_by": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "self_recover": {
-                    "type": "boolean"
-                },
-                "self_register": {
-                    "type": "boolean"
-                },
-                "table": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Table"
-                    }
                 }
             }
         },
@@ -8396,7 +11072,6 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.V2LoginResponse"
                 },
                 "sms_id": {
@@ -8427,89 +11102,16 @@
                 }
             }
         },
-        "models.Table": {
-            "type": "object",
-            "properties": {
-                "icon": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "view_field": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ViewField"
-                    }
-                }
-            }
-        },
-        "models.UpdateClientTypeRequest": {
-            "type": "object",
-            "properties": {
-                "client_platform_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "confirm_by": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "self_recover": {
-                    "type": "boolean"
-                },
-                "self_register": {
-                    "type": "boolean"
-                },
-                "table": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Table"
-                    }
-                }
-            }
-        },
         "models.Verify": {
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.V2LoginResponse"
                 },
                 "tables": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/auth_service.Object"
-                    }
-                }
-            }
-        },
-        "models.ViewField": {
-            "type": "object",
-            "properties": {
-                "label": {
-                    "type": "string"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "view_field": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
                     }
                 }
             }
@@ -8613,7 +11215,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "string"
+                    "$ref": "#/definitions/structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -8636,11 +11238,9 @@
             "type": "object",
             "properties": {
                 "client_platform": {
-                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.ClientPlatform"
                 },
                 "client_type": {
-                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.ClientType"
                 },
                 "login_table_slug": {
@@ -8653,7 +11253,6 @@
                     }
                 },
                 "role": {
-                    "type": "object",
                     "$ref": "#/definitions/object_builder_service.Role"
                 },
                 "user_found": {
@@ -8661,6 +11260,26 @@
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
+        },
+        "structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         }

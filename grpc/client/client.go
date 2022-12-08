@@ -19,6 +19,8 @@ type ServiceManagerI interface {
 	SmsService() sms_service.SmsServiceClient
 	LoginService() object_builder_service.LoginServiceClient
 	EmailServie() auth_service.EmailOtpServiceClient
+	CompanyService() auth_service.CompanyServiceClient
+	ProjectService() auth_service.ProjectServiceClient
 }
 
 type grpcClients struct {
@@ -31,6 +33,8 @@ type grpcClients struct {
 	smsService           sms_service.SmsServiceClient
 	loginService         object_builder_service.LoginServiceClient
 	emailServie          auth_service.EmailOtpServiceClient
+	companyService       auth_service.CompanyServiceClient
+	projectService       auth_service.ProjectServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -67,6 +71,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		smsService:           sms_service.NewSmsServiceClient(connSmsService),
 		loginService:         object_builder_service.NewLoginServiceClient(connObjectBuilderService),
 		emailServie:          auth_service.NewEmailOtpServiceClient(connAuthService),
+		companyService:       auth_service.NewCompanyServiceClient(connAuthService),
+		projectService:       auth_service.NewProjectServiceClient(connAuthService),
 	}, nil
 }
 
@@ -104,4 +110,12 @@ func (g *grpcClients) LoginService() object_builder_service.LoginServiceClient {
 
 func (g *grpcClients) EmailServie() auth_service.EmailOtpServiceClient {
 	return g.emailServie
+}
+
+func (g *grpcClients) CompanyService() auth_service.CompanyServiceClient {
+	return g.companyService
+}
+
+func (g *grpcClients) ProjectService() auth_service.ProjectServiceClient {
+	return g.projectService
 }

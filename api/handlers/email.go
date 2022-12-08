@@ -6,6 +6,7 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
+	_ "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -95,7 +96,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 }
 
 // Verify godoc
-// @ID verify
+// @ID verify_email
 // @Router /verify-email/{sms_id}/{otp} [POST]
 // @Summary Verify
 // @Description Verify
@@ -110,6 +111,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) VerifyEmail(c *gin.Context) {
 	var body models.Verify
+
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

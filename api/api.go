@@ -158,6 +158,21 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.POST("/login", h.V2Login)
 		v2.PUT("/refresh", h.V2RefreshToken)
 	}
+
+	//COMPANY
+	r.POST("/company", h.RegisterCompany)
+	r.PUT("/company", h.UpdateCompany)
+	r.DELETE("/company/:company-id", h.RemoveCompany)
+
+	r.GET("/saidakbar", h.Saidakbar)
+
+	//PROJECT
+	r.POST("/project", h.CreateProject)
+	r.PUT("/project", h.UpdateProject)
+	r.GET("/project", h.GetProjectList)
+	r.GET("project/:project-id", h.GetProjectByID)
+	r.DELETE("/project/:project-id", h.DeleteProject)
+
 	r.POST("/send-code", h.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.Verify)
 	r.POST("/register-otp/:table_slug", h.RegisterOtp)

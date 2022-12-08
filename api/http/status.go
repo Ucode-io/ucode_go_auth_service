@@ -73,6 +73,11 @@ var (
 		Status:      "NOT_FOUND",
 		Description: "The user not found",
 	}
+	ServiceUnavailable = Status{
+		Code:        503,
+		Status:      "SERVICE_UNAVAILABLE",
+		Description: "The server was unable to process data",
+	}
 )
 
 // Can be added as many as need like belove examples

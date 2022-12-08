@@ -6,6 +6,7 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
+	_ "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
