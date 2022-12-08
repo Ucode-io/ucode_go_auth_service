@@ -164,8 +164,6 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.PUT("/company", h.UpdateCompany)
 	r.DELETE("/company/:company-id", h.RemoveCompany)
 
-	r.GET("/saidakbar", h.Saidakbar)
-
 	//PROJECT
 	r.POST("/project", h.CreateProject)
 	r.PUT("/project", h.UpdateProject)

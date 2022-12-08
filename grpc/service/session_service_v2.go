@@ -111,7 +111,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	}
 
 	_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
-		ClientPlatformId: req.ClientPlatformId,
+		ClientPlatformId: session.ClientPlatformId,
 		Path:             req.Path,
 		Method:           req.Method,
 	})
