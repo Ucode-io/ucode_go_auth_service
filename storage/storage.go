@@ -27,6 +27,8 @@ type StorageI interface {
 	UserInfo() UserInfoRepoI
 	Session() SessionRepoI
 	Email() EmailRepoI
+	Company() CompanyRepoI
+	Project() ProjectRepoI
 }
 
 type ClientPlatformRepoI interface {
@@ -160,4 +162,18 @@ type SessionRepoI interface {
 type EmailRepoI interface {
 	Create(ctx context.Context, input *pb.Email) (*pb.Email, error)
 	GetByPK(ctx context.Context, input *pb.EmailOtpPrimaryKey) (*pb.Email, error)
+}
+
+type CompanyRepoI interface {
+	Register(ctx context.Context, entity *pb.RegisterCompanyRequest) (pKey *pb.CompanyPrimaryKey, err error)
+	Update(ctx context.Context, entity *pb.UpdateCompanyRequest) (rowsAffected int64, err error)
+	Remove(ctx context.Context, pKey *pb.CompanyPrimaryKey) (rowsAffected int64, err error)
+}
+
+type ProjectRepoI interface {
+	Create(ctx context.Context, entity *pb.CreateProjectRequest) (pKey *pb.ProjectPrimaryKey, err error)
+	GetList(ctx context.Context, queryParam *pb.GetProjectListRequest) (res *pb.GetProjectListResponse, err error)
+	GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (res *pb.Project, err error)
+	Update(ctx context.Context, entity *pb.UpdateProjectRequest) (rowsAffected int64, err error)
+	Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (rowsAffected int64, err error)
 }

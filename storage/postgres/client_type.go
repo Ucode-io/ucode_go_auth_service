@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
@@ -37,17 +36,13 @@ func (r *clientTypeRepo) Create(ctx context.Context, entity *pb.CreateClientType
 		$3,
 		$4,
 		$5,
-		$6,
-		$7
+		$6
 	)`
 
 	uuid, err := uuid.NewRandom()
-	fmt.Println("err: ", err)
 	if err != nil {
 		return pKey, err
 	}
-
-	fmt.Println("tables: ", entity.Tables)
 
 	_, err = r.db.Exec(ctx, query,
 		uuid.String(),
@@ -57,7 +52,7 @@ func (r *clientTypeRepo) Create(ctx context.Context, entity *pb.CreateClientType
 		entity.SelfRegister,
 		entity.SelfRecover,
 	)
-	fmt.Println("err 2: ", err)
+
 	pKey = &pb.ClientTypePrimaryKey{
 		Id: uuid.String(),
 	}
