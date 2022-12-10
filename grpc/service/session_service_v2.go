@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
-	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -376,7 +376,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	input.LoginData.Sessions = userSessionList.Sessions
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
-		ProjectId:        input.LoginData.ClientType.ProjectId,
+		ProjectId:        input.ProjectId,
 		ClientPlatformId: input.LoginData.ClientPlatform.Id,
 		ClientTypeId:     input.LoginData.ClientType.Id,
 		UserId:           input.LoginData.UserId,

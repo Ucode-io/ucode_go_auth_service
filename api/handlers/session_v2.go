@@ -31,6 +31,11 @@ func (h *Handler) V2Login(c *gin.Context) {
 	}
 	if login.ClientType == "" {
 		h.handleResponse(c, http.BadRequest, "Необходимо выбрать тип пользователя")
+		return
+	}
+	if login.ProjectId == "" {
+		h.handleResponse(c, http.BadRequest, "Необходимо выбрать проекта")
+		return
 	}
 
 	resp, err := h.services.SessionService().V2Login(
