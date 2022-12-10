@@ -3,6 +3,7 @@ package client
 import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 
@@ -21,6 +22,8 @@ type ServiceManagerI interface {
 	EmailServie() auth_service.EmailOtpServiceClient
 	CompanyService() auth_service.CompanyServiceClient
 	ProjectService() auth_service.ProjectServiceClient
+	CompanyServiceClient() company_service.CompanyServiceClient
+	ProjectServiceClient() company_service.ProjectServiceClient
 }
 
 type grpcClients struct {
@@ -35,6 +38,8 @@ type grpcClients struct {
 	emailServie          auth_service.EmailOtpServiceClient
 	companyService       auth_service.CompanyServiceClient
 	projectService       auth_service.ProjectServiceClient
+	companyServiceClient company_service.CompanyServiceClient
+	projectServiceClient company_service.ProjectServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -53,7 +58,16 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	connSmsService, err := grpc.Dial(
+		cfg.SmsServiceHost+cfg.SmsGRPCPort,
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	connCompanyService, err := grpc.Dial(
 		cfg.SmsServiceHost+cfg.SmsGRPCPort,
 		grpc.WithInsecure(),
 	)
@@ -73,6 +87,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		emailServie:          auth_service.NewEmailOtpServiceClient(connAuthService),
 		companyService:       auth_service.NewCompanyServiceClient(connAuthService),
 		projectService:       auth_service.NewProjectServiceClient(connAuthService),
+		companyServiceClient: company_service.NewCompanyServiceClient(connCompanyService),
+		projectServiceClient: company_service.NewProjectServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -118,4 +134,12 @@ func (g *grpcClients) CompanyService() auth_service.CompanyServiceClient {
 
 func (g *grpcClients) ProjectService() auth_service.ProjectServiceClient {
 	return g.projectService
+}
+
+func (g *grpcClients) CompanyServiceClient() company_service.CompanyServiceClient {
+	return g.companyServiceClient
+}
+
+func (g *grpcClients) ProjectServiceClient() company_service.ProjectServiceClient {
+	return g.projectServiceClient
 }

@@ -10933,6 +10933,12 @@ var doc = `{
         "auth_service.V2LoginResponse": {
             "type": "object",
             "properties": {
+                "app_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.RecordPermission"
+                    }
+                },
                 "client_platform": {
                     "$ref": "#/definitions/auth_service.ClientPlatform"
                 },
@@ -10989,6 +10995,12 @@ var doc = `{
                     "type": "string"
                 },
                 "authServiceHost": {
+                    "type": "string"
+                },
+                "companyGRPCPort": {
+                    "type": "string"
+                },
+                "companyServiceHost": {
                     "type": "string"
                 },
                 "defaultLimit": {
@@ -11255,6 +11267,12 @@ var doc = `{
         "object_builder_service.V2LoginResponse": {
             "type": "object",
             "properties": {
+                "app_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.RecordPermission"
+                    }
+                },
                 "client_platform": {
                     "$ref": "#/definitions/object_builder_service.ClientPlatform"
                 },

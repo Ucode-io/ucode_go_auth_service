@@ -852,6 +852,10 @@ definitions:
     type: object
   auth_service.V2LoginResponse:
     properties:
+      app_permissions:
+        items:
+          $ref: '#/definitions/auth_service.RecordPermission'
+        type: array
       client_platform:
         $ref: '#/definitions/auth_service.ClientPlatform'
       client_type:
@@ -889,6 +893,10 @@ definitions:
       authGRPCPort:
         type: string
       authServiceHost:
+        type: string
+      companyGRPCPort:
+        type: string
+      companyServiceHost:
         type: string
       defaultLimit:
         type: string
@@ -1063,6 +1071,10 @@ definitions:
     type: object
   object_builder_service.V2LoginResponse:
     properties:
+      app_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.RecordPermission'
+        type: array
       client_platform:
         $ref: '#/definitions/object_builder_service.ClientPlatform'
       client_type:

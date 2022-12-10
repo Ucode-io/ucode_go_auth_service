@@ -33,6 +33,7 @@ message LoginResponse {
     Token token = 6;
     repeated Permission permissions = 7;
     repeated Session sessions = 8;   
+    repeated Company companies = 9;
 }
 
 message LogoutRequest {
