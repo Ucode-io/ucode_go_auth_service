@@ -236,34 +236,36 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	clientName := convertedClientType["response"].(map[string]interface{})["name"]
-
-	if clientName == nil {
-		err := errors.New("Wrong client type")
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if session.ClientTypeId != "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d" || clientName.(string) != "ADMIN" {
-		resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-			TableSlug: "record_permission",
-			Data:      structPb,
-		})
-		if err != nil {
-			s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		res, err = helper.ConvertStructToResponse(resp.Data)
-		if err != nil {
-			s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		if len(res["response"].([]interface{})) == 0 {
-			err := errors.New("Permission denied")
+	clientName, ok := convertedClientType["response"].(map[string]interface{})["name"]
+	if !ok {
+		if clientName == nil {
+			err := errors.New("Wrong client type")
 			s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-			return nil, status.Error(codes.PermissionDenied, err.Error())
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		if session.ClientTypeId != "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d" || clientName.(string) != "ADMIN" {
+			resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+				TableSlug: "record_permission",
+				Data:      structPb,
+			})
+			if err != nil {
+				s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			res, err = helper.ConvertStructToResponse(resp.Data)
+			if err != nil {
+				s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			if len(res["response"].([]interface{})) == 0 {
+				err := errors.New("Permission denied")
+				s.log.Error("!!!V2HasAccess--->", logger.Error(err))
+				return nil, status.Error(codes.PermissionDenied, err.Error())
+			}
 		}
 	}
+
 	// DONT FORGET TO UNCOMMENT THIS!!!
 
 	// hasAccess, err := s.strg.PermissionScope().HasAccess(ctx, user.RoleId, req.ClientPlatformId, req.Path, req.Method)
