@@ -67,6 +67,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData: res,
 		Tables:    req.Tables,
+		ProjectId: req.ProjectId,
 	})
 	if resp == nil {
 		err := errors.New("User Not Found")

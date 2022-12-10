@@ -190,3 +190,26 @@ func (r *companyRepo) GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (
 
 	return res, nil
 }
+
+func (r *companyRepo) TransferOwnership(ctx context.Context, companyID, ownerID string) (rowsAffected int64, err error) {
+	query := `UPDATE "company" SET
+		owner_id = :owner_id,
+		updated_at = now()
+	WHERE
+		id = :id`
+
+	params := map[string]interface{}{
+		"id":       companyID,
+		"owner_id": ownerID,
+	}
+
+	q, arr := helper.ReplaceQueryParams(query, params)
+	result, err := r.db.Exec(ctx, q, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected = result.RowsAffected()
+
+	return rowsAffected, err
+}

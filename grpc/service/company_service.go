@@ -122,7 +122,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	}
 	expiresAt := time.Now().Add(time.Hour * 24 * 7).Format(config.DatabaseTimeLayout)
 
-	_, err = s.strg.User().Create(ctx, &pb.CreateUserRequest{
+	user, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 		ProjectId:        projectPKey.Id,
 		ClientPlatformId: clientPlatformPKey.GetId(),
 		ClientTypeId:     clientTypePKey.GetId(),
@@ -134,6 +134,12 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		Active:           1, //@TODO:: user must be activated by phone or email
 		ExpiresAt:        expiresAt,
 	})
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	_, err = s.strg.Company().TransferOwnership(ctx, companyPKey.Id, user.Id)
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())

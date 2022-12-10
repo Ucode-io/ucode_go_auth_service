@@ -170,6 +170,7 @@ type CompanyRepoI interface {
 	Remove(ctx context.Context, pKey *pb.CompanyPrimaryKey) (rowsAffected int64, err error)
 	GetList(ctx context.Context, queryParam *pb.GetComapnyListRequest) (*pb.GetListCompanyResponse, error)
 	GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (*pb.Company, error)
+	TransferOwnership(ctx context.Context, companyID, ownerID string) (rowsAffected int64, err error)
 }
 
 type ProjectRepoI interface {
