@@ -10919,6 +10919,9 @@ var doc = `{
                 "password": {
                     "type": "string"
                 },
+                "project_id": {
+                    "type": "string"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
