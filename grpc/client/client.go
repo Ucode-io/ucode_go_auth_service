@@ -68,7 +68,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 	}
 
 	connCompanyService, err := grpc.Dial(
-		cfg.SmsServiceHost+cfg.SmsGRPCPort,
+		cfg.CompanyServiceHost+cfg.CompanyGRPCPort,
 		grpc.WithInsecure(),
 	)
 	if err != nil {

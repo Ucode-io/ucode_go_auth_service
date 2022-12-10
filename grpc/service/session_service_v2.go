@@ -33,6 +33,34 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	var projectID string
+	projectID = req.ProjectId
+
+	project, err := s.strg.Project().GetByPK(ctx, &pb.ProjectPrimaryKey{Id: req.ProjectId})
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	company, err := s.strg.Company().GetByID(ctx, &pb.CompanyPrimaryKey{Id: project.CompanyId})
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	user, err := s.strg.User().GetByUsername(ctx, req.Username)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if err == nil {
+		if company.OwnerId == user.Id {
+			projectID = project.Id
+		}
+	}
+
 	data, err := s.services.LoginService().Login(ctx, &object_builder_service.LoginRequest{
 		Password:      req.Password,
 		Login:         req.Username,
@@ -67,7 +95,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData: res,
 		Tables:    req.Tables,
-		ProjectId: req.ProjectId,
+		ProjectId: projectID,
 	})
 	if resp == nil {
 		err := errors.New("User Not Found")
