@@ -173,3 +173,23 @@ func (s *companyService) Remove(ctx context.Context, req *pb.CompanyPrimaryKey) 
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *companyService) GetList(ctx context.Context, req *pb.GetComapnyListRequest) (*pb.GetListCompanyResponse, error) {
+	resp, err := s.strg.Company().GetList(ctx, req)
+	if err != nil {
+		s.log.Error("---RemoveCompany--->", logger.Error(err))
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (s *companyService) GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (*pb.Company, error) {
+	resp, err := s.strg.Company().GetByID(ctx, pKey)
+	if err != nil {
+		s.log.Error("---RemoveCompany--->", logger.Error(err))
+		return nil, err
+	}
+
+	return resp, nil
+}
