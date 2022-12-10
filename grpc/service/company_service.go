@@ -6,12 +6,15 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/saidamir98/udevs_pkg/security"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
+	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -122,7 +125,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	}
 	expiresAt := time.Now().Add(time.Hour * 24 * 7).Format(config.DatabaseTimeLayout)
 
-	user, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
+	createUserReq := &pb.CreateUserRequest{
 		ProjectId:        projectPKey.Id,
 		ClientPlatformId: clientPlatformPKey.GetId(),
 		ClientTypeId:     clientTypePKey.GetId(),
@@ -133,13 +136,44 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		Password:         hashedPassword,
 		Active:           1, //@TODO:: user must be activated by phone or email
 		ExpiresAt:        expiresAt,
-	})
+	}
+	user, err := s.strg.User().Create(ctx, createUserReq)
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	_, err = s.strg.Company().TransferOwnership(ctx, companyPKey.Id, user.Id)
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// sync auth companies with company service companies
+	_, err = s.services.CompanyServiceClient().CreateCompany(
+		ctx,
+		&company_service.CreateCompanyRequest{
+			Title:       req.Name,
+			Logo:        "",
+			Description: "",
+		},
+	)
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// @TODO:: remove when auth is independent from object builder
+	structData, err := helper.ConvertRequestToSturct(createUserReq)
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		TableSlug: "user",
+		Data:      structData,
+	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
