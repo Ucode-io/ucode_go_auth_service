@@ -13,6 +13,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	secure "ucode/ucode_go_auth_service/pkg/security"
 
+	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/saidamir98/udevs_pkg/security"
 	"google.golang.org/grpc/codes"
@@ -37,27 +38,30 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	var projectID string
 	projectID = req.ProjectId
 
-	project, err := s.strg.Project().GetByPK(ctx, &pb.ProjectPrimaryKey{Id: req.ProjectId})
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	company, err := s.strg.Company().GetByID(ctx, &pb.CompanyPrimaryKey{Id: project.CompanyId})
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	user, err := s.strg.User().GetByUsername(ctx, req.Username)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
+	_, err := uuid.Parse(req.GetProjectId())
 	if err == nil {
-		if company.OwnerId == user.Id {
-			projectID = project.Id
+		project, err := s.strg.Project().GetByPK(ctx, &pb.ProjectPrimaryKey{Id: req.ProjectId})
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		company, err := s.strg.Company().GetByID(ctx, &pb.CompanyPrimaryKey{Id: project.CompanyId})
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		user, err := s.strg.User().GetByUsername(ctx, req.Username)
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		if err == nil {
+			if company.OwnerId == user.Id {
+				projectID = project.Id
+			}
 		}
 	}
 
