@@ -410,6 +410,11 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	input.LoginData.Sessions = userSessionList.Sessions
 
+	_, err = uuid.Parse(input.ProjectId)
+	if err != nil {
+		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
+	}
+
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.ProjectId,
 		ClientPlatformId: input.LoginData.ClientPlatform.Id,
