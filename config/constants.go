@@ -23,4 +23,41 @@ const (
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	// DeveloperClientTypeID
 	DeveloperClientTypeID string = "5a3818a9-90f0-44e9-a053-3be0ba1e2c02"
+
+	AdminClientTypeID string = "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d"
+	AdminClientName   string = "ADMIN"
+)
+
+var (
+	// these apis also manage by app's permission
+	ObjectBuilderTableSlugs = map[string]int{
+		"field":               1,
+		"view":                1,
+		"table":               1,
+		"relation":            1,
+		"section":             1,
+		"view_relation":       1,
+		"html-template":       1,
+		"variable":            1,
+		"dashboard":           1,
+		"panel":               1,
+		"html-to-pdf":         1,
+		"document":            1,
+		"template-to-html":    1,
+		"many-to-many":        1,
+		"upload":              1,
+		"upload-file":         1,
+		"close-cashbox":       1,
+		"open-cashbox":        1,
+		"cashbox_transaction": 1,
+		"query":               1,
+		"event":               1,
+		"event-log":           1,
+		"permission-upsert":   1,
+		"custom-event":        1,
+		"excel":               1,
+		"field-permission":    1,
+		"function":            1,
+		"invoke_function":     1,
+	}
 )
