@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -62,6 +63,10 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, err
+	}
+
+	if bytes, err := json.Marshal(createProjectResp); err == nil {
+		fmt.Println("createProjectResp", string(bytes))
 	}
 
 	projectData, ok := createProjectResp.Data.AsMap()["response"].(map[string]interface{})
