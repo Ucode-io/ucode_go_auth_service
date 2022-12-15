@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -85,7 +86,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	// CLIENT_TYPE
 	createClientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"name":          "ADMIN",
+		"name":          strings.ToUpper(req.Name) + " ADMIN",
 		"confirm_by":    "UNDECIDED",
 		"self_register": true,
 		"self_recover":  true,
