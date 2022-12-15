@@ -5178,6 +5178,52 @@ paths:
       summary: V2Login
       tags:
       - V2_Session
+  /v2/login/superadmin:
+    post:
+      consumes:
+      - application/json
+      description: V2LoginSuperAdmin
+      operationId: V2login_superadmin
+      parameters:
+      - description: V2LoginRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.V2LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: V2LoginSuperAdmin
+      tags:
+      - V2_Session
   /v2/permission:
     get:
       consumes:

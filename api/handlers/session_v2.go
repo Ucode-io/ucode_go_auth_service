@@ -109,15 +109,15 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 }
 
 // V2LoginSuperAdmin godoc
-// @ID V2login
+// @ID V2login_superadmin
 // @Router /v2/login/superadmin [POST]
 // @Summary V2LoginSuperAdmin
 // @Description V2LoginSuperAdmin
 // @Tags V2_Session
 // @Accept json
 // @Produce json
-// @Param login body auth_service.V2LoginSuperAdminRequest true "LoginSuperAdminRequestBody"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Param login body auth_service.V2LoginRequest true "V2LoginRequest"
+// @Success 201 {object} http.Response{data=auth_service.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
