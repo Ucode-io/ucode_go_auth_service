@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -146,6 +148,10 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
+	}
+
+	if bytes, err := json.Marshal(userResp); err == nil {
+		fmt.Println("userResp", string(bytes))
 	}
 
 	userData, ok := userResp.Data.AsMap()["response"].(map[string]interface{})
