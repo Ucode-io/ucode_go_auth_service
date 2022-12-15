@@ -520,7 +520,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	// //@DONE:: create user
 
 	// return companyPKey, nil
-	return nil, nil
+	return &pb.CompanyPrimaryKey{Id: companyPKey.Id}, nil
 }
 
 func (s *companyService) Update(ctx context.Context, req *pb.UpdateCompanyRequest) (*emptypb.Empty, error) {
