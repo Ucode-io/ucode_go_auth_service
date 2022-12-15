@@ -139,7 +139,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	userResp, err := h.services.ObjectBuilderService().GetSingle(
+	userResp, err := h.services.ObjectBuilderService().GetList(
 		context.Background(),
 		&object_builder_service.CommonMessage{
 			TableSlug: "user",
@@ -154,13 +154,21 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		fmt.Println("userResp", string(bytes))
 	}
 
-	userData, ok := userResp.Data.AsMap()["response"].(map[string]interface{})
+	userData, ok := userResp.Data.AsMap()["response"].([]map[string]interface{})
 	if !ok {
 		h.handleResponse(c, http.BadRequest, "Произошло ошибка")
 		return
 	}
 
-	userClientTypeID, ok := userData["client_type_id"].(string)
+	if len(userData) < 1 {
+		h.handleResponse(c, http.BadRequest, "Пользователь не найдено")
+		return
+	} else if len(userData) > 1 {
+		h.handleResponse(c, http.BadRequest, "Много пользователы найдено")
+		return
+	}
+
+	userClientTypeID, ok := userData[0]["client_type_id"].(string)
 	if !ok {
 		h.handleResponse(c, http.BadRequest, "Необходимо выбрать тип пользователя")
 		return
