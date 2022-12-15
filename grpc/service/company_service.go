@@ -239,46 +239,46 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	fmt.Println("roleID", roleID)
 
 	// connections
-	createConnectionReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"table_slug":     "branch",
-		"icon":           "",
-		"view_slug":      "title",
-		"view_label":     "",
-		"name":           "connection",
-		"client_type_id": clientTypeID,
-		"type":           "",
-	})
+	// createConnectionReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+	// 	"table_slug":     "branch",
+	// 	"icon":           "",
+	// 	"view_slug":      "title",
+	// 	"view_label":     "",
+	// 	"name":           "connection",
+	// 	"client_type_id": clientTypeID,
+	// 	"type":           "",
+	// })
 
-	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
-		return nil, err
-	}
+	// if err != nil {
+	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
+	// 	return nil, err
+	// }
 
-	createConnectionResp, err := s.services.ObjectBuilderService().Create(
-		ctx,
-		&object_builder_service.CommonMessage{
-			TableSlug: "connections",
-			Data:      createConnectionReq,
-		},
-	)
-	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
-		return nil, err
-	}
+	// createConnectionResp, err := s.services.ObjectBuilderService().Create(
+	// 	ctx,
+	// 	&object_builder_service.CommonMessage{
+	// 		TableSlug: "connections",
+	// 		Data:      createConnectionReq,
+	// 	},
+	// )
+	// if err != nil {
+	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
+	// 	return nil, err
+	// }
 
-	connectionData, ok := createConnectionResp.Data.AsMap()["data"].(map[string]interface{})
-	if !ok || connectionData == nil {
-		s.log.Error("---RegisterCompany--->", logger.Any("msg", "connection is nil"))
-		return nil, err
-	}
+	// connectionData, ok := createConnectionResp.Data.AsMap()["data"].(map[string]interface{})
+	// if !ok || connectionData == nil {
+	// 	s.log.Error("---RegisterCompany--->", logger.Any("msg", "connection is nil"))
+	// 	return nil, err
+	// }
 
-	connectionID, ok := connectionData["guid"].(string)
-	if !ok {
-		s.log.Error("---RegisterCompany--->", logger.Any("msg", "connection_id is nil"))
-		return nil, err
-	}
+	// connectionID, ok := connectionData["guid"].(string)
+	// if !ok {
+	// 	s.log.Error("---RegisterCompany--->", logger.Any("msg", "connection_id is nil"))
+	// 	return nil, err
+	// }
 
-	fmt.Println("connectionID", connectionID)
+	// fmt.Println("connectionID", connectionID)
 
 	// record_permission
 	recordPermissionTableSlugs := []string{"app", "record_permission"}
