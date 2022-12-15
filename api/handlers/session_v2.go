@@ -154,21 +154,27 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		fmt.Println("userResp", string(bytes))
 	}
 
-	userData, ok := userResp.Data.AsMap()["response"].([]map[string]interface{})
+	userDatas, ok := userResp.Data.AsMap()["response"].([]interface{})
 	if !ok {
 		h.handleResponse(c, http.BadRequest, "Произошло ошибка")
 		return
 	}
 
-	if len(userData) < 1 {
+	if len(userDatas) < 1 {
 		h.handleResponse(c, http.BadRequest, "Пользователь не найдено")
 		return
-	} else if len(userData) > 1 {
+	} else if len(userDatas) > 1 {
 		h.handleResponse(c, http.BadRequest, "Много пользователы найдено")
 		return
 	}
 
-	userClientTypeID, ok := userData[0]["client_type_id"].(string)
+	userData, ok := userDatas[0].(map[string]interface{})
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "Произошло ошибка")
+		return
+	}
+
+	userClientTypeID, ok := userData["client_type_id"].(string)
 	if !ok {
 		h.handleResponse(c, http.BadRequest, "Необходимо выбрать тип пользователя")
 		return
