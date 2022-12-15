@@ -85,12 +85,12 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	// CLIENT_TYPE
 	createClientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"name":                "ADMIN",
-		"confirm_by":          "UNDECIDED",
-		"self_register":       true,
-		"self_recover":        true,
-		"project_id":          projectID,
-		"client_platform_ids": []string{},
+		"name":          "ADMIN",
+		"confirm_by":    "UNDECIDED",
+		"self_register": true,
+		"self_recover":  true,
+		"project_id":    projectID,
+		// "client_platform_ids": []string{},
 	})
 
 	if err != nil {
