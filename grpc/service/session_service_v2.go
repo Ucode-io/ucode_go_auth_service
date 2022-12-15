@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -96,10 +95,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
 
-	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
-		fmt.Println("LoginService().Login", string(bytes))
-	}
-
 	res := helper.ConvertPbToAnotherPb(data)
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
@@ -177,15 +172,11 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	splitedPath := strings.Split(req.Path, "/")
 	splitedPath = splitedPath[1:]
 
-	fmt.Println("splitedPath---", splitedPath)
-
 	var tableSlug string
 	tableSlug = splitedPath[len(splitedPath)-1]
 	if tableSlug[len(tableSlug)-2:] == "id" {
 		tableSlug = splitedPath[len(splitedPath)-2]
 	}
-
-	fmt.Println("tableSlug---", tableSlug)
 
 	if _, ok := config.ObjectBuilderTableSlugs[tableSlug]; ok {
 		tableSlug = "app"
