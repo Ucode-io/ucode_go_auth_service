@@ -148,7 +148,12 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	userData := userResp.Data.AsMap()["data"].(map[string]interface{})
+	userData, ok := userResp.Data.AsMap()["response"].(map[string]interface{})
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "Произошло ошибка")
+		return
+	}
+
 	userClientTypeID, ok := userData["client_type_id"].(string)
 	if !ok {
 		h.handleResponse(c, http.BadRequest, "Необходимо выбрать тип пользователя")
