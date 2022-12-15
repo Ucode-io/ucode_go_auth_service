@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -144,6 +145,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		&object_builder_service.CommonMessage{
 			TableSlug: "user",
 			Data:      userReq,
+			ProjectId: config.UcodeDefaultProjectID,
 		})
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -184,10 +186,13 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	clientTypeResp, err := h.services.ObjectBuilderService().GetSingle(context.Background(), &object_builder_service.CommonMessage{
-		TableSlug: "client_type",
-		Data:      clientTypeReq,
-	})
+	clientTypeResp, err := h.services.ObjectBuilderService().GetSingle(
+		context.Background(),
+		&object_builder_service.CommonMessage{
+			TableSlug: "client_type",
+			Data:      clientTypeReq,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -237,7 +242,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	companies, err := h.services.CompanyServiceClient().GetCompanyList(context.Background(), &company_service.GetCompanyListRequest{
+	companies, err := h.services.CompanyServiceClient().GetList(context.Background(), &company_service.GetCompanyListRequest{
 		Offset:  0,
 		Limit:   128,
 		OwnerId: resp.UserId,
@@ -249,7 +254,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 
 	companiesResp := []*auth_service.Company{}
 
-	bytes, err := json.Marshal(companies)
+	bytes, err := json.Marshal(companies.Companies)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

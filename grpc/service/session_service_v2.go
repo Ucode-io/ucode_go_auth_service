@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -35,48 +35,19 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	var projectID string
-	projectID = req.ProjectId
-
-	_, err := uuid.Parse(req.GetProjectId())
-	if err == nil {
-		project, err := s.strg.Project().GetByPK(ctx, &pb.ProjectPrimaryKey{Id: req.ProjectId})
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		company, err := s.strg.Company().GetByID(ctx, &pb.CompanyPrimaryKey{Id: project.CompanyId})
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		user, err := s.strg.User().GetByUsername(ctx, req.Username)
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		if err == nil {
-			if company.OwnerId == user.Id {
-				projectID = project.Id
-			}
-		}
-	}
-
-	data, err := s.services.LoginService().Login(ctx, &object_builder_service.LoginRequest{
-		Password:      req.Password,
-		Login:         req.Username,
-		ClientType:    req.ClientType,
-		LoginStrategy: req.LoginStrategy,
-	})
+	data, err := s.services.LoginService().Login(
+		ctx,
+		&object_builder_service.LoginRequest{
+			Password:      req.Password,
+			Login:         req.Username,
+			ClientType:    req.ClientType,
+			LoginStrategy: req.LoginStrategy,
+		},
+	)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	fmt.Println("appPermission ::::", data.AppPermissions)
 
 	expiresAt, err := time.Parse(config.DatabaseTimeLayout, "2023-01-28T06:23:33.952Z")
 	if err != nil {
@@ -93,6 +64,42 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		customError := errors.New("User not found")
 		s.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
+	}
+
+	projectID := req.ProjectId
+
+	_, err = uuid.Parse(req.GetProjectId())
+	if err == nil {
+		project, err := s.services.ProjectServiceClient().GetById(
+			ctx,
+			&company_service.GetProjectByIdRequest{
+				ProjectId: req.ProjectId,
+			},
+		)
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		company, err := s.services.CompanyServiceClient().GetById(
+			ctx,
+			&company_service.GetCompanyByIdRequest{
+				Id: project.CompanyId,
+			},
+		)
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		// if user is not company owner
+		if company.Company.GetOwnerId() != data.GetUserId() {
+			// if user has no access to project
+			if req.GetProjectId() != data.Role.GetProjectId() {
+				s.log.Error("!!!Login--->", logger.Any("msg", "user has no access to this project"))
+				return nil, status.Error(codes.Internal, "user has no access to this project")
+			}
+		}
 	}
 
 	res := helper.ConvertPbToAnotherPb(data)
@@ -222,6 +229,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 			resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 				TableSlug: "record_permission",
 				Data:      structPb,
+				ProjectId: config.UcodeDefaultProjectID,
 			})
 			if err != nil {
 				s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))

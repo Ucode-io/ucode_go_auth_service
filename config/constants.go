@@ -24,9 +24,10 @@ const (
 	// DeveloperClientTypeID
 	DeveloperClientTypeID string = "5a3818a9-90f0-44e9-a053-3be0ba1e2c02"
 
-	AdminClientTypeID    string = "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d"
-	AdminClientName      string = "ADMIN"
-	UcodeTestAdminDomain string = "test.admin.u-code.io"
+	AdminClientTypeID     string = "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d"
+	AdminClientName       string = "ADMIN"
+	UcodeTestAdminDomain  string = "test.admin.u-code.io"
+	UcodeDefaultProjectID string = "ucode_default_project_id"
 )
 
 var (

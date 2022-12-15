@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
@@ -39,25 +38,26 @@ func NewCompanyService(cfg config.Config, log logger.LoggerI, strg storage.Stora
 
 func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRequest) (*pb.CompanyPrimaryKey, error) {
 
-	companyId, err := uuid.NewRandom()
+	//@TODO:: refactor later
+	tempOwnerId, err := uuid.NewRandom()
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, err
 	}
 
-	companyPKey, err := s.services.CompanyServiceClient().CreateCompany(ctx, &company_service.CreateCompanyRequest{
+	companyPKey, err := s.services.CompanyServiceClient().Create(ctx, &company_service.CreateCompanyRequest{
 		Title:       req.Name,
 		Logo:        "",
 		Description: "",
-		OwnerId:     companyId.String(),
+		OwnerId:     tempOwnerId.String(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, err
 	}
 
-	_, err = s.services.ProjectServiceClient().CreateProject(ctx, &company_service.CreateProjectRequest{
-		CompanyId:    companyPKey.GetCompanyId(),
+	project, err := s.services.ProjectServiceClient().Create(ctx, &company_service.CreateProjectRequest{
+		CompanyId:    companyPKey.GetId(),
 		K8SNamespace: "",
 		Title:        req.GetName(),
 	})
@@ -68,7 +68,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	// PROJECT
 	createProjectReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"company_id": companyPKey.GetCompanyId(),
+		"company_id": companyPKey.GetId(),
 		"name":       req.GetName(),
 		"domain":     config.UcodeTestAdminDomain,
 	})
@@ -77,11 +77,12 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	createProjectResp, err := s.services.ObjectBuilderService().Create(
+	_, err = s.services.ObjectBuilderService().Create(
 		ctx,
 		&object_builder_service.CommonMessage{
 			TableSlug: "project",
 			Data:      createProjectReq,
+			ProjectId: config.UcodeDefaultProjectID,
 		},
 	)
 	if err != nil {
@@ -89,23 +90,18 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	if bytes, err := json.Marshal(createProjectResp); err == nil {
-		fmt.Println("createProjectResp", string(bytes))
-	}
+	projectID := project.ProjectId
 
-	projectData, ok := createProjectResp.Data.AsMap()["data"].(map[string]interface{})
-	if !ok || projectData == nil {
-		s.log.Error("---RegisterCompany--->", logger.Any("msg", "project is nil"))
-		return nil, err
-	}
-
-	projectID, ok := projectData["guid"].(string)
-	if !ok {
-		s.log.Error("---RegisterCompany--->", logger.Any("msg", "project_id is nil"))
-		return nil, err
-	}
-
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	fmt.Println("projectID", projectID)
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 
 	// CLIENT_TYPE
 	createClientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
@@ -127,6 +123,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		&object_builder_service.CommonMessage{
 			TableSlug: "client_type",
 			Data:      createClientTypeReq,
+			ProjectId: config.UcodeDefaultProjectID,
 		},
 	)
 	if err != nil {
@@ -146,8 +143,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	fmt.Println("clientTypeID", clientTypeID)
-
 	// client_platform
 	createClientPlatformReq, err := helper.ConvertMapToStruct(map[string]interface{}{
 		"name":            "ADMIN PLATFORM",
@@ -166,6 +161,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		&object_builder_service.CommonMessage{
 			TableSlug: "client_platform",
 			Data:      createClientPlatformReq,
+			ProjectId: config.UcodeDefaultProjectID,
 		},
 	)
 	if err != nil {
@@ -184,8 +180,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "clientPlatform_id is nil"))
 		return nil, err
 	}
-
-	fmt.Println("clientPlatformID", clientPlatformID)
 
 	// TEST_LOGIN
 	createTestLoginReq, err := helper.ConvertMapToStruct(map[string]interface{}{
@@ -209,6 +203,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		&object_builder_service.CommonMessage{
 			TableSlug: "test_login",
 			Data:      createTestLoginReq,
+			ProjectId: config.UcodeDefaultProjectID,
 		},
 	)
 	if err != nil {
@@ -240,6 +235,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		&object_builder_service.CommonMessage{
 			TableSlug: "role",
 			Data:      createRoleReq,
+			ProjectId: config.UcodeDefaultProjectID,
 		},
 	)
 	if err != nil {
@@ -258,8 +254,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "role_id is nil"))
 		return nil, err
 	}
-
-	fmt.Println("roleID", roleID)
 
 	// record_permission
 	recordPermissionTableSlugs := []string{"app", "record_permission"}
@@ -290,6 +284,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			&object_builder_service.CommonMessage{
 				TableSlug: "record_permission",
 				Data:      createRecordPermissionReq,
+				ProjectId: config.UcodeDefaultProjectID,
 			},
 		)
 		if err != nil {
@@ -323,6 +318,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		&object_builder_service.CommonMessage{
 			TableSlug: "user",
 			Data:      createUserReq,
+			ProjectId: config.UcodeDefaultProjectID,
 		},
 	)
 	if err != nil {
@@ -342,10 +338,8 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	fmt.Println("userID", userID)
-
-	_, err = s.services.CompanyServiceClient().UpdateCompany(ctx, &company_service.Company{
-		CompanyId:   companyPKey.CompanyId,
+	_, err = s.services.CompanyServiceClient().Update(ctx, &company_service.Company{
+		Id:          companyPKey.Id,
 		Name:        req.Name,
 		Logo:        "",
 		Description: "",
@@ -356,19 +350,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	// //@DONE:: create company
-	// //@DONE:: create project
-	// //@DONE:: create client_platform
-	// //@DONE:: create client_type
-	// //@DONE:: create client
-	// //@DONE:: create role
-	// //@DONE:: permission
-	// //@TODO:: scope
-	// //@TODO:: permission_scope
-	// //@DONE:: role_permission
-	// //@DONE:: create user
-
-	return &pb.CompanyPrimaryKey{Id: companyPKey.GetCompanyId()}, nil
+	return &pb.CompanyPrimaryKey{Id: companyPKey.GetId()}, nil
 }
 
 func (s *companyService) Update(ctx context.Context, req *pb.UpdateCompanyRequest) (*emptypb.Empty, error) {
