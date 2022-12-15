@@ -256,7 +256,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	createConnectionResp, err := s.services.ObjectBuilderService().Create(
 		ctx,
 		&object_builder_service.CommonMessage{
-			TableSlug: "connection",
+			TableSlug: "connections",
 			Data:      createConnectionReq,
 		},
 	)
