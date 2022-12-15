@@ -203,7 +203,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	createRoleReq, err := helper.ConvertMapToStruct(map[string]interface{}{
 		"name":               "ADMIN",
 		"project_id":         projectID,
-		"client_platform_id": "@TODO",
+		"client_platform_id": clientPlatformID,
 		"client_type_id":     clientTypeID,
 	})
 
