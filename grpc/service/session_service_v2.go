@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -94,6 +95,11 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		s.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
+
+	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
+		fmt.Println("LoginService().Login", string(bytes))
+	}
+
 	res := helper.ConvertPbToAnotherPb(data)
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
