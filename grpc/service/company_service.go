@@ -69,7 +69,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		fmt.Println("createProjectResp", string(bytes))
 	}
 
-	projectData, ok := createProjectResp.Data.AsMap()["response"].(map[string]interface{})
+	projectData, ok := createProjectResp.Data.AsMap()["data"].(map[string]interface{})
 	if !ok || projectData == nil {
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "project is nil"))
 		return nil, err
@@ -110,7 +110,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	clientTypeData, ok := createClientTypeResp.Data.AsMap()["response"].(map[string]interface{})
+	clientTypeData, ok := createClientTypeResp.Data.AsMap()["data"].(map[string]interface{})
 	if !ok || clientTypeData == nil {
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "clientType is nil"))
 		return nil, err
@@ -149,7 +149,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	clientPlatformData, ok := createClientPlatformResp.Data.AsMap()["response"].(map[string]interface{})
+	clientPlatformData, ok := createClientPlatformResp.Data.AsMap()["data"].(map[string]interface{})
 	if !ok || clientPlatformData == nil {
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "clientPlatform is nil"))
 		return nil, err
@@ -192,7 +192,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	testLoginData, ok := createTestLoginResp.Data.AsMap()["response"].(map[string]interface{})
+	testLoginData, ok := createTestLoginResp.Data.AsMap()["data"].(map[string]interface{})
 	if !ok || testLoginData == nil {
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "testLogin is nil"))
 		return nil, err
@@ -223,7 +223,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	roleData, ok := createRoleResp.Data.AsMap()["response"].(map[string]interface{})
+	roleData, ok := createRoleResp.Data.AsMap()["data"].(map[string]interface{})
 	if !ok || roleData == nil {
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "role is nil"))
 		return nil, err
@@ -265,7 +265,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	connectionData, ok := createConnectionResp.Data.AsMap()["response"].(map[string]interface{})
+	connectionData, ok := createConnectionResp.Data.AsMap()["data"].(map[string]interface{})
 	if !ok || connectionData == nil {
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "connection is nil"))
 		return nil, err
@@ -315,7 +315,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			return nil, err
 		}
 
-		// recordPermissionData, ok := createRecordPermissionResp.Data.AsMap()["response"].(map[string]interface{})
+		// recordPermissionData, ok := createRecordPermissionResp.Data.AsMap()["data"].(map[string]interface{})
 		// if !ok || recordPermissionData == nil {
 		// 	s.log.Error("---RegisterCompany--->", logger.Any("msg", "recordPermission is nil"))
 		// 	return nil, err
@@ -360,7 +360,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	userData, ok := createUserResp.Data.AsMap()["response"].(map[string]interface{})
+	userData, ok := createUserResp.Data.AsMap()["data"].(map[string]interface{})
 	if !ok || userData == nil {
 		s.log.Error("---RegisterCompany--->", logger.Any("msg", "user is nil"))
 		return nil, err
