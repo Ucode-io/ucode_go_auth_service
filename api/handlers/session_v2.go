@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/gin-gonic/gin"
@@ -241,5 +242,42 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	companies, err := h.services.CompanyServiceClient().GetCompanyList(context.Background(), &company_service.GetCompanyListRequest{
+		Offset:  0,
+		Limit:   128,
+		OwnerId: resp.UserId,
+	})
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	companiesResp := []*auth_service.Company{}
+
+	bytes, err := json.Marshal(companies)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	err = json.Unmarshal(bytes, &companiesResp)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	res := &auth_service.V2SuperAdminLoginResponse{
+		UserFound:      resp.UserFound,
+		ClientPlatform: resp.ClientPlatform,
+		ClientType:     resp.ClientType,
+		Role:           resp.Role,
+		Token:          resp.Token,
+		Permissions:    resp.Permissions,
+		Sessions:       resp.Sessions,
+		LoginTableSlug: resp.LoginTableSlug,
+		AppPermissions: resp.AppPermissions,
+		Companies:      companiesResp,
+	}
+
+	h.handleResponse(c, http.Created, res)
 }

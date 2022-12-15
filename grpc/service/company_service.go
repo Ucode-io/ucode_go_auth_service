@@ -10,9 +10,11 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -36,8 +38,29 @@ func NewCompanyService(cfg config.Config, log logger.LoggerI, strg storage.Stora
 }
 
 func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRequest) (*pb.CompanyPrimaryKey, error) {
-	// COMPANY
-	companyPKey, err := s.strg.Company().Register(ctx, req)
+
+	companyId, err := uuid.NewRandom()
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, err
+	}
+
+	companyPKey, err := s.services.CompanyServiceClient().CreateCompany(ctx, &company_service.CreateCompanyRequest{
+		Title:       req.Name,
+		Logo:        "",
+		Description: "",
+		OwnerId:     companyId.String(),
+	})
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, err
+	}
+
+	_, err = s.services.ProjectServiceClient().CreateProject(ctx, &company_service.CreateProjectRequest{
+		CompanyId:    companyPKey.GetCompanyId(),
+		K8SNamespace: "",
+		Title:        req.GetName(),
+	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, err
@@ -45,7 +68,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	// PROJECT
 	createProjectReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"company_id": companyPKey.GetId(),
+		"company_id": companyPKey.GetCompanyId(),
 		"name":       req.GetName(),
 		"domain":     config.UcodeTestAdminDomain,
 	})
@@ -238,48 +261,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	fmt.Println("roleID", roleID)
 
-	// connections
-	// createConnectionReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-	// 	"table_slug":     "branch",
-	// 	"icon":           "",
-	// 	"view_slug":      "title",
-	// 	"view_label":     "",
-	// 	"name":           "connection",
-	// 	"client_type_id": clientTypeID,
-	// 	"type":           "",
-	// })
-
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// createConnectionResp, err := s.services.ObjectBuilderService().Create(
-	// 	ctx,
-	// 	&object_builder_service.CommonMessage{
-	// 		TableSlug: "connections",
-	// 		Data:      createConnectionReq,
-	// 	},
-	// )
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// connectionData, ok := createConnectionResp.Data.AsMap()["data"].(map[string]interface{})
-	// if !ok || connectionData == nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Any("msg", "connection is nil"))
-	// 	return nil, err
-	// }
-
-	// connectionID, ok := connectionData["guid"].(string)
-	// if !ok {
-	// 	s.log.Error("---RegisterCompany--->", logger.Any("msg", "connection_id is nil"))
-	// 	return nil, err
-	// }
-
-	// fmt.Println("connectionID", connectionID)
-
 	// record_permission
 	recordPermissionTableSlugs := []string{"app", "record_permission"}
 
@@ -315,18 +296,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			s.log.Error("---RegisterCompany--->", logger.Error(err))
 			return nil, err
 		}
-
-		// recordPermissionData, ok := createRecordPermissionResp.Data.AsMap()["data"].(map[string]interface{})
-		// if !ok || recordPermissionData == nil {
-		// 	s.log.Error("---RegisterCompany--->", logger.Any("msg", "recordPermission is nil"))
-		// 	return nil, err
-		// }
-
-		// recordPermissionID, ok := recordPermissionData["guid"].(string)
-		// if !ok {
-		// 	s.log.Error("---RegisterCompany--->", logger.Any("msg", "recordPermission_id is nil"))
-		// 	return nil, err
-		// }
 	}
 
 	// USER
@@ -375,138 +344,17 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	fmt.Println("userID", userID)
 
-	// projectPKey, err := s.strg.Project().Create(ctx, &pb.CreateProjectRequest{
-	// 	CompanyId: companyPKey.Id,
-	// 	Name:      req.Name,
-	// 	Domain:    config.UcodeTestAdminDomain, //@TODO:: get domain
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// clientPlatformPKey, err := s.strg.ClientPlatform().Create(ctx, &pb.CreateClientPlatformRequest{
-	// 	ProjectId: projectPKey.Id,
-	// 	Name:      strings.ToUpper(req.Name),
-	// 	Subdomain: config.UcodeTestAdminDomain, //@TODO:: get subdomain
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// clientTypePKey, err := s.strg.ClientType().Create(ctx, &pb.CreateClientTypeRequest{
-	// 	ProjectId:    projectPKey.Id,
-	// 	Name:         "ADMIN",
-	// 	ConfirmBy:    pb.ConfirmStrategies_UNDECIDED,
-	// 	SelfRegister: false,
-	// 	SelfRecover:  false,
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// err = s.strg.Client().Add(ctx, projectPKey.Id, &pb.AddClientRequest{
-	// 	ClientPlatformId: clientPlatformPKey.Id,
-	// 	ClientTypeId:     clientTypePKey.Id,
-	// 	LoginStrategy:    pb.LoginStrategies_STANDARD,
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// rolePKey, err := s.strg.Role().Add(ctx, &pb.AddRoleRequest{
-	// 	ProjectId:        projectPKey.Id,
-	// 	ClientPlatformId: clientPlatformPKey.Id,
-	// 	ClientTypeId:     clientTypePKey.Id,
-	// 	Name:             "DEFAULT",
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// permissionPkey, err := s.strg.Permission().Create(ctx, &pb.CreatePermissionRequest{
-	// 	ClientPlatformId: clientPlatformPKey.Id,
-	// 	ParentId:         "ffffffff-ffff-4fff-8fff-ffffffffffff",
-	// 	Name:             "/root",
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// _, err = s.strg.RolePermission().Add(ctx, &pb.AddRolePermissionRequest{
-	// 	RoleId:       rolePKey.Id,
-	// 	PermissionId: permissionPkey.Id,
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, err
-	// }
-
-	// hashedPassword, err := security.HashPassword(req.UserInfo.Password)
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-	// expiresAt := time.Now().Add(time.Hour * 24 * 7).Format(config.DatabaseTimeLayout)
-
-	// createUserReq := &pb.CreateUserRequest{
-	// 	ProjectId:        projectPKey.Id,
-	// 	ClientPlatformId: clientPlatformPKey.GetId(),
-	// 	ClientTypeId:     clientTypePKey.GetId(),
-	// 	RoleId:           rolePKey.GetId(),
-	// 	Phone:            req.UserInfo.Phone,
-	// 	Email:            req.UserInfo.Email,
-	// 	Login:            req.UserInfo.Login,
-	// 	Password:         hashedPassword,
-	// 	Active:           1, //@TODO:: user must be activated by phone or email
-	// 	ExpiresAt:        expiresAt,
-	// }
-	// user, err := s.strg.User().Create(ctx, createUserReq)
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// _, err = s.strg.Company().TransferOwnership(ctx, companyPKey.Id, user.Id)
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// // sync auth companies with company service companies
-	// _, err = s.services.CompanyServiceClient().CreateCompany(
-	// 	ctx,
-	// 	&company_service.CreateCompanyRequest{
-	// 		Title:       req.Name,
-	// 		Logo:        "",
-	// 		Description: "",
-	// 	},
-	// )
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// // @TODO:: remove when auth is independent from object builder
-	// structData, err := helper.ConvertRequestToSturct(createUserReq)
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// _, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-	// 	TableSlug: "user",
-	// 	Data:      structData,
-	// })
-	// if err != nil {
-	// 	s.log.Error("---RegisterCompany--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
+	_, err = s.services.CompanyServiceClient().UpdateCompany(ctx, &company_service.Company{
+		CompanyId:   companyPKey.CompanyId,
+		Name:        req.Name,
+		Logo:        "",
+		Description: "",
+		OwnerId:     userID,
+	})
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, err
+	}
 
 	// //@DONE:: create company
 	// //@DONE:: create project
@@ -520,8 +368,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	// //@DONE:: role_permission
 	// //@DONE:: create user
 
-	// return companyPKey, nil
-	return &pb.CompanyPrimaryKey{Id: companyPKey.Id}, nil
+	return &pb.CompanyPrimaryKey{Id: companyPKey.GetCompanyId()}, nil
 }
 
 func (s *companyService) Update(ctx context.Context, req *pb.UpdateCompanyRequest) (*emptypb.Empty, error) {

@@ -18,6 +18,7 @@ message CreateCompanyRequest {
     string title = 1;
     string logo = 2;
     string description = 3;
+    string owner_id = 4;
 }
 
 message Company {
@@ -25,6 +26,7 @@ message Company {
     string name = 2;
     string logo = 3;
     string description = 4;
+    string owner_id = 5;
 }
 
 message CreateCompanyResponse {
@@ -36,6 +38,7 @@ message GetCompanyListRequest {
     int32 offset = 2;
     string search = 3;
     string comany_id = 4;
+    string owner_id = 5;
 }
 
 message GetComanyListResponse {
