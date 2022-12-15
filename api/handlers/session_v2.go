@@ -180,7 +180,36 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	login.ClientType = userClientTypeID
+	clientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"id": userClientTypeID,
+	})
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	clientTypeResp, err := h.services.ObjectBuilderService().GetSingle(context.Background(), &object_builder_service.CommonMessage{
+		TableSlug: "client_type",
+		Data:      clientTypeReq,
+	})
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	clientTypeData, ok := clientTypeResp.Data.AsMap()["response"].(map[string]interface{})
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "Произошло ошибка")
+		return
+	}
+
+	clientTypeName, ok := clientTypeData["name"].(string)
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "Произошло ошибка")
+		return
+	}
+
+	login.ClientType = clientTypeName
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
