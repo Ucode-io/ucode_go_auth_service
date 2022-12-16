@@ -277,6 +277,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		LoginTableSlug: resp.LoginTableSlug,
 		AppPermissions: resp.AppPermissions,
 		Companies:      companiesResp,
+		UserId:         resp.UserId,
 	}
 
 	h.handleResponse(c, http.Created, res)
