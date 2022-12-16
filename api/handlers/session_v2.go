@@ -282,3 +282,58 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, res)
 }
+
+// MultiCompanyLogin godoc
+// @ID multi_company_login
+// @Router /v2/multi-company/login [POST]
+// @Summary MultiCompanyLogin
+// @Description MultiCompanyLogin
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param login body auth_service.MultiCompanyLoginRequest true "LoginRequestBody"
+// @Success 201 {object} http.Response{data=auth_service.MultiCompanyLoginResponse} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) MultiCompanyLogin(c *gin.Context) {
+	var login auth_service.MultiCompanyLoginRequest
+
+	err := c.ShouldBindJSON(&login)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.services.SessionService().MultiCompanyLogin(
+		c.Request.Context(),
+		&login,
+	)
+
+	if err != nil {
+		httpErrorStr := strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+		httpErrorStr = strings.ToLower(httpErrorStr)
+
+		if httpErrorStr == "user not found" {
+			err := errors.New("Пользователь не найдено")
+			h.handleResponse(c, http.NotFound, err.Error())
+			return
+		} else if httpErrorStr == "user has been expired" {
+			err := errors.New("Срок действия пользователя истек")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		} else if httpErrorStr == "invalid username" {
+			err := errors.New("Неверное имя пользователя")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		} else if httpErrorStr == "invalid password" {
+			err := errors.New("Неверное пароль")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		} else if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}

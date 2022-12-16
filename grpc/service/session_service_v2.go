@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/config"
@@ -467,4 +469,199 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 	s.log.Info("UpdateByRoleId--->UpdateByRoleId", logger.Any("rowsAffected", rowsAffected))
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCompanyLoginRequest) (*pb.MultiCompanyLoginResponse, error) {
+	now := time.Now()
+	fmt.Println("TIME1", time.Since(now))
+	resp := &pb.MultiCompanyLoginResponse{}
+
+	if len(req.Username) < 6 {
+		err := errors.New("invalid username")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if len(req.Password) < 6 {
+		err := errors.New("invalid password")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"password": req.Password,
+		"login":    req.Username,
+	})
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	userResp, err := s.services.ObjectBuilderService().GetList(
+		ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      userReq,
+			ProjectId: config.UcodeDefaultProjectID,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	fmt.Println("TIME2", time.Since(now))
+
+	userDatas, ok := userResp.Data.AsMap()["response"].([]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if len(userDatas) < 1 {
+		err := errors.New("user not found")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	} else if len(userDatas) > 1 {
+		err := errors.New("many users found")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	userData, ok := userDatas[0].(map[string]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	clientTypeId, ok := userData["client_type_id"].(string)
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	fmt.Println("TIME3", time.Since(now))
+
+	clientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"id": clientTypeId,
+	})
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	clientTypeResp, err := s.services.ObjectBuilderService().GetSingle(
+		ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data:      clientTypeReq,
+			ProjectId: config.UcodeDefaultProjectID,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	fmt.Println("TIME4", time.Since(now))
+
+	clientTypeData, ok := clientTypeResp.Data.AsMap()["response"].(map[string]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	err = errors.New("invalid assertion")
+	id, ok := clientTypeData["guid"].(string)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	name, ok := clientTypeData["name"].(string)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	selfRegister, ok := clientTypeData["self_register"].(bool)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	selfRecover, ok := clientTypeData["self_recover"].(bool)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	projectId, ok := clientTypeData["project_id"].(string)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	fmt.Println("TIME5", time.Since(now))
+
+	// confirmBy, ok := clientTypeData["confirm_by"].(string)
+	// if !ok {
+	// 	err := errors.New("invalid assertion")
+	// 	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+
+	// pb.ConfirmStrategies(pb.ConfirmStrategies_value[confirmBy])
+
+	clientType := &pb.ClientType{
+		Id:           id,
+		Name:         name,
+		SelfRegister: selfRegister,
+		SelfRecover:  selfRecover,
+		ProjectId:    projectId,
+		// ConfirmBy:    confirmBy,
+	}
+
+	resp.ClientTypes = append(resp.ClientTypes, clientType)
+
+	userId, ok := userData["guid"].(string)
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	userCompanyProjects, err := s.services.CompanyServiceClient().GetListWithProjects(ctx,
+		&company_service.GetListWithProjectsRequest{
+			OwnerId: userId,
+		})
+
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	fmt.Println("TIME6", time.Since(now))
+
+	bytes, err := json.Marshal(userCompanyProjects.GetCompanies())
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	var respCompanies []*pb.MultiCompanyLoginResponse_Company
+	err = json.Unmarshal(bytes, &respCompanies)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resp.Companies = respCompanies
+
+	fmt.Println("TIME7", time.Since(now))
+
+	return resp, nil
 }
