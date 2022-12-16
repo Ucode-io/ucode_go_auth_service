@@ -652,14 +652,11 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	var respCompanies []*pb.MultiCompanyLoginResponse_Company
-	err = json.Unmarshal(bytes, &respCompanies)
+	err = json.Unmarshal(bytes, &resp.Companies)
 	if err != nil {
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	resp.Companies = respCompanies
 
 	fmt.Println("TIME7", time.Since(now))
 
