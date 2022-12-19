@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -22,10 +23,12 @@ func (s *clientService) V2CreateClientPlatform(ctx context.Context, req *pb.Crea
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_platform",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().Create(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_platform",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!CreateClientPlatform.ObjectBuilderService.Create--->", logger.Error(err))
@@ -47,10 +50,12 @@ func (s *clientService) V2GetClientPlatformByID(ctx context.Context, req *pb.Cli
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_platform",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().GetSingle(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_platform",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -72,10 +77,12 @@ func (s *clientService) V2GetClientPlatformByIDDetailed(ctx context.Context, req
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_platform",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().GetSingle(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_platform",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -95,10 +102,12 @@ func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.Get
 		s.log.Error("!!!ClientPlatform--->", logger.Error(err))
 	}
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_platform",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().GetList(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_platform",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
@@ -120,21 +129,25 @@ func (s *clientService) V2UpdateClientPlatform(ctx context.Context, req *pb.Upda
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_platform",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().Update(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_platform",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!UpdateClientPlatform.ObjectBuilderService.Update--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx, &pbObject.ManyToManyMessage{
-		TableFrom: "client_platform",
-		TableTo:   "client_type",
-		IdFrom:    req.Id,
-		IdTo:      req.ClientTypeIds,
-	})
+	_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
+		&pbObject.ManyToManyMessage{
+			TableFrom: "client_platform",
+			TableTo:   "client_type",
+			IdFrom:    req.Id,
+			IdTo:      req.ClientTypeIds,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 	if err != nil {
 		s.log.Error("!!!UpdateClientType.ObjectBuilderService.ManyToManyAppend--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -156,10 +169,12 @@ func (s *clientService) V2DeleteClientPlatform(ctx context.Context, req *pb.Clie
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_platform",
-		Data:      structData,
-	})
+	_, err = s.services.ObjectBuilderService().Delete(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_platform",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!DeleteClientPlatform.ObjectBuilderService.Delete--->", logger.Error(err))
@@ -186,10 +201,12 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.CreateCl
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_type",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().Create(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!CreateClientType.ObjectBuilderService.Create--->", logger.Error(err))
@@ -211,10 +228,12 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientT
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_type",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().GetSingle(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!GetClientTypeByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -236,10 +255,12 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.GetClie
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_type",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().GetList(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
@@ -270,21 +291,25 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.UpdateCl
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_type",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().Update(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 	if err != nil {
 		s.log.Error("!!!UpdateClientType.ObjectBuilderService.Update--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx, &pbObject.ManyToManyMessage{
-		TableFrom: "client_type",
-		TableTo:   "client_platform",
-		IdFrom:    req.Id,
-		IdTo:      req.ClientPlatformIds,
-	})
+	_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
+		&pbObject.ManyToManyMessage{
+			TableFrom: "client_type",
+			TableTo:   "client_platform",
+			IdFrom:    req.Id,
+			IdTo:      req.ClientPlatformIds,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 	if err != nil {
 		s.log.Error("!!!AddClient.ObjectBuilderService.Create--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -307,10 +332,12 @@ func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.ClientTy
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
-		TableSlug: "client_type",
-		Data:      structData,
-	})
+	_, err = s.services.ObjectBuilderService().Delete(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!DeleteClientType.ObjectBuilderService.Delete--->", logger.Error(err))
@@ -329,10 +356,12 @@ func (s *clientService) V2AddClient(ctx context.Context, req *pb.AddClientReques
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "client",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().Create(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!AddClient.ObjectBuilderService.Create--->", logger.Error(err))
@@ -360,10 +389,12 @@ func (s *clientService) V2AddClient(ctx context.Context, req *pb.AddClientReques
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "login_table",
-		Data:      structLoginCreate,
-	})
+	_, err = s.services.ObjectBuilderService().Create(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "login_table",
+			Data:      structLoginCreate,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 	if err != nil {
 		s.log.Error("!!!AddClient.ObjectBuilderService.Create--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -383,10 +414,12 @@ func (s *clientService) V2GetClientList(ctx context.Context, req *pb.GetClientLi
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-		TableSlug: "client",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().GetList(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!GetClientList.ObjectBuilderService.Create--->", logger.Error(err))
@@ -406,10 +439,12 @@ func (s *clientService) V2GetClientMatrix(ctx context.Context, req *pb.GetClient
 		s.log.Error("!!!GetClientList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-		TableSlug: "client",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().GetList(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!GetClientMatrix--->", logger.Error(err))
@@ -431,10 +466,12 @@ func (s *clientService) V2UpdateClient(ctx context.Context, req *pb.UpdateClient
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
-		TableSlug: "client",
-		Data:      structData,
-	})
+	result, err := s.services.ObjectBuilderService().Update(ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client",
+			Data:      structData,
+			ProjectId: config.UcodeDefaultProjectID,
+		})
 
 	if err != nil {
 		s.log.Error("!!!UpdateClient.ObjectBuilderService.Update--->", logger.Error(err))
@@ -458,6 +495,7 @@ func (s *clientService) V2RemoveClient(ctx context.Context, req *pb.ClientPrimar
 	resultClient, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "client",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!RemoveClient.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -467,6 +505,7 @@ func (s *clientService) V2RemoveClient(ctx context.Context, req *pb.ClientPrimar
 	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 		TableSlug: "client",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 
 	if err != nil {
@@ -554,6 +593,7 @@ func (s *clientService) V2AddUserInfoField(ctx context.Context, req *pb.AddUserI
 	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "user_info_field",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!AddUserInfoField.ObjectBuilderService.Creaete--->", logger.Error(err))
@@ -577,6 +617,7 @@ func (s *clientService) V2UpdateUserInfoField(ctx context.Context, req *pb.Updat
 	result, err := s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 		TableSlug: "user_info_field",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!UpdateUserInfoField.ObjectBuilderService.Update--->", logger.Error(err))
@@ -600,6 +641,7 @@ func (s *clientService) V2RemoveUserInfoField(ctx context.Context, req *pb.UserI
 	resultUserInfoField, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "user_info_field",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!RemoveUserInfoField.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -609,6 +651,7 @@ func (s *clientService) V2RemoveUserInfoField(ctx context.Context, req *pb.UserI
 	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 		TableSlug: "user_info_field",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 
 	if err != nil {

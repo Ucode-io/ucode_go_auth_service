@@ -125,6 +125,11 @@ func (r *projectRepo) GetList(ctx context.Context, queryParam *pb.GetProjectList
 		filter += " AND ((name) ILIKE ('%' || :search || '%'))"
 	}
 
+	if len(queryParam.CompanyId) > 0 {
+		params["company_id"] = queryParam.CompanyId
+		filter += " AND company_id = :company_id"
+	}
+
 	if queryParam.Offset > 0 {
 		params["offset"] = queryParam.Offset
 		offset = " OFFSET :offset"

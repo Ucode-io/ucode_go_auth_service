@@ -151,6 +151,14 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 
 	res.Role = role
 
+	companies, err := s.services.CompanyService().GetList(ctx, &pb.GetComapnyListRequest{UserId: user.Id})
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	res.Companies = companies.Companies
+
 	// TODO - Delete all old sessions & refresh token has this function too
 	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, user.Id)
 	if err != nil {

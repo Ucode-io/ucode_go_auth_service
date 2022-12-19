@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -56,6 +57,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!CreateUser.ObjectBuilderService.Create--->", logger.Error(err))
@@ -80,6 +82,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -92,7 +95,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	}, nil
 }
 
-//
 func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetUserList--->", logger.Any("req", req))
 
@@ -105,6 +107,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
@@ -130,6 +133,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
@@ -160,6 +164,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!UpdateUser.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -186,6 +191,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
+		ProjectId: config.UcodeDefaultProjectID,
 	})
 	if err != nil {
 		s.log.Error("!!!DeleteUser.ObjectBuilderService.Delete--->", logger.Error(err))

@@ -397,6 +397,60 @@ definitions:
       access_token:
         type: string
     type: object
+  auth_service.MultiCompanyLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  auth_service.MultiCompanyLoginResponse:
+    properties:
+      client_types:
+        items:
+          $ref: '#/definitions/auth_service.ClientType'
+        type: array
+      companies:
+        items:
+          $ref: '#/definitions/auth_service.MultiCompanyLoginResponse_Company'
+        type: array
+    type: object
+  auth_service.MultiCompanyLoginResponse_Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/auth_service.MultiCompanyLoginResponse_Company_Project'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  auth_service.MultiCompanyLoginResponse_Company_Project:
+    properties:
+      company_id:
+        type: string
+      created_at:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
   auth_service.Object:
     properties:
       object_id:
@@ -843,6 +897,8 @@ definitions:
         type: string
       password:
         type: string
+      project_id:
+        type: string
       tables:
         items:
           $ref: '#/definitions/auth_service.Object'
@@ -852,6 +908,10 @@ definitions:
     type: object
   auth_service.V2LoginResponse:
     properties:
+      app_permissions:
+        items:
+          $ref: '#/definitions/auth_service.RecordPermission'
+        type: array
       client_platform:
         $ref: '#/definitions/auth_service.ClientPlatform'
       client_type:
@@ -889,6 +949,10 @@ definitions:
       authGRPCPort:
         type: string
       authServiceHost:
+        type: string
+      companyGRPCPort:
+        type: string
+      companyServiceHost:
         type: string
       defaultLimit:
         type: string
@@ -1063,6 +1127,10 @@ definitions:
     type: object
   object_builder_service.V2LoginResponse:
     properties:
+      app_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.RecordPermission'
+        type: array
       client_platform:
         $ref: '#/definitions/object_builder_service.ClientPlatform'
       client_type:
@@ -5162,6 +5230,98 @@ paths:
                   type: string
               type: object
       summary: V2Login
+      tags:
+      - V2_Session
+  /v2/login/superadmin:
+    post:
+      consumes:
+      - application/json
+      description: V2LoginSuperAdmin
+      operationId: V2login_superadmin
+      parameters:
+      - description: V2LoginRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.V2LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: V2LoginSuperAdmin
+      tags:
+      - V2_Session
+  /v2/multi-company/login:
+    post:
+      consumes:
+      - application/json
+      description: MultiCompanyLogin
+      operationId: multi_company_login
+      parameters:
+      - description: LoginRequestBody
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.MultiCompanyLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.MultiCompanyLoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: MultiCompanyLogin
       tags:
       - V2_Session
   /v2/permission:
