@@ -49,7 +49,8 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
-	expire := time.Now().Add(time.Minute * 5)
+	loc, _ := time.LoadLocation("Asia/Tashkent")
+	expire := time.Now().In(loc).Add(time.Minute * 10)
 
 	code, err := util.GenerateCode(4)
 	if err != nil {
