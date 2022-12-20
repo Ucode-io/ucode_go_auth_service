@@ -295,7 +295,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	// USER
 	createUserReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"phone":              req.UserInfo.Phone,
+		"phone":              helper.ConverPhoneNumberToMongoPhoneFormat(req.UserInfo.Phone),
 		"active":             1,
 		"password":           req.UserInfo.Password,
 		"login":              req.UserInfo.Login,
