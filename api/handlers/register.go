@@ -49,7 +49,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 		return
 	}
 
-	expire := time.Now().Add(time.Minute * 5)
+	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
 
 	code, err := util.GenerateCode(4)
 	if err != nil {
