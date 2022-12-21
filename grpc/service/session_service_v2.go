@@ -44,6 +44,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			Login:         req.Username,
 			ClientType:    req.ClientType,
 			LoginStrategy: req.LoginStrategy,
+			ProjectId:     config.UcodeDefaultProjectID,
 		},
 	)
 	if err != nil {
