@@ -55,6 +55,7 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
+// @Param project_id query string false "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetClientPlatformListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -77,6 +78,7 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 			Limit:  int32(limit),
 			Offset: int32(offset),
 			Search: c.Query("search"),
+			ProjectId: c.Query("project_id"),
 		},
 	)
 
@@ -272,6 +274,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
+// @Param project_id query string false "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetClientTypeListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -294,6 +297,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 			Limit:  int32(limit),
 			Offset: int32(offset),
 			Search: c.Query("search"),
+			ProjectId: c.Query("project_id"),
 		},
 	)
 

@@ -4667,6 +4667,10 @@ paths:
         in: query
         name: search
         type: string
+      - description: project_id
+        in: query
+        name: project_id
+        type: string
       produces:
       - application/json
       responses:
@@ -4935,6 +4939,10 @@ paths:
       - description: search
         in: query
         name: search
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         type: string
       produces:
       - application/json
