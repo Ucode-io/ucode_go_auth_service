@@ -551,7 +551,8 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+    
+	fmt.Println("Client Type Request ================>: ", clientTypeReq)
 	clientTypeResp, err := s.services.ObjectBuilderService().GetSingle(
 		ctx,
 		&pbObject.CommonMessage{
