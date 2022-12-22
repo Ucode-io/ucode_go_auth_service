@@ -370,7 +370,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		"role_id":            session.RoleId,
 		"ip":                 session.Data,
 		"data":               session.Data,
-		"tables:":            authTables,
+		"tables":             authTables,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
