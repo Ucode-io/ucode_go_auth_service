@@ -282,56 +282,79 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	}
 
 	// USER
-	createUserReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"phone":              helper.ConverPhoneNumberToMongoPhoneFormat(req.UserInfo.Phone),
-		"active":             1,
-		"password":           req.UserInfo.Password,
-		"login":              req.UserInfo.Login,
-		"name":               "",
-		"photo_url":          "",
-		"salary":             0,
-		"role_id":            roleID,
-		"client_type_id":     clientTypeID,
-		"client_platform_id": clientPlatformID,
-		"project_id":         projectID,
-	})
+	//createUserReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+	//	"phone":              helper.ConverPhoneNumberToMongoPhoneFormat(req.UserInfo.Phone),
+	//	"active":             1,
+	//	"password":           req.UserInfo.Password,
+	//	"login":              req.UserInfo.Login,
+	//	"name":               "",
+	//	"photo_url":          "",
+	//	"salary":             0,
+	//	"role_id":            roleID,
+	//	"client_type_id":     clientTypeID,
+	//	"client_platform_id": clientPlatformID,
+	//	"project_id":         projectID,
+	//})
+	//
+	//if err != nil {
+	//	s.log.Error("---RegisterCompany--->", logger.Error(err))
+	//	return nil, err
+	//}
+	//
+	//createUserResp, err := s.services.ObjectBuilderService().Create(
+	//	ctx,
+	//	&object_builder_service.CommonMessage{
+	//		TableSlug: "user",
+	//		Data:      createUserReq,
+	//		ProjectId: config.UcodeDefaultProjectID,
+	//	},
+	//)
+	//if err != nil {
+	//	s.log.Error("---RegisterCompany--->", logger.Error(err))
+	//	return nil, err
+	//}
 
-	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
-		return nil, err
-	}
-
-	createUserResp, err := s.services.ObjectBuilderService().Create(
+	createUserRes, err := s.services.UserService().V2CreateUser(
 		ctx,
-		&object_builder_service.CommonMessage{
-			TableSlug: "user",
-			Data:      createUserReq,
-			ProjectId: config.UcodeDefaultProjectID,
+		&pb.CreateUserRequest{
+			ProjectId:        projectID,
+			ClientPlatformId: clientPlatformID,
+			ClientTypeId:     clientTypeID,
+			RoleId:           roleID,
+			Phone:            req.GetUserInfo().GetPhone(),
+			Email:            req.GetUserInfo().GetEmail(),
+			Login:            req.GetUserInfo().GetLogin(),
+			Password:         req.GetUserInfo().GetPassword(),
+			Active:           1,
+			ExpiresAt:        req.GetUserInfo().GetExpiresAt(),
+			Name:             "",
+			PhotoUrl:         "",
 		},
 	)
+
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
 		return nil, err
 	}
 
-	userData, ok := createUserResp.Data.AsMap()["data"].(map[string]interface{})
-	if !ok || userData == nil {
-		s.log.Error("---RegisterCompany--->", logger.Any("msg", "user is nil"))
-		return nil, err
-	}
-
-	userID, ok := userData["guid"].(string)
-	if !ok {
-		s.log.Error("---RegisterCompany--->", logger.Any("msg", "user_id is nil"))
-		return nil, err
-	}
+	//userData, ok := createUserResp.Data.AsMap()["data"].(map[string]interface{})
+	//if !ok || userData == nil {
+	//	s.log.Error("---RegisterCompany--->", logger.Any("msg", "user is nil"))
+	//	return nil, err
+	//}
+	//
+	//userID, ok := userData["guid"].(string)
+	//if !ok {
+	//	s.log.Error("---RegisterCompany--->", logger.Any("msg", "user_id is nil"))
+	//	return nil, err
+	//}
 
 	_, err = s.services.CompanyServiceClient().Update(ctx, &company_service.Company{
 		Id:          companyPKey.Id,
 		Name:        req.Name,
 		Logo:        "",
 		Description: "",
-		OwnerId:     userID,
+		OwnerId:     createUserRes.GetId(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
