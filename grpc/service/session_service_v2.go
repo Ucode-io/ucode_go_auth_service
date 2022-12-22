@@ -158,7 +158,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	}
 
 	_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
-		ClientPlatformId: req.ClientPlatformId,
+		ClientPlatformId: session.ClientPlatformId,
 		Path:             req.Path,
 		Method:           req.Method,
 	})
@@ -166,15 +166,9 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	methodField := ""
-	tableSlug := ""
-	slugs := make(map[string]int)
-	request := make(map[string]interface{})
-	res := make(map[string]interface{})
-	resp := &pbObject.CommonMessage{}
 
+	var methodField string
 	switch req.Method {
-
 	case "GET":
 		methodField = "read"
 	case "POST":
@@ -183,60 +177,25 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		methodField = "update"
 	case "DELETE":
 		methodField = "delete"
-
 	}
+
 	splitedPath := strings.Split(req.Path, "/")
 	splitedPath = splitedPath[1:]
 
+	var tableSlug string
 	tableSlug = splitedPath[len(splitedPath)-1]
 	if tableSlug[len(tableSlug)-2:] == "id" {
 		tableSlug = splitedPath[len(splitedPath)-2]
 	}
 
-	// these apis also manage by app's permission
-
-	slugs["field"] = 1
-	slugs["view"] = 1
-	slugs["table"] = 1
-	slugs["relation"] = 1
-	slugs["section"] = 1
-	slugs["view"] = 1
-	slugs["view_relation"] = 1
-	slugs["html-template"] = 1
-	slugs["variable"] = 1
-	slugs["dashboard"] = 1
-	slugs["panel"] = 1
-	slugs["html-to-pdf"] = 1
-	slugs["document"] = 1
-	slugs["template-to-html"] = 1
-	slugs["many-to-many"] = 1
-	slugs["upload"] = 1
-	slugs["upload-file"] = 1
-	slugs["close-cashbox"] = 1
-	slugs["open-cashbox"] = 1
-	slugs["cashbox_transaction"] = 1
-	slugs["query"] = 1
-	slugs["event"] = 1
-	slugs["event-log"] = 1
-	slugs["permission-upsert"] = 1
-	slugs["custom-event"] = 1
-	slugs["excel"] = 1
-	slugs["field-permission"] = 1
-	slugs["function"] = 1
-	slugs["invoke_function"] = 1
-
-	if _, ok := slugs[tableSlug]; ok {
+	if _, ok := config.ObjectBuilderTableSlugs[tableSlug]; ok {
 		tableSlug = "app"
 	}
 
+	request := make(map[string]interface{})
 	request["client_type_id"] = session.ClientTypeId
 	request[methodField] = "Yes"
 	request["table_slug"] = tableSlug
-	structPb, err := helper.ConvertMapToStruct(request)
-	if err != nil {
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
 
 	clientType, err := s.services.ClientService().V2GetClientTypeByID(ctx, &pb.ClientTypePrimaryKey{
 		Id: session.ClientTypeId,
@@ -251,34 +210,49 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	clientName := convertedClientType["response"].(map[string]interface{})["name"]
 
-	if clientName == nil {
-		err := errors.New("Wrong client type")
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	clientName, ok := convertedClientType["response"].(map[string]interface{})["name"]
+	if !ok {
+		res := make(map[string]interface{})
+		resp := &pbObject.CommonMessage{}
 
-	if session.ClientTypeId != "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d" || clientName.(string) != "ADMIN" {
-		resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-			TableSlug: "record_permission",
-			Data:      structPb,
-		})
-		if err != nil {
-			s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		res, err = helper.ConvertStructToResponse(resp.Data)
-		if err != nil {
-			s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		if len(res["response"].([]interface{})) == 0 {
-			err := errors.New("Permission denied")
+		if clientName == nil {
+			err := errors.New("Wrong client type")
 			s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-			return nil, status.Error(codes.PermissionDenied, err.Error())
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		structPb, err := helper.ConvertMapToStruct(request)
+		if err != nil {
+			s.log.Error("!!!V2HasAccess--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		if session.ClientTypeId != config.AdminClientPlatformID || clientName.(string) != config.AdminClientName {
+			resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+				TableSlug: "record_permission",
+				Data:      structPb,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
+			if err != nil {
+				s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			res, err = helper.ConvertStructToResponse(resp.Data)
+			if err != nil {
+				s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			if len(res["response"].([]interface{})) == 0 {
+				err := errors.New("Permission denied")
+				s.log.Error("!!!V2HasAccess--->", logger.Error(err))
+				return nil, status.Error(codes.PermissionDenied, err.Error())
+			}
 		}
 	}
+
 	// DONT FORGET TO UNCOMMENT THIS!!!
 
 	// hasAccess, err := s.strg.PermissionScope().HasAccess(ctx, user.RoleId, req.ClientPlatformId, req.Path, req.Method)
@@ -292,6 +266,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	// 	s.log.Error("!!!V2HasAccess--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
+
 	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
 		authTable := &pb.TableBody{
@@ -316,6 +291,8 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		Tables:           authTables,
 	}, nil
 }
+
+
 
 func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenResponse, error) {
 
