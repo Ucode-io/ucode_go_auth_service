@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -58,7 +57,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	project, err := s.services.ProjectServiceClient().Create(ctx, &company_service.CreateProjectRequest{
 		CompanyId:    companyPKey.GetId(),
-		K8SNamespace: "",
+		K8SNamespace: "cp-region-type-id",
 		Title:        req.GetName(),
 	})
 	if err != nil {
@@ -91,17 +90,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	}
 
 	projectID := project.ProjectId
-
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println("projectID", projectID)
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
 
 	// CLIENT_TYPE
 	createClientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
