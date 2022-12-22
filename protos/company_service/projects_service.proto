@@ -17,6 +17,20 @@ service ProjectService {
     rpc GetReourceList(GetReourceListRequest) returns (GetReourceListResponse) {}
     rpc ReconnectResource(ReconnectResourceRequest) returns (EmptyProto) {}
     rpc GetResourceWithPath(GetResourceRequest) returns (GetResourceWithPathResponse) {}
+    rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse) {}
+    rpc AutoConnect(GetProjectsRequest) returns (EmptyProto) {}
+}
+
+message GetProjectsRequest {
+    string k8s_namespace = 1;
+}
+
+message GetProjectsResponse {
+    string id = 1;
+    string title = 2;
+    string created_at = 3;
+    string updated_at = 4;
+    string company_id = 5;
 }
 
 message ProjectWithoutResource {
