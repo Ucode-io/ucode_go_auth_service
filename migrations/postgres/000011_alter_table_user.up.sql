@@ -17,4 +17,4 @@ alter table "user"
     drop column if exists project_id;
 
 alter table "user"
-    add column project_id uuid;
+    add column if not exists project_id uuid;
