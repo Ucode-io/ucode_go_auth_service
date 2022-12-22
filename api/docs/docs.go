@@ -6239,6 +6239,12 @@ var doc = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6718,6 +6724,12 @@ var doc = `{
                         "type": "string",
                         "description": "search",
                         "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
                         "in": "query"
                     }
                 ],
