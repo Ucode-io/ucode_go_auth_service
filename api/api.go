@@ -105,11 +105,12 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.DELETE("/logout", h.Logout)
 	r.PUT("/refresh", h.RefreshToken)
 	r.POST("/has-acess", h.HasAccess)
+	r.POST("/has-access-super-admin", h.HasAccessSuperAdmin)
 
 	v2 := r.Group("/v2")
 	{
 		v2.POST("/client-platform", h.V2CreateClientPlatform)
-		v2.GET("/client-platform", h.V2GetClientPlatformList)//project_id
+		v2.GET("/client-platform", h.V2GetClientPlatformList) //project_id
 		v2.GET("/client-platform/:client-platform-id", h.V2GetClientPlatformByID)
 		v2.GET("/client-platform-detailed/:client-platform-id", h.V2GetClientPlatformByIDDetailed)
 		v2.PUT("/client-platform", h.V2UpdateClientPlatform)
@@ -117,7 +118,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		// admin, dev, hr, ceo
 		v2.POST("/client-type", h.V2CreateClientType)
-		v2.GET("/client-type", h.V2GetClientTypeList)//
+		v2.GET("/client-type", h.V2GetClientTypeList) //
 		v2.GET("/client-type/:client-type-id", h.V2GetClientTypeByID)
 		v2.PUT("/client-type", h.V2UpdateClientType)
 		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)
@@ -157,9 +158,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
 		v2.POST("/login", h.V2Login)
 		v2.PUT("/refresh", h.V2RefreshToken)
+		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
 		v2.POST("/multi-company/login", h.MultiCompanyLogin)
-
 	}
 
 	//COMPANY

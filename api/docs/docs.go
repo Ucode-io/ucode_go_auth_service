@@ -1218,6 +1218,71 @@ var doc = `{
                 }
             }
         },
+        "/has-access-super-admin": {
+            "post": {
+                "description": "Has Access",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Session"
+                ],
+                "summary": "Has Access",
+                "operationId": "has_access",
+                "parameters": [
+                    {
+                        "description": "HasAccessRequestBody",
+                        "name": "has-access",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.HasAccessSuperAdminReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.HasAccessSuperAdminRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/integration": {
             "get": {
                 "description": "Get Integration List",
@@ -2415,7 +2480,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetProjectListResponse"
+                                            "$ref": "#/definitions/company_service.GetProjectListResponse"
                                         }
                                     }
                                 }
@@ -2462,7 +2527,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateProjectRequest"
+                            "$ref": "#/definitions/company_service.Project"
                         }
                     }
                 ],
@@ -2478,7 +2543,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Project"
+                                            "$ref": "#/definitions/company_service.Project"
                                         }
                                     }
                                 }
@@ -2525,7 +2590,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateProjectRequest"
+                            "$ref": "#/definitions/company_service.CreateProjectRequest"
                         }
                     }
                 ],
@@ -2541,7 +2606,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Project"
+                                            "$ref": "#/definitions/company_service.Project"
                                         }
                                     }
                                 }
@@ -2604,7 +2669,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Project"
+                                            "$ref": "#/definitions/company_service.Project"
                                         }
                                     }
                                 }
@@ -5643,7 +5708,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2LoginRequest"
+                            "$ref": "#/definitions/auth_service.V2LoginSuperAdminReq"
                         }
                     }
                 ],
@@ -5659,7 +5724,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/auth_service.V2LoginSuperAdminRes"
                                         }
                                     }
                                 }
@@ -6208,6 +6273,71 @@ var doc = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.V2RefreshTokenResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/refresh-superadmin": {
+            "put": {
+                "description": "V2Refresh Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "V2Refresh Token",
+                "operationId": "v2refresh",
+                "parameters": [
+                    {
+                        "description": "RefreshTokenRequestBody",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.V2RefreshTokenSuperAdminResponse"
                                         }
                                     }
                                 }
@@ -7824,6 +7954,32 @@ var doc = `{
                 }
             }
         },
+        "auth_service.Company": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.CompleteClientType": {
             "type": "object",
             "properties": {
@@ -7937,31 +8093,11 @@ var doc = `{
                 }
             }
         },
-        "auth_service.CreateProjectRequest": {
-            "type": "object",
-            "properties": {
-                "company_id": {
-                    "type": "string"
-                },
-                "domain": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "auth_service.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "active": {
                     "type": "integer"
-                },
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
                 },
                 "email": {
                     "type": "string"
@@ -7985,9 +8121,6 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "role_id": {
                     "type": "string"
                 }
             }
@@ -8068,20 +8201,6 @@ var doc = `{
                 }
             }
         },
-        "auth_service.GetProjectListResponse": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.Project"
-                    }
-                }
-            }
-        },
         "auth_service.GetUserListResponse": {
             "type": "object",
             "properties": {
@@ -8112,6 +8231,58 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.HasAccessSuperAdminReq": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.HasAccessSuperAdminRes": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.TableBody"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -8372,29 +8543,6 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Project": {
-            "type": "object",
-            "properties": {
-                "company_id": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "domain": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "auth_service.RecordPermission": {
             "type": "object",
             "properties": {
@@ -8611,6 +8759,17 @@ var doc = `{
                 }
             }
         },
+        "auth_service.TableBody": {
+            "type": "object",
+            "properties": {
+                "object_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.Token": {
             "type": "object",
             "properties": {
@@ -8744,20 +8903,6 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateProjectRequest": {
-            "type": "object",
-            "properties": {
-                "domain": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "auth_service.UpdateRelationRequest": {
             "type": "object",
             "properties": {
@@ -8879,12 +9024,6 @@ var doc = `{
                 "active": {
                     "type": "integer"
                 },
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
@@ -8913,9 +9052,6 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "role_id": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -9039,6 +9175,44 @@ var doc = `{
                 }
             }
         },
+        "auth_service.V2LoginSuperAdminReq": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.V2LoginSuperAdminRes": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Company"
+                    }
+                },
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Session"
+                    }
+                },
+                "token": {
+                    "type": "object",
+                    "$ref": "#/definitions/auth_service.Token"
+                },
+                "user_found": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.V2RefreshTokenResponse": {
             "type": "object",
             "properties": {
@@ -9051,6 +9225,148 @@ var doc = `{
                 "token": {
                     "type": "object",
                     "$ref": "#/definitions/auth_service.Token"
+                }
+            }
+        },
+        "auth_service.V2RefreshTokenSuperAdminResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "object",
+                    "$ref": "#/definitions/auth_service.Token"
+                }
+            }
+        },
+        "company_service.CreateProjectRequest": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "k8s_namespace": {
+                    "type": "string"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Resource"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.GetProjectListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Project"
+                    }
+                }
+            }
+        },
+        "company_service.Project": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "k8s_namespace": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.Resource": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "type": "object",
+                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "company_service.ResourceWithoutPassword": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "type": "object",
+                    "$ref": "#/definitions/company_service.ResourceWithoutPassword_Credentials"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "company_service.ResourceWithoutPassword_Credentials": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.Resource_Credentials": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

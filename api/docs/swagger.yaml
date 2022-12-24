@@ -154,6 +154,23 @@ definitions:
       table_slug:
         type: string
     type: object
+  auth_service.Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
   auth_service.CompleteClientType:
     properties:
       client_type:
@@ -228,23 +245,10 @@ definitions:
       parent_id:
         type: string
     type: object
-  auth_service.CreateProjectRequest:
-    properties:
-      company_id:
-        type: string
-      domain:
-        type: string
-      name:
-        type: string
-    type: object
   auth_service.CreateUserRequest:
     properties:
       active:
         type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
       email:
         type: string
       expires_at:
@@ -260,8 +264,6 @@ definitions:
       photo_url:
         type: string
       project_id:
-        type: string
-      role_id:
         type: string
     type: object
   auth_service.GetClientMatrixResponse:
@@ -313,15 +315,6 @@ definitions:
           $ref: '#/definitions/auth_service.Session'
         type: array
     type: object
-  auth_service.GetProjectListResponse:
-    properties:
-      count:
-        type: integer
-      projects:
-        items:
-          $ref: '#/definitions/auth_service.Project'
-        type: array
-    type: object
   auth_service.GetUserListResponse:
     properties:
       count:
@@ -342,6 +335,40 @@ definitions:
       path:
         type: string
       project_id:
+        type: string
+    type: object
+  auth_service.HasAccessSuperAdminReq:
+    properties:
+      access_token:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      project_id:
+        type: string
+    type: object
+  auth_service.HasAccessSuperAdminRes:
+    properties:
+      created_at:
+        type: string
+      data:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      ip:
+        type: string
+      project_id:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/auth_service.TableBody'
+        type: array
+      updated_at:
+        type: string
+      user_id:
         type: string
     type: object
   auth_service.Integration:
@@ -510,21 +537,6 @@ definitions:
       permission_id:
         type: string
     type: object
-  auth_service.Project:
-    properties:
-      company_id:
-        type: string
-      created_at:
-        type: string
-      domain:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updated_at:
-        type: string
-    type: object
   auth_service.RecordPermission:
     properties:
       client_type_id:
@@ -666,6 +678,13 @@ definitions:
       view_slug:
         type: string
     type: object
+  auth_service.TableBody:
+    properties:
+      object_id:
+        type: string
+      table_slug:
+        type: string
+    type: object
   auth_service.Token:
     properties:
       access_token:
@@ -753,15 +772,6 @@ definitions:
       parent_id:
         type: string
     type: object
-  auth_service.UpdateProjectRequest:
-    properties:
-      domain:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-    type: object
   auth_service.UpdateRelationRequest:
     properties:
       client_type_id:
@@ -841,10 +851,6 @@ definitions:
     properties:
       active:
         type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
       created_at:
         type: string
       email:
@@ -864,8 +870,6 @@ definitions:
       photo_url:
         type: string
       project_id:
-        type: string
-      role_id:
         type: string
       updated_at:
         type: string
@@ -947,6 +951,31 @@ definitions:
       user_id:
         type: string
     type: object
+  auth_service.V2LoginSuperAdminReq:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  auth_service.V2LoginSuperAdminRes:
+    properties:
+      companies:
+        items:
+          $ref: '#/definitions/auth_service.Company'
+        type: array
+      sessions:
+        items:
+          $ref: '#/definitions/auth_service.Session'
+        type: array
+      token:
+        $ref: '#/definitions/auth_service.Token'
+        type: object
+      user_found:
+        type: boolean
+      user_id:
+        type: string
+    type: object
   auth_service.V2RefreshTokenResponse:
     properties:
       permissions:
@@ -956,6 +985,99 @@ definitions:
       token:
         $ref: '#/definitions/auth_service.Token'
         type: object
+    type: object
+  auth_service.V2RefreshTokenSuperAdminResponse:
+    properties:
+      token:
+        $ref: '#/definitions/auth_service.Token'
+        type: object
+    type: object
+  company_service.CreateProjectRequest:
+    properties:
+      company_id:
+        type: string
+      k8s_namespace:
+        type: string
+      resources:
+        items:
+          $ref: '#/definitions/company_service.Resource'
+        type: array
+      title:
+        type: string
+    type: object
+  company_service.GetProjectListResponse:
+    properties:
+      count:
+        type: integer
+      projects:
+        items:
+          $ref: '#/definitions/company_service.Project'
+        type: array
+    type: object
+  company_service.Project:
+    properties:
+      company_id:
+        type: string
+      k8s_namespace:
+        type: string
+      project_id:
+        type: string
+      resources:
+        items:
+          $ref: '#/definitions/company_service.ResourceWithoutPassword'
+        type: array
+      title:
+        type: string
+    type: object
+  company_service.Resource:
+    properties:
+      credentials:
+        $ref: '#/definitions/company_service.Resource_Credentials'
+        type: object
+      id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+    type: object
+  company_service.Resource_Credentials:
+    properties:
+      database:
+        type: string
+      host:
+        type: string
+      password:
+        type: string
+      port:
+        type: string
+      username:
+        type: string
+    type: object
+  company_service.ResourceWithoutPassword:
+    properties:
+      credentials:
+        $ref: '#/definitions/company_service.ResourceWithoutPassword_Credentials'
+        type: object
+      id:
+        type: string
+      project_id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+    type: object
+  company_service.ResourceWithoutPassword_Credentials:
+    properties:
+      database:
+        type: string
+      host:
+        type: string
+      port:
+        type: string
+      username:
+        type: string
     type: object
   config.Config:
     properties:
@@ -1905,6 +2027,43 @@ paths:
       summary: Has Access
       tags:
       - Session
+  /has-access-super-admin:
+    post:
+      consumes:
+      - application/json
+      description: Has Access
+      operationId: has_access
+      parameters:
+      - description: HasAccessRequestBody
+        in: body
+        name: has-access
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.HasAccessSuperAdminReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.HasAccessSuperAdminRes'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Has Access
+      tags:
+      - Session
   /integration:
     get:
       consumes:
@@ -2607,7 +2766,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetProjectListResponse'
+                  $ref: '#/definitions/company_service.GetProjectListResponse'
               type: object
         "500":
           description: Server Error
@@ -2632,7 +2791,7 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateProjectRequest'
+          $ref: '#/definitions/company_service.CreateProjectRequest'
       produces:
       - application/json
       responses:
@@ -2643,7 +2802,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Project'
+                  $ref: '#/definitions/company_service.Project'
               type: object
         "500":
           description: Server Error
@@ -2668,7 +2827,7 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateProjectRequest'
+          $ref: '#/definitions/company_service.Project'
       produces:
       - application/json
       responses:
@@ -2679,7 +2838,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Project'
+                  $ref: '#/definitions/company_service.Project'
               type: object
         "500":
           description: Server Error
@@ -2742,7 +2901,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Project'
+                  $ref: '#/definitions/company_service.Project'
               type: object
         "500":
           description: Server Error
@@ -4479,7 +4638,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2LoginRequest'
+          $ref: '#/definitions/auth_service.V2LoginSuperAdminReq'
       produces:
       - application/json
       responses:
@@ -4490,7 +4649,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2LoginResponse'
+                  $ref: '#/definitions/auth_service.V2LoginSuperAdminRes'
               type: object
         "500":
           description: Server Error
@@ -4808,6 +4967,43 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2RefreshTokenResponse'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: V2Refresh Token
+      tags:
+      - V2_Session
+  /v2/refresh-superadmin:
+    put:
+      consumes:
+      - application/json
+      description: V2Refresh Token
+      operationId: v2refresh
+      parameters:
+      - description: RefreshTokenRequestBody
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.V2RefreshTokenSuperAdminResponse'
               type: object
         "500":
           description: Server Error
