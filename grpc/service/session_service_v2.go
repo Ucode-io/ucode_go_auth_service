@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -36,22 +37,44 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	data, err := s.services.LoginService().Login(
-		ctx,
-		&pbObject.LoginRequest{
-			Password:      req.Password,
-			Login:         req.Username,
-			ClientType:    req.ClientType,
-			LoginStrategy: req.LoginStrategy,
-			ProjectId:     config.UcodeDefaultProjectID,
-		},
-	)
+	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		s.log.Error("!!!V2Login--->", logger.Error(err))
+		if err == sql.ErrNoRows {
+			errNoRows := errors.New("no user found")
+			return nil, status.Error(codes.Internal, errNoRows.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(user.Password, req.Password)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, "2023-01-28T06:23:33.952Z")
+	if !match {
+		err := errors.New("username or password is wrong")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	//data, err := s.services.LoginService().Login(
+	//	ctx,
+	//	&pbObject.LoginRequest{
+	//		Password:      req.Password,
+	//		Login:         req.Username,
+	//		ClientType:    req.ClientType,
+	//		LoginStrategy: req.LoginStrategy,
+	//		ProjectId:     config.UcodeDefaultProjectID,
+	//	},
+	//)
+	//if err != nil {
+	//	s.log.Error("!!!Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.GetExpiresAt())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -62,66 +85,172 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if !data.UserFound {
-		customError := errors.New("User not found")
-		s.log.Error("!!!Login--->", logger.Error(customError))
-		return nil, status.Error(codes.NotFound, customError.Error())
-	}
+	//if !data.UserFound {
+	//	customError := errors.New("User not found")
+	//	s.log.Error("!!!Login--->", logger.Error(customError))
+	//	return nil, status.Error(codes.NotFound, customError.Error())
+	//}
 
-	projectID := req.ProjectId
-
-	_, err = uuid.Parse(req.GetProjectId())
-	if err == nil {
-		project, err := s.services.ProjectServiceClient().GetById(
-			ctx,
-			&company_service.GetProjectByIdRequest{
-				ProjectId: req.ProjectId,
-			},
-		)
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		company, err := s.services.CompanyServiceClient().GetById(
-			ctx,
-			&company_service.GetCompanyByIdRequest{
-				Id: project.CompanyId,
-			},
-		)
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		// if user is not company owner
-		if company.Company.GetOwnerId() != data.GetUserId() {
-			// if user has no access to project
-			if req.GetProjectId() != data.Role.GetProjectId() {
-				s.log.Error("!!!Login--->", logger.Any("msg", "user has no access to this project"))
-				return nil, status.Error(codes.Internal, "user has no access to this project")
-			}
-		}
-	}
-
-	res := helper.ConvertPbToAnotherPb(data)
-
-	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData: res,
-		Tables:    req.Tables,
-		ProjectId: projectID,
+	userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"login":          req.Username,
+		"client_type_id": req.ClientType,
+		"project_id":     req.ProjectId,
 	})
-	if resp == nil {
-		err := errors.New("User Not Found")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
 	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return resp, nil
+	userResp, err := s.services.ObjectBuilderService().GetSingle(
+		ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      userReq,
+			ProjectId: config.UcodeDefaultProjectID,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!V2Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	_, ok := userResp.Data.AsMap()["response"].(map[string]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//guid, ok := userData["guid"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+
+	//roleId, ok := userData["role_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//clientTypeId, ok := userData["client_type_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//clientPlatformId, ok := userData["client_platform_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//projectId, ok := userData["project_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//projectID := req.ProjectId
+	//
+	//if projectId != projectID {
+	//	err := errors.New("invalid data")
+	//	s.log.Error("!!!V2Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//_, err = uuid.Parse(req.GetProjectId())
+	//if err == nil {
+	//	project, err := s.services.ProjectServiceClient().GetById(
+	//		ctx,
+	//		&company_service.GetProjectByIdRequest{
+	//			ProjectId: req.ProjectId,
+	//		},
+	//	)
+	//	if err != nil {
+	//		s.log.Error("!!!Login--->", logger.Error(err))
+	//		return nil, status.Error(codes.Internal, err.Error())
+	//	}
+	//
+	//	company, err := s.services.CompanyServiceClient().GetById(
+	//		ctx,
+	//		&company_service.GetCompanyByIdRequest{
+	//			Id: project.CompanyId,
+	//		},
+	//	)
+	//	if err != nil {
+	//		s.log.Error("!!!Login--->", logger.Error(err))
+	//		return nil, status.Error(codes.Internal, err.Error())
+	//	}
+	//
+	//	// if user is not company owner
+	//	if company.Company.GetOwnerId() != user.GetId() {
+	//		// if user has no access to project
+	//		roleReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+	//			"guid": roleId,
+	//		})
+	//		if err != nil {
+	//			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		roleRes, err := s.services.ObjectBuilderService().GetSingle(
+	//			ctx,
+	//			&pbObject.CommonMessage{
+	//				TableSlug: "role",
+	//				Data:      roleReq,
+	//				ProjectId: config.UcodeDefaultProjectID,
+	//			},
+	//		)
+	//		if err != nil {
+	//			s.log.Error("!!!V2Login--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		roleData, ok := roleRes.Data.AsMap()["response"].(map[string]interface{})
+	//		if !ok {
+	//			err := errors.New("invalid assertion")
+	//			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		projectIdByRole, ok := roleData["project_id"].(string)
+	//		if !ok {
+	//			err := errors.New("invalid assertion")
+	//			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		if req.GetProjectId() != projectIdByRole {
+	//			s.log.Error("!!!Login--->", logger.Any("msg", "user has no access to this project"))
+	//			return nil, status.Error(codes.Internal, "user has no access to this project")
+	//		}
+	//	}
+	//}
+	//
+	////res := helper.ConvertPbToAnotherPb(data)
+	//
+	//resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+	//	LoginData: res,
+	//	Tables:    req.Tables,
+	//	ProjectId: projectID,
+	//})
+	//if resp == nil {
+	//	err := errors.New("User Not Found")
+	//	s.log.Error("!!!Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.NotFound, err.Error())
+	//}
+	//if err != nil {
+	//	s.log.Error("!!!Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+
+	return nil, nil
 }
 
 func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
@@ -729,27 +858,27 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	//userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-	//	"password": req.Password,
-	//	"login":    req.Username,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
+	userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"password": req.Password,
+		"login":    req.Username,
+	})
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-	//userResp, err := s.services.ObjectBuilderService().GetList(
-	//	ctx,
-	//	&pbObject.CommonMessage{
-	//		TableSlug: "user",
-	//		Data:      userReq,
-	//		ProjectId: config.UcodeDefaultProjectID,
-	//	},
-	//)
-	//if err != nil {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
+	userResp, err := s.services.ObjectBuilderService().GetList(
+		ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      userReq,
+			ProjectId: config.UcodeDefaultProjectID,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
 	if err != nil {
@@ -771,56 +900,56 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 
 	fmt.Println("TIME2", time.Since(now))
 
-	//userDatas, ok := userResp.Data.AsMap()["response"].([]interface{})
-	//if !ok {
-	//	err := errors.New("invalid assertion")
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
+	userDatas, ok := userResp.Data.AsMap()["response"].([]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-	//if len(userDatas) < 1 {
-	//	err := errors.New("user not found")
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.PermissionDenied, err.Error())
-	//} else if len(userDatas) > 1 {
-	//	err := errors.New("many users found")
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.PermissionDenied, err.Error())
-	//}
+	if len(userDatas) < 1 {
+		err := errors.New("user not found")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	} else if len(userDatas) > 1 {
+		err := errors.New("many users found")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
 
-	//userData, ok := userDatas[0].(map[string]interface{})
-	//if !ok {
-	//	err := errors.New("invalid assertion")
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//clientTypeId, ok := userData["client_type_id"].(string)
-	//if !ok {
-	//	err := errors.New("invalid assertion")
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
+	userData, ok := userDatas[0].(map[string]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	clientTypeId, ok := userData["client_type_id"].(string)
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	fmt.Println("TIME3", time.Since(now))
 
-	//clientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-	//	"id": clientTypeId,
-	//})
+	clientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"id": clientTypeId,
+	})
 	if err != nil {
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	//fmt.Println("Client Type Request ================>: ", clientTypeReq)
-	//clientTypeResp, err := s.services.ObjectBuilderService().GetSingle(
-	//	ctx,
-	//	&pbObject.CommonMessage{
-	//		TableSlug: "client_type",
-	//		Data:      clientTypeReq,
-	//		ProjectId: config.UcodeDefaultProjectID,
-	//	},
-	//)
+	fmt.Println("Client Type Request ================>: ", clientTypeReq)
+	clientTypeResp, err := s.services.ObjectBuilderService().GetSingle(
+		ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data:      clientTypeReq,
+			ProjectId: config.UcodeDefaultProjectID,
+		},
+	)
 	if err != nil {
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -828,98 +957,191 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 
 	fmt.Println("TIME4", time.Since(now))
 
-	//clientTypeData, ok := clientTypeResp.Data.AsMap()["response"].(map[string]interface{})
-	//if !ok {
-	//	err := errors.New("invalid assertion")
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
+	clientTypeData, ok := clientTypeResp.Data.AsMap()["response"].(map[string]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-	//err = errors.New("invalid assertion")
-	//id, ok := clientTypeData["guid"].(string)
-	//if !ok {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//name, ok := clientTypeData["name"].(string)
-	//if !ok {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//selfRegister, ok := clientTypeData["self_register"].(bool)
-	//if !ok {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//selfRecover, ok := clientTypeData["self_recover"].(bool)
-	//if !ok {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//projectId, ok := clientTypeData["project_id"].(string)
-	//if !ok {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//fmt.Println("TIME5", time.Since(now))
-	//
-	//// confirmBy, ok := clientTypeData["confirm_by"].(string)
-	//// if !ok {
-	//// 	err := errors.New("invalid assertion")
-	//// 	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//// 	return nil, status.Error(codes.Internal, err.Error())
-	//// }
-	//
-	//// pb.ConfirmStrategies(pb.ConfirmStrategies_value[confirmBy])
-	//
-	//clientType := &pb.ClientType{
-	//	Id:           id,
-	//	Name:         name,
-	//	SelfRegister: selfRegister,
-	//	SelfRecover:  selfRecover,
-	//	ProjectId:    projectId,
-	//	// ConfirmBy:    confirmBy,
-	//}
-	//
-	//resp.ClientTypes = append(resp.ClientTypes, clientType)
-	//
-	//userId, ok := userData["guid"].(string)
-	//if !ok {
-	//	err := errors.New("invalid assertion")
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//userCompanyProjects, err := s.services.CompanyServiceClient().GetListWithProjects(ctx,
-	//	&company_service.GetListWithProjectsRequest{
-	//		OwnerId: userId,
-	//	})
-	//
-	//if err != nil {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//fmt.Println("TIME6", time.Since(now))
-	//
-	//bytes, err := json.Marshal(userCompanyProjects.GetCompanies())
-	//if err != nil {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//err = json.Unmarshal(bytes, &resp.Companies)
-	//if err != nil {
-	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//fmt.Println("TIME7", time.Since(now))
+	err = errors.New("invalid assertion")
+	id, ok := clientTypeData["guid"].(string)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	name, ok := clientTypeData["name"].(string)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	selfRegister, ok := clientTypeData["self_register"].(bool)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	selfRecover, ok := clientTypeData["self_recover"].(bool)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	projectId, ok := clientTypeData["project_id"].(string)
+	if !ok {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	fmt.Println("TIME5", time.Since(now))
+
+	// confirmBy, ok := clientTypeData["confirm_by"].(string)
+	// if !ok {
+	// 	err := errors.New("invalid assertion")
+	// 	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+
+	// pb.ConfirmStrategies(pb.ConfirmStrategies_value[confirmBy])
+
+	clientType := &pb.ClientType{
+		Id:           id,
+		Name:         name,
+		SelfRegister: selfRegister,
+		SelfRecover:  selfRecover,
+		ProjectId:    projectId,
+		// ConfirmBy:    confirmBy,
+	}
+
+	resp.ClientTypes = append(resp.ClientTypes, clientType)
+
+	userId, ok := userData["guid"].(string)
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	userCompanyProjects, err := s.services.CompanyServiceClient().GetListWithProjects(ctx,
+		&company_service.GetListWithProjectsRequest{
+			OwnerId: userId,
+		})
+
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	fmt.Println("TIME6", time.Since(now))
+
+	bytes, err := json.Marshal(userCompanyProjects.GetCompanies())
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	err = json.Unmarshal(bytes, &resp.Companies)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	fmt.Println("TIME7", time.Since(now))
 
 	return resp, nil
+}
+
+func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyLoginRes, error) {
+	resp := pb.V2MultiCompanyLoginRes{
+		Companies: []*pb.V2MultiCompanyLoginRes_Company{},
+	}
+
+	if len(req.Username) < 6 {
+		err := errors.New("invalid username")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if len(req.Password) < 6 {
+		err := errors.New("invalid password")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(user.Password, req.Password)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !match {
+		err := errors.New("username or password is wrong")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
+	if err != nil {
+		errGetProjects := errors.New("cant get user projects")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, errGetProjects.Error())
+	}
+
+	fmt.Println("userProjects", userProjects)
+
+	for _, item := range userProjects.Companies {
+		projects := make([]*pb.V2MultiCompanyLoginRes_Company_Project, 0, 20)
+		company, err := s.services.CompanyServiceClient().GetById(ctx,
+			&company_service.GetCompanyByIdRequest{
+				Id: item.Id,
+			})
+
+		if err != nil {
+			errGetProjects := errors.New("cant get user projects")
+			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, errGetProjects.Error())
+		}
+
+		for _, projectId := range item.Projects {
+			fmt.Println("hello")
+			projectInfo, err := s.services.ProjectServiceClient().GetById(
+				ctx,
+				&company_service.GetProjectByIdRequest{
+					ProjectId: projectId,
+					CompanyId: item.Id,
+				})
+
+			if err != nil {
+				errGetProjects := errors.New("cant get user projects")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.NotFound, errGetProjects.Error())
+			}
+
+			projects = append(projects, &pb.V2MultiCompanyLoginRes_Company_Project{
+				Id:        projectInfo.GetProjectId(),
+				CompanyId: projectInfo.GetCompanyId(),
+				Name:      projectInfo.GetTitle(),
+				Domain:    projectInfo.GetK8SNamespace(),
+			})
+		}
+
+		resp.Companies = append(resp.Companies, &pb.V2MultiCompanyLoginRes_Company{
+			Id:          company.GetCompany().GetId(),
+			Name:        company.GetCompany().GetName(),
+			Logo:        company.GetCompany().GetLogo(),
+			Description: company.GetCompany().GetLogo(),
+			OwnerId:     company.GetCompany().GetOwnerId(),
+			Projects:    projects,
+		})
+	}
+
+	return &resp, nil
 }

@@ -976,6 +976,56 @@ definitions:
       user_id:
         type: string
     type: object
+  auth_service.V2MultiCompanyLoginReq:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  auth_service.V2MultiCompanyLoginRes:
+    properties:
+      companies:
+        items:
+          $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes_Company'
+        type: array
+    type: object
+  auth_service.V2MultiCompanyLoginRes_Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes_Company_Project'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  auth_service.V2MultiCompanyLoginRes_Company_Project:
+    properties:
+      company_id:
+        type: string
+      created_at:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
   auth_service.V2RefreshTokenResponse:
     properties:
       permissions:
@@ -5712,6 +5762,43 @@ paths:
       summary: Get User By ID
       tags:
       - V2_User
+  /v2/v2multi-company/login:
+    post:
+      consumes:
+      - application/json
+      description: MultiCompanyLogin
+      operationId: multi_company_login
+      parameters:
+      - description: LoginRequestBody
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.V2MultiCompanyLoginReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: MultiCompanyLogin
+      tags:
+      - V2_Session
   /verify-email/{sms_id}/{otp}:
     post:
       consumes:

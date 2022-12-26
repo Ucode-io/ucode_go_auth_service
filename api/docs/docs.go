@@ -7555,6 +7555,71 @@ var doc = `{
                 }
             }
         },
+        "/v2/v2multi-company/login": {
+            "post": {
+                "description": "MultiCompanyLogin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "MultiCompanyLogin",
+                "operationId": "multi_company_login",
+                "parameters": [
+                    {
+                        "description": "LoginRequestBody",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.V2MultiCompanyLoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/verify-email/{sms_id}/{otp}": {
             "post": {
                 "description": "Verify",
@@ -9209,6 +9274,83 @@ var doc = `{
                     "type": "boolean"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.V2MultiCompanyLoginReq": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.V2MultiCompanyLoginRes": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes_Company"
+                    }
+                }
+            }
+        },
+        "auth_service.V2MultiCompanyLoginRes_Company": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes_Company_Project"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.V2MultiCompanyLoginRes_Company_Project": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

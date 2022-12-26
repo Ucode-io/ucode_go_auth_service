@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 )
 
@@ -120,6 +121,7 @@ type UserRepoI interface {
 	Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
 	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
 	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
+	GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
 }
 
 type IntegrationRepoI interface {

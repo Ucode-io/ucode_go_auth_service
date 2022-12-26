@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -434,4 +435,39 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	rowsAffected = result.RowsAffected()
 
 	return rowsAffected, err
+}
+
+func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error) {
+	res := models.GetUserProjects{}
+
+	query := `SELECT company_id,
+      			array_agg(project_id)
+				FROM user_project
+				WHERE user_id = $1
+				GROUP BY company_id`
+
+	rows, err := r.db.Query(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			projects []string
+			company  string
+		)
+
+		err = rows.Scan(&company, pq.Array(&projects))
+		if err != nil {
+			return nil, err
+		}
+
+		res.Companies = append(res.Companies, models.Companie{
+			Id:       company,
+			Projects: projects,
+		})
+	}
+
+	return &res, nil
 }
