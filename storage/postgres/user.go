@@ -471,3 +471,19 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.
 
 	return &res, nil
 }
+
+func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
+	res := pb.AddUserToProjectRes{}
+
+	query := `INSERT INTO
+			user_project(user_id, company_id, project_id)
+			VALUES ($1, $2, $3)
+			RETURNING user_id, company_id, project_id`
+
+	err := r.db.QueryRow(ctx, query, req.GetUserId(), req.GetCompanyId(), req.GetProjectId()).Scan(&res.UserId, &res.CompanyId, &res.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}

@@ -98,6 +98,24 @@ definitions:
       user_id:
         type: string
     type: object
+  auth_service.AddUserToProjectReq:
+    properties:
+      company_id:
+        type: string
+      project_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  auth_service.AddUserToProjectRes:
+    properties:
+      company_id:
+        type: string
+      project_id:
+        type: string
+      user_id:
+        type: string
+    type: object
   auth_service.Client:
     properties:
       client_platform_id:
@@ -4102,6 +4120,43 @@ paths:
       summary: Send Message To User
       tags:
       - User
+  /v2/add-user-to-project:
+    post:
+      consumes:
+      - application/json
+      description: Create User
+      operationId: add user to project
+      parameters:
+      - description: AddUserToProjectReq
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.AddUserToProjectReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.AddUserToProjectRes'
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create User
+      tags:
+      - V2_User
   /v2/client:
     delete:
       consumes:

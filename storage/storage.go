@@ -122,6 +122,7 @@ type UserRepoI interface {
 	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
 	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
 	GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
+	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
 }
 
 type IntegrationRepoI interface {

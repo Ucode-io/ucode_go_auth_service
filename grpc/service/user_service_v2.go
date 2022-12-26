@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/saidamir98/udevs_pkg/security"
@@ -266,6 +267,19 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+	}
+
+	return res, nil
+}
+
+func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
+	s.log.Info("AddUserToProject", logger.Any("req", req))
+
+	res, err := s.strg.User().AddUserToProject(ctx, req)
+	if err != nil {
+		errInternal := errors.New("something wrong")
+		s.log.Error("cart add project to user", logger.Error(err))
+		return nil, status.Error(codes.Internal, errInternal.Error())
 	}
 
 	return res, nil

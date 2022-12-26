@@ -4696,6 +4696,71 @@ var doc = `{
                 }
             }
         },
+        "/v2/add-user-to-project": {
+            "post": {
+                "description": "Create User",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_User"
+                ],
+                "summary": "Create User",
+                "operationId": "add user to project",
+                "parameters": [
+                    {
+                        "description": "AddUserToProjectReq",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.AddUserToProjectReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.AddUserToProjectRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/client": {
             "put": {
                 "description": "Update Client",
@@ -7926,6 +7991,34 @@ var doc = `{
             "type": "object",
             "properties": {
                 "relation_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.AddUserToProjectReq": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.AddUserToProjectRes": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 },
                 "user_id": {
