@@ -43,5 +43,5 @@ alter table "user"
 alter table "user"
     add column if not exists project_id uuid;
 
-drop table if exists company;
 drop table if exists project;
+drop table if exists company;
