@@ -259,7 +259,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.GetClie
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.GetProjectId(),
 		})
 
 	if err != nil {
