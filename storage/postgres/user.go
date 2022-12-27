@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -29,9 +30,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	query := `INSERT INTO "user" (
 		id,
 		project_id,
-		client_platform_id,
-		client_type_id,
-		role_id,
 		name,
 		photo_url,
 		phone,
@@ -50,10 +48,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$7,
 		$8,
 		$9,
-		$10,
-		$11,
-		$12,
-		$13
+		$10
 	)`
 
 	uuid, err := uuid.NewRandom()
@@ -64,9 +59,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	_, err = r.db.Exec(ctx, query,
 		uuid.String(),
 		entity.ProjectId,
-		entity.ClientPlatformId,
-		entity.ClientTypeId,
-		entity.RoleId,
 		entity.Name,
 		entity.PhotoUrl,
 		entity.Phone,
@@ -89,9 +81,6 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	query := `SELECT
 		id,
 		project_id,
-		client_platform_id,
-		client_type_id,
-		role_id,
 		name,
 		photo_url,
 		phone,
@@ -110,9 +99,6 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
 		&res.ProjectId,
-		&res.ClientPlatformId,
-		&res.ClientTypeId,
-		&res.RoleId,
 		&res.Name,
 		&res.PhotoUrl,
 		&res.Phone,
@@ -136,9 +122,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 	query := `SELECT
 		id,
 		project_id,
-		client_platform_id,
-		client_type_id,
-		role_id,
 		name,
 		photo_url,
 		phone,
@@ -172,9 +155,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 		err = rows.Scan(
 			&user.Id,
 			&user.ProjectId,
-			&user.ClientPlatformId,
-			&user.ClientTypeId,
-			&user.RoleId,
 			&user.Name,
 			&user.PhotoUrl,
 			&user.Phone,
@@ -220,9 +200,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	query := `SELECT
 		id,
 		project_id,
-		client_platform_id,
-		client_type_id,
-		role_id,
 		name,
 		photo_url,
 		phone,
@@ -246,19 +223,19 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 		filter += " AND ((name || phone || email || login) ILIKE ('%' || :search || '%'))"
 	}
 
-	if len(queryParam.ClientPlatformId) > 0 {
-		params["client_platform_id"] = queryParam.ClientPlatformId
-		filter += " AND client_platform_id = :client_platform_id"
-	}
+	//if len(queryParam.ClientPlatformId) > 0 {
+	//	params["client_platform_id"] = queryParam.ClientPlatformId
+	//	filter += " AND client_platform_id = :client_platform_id"
+	//}
 	if len(queryParam.ProjectId) > 0 {
 		params["project_id"] = queryParam.ProjectId
 		filter += " AND project_id = :project_id"
 	}
 
-	if len(queryParam.ClientTypeId) > 0 {
-		params["client_type_id"] = queryParam.ClientTypeId
-		filter += " AND client_type_id = :client_type_id"
-	}
+	//if len(queryParam.ClientTypeId) > 0 {
+	//	params["client_type_id"] = queryParam.ClientTypeId
+	//	filter += " AND client_type_id = :client_type_id"
+	//}
 
 	if queryParam.Offset > 0 {
 		params["offset"] = queryParam.Offset
@@ -300,9 +277,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 		err = rows.Scan(
 			&obj.Id,
 			&obj.ProjectId,
-			&obj.ClientPlatformId,
-			&obj.ClientTypeId,
-			&obj.RoleId,
 			&obj.Name,
 			&obj.PhotoUrl,
 			&obj.Phone,
@@ -344,9 +318,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
 		project_id = :project_id,
-		client_platform_id = :client_platform_id,
-		client_type_id = :client_type_id,
-		role_id = :role_id,
 		name = :name,
 		photo_url = :photo_url,
 		phone = :phone,
@@ -359,18 +330,15 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		id = :id`
 
 	params := map[string]interface{}{
-		"id":                 entity.Id,
-		"project_id":         entity.ProjectId,
-		"client_platform_id": entity.ClientPlatformId,
-		"client_type_id":     entity.ClientTypeId,
-		"role_id":            entity.RoleId,
-		"name":               entity.Name,
-		"photo_url":          entity.PhotoUrl,
-		"phone":              entity.Phone,
-		"email":              entity.Email,
-		"login":              entity.Login,
-		"active":             entity.Active,
-		"expires_at":         entity.ExpiresAt,
+		"id":         entity.Id,
+		"project_id": entity.ProjectId,
+		"name":       entity.Name,
+		"photo_url":  entity.PhotoUrl,
+		"phone":      entity.Phone,
+		"email":      entity.Email,
+		"login":      entity.Login,
+		"active":     entity.Active,
+		"expires_at": entity.ExpiresAt,
 	}
 
 	q, arr := helper.ReplaceQueryParams(query, params)
@@ -403,9 +371,6 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	query := `SELECT
 		id,
 		project_id,
-		client_platform_id,
-		client_type_id,
-		role_id,
 		name,
 		photo_url,
 		phone,
@@ -431,9 +396,6 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	err = r.db.QueryRow(ctx, query, username).Scan(
 		&res.Id,
 		&res.ProjectId,
-		&res.ClientPlatformId,
-		&res.ClientTypeId,
-		&res.RoleId,
 		&res.Name,
 		&res.PhotoUrl,
 		&res.Phone,
@@ -473,4 +435,55 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	rowsAffected = result.RowsAffected()
 
 	return rowsAffected, err
+}
+
+func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error) {
+	res := models.GetUserProjects{}
+
+	query := `SELECT company_id,
+      			array_agg(project_id)
+				FROM user_project
+				WHERE user_id = $1
+				GROUP BY company_id`
+
+	rows, err := r.db.Query(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			projects []string
+			company  string
+		)
+
+		err = rows.Scan(&company, pq.Array(&projects))
+		if err != nil {
+			return nil, err
+		}
+
+		res.Companies = append(res.Companies, models.Companie{
+			Id:       company,
+			Projects: projects,
+		})
+	}
+
+	return &res, nil
+}
+
+func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
+	res := pb.AddUserToProjectRes{}
+
+	query := `INSERT INTO
+			user_project(user_id, company_id, project_id)
+			VALUES ($1, $2, $3)
+			RETURNING user_id, company_id, project_id`
+
+	err := r.db.QueryRow(ctx, query, req.GetUserId(), req.GetCompanyId(), req.GetProjectId()).Scan(&res.UserId, &res.CompanyId, &res.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }

@@ -105,6 +105,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.DELETE("/logout", h.Logout)
 	r.PUT("/refresh", h.RefreshToken)
 	r.POST("/has-acess", h.HasAccess)
+	r.POST("/has-access-super-admin", h.HasAccessSuperAdmin)
 
 	v2 := r.Group("/v2")
 	{
@@ -160,9 +161,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
 		v2.POST("/login", h.V2Login)
 		v2.PUT("/refresh", h.V2RefreshToken)
+		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
 		v2.POST("/multi-company/login", h.MultiCompanyLogin)
-
+		v2.POST("/v2multi-company/login", h.V2MultiCompanyLogin)
+		v2.POST("/add-user-to-project", h.AddUserToProject)
 	}
 
 	//COMPANY
