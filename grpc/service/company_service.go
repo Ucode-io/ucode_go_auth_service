@@ -280,6 +280,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//}
 
 	// USER
+
 	createUserRes, err := s.services.UserService().V2CreateUser(
 		ctx,
 		&pb.CreateUserRequest{
@@ -289,7 +290,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			Login:     req.GetUserInfo().GetLogin(),
 			Password:  req.GetUserInfo().GetPassword(),
 			Active:    1,
-			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).String(),
+			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Format(config.DatabaseTimeLayout),
 			Name:      "",
 			PhotoUrl:  "",
 		},
