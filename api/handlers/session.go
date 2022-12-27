@@ -142,3 +142,37 @@ func (h *Handler) HasAccess(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, resp)
 }
+
+// HasAccessSuperAdmin godoc
+// @ID has_access
+// @Router /has-access-super-admin [POST]
+// @Summary Has Access
+// @Description Has Access
+// @Tags Session
+// @Accept json
+// @Produce json
+// @Param has-access body auth_service.HasAccessSuperAdminReq true "HasAccessRequestBody"
+// @Success 201 {object} http.Response{data=auth_service.HasAccessSuperAdminRes} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) HasAccessSuperAdmin(c *gin.Context) {
+	var login auth_service.HasAccessSuperAdminReq
+
+	err := c.ShouldBindJSON(&login)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.services.SessionService().HasAccessSuperAdmin(
+		c.Request.Context(),
+		&login,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}

@@ -2,8 +2,7 @@ package handlers
 
 import (
 	"ucode/ucode_go_auth_service/api/http"
-
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
 
@@ -18,12 +17,13 @@ import (
 // @Tags Project
 // @Accept json
 // @Produce json
-// @Param project body auth_service.CreateProjectRequest true "CreateProjectRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.Project} "Project data"
+// @Param project body company_service.CreateProjectRequest true "CreateProjectRequestBody"
+// @Success 201 {object} http.Response{data=company_service.Project} "Project data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateProject(c *gin.Context) {
-	var project auth_service.CreateProjectRequest
+	//var project auth_service.CreateProjectRequest
+	var project company_service.CreateProjectRequest
 
 	err := c.ShouldBindJSON(&project)
 	if err != nil {
@@ -31,7 +31,11 @@ func (h *Handler) CreateProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ProjectService().Create(
+	//resp, err := h.services.ProjectService().Create(
+	//	c.Request.Context(),
+	//	&project,
+	//)
+	resp, err := h.services.ProjectServiceClient().Create(
 		c.Request.Context(),
 		&project,
 	)
@@ -55,7 +59,7 @@ func (h *Handler) CreateProject(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
-// @Success 200 {object} http.Response{data=auth_service.GetProjectListResponse} "GetProjectListResponseBody"
+// @Success 200 {object} http.Response{data=company_service.GetProjectListResponse} "GetProjectListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetProjectList(c *gin.Context) {
@@ -71,14 +75,21 @@ func (h *Handler) GetProjectList(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ProjectService().GetList(
+	//resp, err := h.services.ProjectService().GetList(
+	//	c.Request.Context(),
+	//	&auth_service.GetProjectListRequest{
+	//		Limit:  int32(limit),
+	//		Offset: int32(offset),
+	//		Search: c.Query("search"),
+	//	},
+	//)
+	resp, err := h.services.ProjectServiceClient().GetList(
 		c.Request.Context(),
-		&auth_service.GetProjectListRequest{
+		&company_service.GetProjectListRequest{
 			Limit:  int32(limit),
 			Offset: int32(offset),
 			Search: c.Query("search"),
-		},
-	)
+		})
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -97,7 +108,7 @@ func (h *Handler) GetProjectList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id path string true "project-id"
-// @Success 200 {object} http.Response{data=auth_service.Project} "ProjectBody"
+// @Success 200 {object} http.Response{data=company_service.Project} "ProjectBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetProjectByID(c *gin.Context) {
@@ -108,12 +119,18 @@ func (h *Handler) GetProjectByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ProjectService().GetByPK(
+	//resp, err := h.services.ProjectService().GetByPK(
+	//	c.Request.Context(),
+	//	&auth_service.ProjectPrimaryKey{
+	//		Id: projectID,
+	//	},
+	//)
+
+	resp, err := h.services.ProjectServiceClient().GetById(
 		c.Request.Context(),
-		&auth_service.ProjectPrimaryKey{
-			Id: projectID,
-		},
-	)
+		&company_service.GetProjectByIdRequest{
+			ProjectId: projectID,
+		})
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -131,12 +148,12 @@ func (h *Handler) GetProjectByID(c *gin.Context) {
 // @Tags Project
 // @Accept json
 // @Produce json
-// @Param project body auth_service.UpdateProjectRequest true "UpdateProjectRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.Project} "Project data"
+// @Param project body company_service.Project true "UpdateProjectRequestBody"
+// @Success 200 {object} http.Response{data=company_service.Project} "Project data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateProject(c *gin.Context) {
-	var project auth_service.UpdateProjectRequest
+	var project company_service.Project
 
 	err := c.ShouldBindJSON(&project)
 	if err != nil {
@@ -144,10 +161,13 @@ func (h *Handler) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ProjectService().Update(
+	//resp, err := h.services.ProjectService().Update(
+	//	c.Request.Context(),
+	//	&project,
+	//)
+	resp, err := h.services.ProjectServiceClient().Update(
 		c.Request.Context(),
-		&project,
-	)
+		&project)
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -177,12 +197,17 @@ func (h *Handler) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ProjectService().Delete(
+	//resp, err := h.services.ProjectService().Delete(
+	//	c.Request.Context(),
+	//	&auth_service.ProjectPrimaryKey{
+	//		Id: projectID,
+	//	},
+	//)
+	resp, err := h.services.ProjectServiceClient().Delete(
 		c.Request.Context(),
-		&auth_service.ProjectPrimaryKey{
-			Id: projectID,
-		},
-	)
+		&company_service.DeleteProjectRequest{
+			ProjectId: projectID,
+		})
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
-	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	secure "ucode/ucode_go_auth_service/pkg/security"
@@ -23,7 +23,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
+func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) { //todo
 
 	if len(req.Username) < 6 {
 		err := errors.New("invalid username")
@@ -37,22 +37,44 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	data, err := s.services.LoginService().Login(
-		ctx,
-		&object_builder_service.LoginRequest{
-			Password:      req.Password,
-			Login:         req.Username,
-			ClientType:    req.ClientType,
-			LoginStrategy: req.LoginStrategy,
-			ProjectId:     config.UcodeDefaultProjectID,
-		},
-	)
+	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		s.log.Error("!!!V2Login--->", logger.Error(err))
+		if err == sql.ErrNoRows {
+			errNoRows := errors.New("no user found")
+			return nil, status.Error(codes.Internal, errNoRows.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(user.Password, req.Password)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, "2023-01-28T06:23:33.952Z")
+	if !match {
+		err := errors.New("username or password is wrong")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	//data, err := s.services.LoginService().Login(
+	//	ctx,
+	//	&pbObject.LoginRequest{
+	//		Password:      req.Password,
+	//		Login:         req.Username,
+	//		ClientType:    req.ClientType,
+	//		LoginStrategy: req.LoginStrategy,
+	//		ProjectId:     config.UcodeDefaultProjectID,
+	//	},
+	//)
+	//if err != nil {
+	//	s.log.Error("!!!Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.GetExpiresAt())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -63,54 +85,236 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if !data.UserFound {
-		customError := errors.New("User not found")
-		s.log.Error("!!!Login--->", logger.Error(customError))
-		return nil, status.Error(codes.NotFound, customError.Error())
+	//if !data.UserFound {
+	//	customError := errors.New("User not found")
+	//	s.log.Error("!!!Login--->", logger.Error(customError))
+	//	return nil, status.Error(codes.NotFound, customError.Error())
+	//}
+
+	userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"login":          req.Username,
+		"client_type_id": req.ClientType,
+		"project_id":     req.ProjectId,
+	})
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	projectID := req.ProjectId
-
-	_, err = uuid.Parse(req.GetProjectId())
-	if err == nil {
-		project, err := s.services.ProjectServiceClient().GetById(
-			ctx,
-			&company_service.GetProjectByIdRequest{
-				ProjectId: req.ProjectId,
-			},
-		)
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		company, err := s.services.CompanyServiceClient().GetById(
-			ctx,
-			&company_service.GetCompanyByIdRequest{
-				Id: project.CompanyId,
-			},
-		)
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		// if user is not company owner
-		if company.Company.GetOwnerId() != data.GetUserId() {
-			// if user has no access to project
-			if req.GetProjectId() != data.Role.GetProjectId() {
-				s.log.Error("!!!Login--->", logger.Any("msg", "user has no access to this project"))
-				return nil, status.Error(codes.Internal, "user has no access to this project")
-			}
-		}
+	userResp, err := s.services.ObjectBuilderService().GetSingle(
+		ctx,
+		&pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      userReq,
+			ProjectId: config.UcodeDefaultProjectID,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!V2Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	res := helper.ConvertPbToAnotherPb(data)
+	_, ok := userResp.Data.AsMap()["response"].(map[string]interface{})
+	if !ok {
+		err := errors.New("invalid assertion")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData: res,
-		Tables:    req.Tables,
-		ProjectId: projectID,
+	//guid, ok := userData["guid"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+
+	//roleId, ok := userData["role_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//clientTypeId, ok := userData["client_type_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//clientPlatformId, ok := userData["client_platform_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//projectId, ok := userData["project_id"].(string)
+	//if !ok {
+	//	err := errors.New("invalid assertion")
+	//	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//projectID := req.ProjectId
+	//
+	//if projectId != projectID {
+	//	err := errors.New("invalid data")
+	//	s.log.Error("!!!V2Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//
+	//_, err = uuid.Parse(req.GetProjectId())
+	//if err == nil {
+	//	project, err := s.services.ProjectServiceClient().GetById(
+	//		ctx,
+	//		&company_service.GetProjectByIdRequest{
+	//			ProjectId: req.ProjectId,
+	//		},
+	//	)
+	//	if err != nil {
+	//		s.log.Error("!!!Login--->", logger.Error(err))
+	//		return nil, status.Error(codes.Internal, err.Error())
+	//	}
+	//
+	//	company, err := s.services.CompanyServiceClient().GetById(
+	//		ctx,
+	//		&company_service.GetCompanyByIdRequest{
+	//			Id: project.CompanyId,
+	//		},
+	//	)
+	//	if err != nil {
+	//		s.log.Error("!!!Login--->", logger.Error(err))
+	//		return nil, status.Error(codes.Internal, err.Error())
+	//	}
+	//
+	//	// if user is not company owner
+	//	if company.Company.GetOwnerId() != user.GetId() {
+	//		// if user has no access to project
+	//		roleReq, err := helper.ConvertMapToStruct(map[string]interface{}{
+	//			"guid": roleId,
+	//		})
+	//		if err != nil {
+	//			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		roleRes, err := s.services.ObjectBuilderService().GetSingle(
+	//			ctx,
+	//			&pbObject.CommonMessage{
+	//				TableSlug: "role",
+	//				Data:      roleReq,
+	//				ProjectId: config.UcodeDefaultProjectID,
+	//			},
+	//		)
+	//		if err != nil {
+	//			s.log.Error("!!!V2Login--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		roleData, ok := roleRes.Data.AsMap()["response"].(map[string]interface{})
+	//		if !ok {
+	//			err := errors.New("invalid assertion")
+	//			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		projectIdByRole, ok := roleData["project_id"].(string)
+	//		if !ok {
+	//			err := errors.New("invalid assertion")
+	//			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+	//			return nil, status.Error(codes.Internal, err.Error())
+	//		}
+	//
+	//		if req.GetProjectId() != projectIdByRole {
+	//			s.log.Error("!!!Login--->", logger.Any("msg", "user has no access to this project"))
+	//			return nil, status.Error(codes.Internal, "user has no access to this project")
+	//		}
+	//	}
+	//}
+	//
+	////res := helper.ConvertPbToAnotherPb(data)
+	//
+	//resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+	//	LoginData: res,
+	//	Tables:    req.Tables,
+	//	ProjectId: projectID,
+	//})
+	//if resp == nil {
+	//	err := errors.New("User Not Found")
+	//	s.log.Error("!!!Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.NotFound, err.Error())
+	//}
+	//if err != nil {
+	//	s.log.Error("!!!Login--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+
+	return nil, nil
+}
+
+func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
+	if len(req.Username) < 6 {
+		err := errors.New("invalid username")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if len(req.Password) < 6 {
+		err := errors.New("invalid password")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		s.log.Error("!!!SuperAdminLogin--->", logger.Error(err))
+		if err == sql.ErrNoRows {
+			customError := errors.New("User not found")
+			return nil, status.Error(codes.NotFound, customError.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(user.Password, req.Password)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !match {
+		err := errors.New("username or password is wrong")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	//fmt.Println(":::::::::user.GetExpiresAt():::::::::", user.GetExpiresAt())
+
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.GetExpiresAt())
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if expiresAt.Unix() < time.Now().Unix() {
+		err := errors.New("User has been expired")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
+		LoginData: &pb.V2LoginResponse{
+			UserFound:      true,
+			ClientPlatform: &pb.ClientPlatform{},
+			ClientType:     &pb.ClientType{},
+			Role:           &pb.Role{},
+			UserId:         user.GetId(),
+			Permissions:    []*pb.RecordPermission{},
+			Sessions:       []*pb.Session{},
+			LoginTableSlug: "",
+			AppPermissions: []*pb.RecordPermission{},
+		},
+		ProjectId: "",
 	})
 	if resp == nil {
 		err := errors.New("User Not Found")
@@ -122,8 +326,12 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return resp, nil
-
+	return &pb.V2LoginSuperAdminRes{
+		UserFound: true,
+		UserId:    user.GetId(),
+		Token:     resp.Token,
+		Sessions:  resp.Sessions,
+	}, nil
 }
 
 func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
@@ -292,8 +500,6 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	}, nil
 }
 
-
-
 func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenResponse, error) {
 
 	tokenInfo, err := secure.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
@@ -378,6 +584,89 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	return res, nil
 }
 
+func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenSuperAdminResponse, error) {
+
+	tokenInfo, err := secure.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
+		Id:        tokenInfo.ID,
+		IsChanged: false,
+	})
+	if err != nil {
+		s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	//userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
+	//	ClientTypeId: session.ClientTypeId,
+	//	UserId:       session.UserId,
+	//})
+	//if err != nil {
+	//	s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+	//convertedData := helper.ConvertPbToAnotherPb(userData)
+
+	authTables := []*pb.TableBody{}
+	if tokenInfo.Tables != nil {
+		for _, table := range tokenInfo.Tables {
+			authTable := &pb.TableBody{
+				TableSlug: table.TableSlug,
+				ObjectId:  table.ObjectID,
+			}
+			authTables = append(authTables, authTable)
+		}
+	}
+
+	// TODO - wrap in a function
+	m := map[string]interface{}{
+		"id":                 session.Id,
+		"project_id":         session.ProjectId,
+		"client_platform_id": session.ClientPlatformId,
+		"client_type_id":     session.ClientTypeId,
+		"user_id":            session.UserId,
+		"role_id":            session.RoleId,
+		"ip":                 session.Data,
+		"data":               session.Data,
+		"tables":             authTables,
+	}
+
+	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	token := &pb.Token{
+		AccessToken:      accessToken,
+		RefreshToken:     refreshToken,
+		CreatedAt:        session.CreatedAt,
+		UpdatedAt:        session.UpdatedAt,
+		ExpiresAt:        session.ExpiresAt,
+		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+	}
+	res := &pb.V2RefreshTokenSuperAdminResponse{
+		Token: token,
+	}
+
+	return res, nil
+}
+
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
 
 	// // TODO - Delete all old sessions & refresh token has this function too
@@ -387,7 +676,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
-
 	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -410,6 +698,85 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		Ip:               "0.0.0.0",
 		Data:             "additional json data",
 		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+	})
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if input.Tables == nil {
+		input.Tables = []*pb.Object{}
+	}
+
+	// // TODO - wrap in a function
+	m := map[string]interface{}{
+		"id":                 session.Id,
+		"project_id":         session.ProjectId,
+		"client_platform_id": session.ClientPlatformId,
+		"client_type_id":     session.ClientTypeId,
+		"user_id":            session.UserId,
+		"role_id":            session.RoleId,
+		"ip":                 session.Data,
+		"data":               session.Data,
+		"tables":             input.Tables,
+	}
+
+	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	input.LoginData.Token = &pb.Token{
+		AccessToken:      accessToken,
+		RefreshToken:     refreshToken,
+		CreatedAt:        session.CreatedAt,
+		UpdatedAt:        session.UpdatedAt,
+		ExpiresAt:        session.ExpiresAt,
+		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+	}
+
+	return input.LoginData, nil
+}
+
+func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
+
+	// // TODO - Delete all old sessions & refresh token has this function too
+	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.LoginData.UserId)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
+	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	input.LoginData.Sessions = userSessionList.Sessions
+
+	_, err = uuid.Parse(input.ProjectId)
+	if err != nil {
+		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
+	}
+
+	sessionPKey, err := s.strg.Session().CreateSuperAdmin(ctx, &pb.CreateSessionRequest{
+		UserId:    input.LoginData.UserId,
+		Ip:        "0.0.0.0",
+		Data:      "additional json data",
+		ExpiresAt: time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 	})
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -512,6 +879,25 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(user.Password, req.Password)
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !match {
+		err := errors.New("username or password is wrong")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	fmt.Println("TIME2", time.Since(now))
 
 	userDatas, ok := userResp.Data.AsMap()["response"].([]interface{})
@@ -554,7 +940,7 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-    
+
 	fmt.Println("Client Type Request ================>: ", clientTypeReq)
 	clientTypeResp, err := s.services.ObjectBuilderService().GetSingle(
 		ctx,
@@ -665,4 +1051,97 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 	fmt.Println("TIME7", time.Since(now))
 
 	return resp, nil
+}
+
+func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyLoginRes, error) {
+	resp := pb.V2MultiCompanyLoginRes{
+		Companies: []*pb.V2MultiCompanyLoginRes_Company{},
+	}
+
+	if len(req.Username) < 6 {
+		err := errors.New("invalid username")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if len(req.Password) < 6 {
+		err := errors.New("invalid password")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(user.Password, req.Password)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !match {
+		err := errors.New("username or password is wrong")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
+	if err != nil {
+		errGetProjects := errors.New("cant get user projects")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, errGetProjects.Error())
+	}
+
+	fmt.Println("userProjects", userProjects)
+
+	for _, item := range userProjects.Companies {
+		projects := make([]*pb.V2MultiCompanyLoginRes_Company_Project, 0, 20)
+		company, err := s.services.CompanyServiceClient().GetById(ctx,
+			&company_service.GetCompanyByIdRequest{
+				Id: item.Id,
+			})
+
+		if err != nil {
+			errGetProjects := errors.New("cant get user projects")
+			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, errGetProjects.Error())
+		}
+
+		for _, projectId := range item.Projects {
+			fmt.Println("hello")
+			projectInfo, err := s.services.ProjectServiceClient().GetById(
+				ctx,
+				&company_service.GetProjectByIdRequest{
+					ProjectId: projectId,
+					CompanyId: item.Id,
+				})
+
+			if err != nil {
+				errGetProjects := errors.New("cant get user projects")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.NotFound, errGetProjects.Error())
+			}
+
+			projects = append(projects, &pb.V2MultiCompanyLoginRes_Company_Project{
+				Id:        projectInfo.GetProjectId(),
+				CompanyId: projectInfo.GetCompanyId(),
+				Name:      projectInfo.GetTitle(),
+				Domain:    projectInfo.GetK8SNamespace(),
+			})
+		}
+
+		resp.Companies = append(resp.Companies, &pb.V2MultiCompanyLoginRes_Company{
+			Id:          company.GetCompany().GetId(),
+			Name:        company.GetCompany().GetName(),
+			Logo:        company.GetCompany().GetLogo(),
+			Description: company.GetCompany().GetLogo(),
+			OwnerId:     company.GetCompany().GetOwnerId(),
+			Projects:    projects,
+		})
+	}
+
+	return &resp, nil
 }
