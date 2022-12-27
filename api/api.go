@@ -163,7 +163,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.PUT("/refresh", h.V2RefreshToken)
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
-		v2.POST("/multi-company/login", h.MultiCompanyLogin)
+		v2.POST("/multi-company/login", h.V2MultiCompanyLogin)
 		v2.POST("/v2multi-company/login", h.V2MultiCompanyLogin)
 		v2.POST("/add-user-to-project", h.AddUserToProject)
 	}
