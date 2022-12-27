@@ -109,7 +109,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	v2 := r.Group("/v2")
 	{
 		v2.POST("/client-platform", h.V2CreateClientPlatform)
-		v2.GET("/client-platform", h.V2GetClientPlatformList)//project_id
+		v2.GET("/client-platform", h.V2GetClientPlatformList) //project_id
 		v2.GET("/client-platform/:client-platform-id", h.V2GetClientPlatformByID)
 		v2.GET("/client-platform-detailed/:client-platform-id", h.V2GetClientPlatformByIDDetailed)
 		v2.PUT("/client-platform", h.V2UpdateClientPlatform)
@@ -117,7 +117,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		// admin, dev, hr, ceo
 		v2.POST("/client-type", h.V2CreateClientType)
-		v2.GET("/client-type", h.V2GetClientTypeList)//
+		v2.GET("/client-type", h.V2GetClientTypeList) //
 		v2.GET("/client-type/:client-type-id", h.V2GetClientTypeByID)
 		v2.PUT("/client-type", h.V2UpdateClientType)
 		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)
@@ -149,6 +149,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		v2.POST("/role-permission", h.V2AddRolePermission)
 		v2.DELETE("/role-permission", h.V2RemoveRolePermission)
+
+		v2.GET("/role-permission/detailed/:project-id/:role-id", h.GetListWithRoleAppTablePermissions)
+		v2.PUT("/role-permission/detailed", h.UpdateRoleAppTablePermissions)
 
 		v2.POST("/user", h.V2CreateUser)
 		v2.GET("/user", h.V2GetUserList)

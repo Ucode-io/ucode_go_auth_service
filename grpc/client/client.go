@@ -24,22 +24,24 @@ type ServiceManagerI interface {
 	ProjectService() auth_service.ProjectServiceClient
 	CompanyServiceClient() company_service.CompanyServiceClient
 	ProjectServiceClient() company_service.ProjectServiceClient
+	BuilderPermissionService() object_builder_service.PermissionServiceClient
 }
 
 type grpcClients struct {
-	integrationService   auth_service.IntegrationServiceClient
-	clientService        auth_service.ClientServiceClient
-	permissionService    auth_service.PermissionServiceClient
-	userService          auth_service.UserServiceClient
-	sessionService       auth_service.SessionServiceClient
-	objectBuilderService object_builder_service.ObjectBuilderServiceClient
-	smsService           sms_service.SmsServiceClient
-	loginService         object_builder_service.LoginServiceClient
-	emailServie          auth_service.EmailOtpServiceClient
-	companyService       auth_service.CompanyServiceClient
-	projectService       auth_service.ProjectServiceClient
-	companyServiceClient company_service.CompanyServiceClient
-	projectServiceClient company_service.ProjectServiceClient
+	integrationService       auth_service.IntegrationServiceClient
+	clientService            auth_service.ClientServiceClient
+	permissionService        auth_service.PermissionServiceClient
+	userService              auth_service.UserServiceClient
+	sessionService           auth_service.SessionServiceClient
+	objectBuilderService     object_builder_service.ObjectBuilderServiceClient
+	smsService               sms_service.SmsServiceClient
+	loginService             object_builder_service.LoginServiceClient
+	emailServie              auth_service.EmailOtpServiceClient
+	companyService           auth_service.CompanyServiceClient
+	projectService           auth_service.ProjectServiceClient
+	companyServiceClient     company_service.CompanyServiceClient
+	projectServiceClient     company_service.ProjectServiceClient
+	builderPermissionService object_builder_service.PermissionServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -76,19 +78,20 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 	}
 
 	return &grpcClients{
-		clientService:        auth_service.NewClientServiceClient(connAuthService),
-		permissionService:    auth_service.NewPermissionServiceClient(connAuthService),
-		userService:          auth_service.NewUserServiceClient(connAuthService),
-		sessionService:       auth_service.NewSessionServiceClient(connAuthService),
-		integrationService:   auth_service.NewIntegrationServiceClient(connAuthService),
-		objectBuilderService: object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
-		smsService:           sms_service.NewSmsServiceClient(connSmsService),
-		loginService:         object_builder_service.NewLoginServiceClient(connObjectBuilderService),
-		emailServie:          auth_service.NewEmailOtpServiceClient(connAuthService),
-		companyService:       auth_service.NewCompanyServiceClient(connAuthService),
-		projectService:       auth_service.NewProjectServiceClient(connAuthService),
-		companyServiceClient: company_service.NewCompanyServiceClient(connCompanyService),
-		projectServiceClient: company_service.NewProjectServiceClient(connCompanyService),
+		clientService:            auth_service.NewClientServiceClient(connAuthService),
+		permissionService:        auth_service.NewPermissionServiceClient(connAuthService),
+		userService:              auth_service.NewUserServiceClient(connAuthService),
+		sessionService:           auth_service.NewSessionServiceClient(connAuthService),
+		integrationService:       auth_service.NewIntegrationServiceClient(connAuthService),
+		objectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		smsService:               sms_service.NewSmsServiceClient(connSmsService),
+		loginService:             object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		emailServie:              auth_service.NewEmailOtpServiceClient(connAuthService),
+		companyService:           auth_service.NewCompanyServiceClient(connAuthService),
+		projectService:           auth_service.NewProjectServiceClient(connAuthService),
+		companyServiceClient:     company_service.NewCompanyServiceClient(connCompanyService),
+		projectServiceClient:     company_service.NewProjectServiceClient(connCompanyService),
+		builderPermissionService: object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
 	}, nil
 }
 
@@ -142,4 +145,8 @@ func (g *grpcClients) CompanyServiceClient() company_service.CompanyServiceClien
 
 func (g *grpcClients) ProjectServiceClient() company_service.ProjectServiceClient {
 	return g.projectServiceClient
+}
+
+func (g *grpcClients) BuilderPermissionService() object_builder_service.PermissionServiceClient {
+	return g.builderPermissionService
 }

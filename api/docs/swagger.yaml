@@ -238,10 +238,6 @@ definitions:
     properties:
       active:
         type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
       email:
         type: string
       expires_at:
@@ -257,8 +253,6 @@ definitions:
       photo_url:
         type: string
       project_id:
-        type: string
-      role_id:
         type: string
     type: object
   auth_service.GetClientMatrixResponse:
@@ -557,6 +551,8 @@ definitions:
     properties:
       email:
         type: string
+      expires_at:
+        type: string
       login:
         type: string
       password:
@@ -833,10 +829,6 @@ definitions:
     properties:
       active:
         type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
       created_at:
         type: string
       email:
@@ -856,8 +848,6 @@ definitions:
       photo_url:
         type: string
       project_id:
-        type: string
-      role_id:
         type: string
       updated_at:
         type: string
@@ -1077,6 +1067,122 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.TableClientType'
         type: array
+    type: object
+  object_builder_service.GetListWithRoleAppTablePermissionsResponse:
+    properties:
+      apps:
+        items:
+          $ref: '#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App'
+        type: array
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  object_builder_service.GetListWithRoleAppTablePermissionsResponse_App:
+    properties:
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table'
+        type: array
+    type: object
+  object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table:
+    properties:
+      description:
+        type: string
+      digit_number:
+        type: integer
+      field_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_FieldPermission'
+        type: array
+      icon:
+        type: string
+      id:
+        type: string
+      is_changed:
+        type: boolean
+      label:
+        type: string
+      record_permissions:
+        $ref: '#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_RecordPermission'
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
+        type: string
+      view_permissions:
+        items:
+          $ref: '#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_ViewPermission'
+        type: array
+      with_increment_id:
+        type: boolean
+    type: object
+  object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_FieldPermission:
+    properties:
+      edit_permission:
+        type: boolean
+      field_id:
+        type: string
+      field_label:
+        type: string
+      guid:
+        type: string
+      role_id:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
+    type: object
+  object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_RecordPermission:
+    properties:
+      delete:
+        type: string
+      guid:
+        type: string
+      is_have_condition:
+        type: boolean
+      read:
+        type: string
+      role_id:
+        type: string
+      table_slug:
+        type: string
+      update:
+        type: string
+      write:
+        type: string
+    type: object
+  object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_ViewPermission:
+    properties:
+      guid:
+        type: string
+      label:
+        type: string
+      relation_id:
+        type: string
+      role_id:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
     type: object
   object_builder_service.RecordPermission:
     properties:
@@ -6045,6 +6151,100 @@ paths:
       summary: Create RolePermission
       tags:
       - V2_RolePermission
+  /v2/role-permission/detailed:
+    put:
+      consumes:
+      - application/json
+      description: Update Permission
+      operationId: update_role_app_table_permissions
+      parameters:
+      - description: UpdateRoleRequestBody
+        in: body
+        name: permission
+        required: true
+        schema:
+          $ref: '#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update Permission
+      tags:
+      - V2_Permission
+  /v2/role-permission/detailed/{project-id}/{role-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Permission List
+      operationId: get_list_with_role_app_table_permissions
+      parameters:
+      - description: project-id
+        in: path
+        name: project-id
+        type: string
+      - description: role-id
+        in: path
+        name: role-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetPermissionListResponseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.CommonMessage'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Permission List
+      tags:
+      - V2_Permission
   /v2/role/{role-id}:
     delete:
       consumes:

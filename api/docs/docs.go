@@ -8698,6 +8698,175 @@ var doc = `{
                 }
             }
         },
+        "/v2/role-permission/detailed": {
+            "put": {
+                "description": "Update Permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Permission"
+                ],
+                "summary": "Update Permission",
+                "operationId": "update_role_app_table_permissions",
+                "parameters": [
+                    {
+                        "description": "UpdateRoleRequestBody",
+                        "name": "permission",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/role-permission/detailed/{project-id}/{role-id}": {
+            "get": {
+                "description": "Get Permission List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Permission"
+                ],
+                "summary": "Get Permission List",
+                "operationId": "get_list_with_role_app_table_permissions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "role-id",
+                        "name": "role-id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetPermissionListResponseBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/role/{role-id}": {
             "get": {
                 "description": "Get Role By ID",
@@ -10166,12 +10335,6 @@ var doc = `{
                 "active": {
                     "type": "integer"
                 },
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -10194,9 +10357,6 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "role_id": {
                     "type": "string"
                 }
             }
@@ -10658,6 +10818,9 @@ var doc = `{
                 "email": {
                     "type": "string"
                 },
+                "expires_at": {
+                    "type": "string"
+                },
                 "login": {
                     "type": "string"
                 },
@@ -11082,12 +11245,6 @@ var doc = `{
                 "active": {
                     "type": "integer"
                 },
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
@@ -11116,9 +11273,6 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "role_id": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -11453,6 +11607,183 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.TableClientType"
                     }
+                }
+            }
+        },
+        "object_builder_service.GetListWithRoleAppTablePermissionsResponse": {
+            "type": "object",
+            "properties": {
+                "apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App"
+                    }
+                },
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GetListWithRoleAppTablePermissionsResponse_App": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table"
+                    }
+                }
+            }
+        },
+        "object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "digit_number": {
+                    "type": "integer"
+                },
+                "field_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_FieldPermission"
+                    }
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_changed": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_RecordPermission"
+                },
+                "show_in_menu": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "subtitle_field_slug": {
+                    "type": "string"
+                },
+                "view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_ViewPermission"
+                    }
+                },
+                "with_increment_id": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_FieldPermission": {
+            "type": "object",
+            "properties": {
+                "edit_permission": {
+                    "type": "boolean"
+                },
+                "field_id": {
+                    "type": "string"
+                },
+                "field_label": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_RecordPermission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "is_have_condition": {
+                    "type": "boolean"
+                },
+                "read": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "string"
+                },
+                "write": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.GetListWithRoleAppTablePermissionsResponse_App_Table_ViewPermission": {
+            "type": "object",
+            "properties": {
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
                 }
             }
         },

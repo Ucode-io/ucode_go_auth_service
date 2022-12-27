@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.5
-// source: ping_service.proto
+// source: health_check.proto
 
 package ping_service
 
@@ -102,5 +102,5 @@ var PingService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "ping_service.proto",
+	Metadata: "health_check.proto",
 }

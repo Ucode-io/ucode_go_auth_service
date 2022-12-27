@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
 
@@ -562,4 +565,84 @@ func (h *Handler) V2RemoveRolePermission(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.NoContent, resp)
+}
+
+// GetListWithRoleAppTablePermissions godoc
+// @ID get_list_with_role_app_table_permissions
+// @Router /v2/role-permission/detailed/{project-id}/{role-id} [GET]
+// @Summary Get Permission List
+// @Description  Get Permission List
+// @Tags V2_Permission
+// @Accept json
+// @Produce json
+// @Param project-id path string false "project-id"
+// @Param role-id path string false "role-id"
+// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetPermissionListResponseBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
+	// offset, err := h.getOffsetParam(c)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
+
+	// limit, err := h.getLimitParam(c)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
+
+	resp, err := h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
+		c.Request.Context(),
+		&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
+			RoleId:    c.Param("role-id"),
+			ProjectId: c.Param("project-id"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	if bytes, err := json.Marshal(resp); err != nil {
+		fmt.Println("response", string(bytes))
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+// UpdateRoleAppTablePermissions godoc
+// @ID update_role_app_table_permissions
+// @Router /v2/role-permission/detailed [PUT]
+// @Summary Update Permission
+// @Description Update Permission
+// @Tags V2_Permission
+// @Accept json
+// @Produce json
+// @Param permission body object_builder_service.GetListWithRoleAppTablePermissionsResponse true "UpdateRoleRequestBody"
+// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
+	var permission object_builder_service.UpdateRoleAppTablePermissionsRequest
+
+	err := c.ShouldBindJSON(&permission)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
+		c.Request.Context(),
+		&permission,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
 }
