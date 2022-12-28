@@ -1171,7 +1171,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 	exist := false
 	for _, item := range projects.GetProjectIds() {
-		if item == req.GetProjectId() {
+		if item == session.GetProjectId() {
 			exist = true
 			break
 		}
