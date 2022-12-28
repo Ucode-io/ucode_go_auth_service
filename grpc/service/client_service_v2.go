@@ -249,10 +249,11 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientT
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 
+	// @TODO limit offset error should fix
 	structReq := map[string]interface{}{
-		"limit":  req.GetLimit(),
-		"offset": req.GetOffset(),
-		"search": req.GetSearch(),
+		//"limit": req.GetLimit(),
+		//"offset": req.GetOffset(),
+		//"search": req.GetSearch(),
 	}
 	structData, err := helper.ConvertRequestToSturct(structReq)
 	if err != nil {
