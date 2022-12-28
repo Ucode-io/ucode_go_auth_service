@@ -399,6 +399,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
 		ClientTypeId: session.ClientTypeId,
 		UserId:       session.UserId,
+		ProjectId:    session.GetProjectId(),
 	})
 	if err != nil {
 		s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
