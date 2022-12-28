@@ -1193,14 +1193,17 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	return &pb.V2HasAccessUserRes{
-		Id:        session.Id,
-		ProjectId: session.ProjectId,
-		UserId:    session.UserId,
-		Ip:        session.Ip,
-		Data:      session.Data,
-		ExpiresAt: session.ExpiresAt,
-		CreatedAt: session.CreatedAt,
-		UpdatedAt: session.UpdatedAt,
-		Tables:    authTables,
+		Id:               session.Id,
+		ProjectId:        session.ProjectId,
+		UserId:           session.UserId,
+		Ip:               session.Ip,
+		Data:             session.Data,
+		ExpiresAt:        session.ExpiresAt,
+		CreatedAt:        session.CreatedAt,
+		UpdatedAt:        session.UpdatedAt,
+		Tables:           authTables,
+		ClientPlatformId: session.ClientPlatformId,
+		ClientTypeId:     session.ClientTypeId,
+		RoleId:           session.RoleId,
 	}, nil
 }
