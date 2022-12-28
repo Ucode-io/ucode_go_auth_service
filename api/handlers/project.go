@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"ucode/ucode_go_auth_service/api/http"
-	"ucode/ucode_go_auth_service/genproto/company_service"
-
 	"github.com/saidamir98/udevs_pkg/util"
+	"ucode/ucode_go_auth_service/api/http"
+	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +17,7 @@ import (
 // @Tags Project
 // @Accept json
 // @Produce json
+// @Param user_id query string false "user_id"
 // @Param project body company_service.CreateProjectRequest true "CreateProjectRequestBody"
 // @Success 201 {object} http.Response{data=company_service.Project} "Project data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -40,6 +41,19 @@ func (h *Handler) CreateProject(c *gin.Context) {
 		&project,
 	)
 
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	_, err = h.services.UserService().AddUserToProject(
+		c.Request.Context(),
+		&pb.AddUserToProjectReq{
+			UserId:    c.Query("user_id"),
+			CompanyId: project.GetCompanyId(),
+			ProjectId: resp.GetProjectId(),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
