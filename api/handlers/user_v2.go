@@ -1,10 +1,14 @@
 package handlers
 
 import (
-	"github.com/pkg/errors"
+	"context"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/pkg/helper"
+
+	"github.com/pkg/errors"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
+	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
 
@@ -212,6 +216,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
+
 	req := auth_service.AddUserToProjectReq{}
 
 	err := c.ShouldBindJSON(&req)
@@ -230,5 +235,46 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
+
+	userResp, err := h.services.UserService().V2GetUserByID(
+		c.Request.Context(),
+		&auth_service.UserPrimaryKey{
+			Id: req.UserId,
+		},
+	)
+
+	var userDataToMap = make(map[string]interface{})
+	userDataToMap["guid"] = req.UserId
+	userDataToMap["name"] = userResp.Name
+	userDataToMap["phone"] = userResp.Phone
+	userDataToMap["email"] = userResp.Email
+	userDataToMap["photo_url"] = userResp.PhotoUrl
+	userDataToMap["active"] = userResp.Active
+	userDataToMap["project_id"] = req.ProjectId
+	userDataToMap["company_id"] = req.CompanyId
+	userDataToMap["client_type_id"] = req.ClientTypeId
+	userDataToMap["client_platform_id"] = req.ClientPlatformId
+	userDataToMap["role_id"] = req.RoleId
+
+	structData, err := helper.ConvertMapToStruct(userDataToMap)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	_, err = h.services.ObjectBuilderService().Create(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
 	h.handleResponse(c, http.Created, res)
 }

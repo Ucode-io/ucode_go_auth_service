@@ -9,6 +9,7 @@ definitions:
         type: integer
       login_table:
         $ref: '#/definitions/auth_service.LoginTable'
+        type: object
       login_value:
         type: string
       password:
@@ -99,9 +100,15 @@ definitions:
     type: object
   auth_service.AddUserToProjectReq:
     properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
       company_id:
         type: string
       project_id:
+        type: string
+      role_id:
         type: string
       user_id:
         type: string
@@ -166,7 +173,7 @@ definitions:
   auth_service.CommonMessage:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        type: string
       table_slug:
         type: string
     type: object
@@ -191,6 +198,7 @@ definitions:
     properties:
       client_type:
         $ref: '#/definitions/auth_service.ClientType'
+        type: object
       relations:
         items:
           $ref: '#/definitions/auth_service.Relation'
@@ -277,8 +285,6 @@ definitions:
       phone:
         type: string
       photo_url:
-        type: string
-      project_id:
         type: string
     type: object
   auth_service.GetClientMatrixResponse:
@@ -582,6 +588,7 @@ definitions:
         type: string
       user_info:
         $ref: '#/definitions/auth_service.RegisterCompanyRequest_RegisterUserInfo'
+        type: object
     type: object
   auth_service.RegisterCompanyRequest_RegisterUserInfo:
     properties:
@@ -679,7 +686,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        type: string
       icon:
         type: string
       label:
@@ -736,6 +743,7 @@ definitions:
         type: integer
       login_table:
         $ref: '#/definitions/auth_service.LoginTable'
+        type: object
       login_value:
         type: string
       password:
@@ -938,8 +946,10 @@ definitions:
         type: array
       client_platform:
         $ref: '#/definitions/auth_service.ClientPlatform'
+        type: object
       client_type:
         $ref: '#/definitions/auth_service.ClientType'
+        type: object
       login_table_slug:
         type: string
       permissions:
@@ -948,12 +958,14 @@ definitions:
         type: array
       role:
         $ref: '#/definitions/auth_service.Role'
+        type: object
       sessions:
         items:
           $ref: '#/definitions/auth_service.Session'
         type: array
       token:
         $ref: '#/definitions/auth_service.Token'
+        type: object
       user_found:
         type: boolean
       user_id:
@@ -978,6 +990,7 @@ definitions:
         type: array
       token:
         $ref: '#/definitions/auth_service.Token'
+        type: object
       user_found:
         type: boolean
       user_id:
@@ -1041,11 +1054,13 @@ definitions:
         type: array
       token:
         $ref: '#/definitions/auth_service.Token'
+        type: object
     type: object
   auth_service.V2RefreshTokenSuperAdminResponse:
     properties:
       token:
         $ref: '#/definitions/auth_service.Token'
+        type: object
     type: object
   company_service.CreateProjectRequest:
     properties:
@@ -1088,6 +1103,7 @@ definitions:
     properties:
       credentials:
         $ref: '#/definitions/company_service.Resource_Credentials'
+        type: object
       id:
         type: string
       resource_type:
@@ -1112,6 +1128,7 @@ definitions:
     properties:
       credentials:
         $ref: '#/definitions/company_service.ResourceWithoutPassword_Credentials'
+        type: object
       id:
         type: string
       project_id:
@@ -1186,7 +1203,8 @@ definitions:
     type: object
   http.Response:
     properties:
-      data: {}
+      data:
+        type: object
       description:
         type: string
       status:
@@ -1209,6 +1227,7 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/object_builder_service.V2LoginResponse'
+        type: object
       sms_id:
         type: string
     type: object
@@ -1231,6 +1250,7 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/object_builder_service.V2LoginResponse'
+        type: object
       tables:
         items:
           $ref: '#/definitions/auth_service.Object'
@@ -1270,6 +1290,7 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions'
+        type: object
       project_id:
         type: string
     type: object
@@ -1357,6 +1378,7 @@ definitions:
         type: string
       record_permissions:
         $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission'
+        type: object
       show_in_menu:
         type: boolean
       slug:
@@ -1424,7 +1446,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        type: string
       icon:
         type: string
       label:
@@ -1444,8 +1466,10 @@ definitions:
         type: array
       client_platform:
         $ref: '#/definitions/object_builder_service.ClientPlatform'
+        type: object
       client_type:
         $ref: '#/definitions/object_builder_service.ClientType'
+        type: object
       login_table_slug:
         type: string
       permissions:
@@ -1454,27 +1478,16 @@ definitions:
         type: array
       role:
         $ref: '#/definitions/object_builder_service.Role'
+        type: object
       user_found:
         type: boolean
       user_id:
         type: string
     type: object
-  structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  structpb.Value:
-    properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-    type: object
 info:
   contact: {}
   description: This is a api gateway
+  license: {}
   termsOfService: https://udevs.io
 paths:
   /client:
@@ -1495,15 +1508,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -1540,15 +1544,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -1584,15 +1579,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -1637,15 +1623,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.GetClientPlatformListResponse'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -1681,15 +1658,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -1727,15 +1695,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -1772,15 +1731,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -1810,15 +1760,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -1853,15 +1794,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -1906,15 +1838,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.GetClientTypeListResponse'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -1950,15 +1873,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.ClientType'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -1996,15 +1910,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.ClientType'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2034,15 +1939,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2077,15 +1973,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CompleteClientType'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -2123,15 +2010,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.GetClientMatrixResponse'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2162,15 +2040,6 @@ paths:
       responses:
         "201":
           description: Company data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -2214,15 +2083,6 @@ paths:
                 data:
                   type: string
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2252,15 +2112,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2322,15 +2173,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.User'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2367,15 +2209,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.HasAccessSuperAdminRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -2432,15 +2265,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.GetIntegrationListResponse'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2477,15 +2301,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.Integration'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2515,15 +2330,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2558,15 +2364,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.Integration'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -2603,15 +2400,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.GetIntegrationSessionsResponse'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -2654,15 +2442,6 @@ paths:
                 data:
                   type: string
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2697,15 +2476,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2746,15 +2516,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.Token'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2792,15 +2553,6 @@ paths:
                 data:
                   type: string
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2831,15 +2583,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2883,15 +2626,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -2927,15 +2661,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -2973,15 +2698,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3012,15 +2728,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3057,15 +2764,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3095,15 +2793,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3138,15 +2827,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -3184,15 +2864,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.PermissionScope'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -3260,15 +2931,6 @@ paths:
                 data:
                   $ref: '#/definitions/company_service.GetProjectListResponse'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3287,6 +2949,10 @@ paths:
       description: Create Project
       operationId: create_project
       parameters:
+      - description: user_id
+        in: query
+        name: user_id
+        type: string
       - description: CreateProjectRequestBody
         in: body
         name: project
@@ -3304,15 +2970,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Project'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -3350,15 +3007,6 @@ paths:
                 data:
                   $ref: '#/definitions/company_service.Project'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3388,15 +3036,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3431,15 +3070,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/company_service.Project'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -3477,15 +3107,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.User'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -3529,15 +3150,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3580,15 +3192,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3626,15 +3229,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3671,15 +3265,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3709,15 +3294,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3765,15 +3341,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3809,15 +3376,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -3855,15 +3413,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3894,15 +3443,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -3938,15 +3478,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -3985,15 +3516,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.AddRolePermissionsResponse'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4023,15 +3545,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4066,15 +3579,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CompleteClientType'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -4132,15 +3636,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4177,15 +3672,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/models.SendCodeResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -4224,15 +3710,6 @@ paths:
                 data:
                   $ref: '#/definitions/models.SendCodeResponse'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4269,15 +3746,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.Role'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -4320,15 +3788,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.Role'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -4385,15 +3844,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.GetUserListResponse'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4430,15 +3880,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.User'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4474,15 +3915,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.User'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -4521,15 +3953,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4566,15 +3989,6 @@ paths:
                 data:
                   type: string
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4604,15 +4018,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4643,15 +4048,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4688,15 +4084,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.UserRelation'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4726,15 +4113,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4769,15 +4147,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.User'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -4816,15 +4185,6 @@ paths:
                 data:
                   type: string
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4855,15 +4215,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4901,15 +4252,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.AddUserToProjectRes'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4940,15 +4282,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -4985,15 +4318,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5029,15 +4353,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -5086,15 +4401,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5130,15 +4436,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -5176,15 +4473,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5221,15 +4509,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5259,15 +4538,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5302,15 +4572,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -5359,15 +4620,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5403,15 +4655,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -5449,15 +4692,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5487,15 +4721,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5530,15 +4755,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -5576,15 +4792,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5615,15 +4822,6 @@ paths:
       responses:
         "201":
           description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -5668,15 +4866,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginSuperAdminRes'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5713,15 +4902,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.MultiCompanyLoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -5766,15 +4946,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5810,15 +4981,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -5856,15 +5018,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5895,15 +5048,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5940,15 +5084,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -5978,15 +5113,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6021,15 +5147,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -6068,15 +5185,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.V2RefreshTokenResponse'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6113,15 +5221,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2RefreshTokenSuperAdminResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -6160,15 +5259,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6205,15 +5295,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6243,15 +5324,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6299,15 +5371,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6343,15 +5406,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -6389,15 +5443,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6428,15 +5473,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6472,15 +5508,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -6518,15 +5545,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -6567,15 +5585,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6605,15 +5614,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6648,15 +5648,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -6714,15 +5705,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6778,15 +5760,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.GetUserListResponse'
               type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6823,15 +5796,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.User'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6867,15 +5831,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.User'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -6914,15 +5869,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.CommonMessage'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6959,15 +5905,6 @@ paths:
                 data:
                   type: string
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
-              type: object
         "500":
           description: Server Error
           schema:
@@ -6997,15 +5934,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -7035,15 +5963,6 @@ paths:
       responses:
         "204":
           description: ""
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -7078,15 +5997,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.User'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -7124,15 +6034,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
@@ -7181,15 +6082,6 @@ paths:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
               type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
         "500":
           description: Server Error
           schema:
@@ -7236,15 +6128,6 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
               type: object
         "500":
           description: Server Error
