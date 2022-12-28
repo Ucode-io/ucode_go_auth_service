@@ -98,9 +98,9 @@ func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.Get
 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
 
 	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"offset": req.Offset,
-		"limit":  req.Limit,
-		"search": req.Search,
+		// "offset": req.Offset,
+		// "limit":  req.Limit,
+		// "search": req.Search,
 	})
 	if err != nil {
 		s.log.Error("!!!ClientPlatform--->", logger.Error(err))
