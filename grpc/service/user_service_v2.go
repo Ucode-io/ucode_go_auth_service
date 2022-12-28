@@ -284,3 +284,14 @@ func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToPro
 
 	return res, nil
 }
+
+func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
+	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
+
+	res, err := s.strg.User().GetProjectsByUserId(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

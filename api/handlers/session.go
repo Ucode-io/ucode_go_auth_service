@@ -144,7 +144,7 @@ func (h *Handler) HasAccess(c *gin.Context) {
 }
 
 // HasAccessSuperAdmin godoc
-// @ID has_access
+// @ID has_access_superadmin
 // @Router /has-access-super-admin [POST]
 // @Summary Has Access
 // @Description Has Access

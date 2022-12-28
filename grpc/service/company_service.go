@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/storage"
@@ -9,9 +10,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
 
-	"google.golang.org/protobuf/types/known/emptypb"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
+
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type companyService struct {
@@ -278,6 +280,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//}
 
 	// USER
+
 	createUserRes, err := s.services.UserService().V2CreateUser(
 		ctx,
 		&pb.CreateUserRequest{
@@ -287,7 +290,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			Login:     req.GetUserInfo().GetLogin(),
 			Password:  req.GetUserInfo().GetPassword(),
 			Active:    1,
-			ExpiresAt: req.GetUserInfo().GetExpiresAt(),
+			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Format(config.DatabaseTimeLayout),
 			Name:      "",
 			PhotoUrl:  "",
 		},

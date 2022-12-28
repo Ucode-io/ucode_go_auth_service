@@ -80,7 +80,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	res = &pb.User{}
 	query := `SELECT
 		id,
-		project_id,
+		coalesce(project_id::text, ''),
 		name,
 		photo_url,
 		phone,
@@ -370,7 +370,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	query := `SELECT
 		id,
-		project_id,
+		coalesce(project_id::text, ''),
 		name,
 		photo_url,
 		phone,
@@ -485,5 +485,22 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 		return nil, err
 	}
 
+	return &res, nil
+}
+
+func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
+	res := pb.GetProjectsByUserIdRes{}
+
+	query := `SELECT
+				array_agg(project_id)
+			from user_project
+			where user_id = $1`
+
+	tmp := make([]string, 0, 20)
+	err := r.db.QueryRow(ctx, query, req.GetUserId()).Scan(pq.Array(&tmp))
+	if err != nil {
+		return nil, err
+	}
+	res.ProjectIds = tmp
 	return &res, nil
 }

@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
+
+	"github.com/gin-gonic/gin"
 )
 
 // V2Login godoc
@@ -34,10 +35,10 @@ func (h *Handler) V2Login(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "Необходимо выбрать тип пользователя")
 		return
 	}
-	// if login.ProjectId == "" {
-	// 	h.handleResponse(c, http.BadRequest, "Необходимо выбрать проекта")
-	// 	return
-	// }
+	if login.ProjectId == "" {
+		h.handleResponse(c, http.BadRequest, "Необходимо выбрать проекта")
+		return
+	}
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
@@ -107,7 +108,7 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 }
 
 // V2RefreshTokenSuperAdmin godoc
-// @ID v2refresh
+// @ID v2refresh_superadmin
 // @Router /v2/refresh-superadmin [PUT]
 // @Summary V2Refresh Token
 // @Description V2Refresh Token
@@ -305,7 +306,7 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 }
 
 // V2MultiCompanyLogin godoc
-// @ID multi_company_login
+// @ID multi_company_login_v2
 // @Router /v2/v2multi-company/login [POST]
 // @Summary MultiCompanyLogin
 // @Description MultiCompanyLogin
