@@ -399,6 +399,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
 		ClientTypeId: session.ClientTypeId,
 		UserId:       session.UserId,
+		ProjectId:    session.GetProjectId(),
 	})
 	if err != nil {
 		s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
@@ -1193,14 +1194,17 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	return &pb.V2HasAccessUserRes{
-		Id:        session.Id,
-		ProjectId: session.ProjectId,
-		UserId:    session.UserId,
-		Ip:        session.Ip,
-		Data:      session.Data,
-		ExpiresAt: session.ExpiresAt,
-		CreatedAt: session.CreatedAt,
-		UpdatedAt: session.UpdatedAt,
-		Tables:    authTables,
+		Id:               session.Id,
+		ProjectId:        session.ProjectId,
+		UserId:           session.UserId,
+		Ip:               session.Ip,
+		Data:             session.Data,
+		ExpiresAt:        session.ExpiresAt,
+		CreatedAt:        session.CreatedAt,
+		UpdatedAt:        session.UpdatedAt,
+		Tables:           authTables,
+		ClientPlatformId: session.ClientPlatformId,
+		ClientTypeId:     session.ClientTypeId,
+		RoleId:           session.RoleId,
 	}, nil
 }
