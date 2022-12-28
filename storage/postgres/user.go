@@ -29,7 +29,6 @@ func NewUserRepo(db *pgxpool.Pool) storage.UserRepoI {
 func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error) {
 	query := `INSERT INTO "user" (
 		id,
-		project_id,
 		name,
 		photo_url,
 		phone,
@@ -47,8 +46,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$6,
 		$7,
 		$8,
-		$9,
-		$10
+		$9
 	)`
 
 	uuid, err := uuid.NewRandom()
@@ -58,7 +56,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	_, err = r.db.Exec(ctx, query,
 		uuid.String(),
-		entity.ProjectId,
 		entity.Name,
 		entity.PhotoUrl,
 		entity.Phone,
@@ -199,7 +196,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	var arr []interface{}
 	query := `SELECT
 		id,
-		project_id,
 		name,
 		photo_url,
 		phone,
@@ -276,7 +272,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 		err = rows.Scan(
 			&obj.Id,
-			&obj.ProjectId,
 			&obj.Name,
 			&obj.PhotoUrl,
 			&obj.Phone,

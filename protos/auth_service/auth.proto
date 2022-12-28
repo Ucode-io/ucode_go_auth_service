@@ -101,17 +101,16 @@ message RolePermission {
 
 message User {
     string id = 1;
-    string project_id = 2;
-    string phone = 3;
-    string email = 4;
-    string login = 5;
-    string password = 6;
-    int32 active = 7;
-    string expires_at = 8;
-    string created_at = 9;
-    string updated_at = 10;
-    string name = 11;
-    string photo_url = 12;
+    string phone = 2;
+    string email = 3;
+    string login = 4;
+    string password = 5;
+    int32 active = 6;
+    string expires_at = 7;
+    string created_at = 8;
+    string updated_at = 9;
+    string name = 10;
+    string photo_url = 11;
 }
 
 message UserRelation {

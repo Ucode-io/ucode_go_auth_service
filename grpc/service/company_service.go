@@ -53,7 +53,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	project, err := s.services.ProjectServiceClient().Create(ctx, &company_service.CreateProjectRequest{
+	_, err = s.services.ProjectServiceClient().Create(ctx, &company_service.CreateProjectRequest{
 		CompanyId:    companyPKey.GetId(),
 		K8SNamespace: "cp-region-type-id",
 		Title:        req.GetName(),
@@ -63,7 +63,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	projectID := project.ProjectId
+	//projectID := project.ProjectId
 	// PROJECT
 	//createProjectReq, err := helper.ConvertMapToStruct(map[string]interface{}{
 	//	"company_id": companyPKey.GetId(),
@@ -284,7 +284,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	createUserRes, err := s.services.UserService().V2CreateUser(
 		ctx,
 		&pb.CreateUserRequest{
-			ProjectId: projectID,
 			Phone:     req.GetUserInfo().GetPhone(),
 			Email:     req.GetUserInfo().GetEmail(),
 			Login:     req.GetUserInfo().GetLogin(),
