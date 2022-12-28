@@ -97,7 +97,11 @@ func (s *clientService) V2GetClientPlatformByIDDetailed(ctx context.Context, req
 func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.GetClientPlatformListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
 
-	structData, err := helper.ConvertRequestToSturct(req)
+	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+		"offset": req.Offset,
+		"limit":  req.Limit,
+		"search": req.Search,
+	})
 	if err != nil {
 		s.log.Error("!!!ClientPlatform--->", logger.Error(err))
 	}
@@ -106,7 +110,7 @@ func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.Get
 		&pbObject.CommonMessage{
 			TableSlug: "client_platform",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.ProjectId,
 		})
 
 	if err != nil {
