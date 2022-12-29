@@ -137,8 +137,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 
 	for rows.Next() {
 		var (
-			active    sql.NullInt32
-			expiresAt sql.NullString
 			createdAt sql.NullString
 			updatedAt sql.NullString
 		)
@@ -152,8 +150,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 			&user.Email,
 			&user.Login,
 			&user.Password,
-			&active,
-			&expiresAt,
 			&createdAt,
 			&updatedAt,
 			&user.CompanyId,
@@ -486,4 +482,20 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 	}
 	res.ProjectIds = tmp
 	return &res, nil
+}
+
+func (r *userRepo) GetUserIdsByProjectId(ctx context.Context, req string) (*[]string, error) {
+
+	query := `SELECT
+				array_agg(user_id)
+			from user_project
+			where project_id = $1`
+
+	tmp := make([]string, 0, 20)
+	err := r.db.QueryRow(ctx, query, req).Scan(pq.Array(&tmp))
+	if err != nil {
+		return nil, err
+	}
+
+	return &tmp, nil
 }
