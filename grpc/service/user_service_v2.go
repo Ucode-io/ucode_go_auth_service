@@ -475,9 +475,9 @@ func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToPro
 
 	res, err := s.strg.User().AddUserToProject(ctx, req)
 	if err != nil {
-		err := config.ErrUserAlradyMember
+		errUserAdd := config.ErrUserAlradyMember
 		s.log.Error("cant add project to user", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, status.Error(codes.Internal, errUserAdd.Error())
 	}
 
 	return res, nil
