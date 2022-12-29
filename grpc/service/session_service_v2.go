@@ -164,17 +164,18 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 
 	//fmt.Println(":::::::::user.GetExpiresAt():::::::::", user.GetExpiresAt())
 
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.GetExpiresAt())
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// @TODO:: get user expires from builder
+	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.GetExpiresAt())
+	// if err != nil {
+	// 	s.log.Error("!!!Login--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
-	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("User has been expired")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if expiresAt.Unix() < time.Now().Unix() {
+	// 	err := errors.New("User has been expired")
+	// 	s.log.Error("!!!Login--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
 	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
