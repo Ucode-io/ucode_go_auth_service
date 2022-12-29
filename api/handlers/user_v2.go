@@ -108,6 +108,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user-id path string true "user-id"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} http.Response{data=auth_service.User} "UserBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -115,14 +116,22 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 	userID := c.Param("user-id")
 
 	if !util.IsValidUUID(userID) {
-		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+		h.handleResponse(c, http.InvalidArgument, "user-id is an invalid uuid")
+		return
+	}
+
+	projectID := c.Query("project-id")
+
+	if !util.IsValidUUID(projectID) {
+		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
 
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id: userID,
+			Id:        userID,
+			ProjectId: projectID,
 		},
 	)
 
@@ -177,6 +186,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user-id path string true "user-id"
+// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -188,10 +198,18 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		return
 	}
 
+	projectID := c.Query("project-id")
+
+	if !util.IsValidUUID(projectID) {
+		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.services.UserService().V2DeleteUser(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id: userID,
+			Id:        userID,
+			ProjectId: projectID,
 		},
 	)
 

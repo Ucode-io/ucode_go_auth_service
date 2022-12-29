@@ -35,8 +35,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		email,
 		login,
 		password,
-		active,
-		expires_at,
 		company_id
 	) VALUES (
 		$1,
@@ -46,9 +44,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$5,
 		$6,
 		$7,
-		$8,
-		$9,
-		$10
+		$8
 	)`
 
 	uuid, err := uuid.NewRandom()
@@ -64,8 +60,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.Email,
 		entity.Login,
 		entity.Password,
-		entity.Active,
-		entity.ExpiresAt,
 		entity.CompanyId,
 	)
 
@@ -80,17 +74,16 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	res = &pb.User{}
 	query := `SELECT
 		id,
-		coalesce(project_id::text, ''),
 		name,
 		photo_url,
 		phone,
 		email,
 		login,
 		password,
-		active,
-		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
-		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
+		company_id
+		-- TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at
+		-- TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
+		-- TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"user"
 	WHERE
@@ -98,17 +91,17 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
-		&res.ProjectId,
+
 		&res.Name,
 		&res.PhotoUrl,
 		&res.Phone,
 		&res.Email,
 		&res.Login,
 		&res.Password,
-		&res.Active,
-		&res.ExpiresAt,
-		&res.CreatedAt,
-		&res.UpdatedAt,
+		&res.CompanyId,
+		// &res.ExpiresAt,
+		// &res.CreatedAt,
+		// &res.UpdatedAt,
 	)
 	if err != nil {
 		return res, err
@@ -121,15 +114,12 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 	res = &pb.GetUserListResponse{}
 	query := `SELECT
 		id,
-		project_id,
 		name,
 		photo_url,
 		phone,
 		email,
 		login,
 		password,
-		active,
-		expires_at,
 		created_at,
 		updated_at,
 		company_id
@@ -155,7 +145,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 		user := &pb.User{}
 		err = rows.Scan(
 			&user.Id,
-			&user.ProjectId,
 			&user.Name,
 			&user.PhotoUrl,
 			&user.Phone,
@@ -173,21 +162,21 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 			return res, err
 		}
 
-		if active.Valid {
-			user.Active = active.Int32
-		}
+		// if active.Valid {
+		// 	user.Active = active.Int32
+		// }
 
-		if expiresAt.Valid {
-			user.ExpiresAt = expiresAt.String
-		}
+		// if expiresAt.Valid {
+		// 	user.ExpiresAt = expiresAt.String
+		// }
 
-		if createdAt.Valid {
-			user.CreatedAt = createdAt.String
-		}
+		// if createdAt.Valid {
+		// 	user.CreatedAt = createdAt.String
+		// }
 
-		if updatedAt.Valid {
-			user.UpdatedAt = updatedAt.String
-		}
+		// if updatedAt.Valid {
+		// 	user.UpdatedAt = updatedAt.String
+		// }
 
 		res.Users = append(res.Users, user)
 	}
@@ -207,8 +196,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 		email,
 		login,
 		password,
-		active,
-		expires_at,
 		created_at,
 		updated_at
 	FROM
@@ -228,10 +215,10 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	//	params["client_platform_id"] = queryParam.ClientPlatformId
 	//	filter += " AND client_platform_id = :client_platform_id"
 	//}
-	if len(queryParam.ProjectId) > 0 {
-		params["project_id"] = queryParam.ProjectId
-		filter += " AND project_id = :project_id"
-	}
+	// if len(queryParam.ProjectId) > 0 {
+	// 	params["project_id"] = queryParam.ProjectId
+	// 	filter += " AND project_id = :project_id"
+	// }
 
 	//if len(queryParam.ClientTypeId) > 0 {
 	//	params["client_type_id"] = queryParam.ClientTypeId
@@ -293,21 +280,21 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 			return res, err
 		}
 
-		if active.Valid {
-			obj.Active = active.Int32
-		}
+		// if active.Valid {
+		// 	obj.Active = active.Int32
+		// }
 
-		if expiresAt.Valid {
-			obj.ExpiresAt = expiresAt.String
-		}
+		// if expiresAt.Valid {
+		// 	obj.ExpiresAt = expiresAt.String
+		// }
 
-		if createdAt.Valid {
-			obj.CreatedAt = createdAt.String
-		}
+		// if createdAt.Valid {
+		// 	obj.CreatedAt = createdAt.String
+		// }
 
-		if updatedAt.Valid {
-			obj.UpdatedAt = updatedAt.String
-		}
+		// if updatedAt.Valid {
+		// 	obj.UpdatedAt = updatedAt.String
+		// }
 
 		res.Users = append(res.Users, obj)
 	}
@@ -317,28 +304,22 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		project_id = :project_id,
 		name = :name,
 		photo_url = :photo_url,
 		phone = :phone,
 		email = :email,
 		login = :login,
-		active = :active,
-		expires_at = :expires_at,
 		updated_at = now()
 	WHERE
 		id = :id`
 
 	params := map[string]interface{}{
-		"id":         entity.Id,
-		"project_id": entity.ProjectId,
-		"name":       entity.Name,
-		"photo_url":  entity.PhotoUrl,
-		"phone":      entity.Phone,
-		"email":      entity.Email,
-		"login":      entity.Login,
-		"active":     entity.Active,
-		"expires_at": entity.ExpiresAt,
+		"id":        entity.Id,
+		"name":      entity.Name,
+		"photo_url": entity.PhotoUrl,
+		"phone":     entity.Phone,
+		"email":     entity.Email,
+		"login":     entity.Login,
 	}
 
 	q, arr := helper.ReplaceQueryParams(query, params)
@@ -375,11 +356,10 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		phone,
 		email,
 		login,
-		password,
-		active,
-		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
-		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
+		password
+		-- TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
+		-- TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
+		-- TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"user"
 	WHERE`
@@ -400,10 +380,10 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		&res.Email,
 		&res.Login,
 		&res.Password,
-		&res.Active,
-		&res.ExpiresAt,
-		&res.CreatedAt,
-		&res.UpdatedAt,
+		// &res.Active,
+		// &res.ExpiresAt,
+		// &res.CreatedAt,
+		// &res.UpdatedAt,
 	)
 	if err != nil {
 		return res, err
