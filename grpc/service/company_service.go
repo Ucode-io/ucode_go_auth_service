@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/storage"
@@ -281,16 +280,13 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	// USER
 
-	createUserRes, err := s.services.UserService().V2CreateUser(
+	createUserRes, err := s.strg.User().Create(
 		ctx,
 		&pb.CreateUserRequest{
 			Phone:     req.GetUserInfo().GetPhone(),
 			Email:     req.GetUserInfo().GetEmail(),
 			Login:     req.GetUserInfo().GetLogin(),
 			Password:  req.GetUserInfo().GetPassword(),
-			Active:    1,
-			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Format(config.DatabaseTimeLayout),
-			Name:      "",
 			PhotoUrl:  "",
 			CompanyId: companyPKey.GetId(),
 		},
