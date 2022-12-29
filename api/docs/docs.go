@@ -8458,6 +8458,9 @@ var doc = `{
                 "active": {
                     "type": "integer"
                 },
+                "company_id": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -10180,10 +10183,10 @@ var doc = `{
                 "field_id": {
                     "type": "string"
                 },
-                "field_label": {
+                "guid": {
                     "type": "string"
                 },
-                "guid": {
+                "label": {
                     "type": "string"
                 },
                 "role_id": {

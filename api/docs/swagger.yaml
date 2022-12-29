@@ -272,6 +272,8 @@ definitions:
     properties:
       active:
         type: integer
+      company_id:
+        type: string
       email:
         type: string
       expires_at:
@@ -1398,9 +1400,9 @@ definitions:
         type: boolean
       field_id:
         type: string
-      field_label:
-        type: string
       guid:
+        type: string
+      label:
         type: string
       role_id:
         type: string

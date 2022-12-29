@@ -8439,6 +8439,9 @@
                 "active": {
                     "type": "integer"
                 },
+                "company_id": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -10161,10 +10164,10 @@
                 "field_id": {
                     "type": "string"
                 },
-                "field_label": {
+                "guid": {
                     "type": "string"
                 },
-                "guid": {
+                "label": {
                     "type": "string"
                 },
                 "role_id": {
