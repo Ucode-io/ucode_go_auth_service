@@ -110,10 +110,18 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Param("project_id")
+
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.services.ClientService().V2GetClientPlatformByID(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id: client_platformID,
+			Id:        client_platformID,
+			ProjectId: projectId,
 		},
 	)
 
@@ -330,7 +338,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("projectId")
+	projectId := c.Query("project_id")
 
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
