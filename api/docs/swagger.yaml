@@ -6786,10 +6786,6 @@ paths:
         in: query
         name: client-type-id
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        type: string
       produces:
       - application/json
       responses:

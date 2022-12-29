@@ -27,6 +27,7 @@ func NewUserRepo(db *pgxpool.Pool) storage.UserRepoI {
 }
 
 func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error) {
+
 	query := `INSERT INTO "user" (
 		id,
 		name,
@@ -91,7 +92,6 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
-
 		&res.Name,
 		&res.PhotoUrl,
 		&res.Phone,
@@ -111,6 +111,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 }
 
 func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyList) (res *pb.GetUserListResponse, err error) {
+
 	res = &pb.GetUserListResponse{}
 	query := `SELECT
 		id,
@@ -191,6 +192,7 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	query := `SELECT
 		id,
 		name,
+		company_id,
 		photo_url,
 		phone,
 		email,
@@ -260,11 +262,13 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 			expiresAt sql.NullString
 			createdAt sql.NullString
 			updatedAt sql.NullString
+			companyID sql.NullString
 		)
 
 		err = rows.Scan(
 			&obj.Id,
 			&obj.Name,
+			&companyID,
 			&obj.PhotoUrl,
 			&obj.Phone,
 			&obj.Email,
@@ -305,6 +309,7 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
 		name = :name,
+		company_id = :company_id,
 		photo_url = :photo_url,
 		phone = :phone,
 		email = :email,

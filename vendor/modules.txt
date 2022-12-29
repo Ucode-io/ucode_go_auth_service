@@ -179,7 +179,7 @@ github.com/stretchr/testify/assert
 ## explicit
 github.com/swaggo/gin-swagger
 github.com/swaggo/gin-swagger/swaggerFiles
-# github.com/swaggo/swag v1.6.7
+# github.com/swaggo/swag v1.7.6
 ## explicit; go 1.13
 github.com/swaggo/swag
 # github.com/ugorji/go/codec v1.2.7

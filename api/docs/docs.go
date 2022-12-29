@@ -9422,12 +9422,6 @@ var doc = `{
                         "description": "client-type-id",
                         "name": "client-type-id",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query"
                     }
                 ],
                 "responses": {
