@@ -80,7 +80,6 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	res = &pb.User{}
 	query := `SELECT
 		id,
-		coalesce(project_id::text, ''),
 		name,
 		photo_url,
 		phone,
@@ -88,6 +87,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		login,
 		password,
 		active,
+		company_id,
 		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
 		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
 		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
@@ -106,6 +106,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.Login,
 		&res.Password,
 		&res.Active,
+		&res.CompanyId,
+		&res.ExpiresAt,
 		&res.ExpiresAt,
 		&res.CreatedAt,
 		&res.UpdatedAt,
@@ -121,7 +123,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 	res = &pb.GetUserListResponse{}
 	query := `SELECT
 		id,
-		project_id,
 		name,
 		photo_url,
 		phone,
@@ -155,7 +156,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 		user := &pb.User{}
 		err = rows.Scan(
 			&user.Id,
-			&user.ProjectId,
 			&user.Name,
 			&user.PhotoUrl,
 			&user.Phone,
@@ -202,6 +202,7 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	query := `SELECT
 		id,
 		name,
+		company_id,
 		photo_url,
 		phone,
 		email,
@@ -278,6 +279,8 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 		err = rows.Scan(
 			&obj.Id,
 			&obj.Name,
+			&obj.CompanyId,
+            &obj.PhotoUrl,
 			&obj.PhotoUrl,
 			&obj.Phone,
 			&obj.Email,
@@ -317,8 +320,8 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		project_id = :project_id,
 		name = :name,
+		company_id = :company_id,
 		photo_url = :photo_url,
 		phone = :phone,
 		email = :email,
@@ -331,8 +334,8 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 
 	params := map[string]interface{}{
 		"id":         entity.Id,
-		"project_id": entity.ProjectId,
 		"name":       entity.Name,
+		"company_id": entity.CompanyId,
 		"photo_url":  entity.PhotoUrl,
 		"phone":      entity.Phone,
 		"email":      entity.Email,
