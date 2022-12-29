@@ -55,7 +55,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	_, err = s.services.ProjectServiceClient().Create(ctx, &company_service.CreateProjectRequest{
+	project, err := s.services.ProjectServiceClient().Create(ctx, &company_service.CreateProjectRequest{
 		CompanyId:    companyPKey.GetId(),
 		K8SNamespace: "cp-region-type-id",
 		Title:        req.GetName(),
@@ -353,6 +353,16 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		Logo:        "",
 		Description: "",
 		OwnerId:     createUserRes.GetId(),
+	})
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, err
+	}
+
+	_, err = s.services.UserService().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+		CompanyId: companyPKey.GetId(),
+		ProjectId: project.GetProjectId(),
+		UserId:    createUserRes.GetId(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
