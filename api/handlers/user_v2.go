@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/pkg/errors"
@@ -254,25 +255,30 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	userResp, err := h.services.UserService().V2GetUserByID(
+	user, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id: req.UserId,
+			Id:        req.UserId,
+			ProjectId: req.ProjectId,
 		},
 	)
+	if err != nil {
+		if errors.Is(err, config.ErrUserAlradyMember) {
+			h.handleResponse(c, http.BadEnvironment, "already member!")
+			return
+		}
+
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
 
 	var userDataToMap = make(map[string]interface{})
 	userDataToMap["guid"] = req.UserId
-	userDataToMap["name"] = userResp.Name
-	userDataToMap["phone"] = userResp.Phone
-	userDataToMap["email"] = userResp.Email
-	userDataToMap["photo_url"] = userResp.PhotoUrl
-	userDataToMap["active"] = userResp.Active
+	userDataToMap["active"] = req.Active
 	userDataToMap["project_id"] = req.ProjectId
-	userDataToMap["company_id"] = req.CompanyId
-	userDataToMap["client_type_id"] = req.ClientTypeId
-	userDataToMap["client_platform_id"] = req.ClientPlatformId
 	userDataToMap["role_id"] = req.RoleId
+	userDataToMap["client_type_id"] = user.ClientTypeId
+	userDataToMap["client_platform_id"] = user.ClientPlatformId
 
 	structData, err := helper.ConvertMapToStruct(userDataToMap)
 	if err != nil {

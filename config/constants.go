@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 const (
 	DatabaseQueryTimeLayout = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
@@ -63,4 +66,8 @@ var (
 		"function":            1,
 		"invoke_function":     1,
 	}
+)
+
+var (
+	ErrUserAlradyMember = errors.New("user is already member")
 )

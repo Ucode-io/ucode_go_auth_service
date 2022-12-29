@@ -10473,11 +10473,8 @@ var doc = `{
         "auth_service.AddUserToProjectReq": {
             "type": "object",
             "properties": {
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
+                "active": {
+                    "type": "integer"
                 },
                 "company_id": {
                     "type": "string"
