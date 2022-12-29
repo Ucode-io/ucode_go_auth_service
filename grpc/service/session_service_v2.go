@@ -59,17 +59,17 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	fmt.Println("TEST::::4")
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	fmt.Println("TEST::::5")
-	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("User has been expired")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
+	// if err != nil {
+	// 	s.log.Error("!!!Login--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+	// fmt.Println("TEST::::5")
+	// if expiresAt.Unix() < time.Now().Unix() {
+	// 	err := errors.New("User has been expired")
+	// 	s.log.Error("!!!Login--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 	fmt.Println("TEST::::6")
 	data, err := s.services.LoginService().LoginData(
 		ctx,
@@ -165,17 +165,17 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 	//fmt.Println(":::::::::user.GetExpiresAt():::::::::", user.GetExpiresAt())
 
 	// @TODO:: get user expires from builder
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
+	// if err != nil {
+	// 	s.log.Error("!!!Login--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
-	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("User has been expired")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if expiresAt.Unix() < time.Now().Unix() {
+	// 	err := errors.New("User has been expired")
+	// 	s.log.Error("!!!Login--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
 	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
