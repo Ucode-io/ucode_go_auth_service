@@ -130,6 +130,7 @@ message CreateClientTypeRequest {
 
 message ClientTypePrimaryKey {
     string id = 1;
+    string project_id = 2;
 }
 
 message CompleteClientType {
