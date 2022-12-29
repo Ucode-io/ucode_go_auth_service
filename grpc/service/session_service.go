@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -348,35 +347,35 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
+	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
 	if err != nil {
 		s.log.Error("!!!HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if user.Active < 0 {
-		err := errors.New("user is not active")
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if user.Active < 0 {
+	// 	err := errors.New("user is not active")
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-	if user.Active == 0 {
-		err := errors.New("user hasn't been activated yet")
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if user.Active == 0 {
+	// 	err := errors.New("user hasn't been activated yet")
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
-	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
+	// if err != nil {
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
-	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("user has been expired")
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if expiresAt.Unix() < time.Now().Unix() {
+	// 	err := errors.New("user has been expired")
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
 	_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
 		ClientPlatformId: req.ClientPlatformId,
@@ -439,53 +438,55 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
+	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
 	if err != nil {
 		s.log.Error("!!!HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if user.Active < 0 {
-		err := errors.New("user is not active")
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// @TODO::check user activation status from builders
+	// if user.Active < 0 {
+	// 	err := errors.New("user is not active")
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-	if user.Active == 0 {
-		err := errors.New("user hasn't been activated yet")
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if user.Active == 0 {
+	// 	err := errors.New("user hasn't been activated yet")
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
-	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
+	// if err != nil {
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
-	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("user has been expired")
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if expiresAt.Unix() < time.Now().Unix() {
+	// 	err := errors.New("user has been expired")
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-	project, err := s.services.ProjectServiceClient().GetById(
-		ctx,
-		&company_service.GetProjectByIdRequest{
-			ProjectId: req.ProjectId,
-		})
+	//@TODO:: check user has permission to this project
+	// project, err := s.services.ProjectServiceClient().GetById(
+	// 	ctx,
+	// 	&company_service.GetProjectByIdRequest{
+	// 		ProjectId: req.ProjectId,
+	// 	})
 
-	company, err := s.services.CompanyServiceClient().GetById(
-		ctx,
-		&company_service.GetCompanyByIdRequest{
-			Id: project.GetCompanyId(),
-		})
+	// company, err := s.services.CompanyServiceClient().GetById(
+	// 	ctx,
+	// 	&company_service.GetCompanyByIdRequest{
+	// 		Id: project.GetCompanyId(),
+	// 	})
 
-	if company.GetCompany().GetOwnerId() != user.GetId() {
-		err := errors.New("user has no permission")
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if company.GetCompany().GetOwnerId() != user.GetId() {
+	// 	err := errors.New("user has no permission")
+	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
 	//_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
 	//	ClientPlatformId: req.ClientPlatformId,
