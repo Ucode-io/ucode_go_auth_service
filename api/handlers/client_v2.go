@@ -110,10 +110,10 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Param("project_id")
+	projectId := c.Query("project_id")
 
 	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
+		h.handleResponse(c, http.InvalidArgument, "projectid id is an invalid uuid")
 		return
 	}
 
