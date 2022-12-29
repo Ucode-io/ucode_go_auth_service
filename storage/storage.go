@@ -124,7 +124,7 @@ type UserRepoI interface {
 	GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
 	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
-	GetUserIdsByProjectId(ctx context.Context, req string) (*[]string, error)
+	GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
 }
 
 type IntegrationRepoI interface {

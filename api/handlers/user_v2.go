@@ -80,6 +80,11 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
+	if !util.IsValidUUID(c.Query("project-id")) {
+		h.handleResponse(c, http.BadEnvironment, "project-id is required")
+		return
+	}
+
 	resp, err := h.services.UserService().V2GetUserList(
 		c.Request.Context(),
 		&auth_service.GetUserListRequest{

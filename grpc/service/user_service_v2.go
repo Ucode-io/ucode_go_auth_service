@@ -203,7 +203,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	// 	return nil, status.Error(codes.Internal, err.Error())
 	// }
 
-	userIds, err := s.strg.User().GetUserIdsByProjectId(ctx, req.ProjectId)
+	userIds, err := s.strg.User().GetUserIds(ctx, req)
 	if err != nil {
 		s.log.Error("!!!GetUserList--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())

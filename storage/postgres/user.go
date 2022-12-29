@@ -485,15 +485,26 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 	return &res, nil
 }
 
-func (r *userRepo) GetUserIdsByProjectId(ctx context.Context, req string) (*[]string, error) {
+func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error) {
 
 	query := `SELECT
 				array_agg(user_id)
 			from user_project
-			where project_id = $1`
+			where true=true`
+
+	filter := ` and project_id = :project_id`
+	params := map[string]interface{}{}
+	params["project_id"] = req.ProjectId
+
+	if len(req.Search) > 0 {
+		params["search"] = req.Search
+		filter += " AND ((name || phone || email || login) ILIKE ('%' || :search || '%'))"
+	}
+
+	query, args := helper.ReplaceQueryParams(query+filter, params)
 
 	tmp := make([]string, 0, 20)
-	err := r.db.QueryRow(ctx, query, req).Scan(pq.Array(&tmp))
+	err := r.db.QueryRow(ctx, query, args...).Scan(pq.Array(&tmp))
 	if err != nil {
 		return nil, err
 	}

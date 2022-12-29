@@ -27,7 +27,7 @@ func (s *clientService) V2CreateClientPlatform(ctx context.Context, req *pb.Crea
 		&pbObject.CommonMessage{
 			TableSlug: "client_platform",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.ProjectId,
 		})
 
 	if err != nil {
