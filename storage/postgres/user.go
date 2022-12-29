@@ -315,12 +315,13 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		id = :id`
 
 	params := map[string]interface{}{
-		"id":        entity.Id,
-		"name":      entity.Name,
-		"photo_url": entity.PhotoUrl,
-		"phone":     entity.Phone,
-		"email":     entity.Email,
-		"login":     entity.Login,
+		"id":         entity.GetId(),
+		"name":       entity.GetName(),
+		"photo_url":  entity.GetPhotoUrl(),
+		"phone":      entity.GetPhone(),
+		"email":      entity.GetEmail(),
+		"login":      entity.GetLogin(),
+		"company_id": entity.GetCompanyId(),
 	}
 
 	q, arr := helper.ReplaceQueryParams(query, params)
@@ -335,9 +336,9 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error) {
-	query := `DELETE FROM "user" WHERE id = $1`
+	queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
 
-	result, err := r.db.Exec(ctx, query, pKey.Id)
+	result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
 	if err != nil {
 		return 0, err
 	}

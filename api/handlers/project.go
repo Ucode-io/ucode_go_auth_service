@@ -1,10 +1,15 @@
 package handlers
 
 import (
+	"context"
+	"errors"
 	"github.com/saidamir98/udevs_pkg/util"
+	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
+	"ucode/ucode_go_auth_service/genproto/object_builder_service"
+	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 )
@@ -229,4 +234,56 @@ func (h *Handler) DeleteProject(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.NoContent, resp)
+}
+
+// UpdateProjectUserData godoc
+// @ID update_user_in_project
+// @Router /project/{project-id}/user-update [PUT]
+// @Summary Update Project
+// @Description Update Project
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param project body company_service.UpdateProjectUserDataReq true "UpdateProjectUserDataReqBody"
+// @Success 200 {object} http.Response{data=company_service.UpdateProjectUserDataRes} "Project data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) UpdateProjectUserData(c *gin.Context) {
+	var UpdateProjectUserDataReq company_service.UpdateProjectUserDataReq
+
+	err := c.ShouldBindJSON(&UpdateProjectUserDataReq)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	req, err := helper.ConvertMapToStruct(map[string]interface{}{
+		"client_type_id":     UpdateProjectUserDataReq.GetClientTypeId(),
+		"role_id":            UpdateProjectUserDataReq.GetRoleId(),
+		"client_platform_id": UpdateProjectUserDataReq.GetClientPlatformId(),
+		"guid":               UpdateProjectUserDataReq.GetUserId(),
+	})
+	if err != nil {
+		errConvertMapToStruct := errors.New("cant parse to struct")
+		h.handleResponse(c, http.InvalidArgument, errConvertMapToStruct.Error())
+		return
+	}
+
+	ctx, finish := context.WithTimeout(context.Background(), 20*time.Second)
+	defer finish()
+	resp, err := h.services.ObjectBuilderService().Update(
+		ctx,
+		&object_builder_service.CommonMessage{
+			TableSlug: "user",
+			Data:      req,
+			ProjectId: UpdateProjectUserDataReq.GetProjectId(),
+		},
+	)
+	if err != nil {
+		errUpdateUserData := errors.New("cant update user project data")
+		h.handleResponse(c, http.InvalidArgument, errUpdateUserData.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
 }
