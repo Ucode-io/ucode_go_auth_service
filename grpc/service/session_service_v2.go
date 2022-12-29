@@ -76,7 +76,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		&pbObject.LoginDataReq{
 			UserId:     user.GetId(),
 			ClientType: req.ClientType,
-			ProjectId:  config.UcodeDefaultProjectID,
+			ProjectId:  req.ProjectId,
 		},
 	)
 	if err != nil {
@@ -315,7 +315,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 			resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 				TableSlug: "record_permission",
 				Data:      structPb,
-				ProjectId: config.UcodeDefaultProjectID,
+				ProjectId: session.ProjectId,
 			})
 			if err != nil {
 				s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
