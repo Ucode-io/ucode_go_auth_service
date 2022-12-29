@@ -1,1 +1,0 @@
-ALTER TABLE user ADD COLUMN project_id uuid;

@@ -36,7 +36,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		login,
 		password,
 		active,
-		expires_at
+		expires_at,
+		company_id
 	) VALUES (
 		$1,
 		$2,
@@ -46,7 +47,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$6,
 		$7,
 		$8,
-		$9
+		$9,
+		$10
 	)`
 
 	uuid, err := uuid.NewRandom()
@@ -64,6 +66,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.Password,
 		entity.Active,
 		entity.ExpiresAt,
+		entity.CompanyId,
 	)
 
 	pKey = &pb.UserPrimaryKey{

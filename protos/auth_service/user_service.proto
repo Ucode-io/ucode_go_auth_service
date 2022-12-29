@@ -70,6 +70,7 @@ message CreateUserRequest {
     string expires_at = 6;
     string name = 7;
     string photo_url = 8;
+    string company_id = 9;
 }
 
 message UserPrimaryKey {
