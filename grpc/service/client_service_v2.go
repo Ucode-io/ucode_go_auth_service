@@ -236,7 +236,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientT
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.ProjectId,
 		})
 
 	if err != nil {

@@ -51,7 +51,7 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.RolePrima
 	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: req.ProjectId,
 	})
 	if err != nil {
 		s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -79,7 +79,7 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.GetRoles
 	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: req.ProjectId,
 	})
 	if err != nil {
 		s.log.Error("!!!GetRolesList.ObjectBuilderService.GetList--->", logger.Error(err))

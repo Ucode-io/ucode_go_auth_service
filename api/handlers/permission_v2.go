@@ -56,6 +56,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role-id path string true "role-id"
+// @Param project_id query string true "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientTypeBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -66,8 +67,16 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project_id")
+
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.services.PermissionService().V2GetRoleById(c.Request.Context(), &auth_service.RolePrimaryKey{
-		Id: roleId,
+		Id:        roleId,
+		ProjectId: projectId,
 	})
 
 	if err != nil {
@@ -90,6 +99,7 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 // @Param limit query integer false "limit"
 // @Param client-platform-id query string false "client-platform-id"
 // @Param client-type-id query string false "client-type-id"
+// @Param project_id query string false "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetRolesListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -106,6 +116,13 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project_id")
+
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.services.PermissionService().V2GetRolesList(
 		c.Request.Context(),
 		&auth_service.GetRolesListRequest{
@@ -113,6 +130,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 			Limit:            uint32(limit),
 			ClientPlatformId: c.Query("client-platform-id"),
 			ClientTypeId:     c.Query("client-type-id"),
+			ProjectId:        projectId,
 		},
 	)
 
