@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
+	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
 
@@ -175,30 +177,48 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user-id path string true "user-id"
+// @Param project-id path string true "project-id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteUser(c *gin.Context) {
+	var userDataToMap = make(map[string]interface{})
 	userID := c.Param("user-id")
+	projectID := c.Param("project-id")
 
 	if !util.IsValidUUID(userID) {
 		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
 		return
 	}
 
-	resp, err := h.services.UserService().DeleteUser(
-		c.Request.Context(),
-		&auth_service.UserPrimaryKey{
-			Id: userID,
-		},
-	)
+	// resp, err := h.services.UserService().DeleteUser(
+	// 	c.Request.Context(),
+	// 	&auth_service.UserPrimaryKey{
+	// 		Id: userID,
+	// 	},
+	// )
 
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
+	userDataToMap["id"] = userID
+	structData, err := helper.ConvertMapToStruct(userDataToMap)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
+	_, err = h.services.ObjectBuilderService().Delete(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: projectID,
+		},
+	)
+
+	h.handleResponse(c, http.NoContent, "resp")
 }
 
 // AddUserRelation godoc

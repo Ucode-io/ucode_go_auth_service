@@ -335,9 +335,9 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error) {
-	query := `DELETE FROM "user" WHERE id = $1`
+	queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
 
-	result, err := r.db.Exec(ctx, query, pKey.Id)
+	result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
 	if err != nil {
 		return 0, err
 	}
