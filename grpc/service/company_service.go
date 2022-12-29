@@ -292,6 +292,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Format(config.DatabaseTimeLayout),
 			Name:      "",
 			PhotoUrl:  "",
+			CompanyId: companyPKey.GetId(),
 		},
 	)
 	if err != nil {
