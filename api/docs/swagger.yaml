@@ -100,9 +100,13 @@ definitions:
     type: object
   auth_service.AddUserToProjectReq:
     properties:
+      active:
+        type: integer
       company_id:
         type: string
       project_id:
+        type: string
+      role_id:
         type: string
       user_id:
         type: string
@@ -167,8 +171,7 @@ definitions:
   auth_service.CommonMessage:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
-        type: object
+        type: string
       table_slug:
         type: string
     type: object
@@ -267,6 +270,12 @@ definitions:
     properties:
       active:
         type: integer
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      company_id:
+        type: string
       email:
         type: string
       expires_at:
@@ -280,6 +289,10 @@ definitions:
       phone:
         type: string
       photo_url:
+        type: string
+      project_id:
+        type: string
+      role_id:
         type: string
     type: object
   auth_service.GetClientMatrixResponse:
@@ -681,8 +694,7 @@ definitions:
   auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
-        type: object
+        type: string
       icon:
         type: string
       label:
@@ -835,6 +847,8 @@ definitions:
         type: string
       client_type_id:
         type: string
+      company_id:
+        type: string
       email:
         type: string
       expires_at:
@@ -867,7 +881,11 @@ definitions:
     properties:
       active:
         type: integer
-      created_at:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      company_id:
         type: string
       email:
         type: string
@@ -887,7 +905,7 @@ definitions:
         type: string
       project_id:
         type: string
-      updated_at:
+      role_id:
         type: string
     type: object
   auth_service.UserInfoField:
@@ -1221,23 +1239,6 @@ definitions:
       status:
         type: string
     type: object
-  impl.MessageState:
-    properties:
-      DoNotCompare:
-        items:
-          type: object
-        type: array
-      DoNotCopy:
-        items:
-          $ref: '#/definitions/sync.Mutex'
-        type: array
-    type: object
-  impl.UnknownFields:
-    $ref: '#/definitions/impl.unknownFieldsA'
-  impl.unknownFieldsA:
-    items:
-      type: integer
-    type: array
   models.Email:
     properties:
       client_type:
@@ -1426,9 +1427,9 @@ definitions:
         type: boolean
       field_id:
         type: string
-      field_label:
-        type: string
       guid:
+        type: string
+      label:
         type: string
       role_id:
         type: string
@@ -1474,8 +1475,7 @@ definitions:
   object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
-        type: object
+        type: string
       icon:
         type: string
       label:
@@ -1513,29 +1513,6 @@ definitions:
       user_id:
         type: string
     type: object
-  protoimpl.MessageState:
-    $ref: '#/definitions/impl.MessageState'
-  protoimpl.SizeCache:
-    $ref: '#/definitions/impl.SizeCache'
-  protoimpl.UnknownFields:
-    $ref: '#/definitions/impl.UnknownFields'
-  structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  structpb.Value:
-    properties:
-      kind:
-        $ref: '#/definitions/structpb.isValue_Kind'
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-        type: object
-    type: object
-  structpb.isValue_Kind:
-    type: object
 info:
   contact: {}
   description: This is a api gateway
@@ -1558,7 +1535,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -1809,7 +1787,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -1987,7 +1966,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -2159,7 +2139,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -2376,7 +2357,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -2521,7 +2503,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -2627,7 +2610,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -2771,7 +2755,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -2835,7 +2820,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -3077,7 +3063,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -3371,7 +3358,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -3519,7 +3507,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -3620,7 +3609,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -4092,7 +4082,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -4121,7 +4112,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -4182,10 +4174,16 @@ paths:
         name: user-id
         required: true
         type: string
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -4286,7 +4284,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -4352,7 +4351,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -4607,7 +4607,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -4789,7 +4790,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -5115,7 +5117,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -5179,7 +5182,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -5389,7 +5393,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -5537,7 +5542,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -5677,7 +5683,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -5996,7 +6003,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:
@@ -6029,7 +6037,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204": {}
+        "204":
+          description: ""
         "500":
           description: Server Error
           schema:

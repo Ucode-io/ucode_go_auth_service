@@ -178,7 +178,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -548,7 +550,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -855,7 +859,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1092,7 +1098,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1523,7 +1531,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1777,7 +1787,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1890,7 +1902,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2201,7 +2215,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2308,7 +2324,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2725,7 +2743,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3173,7 +3193,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3490,7 +3512,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3662,7 +3686,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4414,7 +4440,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4525,7 +4553,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4638,7 +4668,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4742,10 +4774,19 @@ var doc = `{
                         "name": "user-id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4984,7 +5025,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5360,7 +5403,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5673,7 +5718,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6242,7 +6289,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6349,7 +6398,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6653,7 +6704,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6970,7 +7023,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7210,7 +7265,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7695,7 +7752,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7816,7 +7875,9 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -8219,10 +8280,16 @@ var doc = `{
         "auth_service.AddUserToProjectReq": {
             "type": "object",
             "properties": {
+                "active": {
+                    "type": "integer"
+                },
                 "company_id": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
                     "type": "string"
                 },
                 "user_id": {
@@ -8322,8 +8389,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "$ref": "#/definitions/structpb.Struct"
+                    "type": "string"
                 },
                 "table_slug": {
                     "type": "string"
@@ -8475,6 +8541,15 @@ var doc = `{
                 "active": {
                     "type": "integer"
                 },
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "company_id": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -8494,6 +8569,12 @@ var doc = `{
                     "type": "string"
                 },
                 "photo_url": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
                     "type": "string"
                 }
             }
@@ -9112,8 +9193,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "$ref": "#/definitions/structpb.Struct"
+                    "type": "string"
                 },
                 "icon": {
                     "type": "string"
@@ -9348,6 +9428,9 @@ var doc = `{
                 "client_type_id": {
                     "type": "string"
                 },
+                "company_id": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -9397,7 +9480,13 @@ var doc = `{
                 "active": {
                     "type": "integer"
                 },
-                "created_at": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "company_id": {
                     "type": "string"
                 },
                 "email": {
@@ -9427,7 +9516,7 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
-                "updated_at": {
+                "role_id": {
                     "type": "string"
                 }
             }
@@ -9935,32 +10024,6 @@ var doc = `{
                 }
             }
         },
-        "impl.MessageState": {
-            "type": "object",
-            "properties": {
-                "DoNotCompare": {
-                    "type": "array",
-                    "items": {
-                        "type": "object"
-                    }
-                },
-                "DoNotCopy": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/sync.Mutex"
-                    }
-                }
-            }
-        },
-        "impl.UnknownFields": {
-            "$ref": "#/definitions/impl.unknownFieldsA"
-        },
-        "impl.unknownFieldsA": {
-            "type": "array",
-            "items": {
-                "type": "integer"
-            }
-        },
         "models.Email": {
             "type": "object",
             "properties": {
@@ -10247,10 +10310,10 @@ var doc = `{
                 "field_id": {
                     "type": "string"
                 },
-                "field_label": {
+                "guid": {
                     "type": "string"
                 },
-                "guid": {
+                "label": {
                     "type": "string"
                 },
                 "role_id": {
@@ -10320,8 +10383,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "$ref": "#/definitions/structpb.Struct"
+                    "type": "string"
                 },
                 "icon": {
                     "type": "string"
@@ -10377,40 +10439,6 @@ var doc = `{
                     "type": "string"
                 }
             }
-        },
-        "protoimpl.MessageState": {
-            "$ref": "#/definitions/impl.MessageState"
-        },
-        "protoimpl.SizeCache": {
-            "$ref": "#/definitions/impl.SizeCache"
-        },
-        "protoimpl.UnknownFields": {
-            "$ref": "#/definitions/impl.UnknownFields"
-        },
-        "structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
-        "structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue",
-                    "type": "object",
-                    "$ref": "#/definitions/structpb.isValue_Kind"
-                }
-            }
-        },
-        "structpb.isValue_Kind": {
-            "type": "object"
         }
     }
 }`
