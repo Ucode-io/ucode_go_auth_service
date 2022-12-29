@@ -8,10 +8,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"github.com/saidamir98/udevs_pkg/security"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -280,13 +283,20 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	// USER
 
+	hashedPassword, err := security.HashPassword(req.GetUserInfo().GetPassword())
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	createUserRes, err := s.strg.User().Create(
 		ctx,
 		&pb.CreateUserRequest{
 			Phone:     req.GetUserInfo().GetPhone(),
 			Email:     req.GetUserInfo().GetEmail(),
 			Login:     req.GetUserInfo().GetLogin(),
-			Password:  req.GetUserInfo().GetPassword(),
+			Password:  hashedPassword,
+			Active:    1, //@TODO:: user must verify himself
 			PhotoUrl:  "",
 			CompanyId: companyPKey.GetId(),
 		},
