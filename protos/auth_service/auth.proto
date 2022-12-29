@@ -112,6 +112,7 @@ message User {
     string updated_at = 10;
     string name = 11;
     string photo_url = 12;
+    string company_id = 13;
 }
 
 message UserRelation {

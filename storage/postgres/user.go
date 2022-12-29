@@ -131,7 +131,8 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 		active,
 		expires_at,
 		created_at,
-		updated_at
+		updated_at,
+		company_id
 	FROM
 		"user"
 	WHERE
@@ -165,6 +166,7 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 			&expiresAt,
 			&createdAt,
 			&updatedAt,
+			&user.CompanyId,
 		)
 
 		if err != nil {
