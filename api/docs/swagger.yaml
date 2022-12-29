@@ -841,6 +841,8 @@ definitions:
         type: string
       client_type_id:
         type: string
+      company_id:
+        type: string
       email:
         type: string
       expires_at:
@@ -854,8 +856,6 @@ definitions:
       phone:
         type: string
       photo_url:
-        type: string
-      project_id:
         type: string
       role_id:
         type: string
@@ -873,6 +873,8 @@ definitions:
     properties:
       active:
         type: integer
+      company_id:
+        type: string
       created_at:
         type: string
       email:
@@ -5745,10 +5747,6 @@ paths:
       - description: client-type-id
         in: query
         name: client-type-id
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
         type: string
       produces:
       - application/json

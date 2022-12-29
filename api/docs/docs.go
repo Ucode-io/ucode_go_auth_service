@@ -7354,12 +7354,6 @@ var doc = `{
                         "description": "client-type-id",
                         "name": "client-type-id",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -9333,6 +9327,9 @@ var doc = `{
                 "client_type_id": {
                     "type": "string"
                 },
+                "company_id": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -9352,9 +9349,6 @@ var doc = `{
                     "type": "string"
                 },
                 "photo_url": {
-                    "type": "string"
-                },
-                "project_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -9381,6 +9375,9 @@ var doc = `{
             "properties": {
                 "active": {
                     "type": "integer"
+                },
+                "company_id": {
+                    "type": "string"
                 },
                 "created_at": {
                     "type": "string"
