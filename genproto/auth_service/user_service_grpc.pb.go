@@ -34,12 +34,14 @@ type UserServiceClient interface {
 	AddUserRelation(ctx context.Context, in *AddUserRelationRequest, opts ...grpc.CallOption) (*UserRelation, error)
 	RemoveUserRelation(ctx context.Context, in *UserRelationPrimaryKey, opts ...grpc.CallOption) (*UserRelation, error)
 	UpsertUserInfo(ctx context.Context, in *UpsertUserInfoRequest, opts ...grpc.CallOption) (*UserInfo, error)
-	V2CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2GetUserByID(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2GetUserListByIDs(ctx context.Context, in *UserPrimaryKeyList, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	V2UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*CommonMessage, error)
+	V2CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
+	V2GetUserByID(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*User, error)
+	V2GetUserListByIDs(ctx context.Context, in *UserPrimaryKeyList, opts ...grpc.CallOption) (*GetUserListResponse, error)
+	V2GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
+	V2UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	V2DeleteUser(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error)
+	GetProjectsByUserId(ctx context.Context, in *GetProjectsByUserIdReq, opts ...grpc.CallOption) (*GetProjectsByUserIdRes, error)
 }
 
 type userServiceClient struct {
@@ -149,8 +151,8 @@ func (c *userServiceClient) UpsertUserInfo(ctx context.Context, in *UpsertUserIn
 	return out, nil
 }
 
-func (c *userServiceClient) V2CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
-	out := new(CommonMessage)
+func (c *userServiceClient) V2CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -158,8 +160,8 @@ func (c *userServiceClient) V2CreateUser(ctx context.Context, in *CreateUserRequ
 	return out, nil
 }
 
-func (c *userServiceClient) V2GetUserByID(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*CommonMessage, error) {
-	out := new(CommonMessage)
+func (c *userServiceClient) V2GetUserByID(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2GetUserByID", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -167,8 +169,8 @@ func (c *userServiceClient) V2GetUserByID(ctx context.Context, in *UserPrimaryKe
 	return out, nil
 }
 
-func (c *userServiceClient) V2GetUserListByIDs(ctx context.Context, in *UserPrimaryKeyList, opts ...grpc.CallOption) (*CommonMessage, error) {
-	out := new(CommonMessage)
+func (c *userServiceClient) V2GetUserListByIDs(ctx context.Context, in *UserPrimaryKeyList, opts ...grpc.CallOption) (*GetUserListResponse, error) {
+	out := new(GetUserListResponse)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2GetUserListByIDs", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -176,8 +178,8 @@ func (c *userServiceClient) V2GetUserListByIDs(ctx context.Context, in *UserPrim
 	return out, nil
 }
 
-func (c *userServiceClient) V2GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
-	out := new(CommonMessage)
+func (c *userServiceClient) V2GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error) {
+	out := new(GetUserListResponse)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2GetUserList", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -185,8 +187,8 @@ func (c *userServiceClient) V2GetUserList(ctx context.Context, in *GetUserListRe
 	return out, nil
 }
 
-func (c *userServiceClient) V2UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*CommonMessage, error) {
-	out := new(CommonMessage)
+func (c *userServiceClient) V2UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2UpdateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -197,6 +199,24 @@ func (c *userServiceClient) V2UpdateUser(ctx context.Context, in *UpdateUserRequ
 func (c *userServiceClient) V2DeleteUser(ctx context.Context, in *UserPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/auth_service.UserService/V2DeleteUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) AddUserToProject(ctx context.Context, in *AddUserToProjectReq, opts ...grpc.CallOption) (*AddUserToProjectRes, error) {
+	out := new(AddUserToProjectRes)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/AddUserToProject", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetProjectsByUserId(ctx context.Context, in *GetProjectsByUserIdReq, opts ...grpc.CallOption) (*GetProjectsByUserIdRes, error) {
+	out := new(GetProjectsByUserIdRes)
+	err := c.cc.Invoke(ctx, "/auth_service.UserService/GetProjectsByUserId", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -218,12 +238,14 @@ type UserServiceServer interface {
 	AddUserRelation(context.Context, *AddUserRelationRequest) (*UserRelation, error)
 	RemoveUserRelation(context.Context, *UserRelationPrimaryKey) (*UserRelation, error)
 	UpsertUserInfo(context.Context, *UpsertUserInfoRequest) (*UserInfo, error)
-	V2CreateUser(context.Context, *CreateUserRequest) (*CommonMessage, error)
-	V2GetUserByID(context.Context, *UserPrimaryKey) (*CommonMessage, error)
-	V2GetUserListByIDs(context.Context, *UserPrimaryKeyList) (*CommonMessage, error)
-	V2GetUserList(context.Context, *GetUserListRequest) (*CommonMessage, error)
-	V2UpdateUser(context.Context, *UpdateUserRequest) (*CommonMessage, error)
+	V2CreateUser(context.Context, *CreateUserRequest) (*User, error)
+	V2GetUserByID(context.Context, *UserPrimaryKey) (*User, error)
+	V2GetUserListByIDs(context.Context, *UserPrimaryKeyList) (*GetUserListResponse, error)
+	V2GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
+	V2UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	V2DeleteUser(context.Context, *UserPrimaryKey) (*emptypb.Empty, error)
+	AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error)
+	GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -264,23 +286,29 @@ func (UnimplementedUserServiceServer) RemoveUserRelation(context.Context, *UserR
 func (UnimplementedUserServiceServer) UpsertUserInfo(context.Context, *UpsertUserInfoRequest) (*UserInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertUserInfo not implemented")
 }
-func (UnimplementedUserServiceServer) V2CreateUser(context.Context, *CreateUserRequest) (*CommonMessage, error) {
+func (UnimplementedUserServiceServer) V2CreateUser(context.Context, *CreateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2CreateUser not implemented")
 }
-func (UnimplementedUserServiceServer) V2GetUserByID(context.Context, *UserPrimaryKey) (*CommonMessage, error) {
+func (UnimplementedUserServiceServer) V2GetUserByID(context.Context, *UserPrimaryKey) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetUserByID not implemented")
 }
-func (UnimplementedUserServiceServer) V2GetUserListByIDs(context.Context, *UserPrimaryKeyList) (*CommonMessage, error) {
+func (UnimplementedUserServiceServer) V2GetUserListByIDs(context.Context, *UserPrimaryKeyList) (*GetUserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetUserListByIDs not implemented")
 }
-func (UnimplementedUserServiceServer) V2GetUserList(context.Context, *GetUserListRequest) (*CommonMessage, error) {
+func (UnimplementedUserServiceServer) V2GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2GetUserList not implemented")
 }
-func (UnimplementedUserServiceServer) V2UpdateUser(context.Context, *UpdateUserRequest) (*CommonMessage, error) {
+func (UnimplementedUserServiceServer) V2UpdateUser(context.Context, *UpdateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2UpdateUser not implemented")
 }
 func (UnimplementedUserServiceServer) V2DeleteUser(context.Context, *UserPrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2DeleteUser not implemented")
+}
+func (UnimplementedUserServiceServer) AddUserToProject(context.Context, *AddUserToProjectReq) (*AddUserToProjectRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
+}
+func (UnimplementedUserServiceServer) GetProjectsByUserId(context.Context, *GetProjectsByUserIdReq) (*GetProjectsByUserIdRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectsByUserId not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -601,6 +629,42 @@ func _UserService_V2DeleteUser_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_AddUserToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserToProjectReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AddUserToProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/AddUserToProject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AddUserToProject(ctx, req.(*AddUserToProjectReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetProjectsByUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectsByUserIdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetProjectsByUserId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.UserService/GetProjectsByUserId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetProjectsByUserId(ctx, req.(*GetProjectsByUserIdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -675,6 +739,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "V2DeleteUser",
 			Handler:    _UserService_V2DeleteUser_Handler,
+		},
+		{
+			MethodName: "AddUserToProject",
+			Handler:    _UserService_AddUserToProject_Handler,
+		},
+		{
+			MethodName: "GetProjectsByUserId",
+			Handler:    _UserService_GetProjectsByUserId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

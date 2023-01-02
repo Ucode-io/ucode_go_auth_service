@@ -27,7 +27,7 @@ func (s *clientService) V2CreateClientPlatform(ctx context.Context, req *pb.Crea
 		&pbObject.CommonMessage{
 			TableSlug: "client_platform",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.ProjectId,
 		})
 
 	if err != nil {
@@ -54,7 +54,7 @@ func (s *clientService) V2GetClientPlatformByID(ctx context.Context, req *pb.Cli
 		&pbObject.CommonMessage{
 			TableSlug: "client_platform",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.ProjectId,
 		})
 
 	if err != nil {
@@ -97,7 +97,11 @@ func (s *clientService) V2GetClientPlatformByIDDetailed(ctx context.Context, req
 func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.GetClientPlatformListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
 
-	structData, err := helper.ConvertRequestToSturct(req)
+	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+		// "offset": req.Offset,
+		// "limit":  req.Limit,
+		// "search": req.Search,
+	})
 	if err != nil {
 		s.log.Error("!!!ClientPlatform--->", logger.Error(err))
 	}
@@ -106,7 +110,7 @@ func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.Get
 		&pbObject.CommonMessage{
 			TableSlug: "client_platform",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.ProjectId,
 		})
 
 	if err != nil {
@@ -232,7 +236,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientT
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.ProjectId,
 		})
 
 	if err != nil {
@@ -249,7 +253,13 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientT
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 
-	structData, err := helper.ConvertRequestToSturct(req)
+	// @TODO limit offset error should fix
+	structReq := map[string]interface{}{
+		//"limit": req.GetLimit(),
+		//"offset": req.GetOffset(),
+		//"search": req.GetSearch(),
+	}
+	structData, err := helper.ConvertRequestToSturct(structReq)
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -259,7 +269,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.GetClie
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.GetProjectId(),
 		})
 
 	if err != nil {

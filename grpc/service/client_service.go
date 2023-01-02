@@ -178,7 +178,7 @@ func (s *clientService) GetClientTypeList(ctx context.Context, req *pb.GetClient
 			resp, err := s.services.ObjectBuilderService().GetList(context.Background(), &object_builder_service.CommonMessage{
 				TableSlug: table.Slug,
 				Data:      structData,
-				ProjectId: config.UcodeDefaultProjectID,
+				ProjectId: config.ProjectID,
 			})
 
 			if err != nil {

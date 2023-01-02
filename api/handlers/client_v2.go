@@ -55,6 +55,7 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
+// @Param project_id query string false "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetClientPlatformListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -74,9 +75,10 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 	resp, err := h.services.ClientService().V2GetClientPlatformList(
 		c.Request.Context(),
 		&auth_service.GetClientPlatformListRequest{
-			Limit:  int32(limit),
-			Offset: int32(offset),
-			Search: c.Query("search"),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.Query("search"),
+			ProjectId: c.Query("project_id"),
 		},
 	)
 
@@ -108,10 +110,18 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project_id")
+
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "projectid id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.services.ClientService().V2GetClientPlatformByID(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id: client_platformID,
+			Id:        client_platformID,
+			ProjectId: projectId,
 		},
 	)
 
@@ -272,6 +282,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
+// @Param project_id query string false "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetClientTypeListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -291,9 +302,10 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 	resp, err := h.services.ClientService().V2GetClientTypeList(
 		c.Request.Context(),
 		&auth_service.GetClientTypeListRequest{
-			Limit:  int32(limit),
-			Offset: int32(offset),
-			Search: c.Query("search"),
+			Limit:     int32(limit),
+			Offset:    int32(offset),
+			Search:    c.Query("search"),
+			ProjectId: c.Query("project_id"),
 		},
 	)
 
@@ -314,6 +326,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param client-type-id path string true "client-type-id"
+// @Param project_id path string true "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientTypeBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -325,10 +338,18 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 		return
 	}
 
+	projectId := c.Query("project_id")
+
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.services.ClientService().V2GetClientTypeByID(
 		c.Request.Context(),
 		&auth_service.ClientTypePrimaryKey{
-			Id: client_typeID,
+			Id:        client_typeID,
+			ProjectId: projectId,
 		},
 	)
 

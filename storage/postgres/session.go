@@ -70,15 +70,50 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 	return pKey, err
 }
 
+func (r *sessionRepo) CreateSuperAdmin(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
+	query := `INSERT INTO "session" (
+		id,
+		user_id,
+		ip,
+		data,
+		expires_at
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4,
+		$5
+	)`
+
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return pKey, err
+	}
+
+	_, err = r.db.Exec(ctx, query,
+		uuid.String(),
+		entity.UserId,
+		entity.Ip,
+		entity.Data,
+		entity.ExpiresAt,
+	)
+
+	pKey = &pb.SessionPrimaryKey{
+		Id: uuid.String(),
+	}
+
+	return pKey, err
+}
+
 func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (res *pb.Session, err error) {
 	res = &pb.Session{}
 	query := `SELECT
 		id,
-		project_id,
-		client_platform_id,
-		client_type_id,
+		coalesce(project_id::text, ''),
+		coalesce(client_platform_id::text, ''),
+		coalesce(client_type_id::text, ''),
 		user_id,
-		role_id,
+		coalesce(role_id::text, ''),
 		TEXT(ip) AS ip,
 		data,
 		is_changed,
@@ -127,11 +162,11 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		res.ExpiresAt = expiresAt.String
 	}
 
-	if expiresAt.Valid {
+	if createdAt.Valid {
 		res.CreatedAt = createdAt.String
 	}
 
-	if expiresAt.Valid {
+	if updatedAt.Valid {
 		res.UpdatedAt = updatedAt.String
 	}
 	if isChanged.Valid {
@@ -234,7 +269,7 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
 		role_id = :role_id,
 		ip = :ip,
 		data = :data,
-		is_changed = :is_changed
+		is_changed = :is_changed,
 		expires_at = :expires_at,
 		updated_at = now()
 	WHERE
@@ -308,11 +343,11 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 
 	query := `SELECT
 		id,
-		project_id,
-		client_platform_id,
-		client_type_id,
+		coalesce(project_id::text, ''),
+		coalesce(client_platform_id::text, ''),
+		coalesce(client_type_id::text, ''),
 		user_id,
-		role_id,
+		coalesce(role_id::text, ''),
 		TEXT(ip) AS ip,
 		data,
 		is_changed,
@@ -415,6 +450,22 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 		role_id = $1`
 
 	result, err := r.db.Exec(ctx, query, entity.RoleId, entity.IsChanged)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected = result.RowsAffected()
+
+	return rowsAffected, err
+}
+
+func (r *sessionRepo) UpdateBySessionId(ctx context.Context, entity *pb.UpdateSessionBySessionIdRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "session" SET
+		is_changed = $2
+	WHERE
+		id = $1`
+
+	result, err := r.db.Exec(ctx, query, entity.Id, entity.IsChanged)
 	if err != nil {
 		return 0, err
 	}

@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 const (
 	DatabaseQueryTimeLayout = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
@@ -24,10 +27,11 @@ const (
 	// DeveloperClientTypeID
 	DeveloperClientTypeID string = "5a3818a9-90f0-44e9-a053-3be0ba1e2c02"
 
-	AdminClientTypeID     string = "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d"
-	AdminClientName       string = "ADMIN"
-	UcodeTestAdminDomain  string = "test.admin.u-code.io"
-	UcodeDefaultProjectID string = "ucode_default_project_id"
+	AdminClientTypeID    string = "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d"
+	AdminClientName      string = "ADMIN"
+	UcodeTestAdminDomain string = "test.admin.u-code.io"
+	// UcodeDefaultProjectID string = "ucode_default_project_id"
+	UcodeDefaultProjectID string = "39f1b0cc-8dc3-42df-b2bf-813310c007a4"
 )
 
 var (
@@ -62,4 +66,8 @@ var (
 		"function":            1,
 		"invoke_function":     1,
 	}
+)
+
+var (
+	ErrUserAlradyMember = errors.New("user is already member")
 )

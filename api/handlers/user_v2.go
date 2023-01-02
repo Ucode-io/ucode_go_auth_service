@@ -1,9 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/pkg/helper"
+
+	"github.com/pkg/errors"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
+	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
 
@@ -74,6 +80,11 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
+	if !util.IsValidUUID(c.Query("project-id")) {
+		h.handleResponse(c, http.BadEnvironment, "project-id is required")
+		return
+	}
+
 	resp, err := h.services.UserService().V2GetUserList(
 		c.Request.Context(),
 		&auth_service.GetUserListRequest{
@@ -103,6 +114,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user-id path string true "user-id"
+// @Param project-id query string true "project-id"
 // @Success 200 {object} http.Response{data=auth_service.User} "UserBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -110,14 +122,22 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 	userID := c.Param("user-id")
 
 	if !util.IsValidUUID(userID) {
-		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+		h.handleResponse(c, http.InvalidArgument, "user-id is an invalid uuid")
+		return
+	}
+
+	projectID := c.Query("project-id")
+
+	if !util.IsValidUUID(projectID) {
+		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
 
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id: userID,
+			Id:        userID,
+			ProjectId: projectID,
 		},
 	)
 
@@ -172,10 +192,12 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user-id path string true "user-id"
+// @Param project-id query string true "project-id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteUser(c *gin.Context) {
+	var userDataToMap = make(map[string]interface{})
 	userID := c.Param("user-id")
 
 	if !util.IsValidUUID(userID) {
@@ -183,10 +205,18 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		return
 	}
 
+	projectID := c.Query("project-id")
+
+	if !util.IsValidUUID(projectID) {
+		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+		return
+	}
+
 	resp, err := h.services.UserService().V2DeleteUser(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id: userID,
+			Id:        userID,
+			ProjectId: projectID,
 		},
 	)
 
@@ -195,5 +225,107 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		return
 	}
 
+	userDataToMap["id"] = userID
+	structData, err := helper.ConvertMapToStruct(userDataToMap)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	_, err = h.services.ObjectBuilderService().Delete(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: projectID,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
 	h.handleResponse(c, http.NoContent, resp)
+}
+
+// AddUserToProject godoc
+// @ID add user to project
+// @Router /v2/add-user-to-project [POST]
+// @Summary Create User
+// @Description Create User
+// @Tags V2_User
+// @Accept json
+// @Produce json
+// @Param user body auth_service.AddUserToProjectReq true "AddUserToProjectReq"
+// @Success 201 {object} http.Response{data=auth_service.AddUserToProjectRes} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) AddUserToProject(c *gin.Context) {
+
+	req := auth_service.AddUserToProjectReq{}
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		errCantParseReq := errors.New("cant parse json")
+		h.log.Error("!!!AddUserToProject -> cant parse json")
+		h.handleResponse(c, http.BadRequest, errCantParseReq.Error())
+		return
+	}
+
+	res, err := h.services.UserService().AddUserToProject(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	user, err := h.services.UserService().V2GetUserByID(
+		c.Request.Context(),
+		&auth_service.UserPrimaryKey{
+			Id:        req.UserId,
+			ProjectId: req.ProjectId,
+		},
+	)
+	if err != nil {
+		if errors.Is(err, config.ErrUserAlradyMember) {
+			h.handleResponse(c, http.BadEnvironment, "already member!")
+			return
+		}
+
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	var userDataToMap = make(map[string]interface{})
+	userDataToMap["guid"] = req.UserId
+	userDataToMap["active"] = req.Active
+	userDataToMap["project_id"] = req.ProjectId
+	userDataToMap["role_id"] = req.RoleId
+	userDataToMap["client_type_id"] = user.ClientTypeId
+	userDataToMap["client_platform_id"] = user.ClientPlatformId
+
+	structData, err := helper.ConvertMapToStruct(userDataToMap)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	_, err = h.services.ObjectBuilderService().Create(
+		context.Background(),
+		&obs.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, res)
 }
