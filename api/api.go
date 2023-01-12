@@ -165,6 +165,13 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin)
 		v2.POST("/user/invite", h.AddUserToProject)
+
+		// api keys
+		v2.POST("/:project-id/api-key", h.CreateApiKey)
+		v2.PUT("/:project-id/update-key", h.UpdateApiKey)
+		v2.GET("/:project-id/get-key", h.GetApiKey)
+		v2.GET("/:project-id/get-list-key", h.GetListApiKeys)
+		v2.DELETE("/:project-id/delete-keys", h.DeleteApiKeys)
 	}
 
 	//COMPANY
