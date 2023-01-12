@@ -84,9 +84,9 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 	}
-	//if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
-	//	fmt.Println("ConvertPbToAnotherPb", string(bytes))
-	//}
+	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
+		fmt.Println("ConvertPbToAnotherPb", string(bytes))
+	}
 	fmt.Println("TEST::::7")
 	if !data.UserFound {
 		customError := errors.New("User not found")

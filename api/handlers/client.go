@@ -123,7 +123,7 @@ func (h *Handler) GetClientPlatformByID(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// GetClientPlatformByID godoc
+// GetClientPlatformByIDDetailed godoc
 // @ID get_client_platform_detailed_by_id
 // @Router /client-platform-detailed/{client-platform-id} [GET]
 // @Summary Get ClientPlatform By ID Detailed
