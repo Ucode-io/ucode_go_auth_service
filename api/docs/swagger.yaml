@@ -339,6 +339,18 @@ definitions:
       row_effected:
         type: integer
     type: object
+  auth_service.GenerateApiTokenReq:
+    properties:
+      app_id:
+        type: string
+      app_secret:
+        type: string
+    type: object
+  auth_service.GenerateApiTokenRes:
+    properties:
+      token:
+        $ref: '#/definitions/auth_service.Token'
+    type: object
   auth_service.GetClientMatrixResponse:
     properties:
       client_platforms:
@@ -408,6 +420,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      resource_environment_id:
         type: string
       role_id:
         type: string
@@ -657,6 +671,11 @@ definitions:
       write:
         type: string
     type: object
+  auth_service.RefreshApiTokenReq:
+    properties:
+      refresh_token:
+        type: string
+    type: object
   auth_service.RefreshTokenRequest:
     properties:
       refresh_token:
@@ -885,10 +904,6 @@ definitions:
     type: object
   auth_service.UpdateReq:
     properties:
-      app_id:
-        type: string
-      app_secret:
-        type: string
       id:
         type: string
       name:
@@ -5351,6 +5366,98 @@ paths:
       summary: Create User
       tags:
       - V2_User
+  /v2/api-key/generate-token:
+    post:
+      consumes:
+      - application/json
+      description: Generate Api Key Token
+      operationId: generate_api_key_token
+      parameters:
+      - description: ApiKeyReqBody
+        in: body
+        name: api-key
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.GenerateApiTokenReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.GenerateApiTokenRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Generate Api Key Token
+      tags:
+      - V2_ApiKey
+  /v2/api-key/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Refresh Api Key Token
+      operationId: refresh_api_key_token
+      parameters:
+      - description: ApiKeyReqBody
+        in: body
+        name: api-key
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.RefreshApiTokenReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.RefreshApiTokenReq'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Refresh Api Key Token
+      tags:
+      - V2_ApiKey
   /v2/client:
     delete:
       consumes:

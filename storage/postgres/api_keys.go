@@ -45,6 +45,14 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq) (*pb.Create
 		return nil, err
 	}
 
+	if createdAt.Valid {
+		res.CreatedAt = createdAt.String
+	}
+
+	if updatedAt.Valid {
+		res.UpdatedAt = updatedAt.String
+	}
+
 	return &res, nil
 }
 func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetListRes, error) {
@@ -57,10 +65,10 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
   				status,
   				name,
   				app_id,
-  				app_secret,
   				role_id,
   				created_at,
-  				updated_at
+  				updated_at,
+  				resource_environment_id
 			FROM
 			    api_keys
 			WHERE
@@ -83,15 +91,23 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&row.Status,
 			&row.Name,
 			&row.AppId,
-			&row.AppSecret,
 			&row.RoleId,
 			&createdAt,
 			&updatedAt,
+			&row.ResourceEnvironmentId,
 		)
-
 		if err != nil {
 			return nil, err
 		}
+
+		if createdAt.Valid {
+			row.CreatedAt = createdAt.String
+		}
+
+		if updatedAt.Valid {
+			row.UpdatedAt = updatedAt.String
+		}
+
 		res.Data = append(res.Data, &row)
 		res.Count++
 	}
@@ -113,12 +129,13 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
   				app_id,
   				app_secret,
   				role_id,
+  				resource_environment_id,
   				created_at,
   				updated_at
 			FROM
 			    api_keys
 			WHERE
-			    id = $1`
+			    id = $1 OR (app_id = $1 AND status = 'ACTIVE')`
 
 	err := r.db.QueryRow(ctx, query, req.GetId()).Scan(
 		&res.Id,
@@ -127,11 +144,20 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.AppId,
 		&res.AppSecret,
 		&res.RoleId,
+		&res.ResourceEnvironmentId,
 		&createdAt,
 		&updatedAt,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	if createdAt.Valid {
+		res.CreatedAt = createdAt.String
+	}
+
+	if updatedAt.Valid {
+		res.UpdatedAt = updatedAt.String
 	}
 	return &res, nil
 }
@@ -139,9 +165,7 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 	query := `UPDATE "api_keys" SET
 				status = $1,
 				name = $2,
-				app_id = $3,
-				app_secret = $4,
-				role_id = $5,
+				role_id = $3,
 				updated_at = now()
 			WHERE
 			    id = $6`
@@ -151,8 +175,6 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 		query,
 		req.GetStatus(),
 		req.GetName(),
-		req.GetAppId(),
-		req.GetAppSecret(),
 		req.GetRoleId(),
 		req.GetId(),
 	)

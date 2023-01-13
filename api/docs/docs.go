@@ -6239,6 +6239,172 @@ var doc = `{
                 }
             }
         },
+        "/v2/api-key/generate-token": {
+            "post": {
+                "description": "Generate Api Key Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_ApiKey"
+                ],
+                "summary": "Generate Api Key Token",
+                "operationId": "generate_api_key_token",
+                "parameters": [
+                    {
+                        "description": "ApiKeyReqBody",
+                        "name": "api-key",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.GenerateApiTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ApiKey data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.GenerateApiTokenRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/api-key/refresh-token": {
+            "post": {
+                "description": "Refresh Api Key Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_ApiKey"
+                ],
+                "summary": "Refresh Api Key Token",
+                "operationId": "refresh_api_key_token",
+                "parameters": [
+                    {
+                        "description": "ApiKeyReqBody",
+                        "name": "api-key",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.RefreshApiTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ApiKey data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.RefreshApiTokenReq"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/client": {
             "put": {
                 "description": "Update Client",
@@ -11363,6 +11529,25 @@ var doc = `{
                 }
             }
         },
+        "auth_service.GenerateApiTokenReq": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "app_secret": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.GenerateApiTokenRes": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "$ref": "#/definitions/auth_service.Token"
+                }
+            }
+        },
         "auth_service.GetClientMatrixResponse": {
             "type": "object",
             "properties": {
@@ -11469,6 +11654,9 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -11853,6 +12041,14 @@ var doc = `{
                 }
             }
         },
+        "auth_service.RefreshApiTokenReq": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.RefreshTokenRequest": {
             "type": "object",
             "properties": {
@@ -12204,12 +12400,6 @@ var doc = `{
         "auth_service.UpdateReq": {
             "type": "object",
             "properties": {
-                "app_id": {
-                    "type": "string"
-                },
-                "app_secret": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },

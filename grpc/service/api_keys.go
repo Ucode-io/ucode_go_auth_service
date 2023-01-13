@@ -2,14 +2,18 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 )
 
@@ -40,15 +44,21 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 
 	req.Id = id.String()
 
-	secretKey := helper.GenerateSecretKey(32)
+	secretKey := "S-" + helper.GenerateSecretKey(32)
+	secretId := "P-" + helper.GenerateSecretKey(32)
 
-	req.AppSecret = secretKey
+	hashedSecretKey, err := security.HashPassword(secretKey)
+
+	req.AppSecret = hashedSecretKey
+	req.AppId = secretId
 
 	res, err := s.strg.ApiKeys().Create(ctx, req)
 	if err != nil {
 		s.log.Error("!!!Create--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on creating new api key")
 	}
+
+	res.AppSecret = secretKey
 
 	return res, nil
 }
@@ -94,7 +104,7 @@ func (s *apiKeysService) GetList(ctx context.Context, req *pb.GetListReq) (*pb.G
 }
 
 func (s *apiKeysService) Delete(ctx context.Context, req *pb.DeleteReq) (*pb.DeleteRes, error) {
-	s.log.Info("---GetList--->", logger.Any("req", req))
+	s.log.Info("---Delete--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeys().Delete(ctx, req)
 	if err != nil {
@@ -106,5 +116,118 @@ func (s *apiKeysService) Delete(ctx context.Context, req *pb.DeleteReq) (*pb.Del
 
 	return &pb.DeleteRes{
 		RowEffected: int32(res),
+	}, nil
+}
+
+func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateApiTokenReq) (*pb.GenerateApiTokenRes, error) {
+	s.log.Info("---GenerateApiToken--->")
+
+	if len(req.GetAppId()) != 34 || req.GetAppId()[:2] != "P-" {
+		errAppId := errors.New("invalid api id or api secret")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(errAppId))
+		return nil, status.Error(codes.InvalidArgument, errAppId.Error())
+	}
+
+	if len(req.GetAppSecret()) != 34 || req.GetAppSecret()[:2] != "S-" {
+		errAppSecret := errors.New("invalid api id or api secret")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(errAppSecret))
+		return nil, status.Error(codes.InvalidArgument, errAppSecret.Error())
+	}
+
+	apiKey, err := s.strg.ApiKeys().Get(ctx, &pb.GetReq{
+		Id: req.GetAppId(),
+	})
+
+	if err != nil {
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		if err == sql.ErrNoRows {
+			errNoRows := errors.New("no api keys found")
+			return nil, status.Error(codes.NotFound, errNoRows.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(apiKey.GetAppSecret(), req.GetAppSecret())
+	if err != nil {
+		errComparePass := errors.New("invalid api id or api secret")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, errComparePass.Error())
+	}
+
+	if !match {
+		errComparePass := errors.New("invalid api id or api secret")
+		s.log.Error("!!!GenerateApiToken--->", logger.String("match", "false"))
+		return nil, status.Error(codes.InvalidArgument, errComparePass.Error())
+	}
+
+	m := map[string]interface{}{
+		"resource_environment_id": apiKey.GetResourceEnvironmentId(),
+		"role_id":                 apiKey.GetRoleId(),
+		"app_id":                  apiKey.GetAppId(),
+	}
+
+	apiKeyToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		errGenerateJWT := errors.New("error on generating token")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		return nil, status.Error(codes.Unavailable, errGenerateJWT.Error())
+	}
+
+	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		errGenerateJWT := errors.New("error on generating token")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, errGenerateJWT.Error())
+	}
+
+	return &pb.GenerateApiTokenRes{
+		Token: &pb.Token{
+			AccessToken:      apiKeyToken,
+			RefreshToken:     refreshToken,
+			CreatedAt:        time.Now().Format(config.DatabaseTimeLayout),
+			UpdatedAt:        time.Now().Format(config.DatabaseTimeLayout),
+			ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+			RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+		},
+	}, nil
+}
+
+func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApiTokenReq) (*pb.RefreshApiTokenRes, error) {
+	s.log.Info("---RefreshApiToken--->")
+
+	m, err := security.ExtractClaims(req.GetRefreshToken(), s.cfg.SecretKey)
+	if err != nil {
+		errExtractToken := errors.New("error on extracting refresh token")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, errExtractToken.Error())
+	}
+
+	_ = m["resource_environment_id"].(string)
+	_ = m["role_id"].(string)
+	_ = m["app_id"].(string)
+
+	apiKeyToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		errGenerateJWT := errors.New("error on refreshing token")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		return nil, status.Error(codes.Unavailable, errGenerateJWT.Error())
+	}
+
+	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		errGenerateJWT := errors.New("error on refreshing token")
+		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, errGenerateJWT.Error())
+	}
+
+	return &pb.RefreshApiTokenRes{
+		Token: &pb.Token{
+			AccessToken:      apiKeyToken,
+			RefreshToken:     refreshToken,
+			CreatedAt:        time.Now().Format(config.DatabaseTimeLayout),
+			UpdatedAt:        time.Now().Format(config.DatabaseTimeLayout),
+			ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+			RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+		},
 	}, nil
 }

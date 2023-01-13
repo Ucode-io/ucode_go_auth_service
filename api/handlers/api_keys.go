@@ -165,3 +165,71 @@ func (h *Handler) DeleteApiKeys(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, res)
 }
+
+// GenerateApiKeyToken godoc
+// @ID generate_api_key_token
+// @Router /v2/api-key/generate-token [POST]
+// @Summary Generate Api Key Token
+// @Description Generate Api Key Token
+// @Tags V2_ApiKey
+// @Accept json
+// @Produce json
+// @Param api-key body auth_service.GenerateApiTokenReq true "ApiKeyReqBody"
+// @Success 201 {object} http.Response{data=auth_service.GenerateApiTokenRes} "ApiKey data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GenerateApiKeyToken(c *gin.Context) {
+	var apiKey auth_service.GenerateApiTokenReq
+
+	err := c.ShouldBindJSON(&apiKey)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	res, err := h.services.ApiKeysService().GenerateApiToken(
+		c.Request.Context(),
+		&apiKey,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, res)
+}
+
+// RefreshApiKeyToken godoc
+// @ID refresh_api_key_token
+// @Router /v2/api-key/refresh-token [POST]
+// @Summary Refresh Api Key Token
+// @Description Refresh Api Key Token
+// @Tags V2_ApiKey
+// @Accept json
+// @Produce json
+// @Param api-key body auth_service.RefreshApiTokenReq true "ApiKeyReqBody"
+// @Success 201 {object} http.Response{data=auth_service.RefreshApiTokenReq} "ApiKey data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) RefreshApiKeyToken(c *gin.Context) {
+	var apiKey auth_service.RefreshApiTokenReq
+
+	err := c.ShouldBindJSON(&apiKey)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	res, err := h.services.ApiKeysService().RefreshApiToken(
+		c.Request.Context(),
+		&apiKey,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, res)
+}
