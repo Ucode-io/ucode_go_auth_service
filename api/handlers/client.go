@@ -23,9 +23,9 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateClientPlatform(c *gin.Context) {
-	var client_platform auth_service.CreateClientPlatformRequest
+	var clientPlatform auth_service.CreateClientPlatformRequest
 
-	err := c.ShouldBindJSON(&client_platform)
+	err := c.ShouldBindJSON(&clientPlatform)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -33,7 +33,7 @@ func (h *Handler) CreateClientPlatform(c *gin.Context) {
 
 	resp, err := h.services.ClientService().CreateClientPlatform(
 		c.Request.Context(),
-		&client_platform,
+		&clientPlatform,
 	)
 
 	if err != nil {
@@ -101,9 +101,9 @@ func (h *Handler) GetClientPlatformList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetClientPlatformByID(c *gin.Context) {
-	client_platformID := c.Param("client-platform-id")
+	clientPlatformid := c.Param("client-platform-id")
 
-	if !util.IsValidUUID(client_platformID) {
+	if !util.IsValidUUID(clientPlatformid) {
 		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
 		return
 	}
@@ -111,7 +111,7 @@ func (h *Handler) GetClientPlatformByID(c *gin.Context) {
 	resp, err := h.services.ClientService().GetClientPlatformByID(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id: client_platformID,
+			Id: clientPlatformid,
 		},
 	)
 
@@ -123,7 +123,7 @@ func (h *Handler) GetClientPlatformByID(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// GetClientPlatformByID godoc
+// GetClientPlatformByIDDetailed godoc
 // @ID get_client_platform_detailed_by_id
 // @Router /client-platform-detailed/{client-platform-id} [GET]
 // @Summary Get ClientPlatform By ID Detailed
@@ -136,9 +136,9 @@ func (h *Handler) GetClientPlatformByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetClientPlatformByIDDetailed(c *gin.Context) {
-	client_platformID := c.Param("client-platform-id")
+	clientPlatformId := c.Param("client-platform-id")
 
-	if !util.IsValidUUID(client_platformID) {
+	if !util.IsValidUUID(clientPlatformId) {
 		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
 		return
 	}
@@ -146,7 +146,7 @@ func (h *Handler) GetClientPlatformByIDDetailed(c *gin.Context) {
 	resp, err := h.services.ClientService().GetClientPlatformByIDDetailed(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id: client_platformID,
+			Id: clientPlatformId,
 		},
 	)
 
@@ -171,9 +171,9 @@ func (h *Handler) GetClientPlatformByIDDetailed(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateClientPlatform(c *gin.Context) {
-	var client_platform auth_service.UpdateClientPlatformRequest
+	var clientPlatform auth_service.UpdateClientPlatformRequest
 
-	err := c.ShouldBindJSON(&client_platform)
+	err := c.ShouldBindJSON(&clientPlatform)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -181,7 +181,7 @@ func (h *Handler) UpdateClientPlatform(c *gin.Context) {
 
 	resp, err := h.services.ClientService().UpdateClientPlatform(
 		c.Request.Context(),
-		&client_platform,
+		&clientPlatform,
 	)
 
 	if err != nil {
@@ -205,9 +205,9 @@ func (h *Handler) UpdateClientPlatform(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteClientPlatform(c *gin.Context) {
-	client_platformID := c.Param("client-platform-id")
+	clientPlatformId := c.Param("client-platform-id")
 
-	if !util.IsValidUUID(client_platformID) {
+	if !util.IsValidUUID(clientPlatformId) {
 		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
 		return
 	}
@@ -215,7 +215,7 @@ func (h *Handler) DeleteClientPlatform(c *gin.Context) {
 	resp, err := h.services.ClientService().DeleteClientPlatform(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id: client_platformID,
+			Id: clientPlatformId,
 		},
 	)
 
@@ -240,9 +240,9 @@ func (h *Handler) DeleteClientPlatform(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateClientType(c *gin.Context) {
-	var client_type auth_service.CreateClientTypeRequest
+	var clientType auth_service.CreateClientTypeRequest
 
-	err := c.ShouldBindJSON(&client_type)
+	err := c.ShouldBindJSON(&clientType)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -250,7 +250,7 @@ func (h *Handler) CreateClientType(c *gin.Context) {
 
 	resp, err := h.services.ClientService().CreateClientType(
 		c.Request.Context(),
-		&client_type,
+		&clientType,
 	)
 
 	if err != nil {
@@ -318,9 +318,9 @@ func (h *Handler) GetClientTypeList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetClientTypeByID(c *gin.Context) {
-	client_typeID := c.Param("client-type-id")
+	clientTypeID := c.Param("client-type-id")
 
-	if !util.IsValidUUID(client_typeID) {
+	if !util.IsValidUUID(clientTypeID) {
 		h.handleResponse(c, http.InvalidArgument, "client_type id is an invalid uuid")
 		return
 	}
@@ -328,7 +328,7 @@ func (h *Handler) GetClientTypeByID(c *gin.Context) {
 	resp, err := h.services.ClientService().GetClientTypeByID(
 		c.Request.Context(),
 		&auth_service.ClientTypePrimaryKey{
-			Id: client_typeID,
+			Id: clientTypeID,
 		},
 	)
 
@@ -353,9 +353,9 @@ func (h *Handler) GetClientTypeByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateClientType(c *gin.Context) {
-	var client_type auth_service.UpdateClientTypeRequest
+	var clientType auth_service.UpdateClientTypeRequest
 
-	err := c.ShouldBindJSON(&client_type)
+	err := c.ShouldBindJSON(&clientType)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -363,7 +363,7 @@ func (h *Handler) UpdateClientType(c *gin.Context) {
 
 	resp, err := h.services.ClientService().UpdateClientType(
 		c.Request.Context(),
-		&client_type,
+		&clientType,
 	)
 
 	if err != nil {
@@ -387,9 +387,9 @@ func (h *Handler) UpdateClientType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteClientType(c *gin.Context) {
-	client_typeID := c.Param("client-type-id")
+	clientTypeID := c.Param("client-type-id")
 
-	if !util.IsValidUUID(client_typeID) {
+	if !util.IsValidUUID(clientTypeID) {
 		h.handleResponse(c, http.InvalidArgument, "client_type id is an invalid uuid")
 		return
 	}
@@ -397,7 +397,7 @@ func (h *Handler) DeleteClientType(c *gin.Context) {
 	resp, err := h.services.ClientService().DeleteClientType(
 		c.Request.Context(),
 		&auth_service.ClientTypePrimaryKey{
-			Id: client_typeID,
+			Id: clientTypeID,
 		},
 	)
 
@@ -456,12 +456,12 @@ func (h *Handler) AddClient(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetClientMatrix(c *gin.Context) {
-	project_id := c.Param("project-id")
+	projectId := c.Param("project-id")
 
 	resp, err := h.services.ClientService().GetClientMatrix(
 		c.Request.Context(),
 		&auth_service.GetClientMatrixRequest{
-			ProjectId: project_id,
+			ProjectId: projectId,
 		},
 	)
 
@@ -667,9 +667,9 @@ func (h *Handler) RemoveRelation(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserInfoField(c *gin.Context) {
-	var user_info_field auth_service.AddUserInfoFieldRequest
+	var userInfoField auth_service.AddUserInfoFieldRequest
 
-	err := c.ShouldBindJSON(&user_info_field)
+	err := c.ShouldBindJSON(&userInfoField)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -677,7 +677,7 @@ func (h *Handler) AddUserInfoField(c *gin.Context) {
 
 	resp, err := h.services.ClientService().AddUserInfoField(
 		c.Request.Context(),
-		&user_info_field,
+		&userInfoField,
 	)
 
 	if err != nil {
@@ -701,9 +701,9 @@ func (h *Handler) AddUserInfoField(c *gin.Context) {
 // @Response 400 {object} http.Response{data=auth_service.CommonMessage} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateUserInfoField(c *gin.Context) {
-	var user_info_field auth_service.UpdateUserInfoFieldRequest
+	var userInfoField auth_service.UpdateUserInfoFieldRequest
 
-	err := c.ShouldBindJSON(&user_info_field)
+	err := c.ShouldBindJSON(&userInfoField)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -711,7 +711,7 @@ func (h *Handler) UpdateUserInfoField(c *gin.Context) {
 
 	resp, err := h.services.ClientService().UpdateUserInfoField(
 		c.Request.Context(),
-		&user_info_field,
+		&userInfoField,
 	)
 
 	if err != nil {
