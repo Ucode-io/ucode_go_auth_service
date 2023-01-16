@@ -603,44 +603,6 @@ definitions:
       table_slug:
         type: string
     type: object
-  auth_service.PermissionGenerated:
-    properties:
-      permissions:
-        items:
-          $ref: '#/definitions/auth_service.PermissionGenerated_Permission'
-        type: array
-    type: object
-  auth_service.PermissionGenerated_Permission:
-    properties:
-      children:
-        items:
-          $ref: '#/definitions/auth_service.PermissionGenerated_Permission'
-        type: array
-      permission:
-        type: string
-      scopes:
-        items:
-          $ref: '#/definitions/auth_service.PermissionGenerated_Permission_Scope'
-        type: array
-    type: object
-  auth_service.PermissionGenerated_Permission_Scope:
-    properties:
-      method:
-        type: string
-      url:
-        type: string
-    type: object
-  auth_service.PermissionScope:
-    properties:
-      client_platform_id:
-        type: string
-      method:
-        type: string
-      path:
-        type: string
-      permission_id:
-        type: string
-    type: object
   auth_service.PermissionScopePrimaryKey:
     properties:
       client_platform_id:
@@ -3321,52 +3283,6 @@ paths:
       summary: Get Permission By ID
       tags:
       - Permission
-  /permission_generated:
-    post:
-      consumes:
-      - application/json
-      description: Generate Permission
-      operationId: permission_generated
-      parameters:
-      - description: AddPermissionScopeRequestBody
-        in: body
-        name: permission-scope
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.PermissionGenerated'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: PermissionScope data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.PermissionScope'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Generate Permission
-      tags:
-      - Permission
   /ping:
     get:
       consumes:
@@ -5492,6 +5408,11 @@ paths:
       description: Get Client
       operationId: remove_client_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: RemoveClientBody
         in: body
         name: remove-client
@@ -5530,6 +5451,11 @@ paths:
       description: Create Client
       operationId: create_client_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: AddClientRequestBody
         in: body
         name: client
@@ -5575,6 +5501,11 @@ paths:
       description: Update Client
       operationId: update_client_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateClientRequestBody
         in: body
         name: client
@@ -5621,6 +5552,11 @@ paths:
       description: Get ClientPlatform List
       operationId: get_client_platform_list_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: offset
         in: query
         name: offset
@@ -5676,6 +5612,11 @@ paths:
       description: Create ClientPlatform
       operationId: create_client_platform_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateClientPlatformRequestBody
         in: body
         name: client-platform
@@ -5721,6 +5662,11 @@ paths:
       description: Update ClientPlatform
       operationId: update_client_platform_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateClientPlatformRequestBody
         in: body
         name: client-platform
@@ -5767,6 +5713,11 @@ paths:
       description: Get ClientPlatform By ID Detailed
       operationId: get_client_platform_detailed_by_id_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
@@ -5812,6 +5763,11 @@ paths:
       description: Get ClientPlatform
       operationId: delete_client_platform_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
@@ -5849,6 +5805,11 @@ paths:
       description: Get ClientPlatform By ID
       operationId: get_client_platform_by_id_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
@@ -5894,6 +5855,11 @@ paths:
       description: Get ClientType List
       operationId: get_client_type_list_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: offset
         in: query
         name: offset
@@ -5949,6 +5915,11 @@ paths:
       description: Create ClientType
       operationId: create_client_type_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: CreateClientTypeRequestBody
         in: body
         name: client-type
@@ -5994,6 +5965,11 @@ paths:
       description: Update ClientType
       operationId: update_client_type_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateClientTypeRequestBody
         in: body
         name: client-type
@@ -6040,6 +6016,11 @@ paths:
       description: Get ClientType
       operationId: delete_client_type_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: client-type-id
         in: path
         name: client-type-id
@@ -6077,6 +6058,11 @@ paths:
       description: Get ClientType By ID
       operationId: get_client_type_by_id_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: client-type-id
         in: path
         name: client-type-id
@@ -6127,6 +6113,11 @@ paths:
       description: Get Client Matrix
       operationId: get_client_matrix_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: project-id
         in: path
         name: project-id
@@ -6710,6 +6701,11 @@ paths:
       description: Create Relation
       operationId: create_relation_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: AddRelationRequestBody
         in: body
         name: relation
@@ -6755,6 +6751,11 @@ paths:
       description: Update Relation
       operationId: update_relation_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateRelationRequestBody
         in: body
         name: relation
@@ -6801,6 +6802,11 @@ paths:
       description: Get Relation
       operationId: delete_relation_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: relation-id
         in: path
         name: relation-id
@@ -7473,6 +7479,11 @@ paths:
       description: Create UserInfoField
       operationId: create_user_info_field_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: AddUserInfoFieldRequestBody
         in: body
         name: user-info-field
@@ -7518,6 +7529,11 @@ paths:
       description: Update UserInfoField
       operationId: update_user_info_field_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: UpdateUserInfoFieldRequestBody
         in: body
         name: user-info-field
@@ -7564,6 +7580,11 @@ paths:
       description: Get UserInfoField
       operationId: delete_user_info_field_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
       - description: user-info-field-id
         in: path
         name: user-info-field-id

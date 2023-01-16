@@ -3012,89 +3012,6 @@ var doc = `{
                 }
             }
         },
-        "/permission_generated": {
-            "post": {
-                "description": "Generate Permission",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Permission"
-                ],
-                "summary": "Generate Permission",
-                "operationId": "permission_generated",
-                "parameters": [
-                    {
-                        "description": "AddPermissionScopeRequestBody",
-                        "name": "permission-scope",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth_service.PermissionGenerated"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "PermissionScope data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/auth_service.PermissionScope"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/ping": {
             "get": {
                 "description": "this returns \"pong\" messsage to show service is working",
@@ -6868,6 +6785,13 @@ var doc = `{
                 "operationId": "update_client_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateClientRequestBody",
                         "name": "client",
                         "in": "body",
@@ -6948,6 +6872,13 @@ var doc = `{
                 "summary": "Create Client",
                 "operationId": "create_client_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "AddClientRequestBody",
                         "name": "client",
@@ -7030,6 +6961,13 @@ var doc = `{
                 "operationId": "remove_client_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "RemoveClientBody",
                         "name": "remove-client",
                         "in": "body",
@@ -7097,6 +7035,13 @@ var doc = `{
                 "summary": "Get ClientPlatform List",
                 "operationId": "get_client_platform_list_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "offset",
@@ -7194,6 +7139,13 @@ var doc = `{
                 "operationId": "update_client_platform_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateClientPlatformRequestBody",
                         "name": "client-platform",
                         "in": "body",
@@ -7274,6 +7226,13 @@ var doc = `{
                 "summary": "Create ClientPlatform",
                 "operationId": "create_client_platform_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateClientPlatformRequestBody",
                         "name": "client-platform",
@@ -7359,6 +7318,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-platform-id",
                         "name": "client-platform-id",
                         "in": "path",
@@ -7440,6 +7406,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-platform-id",
                         "name": "client-platform-id",
                         "in": "path",
@@ -7519,6 +7492,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-platform-id",
                         "name": "client-platform-id",
                         "in": "path",
@@ -7583,6 +7563,13 @@ var doc = `{
                 "summary": "Get ClientType List",
                 "operationId": "get_client_type_list_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "offset",
@@ -7680,6 +7667,13 @@ var doc = `{
                 "operationId": "update_client_type_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateClientTypeRequestBody",
                         "name": "client-type",
                         "in": "body",
@@ -7760,6 +7754,13 @@ var doc = `{
                 "summary": "Create ClientType",
                 "operationId": "create_client_type_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateClientTypeRequestBody",
                         "name": "client-type",
@@ -7843,6 +7844,13 @@ var doc = `{
                 "summary": "Get ClientType By ID",
                 "operationId": "get_client_type_by_id_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "client-type-id",
@@ -7931,6 +7939,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-type-id",
                         "name": "client-type-id",
                         "in": "path",
@@ -7995,6 +8010,13 @@ var doc = `{
                 "summary": "Get Client Matrix",
                 "operationId": "get_client_matrix_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "project-id",
@@ -9040,6 +9062,13 @@ var doc = `{
                 "operationId": "update_relation_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateRelationRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -9120,6 +9149,13 @@ var doc = `{
                 "summary": "Create Relation",
                 "operationId": "create_relation_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "AddRelationRequestBody",
                         "name": "relation",
@@ -9203,6 +9239,13 @@ var doc = `{
                 "summary": "Delete Relation",
                 "operationId": "delete_relation_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "relation-id",
@@ -10389,6 +10432,13 @@ var doc = `{
                 "operationId": "update_user_info_field_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateUserInfoFieldRequestBody",
                         "name": "user-info-field",
                         "in": "body",
@@ -10469,6 +10519,13 @@ var doc = `{
                 "summary": "Create UserInfoField",
                 "operationId": "create_user_info_field_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "AddUserInfoFieldRequestBody",
                         "name": "user-info-field",
@@ -10552,6 +10609,13 @@ var doc = `{
                 "summary": "Delete UserInfoField",
                 "operationId": "delete_user_info_field_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "user-info-field-id",
@@ -11968,65 +12032,6 @@ var doc = `{
                     "type": "string"
                 },
                 "table_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.PermissionGenerated": {
-            "type": "object",
-            "properties": {
-                "permissions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.PermissionGenerated_Permission"
-                    }
-                }
-            }
-        },
-        "auth_service.PermissionGenerated_Permission": {
-            "type": "object",
-            "properties": {
-                "children": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.PermissionGenerated_Permission"
-                    }
-                },
-                "permission": {
-                    "type": "string"
-                },
-                "scopes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.PermissionGenerated_Permission_Scope"
-                    }
-                }
-            }
-        },
-        "auth_service.PermissionGenerated_Permission_Scope": {
-            "type": "object",
-            "properties": {
-                "method": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.PermissionScope": {
-            "type": "object",
-            "properties": {
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "permission_id": {
                     "type": "string"
                 }
             }
