@@ -5092,234 +5092,6 @@ paths:
       summary: Send Message To User
       tags:
       - User
-  /v2/{project-id}/api-key:
-    post:
-      consumes:
-      - application/json
-      description: Create ApiKey
-      operationId: create_api_keys
-      parameters:
-      - description: ApiKeyReqBody
-        in: body
-        name: api-key
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.CreateReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ApiKey data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.CreateRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Create ApiKey
-      tags:
-      - V2_ApiKey
-  /v2/{project-id}/delete-keys:
-    delete:
-      consumes:
-      - application/json
-      description: Delete ApiKeys
-      operationId: delete_api_keys
-      parameters:
-      - description: ApiKeyReqBody
-        in: body
-        name: api-key
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.DeleteReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ApiKey data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.DeleteRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete ApiKeys
-      tags:
-      - V2_ApiKey
-  /v2/{project-id}/get-key:
-    get:
-      consumes:
-      - application/json
-      description: Get ApiKey
-      operationId: get_api_key
-      parameters:
-      - description: id
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ApiKey data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.GetRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get ApiKey
-      tags:
-      - V2_ApiKey
-  /v2/{project-id}/get-list-key:
-    get:
-      consumes:
-      - application/json
-      description: Get List ApiKey
-      operationId: get_list_api_key
-      parameters:
-      - description: resource_environment_id
-        in: query
-        name: resource_environment_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ApiKey data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.GetListRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get List ApiKey
-      tags:
-      - V2_ApiKey
-  /v2/{project-id}/update-key:
-    put:
-      consumes:
-      - application/json
-      description: Update ApiKey
-      operationId: update_api_keys
-      parameters:
-      - description: ApiKeyReqBody
-        in: body
-        name: api-key
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.UpdateReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ApiKey data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.UpdateRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update ApiKey
-      tags:
-      - V2_ApiKey
   /v2/add-user-to-project:
     post:
       consumes:
@@ -5366,6 +5138,261 @@ paths:
       summary: Create User
       tags:
       - V2_User
+  /v2/api-key/{project-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get List ApiKey
+      operationId: get_list_api_key
+      parameters:
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      - description: resource_environment_id
+        in: query
+        name: resource_environment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.GetListRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get List ApiKey
+      tags:
+      - V2_ApiKey
+    post:
+      consumes:
+      - application/json
+      description: Create ApiKey
+      operationId: create_api_keys
+      parameters:
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      - description: ApiKeyReqBody
+        in: body
+        name: api-key
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.CreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.CreateRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create ApiKey
+      tags:
+      - V2_ApiKey
+    put:
+      consumes:
+      - application/json
+      description: Update ApiKey
+      operationId: update_api_keys
+      parameters:
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      - description: ApiKeyReqBody
+        in: body
+        name: api-key
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.UpdateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.UpdateRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update ApiKey
+      tags:
+      - V2_ApiKey
+  /v2/api-key/{project-id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete ApiKeys
+      operationId: delete_api_keys
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      - description: ApiKeyReqBody
+        in: body
+        name: api-key
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.DeleteReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.DeleteRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete ApiKeys
+      tags:
+      - V2_ApiKey
+    get:
+      consumes:
+      - application/json
+      description: Get ApiKey
+      operationId: get_api_key
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.GetRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get ApiKey
+      tags:
+      - V2_ApiKey
   /v2/api-key/generate-token:
     post:
       consumes:
