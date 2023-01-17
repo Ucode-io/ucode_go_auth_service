@@ -27,6 +27,7 @@ type ServiceManagerI interface {
 	BuilderPermissionService() object_builder_service.PermissionServiceClient
 	ApiKeysService() auth_service.ApiKeysClient
 	ResourceService() company_service.ResourceServiceClient
+	EnvironmentService() company_service.EnvironmentServiceClient
 }
 
 type grpcClients struct {
@@ -46,6 +47,7 @@ type grpcClients struct {
 	builderPermissionService object_builder_service.PermissionServiceClient
 	apiKeysClients           auth_service.ApiKeysClient
 	resourceService          company_service.ResourceServiceClient
+	environmentService       company_service.EnvironmentServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -98,6 +100,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		builderPermissionService: object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
 		apiKeysClients:           auth_service.NewApiKeysClient(connAuthService),
 		resourceService:          company_service.NewResourceServiceClient(connCompanyService),
+		environmentService:       company_service.NewEnvironmentServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -163,4 +166,8 @@ func (g *grpcClients) ApiKeysService() auth_service.ApiKeysClient {
 
 func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
 	return g.resourceService
+}
+
+func (g *grpcClients) EnvironmentService() company_service.EnvironmentServiceClient {
+	return g.environmentService
 }

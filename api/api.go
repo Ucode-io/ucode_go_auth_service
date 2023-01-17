@@ -175,6 +175,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.DELETE("/api-key/:project-id/:id", h.DeleteApiKeys)
 		v2.POST("/api-key/generate-token", h.GenerateApiKeyToken)
 		v2.POST("/api-key/refresh-token", h.RefreshToken)
+
+		// environment
+		v2.GET("/environment", h.GetAllEnvironments)
 	}
 
 	//COMPANY

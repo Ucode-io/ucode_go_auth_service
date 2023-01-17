@@ -7,13 +7,15 @@ import (
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
+	obs "ucode/ucode_go_auth_service/genproto/company_service"
 
 	"github.com/gin-gonic/gin"
 )
 
 // V2Login godoc
 // @ID V2login
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/login [POST]
 // @Summary V2Login
 // @Description V2Login
@@ -25,7 +27,10 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Login(c *gin.Context) {
-	var login auth_service.V2LoginRequest
+	var (
+		login     auth_service.V2LoginRequest
+		resEnvRes *obs.GetResourceEnvironmentRes
+	)
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -40,10 +45,24 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
-			ProjectId: login.GetProjectId(),
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := h.services.ResourceService().GetListResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetListResourceEnvironmentReq{
+			ResourceId:    resourceId.(string),
+			EnvironmentId: environmentId.(string),
+			ProjectId:     login.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -51,7 +70,14 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
-	login.ResourceEnvironmentId = resourceEnvironment.GetId()
+	for _, item := range resourceEnvironment.GetData() {
+		if item.GetServiceType() == 1 {
+			resEnvRes = item
+			break
+		}
+	}
+
+	login.ResourceEnvironmentId = resEnvRes.GetId()
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
@@ -63,19 +89,19 @@ func (h *Handler) V2Login(c *gin.Context) {
 		httpErrorStr = strings.ToLower(httpErrorStr)
 	}
 	if httpErrorStr == "user not found" {
-		err := errors.New("Пользователь не найдено")
+		err := errors.New("пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	} else if httpErrorStr == "user has been expired" {
-		err := errors.New("Срок действия пользователя истек")
+		err := errors.New("срок действия пользователя истек")
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	} else if httpErrorStr == "invalid username" {
-		err := errors.New("Неверное имя пользователя")
+		err := errors.New("неверное имя пользователя")
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	} else if httpErrorStr == "invalid password" {
-		err := errors.New("Неверное пароль")
+		err := errors.New("неверное пароль")
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	} else if err != nil {
@@ -228,7 +254,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	companies, err := h.services.CompanyServiceClient().GetList(context.Background(), &company_service.GetCompanyListRequest{
+	companies, err := h.services.CompanyServiceClient().GetList(context.Background(), &obs.GetCompanyListRequest{
 		Offset:  0,
 		Limit:   128,
 		OwnerId: resp.UserId,

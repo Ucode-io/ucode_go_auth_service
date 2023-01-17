@@ -37,6 +37,7 @@ type ResourceServiceClient interface {
 	// resource environment
 	UpsertResourceEnvironment(ctx context.Context, in *UpsertResourceEnvironmentRequest, opts ...grpc.CallOption) (*UpsertResourceEnvironmentResponse, error)
 	GetResourceEnvironment(ctx context.Context, in *GetResourceEnvironmentReq, opts ...grpc.CallOption) (*GetResourceEnvironmentRes, error)
+	GetListResourceEnvironment(ctx context.Context, in *GetListResourceEnvironmentReq, opts ...grpc.CallOption) (*GetListResourceEnvironmentRes, error)
 }
 
 type resourceServiceClient struct {
@@ -173,6 +174,15 @@ func (c *resourceServiceClient) GetResourceEnvironment(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *resourceServiceClient) GetListResourceEnvironment(ctx context.Context, in *GetListResourceEnvironmentReq, opts ...grpc.CallOption) (*GetListResourceEnvironmentRes, error) {
+	out := new(GetListResourceEnvironmentRes)
+	err := c.cc.Invoke(ctx, "/company_service.ResourceService/GetListResourceEnvironment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ResourceServiceServer is the server API for ResourceService service.
 // All implementations must embed UnimplementedResourceServiceServer
 // for forward compatibility
@@ -192,6 +202,7 @@ type ResourceServiceServer interface {
 	// resource environment
 	UpsertResourceEnvironment(context.Context, *UpsertResourceEnvironmentRequest) (*UpsertResourceEnvironmentResponse, error)
 	GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*GetResourceEnvironmentRes, error)
+	GetListResourceEnvironment(context.Context, *GetListResourceEnvironmentReq) (*GetListResourceEnvironmentRes, error)
 	mustEmbedUnimplementedResourceServiceServer()
 }
 
@@ -240,6 +251,9 @@ func (UnimplementedResourceServiceServer) UpsertResourceEnvironment(context.Cont
 }
 func (UnimplementedResourceServiceServer) GetResourceEnvironment(context.Context, *GetResourceEnvironmentReq) (*GetResourceEnvironmentRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResourceEnvironment not implemented")
+}
+func (UnimplementedResourceServiceServer) GetListResourceEnvironment(context.Context, *GetListResourceEnvironmentReq) (*GetListResourceEnvironmentRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListResourceEnvironment not implemented")
 }
 func (UnimplementedResourceServiceServer) mustEmbedUnimplementedResourceServiceServer() {}
 
@@ -506,6 +520,24 @@ func _ResourceService_GetResourceEnvironment_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ResourceService_GetListResourceEnvironment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetListResourceEnvironmentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).GetListResourceEnvironment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ResourceService/GetListResourceEnvironment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).GetListResourceEnvironment(ctx, req.(*GetListResourceEnvironmentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ResourceService_ServiceDesc is the grpc.ServiceDesc for ResourceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -568,6 +600,10 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetResourceEnvironment",
 			Handler:    _ResourceService_GetResourceEnvironment_Handler,
+		},
+		{
+			MethodName: "GetListResourceEnvironment",
+			Handler:    _ResourceService_GetListResourceEnvironment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

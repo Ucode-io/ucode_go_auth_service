@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
-	"ucode/ucode_go_auth_service/genproto/company_service"
+	obs "ucode/ucode_go_auth_service/genproto/company_service"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
@@ -315,6 +314,8 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // V2GetClientTypeList godoc
 // @ID get_client_type_list_v2
 // @Router /v2/client-type [GET]
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Summary Get ClientType List
 // @Description  Get ClientType List
 // @Tags V2_ClientType
@@ -328,6 +329,9 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientTypeList(c *gin.Context) {
+	var (
+		resEnvRes *obs.GetResourceEnvironmentRes
+	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -340,15 +344,36 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-		context.Background(),
-		&company_service.GetResourceEnvironmentReq{
-			ProjectId: c.DefaultQuery("project_id", ""),
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := h.services.ResourceService().GetListResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetListResourceEnvironmentReq{
+			ResourceId:    resourceId.(string),
+			EnvironmentId: environmentId.(string),
+			ProjectId:     c.DefaultQuery("project_id", ""),
 		},
 	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
+	}
+
+	for _, item := range resourceEnvironment.GetData() {
+		if item.GetServiceType() == 1 {
+			resEnvRes = item
+			break
+		}
 	}
 
 	resp, err := h.services.ClientService().V2GetClientTypeList(
@@ -357,7 +382,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.Query("search"),
-			ProjectId: resourceEnvironment.GetId(),
+			ProjectId: resEnvRes.GetId(),
 		},
 	)
 
