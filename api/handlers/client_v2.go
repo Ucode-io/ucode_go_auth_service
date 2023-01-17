@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
@@ -312,7 +314,6 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 
 // V2GetClientTypeList godoc
 // @ID get_client_type_list_v2
-// @Param Resource-Id header string true "Resource-Id"
 // @Router /v2/client-type [GET]
 // @Summary Get ClientType List
 // @Description  Get ClientType List
@@ -339,10 +340,14 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		err = errors.New("error getting resource id")
-		h.handleResponse(c, http.BadRequest, err.Error())
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			ProjectId: c.DefaultQuery("project_id", ""),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -352,7 +357,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.Query("search"),
-			ProjectId: resourceId.(string),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
