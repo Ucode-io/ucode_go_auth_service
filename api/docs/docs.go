@@ -178,9 +178,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -550,9 +548,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -859,9 +855,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1098,9 +1092,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1531,9 +1523,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1787,9 +1777,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1902,9 +1890,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2215,9 +2201,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2324,9 +2308,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2743,9 +2725,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3193,9 +3173,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3512,9 +3490,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3686,9 +3662,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4440,9 +4414,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4553,9 +4525,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4668,9 +4638,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4784,9 +4752,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5025,9 +4991,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5403,9 +5367,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5654,6 +5616,13 @@ var doc = `{
                         "name": "client-type-id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -5718,9 +5687,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6289,9 +6256,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6398,9 +6363,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6704,9 +6667,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6765,6 +6726,12 @@ var doc = `{
                         "type": "string",
                         "description": "client-type-id",
                         "name": "client-type-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
                         "in": "query"
                     }
                 ],
@@ -7023,9 +6990,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7201,6 +7166,13 @@ var doc = `{
                         "name": "role-id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -7265,9 +7237,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7752,9 +7722,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7875,9 +7843,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -9848,6 +9814,9 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -9858,6 +9827,12 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/company_service.ResourceWithoutPassword_Credentials"
                 },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceWithoutPassword_Environment"
+                    }
+                },
                 "id": {
                     "type": "string"
                 },
@@ -9867,8 +9842,8 @@ var doc = `{
                 "resource_type": {
                     "type": "integer"
                 },
-                "service_type": {
-                    "type": "integer"
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -9885,6 +9860,29 @@ var doc = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.ResourceWithoutPassword_Environment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
                     "type": "string"
                 }
             }

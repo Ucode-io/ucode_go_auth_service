@@ -1124,6 +1124,8 @@ definitions:
         type: integer
       service_type:
         type: integer
+      title:
+        type: string
     type: object
   company_service.Resource_Credentials:
     properties:
@@ -1143,14 +1145,18 @@ definitions:
       credentials:
         $ref: '#/definitions/company_service.ResourceWithoutPassword_Credentials'
         type: object
+      environments:
+        items:
+          $ref: '#/definitions/company_service.ResourceWithoutPassword_Environment'
+        type: array
       id:
         type: string
       project_id:
         type: string
       resource_type:
         type: integer
-      service_type:
-        type: integer
+      title:
+        type: string
     type: object
   company_service.ResourceWithoutPassword_Credentials:
     properties:
@@ -1161,6 +1167,21 @@ definitions:
       port:
         type: string
       username:
+        type: string
+    type: object
+  company_service.ResourceWithoutPassword_Environment:
+    properties:
+      description:
+        type: string
+      display_color:
+        type: string
+      id:
+        type: string
+      is_configured:
+        type: boolean
+      name:
+        type: string
+      resource_environment_id:
         type: string
     type: object
   company_service.UpdateProjectUserDataReq:
@@ -1535,8 +1556,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -1787,8 +1807,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -1966,8 +1985,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -2139,8 +2157,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -2357,8 +2374,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -2503,8 +2519,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -2610,8 +2625,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -2755,8 +2769,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -2820,8 +2833,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -3063,8 +3075,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -3358,8 +3369,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -3507,8 +3517,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -3609,8 +3618,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4082,8 +4090,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4112,8 +4119,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4182,8 +4188,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4284,8 +4289,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4351,8 +4355,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4607,8 +4610,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4790,8 +4792,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -4813,6 +4814,11 @@ paths:
       - description: client-type-id
         in: path
         name: client-type-id
+        required: true
+        type: string
+      - description: project_id
+        in: path
+        name: project_id
         required: true
         type: string
       produces:
@@ -5117,8 +5123,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -5182,8 +5187,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -5393,8 +5397,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -5429,6 +5432,10 @@ paths:
       - description: client-type-id
         in: query
         name: client-type-id
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         type: string
       produces:
       - application/json
@@ -5542,8 +5549,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -5683,8 +5689,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -5706,6 +5711,11 @@ paths:
       - description: role-id
         in: path
         name: role-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -6003,8 +6013,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:
@@ -6037,8 +6046,7 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "204": {}
         "500":
           description: Server Error
           schema:

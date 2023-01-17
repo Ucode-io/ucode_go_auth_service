@@ -159,9 +159,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -531,9 +529,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -840,9 +836,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1079,9 +1073,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1512,9 +1504,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1768,9 +1758,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -1883,9 +1871,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2196,9 +2182,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2305,9 +2289,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -2724,9 +2706,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3174,9 +3154,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3493,9 +3471,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -3667,9 +3643,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4421,9 +4395,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4534,9 +4506,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4649,9 +4619,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -4765,9 +4733,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5006,9 +4972,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5384,9 +5348,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -5635,6 +5597,13 @@
                         "name": "client-type-id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -5699,9 +5668,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6270,9 +6237,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6379,9 +6344,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6685,9 +6648,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -6746,6 +6707,12 @@
                         "type": "string",
                         "description": "client-type-id",
                         "name": "client-type-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
                         "in": "query"
                     }
                 ],
@@ -7004,9 +6971,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7182,6 +7147,13 @@
                         "name": "role-id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -7246,9 +7218,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7733,9 +7703,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -7856,9 +7824,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
-                    },
+                    "204": {},
                     "500": {
                         "description": "Server Error",
                         "schema": {
@@ -9829,6 +9795,9 @@
                 },
                 "service_type": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -9839,6 +9808,12 @@
                     "type": "object",
                     "$ref": "#/definitions/company_service.ResourceWithoutPassword_Credentials"
                 },
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.ResourceWithoutPassword_Environment"
+                    }
+                },
                 "id": {
                     "type": "string"
                 },
@@ -9848,8 +9823,8 @@
                 "resource_type": {
                     "type": "integer"
                 },
-                "service_type": {
-                    "type": "integer"
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -9866,6 +9841,29 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.ResourceWithoutPassword_Environment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
                     "type": "string"
                 }
             }
