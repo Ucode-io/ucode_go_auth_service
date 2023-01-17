@@ -209,6 +209,7 @@ message V2LoginRequest {
     string client_type = 4;
     string login_strategy = 5;
     string project_id = 6;
+    string resource_environment_id = 7;
 }
 
 message V2LoginSuperAdminRes {

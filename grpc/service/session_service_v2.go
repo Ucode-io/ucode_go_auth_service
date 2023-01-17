@@ -76,7 +76,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		&pbObject.LoginDataReq{
 			UserId:     user.GetId(),
 			ClientType: req.ClientType,
-			ProjectId:  req.ProjectId,
+			ProjectId:  req.GetResourceEnvironmentId(),
 		},
 	)
 	if err != nil {

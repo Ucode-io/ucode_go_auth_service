@@ -40,6 +40,19 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		context.Background(),
+		&company_service.GetResourceEnvironmentReq{
+			ProjectId: login.GetProjectId(),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	login.ResourceEnvironmentId = resourceEnvironment.GetId()
+
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
 		&login,
