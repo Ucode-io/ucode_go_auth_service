@@ -9353,7 +9353,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetListConfiguredResourceEnvironmentReq"
+                                            "$ref": "#/definitions/company_service.GetListConfiguredResourceEnvironmentRes"
                                         }
                                     }
                                 }
@@ -12987,13 +12987,36 @@ var doc = `{
                 }
             }
         },
-        "company_service.GetListConfiguredResourceEnvironmentReq": {
+        "company_service.GetListConfiguredResourceEnvironmentRes": {
             "type": "object",
             "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment"
+                    }
+                }
+            }
+        },
+        "company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
                 "environment_id": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
                     "type": "string"
                 },
                 "project_id": {
@@ -13001,6 +13024,12 @@ var doc = `{
                 },
                 "resource_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
                 }
             }
         },
