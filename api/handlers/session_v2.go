@@ -109,6 +109,9 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
+	resp.EnvironmentId = resEnvRes.GetEnvironmentId()
+	resp.ResourceId = resEnvRes.GetResourceId()
+
 	h.handleResponse(c, http.Created, resp)
 }
 

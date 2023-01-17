@@ -12796,6 +12796,9 @@ var doc = `{
                 "client_type": {
                     "$ref": "#/definitions/auth_service.ClientType"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "login_table_slug": {
                     "type": "string"
                 },
@@ -12804,6 +12807,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/auth_service.RecordPermission"
                     }
+                },
+                "resource_id": {
+                    "type": "string"
                 },
                 "role": {
                     "$ref": "#/definitions/auth_service.Role"
