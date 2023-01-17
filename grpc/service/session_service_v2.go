@@ -372,6 +372,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		CreatedAt:        session.CreatedAt,
 		UpdatedAt:        session.UpdatedAt,
 		Tables:           authTables,
+		LoginTableSlug:   tokenInfo.LoginTableSlug,
 	}, nil
 }
 
@@ -430,6 +431,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		"ip":                 session.Data,
 		"data":               session.Data,
 		"tables":             authTables,
+		"login_table_slug":   convertedData.LoginTableSlug,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -600,6 +602,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		"ip":                 session.Data,
 		"data":               session.Data,
 		"tables":             input.Tables,
+		"login_table_slug":   input.LoginData.LoginTableSlug,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)

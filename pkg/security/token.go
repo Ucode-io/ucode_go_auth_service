@@ -74,6 +74,7 @@ type TokenInfo struct {
 	RoleID           string
 	// IP               string
 	// Data             string
+	LoginTableSlug string
 }
 
 type Table struct {
@@ -102,6 +103,10 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 			table.TableSlug = item.(map[string]interface{})["table_slug"].(string)
 			result.Tables = append(result.Tables, table)
 		}
+	}
+	loginTableSlug, ok := claims["login_table_slug"]
+	if ok {
+		result.LoginTableSlug = loginTableSlug.(string)
 	}
 
 	// projectID := claims["project_id"].(string)
