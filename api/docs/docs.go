@@ -8125,7 +8125,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetEnvironmentListResponse"
+                                            "$ref": "#/definitions/company_service.GetListConfiguredResourceEnvironmentReq"
                                         }
                                     }
                                 }
@@ -12987,54 +12987,20 @@ var doc = `{
                 }
             }
         },
-        "company_service.EnvironmentWithResources": {
+        "company_service.GetListConfiguredResourceEnvironmentReq": {
             "type": "object",
             "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "display_color": {
+                "environment_id": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
-                },
                 "project_id": {
                     "type": "string"
                 },
-                "resources": {
-                    "$ref": "#/definitions/company_service.EnvironmentWithResources_Resources"
-                }
-            }
-        },
-        "company_service.EnvironmentWithResources_Resources": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "resources": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.Resource"
-                    }
-                }
-            }
-        },
-        "company_service.GetEnvironmentListResponse": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "environments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.EnvironmentWithResources"
-                    }
+                "resource_id": {
+                    "type": "string"
                 }
             }
         },

@@ -1155,38 +1155,16 @@ definitions:
       title:
         type: string
     type: object
-  company_service.EnvironmentWithResources:
+  company_service.GetListConfiguredResourceEnvironmentReq:
     properties:
-      description:
-        type: string
-      display_color:
+      environment_id:
         type: string
       id:
         type: string
-      name:
-        type: string
       project_id:
         type: string
-      resources:
-        $ref: '#/definitions/company_service.EnvironmentWithResources_Resources'
-    type: object
-  company_service.EnvironmentWithResources_Resources:
-    properties:
-      count:
-        type: integer
-      resources:
-        items:
-          $ref: '#/definitions/company_service.Resource'
-        type: array
-    type: object
-  company_service.GetEnvironmentListResponse:
-    properties:
-      count:
-        type: integer
-      environments:
-        items:
-          $ref: '#/definitions/company_service.EnvironmentWithResources'
-        type: array
+      resource_id:
+        type: string
     type: object
   company_service.GetProjectListResponse:
     properties:
@@ -6224,7 +6202,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetEnvironmentListResponse'
+                  $ref: '#/definitions/company_service.GetListConfiguredResourceEnvironmentReq'
               type: object
         "400":
           description: Bad Request

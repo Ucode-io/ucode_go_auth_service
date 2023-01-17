@@ -6,7 +6,7 @@ import (
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 )
 
-// GetAllEnvironments godoc
+// GetAllResourceEnvironments godoc
 // @ID get_environments
 // @Router /v2/environment [GET]
 // @Summary Get Environments
@@ -15,13 +15,13 @@ import (
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Success 201 {object} http.Response{data=obs.GetEnvironmentListResponse} "Environment data"
+// @Success 201 {object} http.Response{data=obs.GetListConfiguredResourceEnvironmentReq} "Environment data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) GetAllEnvironments(c *gin.Context) {
-	resp, err := h.services.EnvironmentService().GetList(
+func (h *Handler) GetAllResourceEnvironments(c *gin.Context) {
+	resp, err := h.services.ResourceService().GetListConfiguredResourceEnvironment(
 		c.Request.Context(),
-		&obs.GetEnvironmentListRequest{
+		&obs.GetListConfiguredResourceEnvironmentReq{
 			ProjectId: c.DefaultQuery("project-id", ""),
 		},
 	)

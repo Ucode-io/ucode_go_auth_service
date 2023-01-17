@@ -177,7 +177,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.POST("/api-key/refresh-token", h.RefreshToken)
 
 		// environment
-		v2.GET("/environment", h.GetAllEnvironments)
+		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
 	}
 
 	//COMPANY
