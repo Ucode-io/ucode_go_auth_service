@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -78,6 +79,8 @@ func (h *Handler) V2Login(c *gin.Context) {
 	}
 
 	login.ResourceEnvironmentId = resEnvRes.GetId()
+
+	fmt.Println("resEnvRes.GetId", resEnvRes.GetId())
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
