@@ -8,7 +8,7 @@ import (
 
 // GetAllResourceEnvironments godoc
 // @ID get_environments
-// @Router /v2/environment [GET]
+// @Router /v2/resource-environment [GET]
 // @Summary Get Environments
 // @Description Get Environments
 // @Tags V2_Environment

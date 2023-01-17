@@ -6180,51 +6180,6 @@ paths:
       summary: Get Client Matrix
       tags:
       - V2_Client
-  /v2/environment:
-    get:
-      consumes:
-      - application/json
-      description: Get Environments
-      operationId: get_environments
-      parameters:
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Environment data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.GetListConfiguredResourceEnvironmentReq'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get Environments
-      tags:
-      - V2_Environment
   /v2/login:
     post:
       consumes:
@@ -6917,6 +6872,51 @@ paths:
       summary: Delete Relation
       tags:
       - V2_Relation
+  /v2/resource-environment:
+    get:
+      consumes:
+      - application/json
+      description: Get Environments
+      operationId: get_environments
+      parameters:
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Environment data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/company_service.GetListConfiguredResourceEnvironmentReq'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Environments
+      tags:
+      - V2_Environment
   /v2/role:
     get:
       consumes:
