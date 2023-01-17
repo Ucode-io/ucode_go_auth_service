@@ -47,7 +47,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// V2GetRoleById godoc
+// V2GetRoleByID godoc
 // @ID get_role_by_id_v2
 // @Router /v2/role/{role-id} [GET]
 // @Summary Get Role By ID
@@ -462,9 +462,9 @@ func (h *Handler) V2GetScopesList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2AddPermissionScope(c *gin.Context) {
-	var permission_scope auth_service.AddPermissionScopeRequest
+	var permissionScope auth_service.AddPermissionScopeRequest
 
-	err := c.ShouldBindJSON(&permission_scope)
+	err := c.ShouldBindJSON(&permissionScope)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -472,7 +472,7 @@ func (h *Handler) V2AddPermissionScope(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().V2AddPermissionScope(
 		c.Request.Context(),
-		&permission_scope,
+		&permissionScope,
 	)
 
 	if err != nil {
@@ -496,9 +496,9 @@ func (h *Handler) V2AddPermissionScope(c *gin.Context) {
 // @Response 400 {object} http.Response{data=auth_service.CommonMessage} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RemovePermissionScope(c *gin.Context) {
-	var permission_scope auth_service.PermissionScopePrimaryKey
+	var permissionScope auth_service.PermissionScopePrimaryKey
 
-	err := c.ShouldBindJSON(&permission_scope)
+	err := c.ShouldBindJSON(&permissionScope)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -506,7 +506,7 @@ func (h *Handler) V2RemovePermissionScope(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().V2RemovePermissionScope(
 		c.Request.Context(),
-		&permission_scope,
+		&permissionScope,
 	)
 
 	if err != nil {
@@ -530,9 +530,9 @@ func (h *Handler) V2RemovePermissionScope(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2AddRolePermission(c *gin.Context) {
-	var role_permission auth_service.AddRolePermissionRequest
+	var rolePermission auth_service.AddRolePermissionRequest
 
-	err := c.ShouldBindJSON(&role_permission)
+	err := c.ShouldBindJSON(&rolePermission)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -540,7 +540,7 @@ func (h *Handler) V2AddRolePermission(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().V2AddRolePermission(
 		c.Request.Context(),
-		&role_permission,
+		&rolePermission,
 	)
 
 	if err != nil {
@@ -564,9 +564,9 @@ func (h *Handler) V2AddRolePermission(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RemoveRolePermission(c *gin.Context) {
-	var role_permission auth_service.RolePermissionPrimaryKey
+	var rolePermission auth_service.RolePermissionPrimaryKey
 
-	err := c.ShouldBindJSON(&role_permission)
+	err := c.ShouldBindJSON(&rolePermission)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -574,7 +574,7 @@ func (h *Handler) V2RemoveRolePermission(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().V2RemoveRolePermission(
 		c.Request.Context(),
-		&role_permission,
+		&rolePermission,
 	)
 
 	if err != nil {
