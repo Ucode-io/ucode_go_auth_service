@@ -19,6 +19,9 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllResourceEnvironments(c *gin.Context) {
+	var (
+		res *obs.GetListConfiguredResourceEnvironmentRes
+	)
 	resp, err := h.services.ResourceService().GetListConfiguredResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetListConfiguredResourceEnvironmentReq{
@@ -26,10 +29,16 @@ func (h *Handler) GetAllResourceEnvironments(c *gin.Context) {
 		},
 	)
 
+	for _, item := range resp.GetData() {
+		if item.GetServiceType() == int32(obs.ServiceType_BUILDER_SERVICE.Number()) {
+			res.Data = append(res.Data, item)
+		}
+	}
+
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, http.OK, res)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -29,8 +28,7 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Login(c *gin.Context) {
 	var (
-		login     auth_service.V2LoginRequest
-		resEnvRes *obs.GetResourceEnvironmentRes
+		login auth_service.V2LoginRequest
 	)
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
@@ -58,12 +56,11 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := h.services.ResourceService().GetListResourceEnvironment(
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
-		&obs.GetListResourceEnvironmentReq{
-			ResourceId:    resourceId.(string),
+		&obs.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
-			ProjectId:     login.GetProjectId(),
+			ResourceId:    resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -71,16 +68,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
-	for _, item := range resourceEnvironment.GetData() {
-		if item.GetServiceType() == 1 {
-			resEnvRes = item
-			break
-		}
-	}
-
-	login.ResourceEnvironmentId = resEnvRes.GetId()
-
-	fmt.Println("resEnvRes.GetId", resEnvRes.GetId())
+	login.ResourceEnvironmentId = resourceEnvironment.GetId()
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
@@ -112,8 +100,8 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
-	resp.EnvironmentId = resEnvRes.GetEnvironmentId()
-	resp.ResourceId = resEnvRes.GetResourceId()
+	resp.EnvironmentId = resourceEnvironment.GetEnvironmentId()
+	resp.ResourceId = resourceEnvironment.GetResourceId()
 
 	h.handleResponse(c, http.Created, resp)
 }
