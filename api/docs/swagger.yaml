@@ -333,11 +333,6 @@ definitions:
       role_id:
         type: string
     type: object
-  auth_service.DeleteReq:
-    properties:
-      id:
-        type: string
-    type: object
   auth_service.DeleteRes:
     properties:
       row_effected:
@@ -5112,10 +5107,21 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: resource_environment_id
+      - description: resource-environment-id
         in: query
-        name: resource_environment_id
-        required: true
+        name: resource-environment-id
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: search
+        in: query
+        name: search
         type: string
       produces:
       - application/json
@@ -5200,56 +5206,6 @@ paths:
       summary: Create ApiKey
       tags:
       - V2_ApiKey
-    put:
-      consumes:
-      - application/json
-      description: Update ApiKey
-      operationId: update_api_keys
-      parameters:
-      - description: project-id
-        in: path
-        name: project-id
-        required: true
-        type: string
-      - description: ApiKeyReqBody
-        in: body
-        name: api-key
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.UpdateReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ApiKey data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.UpdateRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update ApiKey
-      tags:
-      - V2_ApiKey
   /v2/api-key/{project-id}/{id}:
     delete:
       consumes:
@@ -5257,22 +5213,16 @@ paths:
       description: Delete ApiKeys
       operationId: delete_api_keys
       parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
       - description: project-id
         in: path
         name: project-id
         required: true
         type: string
-      - description: ApiKeyReqBody
-        in: body
-        name: api-key
+      - description: id
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/auth_service.DeleteReq'
+        type: string
       produces:
       - application/json
       responses:
@@ -5353,6 +5303,61 @@ paths:
                   type: string
               type: object
       summary: Get ApiKey
+      tags:
+      - V2_ApiKey
+    put:
+      consumes:
+      - application/json
+      description: Update ApiKey
+      operationId: update_api_keys
+      parameters:
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ApiKeyReqBody
+        in: body
+        name: api-key
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.UpdateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.UpdateRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update ApiKey
       tags:
       - V2_ApiKey
   /v2/api-key/generate-token:

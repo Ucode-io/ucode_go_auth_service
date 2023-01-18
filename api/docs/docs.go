@@ -6346,10 +6346,27 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "resource_environment_id",
-                        "name": "resource_environment_id",
-                        "in": "query",
-                        "required": true
+                        "description": "resource-environment-id",
+                        "name": "resource-environment-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6365,94 +6382,6 @@ var doc = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/auth_service.GetListRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update ApiKey",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V2_ApiKey"
-                ],
-                "summary": "Update ApiKey",
-                "operationId": "update_api_keys",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "ApiKeyReqBody",
-                        "name": "api-key",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "ApiKey data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/auth_service.UpdateRes"
                                         }
                                     }
                                 }
@@ -6673,6 +6602,101 @@ var doc = `{
                     }
                 }
             },
+            "put": {
+                "description": "Update ApiKey",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_ApiKey"
+                ],
+                "summary": "Update ApiKey",
+                "operationId": "update_api_keys",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ApiKeyReqBody",
+                        "name": "api-key",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.UpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ApiKey data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.UpdateRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete ApiKeys",
                 "consumes": [
@@ -6689,26 +6713,17 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "project-id",
                         "name": "project-id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "ApiKeyReqBody",
-                        "name": "api-key",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth_service.DeleteReq"
-                        }
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -11885,14 +11900,6 @@ var doc = `{
                     "type": "string"
                 },
                 "role_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.DeleteReq": {
-            "type": "object",
-            "properties": {
-                "id": {
                     "type": "string"
                 }
             }
