@@ -3,10 +3,11 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"strings"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type apiKeysRepo struct {
@@ -135,7 +136,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 			FROM
 			    api_keys
 			WHERE
-			    id = $1 OR (app_id = $1 AND status = 'ACTIVE')`
+			    id = $1`
 
 	err := r.db.QueryRow(ctx, query, req.GetId()).Scan(
 		&res.Id,
