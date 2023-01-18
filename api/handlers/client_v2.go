@@ -197,6 +197,10 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		err                 error
+	)
 	clientPlatformid := c.Param("client-platform-id")
 
 	if !util.IsValidUUID(clientPlatformid) {
@@ -217,7 +221,40 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	projectId = resourceId.(string)
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(environmentId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  c.DefaultQuery("project_id", ""),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	projectId = resourceEnvironment.GetId()
 
 	resp, err := h.services.ClientService().V2GetClientPlatformByID(
 		c.Request.Context(),
