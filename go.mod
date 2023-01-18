@@ -3,7 +3,6 @@ module ucode/ucode_go_auth_service
 go 1.18
 
 require (
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.1
@@ -18,7 +17,7 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
 	github.com/stretchr/testify v1.8.0
 	github.com/swaggo/gin-swagger v1.2.0
-	github.com/swaggo/swag v1.7.6
+	github.com/swaggo/swag v1.8.9
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 	google.golang.org/grpc v1.50.1

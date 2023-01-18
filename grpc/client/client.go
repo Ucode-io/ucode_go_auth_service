@@ -25,6 +25,9 @@ type ServiceManagerI interface {
 	CompanyServiceClient() company_service.CompanyServiceClient
 	ProjectServiceClient() company_service.ProjectServiceClient
 	BuilderPermissionService() object_builder_service.PermissionServiceClient
+	ApiKeysService() auth_service.ApiKeysClient
+	ResourceService() company_service.ResourceServiceClient
+	EnvironmentService() company_service.EnvironmentServiceClient
 }
 
 type grpcClients struct {
@@ -42,6 +45,9 @@ type grpcClients struct {
 	companyServiceClient     company_service.CompanyServiceClient
 	projectServiceClient     company_service.ProjectServiceClient
 	builderPermissionService object_builder_service.PermissionServiceClient
+	apiKeysClients           auth_service.ApiKeysClient
+	resourceService          company_service.ResourceServiceClient
+	environmentService       company_service.EnvironmentServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -92,6 +98,9 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		companyServiceClient:     company_service.NewCompanyServiceClient(connCompanyService),
 		projectServiceClient:     company_service.NewProjectServiceClient(connCompanyService),
 		builderPermissionService: object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
+		apiKeysClients:           auth_service.NewApiKeysClient(connAuthService),
+		resourceService:          company_service.NewResourceServiceClient(connCompanyService),
+		environmentService:       company_service.NewEnvironmentServiceClient(connCompanyService),
 	}, nil
 }
 
@@ -149,4 +158,16 @@ func (g *grpcClients) ProjectServiceClient() company_service.ProjectServiceClien
 
 func (g *grpcClients) BuilderPermissionService() object_builder_service.PermissionServiceClient {
 	return g.builderPermissionService
+}
+
+func (g *grpcClients) ApiKeysService() auth_service.ApiKeysClient {
+	return g.apiKeysClients
+}
+
+func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
+	return g.resourceService
+}
+
+func (g *grpcClients) EnvironmentService() company_service.EnvironmentServiceClient {
+	return g.environmentService
 }

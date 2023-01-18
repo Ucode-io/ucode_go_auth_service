@@ -1,1 +1,1 @@
-ALTER TABLE "project" DROP COLUMN IF EXISTS "company_id";
+ALTER TABLE IF EXISTS "project" DROP COLUMN IF EXISTS "company_id";

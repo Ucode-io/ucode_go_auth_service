@@ -30,6 +30,7 @@ type StorageI interface {
 	Email() EmailRepoI
 	Company() CompanyRepoI
 	Project() ProjectRepoI
+	ApiKeys() ApiKeysRepoI
 }
 
 type ClientPlatformRepoI interface {
@@ -186,4 +187,13 @@ type ProjectRepoI interface {
 	GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (res *pb.Project, err error)
 	Update(ctx context.Context, entity *pb.UpdateProjectRequest) (rowsAffected int64, err error)
 	Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (rowsAffected int64, err error)
+}
+
+type ApiKeysRepoI interface {
+	Create(ctx context.Context, req *pb.CreateReq, appSecret, appId, id string) (res *pb.CreateRes, err error)
+	GetList(ctx context.Context, req *pb.GetListReq) (res *pb.GetListRes, err error)
+	Get(ctx context.Context, req *pb.GetReq) (res *pb.GetRes, err error)
+	Update(ctx context.Context, req *pb.UpdateReq) (rowsAffected int64, err error)
+	Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffected int64, err error)
+	GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error)
 }

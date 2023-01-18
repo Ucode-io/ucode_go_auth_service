@@ -29,6 +29,7 @@ type Store struct {
 	email           storage.EmailRepoI
 	company         storage.CompanyRepoI
 	project         storage.ProjectRepoI
+	apiKeys         storage.ApiKeysRepoI
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -197,4 +198,11 @@ func (s *Store) Project() storage.ProjectRepoI {
 		s.project = NewProjectRepo(s.db)
 	}
 	return s.project
+}
+
+func (s *Store) ApiKeys() storage.ApiKeysRepoI {
+	if s.apiKeys == nil {
+		s.apiKeys = NewApiKeysRepo(s.db)
+	}
+	return s.apiKeys
 }

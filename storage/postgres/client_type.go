@@ -116,21 +116,6 @@ func (r *clientTypeRepo) GetList(ctx context.Context, queryParam *pb.GetClientTy
 		filter += " AND (project_id = :project_id)"
 	}
 
-	if len(queryParam.Search) > 0 {
-		params["search"] = queryParam.Search
-		filter += " AND (name ILIKE '%' || :search || '%')"
-	}
-
-	if queryParam.Offset > 0 {
-		params["offset"] = queryParam.Offset
-		offset = " OFFSET :offset"
-	}
-
-	if queryParam.Limit > 0 {
-		params["limit"] = queryParam.Limit
-		limit = " LIMIT :limit"
-	}
-
 	cQ := `SELECT count(1) FROM "client_type"` + filter
 	var arr []interface{}
 

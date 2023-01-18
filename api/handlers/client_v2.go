@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"ucode/ucode_go_auth_service/api/http"
+	obs "ucode/ucode_go_auth_service/genproto/company_service"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
@@ -12,6 +14,8 @@ import (
 
 // V2CreateClientPlatform godoc
 // @ID create_client_platform_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-platform [POST]
 // @Summary Create ClientPlatform
 // @Description Create ClientPlatform
@@ -23,17 +27,65 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
-	var client_platform auth_service.CreateClientPlatformRequest
+	var (
+		clientPlatform      auth_service.CreateClientPlatformRequest
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
-	err := c.ShouldBindJSON(&client_platform)
+	err := c.ShouldBindJSON(&clientPlatform)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
+	if !util.IsValidUUID(clientPlatform.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  clientPlatform.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	clientPlatform.ProjectId = resourceEnvironment.GetId()
+
 	resp, err := h.services.ClientService().V2CreateClientPlatform(
 		c.Request.Context(),
-		&client_platform,
+		&clientPlatform,
 	)
 
 	if err != nil {
@@ -46,6 +98,8 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 
 // V2GetClientPlatformList godoc
 // @ID get_client_platform_list_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-platform [GET]
 // @Summary Get ClientPlatform List
 // @Description  Get ClientPlatform List
@@ -60,6 +114,9 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -72,13 +129,57 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 		return
 	}
 
+	projectId := c.DefaultQuery("project_id", "")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := h.services.ClientService().V2GetClientPlatformList(
 		c.Request.Context(),
 		&auth_service.GetClientPlatformListRequest{
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.Query("search"),
-			ProjectId: c.Query("project_id"),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -92,6 +193,8 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 
 // V2GetClientPlatformByID godoc
 // @ID get_client_platform_by_id_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-platform/{client-platform-id} [GET]
 // @Summary Get ClientPlatform By ID
 // @Description Get ClientPlatform By ID
@@ -99,29 +202,72 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param client-platform-id path string true "client-platform-id"
+// @Param project_id query string true "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientPlatformBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
-	client_platformID := c.Param("client-platform-id")
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		err                 error
+	)
+	clientPlatformid := c.Param("client-platform-id")
 
-	if !util.IsValidUUID(client_platformID) {
+	if !util.IsValidUUID(clientPlatformid) {
 		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
 		return
 	}
 
-	projectId := c.Query("project_id")
-
+	projectId := c.DefaultQuery("project_id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.InvalidArgument, "projectid id is an invalid uuid")
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err := errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := h.services.ClientService().V2GetClientPlatformByID(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id:        client_platformID,
-			ProjectId: projectId,
+			Id:        clientPlatformid,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -133,8 +279,10 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
-// v2GetClientPlatformByID godoc
+// V2GetClientPlatformByIDDetailed godoc
 // @ID get_client_platform_detailed_by_id_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-platform-detailed/{client-platform-id} [GET]
 // @Summary Get ClientPlatform By ID Detailed
 // @Description Get ClientPlatform By ID Detailed
@@ -142,13 +290,14 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param client-platform-id path string true "client-platform-id"
+// @Param project_id query string true "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientPlatformDetailedBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientPlatformByIDDetailed(c *gin.Context) {
-	client_platformID := c.Param("client-platform-id")
+	clientPlatformId := c.Param("client-platform-id")
 
-	if !util.IsValidUUID(client_platformID) {
+	if !util.IsValidUUID(clientPlatformId) {
 		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
 		return
 	}
@@ -156,7 +305,7 @@ func (h *Handler) V2GetClientPlatformByIDDetailed(c *gin.Context) {
 	resp, err := h.services.ClientService().V2GetClientPlatformByIDDetailed(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id: client_platformID,
+			Id: clientPlatformId,
 		},
 	)
 
@@ -170,20 +319,23 @@ func (h *Handler) V2GetClientPlatformByIDDetailed(c *gin.Context) {
 
 // V2UpdateClientPlatform godoc
 // @ID update_client_platform_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-platform [PUT]
 // @Summary Update ClientPlatform
 // @Description Update ClientPlatform
 // @Tags V2_ClientPlatform
 // @Accept json
 // @Produce json
+// @Param project_id query string true "project_id"
 // @Param client-platform body auth_service.UpdateClientPlatformRequest true "UpdateClientPlatformRequestBody"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientPlatform data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateClientPlatform(c *gin.Context) {
-	var client_platform auth_service.UpdateClientPlatformRequest
+	var clientPlatform auth_service.UpdateClientPlatformRequest
 
-	err := c.ShouldBindJSON(&client_platform)
+	err := c.ShouldBindJSON(&clientPlatform)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -191,7 +343,7 @@ func (h *Handler) V2UpdateClientPlatform(c *gin.Context) {
 
 	resp, err := h.services.ClientService().V2UpdateClientPlatform(
 		c.Request.Context(),
-		&client_platform,
+		&clientPlatform,
 	)
 
 	if err != nil {
@@ -204,6 +356,8 @@ func (h *Handler) V2UpdateClientPlatform(c *gin.Context) {
 
 // V2DeleteClientPlatform godoc
 // @ID delete_client_platform_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-platform/{client-platform-id} [DELETE]
 // @Summary Delete ClientPlatform
 // @Description Get ClientPlatform
@@ -211,13 +365,14 @@ func (h *Handler) V2UpdateClientPlatform(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param client-platform-id path string true "client-platform-id"
+// @Param project_id query string true "project_id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteClientPlatform(c *gin.Context) {
-	client_platformID := c.Param("client-platform-id")
+	clientPlatformId := c.Param("client-platform-id")
 
-	if !util.IsValidUUID(client_platformID) {
+	if !util.IsValidUUID(clientPlatformId) {
 		h.handleResponse(c, http.InvalidArgument, "client_platform id is an invalid uuid")
 		return
 	}
@@ -225,7 +380,7 @@ func (h *Handler) V2DeleteClientPlatform(c *gin.Context) {
 	resp, err := h.services.ClientService().V2DeleteClientPlatform(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id: client_platformID,
+			Id: clientPlatformId,
 		},
 	)
 
@@ -239,6 +394,8 @@ func (h *Handler) V2DeleteClientPlatform(c *gin.Context) {
 
 // V2CreateClientType godoc
 // @ID create_client_type_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-type [POST]
 // @Summary Create ClientType
 // @Description Create ClientType
@@ -250,17 +407,64 @@ func (h *Handler) V2DeleteClientPlatform(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateClientType(c *gin.Context) {
-	var client_type auth_service.CreateClientTypeRequest
+	var (
+		clientType          auth_service.CreateClientTypeRequest
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
-	err := c.ShouldBindJSON(&client_type)
+	err := c.ShouldBindJSON(&clientType)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
+	if !util.IsValidUUID(clientType.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  clientType.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+	clientType.ProjectId = resourceEnvironment.GetId()
+
 	resp, err := h.services.ClientService().V2CreateClientType(
 		c.Request.Context(),
-		&client_type,
+		&clientType,
 	)
 
 	if err != nil {
@@ -274,6 +478,8 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // V2GetClientTypeList godoc
 // @ID get_client_type_list_v2
 // @Router /v2/client-type [GET]
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Summary Get ClientType List
 // @Description  Get ClientType List
 // @Tags V2_ClientType
@@ -287,6 +493,9 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientTypeList(c *gin.Context) {
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -299,13 +508,57 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		return
 	}
 
+	projectId := c.DefaultQuery("project_id", "")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := h.services.ClientService().V2GetClientTypeList(
 		c.Request.Context(),
 		&auth_service.GetClientTypeListRequest{
 			Limit:     int32(limit),
 			Offset:    int32(offset),
 			Search:    c.Query("search"),
-			ProjectId: c.Query("project_id"),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -319,6 +572,8 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 
 // V2GetClientTypeByID godoc
 // @ID get_client_type_by_id_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-type/{client-type-id} [GET]
 // @Summary Get ClientType By ID
 // @Description Get ClientType By ID
@@ -331,25 +586,67 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
-	client_typeID := c.Param("client-type-id")
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		err                 error
+	)
+	clientTypeid := c.Param("client-type-id")
 
-	if !util.IsValidUUID(client_typeID) {
+	if !util.IsValidUUID(clientTypeid) {
 		h.handleResponse(c, http.InvalidArgument, "client_type id is an invalid uuid")
 		return
 	}
 
-	projectId := c.Query("project_id")
-
+	projectId := c.DefaultQuery("project_id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		err := errors.New("error getting resource id")
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := h.services.ClientService().V2GetClientTypeByID(
 		c.Request.Context(),
 		&auth_service.ClientTypePrimaryKey{
-			Id:        client_typeID,
-			ProjectId: projectId,
+			Id:        clientTypeid,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -363,6 +660,8 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 
 // V2UpdateClientType godoc
 // @ID update_client_type_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-type [PUT]
 // @Summary Update ClientType
 // @Description Update ClientType
@@ -374,17 +673,64 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateClientType(c *gin.Context) {
-	var client_type auth_service.UpdateClientTypeRequest
+	var (
+		clientType          auth_service.UpdateClientTypeRequest
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
-	err := c.ShouldBindJSON(&client_type)
+	err := c.ShouldBindJSON(&clientType)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
+	if !util.IsValidUUID(clientType.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  clientType.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+	clientType.ProjectId = resourceEnvironment.GetId()
+
 	resp, err := h.services.ClientService().V2UpdateClientType(
 		c.Request.Context(),
-		&client_type,
+		&clientType,
 	)
 
 	if err != nil {
@@ -397,6 +743,8 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 
 // V2DeleteClientType godoc
 // @ID delete_client_type_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client-type/{client-type-id} [DELETE]
 // @Summary Delete ClientType
 // @Description Get ClientType
@@ -404,13 +752,14 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param client-type-id path string true "client-type-id"
+// @Param project_id query string true "project_id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteClientType(c *gin.Context) {
-	client_typeID := c.Param("client-type-id")
+	clientTypeid := c.Param("client-type-id")
 
-	if !util.IsValidUUID(client_typeID) {
+	if !util.IsValidUUID(clientTypeid) {
 		h.handleResponse(c, http.InvalidArgument, "client_type id is an invalid uuid")
 		return
 	}
@@ -418,7 +767,7 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 	resp, err := h.services.ClientService().V2DeleteClientType(
 		c.Request.Context(),
 		&auth_service.ClientTypePrimaryKey{
-			Id: client_typeID,
+			Id: clientTypeid,
 		},
 	)
 
@@ -432,6 +781,8 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 
 // V2AddClient godoc
 // @ID create_client_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client [POST]
 // @Summary Create Client
 // @Description Create Client
@@ -443,13 +794,60 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2AddClient(c *gin.Context) {
-	var client auth_service.AddClientRequest
+	var (
+		client              auth_service.AddClientRequest
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
 	err := c.ShouldBindJSON(&client)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	if !util.IsValidUUID(client.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  client.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+	client.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := h.services.ClientService().V2AddClient(
 		c.Request.Context(),
@@ -466,23 +864,24 @@ func (h *Handler) V2AddClient(c *gin.Context) {
 
 // V2GetClientMatrix godoc
 // @ID get_client_matrix_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client/{project-id} [GET]
 // @Summary Get Client Matrix
 // @Description Get Client Matrix
 // @Tags V2_Client
 // @Accept json
 // @Produce json
-// @Param project-id path string true "project-id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetClientMatrixBody"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientMatrix(c *gin.Context) {
-	project_id := c.Param("project-id")
+	projectId := c.Param("project_id")
 
 	resp, err := h.services.ClientService().V2GetClientMatrix(
 		c.Request.Context(),
 		&auth_service.GetClientMatrixRequest{
-			ProjectId: project_id,
+			ProjectId: projectId,
 		},
 	)
 
@@ -496,6 +895,8 @@ func (h *Handler) V2GetClientMatrix(c *gin.Context) {
 
 // V2UpdateClient godoc
 // @ID update_client_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client [PUT]
 // @Summary Update Client
 // @Description Update Client
@@ -507,13 +908,60 @@ func (h *Handler) V2GetClientMatrix(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateClient(c *gin.Context) {
-	var client auth_service.UpdateClientRequest
+	var (
+		client              auth_service.UpdateClientRequest
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
 	err := c.ShouldBindJSON(&client)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	if !util.IsValidUUID(client.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  client.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+	client.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := h.services.ClientService().V2UpdateClient(
 		c.Request.Context(),
@@ -530,6 +978,8 @@ func (h *Handler) V2UpdateClient(c *gin.Context) {
 
 // V2RemoveClient godoc
 // @ID remove_client_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/client [DELETE]
 // @Summary Delete Client
 // @Description Get Client
@@ -574,6 +1024,8 @@ func (h *Handler) V2RemoveClient(c *gin.Context) {
 
 // V2AddRelation godoc
 // @ID create_relation_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/relation [POST]
 // @Summary Create Relation
 // @Description Create Relation
@@ -608,6 +1060,8 @@ func (h *Handler) V2AddRelation(c *gin.Context) {
 
 // V2UpdateRelation godoc
 // @ID update_relation_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/relation [PUT]
 // @Summary Update Relation
 // @Description Update Relation
@@ -642,6 +1096,8 @@ func (h *Handler) V2UpdateRelation(c *gin.Context) {
 
 // V2RemoveRelation godoc
 // @ID delete_relation_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/relation/{relation-id} [DELETE]
 // @Summary Delete Relation
 // @Description Get Relation
@@ -677,6 +1133,8 @@ func (h *Handler) V2RemoveRelation(c *gin.Context) {
 
 // V2AddUserInfoField godoc
 // @ID create_user_info_field_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/user-info-field [POST]
 // @Summary Create UserInfoField
 // @Description Create UserInfoField
@@ -688,9 +1146,9 @@ func (h *Handler) V2RemoveRelation(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2AddUserInfoField(c *gin.Context) {
-	var user_info_field auth_service.AddUserInfoFieldRequest
+	var userInfoField auth_service.AddUserInfoFieldRequest
 
-	err := c.ShouldBindJSON(&user_info_field)
+	err := c.ShouldBindJSON(&userInfoField)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -698,7 +1156,7 @@ func (h *Handler) V2AddUserInfoField(c *gin.Context) {
 
 	resp, err := h.services.ClientService().V2AddUserInfoField(
 		c.Request.Context(),
-		&user_info_field,
+		&userInfoField,
 	)
 
 	if err != nil {
@@ -711,6 +1169,8 @@ func (h *Handler) V2AddUserInfoField(c *gin.Context) {
 
 // V2UpdateUserInfoField godoc
 // @ID update_user_info_field_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/user-info-field [PUT]
 // @Summary Update UserInfoField
 // @Description Update UserInfoField
@@ -722,9 +1182,9 @@ func (h *Handler) V2AddUserInfoField(c *gin.Context) {
 // @Response 400 {object} http.Response{data=auth_service.CommonMessage} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateUserInfoField(c *gin.Context) {
-	var user_info_field auth_service.UpdateUserInfoFieldRequest
+	var userInfoField auth_service.UpdateUserInfoFieldRequest
 
-	err := c.ShouldBindJSON(&user_info_field)
+	err := c.ShouldBindJSON(&userInfoField)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -732,7 +1192,7 @@ func (h *Handler) V2UpdateUserInfoField(c *gin.Context) {
 
 	resp, err := h.services.ClientService().V2UpdateUserInfoField(
 		c.Request.Context(),
-		&user_info_field,
+		&userInfoField,
 	)
 
 	if err != nil {
@@ -745,6 +1205,8 @@ func (h *Handler) V2UpdateUserInfoField(c *gin.Context) {
 
 // V2RemoveUserInfoField godoc
 // @ID delete_user_info_field_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/user-info-field/{user-info-field-id} [DELETE]
 // @Summary Delete UserInfoField
 // @Description Get UserInfoField

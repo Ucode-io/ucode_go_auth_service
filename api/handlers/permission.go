@@ -44,7 +44,7 @@ func (h *Handler) AddRole(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// GetRoleById godoc
+// GetRoleByID godoc
 // @ID get_role_by_id
 // @Router /role/{role-id} [GET]
 // @Summary Get Role By ID
@@ -385,9 +385,9 @@ func (h *Handler) DeletePermission(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpsertScope(c *gin.Context) {
-	var upsert_scope auth_service.UpsertScopeRequest
+	var upsertScope auth_service.UpsertScopeRequest
 
-	err := c.ShouldBindJSON(&upsert_scope)
+	err := c.ShouldBindJSON(&upsertScope)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -395,7 +395,7 @@ func (h *Handler) UpsertScope(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().UpsertScope(
 		c.Request.Context(),
-		&upsert_scope,
+		&upsertScope,
 	)
 
 	if err != nil {
@@ -475,9 +475,9 @@ func (h *Handler) GetScopesList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddPermissionScope(c *gin.Context) {
-	var permission_scope auth_service.AddPermissionScopeRequest
+	var permissionScope auth_service.AddPermissionScopeRequest
 
-	err := c.ShouldBindJSON(&permission_scope)
+	err := c.ShouldBindJSON(&permissionScope)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -485,7 +485,7 @@ func (h *Handler) AddPermissionScope(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().AddPermissionScope(
 		c.Request.Context(),
-		&permission_scope,
+		&permissionScope,
 	)
 
 	if err != nil {
@@ -509,9 +509,9 @@ func (h *Handler) AddPermissionScope(c *gin.Context) {
 // @Response 400 {object} http.Response{data=auth_service.CommonMessage} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RemovePermissionScope(c *gin.Context) {
-	var permission_scope auth_service.PermissionScopePrimaryKey
+	var permissionScope auth_service.PermissionScopePrimaryKey
 
-	err := c.ShouldBindJSON(&permission_scope)
+	err := c.ShouldBindJSON(&permissionScope)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -519,7 +519,7 @@ func (h *Handler) RemovePermissionScope(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().RemovePermissionScope(
 		c.Request.Context(),
-		&permission_scope,
+		&permissionScope,
 	)
 
 	if err != nil {
@@ -543,9 +543,9 @@ func (h *Handler) RemovePermissionScope(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRolePermission(c *gin.Context) {
-	var role_permission auth_service.AddRolePermissionRequest
+	var rolePermission auth_service.AddRolePermissionRequest
 
-	err := c.ShouldBindJSON(&role_permission)
+	err := c.ShouldBindJSON(&rolePermission)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -553,7 +553,7 @@ func (h *Handler) AddRolePermission(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().AddRolePermission(
 		c.Request.Context(),
-		&role_permission,
+		&rolePermission,
 	)
 
 	if err != nil {
@@ -564,7 +564,7 @@ func (h *Handler) AddRolePermission(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
-// AddRolePermission godoc
+// AddRolePermissions godoc
 // @ID add_role_permissions
 // @Router /role-permission/many [POST]
 // @Summary Create RolePermissions
@@ -577,9 +577,9 @@ func (h *Handler) AddRolePermission(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRolePermissions(c *gin.Context) {
-	var role_permissions auth_service.AddRolePermissionsRequest
+	var rolePermissions auth_service.AddRolePermissionsRequest
 
-	err := c.ShouldBindJSON(&role_permissions)
+	err := c.ShouldBindJSON(&rolePermissions)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -587,7 +587,7 @@ func (h *Handler) AddRolePermissions(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().AddRolePermissions(
 		c.Request.Context(),
-		&role_permissions,
+		&rolePermissions,
 	)
 
 	if err != nil {
@@ -611,9 +611,9 @@ func (h *Handler) AddRolePermissions(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RemoveRolePermission(c *gin.Context) {
-	var role_permission auth_service.RolePermissionPrimaryKey
+	var rolePermission auth_service.RolePermissionPrimaryKey
 
-	err := c.ShouldBindJSON(&role_permission)
+	err := c.ShouldBindJSON(&rolePermission)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -621,7 +621,7 @@ func (h *Handler) RemoveRolePermission(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().RemoveRolePermission(
 		c.Request.Context(),
-		&role_permission,
+		&rolePermission,
 	)
 
 	if err != nil {
@@ -630,20 +630,4 @@ func (h *Handler) RemoveRolePermission(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.NoContent, resp)
-}
-
-// AddPermissionScope godoc
-// @ID permission_generated
-// @Router /permission_generated [POST]
-// @Summary Generate Permission
-// @Description Generate Permission
-// @Tags Permission
-// @Accept json
-// @Produce json
-// @Param permission-scope body auth_service.PermissionGenerated true "AddPermissionScopeRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.PermissionScope} "PermissionScope data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) PermissionGeneratedPermission(c *gin.Context) {
-
 }

@@ -108,6 +108,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.POST("/has-access-super-admin", h.HasAccessSuperAdmin)
 
 	v2 := r.Group("/v2")
+	v2.Use(h.AuthMiddleware())
 	{
 		v2.POST("/client-platform", h.V2CreateClientPlatform)
 		v2.GET("/client-platform", h.V2GetClientPlatformList) //project_id
@@ -165,6 +166,18 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin)
 		v2.POST("/user/invite", h.AddUserToProject)
+
+		// api keys
+		v2.POST("/api-key/:project-id", h.CreateApiKey)
+		v2.PUT("/api-key/:project-id/:id", h.UpdateApiKey)
+		v2.GET("/api-key/:project-id/:id", h.GetApiKey)
+		v2.GET("/api-key/:project-id", h.GetListApiKeys)
+		v2.DELETE("/api-key/:project-id/:id", h.DeleteApiKeys)
+		v2.POST("/api-key/generate-token", h.GenerateApiKeyToken)
+		v2.POST("/api-key/refresh-token", h.RefreshApiKeyToken)
+
+		// environment
+		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
 	}
 
 	//COMPANY
@@ -196,7 +209,7 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id")
 		c.Header("Access-Control-Max-Age", "3600")
 
 		if c.Request.Method == "OPTIONS" {
