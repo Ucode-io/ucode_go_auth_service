@@ -274,6 +274,8 @@ definitions:
         type: string
       name:
         type: string
+      project_id:
+        type: string
       resource_environment_id:
         type: string
       role_id:
@@ -290,6 +292,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      project_id:
         type: string
       resource_environment_id:
         type: string
@@ -327,11 +331,6 @@ definitions:
       project_id:
         type: string
       role_id:
-        type: string
-    type: object
-  auth_service.DeleteReq:
-    properties:
-      ids:
         type: string
     type: object
   auth_service.DeleteRes:
@@ -420,6 +419,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      project_id:
         type: string
       resource_environment_id:
         type: string
@@ -869,6 +870,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      project_id:
         type: string
       role_id:
         type: string
@@ -5104,10 +5107,21 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: resource_environment_id
+      - description: resource-environment-id
         in: query
-        name: resource_environment_id
-        required: true
+        name: resource-environment-id
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: search
+        in: query
+        name: search
         type: string
       produces:
       - application/json
@@ -5192,56 +5206,6 @@ paths:
       summary: Create ApiKey
       tags:
       - V2_ApiKey
-    put:
-      consumes:
-      - application/json
-      description: Update ApiKey
-      operationId: update_api_keys
-      parameters:
-      - description: project-id
-        in: path
-        name: project-id
-        required: true
-        type: string
-      - description: ApiKeyReqBody
-        in: body
-        name: api-key
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.UpdateReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ApiKey data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.UpdateRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update ApiKey
-      tags:
-      - V2_ApiKey
   /v2/api-key/{project-id}/{id}:
     delete:
       consumes:
@@ -5249,22 +5213,16 @@ paths:
       description: Delete ApiKeys
       operationId: delete_api_keys
       parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
       - description: project-id
         in: path
         name: project-id
         required: true
         type: string
-      - description: ApiKeyReqBody
-        in: body
-        name: api-key
+      - description: id
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/auth_service.DeleteReq'
+        type: string
       produces:
       - application/json
       responses:
@@ -5345,6 +5303,61 @@ paths:
                   type: string
               type: object
       summary: Get ApiKey
+      tags:
+      - V2_ApiKey
+    put:
+      consumes:
+      - application/json
+      description: Update ApiKey
+      operationId: update_api_keys
+      parameters:
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ApiKeyReqBody
+        in: body
+        name: api-key
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.UpdateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.UpdateRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update ApiKey
       tags:
       - V2_ApiKey
   /v2/api-key/generate-token:
@@ -5451,6 +5464,16 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
       - description: RemoveClientBody
         in: body
         name: remove-client
@@ -5494,12 +5517,22 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddClientRequestBody
         in: body
         name: client
         required: true
         schema:
           $ref: '#/definitions/auth_service.AddClientRequest'
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -5542,6 +5575,16 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       - description: UpdateClientRequestBody
@@ -5593,6 +5636,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: offset
@@ -5655,6 +5703,16 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
       - description: CreateClientPlatformRequestBody
         in: body
         name: client-platform
@@ -5703,6 +5761,16 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       - description: UpdateClientPlatformRequestBody
@@ -5756,9 +5824,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -5806,9 +5884,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -5848,9 +5936,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -5963,12 +6061,22 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateClientTypeRequestBody
         in: body
         name: client-type
         required: true
         schema:
           $ref: '#/definitions/auth_service.CreateClientTypeRequest'
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -6011,6 +6119,16 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       - description: UpdateClientTypeRequestBody
@@ -6064,9 +6182,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-type-id
         in: path
         name: client-type-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -6104,6 +6232,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: client-type-id
@@ -6161,9 +6294,14 @@ paths:
         name: Resource-Id
         required: true
         type: string
-      - description: project-id
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
         in: path
-        name: project-id
+        name: project_id
         required: true
         type: string
       produces:
@@ -6759,6 +6897,16 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
       - description: AddRelationRequestBody
         in: body
         name: relation
@@ -6807,6 +6955,16 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -6860,9 +7018,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: relation-id
         in: path
         name: relation-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -7582,6 +7750,16 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
       - description: AddUserInfoFieldRequestBody
         in: body
         name: user-info-field
@@ -7630,6 +7808,16 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       - description: UpdateUserInfoFieldRequestBody
@@ -7683,9 +7871,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: user-info-field-id
         in: path
         name: user-info-field-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
