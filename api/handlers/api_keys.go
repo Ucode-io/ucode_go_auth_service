@@ -44,13 +44,14 @@ func (h *Handler) CreateApiKey(c *gin.Context) {
 
 // UpdateApiKey godoc
 // @ID update_api_keys
-// @Router /v2/api-key/{project-id} [PUT]
+// @Router /v2/api-key/{project-id}/{id} [PUT]
 // @Summary Update ApiKey
 // @Description Update ApiKey
 // @Tags V2_ApiKey
 // @Accept json
 // @Produce json
 // @Param project-id path string true "project-id"
+// @Param id path string true "id"
 // @Param api-key body auth_service.UpdateReq true "ApiKeyReqBody"
 // @Success 201 {object} http.Response{data=auth_service.UpdateRes} "ApiKey data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -63,6 +64,8 @@ func (h *Handler) UpdateApiKey(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	apiKey.Id = c.Param("id")
 
 	res, err := h.services.ApiKeysService().Update(
 		c.Request.Context(),
@@ -116,16 +119,35 @@ func (h *Handler) GetApiKey(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id path string true "project-id"
-// @Param resource_environment_id query string true "resource_environment_id"
+// @Param resource-environment-id query string false "resource-environment-id"
+// @Param offset query integer false "offset"
+// @Param limit query integer false "limit"
+// @Param search query string false "search"
 // @Success 201 {object} http.Response{data=auth_service.GetListRes} "ApiKey data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListApiKeys(c *gin.Context) {
 
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
 	res, err := h.services.ApiKeysService().GetList(
 		c.Request.Context(),
 		&auth_service.GetListReq{
-			ResourceEnvironmentId: c.DefaultQuery("resource_environment_id", ""),
+			ProjectId:             c.Param("project-id"),
+			ResourceEnvironmentId: c.DefaultQuery("resource-environment-id", ""),
+			Offset:                int32(offset),
+			Limit:                 int32(limit),
+			Search:                c.Query("search"),
 		},
 	)
 
@@ -145,24 +167,16 @@ func (h *Handler) GetListApiKeys(c *gin.Context) {
 // @Tags V2_ApiKey
 // @Accept json
 // @Produce json
-// @Param id path string true "id"
 // @Param project-id path string true "project-id"
-// @Param api-key body auth_service.DeleteReq true "ApiKeyReqBody"
+// @Param id path string true "id"
 // @Success 201 {object} http.Response{data=auth_service.DeleteRes} "ApiKey data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteApiKeys(c *gin.Context) {
-	var apiKey auth_service.DeleteReq
-
-	err := c.ShouldBindJSON(&apiKey)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
 
 	res, err := h.services.ApiKeysService().Delete(
 		c.Request.Context(),
-		&apiKey,
+		&auth_service.DeleteReq{Id: c.Param("id")},
 	)
 
 	if err != nil {
