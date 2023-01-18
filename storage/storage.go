@@ -190,7 +190,7 @@ type ProjectRepoI interface {
 }
 
 type ApiKeysRepoI interface {
-	Create(ctx context.Context, req *pb.CreateReq) (res *pb.CreateRes, err error)
+	Create(ctx context.Context, req *pb.CreateReq, appSecret, appId, id string) (res *pb.CreateRes, err error)
 	GetList(ctx context.Context, req *pb.GetListReq) (res *pb.GetListRes, err error)
 	Get(ctx context.Context, req *pb.GetReq) (res *pb.GetRes, err error)
 	Update(ctx context.Context, req *pb.UpdateReq) (rowsAffected int64, err error)

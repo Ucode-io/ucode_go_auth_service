@@ -33,13 +33,10 @@ message RefreshApiTokenRes {
 }
 
 message CreateReq {
-  string id = 1;
-  string name = 2;
-  string app_id = 3;
-  string role_id = 4;
-  string app_secret = 5;
-  string resource_environment_id = 6;
-  string project_id = 7;
+  string name = 1;
+  string project_id = 2;
+  string role_id = 3;
+  string resource_environment_id = 4;
 }
 
 message CreateRes {

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -21,7 +22,7 @@ func NewApiKeysRepo(db *pgxpool.Pool) storage.ApiKeysRepoI {
 	}
 }
 
-func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq) (*pb.CreateRes, error) {
+func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, appId, id string) (*pb.CreateRes, error) {
 	var (
 		res pb.CreateRes
 
@@ -35,15 +36,16 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq) (*pb.Create
 	err := r.db.QueryRow(
 		ctx,
 		query,
-		req.GetId(),
+		id,
 		req.GetName(),
-		req.GetAppId(),
-		req.GetAppSecret(),
+		appId,
+		appSecret,
 		req.GetRoleId(),
 		req.GetResourceEnvironmentId(),
 		req.GetProjectId(),
 	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.ResourceEnvironmentId, &res.ProjectId)
 
+	fmt.Println("err::", err)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +219,7 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 				role_id = $3,
 				updated_at = now()
 			WHERE
-			    id = $6`
+			    id = $4`
 
 	res, err := r.db.Exec(
 		ctx,

@@ -13,6 +13,7 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -43,17 +44,15 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 		return nil, status.Error(codes.Internal, "internal")
 	}
 
-	req.Id = id.String()
-
 	secretKey := "S-" + helper.GenerateSecretKey(32)
 	secretId := "P-" + helper.GenerateSecretKey(32)
 
 	hashedSecretKey, err := security.HashPassword(secretKey)
 
-	req.AppSecret = hashedSecretKey
-	req.AppId = secretId
+	// req.AppSecret = hashedSecretKey
+	// req.AppId = secretId
 
-	res, err := s.strg.ApiKeys().Create(ctx, req)
+	res, err := s.strg.ApiKeys().Create(ctx, req, hashedSecretKey, secretId, id.String())
 	if err != nil {
 		s.log.Error("!!!Create--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on creating new api key")
@@ -84,6 +83,10 @@ func (s *apiKeysService) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, e
 	s.log.Info("---Get--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeys().Get(ctx, req)
+	if err == pgx.ErrNoRows {
+		s.log.Error("!!!Get--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, "api-key not found")
+	}
 	if err != nil {
 		s.log.Error("!!!Get--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on getting api key")
