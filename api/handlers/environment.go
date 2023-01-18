@@ -20,7 +20,9 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAllResourceEnvironments(c *gin.Context) {
 	var (
-		res *obs.GetListConfiguredResourceEnvironmentRes
+		res *obs.GetListConfiguredResourceEnvironmentRes = &obs.GetListConfiguredResourceEnvironmentRes{
+			Data: []*obs.GetListConfiguredResourceEnvironmentResResourceEnvironment{},
+		}
 	)
 	resp, err := h.services.ResourceService().GetListConfiguredResourceEnvironment(
 		c.Request.Context(),
