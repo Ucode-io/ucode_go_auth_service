@@ -27,14 +27,10 @@ func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (strin
 	)
 
 	for k, v := range params {
-		if k != "" {
-			oldsize := len(namedQuery)
+		if k != "" && strings.Contains(namedQuery, ":"+k) {
 			namedQuery = strings.ReplaceAll(namedQuery, ":"+k, "$"+strconv.Itoa(i))
-
-			if oldsize != len(namedQuery) {
-				args = append(args, v)
-				i++
-			}
+			args = append(args, v)
+			i++
 		}
 	}
 

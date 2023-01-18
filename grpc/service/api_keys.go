@@ -4,10 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/google/uuid"
-	"github.com/saidamir98/udevs_pkg/logger"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -15,6 +11,11 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
+
+	"github.com/google/uuid"
+	"github.com/saidamir98/udevs_pkg/logger"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type apiKeysService struct {
