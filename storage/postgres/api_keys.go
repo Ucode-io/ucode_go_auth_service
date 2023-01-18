@@ -74,9 +74,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
   				resource_environment_id,
 				project_id
 			FROM
-			    api_keys
-			WHERE
-			    resource_environment_id = $1`
+			    api_keys`
 
 	filter := ` WHERE true=true`
 	params := make(map[string]interface{})
