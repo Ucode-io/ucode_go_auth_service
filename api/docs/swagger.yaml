@@ -6301,11 +6301,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
-        in: query
-        name: project_id
-        required: true
-        type: string
       - description: RemoveClientBody
         in: body
         name: remove-client
@@ -6360,11 +6355,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest'
-      - description: project_id
-        in: query
-        name: project_id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -6412,11 +6402,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       - description: UpdateClientRequestBody
@@ -6538,11 +6523,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       - description: CreateClientPlatformRequestBody
@@ -6904,11 +6884,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientTypeRequest'
-      - description: project_id
-        in: query
-        name: project_id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -6956,11 +6931,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       - description: UpdateClientTypeRequestBody
@@ -7129,11 +7099,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project_id
-        in: path
-        name: project_id
         required: true
         type: string
       produces:
@@ -7734,11 +7699,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
-        in: query
-        name: project_id
-        required: true
-        type: string
       - description: AddRelationRequestBody
         in: body
         name: relation
@@ -7792,11 +7752,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -7858,11 +7813,6 @@ paths:
       - description: relation-id
         in: path
         name: relation-id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       produces:
@@ -8587,11 +8537,6 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
-        in: query
-        name: project_id
-        required: true
-        type: string
       - description: AddUserInfoFieldRequestBody
         in: body
         name: user-info-field
@@ -8645,11 +8590,6 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       - description: UpdateUserInfoFieldRequestBody
@@ -8711,11 +8651,6 @@ paths:
       - description: user-info-field-id
         in: path
         name: user-info-field-id
-        required: true
-        type: string
-      - description: project_id
-        in: query
-        name: project_id
         required: true
         type: string
       produces:

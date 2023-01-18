@@ -6807,13 +6807,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateClientRequestBody",
                         "name": "client",
                         "in": "body",
@@ -6916,13 +6909,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -7008,13 +6994,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -7309,13 +7288,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -7815,13 +7787,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateClientTypeRequestBody",
                         "name": "client-type",
                         "in": "body",
@@ -7924,13 +7889,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientTypeRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -8205,13 +8163,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "path",
                         "required": true
                     }
                 ],
@@ -9280,13 +9231,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateRelationRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -9379,13 +9323,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -9490,13 +9427,6 @@ const docTemplate = `{
                         "description": "relation-id",
                         "name": "relation-id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -10773,13 +10703,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateUserInfoFieldRequestBody",
                         "name": "user-info-field",
                         "in": "body",
@@ -10872,13 +10795,6 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
                         "required": true
                     },
                     {
@@ -10983,13 +10899,6 @@ const docTemplate = `{
                         "description": "user-info-field-id",
                         "name": "user-info-field-id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
                         "required": true
                     }
                 ],
