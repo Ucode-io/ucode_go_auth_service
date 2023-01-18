@@ -59,6 +59,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	respObject, err := h.services.LoginService().LoginWithEmailOtp(c.Request.Context(), &pbObject.EmailOtpRequest{
 		Email:      request.Email,
 		ClientType: request.ClientType,
+		ProjectId:  "caf1dfc0-3f77-4ee4-beec-fef5467b645c", //@TODO:: temp added hardcoded project id
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
