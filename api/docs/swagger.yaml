@@ -274,6 +274,8 @@ definitions:
         type: string
       name:
         type: string
+      project_id:
+        type: string
       resource_environment_id:
         type: string
       role_id:
@@ -290,6 +292,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      project_id:
         type: string
       resource_environment_id:
         type: string
@@ -331,7 +335,7 @@ definitions:
     type: object
   auth_service.DeleteReq:
     properties:
-      ids:
+      id:
         type: string
     type: object
   auth_service.DeleteRes:
@@ -420,6 +424,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      project_id:
         type: string
       resource_environment_id:
         type: string
@@ -869,6 +875,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      project_id:
         type: string
       role_id:
         type: string
@@ -5451,6 +5459,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: RemoveClientBody
         in: body
         name: remove-client
@@ -5492,6 +5505,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: AddClientRequestBody
@@ -5544,6 +5562,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateClientRequestBody
         in: body
         name: client
@@ -5593,6 +5616,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: offset
@@ -5655,6 +5683,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateClientPlatformRequestBody
         in: body
         name: client-platform
@@ -5703,6 +5736,16 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       - description: UpdateClientPlatformRequestBody
@@ -5756,9 +5799,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -5806,9 +5859,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -5848,9 +5911,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-platform-id
         in: path
         name: client-platform-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -5963,6 +6036,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateClientTypeRequestBody
         in: body
         name: client-type
@@ -6011,6 +6089,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateClientTypeRequestBody
@@ -6064,9 +6147,19 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: client-type-id
         in: path
         name: client-type-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -6104,6 +6197,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: client-type-id
@@ -6161,9 +6259,9 @@ paths:
         name: Resource-Id
         required: true
         type: string
-      - description: project-id
-        in: path
-        name: project-id
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       produces:
@@ -6759,6 +6857,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddRelationRequestBody
         in: body
         name: relation
@@ -6807,6 +6910,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -6858,6 +6966,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: relation-id
@@ -7582,6 +7695,11 @@ paths:
         name: Resource-Id
         required: true
         type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddUserInfoFieldRequestBody
         in: body
         name: user-info-field
@@ -7630,6 +7748,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: UpdateUserInfoFieldRequestBody
@@ -7681,6 +7804,11 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
         required: true
         type: string
       - description: user-info-field-id

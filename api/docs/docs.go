@@ -6792,6 +6792,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateClientRequestBody",
                         "name": "client",
                         "in": "body",
@@ -6876,6 +6883,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -6968,6 +6982,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "RemoveClientBody",
                         "name": "remove-client",
                         "in": "body",
@@ -7039,6 +7060,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7146,6 +7174,20 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateClientPlatformRequestBody",
                         "name": "client-platform",
                         "in": "body",
@@ -7230,6 +7272,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7325,9 +7374,23 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-platform-id",
                         "name": "client-platform-id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -7413,9 +7476,23 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-platform-id",
                         "name": "client-platform-id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -7499,9 +7576,23 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-platform-id",
                         "name": "client-platform-id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -7681,6 +7772,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateClientTypeRequestBody",
                         "name": "client-type",
                         "in": "body",
@@ -7765,6 +7863,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7855,6 +7960,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -7953,9 +8065,23 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "client-type-id",
                         "name": "client-type-id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -8026,9 +8152,9 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "path",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
                         "required": true
                     }
                 ],
@@ -9090,6 +9216,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateRelationRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -9174,6 +9307,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -9264,6 +9404,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10541,6 +10688,13 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateUserInfoFieldRequestBody",
                         "name": "user-info-field",
                         "in": "body",
@@ -10625,6 +10779,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -10715,6 +10876,13 @@ var doc = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
                         "in": "header",
                         "required": true
                     },
@@ -11631,6 +11799,9 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
+                "project_id": {
+                    "type": "string"
+                },
                 "resource_environment_id": {
                     "type": "string"
                 },
@@ -11655,6 +11826,9 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 },
                 "resource_environment_id": {
@@ -11718,7 +11892,7 @@ var doc = `{
         "auth_service.DeleteReq": {
             "type": "object",
             "properties": {
-                "ids": {
+                "id": {
                     "type": "string"
                 }
             }
@@ -11856,6 +12030,9 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 },
                 "resource_environment_id": {
@@ -12547,6 +12724,9 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 },
                 "role_id": {
