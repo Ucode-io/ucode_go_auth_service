@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/security"
+	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
@@ -97,6 +98,11 @@ func (s *apiKeysService) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, e
 
 func (s *apiKeysService) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetListRes, error) {
 	s.log.Info("---GetList--->", logger.Any("req", req))
+
+	if !util.IsValidUUID(req.GetProjectId()) {
+		s.log.Error("!!!GetList--->", logger.Error(errors.New("project id is invalid uuid")))
+		return nil, status.Error(codes.Internal, "error on getting api keys, project id is invalid uuid")
+	}
 
 	res, err := s.strg.ApiKeys().GetList(ctx, req)
 	if err != nil {

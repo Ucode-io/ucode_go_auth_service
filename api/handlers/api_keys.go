@@ -128,10 +128,26 @@ func (h *Handler) GetApiKey(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListApiKeys(c *gin.Context) {
 
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
 	res, err := h.services.ApiKeysService().GetList(
 		c.Request.Context(),
 		&auth_service.GetListReq{
+			ProjectId:             c.Param("project-id"),
 			ResourceEnvironmentId: c.DefaultQuery("resource-environment-id", ""),
+			Offset:                int32(offset),
+			Limit:                 int32(limit),
+			Search:                c.Query("search"),
 		},
 	)
 

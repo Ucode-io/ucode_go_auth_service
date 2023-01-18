@@ -78,12 +78,13 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			FROM
 			    api_keys`
 
-	filter := ` WHERE true=true`
+	filter := ` WHERE project_id = :project_id`
 	params := make(map[string]interface{})
 	offset := " OFFSET 0"
 	limit := " LIMIT 10"
 	order := " ORDER BY created_at"
 	arrangement := " DESC"
+	params["project_id"] = req.GetProjectId()
 
 	if req.Offset > 0 {
 		params["offset"] = req.Offset
@@ -98,11 +99,6 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	if len(req.Search) > 0 {
 		params["search"] = req.Search
 		filter += " AND (name ILIKE '%' || :search || '%')"
-	}
-
-	if util.IsValidUUID(req.GetProjectId()) {
-		filter += ` AND project_id = :project_id`
-		params["project_id"] = req.GetProjectId()
 	}
 
 	if util.IsValidUUID(req.ResourceEnvironmentId) {
