@@ -1,1 +1,1 @@
-ALTER TABLE "company" DROP COLUMN IF EXISTS "owner_id";
+ALTER TABLE IF EXISTS "company" DROP COLUMN IF EXISTS "owner_id";
