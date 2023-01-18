@@ -70,6 +70,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
   				status,
   				name,
   				app_id,
+				app_secret,
   				role_id,
   				created_at,
   				updated_at,
@@ -136,6 +137,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&row.Status,
 			&row.Name,
 			&row.AppId,
+			&row.AppSecret,
 			&row.RoleId,
 			&createdAt,
 			&updatedAt,
@@ -243,4 +245,54 @@ func (r *apiKeysRepo) Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffect
 	}
 
 	return result.RowsAffected(), nil
+}
+
+func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error) {
+	var (
+		res pb.GetRes
+
+		createdAt sql.NullString
+		updatedAt sql.NullString
+	)
+
+	query := `SELECT
+				id,
+  				status,
+  				name,
+  				app_id,
+  				app_secret,
+  				role_id,
+  				resource_environment_id,
+				project_id,
+  				created_at,
+  				updated_at
+			FROM
+			    api_keys
+			WHERE
+			    app_id = $1`
+
+	err := r.db.QueryRow(ctx, query, appId).Scan(
+		&res.Id,
+		&res.Status,
+		&res.Name,
+		&res.AppId,
+		&res.AppSecret,
+		&res.RoleId,
+		&res.ResourceEnvironmentId,
+		&res.ProjectId,
+		&createdAt,
+		&updatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if createdAt.Valid {
+		res.CreatedAt = createdAt.String
+	}
+
+	if updatedAt.Valid {
+		res.UpdatedAt = updatedAt.String
+	}
+	return &res, nil
 }

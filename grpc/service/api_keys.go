@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -137,16 +138,16 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(errAppId))
 		return nil, status.Error(codes.InvalidArgument, errAppId.Error())
 	}
+	fmt.Println("aaaa")
 
 	if len(req.GetAppSecret()) != 34 || req.GetAppSecret()[:2] != "S-" {
 		errAppSecret := errors.New("invalid api id or api secret")
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(errAppSecret))
 		return nil, status.Error(codes.InvalidArgument, errAppSecret.Error())
 	}
+	fmt.Println("bbbb")
 
-	apiKey, err := s.strg.ApiKeys().Get(ctx, &pb.GetReq{
-		Id: req.GetAppId(),
-	})
+	apiKey, err := s.strg.ApiKeys().GetByAppId(ctx, req.AppId)
 
 	if err != nil {
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
@@ -163,7 +164,7 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, errComparePass.Error())
 	}
-
+	fmt.Println("errr:", err, "mathc::", match)
 	if !match {
 		errComparePass := errors.New("invalid api id or api secret")
 		s.log.Error("!!!GenerateApiToken--->", logger.String("match", "false"))
@@ -211,7 +212,6 @@ func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApi
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, errExtractToken.Error())
 	}
-
 	_ = m["resource_environment_id"].(string)
 	_ = m["role_id"].(string)
 	_ = m["app_id"].(string)
