@@ -95,7 +95,7 @@ func (h *Handler) GetApiKey(c *gin.Context) {
 	res, err := h.services.ApiKeysService().Get(
 		c.Request.Context(),
 		&auth_service.GetReq{
-			Id: c.DefaultQuery("id", ""),
+			Id: c.Param("id"),
 		},
 	)
 
