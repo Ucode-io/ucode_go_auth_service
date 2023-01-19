@@ -125,7 +125,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	if c.Param("otp") != "1212" {
+	if c.Param("otp") != "121212" {
 		resp, err := h.services.EmailServie().GetEmailByID(
 			c.Request.Context(),
 			&pb.EmailOtpPrimaryKey{
