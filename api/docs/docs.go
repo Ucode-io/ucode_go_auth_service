@@ -8510,6 +8510,20 @@ var doc = `{
                 "operationId": "get_permission_list_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "offset",
                         "name": "offset",
@@ -8600,6 +8614,20 @@ var doc = `{
                 "operationId": "update_permission_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdatePermissionRequestBody",
                         "name": "permission",
                         "in": "body",
@@ -8680,6 +8708,20 @@ var doc = `{
                 "summary": "Create Permission",
                 "operationId": "create_permission_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreatePermissionRequestBody",
                         "name": "permission",
@@ -8764,6 +8806,20 @@ var doc = `{
                 "operationId": "add_permission_scope_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "AddPermissionScopeRequestBody",
                         "name": "permission-scope",
                         "in": "body",
@@ -8845,6 +8901,20 @@ var doc = `{
                 "operationId": "delete_permission_scope_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "PermissionScopePrimaryKeyBody",
                         "name": "permission-scope",
                         "in": "body",
@@ -8912,6 +8982,20 @@ var doc = `{
                 "summary": "Get Permission By ID",
                 "operationId": "get_permission_by_id_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "permission-id",
@@ -8991,6 +9075,20 @@ var doc = `{
                 "summary": "Delete Permission",
                 "operationId": "delete_permission_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "permission-id",
@@ -9577,6 +9675,20 @@ var doc = `{
                 "operationId": "get_roles_list_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "offset",
                         "name": "offset",
@@ -9679,6 +9791,20 @@ var doc = `{
                 "operationId": "update_role_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateRoleRequestBody",
                         "name": "role",
                         "in": "body",
@@ -9759,6 +9885,20 @@ var doc = `{
                 "summary": "Create Role",
                 "operationId": "create_role_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "AddRoleRequestBody",
                         "name": "role",
@@ -9843,6 +9983,20 @@ var doc = `{
                 "operationId": "add_role_permission_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "AddRolePermissionRequestBody",
                         "name": "role-permission",
                         "in": "body",
@@ -9924,6 +10078,20 @@ var doc = `{
                 "operationId": "delete_role_permission_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "RolePermissionPrimaryKeyBody",
                         "name": "role-permission",
                         "in": "body",
@@ -9991,6 +10159,20 @@ var doc = `{
                 "summary": "Update Permission",
                 "operationId": "update_role_app_table_permissions",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "UpdateRoleRequestBody",
                         "name": "permission",
@@ -10074,6 +10256,20 @@ var doc = `{
                 "summary": "Get Permission List",
                 "operationId": "get_list_with_role_app_table_permissions",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "project-id",
@@ -10162,6 +10358,20 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role-id",
                         "name": "role-id",
                         "in": "path",
@@ -10248,9 +10458,30 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "role-id",
                         "name": "role-id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -10312,6 +10543,20 @@ var doc = `{
                 "summary": "Get Scopes List",
                 "operationId": "get_scopes_list_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "offset",

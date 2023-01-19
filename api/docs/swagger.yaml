@@ -6453,6 +6453,16 @@ paths:
       description: Get Permission List
       operationId: get_permission_list_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: offset
         in: query
         name: offset
@@ -6504,6 +6514,16 @@ paths:
       description: Create Permission
       operationId: create_permission_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreatePermissionRequestBody
         in: body
         name: permission
@@ -6549,6 +6569,16 @@ paths:
       description: Update Permission
       operationId: update_permission_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdatePermissionRequestBody
         in: body
         name: permission
@@ -6595,6 +6625,16 @@ paths:
       description: Get PermissionScope
       operationId: delete_permission_scope_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: PermissionScopePrimaryKeyBody
         in: body
         name: permission-scope
@@ -6633,6 +6673,16 @@ paths:
       description: Create PermissionScope
       operationId: add_permission_scope_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddPermissionScopeRequestBody
         in: body
         name: permission-scope
@@ -6679,6 +6729,16 @@ paths:
       description: Get Permission
       operationId: delete_permission_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: permission-id
         in: path
         name: permission-id
@@ -6716,6 +6776,16 @@ paths:
       description: Get Permission By ID
       operationId: get_permission_by_id_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: permission-id
         in: path
         name: permission-id
@@ -7057,6 +7127,16 @@ paths:
       description: Get Roles List
       operationId: get_roles_list_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: offset
         in: query
         name: offset
@@ -7116,6 +7196,16 @@ paths:
       description: Create Role
       operationId: create_role_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddRoleRequestBody
         in: body
         name: role
@@ -7161,6 +7251,16 @@ paths:
       description: Update Role
       operationId: update_role_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateRoleRequestBody
         in: body
         name: role
@@ -7207,6 +7307,16 @@ paths:
       description: Get RolePermission
       operationId: delete_role_permission_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: RolePermissionPrimaryKeyBody
         in: body
         name: role-permission
@@ -7245,6 +7355,16 @@ paths:
       description: Create RolePermission
       operationId: add_role_permission_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddRolePermissionRequestBody
         in: body
         name: role-permission
@@ -7291,6 +7411,16 @@ paths:
       description: Update Permission
       operationId: update_role_app_table_permissions
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateRoleRequestBody
         in: body
         name: permission
@@ -7337,6 +7467,16 @@ paths:
       description: Get Permission List
       operationId: get_list_with_role_app_table_permissions
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: project-id
         in: path
         name: project-id
@@ -7385,9 +7525,24 @@ paths:
       description: Get Role
       operationId: delete_role_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: role-id
         in: path
         name: role-id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
         required: true
         type: string
       produces:
@@ -7422,6 +7577,16 @@ paths:
       description: Get Role By ID
       operationId: get_role_by_id_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: role-id
         in: path
         name: role-id
@@ -7472,6 +7637,16 @@ paths:
       description: Get Scopes List
       operationId: get_scopes_list_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: offset
         in: query
         name: offset
