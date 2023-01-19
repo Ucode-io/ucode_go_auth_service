@@ -59,7 +59,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	respObject, err := h.services.LoginService().LoginWithEmailOtp(c.Request.Context(), &pbObject.EmailOtpRequest{
 		Email:      request.Email,
 		ClientType: request.ClientType,
-		ProjectId:  "caf1dfc0-3f77-4ee4-beec-fef5467b645c", //@TODO:: temp added hardcoded project id
+		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -194,7 +194,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 		Email:      body.Data["email"].(string),
 		ClientType: "PATIENT",
-		ProjectId: "caf1dfc0-3f77-4ee4-beec-fef5467b645c", //@TODO:: temp added hardcoded project id,
+		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
