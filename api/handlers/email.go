@@ -179,7 +179,6 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	body.Data["project_id"] = "0f214698-6886-42f2-8c7f-25865d99fb16"  //@TODO:: temp added hardcoded project id,
 	structData, err := helper.ConvertMapToStruct(body.Data)
 
 	if err != nil {
@@ -191,6 +190,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
+			ProjectId: "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
 		},
 	)
 	if err != nil {
