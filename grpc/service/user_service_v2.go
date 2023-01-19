@@ -246,7 +246,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	usersResp, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
-		ProjectId: req.ProjectId,
+		ProjectId: req.GetResourceEnvironmentId(),
 	})
 	if err != nil {
 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))

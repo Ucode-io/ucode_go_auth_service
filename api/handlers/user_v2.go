@@ -4,6 +4,7 @@ import (
 	"context"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/pkg/errors"
@@ -52,6 +53,8 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 
 // V2GetUserList godoc
 // @ID get_user_list_v2
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/user [GET]
 // @Summary Get User List
 // @Description  Get User List
@@ -68,6 +71,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserList(c *gin.Context) {
+	var resourceEnvironment *company_service.ResourceEnvironment
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -80,20 +84,60 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(c.Query("project-id")) {
+	projectId := c.DefaultQuery("project-id", "")
+	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.BadEnvironment, "project-id is required")
 		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	resp, err := h.services.UserService().V2GetUserList(
 		c.Request.Context(),
 		&auth_service.GetUserListRequest{
-			Limit:            int32(limit),
-			Offset:           int32(offset),
-			Search:           c.Query("search"),
-			ClientPlatformId: c.Query("client-platform-id"),
-			ClientTypeId:     c.Query("client-type-id"),
-			ProjectId:        c.Query("project-id"),
+			Limit:                 int32(limit),
+			Offset:                int32(offset),
+			Search:                c.Query("search"),
+			ClientPlatformId:      c.Query("client-platform-id"),
+			ClientTypeId:          c.Query("client-type-id"),
+			ProjectId:             projectId,
+			ResourceEnvironmentId: resourceEnvironment.GetId(),
 		},
 	)
 
