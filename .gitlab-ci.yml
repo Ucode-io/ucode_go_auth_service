@@ -34,16 +34,6 @@ migrate-prod:
   only:
     - master
 
-deploy-demo:
-  stage: deploy
-  extends: .deploy_template
-  variables:
-    NAMESPACE: ucode-demo
-    VALUES_FILE: .helm/values-demo.yml
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
-  only:
-    - staging
-
 deploy-staging:
   stage: deploy
   extends: .deploy_template
