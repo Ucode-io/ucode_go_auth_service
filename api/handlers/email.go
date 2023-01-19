@@ -52,7 +52,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 	expire := time.Now().Add(time.Minute * 5)
 
-	code, err := util.GenerateCode(4)
+	code, err := util.GenerateCode(6)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
