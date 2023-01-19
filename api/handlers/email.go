@@ -50,7 +50,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	expire := time.Now().Add(time.Hour*5).Add(time.Minute*5)
+	expire := time.Now().Add(time.Hour*5).Add(time.Minute*5) // hard code time zone
 
 	code, err := util.GenerateCode(6)
 	if err != nil {
