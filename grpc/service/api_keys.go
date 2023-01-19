@@ -138,14 +138,12 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(errAppId))
 		return nil, status.Error(codes.InvalidArgument, errAppId.Error())
 	}
-	fmt.Println("aaaa")
 
 	if len(req.GetAppSecret()) != 34 || req.GetAppSecret()[:2] != "S-" {
 		errAppSecret := errors.New("invalid api id or api secret")
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(errAppSecret))
 		return nil, status.Error(codes.InvalidArgument, errAppSecret.Error())
 	}
-	fmt.Println("bbbb")
 
 	apiKey, err := s.strg.ApiKeys().GetByAppId(ctx, req.AppId)
 
@@ -172,9 +170,10 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 	}
 
 	m := map[string]interface{}{
-		"resource_environment_id": apiKey.GetResourceEnvironmentId(),
-		"role_id":                 apiKey.GetRoleId(),
-		"app_id":                  apiKey.GetAppId(),
+		"environment_id": apiKey.GetEnvironmentId(),
+		"role_id":        apiKey.GetRoleId(),
+		"app_id":         apiKey.GetAppId(),
+		"client_type_id": apiKey.GetClientTypeId(),
 	}
 
 	apiKeyToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -212,9 +211,10 @@ func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApi
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, errExtractToken.Error())
 	}
-	_ = m["resource_environment_id"].(string)
+	_ = m["environment_id"].(string)
 	_ = m["role_id"].(string)
 	_ = m["app_id"].(string)
+	_ = m["client_type_id"].(string)
 
 	apiKeyToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {

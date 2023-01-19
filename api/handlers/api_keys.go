@@ -119,7 +119,7 @@ func (h *Handler) GetApiKey(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id path string true "project-id"
-// @Param resource-environment-id query string false "resource-environment-id"
+// @Param environment-id query string false "environment-id"
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
@@ -143,11 +143,11 @@ func (h *Handler) GetListApiKeys(c *gin.Context) {
 	res, err := h.services.ApiKeysService().GetList(
 		c.Request.Context(),
 		&auth_service.GetListReq{
-			ProjectId:             c.Param("project-id"),
-			ResourceEnvironmentId: c.DefaultQuery("resource-environment-id", ""),
-			Offset:                int32(offset),
-			Limit:                 int32(limit),
-			Search:                c.Query("search"),
+			ProjectId:     c.Param("project-id"),
+			EnvironmentId: c.DefaultQuery("environment-id", ""),
+			Offset:        int32(offset),
+			Limit:         int32(limit),
+			Search:        c.Query("search"),
 		},
 	)
 

@@ -30,8 +30,8 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		updatedAt sql.NullString
 	)
 
-	query := `INSERT INTO api_keys(id, name, app_id, app_secret, role_id, resource_environment_id, project_id, created_at, updated_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, now(), now()) RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, resource_environment_id, project_id`
+	query := `INSERT INTO api_keys(id, name, app_id, app_secret, role_id, environment_id, project_id, client_type_id, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now()) RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id`
 
 	err := r.db.QueryRow(
 		ctx,
@@ -41,9 +41,10 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		appId,
 		appSecret,
 		req.GetRoleId(),
-		req.GetResourceEnvironmentId(),
+		req.GetEnvironmentId(),
 		req.GetProjectId(),
-	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.ResourceEnvironmentId, &res.ProjectId)
+		req.GetClientTypeId(),
+	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId)
 
 	fmt.Println("err::", err)
 	if err != nil {
@@ -74,8 +75,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
   				role_id,
   				created_at,
   				updated_at,
-  				resource_environment_id,
-				project_id
+  				environment_id,
+				project_id,
+				client_type_id
 			FROM
 			    api_keys`
 
@@ -102,9 +104,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 		filter += " AND (name ILIKE '%' || :search || '%')"
 	}
 
-	if util.IsValidUUID(req.ResourceEnvironmentId) {
-		filter += ` AND resource_environment_id = :resource_environment_id`
-		params["resource_environment_id"] = req.GetResourceEnvironmentId()
+	if util.IsValidUUID(req.EnvironmentId) {
+		filter += ` AND environment_id = :environment_id`
+		params["environment_id"] = req.GetEnvironmentId()
 	}
 
 	countQuery := `SELECT count(*) from api_keys` + filter
@@ -141,8 +143,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&row.RoleId,
 			&createdAt,
 			&updatedAt,
-			&row.ResourceEnvironmentId,
+			&row.EnvironmentId,
 			&row.ProjectId,
+			&row.ClientTypeId,
 		)
 		if err != nil {
 			return nil, err
@@ -176,8 +179,9 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
   				app_id,
   				app_secret,
   				role_id,
-  				resource_environment_id,
+  				environment_id,
 				project_id,
+				client_type_id,
   				created_at,
   				updated_at
 			FROM
@@ -192,8 +196,9 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.AppId,
 		&res.AppSecret,
 		&res.RoleId,
-		&res.ResourceEnvironmentId,
+		&res.EnvironmentId,
 		&res.ProjectId,
+		&res.ClientTypeId,
 		&createdAt,
 		&updatedAt,
 	)
@@ -215,9 +220,10 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 				status = $1,
 				name = $2,
 				role_id = $3,
+				client_type_id = $4,
 				updated_at = now()
 			WHERE
-			    id = $4`
+			    id = $5`
 
 	res, err := r.db.Exec(
 		ctx,
@@ -225,6 +231,7 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 		req.GetStatus(),
 		req.GetName(),
 		req.GetRoleId(),
+		req.GetClientTypeId(),
 		req.GetId(),
 	)
 
@@ -262,8 +269,9 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
   				app_id,
   				app_secret,
   				role_id,
-  				resource_environment_id,
+  				environment_id,
 				project_id,
+				client_type_id,
   				created_at,
   				updated_at
 			FROM
@@ -278,8 +286,9 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
 		&res.AppId,
 		&res.AppSecret,
 		&res.RoleId,
-		&res.ResourceEnvironmentId,
+		&res.EnvironmentId,
 		&res.ProjectId,
+		&res.ClientTypeId,
 		&createdAt,
 		&updatedAt,
 	)
