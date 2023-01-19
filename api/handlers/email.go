@@ -200,7 +200,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 		Email:      body.Data["email"].(string),
-		ClientType: "PATIENT",
+		ClientType: "WEB USER",
 		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
 	})
 	if err != nil {
