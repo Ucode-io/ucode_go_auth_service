@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -65,7 +67,12 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	if (respObject == nil || !respObject.UserFound) && request.ClientType != "PATIENT" {
+
+	if bytes, err := json.MarshalIndent(respObject, "", " "); err == nil {
+		fmt.Println("bytes", bytes)
+	}
+
+	if (respObject == nil || !respObject.UserFound) && request.ClientType != "WEB USER" {
 		err := errors.New("Пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
