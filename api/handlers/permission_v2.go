@@ -879,7 +879,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		err                 error
 	)
 
-	projectId := c.DefaultQuery("project-id", "")
+	projectId := c.Param("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
 		return
