@@ -6089,6 +6089,19 @@ var doc = `{
                 "operationId": "add user to project",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "AddUserToProjectReq",
                         "name": "user",
                         "in": "body",
@@ -10791,6 +10804,19 @@ var doc = `{
                 "operationId": "update_user_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateUserRequestBody",
                         "name": "user",
                         "in": "body",
@@ -10871,6 +10897,19 @@ var doc = `{
                 "summary": "Create User",
                 "operationId": "create_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateUserRequestBody",
                         "name": "user",
@@ -11325,6 +11364,19 @@ var doc = `{
                 "summary": "Delete User",
                 "operationId": "delete_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "user-id",
@@ -12074,10 +12126,16 @@ var doc = `{
         "auth_service.CreateReq": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource": {
                     "type": "string"
                 },
                 "resource_environment_id": {
@@ -12095,6 +12153,9 @@ var doc = `{
                     "type": "string"
                 },
                 "app_secret": {
+                    "type": "string"
+                },
+                "client_type_id": {
                     "type": "string"
                 },
                 "created_at": {
@@ -12160,6 +12221,9 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -12291,6 +12355,9 @@ var doc = `{
                     "type": "string"
                 },
                 "app_secret": {
+                    "type": "string"
+                },
+                "client_type_id": {
                     "type": "string"
                 },
                 "created_at": {
@@ -12990,6 +13057,9 @@ var doc = `{
         "auth_service.UpdateReq": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },

@@ -6071,6 +6071,19 @@
                 "operationId": "add user to project",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "AddUserToProjectReq",
                         "name": "user",
                         "in": "body",
@@ -10773,6 +10786,19 @@
                 "operationId": "update_user_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateUserRequestBody",
                         "name": "user",
                         "in": "body",
@@ -10853,6 +10879,19 @@
                 "summary": "Create User",
                 "operationId": "create_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateUserRequestBody",
                         "name": "user",
@@ -11307,6 +11346,19 @@
                 "summary": "Delete User",
                 "operationId": "delete_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "user-id",
@@ -12056,10 +12108,16 @@
         "auth_service.CreateReq": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource": {
                     "type": "string"
                 },
                 "resource_environment_id": {
@@ -12077,6 +12135,9 @@
                     "type": "string"
                 },
                 "app_secret": {
+                    "type": "string"
+                },
+                "client_type_id": {
                     "type": "string"
                 },
                 "created_at": {
@@ -12142,6 +12203,9 @@
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -12273,6 +12337,9 @@
                     "type": "string"
                 },
                 "app_secret": {
+                    "type": "string"
+                },
+                "client_type_id": {
                     "type": "string"
                 },
                 "created_at": {
@@ -12972,6 +13039,9 @@
         "auth_service.UpdateReq": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },

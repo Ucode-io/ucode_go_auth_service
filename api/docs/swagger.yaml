@@ -266,9 +266,13 @@ definitions:
     type: object
   auth_service.CreateReq:
     properties:
+      client_type_id:
+        type: string
       name:
         type: string
       project_id:
+        type: string
+      resource:
         type: string
       resource_environment_id:
         type: string
@@ -280,6 +284,8 @@ definitions:
       app_id:
         type: string
       app_secret:
+        type: string
+      client_type_id:
         type: string
       created_at:
         type: string
@@ -323,6 +329,8 @@ definitions:
       photo_url:
         type: string
       project_id:
+        type: string
+      resource_environment_id:
         type: string
       role_id:
         type: string
@@ -407,6 +415,8 @@ definitions:
       app_id:
         type: string
       app_secret:
+        type: string
+      client_type_id:
         type: string
       created_at:
         type: string
@@ -861,6 +871,8 @@ definitions:
     type: object
   auth_service.UpdateReq:
     properties:
+      client_type_id:
+        type: string
       id:
         type: string
       name:
@@ -5052,6 +5064,15 @@ paths:
       description: Create User
       operationId: add user to project
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddUserToProjectReq
         in: body
         name: user
@@ -7785,6 +7806,15 @@ paths:
       description: Create User
       operationId: create_user_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateUserRequestBody
         in: body
         name: user
@@ -7830,6 +7860,15 @@ paths:
       description: Update User
       operationId: update_user_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateUserRequestBody
         in: body
         name: user
@@ -8035,6 +8074,15 @@ paths:
       description: Get User
       operationId: delete_user_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: user-id
         in: path
         name: user-id
