@@ -120,16 +120,19 @@ message CreatePermissionRequest {
     string client_platform_id = 2;
     string parent_id = 3;
     string name = 4;
+    string resource_environment_id = 5;
 }
 
 message PermissionPrimaryKey {
     string id = 1;
+    string resource_environment_id = 4;
 }
 
 message GetPermissionListRequest {
     int32 limit = 1;
     int32 offset = 2;
     string search = 3;
+    string resource_environment_id = 4;
 }
 
 message GetPermissionListResponse {
@@ -174,6 +177,7 @@ message AddRolePermissionsResponse {
 message RolePermissionPrimaryKey {
     string role_id = 1;
     string permission_id = 2;
+
 }
 
 message GetRolesListRequest {

@@ -82,7 +82,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: req.GetResourceEnvironmentId(),
 	})
 
 	if err != nil {
@@ -434,8 +434,8 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*emptypb.Empty, error) {
 	s.log.Info("---DeleteUser--->", logger.Any("req", req))
 
-	//res := &emptypb.Empty{}
-	//
+	res := &emptypb.Empty{}
+
 	//structData, err := helper.ConvertRequestToSturct(req)
 	//if err != nil {
 	//	s.log.Error("!!!DeleteUser--->", logger.Error(err))
@@ -445,16 +445,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	//_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 	//	TableSlug: "user",
 	//	Data:      structData,
-	//	ProjectId: config.UcodeDefaultProjectID,
+	//	ProjectId: req.GetResourceEnvironmentId(),
 	//})
 	//if err != nil {
 	//	s.log.Error("!!!DeleteUser.ObjectBuilderService.Delete--->", logger.Error(err))
 	//	return nil, status.Error(codes.Internal, err.Error())
 	//}
-	//
-	//return res, nil
-
-	res := &emptypb.Empty{}
 
 	rowsAffected, err := s.strg.User().Delete(ctx, req)
 

@@ -874,12 +874,60 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
 	// 	return
 	// }
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		err                 error
+	)
+
+	projectId := c.Param("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	resp, err := h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
 		c.Request.Context(),
 		&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
 			RoleId:    c.Param("role-id"),
-			ProjectId: c.Param("project-id"),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -887,6 +935,8 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	resp.ProjectId = projectId
 
 	if bytes, err := json.Marshal(resp); err != nil {
 		fmt.Println("response", string(bytes))
