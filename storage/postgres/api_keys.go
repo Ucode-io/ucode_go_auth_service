@@ -65,6 +65,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	var (
 		res = pb.GetListRes{Count: 0}
 	)
+	fmt.Println("teststets")
 
 	query := `SELECT
 				id,
@@ -130,8 +131,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	for rows.Next() {
 		row := pb.GetRes{}
 		var (
-			createdAt sql.NullString
-			updatedAt sql.NullString
+			createdAt    sql.NullString
+			updatedAt    sql.NullString
+			clientTypeId sql.NullString
 		)
 
 		err = rows.Scan(
@@ -145,14 +147,21 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&updatedAt,
 			&row.EnvironmentId,
 			&row.ProjectId,
-			&row.ClientTypeId,
+			&clientTypeId,
 		)
+		fmt.Println("bbbbbbbbbb")
+		fmt.Println(err)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("Aaaaa")
 
 		if createdAt.Valid {
 			row.CreatedAt = createdAt.String
+		}
+
+		if clientTypeId.Valid {
+			row.ClientTypeId = clientTypeId.String
 		}
 
 		if updatedAt.Valid {
