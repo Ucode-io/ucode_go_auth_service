@@ -152,6 +152,8 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // V2GetUserByID godoc
 // @ID get_user_by_id_v2
 // @Router /v2/user/{user-id} [GET]
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Summary Get User By ID
 // @Description Get User By ID
 // @Tags V2_User
@@ -163,6 +165,10 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserByID(c *gin.Context) {
+	var (
+		resourceEnvironment *company_service.ResourceEnvironment
+		err                 error
+	)
 	userID := c.Param("user-id")
 
 	if !util.IsValidUUID(userID) {
@@ -177,11 +183,49 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectID,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
 			Id:        userID,
-			ProjectId: projectID,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
