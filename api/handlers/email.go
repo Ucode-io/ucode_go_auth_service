@@ -186,20 +186,14 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(body.Data)
 	_, err = h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&pb.CreateUserRequest{
-			Login:                 body.Data["login"].(string),
-			Password:              body.Data["password"].(string),
 			Email:                 body.Data["email"].(string),
-			Phone:                 body.Data["phone"].(string),
 			Name:                  body.Data["name"].(string),
-			PhotoUrl:              body.Data["photo_url"].(string),
-			CompanyId:             body.Data["company_id"].(string),
 			ProjectId:             "caf1dfc0-3f77-4ee4-beec-fef5467b645c",
-			RoleId:                body.Data["role_id"].(string),
 			ClientTypeId:          "WEB USER",
-			ClientPlatformId:      body.Data["client_platform_id"].(string),
 			ResourceEnvironmentId: "0f214698-6886-42f2-8c7f-25865d99fb16",
 		},
 	)
