@@ -50,7 +50,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	expire := time.Now().Add(time.Hour*5).Add(time.Minute*5) // hard code time zone
+	expire := time.Now().Add(time.Hour * 5).Add(time.Minute * 5) // hard code time zone
 
 	code, err := util.GenerateCode(6)
 	if err != nil {
@@ -103,7 +103,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	h.handleResponse(c, http.Created, res)
 }
 
-// Verify godoc
+// VerifyEmail godoc
 // @ID verify_email
 // @Router /verify-email/{sms_id}/{otp} [POST]
 // @Summary Verify
@@ -179,24 +179,48 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	structData, err := helper.ConvertMapToStruct(body.Data)
+	_, err = helper.ConvertMapToStruct(body.Data)
 
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = h.services.ObjectBuilderService().Create(
-		context.Background(),
-		&pbObject.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
-			ProjectId: "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
+
+	_, err = h.services.UserService().V2CreateUser(
+		c.Request.Context(),
+		&pb.CreateUserRequest{
+			Login:                 body.Data["login"].(string),
+			Password:              body.Data["password"].(string),
+			Email:                 body.Data["email"].(string),
+			Phone:                 body.Data["phone"].(string),
+			Name:                  body.Data["name"].(string),
+			PhotoUrl:              body.Data["photo_url"].(string),
+			CompanyId:             body.Data["company_id"].(string),
+			ProjectId:             "caf1dfc0-3f77-4ee4-beec-fef5467b645c",
+			RoleId:                body.Data["role_id"].(string),
+			ClientTypeId:          "WEB USER",
+			ClientPlatformId:      body.Data["client_platform_id"].(string),
+			ResourceEnvironmentId: "0f214698-6886-42f2-8c7f-25865d99fb16",
 		},
 	)
+
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	//_, err = h.services.ObjectBuilderService().Create(
+	//	context.Background(),
+	//	&pbObject.CommonMessage{
+	//		TableSlug: c.Param("table_slug"),
+	//		Data:      structData,
+	//		ProjectId: "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
+	//	},
+	//)
+	//if err != nil {
+	//	h.handleResponse(c, http.GRPCError, err.Error())
+	//	return
+	//}
 
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 		Email:      body.Data["email"].(string),
