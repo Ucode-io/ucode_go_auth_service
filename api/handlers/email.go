@@ -193,6 +193,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			Email:                 body.Data["email"].(string),
 			Name:                  body.Data["name"].(string),
 			ProjectId:             "caf1dfc0-3f77-4ee4-beec-fef5467b645c",
+			CompanyId:             "90d33fe1-b996-481c-aad0-e52b1e8cff6c",
 			ClientTypeId:          "WEB USER",
 			ResourceEnvironmentId: "0f214698-6886-42f2-8c7f-25865d99fb16",
 		},
