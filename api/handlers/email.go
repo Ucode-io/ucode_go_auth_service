@@ -61,7 +61,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	respObject, err := h.services.LoginService().LoginWithEmailOtp(c.Request.Context(), &pbObject.EmailOtpRequest{
 		Email:      request.Email,
 		ClientType: request.ClientType,
-		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id
+		ProjectId:  "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -78,12 +78,14 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.EmailServie().Create(c.Request.Context(), &pb.Email{
-		Id:        id.String(),
-		Email:     request.Email,
-		Otp:       code,
-		ExpiresAt: expire.String()[:19],
-	})
+	resp, err := h.services.EmailServie().Create(
+		c.Request.Context(),
+		&pb.Email{
+			Id:        id.String(),
+			Email:     request.Email,
+			Otp:       code,
+			ExpiresAt: expire.String()[:19],
+		})
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -146,10 +148,13 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
-	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    body.Tables,
-	})
+	res, err := h.services.SessionService().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    body.Tables,
+			ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -190,7 +195,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
 			Data:      structData,
-			ProjectId: "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
+			ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id,
 		},
 	)
 	if err != nil {
@@ -198,21 +203,26 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
-		Email:      body.Data["email"].(string),
-		ClientType: "WEB USER",
-		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
-	})
+	resp, err := h.services.LoginService().LoginWithEmailOtp(
+		context.Background(),
+		&pbObject.EmailOtpRequest{
+			Email:      body.Data["email"].(string),
+			ClientType: "WEB USER",
+			ProjectId:  "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    []*pb.Object{},
-	})
+	res, err := h.services.SessionService().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    []*pb.Object{},
+			ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
