@@ -58,11 +58,14 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	respObject, err := h.services.LoginService().LoginWithEmailOtp(c.Request.Context(), &pbObject.EmailOtpRequest{
-		Email:      request.Email,
-		ClientType: request.ClientType,
-		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id
-	})
+	respObject, err := h.services.LoginService().LoginWithEmailOtp(
+		c.Request.Context(),
+		&pbObject.EmailOtpRequest{
+			Email:      request.Email,
+			ClientType: request.ClientType,
+			ProjectId:  "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -78,12 +81,14 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.EmailServie().Create(c.Request.Context(), &pb.Email{
-		Id:        id.String(),
-		Email:     request.Email,
-		Otp:       code,
-		ExpiresAt: expire.String()[:19],
-	})
+	resp, err := h.services.EmailServie().Create(
+		c.Request.Context(),
+		&pb.Email{
+			Id:        id.String(),
+			Email:     request.Email,
+			Otp:       code,
+			ExpiresAt: expire.String()[:19],
+		})
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -103,7 +108,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	h.handleResponse(c, http.Created, res)
 }
 
-// VerifyEmail godoc
+// Verify godoc
 // @ID verify_email
 // @Router /verify-email/{sms_id}/{otp} [POST]
 // @Summary Verify
@@ -146,10 +151,13 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
-	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    body.Tables,
-	})
+	res, err := h.services.SessionService().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    body.Tables,
+			ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -179,59 +187,45 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	_, err = helper.ConvertMapToStruct(body.Data)
+	structData, err := helper.ConvertMapToStruct(body.Data)
 
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-
-	fmt.Println(body.Data)
-	_, err = h.services.UserService().V2CreateUser(
-		c.Request.Context(),
-		&pb.CreateUserRequest{
-			Email:                 body.Data["email"].(string),
-			Name:                  body.Data["name"].(string),
-			ProjectId:             "caf1dfc0-3f77-4ee4-beec-fef5467b645c",
-			CompanyId:             "90d33fe1-b996-481c-aad0-e52b1e8cff6c",
-			ClientTypeId:          "WEB USER",
-			ResourceEnvironmentId: "0f214698-6886-42f2-8c7f-25865d99fb16",
+	_, err = h.services.ObjectBuilderService().Create(
+		context.Background(),
+		&pbObject.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
+			ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
-	//_, err = h.services.ObjectBuilderService().Create(
-	//	context.Background(),
-	//	&pbObject.CommonMessage{
-	//		TableSlug: c.Param("table_slug"),
-	//		Data:      structData,
-	//		ProjectId: "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
-	//	},
-	//)
-	//if err != nil {
-	//	h.handleResponse(c, http.GRPCError, err.Error())
-	//	return
-	//}
-
-	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
-		Email:      body.Data["email"].(string),
-		ClientType: "WEB USER",
-		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
-	})
+	resp, err := h.services.LoginService().LoginWithEmailOtp(
+		context.Background(),
+		&pbObject.EmailOtpRequest{
+			Email:      body.Data["email"].(string),
+			ClientType: "WEB USER",
+			ProjectId:  "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    []*pb.Object{},
-	})
+	res, err := h.services.SessionService().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    []*pb.Object{},
+			ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
