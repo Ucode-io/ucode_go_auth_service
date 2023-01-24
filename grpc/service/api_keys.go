@@ -241,3 +241,15 @@ func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApi
 		},
 	}, nil
 }
+
+func (s *apiKeysService) GetEnvID(ctx context.Context, req *pb.GetReq) (resp *pb.GetRes, err error) {
+	s.log.Info("---GetEnvID--->>>>", logger.Any("req", req))
+
+	resp, err = s.strg.ApiKeys().GetEnvID(context.Background(), req)
+	if err != nil {
+		s.log.Error("---GetEnvID->Error--->>>", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return resp, nil
+}
