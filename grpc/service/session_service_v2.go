@@ -1030,30 +1030,30 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!V2HasAccessUser--->", logger.Error(err))
+		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
-		s.log.Error("!!!V2HasAccessUser--->", logger.Error(err))
+		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	if session.IsChanged {
 		err := errors.New("permission update")
-		s.log.Error("!!!V2HasAccessUser--->", logger.Error(err))
+		s.log.Error("!!!V2HasAccessUser->IsChanged--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
 	if err != nil {
-		s.log.Error("!!!V2HasAccessUser--->", logger.Error(err))
+		s.log.Error("!!!V2HasAccessUser->TimeParse--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	if expiresAt.Unix() < time.Now().Unix() {
 		err := errors.New("user has been expired")
-		s.log.Error("!!!V2HasAccessUser--->", logger.Error(err))
+		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -1171,7 +1171,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		UserId: session.GetUserId(),
 	})
 	if err != nil {
-		s.log.Error("V2HasAccessUser", logger.Error(err))
+		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
 		return nil, err
 	}
 
@@ -1185,7 +1185,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 	if !exist {
 		err = errors.New("access denied")
-		s.log.Error("!!!V2HasAccessUser--->", logger.Error(err))
+		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
