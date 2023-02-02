@@ -22,17 +22,17 @@ import (
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
 	s.log.Info("---CreateUser--->", logger.Any("req", req))
 
-	if len(req.Login) < 6 {
-		err := fmt.Errorf("login must not be less than 6 characters")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if len(req.Login) < 6 {
+	// 	err := fmt.Errorf("login must not be less than 6 characters")
+	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-	if len(req.Password) < 6 {
-		err := fmt.Errorf("password must not be less than 6 characters")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, err
-	}
+	// if len(req.Password) < 6 {
+	// 	err := fmt.Errorf("password must not be less than 6 characters")
+	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
+	// 	return nil, err
+	// }
 
 	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
@@ -49,13 +49,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		return nil, err
 	}
 
-	phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
-	phone := phoneRegex.MatchString(req.Phone)
-	if !phone {
-		err = fmt.Errorf("phone number is not valid")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, err
-	}
+	// phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
+	// phone := phoneRegex.MatchString(req.Phone)
+	// if !phone {
+	// 	err = fmt.Errorf("phone number is not valid")
+	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
+	// 	return nil, err
+	// }
 
 	pKey, err := s.strg.User().Create(ctx, req)
 
