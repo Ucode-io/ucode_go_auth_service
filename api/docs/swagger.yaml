@@ -263,18 +263,18 @@ definitions:
         type: string
       parent_id:
         type: string
+      resource_environment_id:
+        type: string
     type: object
   auth_service.CreateReq:
     properties:
       client_type_id:
         type: string
+      environment_id:
+        type: string
       name:
         type: string
       project_id:
-        type: string
-      resource:
-        type: string
-      resource_environment_id:
         type: string
       role_id:
         type: string
@@ -289,13 +289,13 @@ definitions:
         type: string
       created_at:
         type: string
+      environment_id:
+        type: string
       id:
         type: string
       name:
         type: string
       project_id:
-        type: string
-      resource_environment_id:
         type: string
       role_id:
         type: string
@@ -420,13 +420,13 @@ definitions:
         type: string
       created_at:
         type: string
+      environment_id:
+        type: string
       id:
         type: string
       name:
         type: string
       project_id:
-        type: string
-      resource_environment_id:
         type: string
       role_id:
         type: string
@@ -5124,9 +5124,9 @@ paths:
         name: project-id
         required: true
         type: string
-      - description: resource-environment-id
+      - description: environment-id
         in: query
-        name: resource-environment-id
+        name: environment-id
         type: string
       - description: offset
         in: query

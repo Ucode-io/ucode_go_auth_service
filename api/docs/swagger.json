@@ -6341,8 +6341,8 @@
                     },
                     {
                         "type": "string",
-                        "description": "resource-environment-id",
-                        "name": "resource-environment-id",
+                        "description": "environment-id",
+                        "name": "environment-id",
                         "in": "query"
                     },
                     {
@@ -12102,6 +12102,9 @@
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
                 }
             }
         },
@@ -12111,16 +12114,13 @@
                 "client_type_id": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "resource": {
-                    "type": "string"
-                },
-                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -12143,6 +12143,9 @@
                 "created_at": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -12150,9 +12153,6 @@
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -12345,6 +12345,9 @@
                 "created_at": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -12352,9 +12355,6 @@
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {

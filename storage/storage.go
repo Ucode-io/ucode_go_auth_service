@@ -196,4 +196,5 @@ type ApiKeysRepoI interface {
 	Update(ctx context.Context, req *pb.UpdateReq) (rowsAffected int64, err error)
 	Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffected int64, err error)
 	GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error)
+	GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error)
 }

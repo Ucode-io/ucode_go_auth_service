@@ -947,7 +947,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 
 // UpdateRoleAppTablePermissions godoc
 // @ID update_role_app_table_permissions
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/role-permission/detailed [PUT]
 // @Summary Update Permission
@@ -960,8 +960,10 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
-	var permission object_builder_service.UpdateRoleAppTablePermissionsRequest
-	var resourceEnvironment *obs.ResourceEnvironment
+	var (
+		permission          object_builder_service.UpdateRoleAppTablePermissionsRequest
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
 	err := c.ShouldBindJSON(&permission)
 	if err != nil {
@@ -969,11 +971,16 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 		return
 	}
 
-	resourceId, _ := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	// 	return
-	// }
+	if !util.IsValidUUID(permission.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {

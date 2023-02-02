@@ -6359,8 +6359,8 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "resource-environment-id",
-                        "name": "resource-environment-id",
+                        "description": "environment-id",
+                        "name": "environment-id",
                         "in": "query"
                     },
                     {
@@ -12120,6 +12120,9 @@ var doc = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
                 }
             }
         },
@@ -12129,16 +12132,13 @@ var doc = `{
                 "client_type_id": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "resource": {
-                    "type": "string"
-                },
-                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -12161,6 +12161,9 @@ var doc = `{
                 "created_at": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -12168,9 +12171,6 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {
@@ -12363,6 +12363,9 @@ var doc = `{
                 "created_at": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -12370,9 +12373,6 @@ var doc = `{
                     "type": "string"
                 },
                 "project_id": {
-                    "type": "string"
-                },
-                "resource_environment_id": {
                     "type": "string"
                 },
                 "role_id": {

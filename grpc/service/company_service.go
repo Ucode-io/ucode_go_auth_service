@@ -65,6 +65,20 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
+	_, err = s.services.EnvironmentService().Create(
+		ctx,
+		&company_service.CreateEnvironmentRequest{
+			ProjectId:    project.ProjectId,
+			Name:         "Production",
+			DisplayColor: "#00FF00",
+			Description:  "Production Environment",
+		},
+	)
+	if err != nil {
+		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, err
+	}
+
 	//projectID := project.ProjectId
 	// PROJECT
 	//createProjectReq, err := helper.ConvertMapToStruct(map[string]interface{}{
