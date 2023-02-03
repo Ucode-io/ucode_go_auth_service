@@ -8,10 +8,10 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
-	_ "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -187,7 +187,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	_, err = helper.ConvertMapToStruct(body.Data)
+	structData, err := helper.ConvertMapToStruct(body.Data)
 
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -216,18 +216,19 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	//_, err = h.services.ObjectBuilderService().Create(
-	//	context.Background(),
-	//	&pbObject.CommonMessage{
-	//		TableSlug: c.Param("table_slug"),
-	//		Data:      structData,
-	//		ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id,
-	//	},
-	//)
-	//if err != nil {
-	//	h.handleResponse(c, http.GRPCError, err.Error())
-	//	return
-	//}
+	_, err = h.services.ObjectBuilderService().Create(
+		context.Background(),
+		&pbObject.CommonMessage{
+			TableSlug: c.Param("table_slug"),
+			Data:      structData,
+			ProjectId: "217283cf-58d3-4218-9f9a-db4f66b92899", //@TODO:: temp added hardcoded project id,
+		},
+	)
+	if err != nil {
+		h.log.Error("---ERR->ObjectBuilderService->Create--->", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 		Email:      body.Data["email"].(string),
