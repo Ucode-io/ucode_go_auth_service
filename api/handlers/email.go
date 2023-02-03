@@ -187,17 +187,11 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	structData, err := helper.ConvertMapToStruct(body.Data)
-
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
 
 	id, _ := uuid.NewRandom()
 
 	fmt.Println(body.Data)
-	_, err = h.services.UserService().V2CreateUser(
+	respCreateUser, err := h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&pb.CreateUserRequest{
 			Email:                 body.Data["email"].(string),
@@ -213,6 +207,13 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	body.Data["guid"] = respCreateUser.GetId()
+	structData, err := helper.ConvertMapToStruct(body.Data)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
 
