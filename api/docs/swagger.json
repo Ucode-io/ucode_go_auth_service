@@ -6071,6 +6071,19 @@
                 "operationId": "add user to project",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "AddUserToProjectReq",
                         "name": "user",
                         "in": "body",
@@ -10135,8 +10148,7 @@
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -10759,6 +10771,19 @@
                 "operationId": "update_user_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateUserRequestBody",
                         "name": "user",
                         "in": "body",
@@ -10839,6 +10864,19 @@
                 "summary": "Create User",
                 "operationId": "create_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateUserRequestBody",
                         "name": "user",
@@ -11196,6 +11234,19 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "user-id",
                         "name": "user-id",
                         "in": "path",
@@ -11280,6 +11331,19 @@
                 "summary": "Delete User",
                 "operationId": "delete_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "user-id",

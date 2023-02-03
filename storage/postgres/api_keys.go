@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 )
 
 type apiKeysRepo struct {
@@ -313,4 +314,26 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
 		res.UpdatedAt = updatedAt.String
 	}
 	return &res, nil
+}
+
+func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
+
+	res := &pb.GetRes{}
+
+	query := `
+		SELECT
+  			environment_id
+		FROM
+			api_keys
+		WHERE
+			app_id = $1`
+
+	err := r.db.QueryRow(ctx, query, req.GetId()).Scan(
+		&res.EnvironmentId,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "error while scanning")
+	}
+
+	return res, nil
 }

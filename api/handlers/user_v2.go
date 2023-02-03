@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/company_service"
@@ -19,6 +20,8 @@ import (
 
 // V2CreateUser godoc
 // @ID create_user_v2
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/user [POST]
 // @Summary Create User
 // @Description Create User
@@ -30,13 +33,61 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateUser(c *gin.Context) {
-	var user auth_service.CreateUserRequest
+	var (
+		resourceEnvironment *company_service.ResourceEnvironment
+		user                auth_service.CreateUserRequest
+	)
 
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	if !util.IsValidUUID(user.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  user.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	user.ResourceEnvironmentId = resourceEnvironment.GetId()
 
 	resp, err := h.services.UserService().V2CreateUser(
 		c.Request.Context(),
@@ -152,6 +203,8 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // V2GetUserByID godoc
 // @ID get_user_by_id_v2
 // @Router /v2/user/{user-id} [GET]
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Summary Get User By ID
 // @Description Get User By ID
 // @Tags V2_User
@@ -163,6 +216,10 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserByID(c *gin.Context) {
+	var (
+		resourceEnvironment *company_service.ResourceEnvironment
+		err                 error
+	)
 	userID := c.Param("user-id")
 
 	if !util.IsValidUUID(userID) {
@@ -177,11 +234,49 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		return
 	}
 
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectID,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
 			Id:        userID,
-			ProjectId: projectID,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -195,6 +290,8 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 
 // V2UpdateUser godoc
 // @ID update_user_v2
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/user [PUT]
 // @Summary Update User
 // @Description Update User
@@ -206,13 +303,61 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateUser(c *gin.Context) {
-	var user auth_service.UpdateUserRequest
+	var (
+		resourceEnvironment *company_service.ResourceEnvironment
+		user                auth_service.UpdateUserRequest
+	)
 
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	if !util.IsValidUUID(user.GetProjectId()) {
+		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  user.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	fmt.Println(resourceEnvironment.GetId())
 
 	resp, err := h.services.UserService().V2UpdateUser(
 		c.Request.Context(),
@@ -229,6 +374,8 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 
 // V2DeleteUser godoc
 // @ID delete_user_v2
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/user/{user-id} [DELETE]
 // @Summary Delete User
 // @Description Get User
@@ -241,7 +388,11 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteUser(c *gin.Context) {
-	var userDataToMap = make(map[string]interface{})
+	var (
+		userDataToMap       = make(map[string]interface{})
+		resourceEnvironment *company_service.ResourceEnvironment
+		err                 error
+	)
 	userID := c.Param("user-id")
 
 	if !util.IsValidUUID(userID) {
@@ -254,6 +405,44 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	if !util.IsValidUUID(projectID) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectID,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	resp, err := h.services.UserService().V2DeleteUser(
@@ -281,7 +470,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: "user",
 			Data:      structData,
-			ProjectId: projectID,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -295,6 +484,8 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 
 // AddUserToProject godoc
 // @ID add user to project
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/add-user-to-project [POST]
 // @Summary Create User
 // @Description Create User
@@ -306,8 +497,10 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
-
-	req := auth_service.AddUserToProjectReq{}
+	var (
+		req                 = auth_service.AddUserToProjectReq{}
+		resourceEnvironment *company_service.ResourceEnvironment
+	)
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -315,6 +508,49 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		h.log.Error("!!!AddUserToProject -> cant parse json")
 		h.handleResponse(c, http.BadRequest, errCantParseReq.Error())
 		return
+	}
+
+	if !util.IsValidUUID(req.GetProjectId()) {
+		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&company_service.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  req.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	res, err := h.services.UserService().AddUserToProject(
@@ -362,7 +598,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		&obs.CommonMessage{
 			TableSlug: "user",
 			Data:      structData,
-			ProjectId: req.ProjectId,
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 

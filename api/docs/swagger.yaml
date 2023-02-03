@@ -6085,6 +6085,15 @@ paths:
       description: Create User
       operationId: add user to project
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: AddUserToProjectReq
         in: body
         name: user
@@ -8437,7 +8446,6 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
@@ -8804,6 +8812,15 @@ paths:
       description: Create User
       operationId: create_user_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: CreateUserRequestBody
         in: body
         name: user
@@ -8849,6 +8866,15 @@ paths:
       description: Update User
       operationId: update_user_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: UpdateUserRequestBody
         in: body
         name: user
@@ -9054,6 +9080,15 @@ paths:
       description: Get User
       operationId: delete_user_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: user-id
         in: path
         name: user-id
@@ -9096,6 +9131,15 @@ paths:
       description: Get User By ID
       operationId: get_user_by_id_v2
       parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
       - description: user-id
         in: path
         name: user-id

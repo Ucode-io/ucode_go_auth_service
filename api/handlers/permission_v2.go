@@ -874,12 +874,60 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
 	// 	return
 	// }
+	var (
+		resourceEnvironment *obs.ResourceEnvironment
+		err                 error
+	)
+
+	projectId := c.Param("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  projectId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	resp, err := h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
 		c.Request.Context(),
 		&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
 			RoleId:    c.Param("role-id"),
-			ProjectId: c.Param("project-id"),
+			ProjectId: resourceEnvironment.GetId(),
 		},
 	)
 
@@ -887,6 +935,8 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	resp.ProjectId = projectId
 
 	if bytes, err := json.Marshal(resp); err != nil {
 		fmt.Println("response", string(bytes))
@@ -897,7 +947,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 
 // UpdateRoleAppTablePermissions godoc
 // @ID update_role_app_table_permissions
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/role-permission/detailed [PUT]
 // @Summary Update Permission
@@ -910,13 +960,61 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
-	var permission object_builder_service.UpdateRoleAppTablePermissionsRequest
+	var (
+		permission          object_builder_service.UpdateRoleAppTablePermissionsRequest
+		resourceEnvironment *obs.ResourceEnvironment
+	)
 
 	err := c.ShouldBindJSON(&permission)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	if !util.IsValidUUID(permission.GetProjectId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	if util.IsValidUUID(resourceId.(string)) {
+		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetResourceEnvironmentReq{
+				EnvironmentId: environmentId.(string),
+				ResourceId:    resourceId.(string),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+			c.Request.Context(),
+			&obs.GetDefaultResourceEnvironmentReq{
+				ResourceId: resourceId.(string),
+				ProjectId:  permission.GetProjectId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	permission.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
 		c.Request.Context(),

@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -48,35 +50,45 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	expire := time.Now().Add(time.Minute * 5)
+	expire := time.Now().Add(time.Hour * 5).Add(time.Minute * 5) // hard code time zone
 
-	code, err := util.GenerateCode(4)
+	code, err := util.GenerateCode(6)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
 
-	respObject, err := h.services.LoginService().LoginWithEmailOtp(c.Request.Context(), &pbObject.EmailOtpRequest{
-		Email:      request.Email,
-		ClientType: request.ClientType,
-		ProjectId:  "caf1dfc0-3f77-4ee4-beec-fef5467b645c", //@TODO:: temp added hardcoded project id
-	})
+	respObject, err := h.services.LoginService().LoginWithEmailOtp(
+		c.Request.Context(),
+		&pbObject.EmailOtpRequest{
+			Email:      request.Email,
+			ClientType: request.ClientType,
+			ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	if (respObject == nil || !respObject.UserFound) && request.ClientType != "PATIENT" {
+
+	if bytes, err := json.MarshalIndent(respObject, "", " "); err == nil {
+		fmt.Println("bytes", bytes)
+	}
+
+	if (respObject == nil || !respObject.UserFound) && request.ClientType != "WEB USER" {
 		err := errors.New("Пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	}
 
-	resp, err := h.services.EmailServie().Create(c.Request.Context(), &pb.Email{
-		Id:        id.String(),
-		Email:     request.Email,
-		Otp:       code,
-		ExpiresAt: expire.String()[:19],
-	})
+	resp, err := h.services.EmailServie().Create(
+		c.Request.Context(),
+		&pb.Email{
+			Id:        id.String(),
+			Email:     request.Email,
+			Otp:       code,
+			ExpiresAt: expire.String()[:19],
+		})
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -118,7 +130,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	if c.Param("otp") != "1212" {
+	if c.Param("otp") != "121212" {
 		resp, err := h.services.EmailServie().GetEmailByID(
 			c.Request.Context(),
 			&pb.EmailOtpPrimaryKey{
@@ -139,10 +151,13 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
-	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-		LoginData: convertedToAuthPb,
-		Tables:    body.Tables,
-	})
+	res, err := h.services.SessionService().SessionAndTokenGenerator(
+		context.Background(),
+		&pb.SessionAndTokenRequest{
+			LoginData: convertedToAuthPb,
+			Tables:    body.Tables,
+			ProjectId: "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -172,29 +187,48 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
-	structData, err := helper.ConvertMapToStruct(body.Data)
+	_, err = helper.ConvertMapToStruct(body.Data)
 
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = h.services.ObjectBuilderService().Create(
-		context.Background(),
-		&pbObject.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      structData,
+
+	fmt.Println(body.Data)
+	_, err = h.services.UserService().V2CreateUser(
+		c.Request.Context(),
+		&pb.CreateUserRequest{
+			Email:                 body.Data["email"].(string),
+			Name:                  body.Data["name"].(string),
+			ProjectId:             "caf1dfc0-3f77-4ee4-beec-fef5467b645c",
+			CompanyId:             "90d33fe1-b996-481c-aad0-e52b1e8cff6c",
+			ClientTypeId:          "WEB USER",
+			ResourceEnvironmentId: "0f214698-6886-42f2-8c7f-25865d99fb16",
 		},
 	)
+
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
+	//_, err = h.services.ObjectBuilderService().Create(
+	//	context.Background(),
+	//	&pbObject.CommonMessage{
+	//		TableSlug: c.Param("table_slug"),
+	//		Data:      structData,
+	//		ProjectId: "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
+	//	},
+	//)
+	//if err != nil {
+	//	h.handleResponse(c, http.GRPCError, err.Error())
+	//	return
+	//}
+
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 		Email:      body.Data["email"].(string),
-		ClientType: "PATIENT",
-		ProjectId: "caf1dfc0-3f77-4ee4-beec-fef5467b645c", //@TODO:: temp added hardcoded project id,
+		ClientType: "WEB USER",
+		ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id,
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -212,4 +246,5 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, res)
+
 }

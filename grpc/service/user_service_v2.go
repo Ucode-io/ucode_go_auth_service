@@ -22,17 +22,17 @@ import (
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
 	s.log.Info("---CreateUser--->", logger.Any("req", req))
 
-	if len(req.Login) < 6 {
-		err := fmt.Errorf("login must not be less than 6 characters")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if len(req.Login) < 6 {
+	// 	err := fmt.Errorf("login must not be less than 6 characters")
+	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-	if len(req.Password) < 6 {
-		err := fmt.Errorf("password must not be less than 6 characters")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, err
-	}
+	// if len(req.Password) < 6 {
+	// 	err := fmt.Errorf("password must not be less than 6 characters")
+	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
+	// 	return nil, err
+	// }
 
 	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
@@ -49,13 +49,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		return nil, err
 	}
 
-	phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
-	phone := phoneRegex.MatchString(req.Phone)
-	if !phone {
-		err = fmt.Errorf("phone number is not valid")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, err
-	}
+	// phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
+	// phone := phoneRegex.MatchString(req.Phone)
+	// if !phone {
+	// 	err = fmt.Errorf("phone number is not valid")
+	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
+	// 	return nil, err
+	// }
 
 	pKey, err := s.strg.User().Create(ctx, req)
 
@@ -82,7 +82,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: req.GetResourceEnvironmentId(),
 	})
 
 	if err != nil {
@@ -434,8 +434,8 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*emptypb.Empty, error) {
 	s.log.Info("---DeleteUser--->", logger.Any("req", req))
 
-	//res := &emptypb.Empty{}
-	//
+	res := &emptypb.Empty{}
+
 	//structData, err := helper.ConvertRequestToSturct(req)
 	//if err != nil {
 	//	s.log.Error("!!!DeleteUser--->", logger.Error(err))
@@ -445,16 +445,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	//_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 	//	TableSlug: "user",
 	//	Data:      structData,
-	//	ProjectId: config.UcodeDefaultProjectID,
+	//	ProjectId: req.GetResourceEnvironmentId(),
 	//})
 	//if err != nil {
 	//	s.log.Error("!!!DeleteUser.ObjectBuilderService.Delete--->", logger.Error(err))
 	//	return nil, status.Error(codes.Internal, err.Error())
 	//}
-	//
-	//return res, nil
-
-	res := &emptypb.Empty{}
 
 	rowsAffected, err := s.strg.User().Delete(ctx, req)
 

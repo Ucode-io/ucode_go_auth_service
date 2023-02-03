@@ -6082,6 +6082,19 @@ const docTemplate = `{
                 "operationId": "add user to project",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "AddUserToProjectReq",
                         "name": "user",
                         "in": "body",
@@ -10146,8 +10159,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -10770,6 +10782,19 @@ const docTemplate = `{
                 "operationId": "update_user_v2",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateUserRequestBody",
                         "name": "user",
                         "in": "body",
@@ -10850,6 +10875,19 @@ const docTemplate = `{
                 "summary": "Create User",
                 "operationId": "create_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "CreateUserRequestBody",
                         "name": "user",
@@ -11207,6 +11245,19 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "user-id",
                         "name": "user-id",
                         "in": "path",
@@ -11291,6 +11342,19 @@ const docTemplate = `{
                 "summary": "Delete User",
                 "operationId": "delete_user_v2",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "user-id",

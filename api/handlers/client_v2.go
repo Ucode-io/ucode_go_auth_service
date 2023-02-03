@@ -10,6 +10,7 @@ import (
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v4"
 )
 
 // V2CreateClientPlatform godoc
@@ -168,6 +169,10 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				h.handleResponse(c, http.GRPCError, "У вас нет ресурса по умолчанию, установите один ресурс по умолчанию")
+				return
+			}
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
@@ -547,6 +552,10 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 			},
 		)
 		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				h.handleResponse(c, http.GRPCError, "У вас нет ресурса по умолчанию, установите один ресурс по умолчанию")
+				return
+			}
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
