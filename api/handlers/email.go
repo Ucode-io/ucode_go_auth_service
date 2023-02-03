@@ -194,6 +194,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
+	id, _ := uuid.NewRandom()
+
 	fmt.Println(body.Data)
 	_, err = h.services.UserService().V2CreateUser(
 		c.Request.Context(),
@@ -204,6 +206,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			CompanyId:             "90d33fe1-b996-481c-aad0-e52b1e8cff6c",
 			ClientTypeId:          "WEB USER",
 			ResourceEnvironmentId: "217283cf-58d3-4218-9f9a-db4f66b92899",
+			Login:                 body.Data["email"].(string) + id.String(),
 		},
 	)
 
