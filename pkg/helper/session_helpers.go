@@ -25,12 +25,12 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	}
 
 	res.ClientType = &pb.ClientType{
-		Id:           data.GetClientType().Guid,
-		Name:         data.GetClientType().Name,
-		ConfirmBy:    pb.ConfirmStrategies(data.ClientType.ConfirmBy),
-		SelfRegister: data.GetClientType().SelfRegister,
-		SelfRecover:  data.GetClientType().SelfRecover,
-		ProjectId:    data.GetClientType().ProjectId,
+		Id:           data.GetClientType().GetGuid(),
+		Name:         data.GetClientType().GetName(),
+		ConfirmBy:    pb.ConfirmStrategies(data.GetClientType().GetConfirmBy()),
+		SelfRegister: data.GetClientType().GetSelfRegister(),
+		SelfRecover:  data.GetClientType().GetSelfRecover(),
+		ProjectId:    data.GetClientType().GetProjectId(),
 		Tables:       tables,
 	}
 
@@ -40,31 +40,31 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		ProjectId: data.GetClientPlatform().GetProjectId(),
 		Subdomain: data.GetClientPlatform().GetSubdomain(),
 	}
-	permissions := make([]*pb.RecordPermission, 0, len(data.Permissions))
-	for _, v := range data.Permissions {
+	permissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
+	for _, v := range data.GetPermissions() {
 		permission := &pb.RecordPermission{}
-		permission.ClientTypeId = v.ClientTypeId
-		permission.Id = v.Guid
-		permission.Read = v.Read
-		permission.Write = v.Write
-		permission.Delete = v.Delete
-		permission.Update = v.Update
-		permission.RoleId = v.RoleId
-		permission.TableSlug = v.TableSlug
+		permission.ClientTypeId = v.GetClientTypeId()
+		permission.Id = v.GetGuid()
+		permission.Read = v.GetRead()
+		permission.Write = v.GetWrite()
+		permission.Delete = v.GetDelete()
+		permission.Update = v.GetUpdate()
+		permission.RoleId = v.GetRoleId()
+		permission.TableSlug = v.GetTableSlug()
 		permissions = append(permissions, permission)
 	}
 
-	appPermissions := make([]*pb.RecordPermission, 0, len(data.Permissions))
-	for _, v := range data.AppPermissions {
+	appPermissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
+	for _, v := range data.GetAppPermissions() {
 		appPermission := &pb.RecordPermission{}
-		appPermission.ClientTypeId = v.ClientTypeId
-		appPermission.Id = v.Guid
-		appPermission.Read = v.Read
-		appPermission.Write = v.Write
-		appPermission.Delete = v.Delete
-		appPermission.Update = v.Update
-		appPermission.RoleId = v.RoleId
-		appPermission.TableSlug = v.TableSlug
+		appPermission.ClientTypeId = v.GetClientTypeId()
+		appPermission.Id = v.GetGuid()
+		appPermission.Read = v.GetRead()
+		appPermission.Write = v.GetWrite()
+		appPermission.Delete = v.GetDelete()
+		appPermission.Update = v.GetUpdate()
+		appPermission.RoleId = v.GetRoleId()
+		appPermission.TableSlug = v.GetTableSlug()
 		appPermissions = append(appPermissions, appPermission)
 	}
 	res.Permissions = permissions
