@@ -46,6 +46,8 @@ func ReplaceSQL(old, searchPattern string) string {
 }
 
 func ConvertMapToStruct(inputMap map[string]interface{}) (*structpb.Struct, error) {
+	log.Printf("---INFO->ConvertMapToStruct---> %+v", inputMap)
+
 	marshledInputMap, err := json.Marshal(inputMap)
 	outputStruct := &structpb.Struct{}
 	if err != nil {
