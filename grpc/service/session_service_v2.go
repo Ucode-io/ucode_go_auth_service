@@ -547,9 +547,16 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 }
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
+	s.log.Info("--->SessionAndTokenGenerator--->", logger.Any("req", input))
+
+	if _, err := uuid.Parse(input.GetLoginData().GetUserId()); err != nil {
+		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
+		s.log.Error("---ERR->GetLoginData().GetUserId-->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
 	// // TODO - Delete all old sessions & refresh token has this function too
-	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.LoginData.UserId)
+	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.GetLoginData().GetUserId())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
