@@ -1,16 +1,19 @@
 package helper
 
 import (
+	"log"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
+	log.Printf("---INFO-->ConvertPbToAnotherPb---> %+v", data)
+
 	res := &pb.V2LoginResponse{}
 	res.UserId = data.UserId
 	res.LoginTableSlug = data.LoginTableSlug
-	tables := make([]*pb.Table, 0, len(data.ClientType.Tables))
-	for _, v := range data.ClientType.Tables {
+	tables := make([]*pb.Table, 0, len(data.GetClientType().GetTables()))
+	for _, v := range data.GetClientType().GetTables() {
 		table := &pb.Table{}
 		table.Data = v.Data
 		table.Icon = v.Icon
@@ -22,20 +25,20 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	}
 
 	res.ClientType = &pb.ClientType{
-		Id:           data.ClientType.Guid,
-		Name:         data.ClientType.Name,
+		Id:           data.GetClientType().Guid,
+		Name:         data.GetClientType().Name,
 		ConfirmBy:    pb.ConfirmStrategies(data.ClientType.ConfirmBy),
-		SelfRegister: data.ClientType.SelfRegister,
-		SelfRecover:  data.ClientType.SelfRecover,
-		ProjectId:    data.ClientType.ProjectId,
+		SelfRegister: data.GetClientType().SelfRegister,
+		SelfRecover:  data.GetClientType().SelfRecover,
+		ProjectId:    data.GetClientType().ProjectId,
 		Tables:       tables,
 	}
 
 	res.ClientPlatform = &pb.ClientPlatform{
-		Id:        data.ClientPlatform.Guid,
-		Name:      data.ClientPlatform.Name,
-		ProjectId: data.ClientPlatform.ProjectId,
-		Subdomain: data.ClientPlatform.Subdomain,
+		Id:        data.GetClientPlatform().GetGuid(),
+		Name:      data.GetClientPlatform().GetName(),
+		ProjectId: data.GetClientPlatform().GetProjectId(),
+		Subdomain: data.GetClientPlatform().GetSubdomain(),
 	}
 	permissions := make([]*pb.RecordPermission, 0, len(data.Permissions))
 	for _, v := range data.Permissions {
@@ -67,11 +70,11 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	res.Permissions = permissions
 	res.AppPermissions = appPermissions
 	res.Role = &pb.Role{
-		Id:               data.Role.Guid,
-		ClientTypeId:     data.Role.ClientTypeId,
-		Name:             data.Role.Name,
-		ClientPlatformId: data.Role.ClientPlatformId,
-		ProjectId:        data.Role.ProjectId,
+		Id:               data.GetRole().GetGuid(),
+		ClientTypeId:     data.GetRole().GetClientTypeId(),
+		Name:             data.GetRole().GetName(),
+		ClientPlatformId: data.GetRole().GetClientPlatformId(),
+		ProjectId:        data.GetRole().GetProjectId(),
 	}
 	return res
 }
