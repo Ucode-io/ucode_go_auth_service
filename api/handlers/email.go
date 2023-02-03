@@ -207,6 +207,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			ClientTypeId:          "WEB USER",
 			ResourceEnvironmentId: "217283cf-58d3-4218-9f9a-db4f66b92899",
 			Login:                 body.Data["email"].(string) + id.String(),
+			Phone:                 "+99899" + id.String(),
 		},
 	)
 
