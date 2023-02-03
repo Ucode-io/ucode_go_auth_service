@@ -188,7 +188,7 @@ func (s *clientService) V2DeleteClientPlatform(ctx context.Context, req *pb.Clie
 	return res, nil
 }
 
-func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.CreateClientTypeRequest) (*pb.CommonMessage, error) {
+func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2CreateClientTypeRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---CreateClientType--->", logger.Any("req", req))
 
 	requestToObjBuilderService := &pb.CreateClientTypeRequestToObjService{
@@ -196,7 +196,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.CreateCl
 		ConfirmBy:    req.ConfirmBy.String(),
 		SelfRegister: req.SelfRegister,
 		SelfRecover:  req.SelfRecover,
-		ProjectId:    req.ProjectId,
+		ProjectId:    req.DbProjectId,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
@@ -209,7 +209,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.CreateCl
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.GetProjectId(),
 		})
 
 	if err != nil {
@@ -223,7 +223,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.CreateCl
 	}, nil
 }
 
-func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientTypePrimaryKey) (*pb.CommonMessage, error) {
+func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2ClientTypePrimaryKey) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeByID--->", logger.Any("req", req))
 
 	structData, err := helper.ConvertRequestToSturct(req)
@@ -236,7 +236,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientT
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: req.ProjectId,
+			ProjectId: req.GetProjectId(),
 		})
 
 	if err != nil {
@@ -250,7 +250,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.ClientT
 	}, nil
 }
 
-func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.GetClientTypeListRequest) (*pb.CommonMessage, error) {
+func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 
 	fmt.Println("req.ProjectId", req.ProjectId)
@@ -285,7 +285,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.GetClie
 	}, nil
 }
 
-func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.UpdateClientTypeRequest) (*pb.CommonMessage, error) {
+func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2UpdateClientTypeRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---UpdateClientType--->", logger.Any("req", req))
 
 	requestToObjBuilderService := &pb.UpdateClientTypeRequestToObjService{
@@ -293,12 +293,13 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.UpdateCl
 		ConfirmBy:         req.ConfirmBy.String(),
 		SelfRegister:      req.SelfRegister,
 		SelfRecover:       req.SelfRecover,
-		ProjectId:         req.ProjectId,
-		Id:                req.Id,
+		ProjectId:         req.DbProjectId,
+		Guid:              req.Guid,
 		ClientPlatformIds: req.ClientPlatformIds,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
+	fmt.Println(structData.AsMap())
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -307,24 +308,11 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.UpdateCl
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.GetProjectId(),
 		})
 	if err != nil {
 		s.log.Error("!!!UpdateClientType.ObjectBuilderService.Update--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
-	}
-
-	_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
-		&pbObject.ManyToManyMessage{
-			TableFrom: "client_type",
-			TableTo:   "client_platform",
-			IdFrom:    req.Id,
-			IdTo:      req.ClientPlatformIds,
-			ProjectId: config.UcodeDefaultProjectID,
-		})
-	if err != nil {
-		s.log.Error("!!!AddClient.ObjectBuilderService.Create--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pb.CommonMessage{
@@ -333,7 +321,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.UpdateCl
 	}, nil
 }
 
-func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.ClientTypePrimaryKey) (*emptypb.Empty, error) {
+func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.V2ClientTypePrimaryKey) (*emptypb.Empty, error) {
 	s.log.Info("---DeleteClientType--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
@@ -348,7 +336,7 @@ func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.ClientTy
 		&pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.GetProjectId(),
 		})
 
 	if err != nil {

@@ -281,7 +281,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	request[methodField] = "Yes"
 	request["table_slug"] = tableSlug
 
-	clientType, err := s.services.ClientService().V2GetClientTypeByID(ctx, &pb.ClientTypePrimaryKey{
+	clientType, err := s.services.ClientService().V2GetClientTypeByID(ctx, &pb.V2ClientTypePrimaryKey{
 		Id: session.ClientTypeId,
 	})
 	if err != nil {

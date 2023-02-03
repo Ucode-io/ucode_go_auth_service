@@ -1,28 +1,25 @@
 syntax="proto3";
 
-package company_service;
-option go_package="genproto/company_service";
+package versioning_service;
+option go_package="genproto/versioning_service";
 
 import "google/protobuf/empty.proto";
-import "company.proto";
+import "versioning.proto";
 
 service CommitService {
-    rpc Create(CreateCommitRequest) returns (Commit) {}
-    rpc GetByID(CommitPrimaryKey) returns (Commit) {}
+    rpc Create(CreateCommitRequest) returns (CommitWithRelease) {}
+    rpc GetByID(CommitPrimaryKey) returns (CommitWithRelease) {}
     rpc GetList(GetCommitListRequest) returns (GetCommitListResponse) {}
-    rpc Update(UpdateCommitRequest) returns (Commit) {}
-    rpc Restore(RestoreRequest) returns (google.protobuf.Empty) {}
-    rpc GetCurrent(GetCurrentRequest) returns (GetCurrentResponse) {}
-
+    rpc Restore(RestoreCommitRequest) returns (google.protobuf.Empty) {}
+    rpc Insert(CreateCommitRequest) returns (InsertCommitResponse) {}
 }
-
 
 message CreateCommitRequest {
     string project_id = 1;
     string environment_id = 2;
     string author_id = 3;
     string name = 4;
-    string description = 5;
+    string commit_type = 5;
 }
 
 message CommitPrimaryKey {
@@ -36,28 +33,21 @@ message GetCommitListRequest {
     string project_id = 4;
     string environment_id = 5;
     string created_at = 6;
+    string commit_type = 7;
 }
 
 message GetCommitListResponse {
     int32 count = 1;
-    repeated Commit commits = 2;
+    repeated CommitWithRelease commits = 2;
 }
 
-message UpdateCommitRequest {
-    string id = 1;
-    string description = 2;
-}
-
-message GetCurrentRequest {
-    string environment_id = 1;
-}
-
-message RestoreRequest {
+message RestoreCommitRequest {
     string project_id = 1;
     string environment_id = 2;
     string id = 3;
 }
 
-message GetCurrentResponse {
+message InsertCommitResponse {
     string commit_id = 1;
+    string version_id = 2;
 }
