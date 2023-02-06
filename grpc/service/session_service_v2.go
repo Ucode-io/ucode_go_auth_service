@@ -1034,6 +1034,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
@@ -1191,7 +1192,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	if !exist {
-		err = errors.New("access denied")
+		err = errors.New("---V2HasAccessUser->Access denied")
 		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
