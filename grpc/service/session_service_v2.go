@@ -1186,7 +1186,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	if !exist {
-		err = errors.New("access denied")
+		err = errors.New("---V2HasAccessUser->Access Denied")
 		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
