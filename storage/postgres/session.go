@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 )
 
 type sessionRepo struct {
@@ -157,7 +158,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		&updatedAt,
 	)
 	if err != nil {
-		return res, err
+		return res, errors.Wrap(err, "error while getting session by id: "+err.Error())
 	}
 
 	if userID.Valid {
