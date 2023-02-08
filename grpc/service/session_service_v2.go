@@ -547,6 +547,7 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 }
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
+	s.log.Info("---SessionAndTokenGenerator--->", logger.Any("input", input))
 
 	// // TODO - Delete all old sessions & refresh token has this function too
 	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.LoginData.UserId)
@@ -554,7 +555,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
+	s.log.Info("SessionAndTokenGenerator--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
 	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -638,7 +639,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
+	s.log.Info("---SessionAndTokenGeneratorSuperAdmin--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
 	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -657,6 +658,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		Ip:        "0.0.0.0",
 		Data:      "additional json data",
 		ExpiresAt: time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+		ProjectId: input.ProjectId,
 	})
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -1184,7 +1186,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	if !exist {
-		err = errors.New("access denied")
+		err = errors.New("---V2HasAccessUser->Access Denied")
 		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}

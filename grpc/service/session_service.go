@@ -425,6 +425,7 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 }
 
 func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAccessSuperAdminReq) (*pb.HasAccessSuperAdminRes, error) {
+	s.log.Info("---HasAccessSuperAdmin--->", logger.Any("req", req))
 
 	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
