@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.5
-// source: commit_service.proto
+// source: api_commit_service.proto
 
-package versioning_service
+package api_reference_service
 
 import (
 	context "context"
@@ -41,7 +41,7 @@ func NewCommitServiceClient(cc grpc.ClientConnInterface) CommitServiceClient {
 
 func (c *commitServiceClient) Create(ctx context.Context, in *CreateCommitRequest, opts ...grpc.CallOption) (*CommitWithRelease, error) {
 	out := new(CommitWithRelease)
-	err := c.cc.Invoke(ctx, "/versioning_service.CommitService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (c *commitServiceClient) Create(ctx context.Context, in *CreateCommitReques
 
 func (c *commitServiceClient) GetByID(ctx context.Context, in *CommitPrimaryKey, opts ...grpc.CallOption) (*CommitWithRelease, error) {
 	out := new(CommitWithRelease)
-	err := c.cc.Invoke(ctx, "/versioning_service.CommitService/GetByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/GetByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (c *commitServiceClient) GetByID(ctx context.Context, in *CommitPrimaryKey,
 
 func (c *commitServiceClient) GetList(ctx context.Context, in *GetCommitListRequest, opts ...grpc.CallOption) (*GetCommitListResponse, error) {
 	out := new(GetCommitListResponse)
-	err := c.cc.Invoke(ctx, "/versioning_service.CommitService/GetList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/GetList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (c *commitServiceClient) GetList(ctx context.Context, in *GetCommitListRequ
 
 func (c *commitServiceClient) Restore(ctx context.Context, in *RestoreCommitRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/versioning_service.CommitService/Restore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/Restore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (c *commitServiceClient) Restore(ctx context.Context, in *RestoreCommitRequ
 
 func (c *commitServiceClient) Insert(ctx context.Context, in *CreateCommitRequest, opts ...grpc.CallOption) (*InsertCommitResponse, error) {
 	out := new(InsertCommitResponse)
-	err := c.cc.Invoke(ctx, "/versioning_service.CommitService/Insert", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/Insert", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (c *commitServiceClient) Insert(ctx context.Context, in *CreateCommitReques
 
 func (c *commitServiceClient) GetMultipleCommitInfo(ctx context.Context, in *GetMultipleCommitInfoRequest, opts ...grpc.CallOption) (*GetMultipleCommitInfoResponse, error) {
 	out := new(GetMultipleCommitInfoResponse)
-	err := c.cc.Invoke(ctx, "/versioning_service.CommitService/GetMultipleCommitInfo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api_reference_service.CommitService/GetMultipleCommitInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func _CommitService_Create_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/versioning_service.CommitService/Create",
+		FullMethod: "/api_reference_service.CommitService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CommitServiceServer).Create(ctx, req.(*CreateCommitRequest))
@@ -169,7 +169,7 @@ func _CommitService_GetByID_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/versioning_service.CommitService/GetByID",
+		FullMethod: "/api_reference_service.CommitService/GetByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CommitServiceServer).GetByID(ctx, req.(*CommitPrimaryKey))
@@ -187,7 +187,7 @@ func _CommitService_GetList_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/versioning_service.CommitService/GetList",
+		FullMethod: "/api_reference_service.CommitService/GetList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CommitServiceServer).GetList(ctx, req.(*GetCommitListRequest))
@@ -205,7 +205,7 @@ func _CommitService_Restore_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/versioning_service.CommitService/Restore",
+		FullMethod: "/api_reference_service.CommitService/Restore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CommitServiceServer).Restore(ctx, req.(*RestoreCommitRequest))
@@ -223,7 +223,7 @@ func _CommitService_Insert_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/versioning_service.CommitService/Insert",
+		FullMethod: "/api_reference_service.CommitService/Insert",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CommitServiceServer).Insert(ctx, req.(*CreateCommitRequest))
@@ -241,7 +241,7 @@ func _CommitService_GetMultipleCommitInfo_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/versioning_service.CommitService/GetMultipleCommitInfo",
+		FullMethod: "/api_reference_service.CommitService/GetMultipleCommitInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CommitServiceServer).GetMultipleCommitInfo(ctx, req.(*GetMultipleCommitInfoRequest))
@@ -253,7 +253,7 @@ func _CommitService_GetMultipleCommitInfo_Handler(srv interface{}, ctx context.C
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CommitService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "versioning_service.CommitService",
+	ServiceName: "api_reference_service.CommitService",
 	HandlerType: (*CommitServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -282,5 +282,5 @@ var CommitService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "commit_service.proto",
+	Metadata: "api_commit_service.proto",
 }
