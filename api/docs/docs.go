@@ -15158,6 +15158,12 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table": {
             "type": "object",
             "properties": {
+                "automatic_filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
@@ -15202,6 +15208,26 @@ const docTemplate = `{
                 },
                 "with_increment_id": {
                     "type": "boolean"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter": {
+            "type": "object",
+            "properties": {
+                "custom_field": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "object_field": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },

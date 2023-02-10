@@ -84,6 +84,13 @@ message RoleWithAppTablePermissions {
                 string table_slug = 5;
                 bool view_permission = 6;
             }
+            message AutomaticFilter {
+                string guid = 1;
+                string table_slug = 2;
+                string custom_field = 3;
+                string object_field = 4;
+                string role_id = 5;
+            }
 
             string label = 1;
             string slug = 2;
@@ -98,6 +105,7 @@ message RoleWithAppTablePermissions {
             RecordPermission record_permissions = 11;
             repeated FieldPermission field_permissions = 12;
             repeated ViewPermission view_permissions = 13;
+            repeated AutomaticFilter automatic_filters = 14;
         }
         string name = 1;
         string description = 2;
