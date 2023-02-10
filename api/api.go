@@ -179,11 +179,15 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
 
+		// connection
 		v2.POST("/connection", h.V2CreateConnection)
 		v2.GET("/connection", h.V2GetConnectionList)
 		v2.GET("/connection/:connection_id", h.V2GetConnectionByID)
 		v2.PUT("/connection", h.V2UpdateConnection)
 		v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
+
+		// objects
+		v2.POST("/object/get-list/:table_slug", h.V2GetListObjects)
 	}
 
 	//COMPANY
