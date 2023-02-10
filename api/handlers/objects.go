@@ -91,7 +91,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 	}
 
 	fmt.Println("test")
-	// this is get list connection list from object builder
+	// this is get list objects list from object builder
 	resp, err := h.services.ObjectBuilderService().GetList(
 		c.Request.Context(),
 		&obs.CommonMessage{

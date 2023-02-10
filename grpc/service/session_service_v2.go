@@ -177,7 +177,6 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
-
 	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
 			UserFound:      true,
