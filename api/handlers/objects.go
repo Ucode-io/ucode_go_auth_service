@@ -27,7 +27,7 @@ import (
 // @Param project_id query string false "project_id"
 // @Param table_slug path string true "table_slug"
 // @Param data body models.CommonMessage true "data"
-// @Success 200 {object} http.Response{data=string} "GetConnectionListResponseBody"
+// @Success 200 {object} http.Response{data=string} "GetObjectListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetListObjects(c *gin.Context) {
