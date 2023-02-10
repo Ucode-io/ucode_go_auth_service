@@ -19,9 +19,9 @@ import (
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/object/get-list/{table_slug} [POST]
-// @Summary Get Connection List
-// @Description  Get Connection List
-// @Tags V2_Connection
+// @Summary Get object list
+// @Description  Get object list
+// @Tags V2_Object
 // @Accept json
 // @Produce json
 // @Param project_id query string false "project_id"
