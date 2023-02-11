@@ -2211,10 +2211,12 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table:
     properties:
-      automatic_filters:
+      action_permission:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission'
         type: array
+      automatic_filters:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod'
       description:
         type: string
       digit_number:
@@ -2246,6 +2248,15 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission:
+    properties:
+      custom_event_id:
+        type: string
+      guid:
+        type: string
+      permission:
+        type: boolean
+    type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter:
     properties:
       custom_field:
@@ -2254,6 +2265,25 @@ definitions:
         type: string
       object_field:
         type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod:
+    properties:
+      delete:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
+      read:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
+      update:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
+      write:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission:
     properties:
