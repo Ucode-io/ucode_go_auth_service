@@ -15276,7 +15276,7 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table": {
             "type": "object",
             "properties": {
-                "action_permission": {
+                "action_permissions": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission"

@@ -109,7 +109,7 @@ message RoleWithAppTablePermissions {
             repeated FieldPermission field_permissions = 12;
             repeated ViewPermission view_permissions = 13;
             AutomaticFilterWithMethod automatic_filters = 14;
-            repeated ActionPermission action_permission = 15;
+            repeated ActionPermission action_permissions = 15;
         }
         string name = 1;
         string description = 2;
