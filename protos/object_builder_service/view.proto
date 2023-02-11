@@ -44,6 +44,8 @@ message CreateViewRequest {
     string default_limit = 23;
     google.protobuf.Struct attributes = 24;
     string project_id = 25;
+    int64 commit_id = 26;
+    string commit_guid = 27;
 }
 
 message QuickFilter {
@@ -107,6 +109,7 @@ message HtmlBody {
     string html = 1;
     google.protobuf.Struct data = 2;
     string project_id = 3;
+    string version_id = 4;
 }
 
 message PdfBody {

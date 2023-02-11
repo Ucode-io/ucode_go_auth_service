@@ -17,7 +17,7 @@ import (
 
 // V2AddRole godoc
 // @ID create_role_v2
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/role [POST]
 // @Summary Create Role
@@ -25,14 +25,14 @@ import (
 // @Tags V2_Role
 // @Accept json
 // @Produce json
-// @Param role body auth_service.AddRoleRequest true "AddRoleRequestBody"
+// @Param role body auth_service.V2AddRoleRequest true "AddRoleRequestBody"
 // @Success 201 {object} http.Response{data=auth_service.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2AddRole(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
-		role                auth_service.AddRoleRequest
+		role                auth_service.V2AddRoleRequest
 	)
 
 	err := c.ShouldBindJSON(&role)
@@ -101,7 +101,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 
 // V2GetRoleByID godoc
 // @ID get_role_by_id_v2
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/role/{role-id} [GET]
 // @Summary Get Role By ID
@@ -110,7 +110,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role-id path string true "role-id"
-// @Param project_id query string true "project_id"
+// @Param project_id query string false "project_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientTypeBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -170,7 +170,7 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.services.PermissionService().V2GetRoleById(c.Request.Context(), &auth_service.RolePrimaryKey{
+	resp, err := h.services.PermissionService().V2GetRoleById(c.Request.Context(), &auth_service.V2RolePrimaryKey{
 		Id:        roleId,
 		ProjectId: resourceEnvironment.GetId(),
 	})
@@ -185,7 +185,7 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 
 // V2GetRolesList godoc
 // @ID get_roles_list_v2
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/role [GET]
 // @Summary Get Roles List
@@ -265,7 +265,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().V2GetRolesList(
 		c.Request.Context(),
-		&auth_service.GetRolesListRequest{
+		&auth_service.V2GetRolesListRequest{
 			Offset:           uint32(offset),
 			Limit:            uint32(limit),
 			ClientPlatformId: c.Query("client-platform-id"),
@@ -284,7 +284,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 
 // V2UpdateRole godoc
 // @ID update_role_v2
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/role [PUT]
 // @Summary Update Role
@@ -292,14 +292,14 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 // @Tags V2_Role
 // @Accept json
 // @Produce json
-// @Param role body auth_service.UpdateRoleRequest true "UpdateRoleRequestBody"
+// @Param role body auth_service.V2UpdateRoleRequest true "UpdateRoleRequestBody"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateRole(c *gin.Context) {
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
-		role                auth_service.UpdateRoleRequest
+		role                auth_service.V2UpdateRoleRequest
 	)
 
 	err := c.ShouldBindJSON(&role)
@@ -351,7 +351,7 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 		}
 	}
 
-	role.ProjectId = resourceEnvironment.GetEnvironmentId()
+	role.ProjectId = resourceEnvironment.GetId()
 
 	resp, err := h.services.PermissionService().V2UpdateRole(
 		c.Request.Context(),
@@ -368,7 +368,7 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 
 // V2RemoveRole godoc
 // @ID delete_role_v2
-// @Param Resource-Id header string true "Resource-Id"
+// @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Router /v2/role/{role-id} [DELETE]
 // @Summary Delete Role
@@ -377,7 +377,7 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role-id path string true "role-id"
-// @Param project_id query string true "project_id"
+// @Param project_id query string false "project_id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -439,7 +439,7 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 
 	resp, err := h.services.PermissionService().V2RemoveRole(
 		c.Request.Context(),
-		&auth_service.RolePrimaryKey{
+		&auth_service.V2RolePrimaryKey{
 			Id:        roleID,
 			ProjectId: resourceEnvironment.GetId(),
 		},

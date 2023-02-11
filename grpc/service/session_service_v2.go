@@ -177,7 +177,6 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
-
 	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
 			UserFound:      true,
@@ -281,7 +280,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	request[methodField] = "Yes"
 	request["table_slug"] = tableSlug
 
-	clientType, err := s.services.ClientService().V2GetClientTypeByID(ctx, &pb.ClientTypePrimaryKey{
+	clientType, err := s.services.ClientService().V2GetClientTypeByID(ctx, &pb.V2ClientTypePrimaryKey{
 		Id: session.ClientTypeId,
 	})
 	if err != nil {
@@ -645,7 +644,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
+	s.log.Info("---SessionAndTokenGeneratorSuperAdmin--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
 	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -664,6 +663,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		Ip:        "0.0.0.0",
 		Data:      "additional json data",
 		ExpiresAt: time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+		ProjectId: input.ProjectId,
 	})
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))

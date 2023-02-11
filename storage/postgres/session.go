@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 )
 
 type sessionRepo struct {
@@ -25,6 +26,8 @@ func NewSessionRepo(db *pgxpool.Pool) storage.SessionRepoI {
 }
 
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
+	log.Printf("--->STRG: CreateSessionRequest: %+v", entity)
+
 	query := `INSERT INTO "session" (
 		id,
 		project_id,
@@ -77,13 +80,15 @@ func (r *sessionRepo) CreateSuperAdmin(ctx context.Context, entity *pb.CreateSes
 		user_id,
 		ip,
 		data,
-		expires_at
+		expires_at,
+		project_id
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
-		$5
+		$5,
+		$6
 	)`
 
 	uuid, err := uuid.NewRandom()
@@ -93,10 +98,11 @@ func (r *sessionRepo) CreateSuperAdmin(ctx context.Context, entity *pb.CreateSes
 
 	_, err = r.db.Exec(ctx, query,
 		uuid.String(),
-		entity.UserId,
-		entity.Ip,
-		entity.Data,
-		entity.ExpiresAt,
+		entity.GetUserId(),
+		entity.GetIp(),
+		entity.GetData(),
+		entity.GetExpiresAt(),
+		entity.GetProjectId(),
 	)
 
 	pKey = &pb.SessionPrimaryKey{
@@ -152,7 +158,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		&updatedAt,
 	)
 	if err != nil {
-		return res, err
+		return res, errors.Wrap(err, "error while getting session by id: "+err.Error())
 	}
 
 	if userID.Valid {

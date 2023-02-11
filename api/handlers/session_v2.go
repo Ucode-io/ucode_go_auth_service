@@ -260,6 +260,27 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 
 	companiesResp := []*auth_service.Company{}
 
+	if len(companies.Companies) < 1 {
+		companiesById := make([]*obs.Company, 0)
+		user, err := h.services.UserService().GetUserByID(context.Background(), &auth_service.UserPrimaryKey{
+			Id: resp.UserId,
+		})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		company, err := h.services.CompanyServiceClient().GetById(context.Background(), &obs.GetCompanyByIdRequest{
+			Id: user.GetCompanyId(),
+		})
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+		companiesById = append(companiesById, company.Company)
+		companies.Companies = companiesById
+		companies.Count = 1
+		
+	}
 	bytes, err := json.Marshal(companies.Companies)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -13,7 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *permissionService) V2AddRole(ctx context.Context, req *pb.AddRoleRequest) (*pb.CommonMessage, error) {
+func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---AddRole--->", logger.Any("req", req))
 
 	// pKey, err := s.strg.Role().Add(ctx, req)
@@ -26,7 +27,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.AddRoleReques
 	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		s.log.Error("!!!AddRole.ObjectBuilderService.Create--->", logger.Error(err))
@@ -39,7 +40,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.AddRoleReques
 	}, nil
 }
 
-func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.RolePrimaryKey) (*pb.CommonMessage, error) {
+func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
 	s.log.Info("---GetRoleById--->", logger.Any("req", req))
 
 	structData, err := helper.ConvertRequestToSturct(req)
@@ -51,7 +52,7 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.RolePrima
 	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: req.ProjectId,
+		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -64,13 +65,14 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.RolePrima
 	}, nil
 }
 
-func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.GetRolesListRequest) (*pb.CommonMessage, error) {
+func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRolesListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetRolesList--->", logger.Any("req", req))
 
 	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"client_platform_id": req.GetClientPlatformId(),
+		// "client_platform_id": req.GetClientPlatformId(),
 		"client_type_id":     req.GetClientTypeId(),
 	})
+	fmt.Println(structData.AsMap())
 	if err != nil {
 		s.log.Error("!!!GetRolesList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -79,7 +81,7 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.GetRoles
 	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: req.ProjectId,
+		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		s.log.Error("!!!GetRolesList.ObjectBuilderService.GetList--->", logger.Error(err))
@@ -92,8 +94,11 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.GetRoles
 	}, nil
 }
 
-func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.UpdateRoleRequest) (*pb.CommonMessage, error) {
+func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRoleRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---UpdateRole--->", logger.Any("req", req))
+
+    projectId := req.GetProjectId()
+	req.ProjectId = req.GetDbProjectId()
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
@@ -104,7 +109,7 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.UpdateRole
 	result, err := s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: projectId,
 	})
 	if err != nil {
 		s.log.Error("!!!UpdateRole.ObjectBuilderService.Update--->", logger.Error(err))
@@ -118,7 +123,7 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.UpdateRole
 
 }
 
-func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.RolePrimaryKey) (*pb.CommonMessage, error) {
+func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
 	s.log.Info("---RemoveRole--->", logger.Any("req", req))
 
 	structData, err := helper.ConvertRequestToSturct(req)
@@ -130,7 +135,7 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.RolePrimar
 	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -139,7 +144,7 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.RolePrimar
 	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 		TableSlug: "role",
 		Data:      structData,
-		ProjectId: config.UcodeDefaultProjectID,
+		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		s.log.Error("!!!GetRoleById.ObjectBuilderService.Delete--->", logger.Error(err))
