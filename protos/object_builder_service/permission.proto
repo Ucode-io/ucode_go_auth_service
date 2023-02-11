@@ -87,6 +87,7 @@ message RoleWithAppTablePermissions {
                 string guid = 1;
                 string custom_event_id = 2;
                 bool permission = 3;
+                string label = 4;
             }
             message AutomaticFilterWithMethod {
                 repeated AutomaticFilter read = 1;
