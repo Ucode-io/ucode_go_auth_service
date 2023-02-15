@@ -520,21 +520,21 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	var filter string
 	params := map[string]interface{}{}
 	if req.Email != "" {
-		filter = "email = :" + req.Email
+		filter = "email = :email"
 		params["email"] = req.Email
 	}
 	if req.Login != "" {
 		if filter != "" {
-			filter += "OR login = :" + req.Login
+			filter += "OR login = :login"
 		} else {
-			filter = "login = :" + req.Login
+			filter = "login = :login"
 		}
 		params["login"] = req.Login
 	}
-	if req.Email != "" {
+	if req.Phone != "" {
 		if filter != "" {
-			filter += " OR phone = :" + req.Phone
-		}  else {
+			filter += " OR phone = :login"
+		} else {
 			filter = "phone = :" + req.Phone
 		}
 		params["phone"] = req.Phone
