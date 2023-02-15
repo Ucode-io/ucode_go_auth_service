@@ -11863,7 +11863,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetProjectsByUserIdReq"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse"
                                         }
                                     }
                                 }
@@ -13656,14 +13656,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_auth_service.GetProjectsByUserIdReq": {
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_auth_service_genproto_auth_service.GetRes": {
             "type": "object",
             "properties": {
@@ -13698,6 +13690,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse": {
+            "type": "object",
+            "properties": {
+                "user_id": {
                     "type": "string"
                 }
             }

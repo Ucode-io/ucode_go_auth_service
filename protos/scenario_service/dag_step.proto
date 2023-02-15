@@ -14,6 +14,7 @@ service DAGStepService {
     rpc GetAll(GetAllDAGStepRequest) returns (DAGStepList);
     rpc Delete(DeleteDAGStepRequest) returns (google.protobuf.Empty);
     rpc Update(UpdateDAGStepRequest) returns (DAGStep);
+    rpc DagStepRun(DAGStepRunRequest) returns (DAGStepRunResponse);
 }
 
 enum DAG_STEP_TYPE {
@@ -64,4 +65,13 @@ message UpdateDAGStepRequest {
 
 message GetAllDAGStepRequest {
     Filters filters = 1;
+    DAG_STEP_TYPE type = 2;
+}
+
+message DAGStepRunRequest {
+    DAG_STEP_TYPE type = 1;
+}
+
+message DAGStepRunResponse {
+    string result = 1;
 }

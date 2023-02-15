@@ -1090,11 +1090,6 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetRes'
         type: array
     type: object
-  ucode_ucode_go_auth_service_genproto_auth_service.GetProjectsByUserIdReq:
-    properties:
-      user_id:
-        type: string
-    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetRes:
     properties:
       app_id:
@@ -1118,6 +1113,11 @@ definitions:
       status:
         type: string
       updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse:
+    properties:
+      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse:
@@ -9631,7 +9631,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetProjectsByUserIdReq'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse'
               type: object
         "400":
           description: Invalid Argument
