@@ -64,6 +64,7 @@ message RoleWithAppTablePermissions {
                 string delete = 4;
                 string guid = 5;
                 bool is_have_condition = 6;
+                bool is_public = 7;
             }
             message FieldPermission {
                 string field_id = 1;
@@ -106,12 +107,11 @@ message RoleWithAppTablePermissions {
             bool with_increment_id = 8;
             int32 digit_number = 9;
             string id = 10;
-            bool is_public = 11;
+            RecordPermission record_permissions = 11;
             repeated FieldPermission field_permissions = 12;
             repeated ViewPermission view_permissions = 13;
             AutomaticFilterWithMethod automatic_filters = 14;
             repeated ActionPermission action_permissions = 15;
-            RecordPermission record_permissions = 16;
         }
         string name = 1;
         string description = 2;

@@ -2245,8 +2245,6 @@ definitions:
         type: string
       is_changed:
         type: boolean
-      is_public:
-        type: boolean
       label:
         type: string
       record_permissions:
@@ -2323,6 +2321,8 @@ definitions:
       guid:
         type: string
       is_have_condition:
+        type: boolean
+      is_public:
         type: boolean
       read:
         type: string

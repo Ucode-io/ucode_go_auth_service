@@ -15411,9 +15411,6 @@ const docTemplate = `{
                 "is_changed": {
                     "type": "boolean"
                 },
-                "is_public": {
-                    "type": "boolean"
-                },
                 "label": {
                     "type": "string"
                 },
@@ -15530,6 +15527,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_have_condition": {
+                    "type": "boolean"
+                },
+                "is_public": {
                     "type": "boolean"
                 },
                 "read": {
