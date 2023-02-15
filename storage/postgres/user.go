@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -12,6 +13,7 @@ import (
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
 )
@@ -544,7 +546,9 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 
 	var userId string
 	err := r.db.QueryRow(ctx, query, args...).Scan(&userId)
-	if err != nil {
+	if err == pgx.ErrNoRows {
+		return nil, errors.New("not found")
+	} else if err != nil {
 		return nil, err
 	}
 
