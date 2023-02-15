@@ -23,11 +23,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FolderServiceClient interface {
-	Create(ctx context.Context, in *CreateReq, opts ...grpc.CallOption) (*Folder, error)
-	GetList(ctx context.Context, in *GetListReq, opts ...grpc.CallOption) (*GetListRes, error)
-	GetSingle(ctx context.Context, in *GetSingleReq, opts ...grpc.CallOption) (*GetSingleRes, error)
-	Update(ctx context.Context, in *UpdateReq, opts ...grpc.CallOption) (*Folder, error)
-	Delete(ctx context.Context, in *DeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CreateFolder(ctx context.Context, in *CreateFolderReq, opts ...grpc.CallOption) (*Folder, error)
+	GetListFolder(ctx context.Context, in *GetListFolderReq, opts ...grpc.CallOption) (*GetListFolderRes, error)
+	GetSingleFolder(ctx context.Context, in *GetSingleFolderReq, opts ...grpc.CallOption) (*GetSingleFolderRes, error)
+	UpdateFolder(ctx context.Context, in *UpdateFolderReq, opts ...grpc.CallOption) (*Folder, error)
+	DeleteFolder(ctx context.Context, in *DeleteFolderReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type folderServiceClient struct {
@@ -38,45 +38,45 @@ func NewFolderServiceClient(cc grpc.ClientConnInterface) FolderServiceClient {
 	return &folderServiceClient{cc}
 }
 
-func (c *folderServiceClient) Create(ctx context.Context, in *CreateReq, opts ...grpc.CallOption) (*Folder, error) {
+func (c *folderServiceClient) CreateFolder(ctx context.Context, in *CreateFolderReq, opts ...grpc.CallOption) (*Folder, error) {
 	out := new(Folder)
-	err := c.cc.Invoke(ctx, "/query_service.FolderService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/query_service.FolderService/CreateFolder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *folderServiceClient) GetList(ctx context.Context, in *GetListReq, opts ...grpc.CallOption) (*GetListRes, error) {
-	out := new(GetListRes)
-	err := c.cc.Invoke(ctx, "/query_service.FolderService/GetList", in, out, opts...)
+func (c *folderServiceClient) GetListFolder(ctx context.Context, in *GetListFolderReq, opts ...grpc.CallOption) (*GetListFolderRes, error) {
+	out := new(GetListFolderRes)
+	err := c.cc.Invoke(ctx, "/query_service.FolderService/GetListFolder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *folderServiceClient) GetSingle(ctx context.Context, in *GetSingleReq, opts ...grpc.CallOption) (*GetSingleRes, error) {
-	out := new(GetSingleRes)
-	err := c.cc.Invoke(ctx, "/query_service.FolderService/GetSingle", in, out, opts...)
+func (c *folderServiceClient) GetSingleFolder(ctx context.Context, in *GetSingleFolderReq, opts ...grpc.CallOption) (*GetSingleFolderRes, error) {
+	out := new(GetSingleFolderRes)
+	err := c.cc.Invoke(ctx, "/query_service.FolderService/GetSingleFolder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *folderServiceClient) Update(ctx context.Context, in *UpdateReq, opts ...grpc.CallOption) (*Folder, error) {
+func (c *folderServiceClient) UpdateFolder(ctx context.Context, in *UpdateFolderReq, opts ...grpc.CallOption) (*Folder, error) {
 	out := new(Folder)
-	err := c.cc.Invoke(ctx, "/query_service.FolderService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/query_service.FolderService/UpdateFolder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *folderServiceClient) Delete(ctx context.Context, in *DeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *folderServiceClient) DeleteFolder(ctx context.Context, in *DeleteFolderReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/query_service.FolderService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/query_service.FolderService/DeleteFolder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,11 +87,11 @@ func (c *folderServiceClient) Delete(ctx context.Context, in *DeleteReq, opts ..
 // All implementations must embed UnimplementedFolderServiceServer
 // for forward compatibility
 type FolderServiceServer interface {
-	Create(context.Context, *CreateReq) (*Folder, error)
-	GetList(context.Context, *GetListReq) (*GetListRes, error)
-	GetSingle(context.Context, *GetSingleReq) (*GetSingleRes, error)
-	Update(context.Context, *UpdateReq) (*Folder, error)
-	Delete(context.Context, *DeleteReq) (*emptypb.Empty, error)
+	CreateFolder(context.Context, *CreateFolderReq) (*Folder, error)
+	GetListFolder(context.Context, *GetListFolderReq) (*GetListFolderRes, error)
+	GetSingleFolder(context.Context, *GetSingleFolderReq) (*GetSingleFolderRes, error)
+	UpdateFolder(context.Context, *UpdateFolderReq) (*Folder, error)
+	DeleteFolder(context.Context, *DeleteFolderReq) (*emptypb.Empty, error)
 	mustEmbedUnimplementedFolderServiceServer()
 }
 
@@ -99,20 +99,20 @@ type FolderServiceServer interface {
 type UnimplementedFolderServiceServer struct {
 }
 
-func (UnimplementedFolderServiceServer) Create(context.Context, *CreateReq) (*Folder, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+func (UnimplementedFolderServiceServer) CreateFolder(context.Context, *CreateFolderReq) (*Folder, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFolder not implemented")
 }
-func (UnimplementedFolderServiceServer) GetList(context.Context, *GetListReq) (*GetListRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
+func (UnimplementedFolderServiceServer) GetListFolder(context.Context, *GetListFolderReq) (*GetListFolderRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListFolder not implemented")
 }
-func (UnimplementedFolderServiceServer) GetSingle(context.Context, *GetSingleReq) (*GetSingleRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSingle not implemented")
+func (UnimplementedFolderServiceServer) GetSingleFolder(context.Context, *GetSingleFolderReq) (*GetSingleFolderRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSingleFolder not implemented")
 }
-func (UnimplementedFolderServiceServer) Update(context.Context, *UpdateReq) (*Folder, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+func (UnimplementedFolderServiceServer) UpdateFolder(context.Context, *UpdateFolderReq) (*Folder, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateFolder not implemented")
 }
-func (UnimplementedFolderServiceServer) Delete(context.Context, *DeleteReq) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+func (UnimplementedFolderServiceServer) DeleteFolder(context.Context, *DeleteFolderReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFolder not implemented")
 }
 func (UnimplementedFolderServiceServer) mustEmbedUnimplementedFolderServiceServer() {}
 
@@ -127,92 +127,92 @@ func RegisterFolderServiceServer(s grpc.ServiceRegistrar, srv FolderServiceServe
 	s.RegisterService(&FolderService_ServiceDesc, srv)
 }
 
-func _FolderService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateReq)
+func _FolderService_CreateFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFolderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FolderServiceServer).Create(ctx, in)
+		return srv.(FolderServiceServer).CreateFolder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.FolderService/Create",
+		FullMethod: "/query_service.FolderService/CreateFolder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FolderServiceServer).Create(ctx, req.(*CreateReq))
+		return srv.(FolderServiceServer).CreateFolder(ctx, req.(*CreateFolderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FolderService_GetList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetListReq)
+func _FolderService_GetListFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetListFolderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FolderServiceServer).GetList(ctx, in)
+		return srv.(FolderServiceServer).GetListFolder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.FolderService/GetList",
+		FullMethod: "/query_service.FolderService/GetListFolder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FolderServiceServer).GetList(ctx, req.(*GetListReq))
+		return srv.(FolderServiceServer).GetListFolder(ctx, req.(*GetListFolderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FolderService_GetSingle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSingleReq)
+func _FolderService_GetSingleFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSingleFolderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FolderServiceServer).GetSingle(ctx, in)
+		return srv.(FolderServiceServer).GetSingleFolder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.FolderService/GetSingle",
+		FullMethod: "/query_service.FolderService/GetSingleFolder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FolderServiceServer).GetSingle(ctx, req.(*GetSingleReq))
+		return srv.(FolderServiceServer).GetSingleFolder(ctx, req.(*GetSingleFolderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FolderService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateReq)
+func _FolderService_UpdateFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateFolderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FolderServiceServer).Update(ctx, in)
+		return srv.(FolderServiceServer).UpdateFolder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.FolderService/Update",
+		FullMethod: "/query_service.FolderService/UpdateFolder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FolderServiceServer).Update(ctx, req.(*UpdateReq))
+		return srv.(FolderServiceServer).UpdateFolder(ctx, req.(*UpdateFolderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FolderService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteReq)
+func _FolderService_DeleteFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFolderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FolderServiceServer).Delete(ctx, in)
+		return srv.(FolderServiceServer).DeleteFolder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/query_service.FolderService/Delete",
+		FullMethod: "/query_service.FolderService/DeleteFolder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FolderServiceServer).Delete(ctx, req.(*DeleteReq))
+		return srv.(FolderServiceServer).DeleteFolder(ctx, req.(*DeleteFolderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -225,24 +225,24 @@ var FolderService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*FolderServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Create",
-			Handler:    _FolderService_Create_Handler,
+			MethodName: "CreateFolder",
+			Handler:    _FolderService_CreateFolder_Handler,
 		},
 		{
-			MethodName: "GetList",
-			Handler:    _FolderService_GetList_Handler,
+			MethodName: "GetListFolder",
+			Handler:    _FolderService_GetListFolder_Handler,
 		},
 		{
-			MethodName: "GetSingle",
-			Handler:    _FolderService_GetSingle_Handler,
+			MethodName: "GetSingleFolder",
+			Handler:    _FolderService_GetSingleFolder_Handler,
 		},
 		{
-			MethodName: "Update",
-			Handler:    _FolderService_Update_Handler,
+			MethodName: "UpdateFolder",
+			Handler:    _FolderService_UpdateFolder_Handler,
 		},
 		{
-			MethodName: "Delete",
-			Handler:    _FolderService_Delete_Handler,
+			MethodName: "DeleteFolder",
+			Handler:    _FolderService_DeleteFolder_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,13 +8,12 @@ import "google/protobuf/struct.proto";
 
 
 service FolderService {
-  rpc Create(CreateReq) returns (Folder) {}
-  rpc GetList(GetListReq) returns (GetListRes) {}
-  rpc GetSingle(GetSingleReq) returns (GetSingleRes) {}
-  rpc Update(UpdateReq) returns (Folder) {}
-  rpc Delete(DeleteReq) returns (google.protobuf.Empty) {}
+  rpc CreateFolder(CreateFolderReq) returns (Folder) {}
+  rpc GetListFolder(GetListFolderReq) returns (GetListFolderRes) {}
+  rpc GetSingleFolder(GetSingleFolderReq) returns (GetSingleFolderRes) {}
+  rpc UpdateFolder(UpdateFolderReq) returns (Folder) {}
+  rpc DeleteFolder(DeleteFolderReq) returns (google.protobuf.Empty) {}
 }
-
 
 message Folder {
   string id = 1;
@@ -25,7 +24,7 @@ message Folder {
   string version_id = 6;
 }
 
-message CreateReq {
+message CreateFolderReq {
   string project_id = 1;
   string title = 2;
   string parent_id = 3;
@@ -33,30 +32,30 @@ message CreateReq {
   string version_id = 5;
 }
 
-message GetListReq {
+message GetListFolderReq {
   string project_id = 1;
   int32 limit = 2;
   int32 offset = 3;
   string version_id = 4;
 }
 
-message GetListRes {
+message GetListFolderRes {
   repeated Folder folders = 1;
   int32 count = 2;
 }
 
-message GetSingleReq {
+message GetSingleFolderReq {
   string id = 1;
   string project_id = 2;
   string version_id = 3;
 }
 
-message GetSingleRes {
+message GetSingleFolderRes {
   repeated Folder folders = 1;
   int32 count = 2;
 }
 
-message UpdateReq {
+message UpdateFolderReq {
   string id = 1;
   string project_id = 2;
   string title = 3;
@@ -65,7 +64,7 @@ message UpdateReq {
   string version_id = 6;
 }
 
-message DeleteReq {
+message DeleteFolderReq {
   string id = 1;
   string project_id = 2;
   string version_id = 3;

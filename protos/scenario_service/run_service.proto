@@ -16,6 +16,8 @@ message RunScenarioRequest {
     map<string, string> header = 2;
     google.protobuf.Struct body = 3;
     string url = 4; 
+    string dag_step_id = 5;
+    string method = 6;
 }
 
 message RunScenarioResponse {

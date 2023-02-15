@@ -106,11 +106,12 @@ message RoleWithAppTablePermissions {
             bool with_increment_id = 8;
             int32 digit_number = 9;
             string id = 10;
-            RecordPermission record_permissions = 11;
+            bool is_public = 11;
             repeated FieldPermission field_permissions = 12;
             repeated ViewPermission view_permissions = 13;
             AutomaticFilterWithMethod automatic_filters = 14;
             repeated ActionPermission action_permissions = 15;
+            RecordPermission record_permissions = 16;
         }
         string name = 1;
         string description = 2;
