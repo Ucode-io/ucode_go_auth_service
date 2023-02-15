@@ -527,7 +527,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	}
 	if req.Login != "" {
 		if filter != "" {
-			filter += "OR login = :login"
+			filter += " OR login = :login"
 		} else {
 			filter = "login = :login"
 		}
