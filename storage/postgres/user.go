@@ -511,3 +511,25 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 
 	return &tmp, nil
 }
+
+func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
+
+	query := `SELECT
+				id
+			from "user" WHERE `
+	filter := req.LoginType + " = :" + req.LoginType
+	params := map[string]interface{}{}
+	params[req.LoginType] = req.LoginValue
+
+	query, args := helper.ReplaceQueryParams(query+filter, params)
+
+	var userId string
+	err := r.db.QueryRow(ctx, query, args...).Scan(&userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetUserByLoginTypesResponse{
+		UserId: userId,
+	}, nil
+}
