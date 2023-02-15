@@ -44,7 +44,6 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		return
 	}
 
-
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
@@ -70,6 +69,16 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		if user.CompanyId == "" {
+			project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+				ProjectId: resourceEnvironment.GetProjectId(),
+			})
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+			user.CompanyId = project.GetCompanyId()
+		}
 	} else {
 		if !util.IsValidUUID(user.GetProjectId()) {
 			h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
@@ -89,7 +98,6 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	}
 
 	user.ResourceEnvironmentId = resourceEnvironment.GetId()
-
 	resp, err := h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&user,
