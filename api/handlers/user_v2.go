@@ -60,7 +60,8 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
+	fmt.Println("env::", environmentId)
+	fmt.Println("resource::", resourceId)
 	if util.IsValidUUID(resourceId.(string)) {
 		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 			c.Request.Context(),
