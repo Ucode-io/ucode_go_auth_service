@@ -78,6 +78,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 				return
 			}
 			user.CompanyId = project.GetCompanyId()
+			user.ProjectId = resourceEnvironment.GetProjectId()
 		}
 	} else {
 		if !util.IsValidUUID(user.GetProjectId()) {
