@@ -39,8 +39,9 @@ message GetUserByLoginTypesResponse {
 }
 
 message GetUserByLoginTypesRequest {
-   string login_type = 1;
-   string login_value = 2;
+   string email = 1;
+   string phone = 2;
+   string login = 3;
 }
 
 message GetProjectsByUserIdReq {

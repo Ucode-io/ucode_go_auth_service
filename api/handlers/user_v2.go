@@ -13,8 +13,6 @@ import (
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 
-	custom_util "ucode/ucode_go_auth_service/pkg/util"
-
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -614,47 +612,38 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 
 // V2GetUserByLoginType godoc
 // @ID get_user_by_login_type
-// @Router /v2/user/check/{login-type}/{login-value} [GET]
+// @Router /v2/user/check [POST]
 // @Summary Get User By Login type
 // @Description Get User By Login type
 // @Tags V2_User
 // @Accept json
 // @Produce json
-// @Description login-type must be one of email / phone / login
-// @Param login-type path string true "login-type"
-// @Param login-value path string true "login-value"
+// @Param user-check body auth_service.GetUserByLoginTypesRequest true "user-check"
 // @Success 200 {object} http.Response{data=auth_service.GetUserByLoginTypesResponse} "UserBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserByLoginType(c *gin.Context) {
-	var loginTypes = []string{"email", "phone", "login"}
-	var loginType = c.Param("login-type")
-	var loginValue = c.Param("login-value")
 
-	err := custom_util.CheckEnum(loginType, loginTypes)
+	var (
+		request auth_service.GetUserByLoginTypesRequest
+	)
+
+	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	var isValidLoginValue bool
-
-	switch loginType {
-	case "email":
-		isValidLoginValue = util.IsValidEmail(loginValue)		
-	default:
-		isValidLoginValue = true
-	}
-	if !isValidLoginValue {
-		h.handleResponse(c, http.InvalidArgument, "Invalid "+loginType)
-		return
+	if request.Email != "" {
+		var isValid = util.IsValidEmail(request.Email)
+		if !isValid {
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		}
 	}
 
 	resp, err := h.services.UserService().V2GetUserByLoginTypes(
 		c.Request.Context(),
-		&auth_service.GetUserByLoginTypesRequest{
-			LoginType:  loginType,
-			LoginValue: loginValue,
-		},
+		&request,
 	)
 
 	if err != nil {

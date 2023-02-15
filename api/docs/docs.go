@@ -11821,9 +11821,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/user/check/{login-type}/{login-value}": {
-            "get": {
-                "description": "Get User By Login type\nlogin-type must be one of email / phone / login",
+        "/v2/user/check": {
+            "post": {
+                "description": "Get User By Login type",
                 "consumes": [
                     "application/json"
                 ],
@@ -11837,18 +11837,13 @@ const docTemplate = `{
                 "operationId": "get_user_by_login_type",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "login-type",
-                        "name": "login-type",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "login-value",
-                        "name": "login-value",
-                        "in": "path",
-                        "required": true
+                        "description": "user-check",
+                        "name": "user-check",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -13690,6 +13685,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }

@@ -517,9 +517,28 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	query := `SELECT
 				id
 			from "user" WHERE `
-	filter := req.LoginType + " = :" + req.LoginType
+	var filter string
 	params := map[string]interface{}{}
-	params[req.LoginType] = req.LoginValue
+	if req.Email != "" {
+		filter = "email = :" + req.Email
+		params["email"] = req.Email
+	}
+	if req.Login != "" {
+		if filter != "" {
+			filter += "OR login = :" + req.Login
+		} else {
+			filter = "login = :" + req.Login
+		}
+		params["login"] = req.Login
+	}
+	if req.Email != "" {
+		if filter != "" {
+			filter += " OR phone = :" + req.Phone
+		}  else {
+			filter = "phone = :" + req.Phone
+		}
+		params["phone"] = req.Phone
+	}
 
 	query, args := helper.ReplaceQueryParams(query+filter, params)
 

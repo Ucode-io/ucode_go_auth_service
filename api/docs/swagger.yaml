@@ -1115,6 +1115,15 @@ definitions:
       updated_at:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest:
+    properties:
+      email:
+        type: string
+      login:
+        type: string
+      phone:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse:
     properties:
       user_id:
@@ -9602,25 +9611,19 @@ paths:
       summary: Get User By ID
       tags:
       - V2_User
-  /v2/user/check/{login-type}/{login-value}:
-    get:
+  /v2/user/check:
+    post:
       consumes:
       - application/json
-      description: |-
-        Get User By Login type
-        login-type must be one of email / phone / login
+      description: Get User By Login type
       operationId: get_user_by_login_type
       parameters:
-      - description: login-type
-        in: path
-        name: login-type
+      - description: user-check
+        in: body
+        name: user-check
         required: true
-        type: string
-      - description: login-value
-        in: path
-        name: login-value
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest'
       produces:
       - application/json
       responses:
