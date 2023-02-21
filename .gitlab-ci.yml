@@ -25,6 +25,15 @@ build-prod:
   only:
     - master
 
+migrate-staging:
+  stage: migrate
+  extends: .migrate_template
+  variables:
+    PATH_MIGRATION: migrations/postgres
+    POSTGRES_LINK: $UCODE_AUTH_SERVICE_TESTDB
+  only:
+    - staging
+
 migrate-prod:
   stage: migrate
   extends: .migrate_template
