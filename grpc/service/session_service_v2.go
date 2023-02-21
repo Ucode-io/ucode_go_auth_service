@@ -71,6 +71,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
 	fmt.Println("TEST::::6")
+	fmt.Println(req.ResourceEnvironmentId)
 	data, err := s.services.LoginService().LoginData(
 		ctx,
 		&pbObject.LoginDataReq{
@@ -570,7 +571,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.ProjectId,
-		ClientPlatformId: input.LoginData.ClientPlatform.Id,
+		// ClientPlatformId: input.LoginData.ClientPlatform.Id,
 		ClientTypeId:     input.LoginData.ClientType.Id,
 		UserId:           input.LoginData.UserId,
 		RoleId:           input.LoginData.Role.Id,
@@ -594,16 +595,16 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
-		"id":                 session.Id,
-		"project_id":         session.ProjectId,
-		"client_platform_id": session.ClientPlatformId,
-		"client_type_id":     session.ClientTypeId,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
-		"ip":                 session.Data,
-		"data":               session.Data,
-		"tables":             input.Tables,
-		"login_table_slug":   input.LoginData.LoginTableSlug,
+		"id":         session.Id,
+		"project_id": session.ProjectId,
+		// "client_platform_id": session.ClientPlatformId,
+		"client_type_id":   session.ClientTypeId,
+		"user_id":          session.UserId,
+		"role_id":          session.RoleId,
+		"ip":               session.Data,
+		"data":             session.Data,
+		"tables":           input.Tables,
+		"login_table_slug": input.LoginData.LoginTableSlug,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -675,15 +676,15 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 	fmt.Println("TEST:::::5")
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
-		"id":                 session.Id,
-		"project_id":         session.ProjectId,
-		"client_platform_id": session.ClientPlatformId,
-		"client_type_id":     session.ClientTypeId,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
-		"ip":                 session.Data,
-		"data":               session.Data,
-		"tables":             input.Tables,
+		"id":         session.Id,
+		"project_id": session.ProjectId,
+		// "client_platform_id": session.ClientPlatformId,
+		"client_type_id": session.ClientTypeId,
+		"user_id":        session.UserId,
+		"role_id":        session.RoleId,
+		"ip":             session.Data,
+		"data":           session.Data,
+		"tables":         input.Tables,
 	}
 	fmt.Println("TEST:::::6")
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
