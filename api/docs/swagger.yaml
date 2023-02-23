@@ -593,6 +593,12 @@ definitions:
         description: Version is the TLS version used by the connection (e.g. VersionTLS12).
         type: integer
     type: object
+  ucode_ucode_go_auth_service_api_models.CommonMessage:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+    type: object
   ucode_ucode_go_auth_service_api_models.Connection:
     properties:
       client_type_id:
@@ -1107,6 +1113,20 @@ definitions:
       status:
         type: string
       updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest:
+    properties:
+      email:
+        type: string
+      login:
+        type: string
+      phone:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse:
+    properties:
+      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse:
@@ -2205,6 +2225,12 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table:
     properties:
+      action_permissions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission'
+        type: array
+      automatic_filters:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod'
       description:
         type: string
       digit_number:
@@ -2236,6 +2262,45 @@ definitions:
       with_increment_id:
         type: boolean
     type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission:
+    properties:
+      custom_event_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      permission:
+        type: boolean
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter:
+    properties:
+      custom_field:
+        type: string
+      guid:
+        type: string
+      object_field:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod:
+    properties:
+      delete:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
+      read:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
+      update:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
+      write:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission:
     properties:
       edit_permission:
@@ -2245,10 +2310,6 @@ definitions:
       guid:
         type: string
       label:
-        type: string
-      role_id:
-        type: string
-      table_slug:
         type: string
       view_permission:
         type: boolean
@@ -2261,11 +2322,9 @@ definitions:
         type: string
       is_have_condition:
         type: boolean
+      is_public:
+        type: boolean
       read:
-        type: string
-      role_id:
-        type: string
-      table_slug:
         type: string
       update:
         type: string
@@ -2279,10 +2338,6 @@ definitions:
       label:
         type: string
       relation_id:
-        type: string
-      role_id:
-        type: string
-      table_slug:
         type: string
       view_permission:
         type: boolean
@@ -2413,7 +2468,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          type: integer
+          $ref: '#/definitions/x509.ExtKeyUsage'
         type: array
       extensions:
         description: |-
@@ -2448,7 +2503,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        type: integer
+        $ref: '#/definitions/x509.KeyUsage'
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -2506,7 +2561,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.PublicKeyAlgorithm'
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -2540,7 +2595,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.SignatureAlgorithm'
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -2576,6 +2631,123 @@ definitions:
       version:
         type: integer
     type: object
+  x509.ExtKeyUsage:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    type: integer
+    x-enum-varnames:
+    - ExtKeyUsageAny
+    - ExtKeyUsageServerAuth
+    - ExtKeyUsageClientAuth
+    - ExtKeyUsageCodeSigning
+    - ExtKeyUsageEmailProtection
+    - ExtKeyUsageIPSECEndSystem
+    - ExtKeyUsageIPSECTunnel
+    - ExtKeyUsageIPSECUser
+    - ExtKeyUsageTimeStamping
+    - ExtKeyUsageOCSPSigning
+    - ExtKeyUsageMicrosoftServerGatedCrypto
+    - ExtKeyUsageNetscapeServerGatedCrypto
+    - ExtKeyUsageMicrosoftCommercialCodeSigning
+    - ExtKeyUsageMicrosoftKernelCodeSigning
+  x509.KeyUsage:
+    enum:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 16
+    - 32
+    - 64
+    - 128
+    - 256
+    type: integer
+    x-enum-varnames:
+    - KeyUsageDigitalSignature
+    - KeyUsageContentCommitment
+    - KeyUsageKeyEncipherment
+    - KeyUsageDataEncipherment
+    - KeyUsageKeyAgreement
+    - KeyUsageCertSign
+    - KeyUsageCRLSign
+    - KeyUsageEncipherOnly
+    - KeyUsageDecipherOnly
+  x509.PublicKeyAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      DSA: Unsupported.
+    x-enum-varnames:
+    - UnknownPublicKeyAlgorithm
+    - RSA
+    - DSA
+    - ECDSA
+    - Ed25519
+  x509.SignatureAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    type: integer
+    x-enum-comments:
+      DSAWithSHA1: Unsupported.
+      DSAWithSHA256: Unsupported.
+      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+      MD2WithRSA: Unsupported.
+      MD5WithRSA: Only supported for signing, not verification.
+      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+    x-enum-varnames:
+    - UnknownSignatureAlgorithm
+    - MD2WithRSA
+    - MD5WithRSA
+    - SHA1WithRSA
+    - SHA256WithRSA
+    - SHA384WithRSA
+    - SHA512WithRSA
+    - DSAWithSHA1
+    - DSAWithSHA256
+    - ECDSAWithSHA1
+    - ECDSAWithSHA256
+    - ECDSAWithSHA384
+    - ECDSAWithSHA512
+    - SHA256WithRSAPSS
+    - SHA384WithRSAPSS
+    - SHA512WithRSAPSS
+    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -7675,6 +7847,70 @@ paths:
       summary: MultiCompanyLogin
       tags:
       - V2_Session
+  /v2/object/get-list/{table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: Get object list
+      operationId: get_list_object
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project_id
+        in: query
+        name: project_id
+        type: string
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.CommonMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetObjectListResponseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get object list
+      tags:
+      - V2_Object
   /v2/permission:
     get:
       consumes:
@@ -9375,6 +9611,52 @@ paths:
                   type: string
               type: object
       summary: Get User By ID
+      tags:
+      - V2_User
+  /v2/user/check:
+    post:
+      consumes:
+      - application/json
+      description: Get User By Login type
+      operationId: get_user_by_login_type
+      parameters:
+      - description: user-check
+        in: body
+        name: user-check
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UserBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get User By Login type
       tags:
       - V2_User
   /v2/v2multi-company/login:

@@ -71,6 +71,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
 	fmt.Println("TEST::::6")
+	fmt.Println(req.ResourceEnvironmentId)
 	data, err := s.services.LoginService().LoginData(
 		ctx,
 		&pbObject.LoginDataReq{
@@ -177,7 +178,6 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
-
 	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
 			UserFound:      true,
@@ -571,7 +571,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.ProjectId,
-		ClientPlatformId: input.LoginData.ClientPlatform.Id,
+		// ClientPlatformId: input.LoginData.ClientPlatform.Id,
 		ClientTypeId:     input.LoginData.ClientType.Id,
 		UserId:           input.LoginData.UserId,
 		RoleId:           input.LoginData.Role.Id,
@@ -595,16 +595,16 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
-		"id":                 session.Id,
-		"project_id":         session.ProjectId,
-		"client_platform_id": session.ClientPlatformId,
-		"client_type_id":     session.ClientTypeId,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
-		"ip":                 session.Data,
-		"data":               session.Data,
-		"tables":             input.Tables,
-		"login_table_slug":   input.LoginData.LoginTableSlug,
+		"id":         session.Id,
+		"project_id": session.ProjectId,
+		// "client_platform_id": session.ClientPlatformId,
+		"client_type_id":   session.ClientTypeId,
+		"user_id":          session.UserId,
+		"role_id":          session.RoleId,
+		"ip":               session.Data,
+		"data":             session.Data,
+		"tables":           input.Tables,
+		"login_table_slug": input.LoginData.LoginTableSlug,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -632,7 +632,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 }
 
 func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
-
 	// // TODO - Delete all old sessions & refresh token has this function too
 	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.LoginData.UserId)
 	if err != nil {
@@ -645,14 +644,14 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
+	fmt.Println("TEST:::::1")
 	input.LoginData.Sessions = userSessionList.Sessions
 
 	_, err = uuid.Parse(input.ProjectId)
 	if err != nil {
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
-
+	fmt.Println("TEST:::::2")
 	sessionPKey, err := s.strg.Session().CreateSuperAdmin(ctx, &pb.CreateSessionRequest{
 		UserId:    input.LoginData.UserId,
 		Ip:        "0.0.0.0",
@@ -664,29 +663,30 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+	fmt.Println("TEST:::::3")
 	session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	fmt.Println("TEST:::::4")
 	if input.Tables == nil {
 		input.Tables = []*pb.Object{}
 	}
-
+	fmt.Println("TEST:::::5")
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
-		"id":                 session.Id,
-		"project_id":         session.ProjectId,
-		"client_platform_id": session.ClientPlatformId,
-		"client_type_id":     session.ClientTypeId,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
-		"ip":                 session.Data,
-		"data":               session.Data,
-		"tables":             input.Tables,
+		"id":         session.Id,
+		"project_id": session.ProjectId,
+		// "client_platform_id": session.ClientPlatformId,
+		"client_type_id": session.ClientTypeId,
+		"user_id":        session.UserId,
+		"role_id":        session.RoleId,
+		"ip":             session.Data,
+		"data":           session.Data,
+		"tables":         input.Tables,
 	}
-
+	fmt.Println("TEST:::::6")
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -698,7 +698,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+	fmt.Println("TEST:::::7")
 	input.LoginData.Token = &pb.Token{
 		AccessToken:      accessToken,
 		RefreshToken:     refreshToken,
@@ -707,7 +707,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		ExpiresAt:        session.ExpiresAt,
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
-
+	fmt.Println("TEST:::::8")
 	return input.LoginData, nil
 }
 

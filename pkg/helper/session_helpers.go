@@ -32,10 +32,10 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	}
 
 	res.ClientPlatform = &pb.ClientPlatform{
-		Id:        data.ClientPlatform.Guid,
-		Name:      data.ClientPlatform.Name,
-		ProjectId: data.ClientPlatform.ProjectId,
-		Subdomain: data.ClientPlatform.Subdomain,
+		Id:        data.ClientPlatform.GetGuid(),
+		Name:      data.ClientPlatform.GetName(),
+		ProjectId: data.ClientPlatform.GetProjectId(),
+		Subdomain: data.ClientPlatform.GetSubdomain(),
 	}
 	permissions := make([]*pb.RecordPermission, 0, len(data.Permissions))
 	for _, v := range data.Permissions {
