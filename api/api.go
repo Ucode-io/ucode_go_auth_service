@@ -207,9 +207,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.POST("/send-code", h.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.Verify)
 	r.POST("/register-otp/:table_slug", h.RegisterOtp)
-	r.POST("/send-message", h.SendMessageToEmail)
-	r.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
-	r.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
+	
+	// With API-KEY authentication
+	v2.POST("/send-message", h.SendMessageToEmail)
+	v2.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
+	v2.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return

@@ -66,13 +66,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 	// objectBuilder -> auth service
 	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"guid":               pKey.Id,
-		"project_id":         req.ProjectId,
-		"role_id":            req.RoleId,
-		"client_type_id":     req.ClientTypeId,
-		"client_platform_id": req.ClientPlatformId,
-		"active":             req.Active,
-		"expires_at":         req.ExpiresAt,
+		"guid":               pKey.GetId(),
+		"project_id":         req.GetProjectId(),
+		"role_id":            req.GetRoleId(),
+		"client_type_id":     req.GetClientTypeId(),
+		"client_platform_id": req.GetClientPlatformId(),
+		"active":             req.GetActive(),
+		"expires_at":         req.GetExpiresAt(),
 	})
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -92,8 +92,8 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:    pKey.Id,
-		ProjectId: req.ProjectId,
-		CompanyId: req.CompanyId,
+		ProjectId: req.GetProjectId(),
+		CompanyId: req.GetCompanyId(),
 	})
 
 	if err != nil {

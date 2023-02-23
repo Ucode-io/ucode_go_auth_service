@@ -57,13 +57,13 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	_, err = r.db.Exec(ctx, query,
 		uuid.String(),
-		entity.Name,
-		entity.PhotoUrl,
-		entity.Phone,
-		entity.Email,
-		entity.Login,
-		entity.Password,
-		entity.CompanyId,
+		entity.GetName(),
+		entity.GetPhotoUrl(),
+		entity.GetPhone(),
+		entity.GetEmail(),
+		entity.GetLogin(),
+		entity.GetPassword(),
+		entity.GetCompanyId(),
 	)
 
 	pKey = &pb.UserPrimaryKey{
