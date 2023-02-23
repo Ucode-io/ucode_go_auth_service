@@ -307,6 +307,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			Login:                 body.Data["login"].(string),
 			Email:                 body.Data["email"].(string),
 			Name:                  body.Data["name"].(string),
+			Phone:                 body.Data["phone"].(string),
 			ProjectId:             resourceEnvironment.GetProjectId(),
 			CompanyId:             "90d33fe1-b996-481c-aad0-e52b1e8cff6c",
 			ClientTypeId:          "WEB USER",
