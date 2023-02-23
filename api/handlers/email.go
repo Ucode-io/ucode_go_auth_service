@@ -87,7 +87,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		fmt.Println("bytes", bytes)
 	}
 
-	if (respObject == nil || !respObject.UserFound) && request.ClientType != "WEB USER" {
+	if (respObject == nil || !respObject.GetUserFound()) && request.ClientType != "WEB USER" {
 		err := errors.New("Пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
