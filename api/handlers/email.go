@@ -304,6 +304,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	_, err = h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&pb.CreateUserRequest{
+			Login:                 body.Data["login"].(string),
 			Email:                 body.Data["email"].(string),
 			Name:                  body.Data["name"].(string),
 			ProjectId:             resourceEnvironment.GetProjectId(),
