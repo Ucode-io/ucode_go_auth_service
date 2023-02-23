@@ -12,6 +12,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -87,8 +88,11 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		fmt.Println("bytes", bytes)
 	}
 
+	fmt.Println(":::respObject.GetUserFound():::")
+
 	if (respObject == nil || !respObject.GetUserFound()) && request.ClientType != "WEB USER" {
 		err := errors.New("Пользователь не найдено")
+		h.log.Error("", logger.Error(err))
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	}
@@ -106,6 +110,9 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	fmt.Println(":::EmailService->Create:::")
+	
 	err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
