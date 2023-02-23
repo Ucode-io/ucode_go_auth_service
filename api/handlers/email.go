@@ -80,6 +80,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		fmt.Println(":::LoginWithEmailOtp:::", err.Error())
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
