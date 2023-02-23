@@ -336,7 +336,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 		Email:      body.Data["email"].(string),
 		ClientType: "WEB USER",
-		ProjectId:  resourceEnvironment.GetProjectId(), //@TODO:: temp added hardcoded project id,
+		ProjectId:  resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id,
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
