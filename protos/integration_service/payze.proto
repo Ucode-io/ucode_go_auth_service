@@ -1,0 +1,39 @@
+syntax="proto3";
+
+package integration_service;
+option go_package="genproto/integration_service";
+
+service PayzeService {
+    rpc GeneratePayzeLink(PayzeLinkRequest) returns (PayzeLinkResponse){}
+    rpc GeneratePayzeLinkSvod(PayzeLinkRequestSvod) returns (PayzeLinkResponse){}
+
+}
+
+message PayzeLinkRequest {
+    string method = 1;
+    string apiKey = 2;
+    string apiSecret = 3;
+    PayzeLinkRequestData data = 4;
+}
+
+message PayzeLinkRequestData {
+    int32 amount = 1;
+    string currency = 2;
+    string callback = 3;
+    string callbackError = 4;
+    bool preauthorize = 5;
+    string lang = 6;
+    string hookUrl = 7;
+    bool hookRefund = 8;
+}
+
+message PayzeLinkResponse {
+    string link = 1;
+}
+
+message PayzeLinkRequestSvod {
+   string method = 1;
+    string apiKey = 2;
+    string apiSecret = 3;
+    PayzeLinkRequestData data = 4;
+}

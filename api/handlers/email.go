@@ -26,6 +26,7 @@ import (
 // @Tags Email
 // @Accept json
 // @Produce json
+// @Param project-id query string true "project-id"
 // @Param send_message body models.Email true "SendMessageToEmailRequestBody"
 // @Success 201 {object} http.Response{data=models.SendCodeResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -58,12 +59,23 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
+	projectID, _ := c.GetQuery("project-id")
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if _, err := uuid.Parse(projectID); err != nil {
+		h.handleResponse(c, http.BadRequest, "project-id is required")
+		return
+	}
+
 	respObject, err := h.services.LoginService().LoginWithEmailOtp(
 		c.Request.Context(),
 		&pbObject.EmailOtpRequest{
 			Email:      request.Email,
 			ClientType: request.ClientType,
-			ProjectId:  "0f214698-6886-42f2-8c7f-25865d99fb16", //@TODO:: temp added hardcoded project id
+			ProjectId:  projectID, //@TODO:: temp added hardcoded project id
 		},
 	)
 	if err != nil {
