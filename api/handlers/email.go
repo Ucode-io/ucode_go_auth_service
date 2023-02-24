@@ -320,25 +320,25 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	dataStrct, err := helper.ConvertMapToStruct(body.Data)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
+	// dataStrct, err := helper.ConvertMapToStruct(body.Data)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
 
-	_, err = h.services.ObjectBuilderService().Create(
-		context.Background(),
-		&pbObject.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			Data:      dataStrct,
-			ProjectId: resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id,
-		},
-	)
-	if err != nil {
-		h.log.Error("---> error in create user object", logger.Error(err))
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// _, err = h.services.ObjectBuilderService().Create(
+	// 	context.Background(),
+	// 	&pbObject.CommonMessage{
+	// 		TableSlug: c.Param("table_slug"),
+	// 		Data:      dataStrct,
+	// 		ProjectId: resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.log.Error("---> error in create user object", logger.Error(err))
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 		Email:      body.Data["email"].(string),
