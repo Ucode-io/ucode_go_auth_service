@@ -50,13 +50,13 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$8
 	)`
 
-	uuid, err := uuid.NewRandom()
+	id, err := uuid.NewRandom()
 	if err != nil {
 		return pKey, err
 	}
 
 	_, err = r.db.Exec(ctx, query,
-		uuid.String(),
+		id.String(),
 		entity.GetName(),
 		entity.GetPhotoUrl(),
 		entity.GetPhone(),
@@ -67,7 +67,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	)
 
 	pKey = &pb.UserPrimaryKey{
-		Id: uuid.String(),
+		Id: id.String(),
 	}
 
 	return pKey, err

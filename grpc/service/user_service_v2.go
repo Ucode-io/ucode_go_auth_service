@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -18,6 +19,87 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUserRequest) (resp *pb.User, err error) {
+
+	hashedPassword, err := security.HashPassword(req.Password)
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	req.Password = hashedPassword
+
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	email := emailRegex.MatchString(req.Email)
+	if !email {
+		err = fmt.Errorf("email is not valid")
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, err
+	}
+
+	pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+		Login:                 req.GetLogin(),
+		Password:              req.GetPassword(),
+		Email:                 req.GetEmail(),
+		Phone:                 req.GetPhone(),
+		Name:                  req.GetName(),
+		CompanyId:             req.GetCompanyId(),
+		ProjectId:             req.GetProjectId(),
+		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
+		RoleId:                req.GetRoleId(),
+		ClientTypeId:          req.GetClientTypeId(),
+		ClientPlatformId:      req.GetClientPlatformId(),
+		Active:                req.GetActive(),
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+		"guid":               pKey.GetId(),
+		"project_id":         req.GetProjectId(),
+		"role_id":            req.GetRoleId(),
+		"client_type_id":     req.GetClientTypeId(),
+		"client_platform_id": req.GetClientPlatformId(),
+		"active":             req.GetActive(),
+		"expires_at":         req.GetExpiresAt(),
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		TableSlug: "users",
+		Data:      structData,
+		ProjectId: req.GetResourceEnvironmentId(),
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+		UserId:    pKey.Id,
+		ProjectId: req.GetProjectId(),
+		CompanyId: req.GetCompanyId(),
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+		Id: pKey.Id,
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return resp, err
+}
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
 	s.log.Info("---CreateUser--->", logger.Any("req", req))

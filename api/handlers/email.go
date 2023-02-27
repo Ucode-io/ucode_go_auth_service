@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	_ "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -255,8 +256,11 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	var (
-		body                models.RegisterOtp
-		resourceEnvironment *obs.ResourceEnvironment
+		body                  models.RegisterOtp
+		resourceEnvironment   *obs.ResourceEnvironment
+		CompanyId             string
+		ProjectId             string
+		ResourceEnvironmentId string
 	)
 
 	err := c.ShouldBindJSON(&body)
@@ -272,7 +276,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	}
 
 	resourceId, ok := c.Get("resource_id")
-	if !ok {
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
@@ -280,11 +284,6 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-
-	if !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
 
@@ -300,50 +299,43 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
+	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+		ProjectId: resourceEnvironment.GetProjectId(),
+	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	ProjectId = resourceEnvironment.GetProjectId()
+	ResourceEnvironmentId = resourceEnvironment.GetId()
+	CompanyId = project.GetCompanyId()
+
 	fmt.Println(body.Data)
-	_, err = h.services.UserService().V2CreateUser(
+	_, err = h.services.UserService().RegisterUserViaEmail(
 		c.Request.Context(),
 		&pb.CreateUserRequest{
 			Login:                 body.Data["login"].(string),
 			Email:                 body.Data["email"].(string),
 			Name:                  body.Data["name"].(string),
 			Phone:                 body.Data["phone"].(string),
-			ProjectId:             resourceEnvironment.GetProjectId(),
-			CompanyId:             "90d33fe1-b996-481c-aad0-e52b1e8cff6c",
+			ProjectId:             ProjectId,
+			CompanyId:             CompanyId,
 			ClientTypeId:          "WEB USER",
-			ResourceEnvironmentId: resourceEnvironment.GetId(),
+			ResourceEnvironmentId: ResourceEnvironmentId,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
-	// dataStrct, err := helper.ConvertMapToStruct(body.Data)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
-
-	// _, err = h.services.ObjectBuilderService().Create(
-	// 	context.Background(),
-	// 	&pbObject.CommonMessage{
-	// 		TableSlug: c.Param("table_slug"),
-	// 		Data:      dataStrct,
-	// 		ProjectId: resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id,
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.log.Error("---> error in create user object", logger.Error(err))
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+
 		Email:      body.Data["email"].(string),
 		ClientType: "WEB USER",
-		ProjectId:  resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id,
+		ProjectId:  ResourceEnvironmentId, //@TODO:: temp added hardcoded project id,
+		TableSlug:  "users",
 	})
 	if err != nil {
 		h.log.Error("---> error in login with email otp", logger.Error(err))
