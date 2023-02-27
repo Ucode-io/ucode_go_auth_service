@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"log"
 	"net/smtp"
 
 	"github.com/pkg/errors"
@@ -44,6 +45,9 @@ func SendEmail(subject, to, link, token string) error {
 }
 
 func SendCodeToEmail(subject, to, code string) error {
+
+	log.Printf("---SendCodeEmail---> email: %s, code: %s", to, code)
+
 	message := `
 		Ваше код подверждение: ` + code
 
