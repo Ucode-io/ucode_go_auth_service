@@ -71,7 +71,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	}
 
 	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "users",
+		TableSlug: "user",
 		Data:      structData,
 		ProjectId: req.GetResourceEnvironmentId(),
 	})
