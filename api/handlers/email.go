@@ -321,7 +321,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			Phone:                 body.Data["phone"].(string),
 			ProjectId:             ProjectId,
 			CompanyId:             CompanyId,
-			ClientTypeId:          "WEB USER",
+			ClientTypeId:          "WEB_USER",
 			ResourceEnvironmentId: ResourceEnvironmentId,
 		},
 	)
@@ -333,7 +333,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 		Email:      body.Data["email"].(string),
-		ClientType: "WEB USER",
+		ClientType: "WEB_USER",
 		ProjectId:  ResourceEnvironmentId, //@TODO:: temp added hardcoded project id,
 		TableSlug:  "users",
 	})
