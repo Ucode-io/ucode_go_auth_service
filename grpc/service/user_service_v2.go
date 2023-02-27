@@ -57,17 +57,16 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	}
 
 	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"guid":               pKey.GetId(),
-		"project_id":         req.GetProjectId(),
-		"role_id":            req.GetRoleId(),
-		"client_type_id":     req.GetClientTypeId(),
-		"client_platform_id": req.GetClientPlatformId(),
-		"active":             req.GetActive(),
-		"expires_at":         req.GetExpiresAt(),
-		"email":              req.GetEmail(),
-		"phone":              req.GetPhone(),
-		"name":               req.GetName(),
-		"login":              req.GetLogin(),
+		"guid":           pKey.GetId(),
+		"project_id":     req.GetProjectId(),
+		"role_id":        req.GetRoleId(),
+		"client_type_id": req.GetClientTypeId(),
+		"active":         req.GetActive(),
+		"expires_at":     req.GetExpiresAt(),
+		"email":          req.GetEmail(),
+		"phone":          req.GetPhone(),
+		"name":           req.GetName(),
+		"login":          req.GetLogin(),
 	})
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
