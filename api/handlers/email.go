@@ -335,7 +335,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		Email:      body.Data["email"].(string),
 		ClientType: "WEB_USER",
 		ProjectId:  ResourceEnvironmentId, //@TODO:: temp added hardcoded project id,
-		TableSlug:  "users",
+		TableSlug:  "user",
 	})
 	if err != nil {
 		h.log.Error("---> error in login with email otp", logger.Error(err))
