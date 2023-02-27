@@ -64,6 +64,10 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		"client_platform_id": req.GetClientPlatformId(),
 		"active":             req.GetActive(),
 		"expires_at":         req.GetExpiresAt(),
+		"email":              req.GetEmail(),
+		"phone":              req.GetPhone(),
+		"name":               req.GetName(),
+		"login":              req.GetLogin(),
 	})
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
