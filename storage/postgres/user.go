@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -12,6 +13,7 @@ import (
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
 )
@@ -48,24 +50,24 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$8
 	)`
 
-	uuid, err := uuid.NewRandom()
+	id, err := uuid.NewRandom()
 	if err != nil {
 		return pKey, err
 	}
 
 	_, err = r.db.Exec(ctx, query,
-		uuid.String(),
-		entity.Name,
-		entity.PhotoUrl,
-		entity.Phone,
-		entity.Email,
-		entity.Login,
-		entity.Password,
-		entity.CompanyId,
+		id.String(),
+		entity.GetName(),
+		entity.GetPhotoUrl(),
+		entity.GetPhone(),
+		entity.GetEmail(),
+		entity.GetLogin(),
+		entity.GetPassword(),
+		entity.GetCompanyId(),
 	)
 
 	pKey = &pb.UserPrimaryKey{
-		Id: uuid.String(),
+		Id: id.String(),
 	}
 
 	return pKey, err
@@ -510,4 +512,47 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 	}
 
 	return &tmp, nil
+}
+
+func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
+
+	query := `SELECT
+				id
+			from "user" WHERE `
+	var filter string
+	params := map[string]interface{}{}
+	if req.Email != "" {
+		filter = "email = :email"
+		params["email"] = req.Email
+	}
+	if req.Login != "" {
+		if filter != "" {
+			filter += " OR login = :login"
+		} else {
+			filter = "login = :login"
+		}
+		params["login"] = req.Login
+	}
+	if req.Phone != "" {
+		if filter != "" {
+			filter += " OR phone = :login"
+		} else {
+			filter = "phone = :" + req.Phone
+		}
+		params["phone"] = req.Phone
+	}
+
+	query, args := helper.ReplaceQueryParams(query+filter, params)
+
+	var userId string
+	err := r.db.QueryRow(ctx, query, args...).Scan(&userId)
+	if err == pgx.ErrNoRows {
+		return nil, errors.New("not found")
+	} else if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetUserByLoginTypesResponse{
+		UserId: userId,
+	}, nil
 }

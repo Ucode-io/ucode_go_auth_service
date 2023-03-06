@@ -7,20 +7,21 @@ import (
 )
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
-	log.Printf("---INFO-->ConvertPbToAnotherPb---> %+v", data)
+
+	log.Printf("ConvertPbToAnotherPb: %v", data)
 
 	res := &pb.V2LoginResponse{}
-	res.UserId = data.UserId
-	res.LoginTableSlug = data.LoginTableSlug
+	res.UserId = data.GetUserId()
+	res.LoginTableSlug = data.GetLoginTableSlug()
 	tables := make([]*pb.Table, 0, len(data.GetClientType().GetTables()))
 	for _, v := range data.GetClientType().GetTables() {
 		table := &pb.Table{}
-		table.Data = v.Data
-		table.Icon = v.Icon
-		table.Label = v.Label
-		table.Slug = v.Slug
-		table.ViewLabel = v.ViewLabel
-		table.ViewSlug = v.ViewSlug
+		table.Data = v.GetData()
+		table.Icon = v.GetIcon()
+		table.Label = v.GetLabel()
+		table.Slug = v.GetSlug()
+		table.ViewLabel = v.GetViewLabel()
+		table.ViewSlug = v.GetViewSlug()
 		tables = append(tables, table)
 	}
 
