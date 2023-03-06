@@ -320,6 +320,7 @@ func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (r
 }
 
 func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error) {
+	log.Printf("---STRG->DeleteExpiredUserSessions---> %s", userID)
 	query := `DELETE FROM "session" WHERE user_id = $1 AND expires_at < $2`
 
 	result, err := r.db.Exec(ctx, query, userID, time.Now().Format("2006-01-02 15:04:05"))

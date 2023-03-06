@@ -547,34 +547,40 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 }
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
-	s.log.Info("---SessionAndTokenGenerator--->", logger.Any("input", input))
+	s.log.Info("--->SessionAndTokenGenerator--->", logger.Any("req", input))
+
+	if _, err := uuid.Parse(input.GetLoginData().GetUserId()); err != nil {
+		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
+		s.log.Error("---ERR->GetLoginData().GetUserId-->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
 	// // TODO - Delete all old sessions & refresh token has this function too
-	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.LoginData.UserId)
+	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.GetLoginData().GetUserId())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("SessionAndTokenGenerator--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
-	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
+	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
+	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.GetLoginData().GetUserId())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	input.LoginData.Sessions = userSessionList.Sessions
+	input.LoginData.Sessions = userSessionList.GetSessions()
 
-	_, err = uuid.Parse(input.ProjectId)
+	_, err = uuid.Parse(input.GetProjectId())
 	if err != nil {
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
-		ProjectId:        input.ProjectId,
-		// ClientPlatformId: input.LoginData.ClientPlatform.Id,
-		ClientTypeId:     input.LoginData.ClientType.Id,
-		UserId:           input.LoginData.UserId,
-		RoleId:           input.LoginData.Role.Id,
+		ProjectId:        input.GetProjectId(),
+		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
+		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
+		UserId:           input.GetLoginData().GetUserId(),
+		RoleId:           input.GetLoginData().GetRole().GetId(),
 		Ip:               "0.0.0.0",
 		Data:             "additional json data",
 		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
@@ -595,16 +601,16 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
-		"id":         session.Id,
-		"project_id": session.ProjectId,
-		// "client_platform_id": session.ClientPlatformId,
-		"client_type_id":   session.ClientTypeId,
-		"user_id":          session.UserId,
-		"role_id":          session.RoleId,
-		"ip":               session.Data,
-		"data":             session.Data,
-		"tables":           input.Tables,
-		"login_table_slug": input.LoginData.LoginTableSlug,
+		"id":                 session.GetId(),
+		"project_id":         session.GetProjectId(),
+		"client_platform_id": session.GetClientPlatformId(),
+		"client_type_id":     session.GetClientTypeId(),
+		"user_id":            session.GetUserId(),
+		"role_id":            session.GetRoleId(),
+		"ip":                 session.GetData(),
+		"data":               session.GetData(),
+		"tables":             input.GetTables(),
+		"login_table_slug":   input.GetLoginData().GetLoginTableSlug(),
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -622,9 +628,9 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	input.LoginData.Token = &pb.Token{
 		AccessToken:      accessToken,
 		RefreshToken:     refreshToken,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		ExpiresAt:        session.ExpiresAt,
+		CreatedAt:        session.GetCreatedAt(),
+		UpdatedAt:        session.GetUpdatedAt(),
+		ExpiresAt:        session.GetExpiresAt(),
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
 
@@ -1029,6 +1035,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
@@ -1186,7 +1193,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	if !exist {
-		err = errors.New("---V2HasAccessUser->Access Denied")
+		err = errors.New("---V2HasAccessUser->Access denied")
 		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}

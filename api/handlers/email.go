@@ -8,7 +8,6 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
-	_ "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
@@ -266,12 +265,6 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	_, err = helper.ConvertMapToStruct(body.Data)
-
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
 
