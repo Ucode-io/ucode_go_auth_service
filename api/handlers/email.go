@@ -65,18 +65,18 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
 		return
 	}
 
 	if !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
 		return
 	}
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
@@ -95,8 +95,9 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	respObject, err := h.services.LoginService().LoginWithEmailOtp(
 		c.Request.Context(),
 		&pbObject.EmailOtpRequest{
+			ClientType: "WEB_USER",
+			TableSlug:  "user",
 			Email:      request.Email,
-			ClientType: request.ClientType,
 			ProjectId:  resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id
 		},
 	)
