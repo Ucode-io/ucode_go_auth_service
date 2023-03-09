@@ -3,13 +3,13 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
@@ -351,7 +351,7 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAff
 
 	result, err = r.db.Exec(ctx, `DELETE FROM user WHERE id = $1`, pKey.GetId())
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "delete user error")
 	}
 	rowsAffected = result.RowsAffected()
 	if rowsAffected == 0 {
