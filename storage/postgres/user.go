@@ -349,7 +349,7 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAff
 		return 0, errors.New("user not found")
 	}
 
-	result, err = r.db.Exec(ctx, `DELETE FROM user WHERE id = $1`, pKey.Id)
+	result, err = r.db.Exec(ctx, `DELETE FROM user WHERE id = $1`, pKey.GetId())
 	if err != nil {
 		return 0, err
 	}
