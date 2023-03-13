@@ -305,7 +305,41 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
 
-	fmt.Println(body.Data)
+	if v, ok := body.Data["email"]; ok {
+		if !util.IsValidEmail(v.(string)) {
+			h.handleResponse(c, http.BadRequest, "Неверный формат email")
+			return
+		}
+	} else {
+		h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+		return
+	}
+
+	if v, ok := body.Data["login"]; ok {
+		if !util.IsValidLogin(v.(string)) {
+			h.handleResponse(c, http.BadRequest, "Неверный формат логина")
+			return
+		}
+	} else {
+		h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
+		return
+	}
+
+	if _, ok := body.Data["name"]; !ok {
+		h.handleResponse(c, http.BadRequest, "Поле name не заполнено")
+		return
+	}
+
+	if v, ok := body.Data["phone"]; ok {
+		if !util.IsValidPhone(v.(string)) {
+			h.handleResponse(c, http.BadRequest, "Неверный формат телефона")
+			return
+		}
+	} else {
+		h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
+		return
+	}
+
 	_, err = h.services.UserService().RegisterUserViaEmail(
 		c.Request.Context(),
 		&pb.CreateUserRequest{
