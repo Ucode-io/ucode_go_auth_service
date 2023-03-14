@@ -315,12 +315,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	if v, ok := body.Data["login"]; ok {
-		if !util.IsValidLogin(v.(string)) {
-			h.handleResponse(c, http.BadRequest, "Неверный формат логина")
-			return
-		}
-	} else {
+	if _, ok := body.Data["login"]; !ok {
 		h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
 		return
 	}
