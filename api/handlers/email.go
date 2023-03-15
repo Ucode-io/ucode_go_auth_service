@@ -370,7 +370,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
 		LoginData: convertedToAuthPb,
 		Tables:    []*pb.Object{},
-		ProjectId: ResourceEnvironmentId, 
+		ProjectId: ProjectId,
 	})
 	if err != nil {
 		h.log.Error("---> error in session and token generator", logger.Error(err))
