@@ -325,12 +325,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	if v, ok := body.Data["phone"]; ok {
-		if !util.IsValidPhone(v.(string)) {
-			h.handleResponse(c, http.BadRequest, "Неверный формат телефона")
-			return
-		}
-	} else {
+	if _, ok := body.Data["phone"]; !ok {
 		h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
 		return
 	}
