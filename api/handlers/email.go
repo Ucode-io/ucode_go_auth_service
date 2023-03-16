@@ -231,7 +231,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		&pb.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
-			ProjectId: resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id
+			ProjectId: resourceEnvironment.GetProjectId(), //@TODO:: temp added hardcoded project id
 		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
