@@ -28,4 +28,6 @@ type RegisterOtp struct {
 type Email struct {
 	Email      string `json:"email"`
 	ClientType string `json:"client_type"`
+	RegisterType string `json:"register_type"`
+	GoogleToken string `json:"google_token"`
 }
