@@ -443,21 +443,21 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		ProjectId:  ResourceEnvironmentId, 
 		TableSlug:  "user",
 	})
-	fmt.Println("##################### test 1")
+	
 	if err != nil {
 		h.log.Error("---> error in login with email otp", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("##################### test 2")
+
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-	fmt.Println("##################### test 3")
+
 	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
 		LoginData: convertedToAuthPb,
 		Tables:    []*pb.Object{},
 		ProjectId: ProjectId,
 	})
-	fmt.Println("##################### test 4")
+
 	if err != nil {
 		h.log.Error("---> error in session and token generator", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
