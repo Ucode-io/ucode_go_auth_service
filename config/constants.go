@@ -36,6 +36,10 @@ const (
 
 var (
 	// these apis also manage by app's permission
+
+	WithGoogle = "google"
+	Default = "default"
+
 	ObjectBuilderTableSlugs = map[string]int{
 		"field":               1,
 		"view":                1,

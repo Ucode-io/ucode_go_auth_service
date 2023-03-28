@@ -3,8 +3,10 @@ package helper
 import (
 	"log"
 	"net/smtp"
-
+	"io/ioutil"
+	net_http "net/http"
 	"github.com/pkg/errors"
+	"encoding/json"
 )
 
 const (
@@ -16,6 +18,30 @@ const (
 	from     string = "ucode.udevs.io@gmail.com"
 	password string = "gehwhgelispgqoql"
 )
+
+func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
+	resp, err := net_http.Get("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken)
+	// fmt.Println("Request to https://www.googleapis.com/oauth2/v3/userinfo?access_token= " + accessToken)
+	if err != nil {
+	 return nil, err
+	}
+   
+	defer resp.Body.Close()
+   
+	userInfo := make(map[string]interface{})
+   
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+	 return nil, err
+	}
+   
+	err = json.Unmarshal(body, &userInfo)
+	if err != nil {
+	 return nil, err
+	}
+	
+	return userInfo, nil
+}
 
 func SendEmail(subject, to, link, token string) error {
 	message := `
