@@ -633,6 +633,10 @@ definitions:
         type: string
       email:
         type: string
+      google_token:
+        type: string
+      register_type:
+        type: string
     type: object
   ucode_ucode_go_auth_service_api_models.RegisterOtp:
     properties:

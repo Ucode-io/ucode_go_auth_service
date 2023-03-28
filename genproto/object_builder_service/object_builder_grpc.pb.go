@@ -51,7 +51,7 @@ type ObjectBuilderServiceClient interface {
 	GetObjectDetails(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	GetListInExcel(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	Batch(ctx context.Context, in *BatchRequest, opts ...grpc.CallOption) (*CommonMessage, error)
-	MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 	MultipleInsert(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetFinancialAnalytics(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error)
 }
@@ -163,8 +163,8 @@ func (c *objectBuilderServiceClient) Batch(ctx context.Context, in *BatchRequest
 	return out, nil
 }
 
-func (c *objectBuilderServiceClient) MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *objectBuilderServiceClient) MultipleUpdate(ctx context.Context, in *CommonMessage, opts ...grpc.CallOption) (*CommonMessage, error) {
+	out := new(CommonMessage)
 	err := c.cc.Invoke(ctx, ObjectBuilderService_MultipleUpdate_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -205,7 +205,7 @@ type ObjectBuilderServiceServer interface {
 	GetObjectDetails(context.Context, *CommonMessage) (*CommonMessage, error)
 	GetListInExcel(context.Context, *CommonMessage) (*CommonMessage, error)
 	Batch(context.Context, *BatchRequest) (*CommonMessage, error)
-	MultipleUpdate(context.Context, *CommonMessage) (*emptypb.Empty, error)
+	MultipleUpdate(context.Context, *CommonMessage) (*CommonMessage, error)
 	MultipleInsert(context.Context, *CommonMessage) (*emptypb.Empty, error)
 	GetFinancialAnalytics(context.Context, *CommonMessage) (*CommonMessage, error)
 	mustEmbedUnimplementedObjectBuilderServiceServer()
@@ -248,7 +248,7 @@ func (UnimplementedObjectBuilderServiceServer) GetListInExcel(context.Context, *
 func (UnimplementedObjectBuilderServiceServer) Batch(context.Context, *BatchRequest) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Batch not implemented")
 }
-func (UnimplementedObjectBuilderServiceServer) MultipleUpdate(context.Context, *CommonMessage) (*emptypb.Empty, error) {
+func (UnimplementedObjectBuilderServiceServer) MultipleUpdate(context.Context, *CommonMessage) (*CommonMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MultipleUpdate not implemented")
 }
 func (UnimplementedObjectBuilderServiceServer) MultipleInsert(context.Context, *CommonMessage) (*emptypb.Empty, error) {

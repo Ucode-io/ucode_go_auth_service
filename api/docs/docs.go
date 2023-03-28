@@ -12975,6 +12975,12 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string"
+                },
+                "google_token": {
+                    "type": "string"
+                },
+                "register_type": {
+                    "type": "string"
                 }
             }
         },
