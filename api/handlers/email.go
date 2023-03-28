@@ -169,11 +169,11 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 	fmt.Println(":::EmailService->Create:::")
 
-	err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
+	// err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
 
 	res := models.SendCodeResponse{
 		SmsId: resp.Id,
