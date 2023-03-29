@@ -124,6 +124,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("::::::::::::::::::::::resourceEnvironment:::", resourceEnvironment.GetId())
 	// Check if user exists
 	respObject, err := h.services.LoginService().LoginWithEmailOtp(
 		c.Request.Context(),
