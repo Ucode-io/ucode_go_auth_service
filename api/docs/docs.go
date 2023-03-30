@@ -12200,7 +12200,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/verify-email/{sms_id}/{otp}": {
+        "/v2/verify-email/{sms_id}/{otp}": {
             "post": {
                 "description": "Verify",
                 "consumes": [
@@ -12227,6 +12227,20 @@ const docTemplate = `{
                         "description": "otp",
                         "name": "otp",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -12979,6 +12993,9 @@ const docTemplate = `{
                 "google_token": {
                     "type": "string"
                 },
+                "phone": {
+                    "type": "string"
+                },
                 "register_type": {
                     "type": "string"
                 }
@@ -13032,6 +13049,9 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
+                },
+                "register_type": {
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
