@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
+	_ "encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -141,9 +141,9 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	if bytes, err := json.MarshalIndent(respObject, "", " "); err == nil {
-		fmt.Println("bytes", bytes)
-	}
+	// if bytes, err := json.MarshalIndent(respObject, "", " "); err == nil {
+	// 	fmt.Println("bytes", bytes)
+	// }
 
 	fmt.Println(":::respObject.GetUserFound():::")
 
@@ -170,11 +170,11 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 	fmt.Println(":::EmailService->Create:::")
 
-	// err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
+	err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
 
 	res := models.SendCodeResponse{
 		SmsId: resp.Id,
