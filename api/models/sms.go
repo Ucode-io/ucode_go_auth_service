@@ -12,8 +12,9 @@ type Sms struct {
 }
 
 type SendCodeResponse struct {
-	SmsId string                    `json:"sms_id"`
-	Data  *pbObject.V2LoginResponse `json:"data"`
+	SmsId       string `json:"sms_id"`
+	GoogleAcces bool `json:"google_acces"`
+	Data       *pbObject.V2LoginResponse `json:"data"`
 }
 
 type Verify struct {
