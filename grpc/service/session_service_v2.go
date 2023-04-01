@@ -126,6 +126,11 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.Internal, errGenerateToken.Error())
 	}
 	fmt.Println("TEST::::9")
+
+	if req.Tables != nil {
+		res.Tables = req.Tables
+	}
+	
 	return res, nil
 }
 

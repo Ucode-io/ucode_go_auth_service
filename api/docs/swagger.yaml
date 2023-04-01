@@ -1,1390 +1,5 @@
 definitions:
-  auth_service.AddClientRequest:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      login_strategy:
-        type: integer
-      login_table:
-        $ref: '#/definitions/auth_service.LoginTable'
-      login_value:
-        type: string
-      password:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.AddPermissionScopeRequest:
-    properties:
-      client_platform_id:
-        type: string
-      method:
-        type: string
-      path:
-        type: string
-      permission_id:
-        type: string
-    type: object
-  auth_service.AddRelationRequest:
-    properties:
-      client_type_id:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      type:
-        type: integer
-    type: object
-  auth_service.AddRolePermissionRequest:
-    properties:
-      permission_id:
-        type: string
-      role_id:
-        type: string
-    type: object
-  auth_service.AddRolePermissionsRequest:
-    properties:
-      permissions:
-        items:
-          $ref: '#/definitions/auth_service.AddRolePermissionRequest'
-        type: array
-    type: object
-  auth_service.AddRolePermissionsResponse:
-    properties:
-      added_roles:
-        type: integer
-    type: object
-  auth_service.AddRoleRequest:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.AddSessionToIntegrationRequest:
-    properties:
-      data:
-        type: string
-      expires_at:
-        type: string
-      integration_id:
-        type: string
-      secret_key:
-        type: string
-    type: object
-  auth_service.AddUserInfoFieldRequest:
-    properties:
-      client_type_id:
-        type: string
-      data_type:
-        type: string
-      field_name:
-        type: string
-      field_type:
-        type: string
-    type: object
-  auth_service.AddUserRelationRequest:
-    properties:
-      relation_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.AddUserToProjectReq:
-    properties:
-      active:
-        type: integer
-      company_id:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.AddUserToProjectRes:
-    properties:
-      company_id:
-        type: string
-      project_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.Client:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      login_strategy:
-        type: integer
-      project_id:
-        type: string
-    type: object
-  auth_service.ClientPlatform:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      subdomain:
-        type: string
-    type: object
-  auth_service.ClientPrimaryKey:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-    type: object
-  auth_service.ClientType:
-    properties:
-      confirm_by:
-        type: integer
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      self_recover:
-        type: boolean
-      self_register:
-        type: boolean
-      tables:
-        items:
-          $ref: '#/definitions/auth_service.Table'
-        type: array
-    type: object
-  auth_service.CommonMessage:
-    properties:
-      data:
-        $ref: '#/definitions/structpb.Struct'
-      table_slug:
-        type: string
-    type: object
-  auth_service.Company:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      logo:
-        type: string
-      name:
-        type: string
-      owner_id:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  auth_service.CompleteClientType:
-    properties:
-      client_type:
-        $ref: '#/definitions/auth_service.ClientType'
-      relations:
-        items:
-          $ref: '#/definitions/auth_service.Relation'
-        type: array
-      roles:
-        items:
-          $ref: '#/definitions/auth_service.Role'
-        type: array
-      user_info_fields:
-        items:
-          $ref: '#/definitions/auth_service.UserInfoField'
-        type: array
-    type: object
-  auth_service.CreateClientPlatformRequest:
-    properties:
-      name:
-        type: string
-      project_id:
-        type: string
-      subdomain:
-        type: string
-    type: object
-  auth_service.CreateClientTypeRequest:
-    properties:
-      confirm_by:
-        type: integer
-      name:
-        type: string
-      project_id:
-        type: string
-      self_recover:
-        type: boolean
-      self_register:
-        type: boolean
-      tables:
-        items:
-          $ref: '#/definitions/auth_service.Table'
-        type: array
-    type: object
-  auth_service.CreateIntegrationRequest:
-    properties:
-      active:
-        type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      expires_at:
-        type: string
-      ip_whitelist:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      secret_key:
-        type: string
-      title:
-        type: string
-    type: object
-  auth_service.CreatePermissionRequest:
-    properties:
-      client_platform_id:
-        type: string
-      name:
-        type: string
-      parent_id:
-        type: string
-    type: object
-  auth_service.CreateReq:
-    properties:
-      client_type_id:
-        type: string
-      environment_id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-    type: object
-  auth_service.CreateRes:
-    properties:
-      app_id:
-        type: string
-      app_secret:
-        type: string
-      client_type_id:
-        type: string
-      created_at:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      status:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  auth_service.CreateUserRequest:
-    properties:
-      active:
-        type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      company_id:
-        type: string
-      email:
-        type: string
-      expires_at:
-        type: string
-      login:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      phone:
-        type: string
-      photo_url:
-        type: string
-      project_id:
-        type: string
-      resource_environment_id:
-        type: string
-      role_id:
-        type: string
-    type: object
-  auth_service.DeleteRes:
-    properties:
-      row_effected:
-        type: integer
-    type: object
-  auth_service.GenerateApiTokenReq:
-    properties:
-      app_id:
-        type: string
-      app_secret:
-        type: string
-    type: object
-  auth_service.GenerateApiTokenRes:
-    properties:
-      token:
-        $ref: '#/definitions/auth_service.Token'
-    type: object
-  auth_service.GetClientMatrixResponse:
-    properties:
-      client_platforms:
-        items:
-          $ref: '#/definitions/auth_service.ClientPlatform'
-        type: array
-      client_types:
-        items:
-          $ref: '#/definitions/auth_service.ClientType'
-        type: array
-      clients:
-        items:
-          $ref: '#/definitions/auth_service.Client'
-        type: array
-    type: object
-  auth_service.GetClientPlatformListResponse:
-    properties:
-      client_platforms:
-        items:
-          $ref: '#/definitions/auth_service.ClientPlatform'
-        type: array
-      count:
-        type: integer
-    type: object
-  auth_service.GetClientTypeListResponse:
-    properties:
-      client_types:
-        items:
-          $ref: '#/definitions/auth_service.ClientType'
-        type: array
-      count:
-        type: integer
-    type: object
-  auth_service.GetIntegrationListResponse:
-    properties:
-      count:
-        type: integer
-      integrations:
-        items:
-          $ref: '#/definitions/auth_service.Integration'
-        type: array
-    type: object
-  auth_service.GetIntegrationSessionsResponse:
-    properties:
-      sessions:
-        items:
-          $ref: '#/definitions/auth_service.Session'
-        type: array
-    type: object
-  auth_service.GetListRes:
-    properties:
-      count:
-        type: integer
-      data:
-        items:
-          $ref: '#/definitions/auth_service.GetRes'
-        type: array
-    type: object
-  auth_service.GetRes:
-    properties:
-      app_id:
-        type: string
-      app_secret:
-        type: string
-      client_type_id:
-        type: string
-      created_at:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      status:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  auth_service.GetUserByLoginTypesRequest:
-    properties:
-      email:
-        type: string
-      login:
-        type: string
-      phone:
-        type: string
-    type: object
-  auth_service.GetUserByLoginTypesResponse:
-    properties:
-      user_id:
-        type: string
-    type: object
-  auth_service.GetUserListResponse:
-    properties:
-      count:
-        type: integer
-      users:
-        items:
-          $ref: '#/definitions/auth_service.User'
-        type: array
-    type: object
-  auth_service.HasAccessRequest:
-    properties:
-      access_token:
-        type: string
-      client_platform_id:
-        type: string
-      method:
-        type: string
-      path:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.HasAccessSuperAdminReq:
-    properties:
-      access_token:
-        type: string
-      method:
-        type: string
-      path:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.HasAccessSuperAdminRes:
-    properties:
-      created_at:
-        type: string
-      data:
-        type: string
-      expires_at:
-        type: string
-      id:
-        type: string
-      ip:
-        type: string
-      project_id:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/auth_service.TableBody'
-        type: array
-      updated_at:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.Integration:
-    properties:
-      active:
-        type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      created_at:
-        type: string
-      data:
-        type: string
-      expires_at:
-        type: string
-      id:
-        type: string
-      ip_whitelist:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      secret_key:
-        type: string
-      title:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  auth_service.LoginRequest:
-    properties:
-      password:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/auth_service.Object'
-        type: array
-      username:
-        type: string
-    type: object
-  auth_service.LoginTable:
-    properties:
-      object_id:
-        type: string
-      table_slug:
-        type: string
-      view_fields:
-        items:
-          type: string
-        type: array
-    type: object
-  auth_service.LogoutRequest:
-    properties:
-      access_token:
-        type: string
-    type: object
-  auth_service.MultiCompanyLoginRequest:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    type: object
-  auth_service.MultiCompanyLoginResponse:
-    properties:
-      client_types:
-        items:
-          $ref: '#/definitions/auth_service.ClientType'
-        type: array
-      companies:
-        items:
-          $ref: '#/definitions/auth_service.MultiCompanyLoginResponse_Company'
-        type: array
-    type: object
-  auth_service.MultiCompanyLoginResponse_Company:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      logo:
-        type: string
-      name:
-        type: string
-      owner_id:
-        type: string
-      projects:
-        items:
-          $ref: '#/definitions/auth_service.MultiCompanyLoginResponse_Company_Project'
-        type: array
-      updated_at:
-        type: string
-    type: object
-  auth_service.MultiCompanyLoginResponse_Company_Project:
-    properties:
-      company_id:
-        type: string
-      created_at:
-        type: string
-      domain:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  auth_service.Object:
-    properties:
-      object_id:
-        type: string
-      table_slug:
-        type: string
-    type: object
-  auth_service.PermissionScopePrimaryKey:
-    properties:
-      client_platform_id:
-        type: string
-      method:
-        type: string
-      path:
-        type: string
-      permission_id:
-        type: string
-    type: object
-  auth_service.RecordPermission:
-    properties:
-      client_type_id:
-        type: string
-      delete:
-        type: string
-      id:
-        type: string
-      read:
-        type: string
-      role_id:
-        type: string
-      table_slug:
-        type: string
-      update:
-        type: string
-      write:
-        type: string
-    type: object
-  auth_service.RefreshApiTokenReq:
-    properties:
-      refresh_token:
-        type: string
-    type: object
-  auth_service.RefreshTokenRequest:
-    properties:
-      refresh_token:
-        type: string
-    type: object
-  auth_service.RegisterCompanyRequest:
-    properties:
-      name:
-        type: string
-      user_info:
-        $ref: '#/definitions/auth_service.RegisterCompanyRequest_RegisterUserInfo'
-    type: object
-  auth_service.RegisterCompanyRequest_RegisterUserInfo:
-    properties:
-      email:
-        type: string
-      expires_at:
-        type: string
-      login:
-        type: string
-      password:
-        type: string
-      phone:
-        type: string
-    type: object
-  auth_service.Relation:
-    properties:
-      client_type_id:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      type:
-        type: integer
-    type: object
-  auth_service.ResetPasswordRequest:
-    properties:
-      password:
-        type: string
-      token:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.Role:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.RolePermissionPrimaryKey:
-    properties:
-      permission_id:
-        type: string
-      role_id:
-        type: string
-    type: object
-  auth_service.SendMessageToEmailRequest:
-    properties:
-      base_url:
-        type: string
-      email:
-        type: string
-      token:
-        type: string
-    type: object
-  auth_service.Session:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      created_at:
-        type: string
-      data:
-        type: string
-      expires_at:
-        type: string
-      id:
-        type: string
-      integration_id:
-        type: string
-      ip:
-        type: string
-      is_changed:
-        type: boolean
-      project_id:
-        type: string
-      role_id:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.Table:
-    properties:
-      data:
-        $ref: '#/definitions/structpb.Struct'
-      icon:
-        type: string
-      label:
-        type: string
-      slug:
-        type: string
-      view_label:
-        type: string
-      view_slug:
-        type: string
-    type: object
-  auth_service.TableBody:
-    properties:
-      object_id:
-        type: string
-      table_slug:
-        type: string
-    type: object
-  auth_service.Token:
-    properties:
-      access_token:
-        type: string
-      created_at:
-        type: string
-      expires_at:
-        type: string
-      refresh_in_seconds:
-        type: integer
-      refresh_token:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  auth_service.UpdateClientPlatformRequest:
-    properties:
-      client_type_ids:
-        items:
-          type: string
-        type: array
-      id:
-        type: string
-      name:
-        type: string
-      subdomain:
-        type: string
-    type: object
-  auth_service.UpdateClientRequest:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      login_strategy:
-        type: integer
-      login_table:
-        $ref: '#/definitions/auth_service.LoginTable'
-      login_value:
-        type: string
-      password:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.UpdateClientTypeRequest:
-    properties:
-      client_platform_ids:
-        items:
-          type: string
-        type: array
-      confirm_by:
-        type: integer
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      self_recover:
-        type: boolean
-      self_register:
-        type: boolean
-      tables:
-        items:
-          $ref: '#/definitions/auth_service.Table'
-        type: array
-    type: object
-  auth_service.UpdateCompanyRequest:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-    type: object
-  auth_service.UpdatePermissionRequest:
-    properties:
-      client_platform_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      parent_id:
-        type: string
-    type: object
-  auth_service.UpdateRelationRequest:
-    properties:
-      client_type_id:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      type:
-        type: integer
-    type: object
-  auth_service.UpdateReq:
-    properties:
-      client_type_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      status:
-        type: string
-    type: object
-  auth_service.UpdateRes:
-    properties:
-      row_effected:
-        type: integer
-    type: object
-  auth_service.UpdateRoleRequest:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.UpdateUserInfoFieldRequest:
-    properties:
-      client_type_id:
-        type: string
-      data_type:
-        type: string
-      field_name:
-        type: string
-      field_type:
-        type: string
-      id:
-        type: string
-    type: object
-  auth_service.UpdateUserRequest:
-    properties:
-      active:
-        type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      company_id:
-        type: string
-      email:
-        type: string
-      expires_at:
-        type: string
-      id:
-        type: string
-      login:
-        type: string
-      name:
-        type: string
-      phone:
-        type: string
-      photo_url:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-    type: object
-  auth_service.UpsertScopeRequest:
-    properties:
-      client_platform_id:
-        type: string
-      method:
-        type: string
-      path:
-        type: string
-    type: object
-  auth_service.User:
-    properties:
-      active:
-        type: integer
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      company_id:
-        type: string
-      email:
-        type: string
-      expires_at:
-        type: string
-      id:
-        type: string
-      login:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      phone:
-        type: string
-      photo_url:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-    type: object
-  auth_service.UserInfoField:
-    properties:
-      client_type_id:
-        type: string
-      data_type:
-        type: string
-      field_name:
-        type: string
-      field_type:
-        type: string
-      id:
-        type: string
-    type: object
-  auth_service.UserRelation:
-    properties:
-      relation_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.UserRelationPrimaryKey:
-    properties:
-      relation_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.V2AddRoleRequest:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      db_project_id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
-  auth_service.V2CreateClientTypeRequest:
-    properties:
-      client_platform_ids:
-        items:
-          type: string
-        type: array
-      confirm_by:
-        type: integer
-      db_project_id:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      self_recover:
-        type: boolean
-      self_register:
-        type: boolean
-    type: object
-  auth_service.V2LoginRequest:
-    properties:
-      client_type:
-        type: string
-      login_strategy:
-        type: string
-      password:
-        type: string
-      project_id:
-        type: string
-      resource_environment_id:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/auth_service.Object'
-        type: array
-      username:
-        type: string
-    type: object
-  auth_service.V2LoginResponse:
-    properties:
-      app_permissions:
-        items:
-          $ref: '#/definitions/auth_service.RecordPermission'
-        type: array
-      client_platform:
-        $ref: '#/definitions/auth_service.ClientPlatform'
-      client_type:
-        $ref: '#/definitions/auth_service.ClientType'
-      environment_id:
-        type: string
-      login_table_slug:
-        type: string
-      permissions:
-        items:
-          $ref: '#/definitions/auth_service.RecordPermission'
-        type: array
-      resource_id:
-        type: string
-      role:
-        $ref: '#/definitions/auth_service.Role'
-      sessions:
-        items:
-          $ref: '#/definitions/auth_service.Session'
-        type: array
-      token:
-        $ref: '#/definitions/auth_service.Token'
-      user_found:
-        type: boolean
-      user_id:
-        type: string
-    type: object
-  auth_service.V2LoginSuperAdminReq:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    type: object
-  auth_service.V2LoginSuperAdminRes:
-    properties:
-      companies:
-        items:
-          $ref: '#/definitions/auth_service.Company'
-        type: array
-      sessions:
-        items:
-          $ref: '#/definitions/auth_service.Session'
-        type: array
-      token:
-        $ref: '#/definitions/auth_service.Token'
-      user_found:
-        type: boolean
-      user_id:
-        type: string
-    type: object
-  auth_service.V2MultiCompanyLoginReq:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    type: object
-  auth_service.V2MultiCompanyLoginRes:
-    properties:
-      companies:
-        items:
-          $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes_Company'
-        type: array
-    type: object
-  auth_service.V2MultiCompanyLoginRes_Company:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      logo:
-        type: string
-      name:
-        type: string
-      owner_id:
-        type: string
-      projects:
-        items:
-          $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes_Company_Project'
-        type: array
-      updated_at:
-        type: string
-    type: object
-  auth_service.V2MultiCompanyLoginRes_Company_Project:
-    properties:
-      company_id:
-        type: string
-      created_at:
-        type: string
-      domain:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  auth_service.V2RefreshTokenResponse:
-    properties:
-      permissions:
-        items:
-          $ref: '#/definitions/auth_service.RecordPermission'
-        type: array
-      token:
-        $ref: '#/definitions/auth_service.Token'
-    type: object
-  auth_service.V2RefreshTokenSuperAdminResponse:
-    properties:
-      token:
-        $ref: '#/definitions/auth_service.Token'
-    type: object
-  auth_service.V2UpdateClientTypeRequest:
-    properties:
-      client_platform_ids:
-        items:
-          type: string
-        type: array
-      confirm_by:
-        type: integer
-      db_project_id:
-        type: string
-      guid:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-      self_recover:
-        type: boolean
-      self_register:
-        type: boolean
-    type: object
-  auth_service.V2UpdateRoleRequest:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      db_project_id:
-        type: string
-      guid:
-        type: string
-      name:
-        type: string
-      project_id:
-        type: string
-    type: object
-  company_service.CreateProjectRequest:
-    properties:
-      company_id:
-        type: string
-      k8s_namespace:
-        type: string
-      resources:
-        items:
-          $ref: '#/definitions/company_service.Resource'
-        type: array
-      title:
-        type: string
-    type: object
-  company_service.GetListConfiguredResourceEnvironmentRes:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment'
-        type: array
-    type: object
-  company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment:
-    properties:
-      description:
-        type: string
-      display_color:
-        type: string
-      environment_id:
-        type: string
-      id:
-        type: string
-      is_configured:
-        type: boolean
-      name:
-        type: string
-      project_id:
-        type: string
-      resource_id:
-        type: string
-      resource_type:
-        type: integer
-      service_type:
-        type: integer
-    type: object
-  company_service.GetProjectListResponse:
-    properties:
-      count:
-        type: integer
-      projects:
-        items:
-          $ref: '#/definitions/company_service.Project'
-        type: array
-    type: object
-  company_service.Project:
-    properties:
-      company_id:
-        type: string
-      k8s_namespace:
-        type: string
-      logo:
-        type: string
-      project_id:
-        type: string
-      resources:
-        items:
-          $ref: '#/definitions/company_service.ResourceWithoutPassword'
-        type: array
-      title:
-        type: string
-    type: object
-  company_service.Resource:
-    properties:
-      credentials:
-        $ref: '#/definitions/company_service.Resource_Credentials'
-      id:
-        type: string
-      resource_type:
-        type: integer
-      service_type:
-        type: integer
-      title:
-        type: string
-    type: object
-  company_service.Resource_Credentials:
-    properties:
-      database:
-        type: string
-      host:
-        type: string
-      password:
-        type: string
-      port:
-        type: string
-      username:
-        type: string
-    type: object
-  company_service.ResourceWithoutPassword:
-    properties:
-      credentials:
-        $ref: '#/definitions/company_service.ResourceWithoutPassword_Credentials'
-      environments:
-        items:
-          $ref: '#/definitions/company_service.ResourceWithoutPassword_Environment'
-        type: array
-      id:
-        type: string
-      project_id:
-        type: string
-      resource_type:
-        type: integer
-      title:
-        type: string
-    type: object
-  company_service.ResourceWithoutPassword_Credentials:
-    properties:
-      database:
-        type: string
-      host:
-        type: string
-      port:
-        type: string
-      username:
-        type: string
-    type: object
-  company_service.ResourceWithoutPassword_Environment:
-    properties:
-      default:
-        type: boolean
-      description:
-        type: string
-      display_color:
-        type: string
-      id:
-        type: string
-      is_configured:
-        type: boolean
-      name:
-        type: string
-      resource_environment_id:
-        type: string
-    type: object
-  company_service.UpdateProjectUserDataReq:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  company_service.UpdateProjectUserDataRes:
+  big.Int:
     type: object
   config.Config:
     properties:
@@ -1438,21 +53,553 @@ definitions:
       version:
         type: string
     type: object
+  google_golang_org_protobuf_types_known_structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  google_golang_org_protobuf_types_known_structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+    type: object
+  http.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  http.Request:
+    properties:
+      body:
+        description: |-
+          Body is the request's body.
+
+          For client requests, a nil body means the request has no
+          body, such as a GET request. The HTTP Client's Transport
+          is responsible for calling the Close method.
+
+          For server requests, the Request Body is always non-nil
+          but will return EOF immediately when no body is present.
+          The Server will close the request body. The ServeHTTP
+          Handler does not need to.
+
+          Body must allow Read to be called concurrently with Close.
+          In particular, calling Close should unblock a Read waiting
+          for input.
+      cancel:
+        description: |-
+          Cancel is an optional channel whose closure indicates that the client
+          request should be regarded as canceled. Not all implementations of
+          RoundTripper may support Cancel.
+
+          For server requests, this field is not applicable.
+
+          Deprecated: Set the Request's context with NewRequestWithContext
+          instead. If a Request's Cancel field and context are both
+          set, it is undefined whether Cancel is respected.
+        type: object
+      close:
+        description: |-
+          Close indicates whether to close the connection after
+          replying to this request (for servers) or after sending this
+          request and reading its response (for clients).
+
+          For server requests, the HTTP server handles this automatically
+          and this field is not needed by Handlers.
+
+          For client requests, setting this field prevents re-use of
+          TCP connections between requests to the same hosts, as if
+          Transport.DisableKeepAlives were set.
+        type: boolean
+      contentLength:
+        description: |-
+          ContentLength records the length of the associated content.
+          The value -1 indicates that the length is unknown.
+          Values >= 0 indicate that the given number of bytes may
+          be read from Body.
+
+          For client requests, a value of 0 with a non-nil Body is
+          also treated as unknown.
+        type: integer
+      form:
+        allOf:
+        - $ref: '#/definitions/url.Values'
+        description: |-
+          Form contains the parsed form data, including both the URL
+          field's query parameters and the PATCH, POST, or PUT form data.
+          This field is only available after ParseForm is called.
+          The HTTP client ignores Form and uses Body instead.
+      header:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: "Header contains the request header fields either received\nby
+          the server or to be sent by the client.\n\nIf a server received a request
+          with header lines,\n\n\tHost: example.com\n\taccept-encoding: gzip, deflate\n\tAccept-Language:
+          en-us\n\tfOO: Bar\n\tfoo: two\n\nthen\n\n\tHeader = map[string][]string{\n\t\t\"Accept-Encoding\":
+          {\"gzip, deflate\"},\n\t\t\"Accept-Language\": {\"en-us\"},\n\t\t\"Foo\":
+          {\"Bar\", \"two\"},\n\t}\n\nFor incoming requests, the Host header is promoted
+          to the\nRequest.Host field and removed from the Header map.\n\nHTTP defines
+          that header names are case-insensitive. The\nrequest parser implements this
+          by using CanonicalHeaderKey,\nmaking the first character and any characters
+          following a\nhyphen uppercase and the rest lowercase.\n\nFor client requests,
+          certain headers such as Content-Length\nand Connection are automatically
+          written when needed and\nvalues in Header may be ignored. See the documentation\nfor
+          the Request.Write method."
+      host:
+        description: |-
+          For server requests, Host specifies the host on which the
+          URL is sought. For HTTP/1 (per RFC 7230, section 5.4), this
+          is either the value of the "Host" header or the host name
+          given in the URL itself. For HTTP/2, it is the value of the
+          ":authority" pseudo-header field.
+          It may be of the form "host:port". For international domain
+          names, Host may be in Punycode or Unicode form. Use
+          golang.org/x/net/idna to convert it to either format if
+          needed.
+          To prevent DNS rebinding attacks, server Handlers should
+          validate that the Host header has a value for which the
+          Handler considers itself authoritative. The included
+          ServeMux supports patterns registered to particular host
+          names and thus protects its registered Handlers.
+
+          For client requests, Host optionally overrides the Host
+          header to send. If empty, the Request.Write method uses
+          the value of URL.Host. Host may contain an international
+          domain name.
+        type: string
+      method:
+        description: |-
+          Method specifies the HTTP method (GET, POST, PUT, etc.).
+          For client requests, an empty string means GET.
+
+          Go's HTTP client does not support sending a request with
+          the CONNECT method. See the documentation on Transport for
+          details.
+        type: string
+      multipartForm:
+        allOf:
+        - $ref: '#/definitions/multipart.Form'
+        description: |-
+          MultipartForm is the parsed multipart form, including file uploads.
+          This field is only available after ParseMultipartForm is called.
+          The HTTP client ignores MultipartForm and uses Body instead.
+      postForm:
+        allOf:
+        - $ref: '#/definitions/url.Values'
+        description: |-
+          PostForm contains the parsed form data from PATCH, POST
+          or PUT body parameters.
+
+          This field is only available after ParseForm is called.
+          The HTTP client ignores PostForm and uses Body instead.
+      proto:
+        description: |-
+          The protocol version for incoming server requests.
+
+          For client requests, these fields are ignored. The HTTP
+          client code always uses either HTTP/1.1 or HTTP/2.
+          See the docs on Transport for details.
+        type: string
+      protoMajor:
+        description: "1"
+        type: integer
+      protoMinor:
+        description: "0"
+        type: integer
+      remoteAddr:
+        description: |-
+          RemoteAddr allows HTTP servers and other software to record
+          the network address that sent the request, usually for
+          logging. This field is not filled in by ReadRequest and
+          has no defined format. The HTTP server in this package
+          sets RemoteAddr to an "IP:port" address before invoking a
+          handler.
+          This field is ignored by the HTTP client.
+        type: string
+      requestURI:
+        description: |-
+          RequestURI is the unmodified request-target of the
+          Request-Line (RFC 7230, Section 3.1.1) as sent by the client
+          to a server. Usually the URL field should be used instead.
+          It is an error to set this field in an HTTP client request.
+        type: string
+      response:
+        allOf:
+        - $ref: '#/definitions/http.Response'
+        description: |-
+          Response is the redirect response which caused this request
+          to be created. This field is only populated during client
+          redirects.
+      tls:
+        allOf:
+        - $ref: '#/definitions/tls.ConnectionState'
+        description: |-
+          TLS allows HTTP servers and other software to record
+          information about the TLS connection on which the request
+          was received. This field is not filled in by ReadRequest.
+          The HTTP server in this package sets the field for
+          TLS-enabled connections before invoking a handler;
+          otherwise it leaves the field nil.
+          This field is ignored by the HTTP client.
+      trailer:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: |-
+          Trailer specifies additional headers that are sent after the request
+          body.
+
+          For server requests, the Trailer map initially contains only the
+          trailer keys, with nil values. (The client declares which trailers it
+          will later send.)  While the handler is reading from Body, it must
+          not reference Trailer. After reading from Body returns EOF, Trailer
+          can be read again and will contain non-nil values, if they were sent
+          by the client.
+
+          For client requests, Trailer must be initialized to a map containing
+          the trailer keys to later send. The values may be nil or their final
+          values. The ContentLength must be 0 or -1, to send a chunked request.
+          After the HTTP request is sent the map values can be updated while
+          the request body is read. Once the body returns EOF, the caller must
+          not mutate Trailer.
+
+          Few HTTP clients, servers, or proxies support HTTP trailers.
+      transferEncoding:
+        description: |-
+          TransferEncoding lists the transfer encodings from outermost to
+          innermost. An empty list denotes the "identity" encoding.
+          TransferEncoding can usually be ignored; chunked encoding is
+          automatically added and removed as necessary when sending and
+          receiving requests.
+        items:
+          type: string
+        type: array
+      url:
+        allOf:
+        - $ref: '#/definitions/url.URL'
+        description: |-
+          URL specifies either the URI being requested (for server
+          requests) or the URL to access (for client requests).
+
+          For server requests, the URL is parsed from the URI
+          supplied on the Request-Line as stored in RequestURI.  For
+          most requests, fields other than Path and RawQuery will be
+          empty. (See RFC 7230, Section 5.3)
+
+          For client requests, the URL's Host specifies the server to
+          connect to, while the Request's Host field optionally
+          specifies the Host header value to send in the HTTP
+          request.
+    type: object
   http.Response:
     properties:
-      data: {}
-      description:
+      body:
+        description: |-
+          Body represents the response body.
+
+          The response body is streamed on demand as the Body field
+          is read. If the network connection fails or the server
+          terminates the response, Body.Read calls return an error.
+
+          The http Client and Transport guarantee that Body is always
+          non-nil, even on responses without a body or responses with
+          a zero-length body. It is the caller's responsibility to
+          close Body. The default HTTP client's Transport may not
+          reuse HTTP/1.x "keep-alive" TCP connections if the Body is
+          not read to completion and closed.
+
+          The Body is automatically dechunked if the server replied
+          with a "chunked" Transfer-Encoding.
+
+          As of Go 1.12, the Body will also implement io.Writer
+          on a successful "101 Switching Protocols" response,
+          as used by WebSockets and HTTP/2's "h2c" mode.
+      close:
+        description: |-
+          Close records whether the header directed that the connection be
+          closed after reading Body. The value is advice for clients: neither
+          ReadResponse nor Response.Write ever closes a connection.
+        type: boolean
+      contentLength:
+        description: |-
+          ContentLength records the length of the associated content. The
+          value -1 indicates that the length is unknown. Unless Request.Method
+          is "HEAD", values >= 0 indicate that the given number of bytes may
+          be read from Body.
+        type: integer
+      header:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: |-
+          Header maps header keys to values. If the response had multiple
+          headers with the same key, they may be concatenated, with comma
+          delimiters.  (RFC 7230, section 3.2.2 requires that multiple headers
+          be semantically equivalent to a comma-delimited sequence.) When
+          Header values are duplicated by other fields in this struct (e.g.,
+          ContentLength, TransferEncoding, Trailer), the field values are
+          authoritative.
+
+          Keys in the map are canonicalized (see CanonicalHeaderKey).
+      proto:
+        description: e.g. "HTTP/1.0"
         type: string
+      protoMajor:
+        description: e.g. 1
+        type: integer
+      protoMinor:
+        description: e.g. 0
+        type: integer
+      request:
+        allOf:
+        - $ref: '#/definitions/http.Request'
+        description: |-
+          Request is the request that was sent to obtain this Response.
+          Request's Body is nil (having already been consumed).
+          This is only populated for Client requests.
       status:
+        description: e.g. "200 OK"
         type: string
+      statusCode:
+        description: e.g. 200
+        type: integer
+      tls:
+        allOf:
+        - $ref: '#/definitions/tls.ConnectionState'
+        description: |-
+          TLS contains information about the TLS connection on which the
+          response was received. It is nil for unencrypted responses.
+          The pointer is shared between responses and should not be
+          modified.
+      trailer:
+        allOf:
+        - $ref: '#/definitions/http.Header'
+        description: |-
+          Trailer maps trailer keys to values in the same
+          format as Header.
+
+          The Trailer initially contains only nil values, one for
+          each key specified in the server's "Trailer" header
+          value. Those values are not added to Header.
+
+          Trailer must not be accessed concurrently with Read calls
+          on the Body.
+
+          After Body.Read has returned io.EOF, Trailer will contain
+          any trailer values sent by the server.
+      transferEncoding:
+        description: |-
+          Contains transfer encodings from outer-most to inner-most. Value is
+          nil, means that "identity" encoding is used.
+        items:
+          type: string
+        type: array
+      uncompressed:
+        description: |-
+          Uncompressed reports whether the response was sent compressed but
+          was decompressed by the http package. When true, reading from
+          Body yields the uncompressed content instead of the compressed
+          content actually set from the server, ContentLength is set to -1,
+          and the "Content-Length" and "Content-Encoding" fields are deleted
+          from the responseHeader. To get the original response from
+          the server, set Transport.DisableCompression to true.
+        type: boolean
     type: object
-  models.CommonMessage:
+  multipart.FileHeader:
+    properties:
+      filename:
+        type: string
+      header:
+        $ref: '#/definitions/textproto.MIMEHeader'
+      size:
+        type: integer
+    type: object
+  multipart.Form:
+    properties:
+      file:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/multipart.FileHeader'
+          type: array
+        type: object
+      value:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+    type: object
+  net.IPNet:
+    properties:
+      ip:
+        description: network number
+        items:
+          type: integer
+        type: array
+      mask:
+        description: network mask
+        items:
+          type: integer
+        type: array
+    type: object
+  pkix.AttributeTypeAndValue:
+    properties:
+      type:
+        items:
+          type: integer
+        type: array
+      value: {}
+    type: object
+  pkix.Extension:
+    properties:
+      critical:
+        type: boolean
+      id:
+        items:
+          type: integer
+        type: array
+      value:
+        items:
+          type: integer
+        type: array
+    type: object
+  pkix.Name:
+    properties:
+      country:
+        items:
+          type: string
+        type: array
+      extraNames:
+        description: |-
+          ExtraNames contains attributes to be copied, raw, into any marshaled
+          distinguished names. Values override any attributes with the same OID.
+          The ExtraNames field is not populated when parsing, see Names.
+        items:
+          $ref: '#/definitions/pkix.AttributeTypeAndValue'
+        type: array
+      locality:
+        items:
+          type: string
+        type: array
+      names:
+        description: |-
+          Names contains all parsed attributes. When parsing distinguished names,
+          this can be used to extract non-standard attributes that are not parsed
+          by this package. When marshaling to RDNSequences, the Names field is
+          ignored, see ExtraNames.
+        items:
+          $ref: '#/definitions/pkix.AttributeTypeAndValue'
+        type: array
+      serialNumber:
+        type: string
+      streetAddress:
+        items:
+          type: string
+        type: array
+    type: object
+  textproto.MIMEHeader:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  tls.ConnectionState:
+    properties:
+      cipherSuite:
+        description: |-
+          CipherSuite is the cipher suite negotiated for the connection (e.g.
+          TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_AES_128_GCM_SHA256).
+        type: integer
+      didResume:
+        description: |-
+          DidResume is true if this connection was successfully resumed from a
+          previous session with a session ticket or similar mechanism.
+        type: boolean
+      handshakeComplete:
+        description: HandshakeComplete is true if the handshake has concluded.
+        type: boolean
+      negotiatedProtocol:
+        description: NegotiatedProtocol is the application protocol negotiated with
+          ALPN.
+        type: string
+      negotiatedProtocolIsMutual:
+        description: |-
+          NegotiatedProtocolIsMutual used to indicate a mutual NPN negotiation.
+
+          Deprecated: this value is always true.
+        type: boolean
+      ocspresponse:
+        description: |-
+          OCSPResponse is a stapled Online Certificate Status Protocol (OCSP)
+          response provided by the peer for the leaf certificate, if any.
+        items:
+          type: integer
+        type: array
+      peerCertificates:
+        description: |-
+          PeerCertificates are the parsed certificates sent by the peer, in the
+          order in which they were sent. The first element is the leaf certificate
+          that the connection is verified against.
+
+          On the client side, it can't be empty. On the server side, it can be
+          empty if Config.ClientAuth is not RequireAnyClientCert or
+          RequireAndVerifyClientCert.
+        items:
+          $ref: '#/definitions/x509.Certificate'
+        type: array
+      serverName:
+        description: |-
+          ServerName is the value of the Server Name Indication extension sent by
+          the client. It's available both on the server and on the client side.
+        type: string
+      signedCertificateTimestamps:
+        description: |-
+          SignedCertificateTimestamps is a list of SCTs provided by the peer
+          through the TLS handshake for the leaf certificate, if any.
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      tlsunique:
+        description: |-
+          TLSUnique contains the "tls-unique" channel binding value (see RFC 5929,
+          Section 3). This value will be nil for TLS 1.3 connections and for all
+          resumed connections.
+
+          Deprecated: there are conditions in which this value might not be unique
+          to a connection. See the Security Considerations sections of RFC 5705 and
+          RFC 7627, and https://mitls.org/pages/attacks/3SHAKE#channelbindings.
+        items:
+          type: integer
+        type: array
+      verifiedChains:
+        description: |-
+          VerifiedChains is a list of one or more chains where the first element is
+          PeerCertificates[0] and the last element is from Config.RootCAs (on the
+          client side) or Config.ClientCAs (on the server side).
+
+          On the client side, it's set if Config.InsecureSkipVerify is false. On
+          the server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven
+          (and the peer provided a certificate) or RequireAndVerifyClientCert.
+        items:
+          items:
+            $ref: '#/definitions/x509.Certificate'
+          type: array
+        type: array
+      version:
+        description: Version is the TLS version used by the connection (e.g. VersionTLS12).
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_api_models.CommonMessage:
     properties:
       data:
         additionalProperties: true
         type: object
     type: object
-  models.Connection:
+  ucode_ucode_go_auth_service_api_models.Connection:
     properties:
       client_type_id:
         type: string
@@ -1467,7 +614,7 @@ definitions:
       view_slug:
         type: string
     type: object
-  models.CreateConnectionRequest:
+  ucode_ucode_go_auth_service_api_models.CreateConnectionRequest:
     properties:
       client_type_id:
         type: string
@@ -1480,27 +627,31 @@ definitions:
       view_slug:
         type: string
     type: object
-  models.Email:
+  ucode_ucode_go_auth_service_api_models.Email:
     properties:
       client_type:
         type: string
       email:
         type: string
+      google_token:
+        type: string
+      register_type:
+        type: string
     type: object
-  models.RegisterOtp:
+  ucode_ucode_go_auth_service_api_models.RegisterOtp:
     properties:
       data:
         additionalProperties: true
         type: object
     type: object
-  models.SendCodeResponse:
+  ucode_ucode_go_auth_service_api_models.SendCodeResponse:
     properties:
       data:
-        $ref: '#/definitions/object_builder_service.V2LoginResponse'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse'
       sms_id:
         type: string
     type: object
-  models.Sms:
+  ucode_ucode_go_auth_service_api_models.Sms:
     properties:
       client_type:
         type: string
@@ -1509,22 +660,1469 @@ definitions:
       text:
         type: string
     type: object
-  models.StructBody:
+  ucode_ucode_go_auth_service_api_models.StructBody:
     properties:
       body:
         additionalProperties: true
         type: object
     type: object
-  models.Verify:
+  ucode_ucode_go_auth_service_api_models.Verify:
     properties:
       data:
-        $ref: '#/definitions/object_builder_service.V2LoginResponse'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse'
       tables:
         items:
-          $ref: '#/definitions/auth_service.Object'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
         type: array
     type: object
-  object_builder_service.ClientPlatform:
+  ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      login_strategy:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies'
+      login_table:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginTable'
+      login_value:
+        type: string
+      password:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddPermissionScopeRequest:
+    properties:
+      client_platform_id:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      permission_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddRelationRequest:
+    properties:
+      client_type_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest:
+    properties:
+      permission_id:
+        type: string
+      role_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsRequest:
+    properties:
+      permissions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsResponse:
+    properties:
+      added_roles:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddRoleRequest:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddSessionToIntegrationRequest:
+    properties:
+      data:
+        type: string
+      expires_at:
+        type: string
+      integration_id:
+        type: string
+      secret_key:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddUserInfoFieldRequest:
+    properties:
+      client_type_id:
+        type: string
+      data_type:
+        type: string
+      field_name:
+        type: string
+      field_type:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddUserRelationRequest:
+    properties:
+      relation_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectReq:
+    properties:
+      active:
+        type: integer
+      company_id:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes:
+    properties:
+      company_id:
+        type: string
+      project_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Client:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      login_strategy:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies'
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      subdomain:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ClientPrimaryKey:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ClientType:
+    properties:
+      confirm_by:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      self_recover:
+        type: boolean
+      self_register:
+        type: boolean
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Table'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage:
+    properties:
+      data:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+      table_slug:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CompleteClientType:
+    properties:
+      client_type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
+      relations:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Relation'
+        type: array
+      roles:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role'
+        type: array
+      user_info_fields:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UserInfoField'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
+  ucode_ucode_go_auth_service_genproto_auth_service.CreateClientPlatformRequest:
+    properties:
+      name:
+        type: string
+      project_id:
+        type: string
+      subdomain:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CreateClientTypeRequest:
+    properties:
+      confirm_by:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
+      name:
+        type: string
+      project_id:
+        type: string
+      self_recover:
+        type: boolean
+      self_register:
+        type: boolean
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Table'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CreateIntegrationRequest:
+    properties:
+      active:
+        type: integer
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      expires_at:
+        type: string
+      ip_whitelist:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      secret_key:
+        type: string
+      title:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CreatePermissionRequest:
+    properties:
+      client_platform_id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CreateReq:
+    properties:
+      client_type_id:
+        type: string
+      environment_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CreateRes:
+    properties:
+      app_id:
+        type: string
+      app_secret:
+        type: string
+      client_type_id:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.CreateUserRequest:
+    properties:
+      active:
+        type: integer
+      base_url:
+        type: string
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      company_id:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      photo_url:
+        type: string
+      project_id:
+        type: string
+      resource_environment_id:
+        type: string
+      role_id:
+        type: string
+      year_of_birth:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.DeleteRes:
+    properties:
+      row_effected:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq:
+    properties:
+      app_id:
+        type: string
+      app_secret:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenRes:
+    properties:
+      token:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetClientMatrixResponse:
+    properties:
+      client_platforms:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform'
+        type: array
+      client_types:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
+        type: array
+      clients:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Client'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetClientPlatformListResponse:
+    properties:
+      client_platforms:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform'
+        type: array
+      count:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetClientTypeListResponse:
+    properties:
+      client_types:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
+        type: array
+      count:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationListResponse:
+    properties:
+      count:
+        type: integer
+      integrations:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Integration'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationSessionsResponse:
+    properties:
+      sessions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetListRes:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetRes'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetRes:
+    properties:
+      app_id:
+        type: string
+      app_secret:
+        type: string
+      client_type_id:
+        type: string
+      created_at:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest:
+    properties:
+      email:
+        type: string
+      login:
+        type: string
+      phone:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse:
+    properties:
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse:
+    properties:
+      count:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest:
+    properties:
+      access_token:
+        type: string
+      client_platform_id:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminReq:
+    properties:
+      access_token:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminRes:
+    properties:
+      created_at:
+        type: string
+      data:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      ip:
+        type: string
+      project_id:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.TableBody'
+        type: array
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Integration:
+    properties:
+      active:
+        type: integer
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      created_at:
+        type: string
+      data:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      ip_whitelist:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      secret_key:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest:
+    properties:
+      password:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
+        type: array
+      username:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - LoginStrategies_UNKNOWN
+    - LoginStrategies_STANDARD
+    - LoginStrategies_PHONE_OTP
+    - LoginStrategies_EMAIL_OTP
+  ucode_ucode_go_auth_service_genproto_auth_service.LoginTable:
+    properties:
+      object_id:
+        type: string
+      table_slug:
+        type: string
+      view_fields:
+        items:
+          type: string
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.LogoutRequest:
+    properties:
+      access_token:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse:
+    properties:
+      client_types:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
+        type: array
+      companies:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company_Project'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company_Project:
+    properties:
+      company_id:
+        type: string
+      created_at:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Object:
+    properties:
+      object_id:
+        type: string
+      table_slug:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.PermissionScopePrimaryKey:
+    properties:
+      client_platform_id:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      permission_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission:
+    properties:
+      client_type_id:
+        type: string
+      delete:
+        type: string
+      id:
+        type: string
+      read:
+        type: string
+      role_id:
+        type: string
+      table_slug:
+        type: string
+      update:
+        type: string
+      write:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.RefreshApiTokenReq:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest:
+    properties:
+      name:
+        type: string
+      user_info:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest_RegisterUserInfo'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest_RegisterUserInfo:
+    properties:
+      email:
+        type: string
+      expires_at:
+        type: string
+      login:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Relation:
+    properties:
+      client_type_id:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - RelationTypes_UNREVEALED
+    - RelationTypes_BRANCH
+    - RelationTypes_REGION
+  ucode_ucode_go_auth_service_genproto_auth_service.ResetPasswordRequest:
+    properties:
+      password:
+        type: string
+      token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Role:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey:
+    properties:
+      permission_id:
+        type: string
+      role_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.SendMessageToEmailRequest:
+    properties:
+      base_url:
+        type: string
+      email:
+        type: string
+      token:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Session:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      created_at:
+        type: string
+      data:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      integration_id:
+        type: string
+      ip:
+        type: string
+      is_changed:
+        type: boolean
+      project_id:
+        type: string
+      role_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Table:
+    properties:
+      data:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+      icon:
+        type: string
+      label:
+        type: string
+      slug:
+        type: string
+      view_label:
+        type: string
+      view_slug:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.TableBody:
+    properties:
+      object_id:
+        type: string
+      table_slug:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Token:
+    properties:
+      access_token:
+        type: string
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      refresh_in_seconds:
+        type: integer
+      refresh_token:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientPlatformRequest:
+    properties:
+      client_type_ids:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      subdomain:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientRequest:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      login_strategy:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies'
+      login_table:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginTable'
+      login_value:
+        type: string
+      password:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientTypeRequest:
+    properties:
+      client_platform_ids:
+        items:
+          type: string
+        type: array
+      confirm_by:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      self_recover:
+        type: boolean
+      self_register:
+        type: boolean
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Table'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateCompanyRequest:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest:
+    properties:
+      client_platform_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest:
+    properties:
+      client_type_id:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateReq:
+    properties:
+      client_type_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      status:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateRes:
+    properties:
+      row_effected:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateRoleRequest:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserInfoFieldRequest:
+    properties:
+      client_type_id:
+        type: string
+      data_type:
+        type: string
+      field_name:
+        type: string
+      field_type:
+        type: string
+      id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserRequest:
+    properties:
+      active:
+        type: integer
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      company_id:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      photo_url:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpsertScopeRequest:
+    properties:
+      client_platform_id:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.User:
+    properties:
+      active:
+        type: integer
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      company_id:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      photo_url:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UserInfoField:
+    properties:
+      client_type_id:
+        type: string
+      data_type:
+        type: string
+      field_name:
+        type: string
+      field_type:
+        type: string
+      id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UserRelation:
+    properties:
+      relation_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UserRelationPrimaryKey:
+    properties:
+      relation_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2AddRoleRequest:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      db_project_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2CreateClientTypeRequest:
+    properties:
+      client_platform_ids:
+        items:
+          type: string
+        type: array
+      confirm_by:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
+      db_project_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      self_recover:
+        type: boolean
+      self_register:
+        type: boolean
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2LoginRequest:
+    properties:
+      client_type:
+        type: string
+      login_strategy:
+        type: string
+      password:
+        type: string
+      project_id:
+        type: string
+      resource_environment_id:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
+        type: array
+      username:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse:
+    properties:
+      app_permissions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission'
+        type: array
+      client_platform:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform'
+      client_type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
+      environment_id:
+        type: string
+      login_table_slug:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission'
+        type: array
+      resource_id:
+        type: string
+      role:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role'
+      sessions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session'
+        type: array
+      token:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
+      user:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
+      user_found:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminReq:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminRes:
+    properties:
+      companies:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company'
+        type: array
+      sessions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session'
+        type: array
+      token:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
+      user_found:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes:
+    properties:
+      companies:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company_Project'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company_Project:
+    properties:
+      company_id:
+        type: string
+      created_at:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenResponse:
+    properties:
+      permissions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission'
+        type: array
+      token:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenSuperAdminResponse:
+    properties:
+      token:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateClientTypeRequest:
+    properties:
+      client_platform_ids:
+        items:
+          type: string
+        type: array
+      confirm_by:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
+      db_project_id:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      self_recover:
+        type: boolean
+      self_register:
+        type: boolean
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateRoleRequest:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      db_project_id:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.CreateProjectRequest:
+    properties:
+      company_id:
+        type: string
+      k8s_namespace:
+        type: string
+      resources:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Resource'
+        type: array
+      title:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentRes:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment:
+    properties:
+      description:
+        type: string
+      display_color:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      is_configured:
+        type: boolean
+      name:
+        type: string
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.GetProjectListResponse:
+    properties:
+      count:
+        type: integer
+      projects:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.Project:
+    properties:
+      company_id:
+        type: string
+      k8s_namespace:
+        type: string
+      logo:
+        type: string
+      project_id:
+        type: string
+      resources:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword'
+        type: array
+      title:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.Resource:
+    properties:
+      credentials:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Resource_Credentials'
+      id:
+        type: string
+      resource_type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceType'
+      service_type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ServiceType'
+      title:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.Resource_Credentials:
+    properties:
+      database:
+        type: string
+      host:
+        type: string
+      password:
+        type: string
+      port:
+        type: string
+      username:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.ResourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResourceType_NOT_DECIDED
+    - ResourceType_MONGODB
+    - ResourceType_CLICKHOUSE
+    - ResourceType_POSTGRESQL
+  ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword:
+    properties:
+      credentials:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Credentials'
+      environments:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Environment'
+        type: array
+      id:
+        type: string
+      project_id:
+        type: string
+      resource_type:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceType'
+      title:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Credentials:
+    properties:
+      database:
+        type: string
+      host:
+        type: string
+      port:
+        type: string
+      username:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Environment:
+    properties:
+      default:
+        type: boolean
+      description:
+        type: string
+      display_color:
+        type: string
+      id:
+        type: string
+      is_configured:
+        type: boolean
+      name:
+        type: string
+      resource_environment_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.ServiceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ServiceType_NOT_SPECIFIED
+    - ServiceType_BUILDER_SERVICE
+    - ServiceType_ANALYTICS_SERVICE
+  ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataReq:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataRes:
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.ClientPlatform:
     properties:
       guid:
         type: string
@@ -1535,10 +2133,10 @@ definitions:
       subdomain:
         type: string
     type: object
-  object_builder_service.ClientType:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.ClientType:
     properties:
       confirm_by:
-        type: integer
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ConfirmStrategies'
       guid:
         type: string
       name:
@@ -1551,17 +2149,27 @@ definitions:
         type: boolean
       tables:
         items:
-          $ref: '#/definitions/object_builder_service.TableClientType'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.TableClientType'
         type: array
     type: object
-  object_builder_service.GetListWithRoleAppTablePermissionsResponse:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.ConfirmStrategies:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ConfirmStrategies_UNDECIDED
+    - ConfirmStrategies_PHONE
+    - ConfirmStrategies_EMAIL
+  ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse:
     properties:
       data:
-        $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions'
       project_id:
         type: string
     type: object
-  object_builder_service.RecordPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission:
     properties:
       client_type_id:
         type: string
@@ -1580,7 +2188,7 @@ definitions:
       write:
         type: string
     type: object
-  object_builder_service.Role:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.Role:
     properties:
       client_platform_id:
         type: string
@@ -1593,11 +2201,11 @@ definitions:
       project_id:
         type: string
     type: object
-  object_builder_service.RoleWithAppTablePermissions:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions:
     properties:
       apps:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App'
         type: array
       client_platform_id:
         type: string
@@ -1610,7 +2218,7 @@ definitions:
       project_id:
         type: string
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App:
     properties:
       description:
         type: string
@@ -1622,24 +2230,24 @@ definitions:
         type: string
       tables:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table'
         type: array
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App_Table:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table:
     properties:
       action_permissions:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission'
         type: array
       automatic_filters:
-        $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod'
       description:
         type: string
       digit_number:
         type: integer
       field_permissions:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission'
         type: array
       icon:
         type: string
@@ -1650,7 +2258,7 @@ definitions:
       label:
         type: string
       record_permissions:
-        $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission'
       show_in_menu:
         type: boolean
       slug:
@@ -1659,12 +2267,12 @@ definitions:
         type: string
       view_permissions:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission'
         type: array
       with_increment_id:
         type: boolean
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission:
     properties:
       custom_event_id:
         type: string
@@ -1675,7 +2283,7 @@ definitions:
       permission:
         type: boolean
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter:
     properties:
       custom_field:
         type: string
@@ -1684,26 +2292,26 @@ definitions:
       object_field:
         type: string
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod:
     properties:
       delete:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
         type: array
       read:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
         type: array
       update:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
         type: array
       write:
         items:
-          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
         type: array
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission:
     properties:
       edit_permission:
         type: boolean
@@ -1716,7 +2324,7 @@ definitions:
       view_permission:
         type: boolean
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission:
     properties:
       delete:
         type: string
@@ -1733,7 +2341,7 @@ definitions:
       write:
         type: string
     type: object
-  object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission:
     properties:
       guid:
         type: string
@@ -1744,10 +2352,10 @@ definitions:
       view_permission:
         type: boolean
     type: object
-  object_builder_service.TableClientType:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/structpb.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       icon:
         type: string
       label:
@@ -1759,41 +2367,282 @@ definitions:
       view_slug:
         type: string
     type: object
-  object_builder_service.V2LoginResponse:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse:
     properties:
       app_permissions:
         items:
-          $ref: '#/definitions/object_builder_service.RecordPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission'
         type: array
       client_platform:
-        $ref: '#/definitions/object_builder_service.ClientPlatform'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientPlatform'
       client_type:
-        $ref: '#/definitions/object_builder_service.ClientType'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientType'
       login_table_slug:
         type: string
       permissions:
         items:
-          $ref: '#/definitions/object_builder_service.RecordPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission'
         type: array
       role:
-        $ref: '#/definitions/object_builder_service.Role'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.Role'
       user_found:
         type: boolean
       user_id:
         type: string
     type: object
-  structpb.Struct:
+  url.URL:
     properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
+      forceQuery:
+        description: append a query ('?') even if RawQuery is empty
+        type: boolean
+      fragment:
+        description: fragment for references, without '#'
+        type: string
+      host:
+        description: host or host:port
+        type: string
+      omitHost:
+        description: do not emit empty host (authority)
+        type: boolean
+      opaque:
+        description: encoded opaque data
+        type: string
+      path:
+        description: path (relative paths may omit leading slash)
+        type: string
+      rawFragment:
+        description: encoded fragment hint (see EscapedFragment method)
+        type: string
+      rawPath:
+        description: encoded path hint (see EscapedPath method)
+        type: string
+      rawQuery:
+        description: encoded query values, without '?'
+        type: string
+      scheme:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/url.Userinfo'
+        description: username and password information
     type: object
-  structpb.Value:
+  url.Userinfo:
+    type: object
+  url.Values:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  x509.Certificate:
     properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+      authorityKeyId:
+        items:
+          type: integer
+        type: array
+      basicConstraintsValid:
+        description: |-
+          BasicConstraintsValid indicates whether IsCA, MaxPathLen,
+          and MaxPathLenZero are valid.
+        type: boolean
+      crldistributionPoints:
+        description: CRL Distribution Points
+        items:
+          type: string
+        type: array
+      dnsnames:
+        description: |-
+          Subject Alternate Name values. (Note that these values may not be valid
+          if invalid values were contained within a parsed certificate. For
+          example, an element of DNSNames may not be a valid DNS domain name.)
+        items:
+          type: string
+        type: array
+      emailAddresses:
+        items:
+          type: string
+        type: array
+      excludedDNSDomains:
+        items:
+          type: string
+        type: array
+      excludedEmailAddresses:
+        items:
+          type: string
+        type: array
+      excludedIPRanges:
+        items:
+          $ref: '#/definitions/net.IPNet'
+        type: array
+      excludedURIDomains:
+        items:
+          type: string
+        type: array
+      extKeyUsage:
+        description: Sequence of extended key usages.
+        items:
+          type: integer
+        type: array
+      extensions:
+        description: |-
+          Extensions contains raw X.509 extensions. When parsing certificates,
+          this can be used to extract non-critical extensions that are not
+          parsed by this package. When marshaling certificates, the Extensions
+          field is ignored, see ExtraExtensions.
+        items:
+          $ref: '#/definitions/pkix.Extension'
+        type: array
+      extraExtensions:
+        description: |-
+          ExtraExtensions contains extensions to be copied, raw, into any
+          marshaled certificates. Values override any extensions that would
+          otherwise be produced based on the other fields. The ExtraExtensions
+          field is not populated when parsing certificates, see Extensions.
+        items:
+          $ref: '#/definitions/pkix.Extension'
+        type: array
+      ipaddresses:
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      isCA:
+        type: boolean
+      issuer:
+        $ref: '#/definitions/pkix.Name'
+      issuingCertificateURL:
+        items:
+          type: string
+        type: array
+      keyUsage:
+        type: integer
+      maxPathLen:
+        description: |-
+          MaxPathLen and MaxPathLenZero indicate the presence and
+          value of the BasicConstraints' "pathLenConstraint".
+
+          When parsing a certificate, a positive non-zero MaxPathLen
+          means that the field was specified, -1 means it was unset,
+          and MaxPathLenZero being true mean that the field was
+          explicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false
+          should be treated equivalent to -1 (unset).
+
+          When generating a certificate, an unset pathLenConstraint
+          can be requested with either MaxPathLen == -1 or using the
+          zero value for both MaxPathLen and MaxPathLenZero.
+        type: integer
+      maxPathLenZero:
+        description: |-
+          MaxPathLenZero indicates that BasicConstraintsValid==true
+          and MaxPathLen==0 should be interpreted as an actual
+          maximum path length of zero. Otherwise, that combination is
+          interpreted as MaxPathLen not being set.
+        type: boolean
+      notBefore:
+        description: Validity bounds.
+        type: string
+      ocspserver:
+        description: RFC 5280, 4.2.2.1 (Authority Information Access)
+        items:
+          type: string
+        type: array
+      permittedDNSDomains:
+        items:
+          type: string
+        type: array
+      permittedDNSDomainsCritical:
+        description: Name constraints
+        type: boolean
+      permittedEmailAddresses:
+        items:
+          type: string
+        type: array
+      permittedIPRanges:
+        items:
+          $ref: '#/definitions/net.IPNet'
+        type: array
+      permittedURIDomains:
+        items:
+          type: string
+        type: array
+      policyIdentifiers:
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      publicKey: {}
+      publicKeyAlgorithm:
+        type: integer
+      raw:
+        description: Complete ASN.1 DER content (certificate, signature algorithm
+          and signature).
+        items:
+          type: integer
+        type: array
+      rawIssuer:
+        description: DER encoded Issuer
+        items:
+          type: integer
+        type: array
+      rawSubject:
+        description: DER encoded Subject
+        items:
+          type: integer
+        type: array
+      rawSubjectPublicKeyInfo:
+        description: DER encoded SubjectPublicKeyInfo.
+        items:
+          type: integer
+        type: array
+      rawTBSCertificate:
+        description: Certificate part of raw ASN.1 DER content.
+        items:
+          type: integer
+        type: array
+      serialNumber:
+        $ref: '#/definitions/big.Int'
+      signature:
+        items:
+          type: integer
+        type: array
+      signatureAlgorithm:
+        type: integer
+      subject:
+        $ref: '#/definitions/pkix.Name'
+      subjectKeyId:
+        items:
+          type: integer
+        type: array
+      unhandledCriticalExtensions:
+        description: |-
+          UnhandledCriticalExtensions contains a list of extension IDs that
+          were not (fully) processed when parsing. Verify will fail if this
+          slice is non-empty, unless verification is delegated to an OS
+          library which understands all the critical extensions.
+
+          Users can access these extensions using Extensions and can remove
+          elements from this slice if they believe that they have been
+          handled.
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      unknownExtKeyUsage:
+        description: Encountered extended key usages unknown to this package.
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      uris:
+        items:
+          $ref: '#/definitions/url.URL'
+        type: array
+      version:
+        type: integer
     type: object
 info:
   contact: {}
@@ -1812,12 +2661,12 @@ paths:
         name: remove-client
         required: true
         schema:
-          $ref: '#/definitions/auth_service.ClientPrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPrimaryKey'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -1850,7 +2699,7 @@ paths:
         name: client
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddClientRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest'
       produces:
       - application/json
       responses:
@@ -1861,7 +2710,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -1895,7 +2744,7 @@ paths:
         name: client
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateClientRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientRequest'
       produces:
       - application/json
       responses:
@@ -1906,7 +2755,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -1958,7 +2807,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetClientPlatformListResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetClientPlatformListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -1992,7 +2841,7 @@ paths:
         name: client-platform
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateClientPlatformRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientPlatformRequest'
       produces:
       - application/json
       responses:
@@ -2003,7 +2852,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -2037,7 +2886,7 @@ paths:
         name: client-platform
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateClientPlatformRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientPlatformRequest'
       produces:
       - application/json
       responses:
@@ -2048,7 +2897,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -2093,7 +2942,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -2132,7 +2981,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -2175,7 +3024,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -2227,7 +3076,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetClientTypeListResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetClientTypeListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -2261,7 +3110,7 @@ paths:
         name: client-type
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateClientTypeRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientTypeRequest'
       produces:
       - application/json
       responses:
@@ -2272,7 +3121,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.ClientType'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
               type: object
         "400":
           description: Bad Request
@@ -2306,7 +3155,7 @@ paths:
         name: client-type
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateClientTypeRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientTypeRequest'
       produces:
       - application/json
       responses:
@@ -2317,7 +3166,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.ClientType'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
               type: object
         "400":
           description: Bad Request
@@ -2356,7 +3205,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -2399,7 +3248,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CompleteClientType'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CompleteClientType'
               type: object
         "400":
           description: Invalid Argument
@@ -2444,7 +3293,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetClientMatrixResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetClientMatrixResponse'
               type: object
         "400":
           description: Bad Request
@@ -2479,7 +3328,7 @@ paths:
         name: company
         required: true
         schema:
-          $ref: '#/definitions/auth_service.RegisterCompanyRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest'
       produces:
       - application/json
       responses:
@@ -2524,7 +3373,7 @@ paths:
         name: company
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateCompanyRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateCompanyRequest'
       produces:
       - application/json
       responses:
@@ -2574,7 +3423,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -2632,7 +3481,7 @@ paths:
         name: has-access
         required: true
         schema:
-          $ref: '#/definitions/auth_service.HasAccessRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest'
       produces:
       - application/json
       responses:
@@ -2643,7 +3492,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Bad Request
@@ -2678,7 +3527,7 @@ paths:
         name: has-access
         required: true
         schema:
-          $ref: '#/definitions/auth_service.HasAccessSuperAdminReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminReq'
       produces:
       - application/json
       responses:
@@ -2689,7 +3538,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.HasAccessSuperAdminRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminRes'
               type: object
         "400":
           description: Bad Request
@@ -2753,7 +3602,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetIntegrationListResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -2787,7 +3636,7 @@ paths:
         name: Integration
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateIntegrationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateIntegrationRequest'
       produces:
       - application/json
       responses:
@@ -2798,7 +3647,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Integration'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Integration'
               type: object
         "400":
           description: Bad Request
@@ -2837,7 +3686,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -2880,7 +3729,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Integration'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Integration'
               type: object
         "400":
           description: Invalid Argument
@@ -2925,7 +3774,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetIntegrationSessionsResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationSessionsResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -2964,7 +3813,7 @@ paths:
         name: addSessionToIntegration
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddSessionToIntegrationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddSessionToIntegrationRequest'
       produces:
       - application/json
       responses:
@@ -3019,7 +3868,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3067,7 +3916,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Token'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
               type: object
         "400":
           description: Invalid Argument
@@ -3102,7 +3951,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/auth_service.LoginRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest'
       produces:
       - application/json
       responses:
@@ -3148,12 +3997,12 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/auth_service.LogoutRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LogoutRequest'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3204,7 +4053,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -3238,7 +4087,7 @@ paths:
         name: permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreatePermissionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreatePermissionRequest'
       produces:
       - application/json
       responses:
@@ -3249,7 +4098,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -3283,7 +4132,7 @@ paths:
         name: permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdatePermissionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest'
       produces:
       - application/json
       responses:
@@ -3294,7 +4143,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -3329,12 +4178,12 @@ paths:
         name: permission-scope
         required: true
         schema:
-          $ref: '#/definitions/auth_service.PermissionScopePrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.PermissionScopePrimaryKey'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3342,7 +4191,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "500":
           description: Server Error
@@ -3367,7 +4216,7 @@ paths:
         name: permission-scope
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddPermissionScopeRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddPermissionScopeRequest'
       produces:
       - application/json
       responses:
@@ -3378,7 +4227,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -3417,7 +4266,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3460,7 +4309,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -3535,7 +4384,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetProjectListResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.GetProjectListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -3573,7 +4422,7 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/company_service.CreateProjectRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.CreateProjectRequest'
       produces:
       - application/json
       responses:
@@ -3584,7 +4433,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.Project'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project'
               type: object
         "400":
           description: Bad Request
@@ -3618,7 +4467,7 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/company_service.Project'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project'
       produces:
       - application/json
       responses:
@@ -3629,7 +4478,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.Project'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project'
               type: object
         "400":
           description: Bad Request
@@ -3668,7 +4517,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -3711,7 +4560,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.Project'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project'
               type: object
         "400":
           description: Invalid Argument
@@ -3746,7 +4595,7 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/company_service.UpdateProjectUserDataReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataReq'
       produces:
       - application/json
       responses:
@@ -3757,7 +4606,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.UpdateProjectUserDataRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataRes'
               type: object
         "400":
           description: Bad Request
@@ -3792,7 +4641,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.RefreshTokenRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest'
       produces:
       - application/json
       responses:
@@ -3803,7 +4652,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Bad Request
@@ -3826,57 +4675,6 @@ paths:
       summary: Refresh Token
       tags:
       - Session
-  /register-email-otp/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: RegisterOtp
-      operationId: registerEmailOtp
-      parameters:
-      - description: register_body
-        in: body
-        name: registerBody
-        required: true
-        schema:
-          $ref: '#/definitions/models.RegisterOtp'
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.V2LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: RegisterEmailOtp
-      tags:
-      - Email
   /register-otp/{table_slug}:
     post:
       consumes:
@@ -3889,7 +4687,7 @@ paths:
         name: registerBody
         required: true
         schema:
-          $ref: '#/definitions/models.RegisterOtp'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
       - description: table_slug
         in: path
         name: table_slug
@@ -3905,7 +4703,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2LoginResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -3940,7 +4738,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddRelationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRelationRequest'
       produces:
       - application/json
       responses:
@@ -3951,7 +4749,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -3985,7 +4783,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateRelationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest'
       produces:
       - application/json
       responses:
@@ -3996,7 +4794,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -4035,7 +4833,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4090,7 +4888,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -4124,7 +4922,7 @@ paths:
         name: role
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddRoleRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRoleRequest'
       produces:
       - application/json
       responses:
@@ -4135,7 +4933,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -4169,7 +4967,7 @@ paths:
         name: role
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateRoleRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRoleRequest'
       produces:
       - application/json
       responses:
@@ -4180,7 +4978,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -4215,12 +5013,12 @@ paths:
         name: role-permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.RolePermissionPrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4253,7 +5051,7 @@ paths:
         name: role-permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddRolePermissionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest'
       produces:
       - application/json
       responses:
@@ -4264,7 +5062,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -4299,7 +5097,7 @@ paths:
         name: role-permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddRolePermissionsRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsRequest'
       produces:
       - application/json
       responses:
@@ -4310,7 +5108,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.AddRolePermissionsResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsResponse'
               type: object
         "400":
           description: Bad Request
@@ -4349,7 +5147,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4392,7 +5190,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CompleteClientType'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CompleteClientType'
               type: object
         "400":
           description: Invalid Argument
@@ -4457,7 +5255,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -4492,7 +5290,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/models.Sms'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Sms'
       produces:
       - application/json
       responses:
@@ -4503,7 +5301,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.SendCodeResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse'
               type: object
         "400":
           description: Bad Request
@@ -4526,57 +5324,6 @@ paths:
       summary: SendCode
       tags:
       - register
-  /send-message:
-    post:
-      consumes:
-      - application/json
-      description: Send Message to Email
-      operationId: send_message_to_email
-      parameters:
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: SendMessageToEmailRequestBody
-        in: body
-        name: send_message
-        required: true
-        schema:
-          $ref: '#/definitions/models.Email'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.SendCodeResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Send Message To Email
-      tags:
-      - Email
   /upsert-scope:
     post:
       consumes:
@@ -4589,7 +5336,7 @@ paths:
         name: upsert-scope
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpsertScopeRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpsertScopeRequest'
       produces:
       - application/json
       responses:
@@ -4600,7 +5347,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Role'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role'
               type: object
         "400":
           description: Bad Request
@@ -4635,7 +5382,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.StructBody'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.StructBody'
       - description: user-id
         in: path
         name: user-id
@@ -4651,7 +5398,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Role'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role'
               type: object
         "400":
           description: Bad Request
@@ -4715,7 +5462,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetUserListResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -4749,7 +5496,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateUserRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -4760,7 +5507,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Bad Request
@@ -4794,7 +5541,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateUserRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -4805,7 +5552,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Bad Request
@@ -4840,7 +5587,7 @@ paths:
         name: user-info-field
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddUserInfoFieldRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserInfoFieldRequest'
       produces:
       - application/json
       responses:
@@ -4851,7 +5598,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -4885,7 +5632,7 @@ paths:
         name: user-info-field
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateUserInfoFieldRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserInfoFieldRequest'
       produces:
       - application/json
       responses:
@@ -4905,7 +5652,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "500":
           description: Server Error
@@ -4935,7 +5682,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -4969,12 +5716,12 @@ paths:
         name: user-relation
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UserRelationPrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UserRelationPrimaryKey'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5007,7 +5754,7 @@ paths:
         name: user-relation
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddUserRelationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserRelationRequest'
       produces:
       - application/json
       responses:
@@ -5018,7 +5765,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.UserRelation'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UserRelation'
               type: object
         "400":
           description: Bad Request
@@ -5062,7 +5809,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5105,7 +5852,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Invalid Argument
@@ -5140,7 +5887,7 @@ paths:
         name: reset_password
         required: true
         schema:
-          $ref: '#/definitions/auth_service.ResetPasswordRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ResetPasswordRequest'
       produces:
       - application/json
       responses:
@@ -5186,12 +5933,12 @@ paths:
         name: send_message
         required: true
         schema:
-          $ref: '#/definitions/auth_service.SendMessageToEmailRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.SendMessageToEmailRequest'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -5234,7 +5981,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddUserToProjectReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectReq'
       produces:
       - application/json
       responses:
@@ -5245,7 +5992,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.AddUserToProjectRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes'
               type: object
         "400":
           description: Bad Request
@@ -5306,7 +6053,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetListRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListRes'
               type: object
         "400":
           description: Bad Request
@@ -5345,7 +6092,7 @@ paths:
         name: api-key
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateReq'
       produces:
       - application/json
       responses:
@@ -5356,7 +6103,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CreateRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateRes'
               type: object
         "400":
           description: Bad Request
@@ -5406,7 +6153,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.DeleteRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.DeleteRes'
               type: object
         "400":
           description: Bad Request
@@ -5455,7 +6202,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetRes'
               type: object
         "400":
           description: Bad Request
@@ -5499,7 +6246,7 @@ paths:
         name: api-key
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateReq'
       produces:
       - application/json
       responses:
@@ -5510,7 +6257,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.UpdateRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRes'
               type: object
         "400":
           description: Bad Request
@@ -5545,7 +6292,7 @@ paths:
         name: api-key
         required: true
         schema:
-          $ref: '#/definitions/auth_service.GenerateApiTokenReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq'
       produces:
       - application/json
       responses:
@@ -5556,7 +6303,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GenerateApiTokenRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenRes'
               type: object
         "400":
           description: Bad Request
@@ -5591,7 +6338,7 @@ paths:
         name: api-key
         required: true
         schema:
-          $ref: '#/definitions/auth_service.RefreshApiTokenReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshApiTokenReq'
       produces:
       - application/json
       responses:
@@ -5602,7 +6349,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.RefreshApiTokenReq'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshApiTokenReq'
               type: object
         "400":
           description: Bad Request
@@ -5647,12 +6394,12 @@ paths:
         name: remove-client
         required: true
         schema:
-          $ref: '#/definitions/auth_service.ClientPrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPrimaryKey'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -5695,7 +6442,7 @@ paths:
         name: client
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddClientRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest'
       produces:
       - application/json
       responses:
@@ -5706,7 +6453,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -5750,7 +6497,7 @@ paths:
         name: client
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateClientRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientRequest'
       produces:
       - application/json
       responses:
@@ -5761,7 +6508,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -5827,7 +6574,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -5871,7 +6618,7 @@ paths:
         name: client-platform
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateClientPlatformRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientPlatformRequest'
       produces:
       - application/json
       responses:
@@ -5882,7 +6629,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -5931,7 +6678,7 @@ paths:
         name: client-platform
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateClientPlatformRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientPlatformRequest'
       produces:
       - application/json
       responses:
@@ -5942,7 +6689,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -6002,7 +6749,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -6056,7 +6803,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6114,7 +6861,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -6179,7 +6926,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -6222,7 +6969,7 @@ paths:
         name: client-type
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2CreateClientTypeRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2CreateClientTypeRequest'
       produces:
       - application/json
       responses:
@@ -6233,7 +6980,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -6276,7 +7023,7 @@ paths:
         name: client-type
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2UpdateClientTypeRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateClientTypeRequest'
       produces:
       - application/json
       responses:
@@ -6287,7 +7034,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -6339,7 +7086,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6395,7 +7142,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -6445,7 +7192,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -6511,7 +7258,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -6554,7 +7301,7 @@ paths:
         name: connection
         required: true
         schema:
-          $ref: '#/definitions/models.CreateConnectionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.CreateConnectionRequest'
       produces:
       - application/json
       responses:
@@ -6565,7 +7312,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -6608,7 +7355,7 @@ paths:
         name: connection
         required: true
         schema:
-          $ref: '#/definitions/models.Connection'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Connection'
       produces:
       - application/json
       responses:
@@ -6619,7 +7366,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -6671,7 +7418,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6728,7 +7475,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -6773,7 +7520,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2LoginRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginRequest'
       produces:
       - application/json
       responses:
@@ -6819,7 +7566,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2LoginSuperAdminReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminReq'
       produces:
       - application/json
       responses:
@@ -6830,7 +7577,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2LoginSuperAdminRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminRes'
               type: object
         "400":
           description: Bad Request
@@ -6865,7 +7612,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/auth_service.MultiCompanyLoginRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginRequest'
       produces:
       - application/json
       responses:
@@ -6876,7 +7623,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.MultiCompanyLoginResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -6929,7 +7676,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.CommonMessage'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.CommonMessage'
       produces:
       - application/json
       responses:
@@ -7002,7 +7749,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -7046,7 +7793,7 @@ paths:
         name: permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreatePermissionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreatePermissionRequest'
       produces:
       - application/json
       responses:
@@ -7057,7 +7804,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7101,7 +7848,7 @@ paths:
         name: permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdatePermissionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest'
       produces:
       - application/json
       responses:
@@ -7112,7 +7859,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7157,12 +7904,12 @@ paths:
         name: permission-scope
         required: true
         schema:
-          $ref: '#/definitions/auth_service.PermissionScopePrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.PermissionScopePrimaryKey'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7170,7 +7917,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "500":
           description: Server Error
@@ -7205,7 +7952,7 @@ paths:
         name: permission-scope
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddPermissionScopeRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddPermissionScopeRequest'
       produces:
       - application/json
       responses:
@@ -7216,7 +7963,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7265,7 +8012,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7318,7 +8065,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -7353,7 +8100,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.RefreshTokenRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest'
       produces:
       - application/json
       responses:
@@ -7364,7 +8111,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2RefreshTokenResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenResponse'
               type: object
         "400":
           description: Bad Request
@@ -7399,7 +8146,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.RefreshTokenRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest'
       produces:
       - application/json
       responses:
@@ -7410,7 +8157,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2RefreshTokenSuperAdminResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenSuperAdminResponse'
               type: object
         "400":
           description: Bad Request
@@ -7433,6 +8180,67 @@ paths:
       summary: V2Refresh Token
       tags:
       - V2_Session
+  /v2/register-email-otp/{table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: RegisterOtp
+      operationId: registerEmailOtp
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: RegisterEmailOtp
+      tags:
+      - Email
   /v2/relation:
     post:
       consumes:
@@ -7455,7 +8263,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddRelationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRelationRequest'
       produces:
       - application/json
       responses:
@@ -7466,7 +8274,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7510,7 +8318,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateRelationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest'
       produces:
       - application/json
       responses:
@@ -7521,7 +8329,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7570,7 +8378,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7614,7 +8422,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.GetListConfiguredResourceEnvironmentRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentRes'
               type: object
         "400":
           description: Bad Request
@@ -7683,7 +8491,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -7726,7 +8534,7 @@ paths:
         name: role
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2AddRoleRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2AddRoleRequest'
       produces:
       - application/json
       responses:
@@ -7737,7 +8545,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7780,7 +8588,7 @@ paths:
         name: role
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2UpdateRoleRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateRoleRequest'
       produces:
       - application/json
       responses:
@@ -7791,7 +8599,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7836,12 +8644,12 @@ paths:
         name: role-permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.RolePermissionPrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey'
       produces:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -7884,7 +8692,7 @@ paths:
         name: role-permission
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddRolePermissionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest'
       produces:
       - application/json
       responses:
@@ -7895,7 +8703,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -7939,7 +8747,7 @@ paths:
         name: permission
         required: true
         schema:
-          $ref: '#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse'
       produces:
       - application/json
       responses:
@@ -7950,7 +8758,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -8008,7 +8816,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -8060,7 +8868,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8116,7 +8924,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -8191,7 +8999,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -8214,6 +9022,62 @@ paths:
       summary: Get Scopes List
       tags:
       - V2_Scope
+  /v2/send-message:
+    post:
+      consumes:
+      - application/json
+      description: Send Message to Email
+      operationId: send_message_to_email
+      parameters:
+      - description: SendMessageToEmailRequestBody
+        in: body
+        name: send_message
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Email'
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Send Message To Email
+      tags:
+      - Email
   /v2/user:
     get:
       consumes:
@@ -8265,7 +9129,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetUserListResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -8308,7 +9172,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.CreateUserRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -8319,7 +9183,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Bad Request
@@ -8362,7 +9226,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateUserRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -8373,7 +9237,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Bad Request
@@ -8418,7 +9282,7 @@ paths:
         name: user-info-field
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AddUserInfoFieldRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserInfoFieldRequest'
       produces:
       - application/json
       responses:
@@ -8429,7 +9293,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "400":
           description: Bad Request
@@ -8473,7 +9337,7 @@ paths:
         name: user-info-field
         required: true
         schema:
-          $ref: '#/definitions/auth_service.UpdateUserInfoFieldRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserInfoFieldRequest'
       produces:
       - application/json
       responses:
@@ -8493,7 +9357,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
               type: object
         "500":
           description: Server Error
@@ -8533,7 +9397,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8585,7 +9449,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -8642,7 +9506,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
               type: object
         "400":
           description: Invalid Argument
@@ -8677,7 +9541,7 @@ paths:
         name: user-check
         required: true
         schema:
-          $ref: '#/definitions/auth_service.GetUserByLoginTypesRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest'
       produces:
       - application/json
       responses:
@@ -8688,7 +9552,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetUserByLoginTypesResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -8723,7 +9587,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2MultiCompanyLoginReq'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq'
       produces:
       - application/json
       responses:
@@ -8734,7 +9598,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes'
               type: object
         "400":
           description: Bad Request
@@ -8779,7 +9643,7 @@ paths:
         name: verifyBody
         required: true
         schema:
-          $ref: '#/definitions/models.Verify'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Verify'
       produces:
       - application/json
       responses:
@@ -8790,7 +9654,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2LoginResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -8835,7 +9699,7 @@ paths:
         name: verifyBody
         required: true
         schema:
-          $ref: '#/definitions/models.Verify'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Verify'
       produces:
       - application/json
       responses:
@@ -8846,7 +9710,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2LoginResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
