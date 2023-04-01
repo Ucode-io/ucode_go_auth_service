@@ -5,6 +5,7 @@ import (
 	_ "encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -36,6 +37,8 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) SendMessageToEmail(c *gin.Context) {
+
+	log.Println("--- SendMessageToEmail ---")
 
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
