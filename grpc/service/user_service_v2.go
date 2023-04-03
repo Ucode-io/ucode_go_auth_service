@@ -20,6 +20,88 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWithGoogleRequest) (resp *pb.User, err error) {
+
+	
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	email := emailRegex.MatchString(req.Email)
+	if !email {
+		err = fmt.Errorf("email is not valid")
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, err
+	}
+
+	pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+		Login:                 "",
+		Password:              "",
+		Email:                 req.Email,
+		Phone:                 "",
+		Name:                  req.Name,
+		CompanyId:             req.GetCompanyId(),
+		ProjectId:             req.GetProjectId(),
+		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
+		RoleId:                "",
+		ClientTypeId:          req.GetClientTypeId(),
+		ClientPlatformId:      "",
+		Active:                0,
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+		"guid":           pKey.GetId(),
+		"project_id":     req.GetProjectId(),
+		"role_id":        "",
+		"client_type_id": req.GetClientTypeId(),
+		"active":         0,
+		"expires_at":     "",
+		"email":          req.Email,
+		"phone":          "",
+		"name":           req.Name,
+		"login":          "",
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
+	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		TableSlug: "user",
+		Data:      structData,
+		ProjectId: req.GetResourceEnvironmentId(),
+	})
+	
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	
+	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+		UserId:    pKey.Id,
+		ProjectId: req.GetProjectId(),
+		CompanyId: req.GetCompanyId(),
+	})
+	
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	
+	resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+		Id: pKey.Id,
+	})
+	
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	
+	return resp, err
+}
+
 func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUserRequest) (resp *pb.User, err error) {
 
 	hashedPassword, err := security.HashPassword(req.Password)
@@ -73,6 +155,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
 	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "user",
 		Data:      structData,

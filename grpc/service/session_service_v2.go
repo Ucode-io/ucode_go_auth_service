@@ -126,6 +126,11 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.Internal, errGenerateToken.Error())
 	}
 	fmt.Println("TEST::::9")
+
+	if req.Tables != nil {
+		res.Tables = req.Tables
+	}
+	
 	return res, nil
 }
 
@@ -599,6 +604,15 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		input.Tables = []*pb.Object{}
 	}
 
+	userData, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+		ProjectId: input.GetProjectId(),
+		Id:        input.GetLoginData().GetUserId(),
+	})
+	if err != nil {
+		s.log.Error("!!!Login->GetByPK--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
 		"id":                 session.GetId(),
@@ -633,6 +647,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		ExpiresAt:        session.GetExpiresAt(),
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
+	input.LoginData.User = userData
 
 	return input.LoginData, nil
 }

@@ -3,13 +3,13 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
@@ -338,14 +338,28 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error) {
+
+	return 0, errors.New("you are not allowed to delete user")
+
 	queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
 
 	result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
 	if err != nil {
 		return 0, err
 	}
-
 	rowsAffected = result.RowsAffected()
+	if rowsAffected == 0 {
+		return 0, errors.New("user not found")
+	}
+
+	result, err = r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
+	if err != nil {
+		return 0, errors.Wrap(err, "delete user error")
+	}
+	rowsAffected = result.RowsAffected()
+	if rowsAffected == 0 {
+		return 0, errors.New("user not found")
+	}
 
 	return rowsAffected, err
 }

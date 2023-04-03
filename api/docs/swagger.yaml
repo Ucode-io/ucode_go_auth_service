@@ -306,6 +306,8 @@ definitions:
     properties:
       active:
         type: integer
+      base_url:
+        type: string
       client_platform_id:
         type: string
       client_type_id:
@@ -331,6 +333,8 @@ definitions:
       resource_environment_id:
         type: string
       role_id:
+        type: string
+      year_of_birth:
         type: string
     type: object
   auth_service.DeleteRes:
@@ -1100,8 +1104,14 @@ definitions:
         items:
           $ref: '#/definitions/auth_service.Session'
         type: array
+      tables:
+        items:
+          $ref: '#/definitions/auth_service.Object'
+        type: array
       token:
         $ref: '#/definitions/auth_service.Token'
+      user:
+        $ref: '#/definitions/auth_service.User'
       user_found:
         type: boolean
       user_id:
@@ -1485,6 +1495,10 @@ definitions:
       client_type:
         type: string
       email:
+        type: string
+      google_token:
+        type: string
+      register_type:
         type: string
     type: object
   models.RegisterOtp:
@@ -3826,57 +3840,6 @@ paths:
       summary: Refresh Token
       tags:
       - Session
-  /register-email-otp/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: RegisterOtp
-      operationId: registerEmailOtp
-      parameters:
-      - description: register_body
-        in: body
-        name: registerBody
-        required: true
-        schema:
-          $ref: '#/definitions/models.RegisterOtp'
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.V2LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: RegisterEmailOtp
-      tags:
-      - Email
   /register-otp/{table_slug}:
     post:
       consumes:
@@ -4526,57 +4489,6 @@ paths:
       summary: SendCode
       tags:
       - register
-  /send-message:
-    post:
-      consumes:
-      - application/json
-      description: Send Message to Email
-      operationId: send_message_to_email
-      parameters:
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: SendMessageToEmailRequestBody
-        in: body
-        name: send_message
-        required: true
-        schema:
-          $ref: '#/definitions/models.Email'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.SendCodeResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Send Message To Email
-      tags:
-      - Email
   /upsert-scope:
     post:
       consumes:
@@ -7433,6 +7345,67 @@ paths:
       summary: V2Refresh Token
       tags:
       - V2_Session
+  /v2/register-email-otp/{table_slug}:
+    post:
+      consumes:
+      - application/json
+      description: RegisterOtp
+      operationId: registerEmailOtp
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterOtp'
+      - description: table_slug
+        in: path
+        name: table_slug
+        required: true
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: RegisterEmailOtp
+      tags:
+      - Email
   /v2/relation:
     post:
       consumes:
@@ -8214,6 +8187,62 @@ paths:
       summary: Get Scopes List
       tags:
       - V2_Scope
+  /v2/send-message:
+    post:
+      consumes:
+      - application/json
+      description: Send Message to Email
+      operationId: send_message_to_email
+      parameters:
+      - description: SendMessageToEmailRequestBody
+        in: body
+        name: send_message
+        required: true
+        schema:
+          $ref: '#/definitions/models.Email'
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.SendCodeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Send Message To Email
+      tags:
+      - Email
   /v2/user:
     get:
       consumes:

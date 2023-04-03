@@ -40,19 +40,19 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 	}
 
 	if !util.IsValidUUID(clientPlatform.GetProjectId()) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id"))
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id").Error())
 		return
 	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
 		return
 	}
 

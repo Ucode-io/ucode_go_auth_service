@@ -3615,96 +3615,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/register-email-otp/{table_slug}": {
-            "post": {
-                "description": "RegisterOtp",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "RegisterEmailOtp",
-                "operationId": "registerEmailOtp",
-                "parameters": [
-                    {
-                        "description": "register_body",
-                        "name": "registerBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.RegisterOtp"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/register-otp/{table_slug}": {
             "post": {
                 "description": "RegisterOtp",
@@ -4795,96 +4705,6 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.Sms"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.SendCodeResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/send-message": {
-            "post": {
-                "description": "Send Message to Email",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "Send Message To Email",
-                "operationId": "send_message_to_email",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "SendMessageToEmailRequestBody",
-                        "name": "send_message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Email"
                         }
                     }
                 ],
@@ -9905,6 +9725,110 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/register-email-otp/{table_slug}": {
+            "post": {
+                "description": "RegisterOtp",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "RegisterEmailOtp",
+                "operationId": "registerEmailOtp",
+                "parameters": [
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RegisterOtp"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/relation": {
             "put": {
                 "description": "Update Relation",
@@ -11207,6 +11131,103 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/send-message": {
+            "post": {
+                "description": "Send Message to Email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "Send Message To Email",
+                "operationId": "send_message_to_email",
+                "parameters": [
+                    {
+                        "description": "SendMessageToEmailRequestBody",
+                        "name": "send_message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Email"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -12848,6 +12869,9 @@ const docTemplate = `{
                 "active": {
                     "type": "integer"
                 },
+                "base_url": {
+                    "type": "string"
+                },
                 "client_platform_id": {
                     "type": "string"
                 },
@@ -12885,6 +12909,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "role_id": {
+                    "type": "string"
+                },
+                "year_of_birth": {
                     "type": "string"
                 }
             }
@@ -14069,8 +14096,17 @@ const docTemplate = `{
                         "$ref": "#/definitions/auth_service.Session"
                     }
                 },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Object"
+                    }
+                },
                 "token": {
                     "$ref": "#/definitions/auth_service.Token"
+                },
+                "user": {
+                    "$ref": "#/definitions/auth_service.User"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -14658,6 +14694,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
+                    "type": "string"
+                },
+                "google_token": {
+                    "type": "string"
+                },
+                "register_type": {
                     "type": "string"
                 }
             }
