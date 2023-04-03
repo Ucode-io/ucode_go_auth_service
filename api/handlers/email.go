@@ -27,10 +27,11 @@ import (
 // @Router /v2/send-message [POST]
 // @Summary Send Message To Email
 // @Description Send Message to Email
-// @Tags Email
+// @Tags Email  
 // @Accept json
 // @Produce json
 // @Param send_message body models.Email true "SendMessageToEmailRequestBody"
+// @Param X-API-KEY header string false "X-API-KEY"
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Success 201 {object} http.Response{data=models.SendCodeResponse} "User data"
@@ -197,6 +198,9 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 // @Produce json
 // @Param sms_id path string true "sms_id"
 // @Param otp path string true "otp"
+// @Param X-API-KEY header string false "X-API-KEY"
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
 // @Param verifyBody body models.Verify true "verify_body"
 // @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -288,6 +292,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Produce json
 // @Param registerBody body models.RegisterOtp true "register_body"
 // @Param table_slug path string true "table_slug"
+// @Param X-API-KEY header string false "X-API-KEY"
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
