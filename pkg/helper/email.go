@@ -1,12 +1,14 @@
 package helper
 
 import (
-	"log"
-	"net/smtp"
-	"io/ioutil"
-	net_http "net/http"
-	"github.com/pkg/errors"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	net_http "net/http"
+	"net/smtp"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -14,9 +16,9 @@ const (
 	host     = "smtp.gmail.com"
 	hostPort = ":587"
 
-	// user we are authorizing as
+	// user we are authorizing as  old="gehwhgelispgqoql"  new="xkiaqodjfuielsug"
 	from     string = "ucode.udevs.io@gmail.com"
-	password string = "gehwhgelispgqoql"
+	password string = "xkiaqodjfuielsug"
 )
 
 func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
@@ -50,14 +52,6 @@ func SendEmail(subject, to, link, token string) error {
 	   ` + link + "?token=" + token
 
 	auth := smtp.PlainAuth("", from, password, host)
-
-	//  // // NOTE: Using the backtick here ` works like a heredoc, which is why all the
-	//  // // rest of the lines are forced to the beginning of the line, otherwise the
-	//  // // formatting is wrong for the RFC 822 style
-	//  msg := `To: "` + to + `" <` + to + `>
-	// From: "` + from + `" <` + from + `>
-	// Subject: ` + subject + `
-	// ` + message
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + from + "\" <" + from + ">\n" +
 		"Subject: " + subject + "\n" +
@@ -77,15 +71,9 @@ func SendCodeToEmail(subject, to, code string) error {
 	message := `
 		Ваше код подверждение: ` + code
 
+	fmt.Println("Test 1 >>>>>>>>>>>>>>...: ", message)
 	auth := smtp.PlainAuth("", from, password, host)
-
-	//  // // NOTE: Using the backtick here ` works like a heredoc, which is why all the
-	//  // // rest of the lines are forced to the beginning of the line, otherwise the
-	//  // // formatting is wrong for the RFC 822 style
-	//  msg := `To: "` + to + `" <` + to + `>
-	// From: "` + from + `" <` + from + `>
-	// Subject: ` + subject + `
-	// ` + message
+	fmt.Println("Test 2 >>>>>>>>>>>>>>...: ", auth)
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + from + "\" <" + from + ">\n" +
 		"Subject: " + subject + "\n" +

@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
+	_ "encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -36,6 +37,8 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) SendMessageToEmail(c *gin.Context) {
+
+	log.Println("--- SendMessageToEmail ---")
 
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
@@ -124,6 +127,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("::::::::::::::::::::::resourceEnvironment:::", resourceEnvironment.GetId())
 	// Check if user exists
 	respObject, err := h.services.LoginService().LoginWithEmailOtp(
 		c.Request.Context(),
@@ -140,9 +144,9 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	if bytes, err := json.MarshalIndent(respObject, "", " "); err == nil {
-		fmt.Println("bytes", bytes)
-	}
+	// if bytes, err := json.MarshalIndent(respObject, "", " "); err == nil {
+	// 	fmt.Println("bytes", bytes)
+	// }
 
 	fmt.Println(":::respObject.GetUserFound():::")
 
@@ -169,11 +173,11 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 	fmt.Println(":::EmailService->Create:::")
 
-	// err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
+	err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
 
 	res := models.SendCodeResponse{
 		SmsId: resp.Id,
