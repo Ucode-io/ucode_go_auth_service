@@ -350,6 +350,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		body.Data["register_type"] = cfg.Default
 	}
 
+	var userId string
+
 	switch body.Data["register_type"] {
 		case cfg.WithGoogle : {
 
@@ -370,7 +372,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			}
 			
 
-			_, err = h.services.UserService().RegisterWithGoogle(
+			response, err := h.services.UserService().RegisterWithGoogle(
 				c.Request.Context(),
 				&pb.RegisterWithGoogleRequest{
 					Name: 				userInfo["name"].(string),
@@ -382,7 +384,10 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				},
 			)
 
+			userId = response.Id
+
 			body.Data["email"] = userInfo["email"]
+			body.Data["name"] = userInfo["name"]
 			
 			if err != nil {
 				h.handleResponse(c, http.GRPCError, err.Error())
@@ -416,7 +421,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			_, err = h.services.UserService().RegisterUserViaEmail(
+			response, err := h.services.UserService().RegisterUserViaEmail(
 				c.Request.Context(),
 				&pb.CreateUserRequest{
 					Login:                 body.Data["login"].(string),
@@ -433,6 +438,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+
+			userId = response.Id
 		}
 	}
 	
@@ -443,11 +450,86 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		ProjectId:  ResourceEnvironmentId, 
 		TableSlug:  "user",
 	})
-	
 	if err != nil {
 		h.log.Error("---> error in login with email otp", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
+	}
+
+	if body.Data["addational_table"] != nil {
+		if body.Data["addational_table"].(map[string]interface{})["table_slug"] == nil {
+			h.log.Error("Addational user create >>>> ")
+			h.handleResponse(c, http.GRPCError, "If addional table have, table slug is required")
+			return
+		}
+
+		switch body.Data["register_type"] {
+			case cfg.WithGoogle: {
+				structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+					"guid":           userId,
+					"project_id":     ProjectId,
+					"role_id":        "",
+					"client_type_id": "WEB_USER",
+					"active":         0,
+					"expires_at":     "",
+					"email":          body.Data["email"].(string),
+					"phone":          "",
+					"name":           body.Data["name"].(string),
+					"login":          "",
+				})
+				if err != nil {
+					h.log.Error("!!!CreateUser--->", logger.Error(err))
+					h.handleResponse(c, http.GRPCError, "Struct data >>")
+					return
+				}
+			
+				_, err = h.services.ObjectBuilderService().Create(
+					context.Background(),
+					&pbObject.CommonMessage{
+					TableSlug: "user",
+					Data:      structData,
+					ProjectId: ProjectId,
+				})
+				if err != nil {
+					h.log.Error("!!!CreateUser--->", logger.Error(err))
+					h.handleResponse(c, http.GRPCError, "Struct data >>")
+					return
+				}
+			}
+			case cfg.Default: {
+				structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+					"guid":           userId,
+					"project_id":     ProjectId,
+					"role_id":        "",
+					"client_type_id": "WEB_USER",
+					"active":         0,
+					"expires_at":     "",
+					"email":          body.Data["email"].(string),
+					"phone":          "",
+					"name":           body.Data["name"].(string),
+					"login":          "",
+				})
+				if err != nil {
+					h.log.Error("!!!CreateUser--->", logger.Error(err))
+					h.handleResponse(c, http.GRPCError, "Struct data >>")
+					return
+				}
+			
+				_, err = h.services.ObjectBuilderService().Create(
+					context.Background(),
+					&pbObject.CommonMessage{
+					TableSlug: "user",
+					Data:      structData,
+					ProjectId: ProjectId,
+				})
+				if err != nil {
+					h.log.Error("!!!CreateUser--->", logger.Error(err))
+					h.handleResponse(c, http.GRPCError, "Struct data >>")
+					return
+				}
+			}
+		}
+
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
