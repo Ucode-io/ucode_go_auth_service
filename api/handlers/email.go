@@ -10,10 +10,10 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
+	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -114,175 +114,178 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	}
 	fmt.Println(":::::::: Register type :", request.RegisterType)
 	switch request.RegisterType {
-		case cfg.Default: {
-			respObject, err = h.services.LoginService().LoginWithEmailOtp(
-				c.Request.Context(),
-				&pbObject.EmailOtpRequest{
-					ClientType: "WEB_USER",
-					TableSlug:  "user",
-					Email:      request.Email,
-					ProjectId:  resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-		
-			resp, err := h.services.EmailServie().Create(
-				c.Request.Context(),
-				&pb.Email{
-					Id:        id.String(),
-					Email:     request.Email,
-					Otp:       code,
-					ExpiresAt: expire.String()[:19],
-				},
-			)
-		
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-		
-			err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
-			if err != nil {
-				h.handleResponse(c, http.InvalidArgument, err.Error())
-				return
-			}
-
-			if(respObject == nil || !respObject.UserFound) {
-				res := models.SendCodeResponse{
-					SmsId: resp.Id,
-					Data:  &pbObject.V2LoginResponse{
-						UserFound: false,
+		case cfg.Default:
+			{
+				respObject, err = h.services.LoginService().LoginWithEmailOtp(
+					c.Request.Context(),
+					&pbObject.EmailOtpRequest{
+						ClientType: "WEB_USER",
+						TableSlug:  "user",
+						Email:      request.Email,
+						ProjectId:  resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id
 					},
+				)
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
+
+				resp, err := h.services.EmailServie().Create(
+					c.Request.Context(),
+					&pb.Email{
+						Id:        id.String(),
+						Email:     request.Email,
+						Otp:       code,
+						ExpiresAt: expire.String()[:19],
+					},
+				)
+
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
+
+				err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
+				if err != nil {
+					h.handleResponse(c, http.InvalidArgument, err.Error())
+					return
+				}
+
+				if respObject == nil || !respObject.UserFound {
+					res := models.SendCodeResponse{
+						SmsId: resp.Id,
+						Data: &pbObject.V2LoginResponse{
+							UserFound: false,
+						},
+						GoogleAcces: false,
+					}
+
+					h.handleResponse(c, http.Created, res)
+					return
+				}
+
+				res := models.SendCodeResponse{
+					SmsId:       resp.Id,
+					Data:        respObject,
 					GoogleAcces: false,
 				}
-			
+
 				h.handleResponse(c, http.Created, res)
 				return
-			} 
-		
-			res := models.SendCodeResponse{
-				SmsId: resp.Id,
-				Data:  respObject,
-				GoogleAcces: false,
 			}
-		
-			h.handleResponse(c, http.Created, res)
-			return
-		}
-		case cfg.WithPhone: {
-			if request.Phone == "" {
-				h.handleResponse(c, http.GRPCError, "Phone required when register type is phone")
-				return
-			}
-			respObject, err = h.services.LoginService().LoginWithOtp(
-				c.Request.Context(), 
-				&pbObject.PhoneOtpRequst{
-					PhoneNumber: phone,
-					ClientType:  request.ClientType,
-					ProjectId:  resourceEnvironment.GetId(),
-			})
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-			fmt.Println("::::::: LoginWith O response :", respObject)
-			resp, err := h.services.SmsService().Send(
-				c.Request.Context(),
-				&pbSms.Sms{
-					Id:        id.String(),
-					Text:      "Your one time password, don't get it to anyone: ",
-					Otp:       code,
-					Recipient: request.Phone,
-					ExpiresAt: expire.String()[:19],
-					PhoneNumber: request.Phone,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-			fmt.Println("::::::: Phone response :", resp)
-			if(respObject == nil || !respObject.UserFound) {
-				res := models.SendCodeResponse{
-					SmsId: resp.SmsId,
-					Data:  &pbObject.V2LoginResponse{
-						UserFound: false,
+		case cfg.WithPhone:
+			{
+				if request.Phone == "" {
+					h.handleResponse(c, http.GRPCError, "Phone required when register type is phone")
+					return
+				}
+				respObject, err = h.services.LoginService().LoginWithOtp(
+					c.Request.Context(),
+					&pbObject.PhoneOtpRequst{
+						PhoneNumber: phone,
+						ClientType:  request.ClientType,
+						ProjectId:   resourceEnvironment.GetId(),
+					})
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
+				fmt.Println("::::::: LoginWith O response :", respObject)
+				resp, err := h.services.SmsService().Send(
+					c.Request.Context(),
+					&pbSms.Sms{
+						Id:          id.String(),
+						Text:        "Your one time password, don't get it to anyone: ",
+						Otp:         code,
+						Recipient:   request.Phone,
+						ExpiresAt:   expire.String()[:19],
+						PhoneNumber: request.Phone,
 					},
+				)
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
+				fmt.Println("::::::: Phone response :", resp)
+				if respObject == nil || !respObject.UserFound {
+					res := models.SendCodeResponse{
+						SmsId: resp.SmsId,
+						Data: &pbObject.V2LoginResponse{
+							UserFound: false,
+						},
+						GoogleAcces: false,
+					}
+
+					h.handleResponse(c, http.Created, res)
+					return
+				}
+
+				res := models.SendCodeResponse{
+					SmsId:       resp.SmsId,
+					Data:        respObject,
 					GoogleAcces: false,
 				}
-			
+
 				h.handleResponse(c, http.Created, res)
 				return
-			} 
-		
-			res := models.SendCodeResponse{
-				SmsId: resp.SmsId,
-				Data:  respObject,
-				GoogleAcces: false,
 			}
-		
-			h.handleResponse(c, http.Created, res)
-			return
-		}
-		case cfg.WithGoogle:  {
-			if request.GoogleToken == "" {
-				h.handleResponse(c, http.BadRequest, "google token is required when register type is google")
-				return
-			}
-			
-			userInfo, err := helper.GetGoogleUserInfo(request.GoogleToken)
-			if err != nil {
-				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
-				return
-			}
-			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
-				h.handleResponse(c, http.BadRequest, "Invalid google access token")
-				return
-			}
-	
-			request.Email = userInfo["email"].(string)
+		case cfg.WithGoogle:
+			{
+				if request.GoogleToken == "" {
+					h.handleResponse(c, http.BadRequest, "google token is required when register type is google")
+					return
+				}
 
-			respObject, err = h.services.LoginService().LoginWithEmailOtp(
-				c.Request.Context(),
-				&pbObject.EmailOtpRequest{
-					ClientType: "WEB_USER",
-					TableSlug:  "user",
-					Email:      request.Email,
-					ProjectId:  resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
+				userInfo, err := helper.GetGoogleUserInfo(request.GoogleToken)
+				if err != nil {
+					h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
+					return
+				}
+				if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+					h.handleResponse(c, http.BadRequest, "Invalid google access token")
+					return
+				}
 
-			if(respObject == nil || !respObject.UserFound) {
-				res := models.SendCodeResponse{
-					SmsId: "",
-					Data:  &pbObject.V2LoginResponse{
-						UserFound: false,
+				request.Email = userInfo["email"].(string)
+
+				respObject, err = h.services.LoginService().LoginWithEmailOtp(
+					c.Request.Context(),
+					&pbObject.EmailOtpRequest{
+						ClientType: "WEB_USER",
+						TableSlug:  "user",
+						Email:      request.Email,
+						ProjectId:  resourceEnvironment.GetId(), //@TODO:: temp added hardcoded project id
 					},
+				)
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
+
+				if respObject == nil || !respObject.UserFound {
+					res := models.SendCodeResponse{
+						SmsId: "",
+						Data: &pbObject.V2LoginResponse{
+							UserFound: false,
+						},
+						GoogleAcces: true,
+					}
+
+					h.handleResponse(c, http.Created, res)
+					return
+				}
+
+				res := models.SendCodeResponse{
+					SmsId:       "",
 					GoogleAcces: true,
+					Data:        respObject,
 				}
-			
+
 				h.handleResponse(c, http.Created, res)
 				return
-			} 
-
-			res := models.SendCodeResponse{
-				SmsId: "",
-				GoogleAcces: true,
-				Data:  respObject,
 			}
-		
-			h.handleResponse(c, http.Created, res)
-			return
-		}
 	}
-	
+
 	h.handleResponse(c, http.GRPCError, "Register type must be default or phone type")
 	return
 }
@@ -308,49 +311,52 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		body                models.Verify
 		resourceEnvironment *obs.ResourceEnvironment
 	)
-
+	
 	err := c.ShouldBindJSON(&body)
+
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	switch body.RegisterType {
-		case cfg.Default: {
-			if c.Param("otp") != "121212" {
-				resp, err := h.services.EmailServie().GetEmailByID(
-					c.Request.Context(),
-					&pb.EmailOtpPrimaryKey{
-						Id: c.Param("sms_id"),
-					},
-				)
-				if err != nil {
-					h.handleResponse(c, http.GRPCError, err.Error())
-					return
-				}
-				if resp.Otp != c.Param("otp") {
-					h.handleResponse(c, http.InvalidArgument, "Неверный код подверждения")
-					return
-				}
-			}
-		}
-		case cfg.WithPhone : {
-			if c.Param("otp") != "121212" {
-				_, err := h.services.SmsService().ConfirmOtp(
-					c.Request.Context(),
-					&pbSms.ConfirmOtpRequest{
-						SmsId: c.Param("sms_id"),
-						Otp:   c.Param("otp"),
-					},
-				)
-				if err != nil {
-					h.handleResponse(c, http.GRPCError, err.Error())
-					return
+		case cfg.Default:
+			{
+				if c.Param("otp") != "121212" {
+					resp, err := h.services.EmailServie().GetEmailByID(
+						c.Request.Context(),
+						&pb.EmailOtpPrimaryKey{
+							Id: c.Param("sms_id"),
+						},
+					)
+					if err != nil {
+						h.handleResponse(c, http.GRPCError, err.Error())
+						return
+					}
+					if resp.Otp != c.Param("otp") {
+						h.handleResponse(c, http.InvalidArgument, "Неверный код подверждения")
+						return
+					}
 				}
 			}
-		}
+		case cfg.WithPhone:
+			{
+				if c.Param("otp") != "121212" {
+					_, err := h.services.SmsService().ConfirmOtp(
+						c.Request.Context(),
+						&pbSms.ConfirmOtpRequest{
+							SmsId: c.Param("sms_id"),
+							Otp:   c.Param("otp"),
+						},
+					)
+					if err != nil {
+						h.handleResponse(c, http.GRPCError, err.Error())
+						return
+					}
+				}
+			}
 	}
-	
+
 	if !body.Data.UserFound {
 		h.handleResponse(c, http.OK, "User verified but not found")
 		return
@@ -439,11 +445,13 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
@@ -468,149 +476,166 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
 
+	if body.Data["register_type"] != cfg.WithGoogle {
+		body.Data["register_type"] = cfg.Default
+	}
+
+	var userId string
+	if body.Data["phone"] != "" {
+		body.Data["phone"] = helper.ConverPhoneNumberToMongoPhoneFormat(body.Data["phone"].(string))
+	}
+
 	switch body.Data["register_type"] {
-		case cfg.WithGoogle : {
+		case cfg.WithGoogle: {
 
-			if _, ok := body.Data["google_token"]; !ok {
-				h.handleResponse(c, http.BadRequest, "google_type type required when register_type is google")
-				return
-			}
+				if _, ok := body.Data["google_token"]; !ok {
+					h.handleResponse(c, http.BadRequest, "google_type type required when register_type is google")
+					return
+				}
 
-			userInfo, err := helper.GetGoogleUserInfo(body.Data["google_token"].(string))
-			if err != nil {
-				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
-				return
-			}
-			
-			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
-				h.handleResponse(c, http.BadRequest, "Invalid google access token")
-				return
-			}
-			
+				userInfo, err := helper.GetGoogleUserInfo(body.Data["google_token"].(string))
+				if err != nil {
+					h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
+					return
+				}
 
-			_, err = h.services.UserService().RegisterWithGoogle(
-				c.Request.Context(),
-				&pb.RegisterWithGoogleRequest{
-					Name: 				userInfo["name"].(string),
-					Email: 				userInfo["email"].(string),
-					ProjectId:             ProjectId,
-					CompanyId:             CompanyId,
-					ClientTypeId:          "WEB_USER",
-					ResourceEnvironmentId: ResourceEnvironmentId,
-				},
-			)
+				if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+					h.handleResponse(c, http.BadRequest, "Invalid google access token")
+					return
+				}
 
-			body.Data["email"] = userInfo["email"]
-			
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
+				response, err := h.services.UserService().RegisterWithGoogle(
+					c.Request.Context(),
+					&pb.RegisterWithGoogleRequest{
+						Name:                  userInfo["name"].(string),
+						Email:                 userInfo["email"].(string),
+						ProjectId:             ProjectId,
+						CompanyId:             CompanyId,
+						ClientTypeId:          "WEB_USER",
+						ResourceEnvironmentId: ResourceEnvironmentId,
+					},
+				)
 
-			resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				userId = response.Id
 
-				Email:      body.Data["email"].(string),
-				ClientType: "WEB_USER",
-				ProjectId:  ResourceEnvironmentId, 
-				TableSlug:  "user",
-			})
-			
-			if err != nil {
-				h.log.Error("---> error in login with email otp", logger.Error(err))
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-		
-			convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-		
-			res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-				LoginData: convertedToAuthPb,
-				Tables:    []*pb.Object{},
-				ProjectId: ProjectId,
-			})
-		
-			if err != nil {
-				h.log.Error("---> error in session and token generator", logger.Error(err))
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-		
-			h.handleResponse(c, http.Created, res)
+				body.Data["email"] = userInfo["email"]
+				body.Data["name"] = userInfo["name"]
+
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
 		}
 		case cfg.Default: {
 
-			if v, ok := body.Data["email"]; ok {
-				if !util.IsValidEmail(v.(string)) {
-					h.handleResponse(c, http.BadRequest, "Неверный формат email")
+				if v, ok := body.Data["email"]; ok {
+					if !util.IsValidEmail(v.(string)) {
+						h.handleResponse(c, http.BadRequest, "Неверный формат email")
+						return
+					}
+				} else {
+					h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
 					return
 				}
-			} else {
-				h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
-				return
-			}
-		
-			if _, ok := body.Data["login"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
-				return
-			}
-		
-			if _, ok := body.Data["name"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле name не заполнено")
-				return
-			}
-		
-			if _, ok := body.Data["phone"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
-				return
-			}
 
-			_, err = h.services.UserService().RegisterUserViaEmail(
-				c.Request.Context(),
-				&pb.CreateUserRequest{
-					Login:                 body.Data["login"].(string),
-					Email:                 body.Data["email"].(string),
-					Name:                  body.Data["name"].(string),
-					Phone:                 body.Data["phone"].(string),
-					ProjectId:             ProjectId,
-					CompanyId:             CompanyId,
-					ClientTypeId:          "WEB_USER",
-					ResourceEnvironmentId: ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
+				if _, ok := body.Data["login"]; !ok {
+					h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
+					return
+				}
 
-			resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				if _, ok := body.Data["name"]; !ok {
+					h.handleResponse(c, http.BadRequest, "Поле name не заполнено")
+					return
+				}
 
-				Email:      body.Data["email"].(string),
-				ClientType: "WEB_USER",
-				ProjectId:  ResourceEnvironmentId, 
-				TableSlug:  "user",
-			})
-			
-			if err != nil {
-				h.log.Error("---> error in login with email otp", logger.Error(err))
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-		
-			convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
-		
-			res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
-				LoginData: convertedToAuthPb,
-				Tables:    []*pb.Object{},
-				ProjectId: ProjectId,
-			})
-		
-			if err != nil {
-				h.log.Error("---> error in session and token generator", logger.Error(err))
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-		
-			h.handleResponse(c, http.Created, res)
+				if _, ok := body.Data["phone"]; !ok {
+					h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
+					return
+				}
+
+				response, err := h.services.UserService().RegisterUserViaEmail(
+					c.Request.Context(),
+					&pb.CreateUserRequest{
+						Login:                 body.Data["login"].(string),
+						Email:                 body.Data["email"].(string),
+						Name:                  body.Data["name"].(string),
+						Phone:                 body.Data["phone"].(string),
+						ProjectId:             ProjectId,
+						CompanyId:             CompanyId,
+						ClientTypeId:          "WEB_USER",
+						ResourceEnvironmentId: ResourceEnvironmentId,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
+
+				userId = response.Id
 		}
 	}
+
+	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+
+		Email:      body.Data["email"].(string),
+		ClientType: "WEB_USER",
+		ProjectId:  ResourceEnvironmentId,
+		TableSlug:  "user",
+	})
+	if err != nil {
+		h.log.Error("---> error in login with email otp", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	if body.Data["addational_table"] != nil {
+		if body.Data["addational_table"].(map[string]interface{})["table_slug"] == nil {
+			h.log.Error("Addational user create >>>> ")
+			h.handleResponse(c, http.GRPCError, "If addional table have, table slug is required")
+			return
+		}
+
+		if body.Data["register_type"].(string) == cfg.Default {
+			body.Data["addational_table"].(map[string]interface{})["guid"] = userId
+			body.Data["addational_table"].(map[string]interface{})["project_id"] = ProjectId
+			
+			mapedInterface := body.Data["addational_table"].(map[string]interface{})
+			structData, err := helper.ConvertRequestToSturct(mapedInterface)
+			if err != nil {
+				h.log.Error("!!!CreateUser--->", logger.Error(err))
+				h.handleResponse(c, http.GRPCError, "Struct data >>")
+				return
+			}
+
+			_, err = h.services.ObjectBuilderService().Create(
+				context.Background(),
+				&pbObject.CommonMessage{
+					TableSlug: mapedInterface["table_slug"].(string),
+					Data:      structData,
+					ProjectId: ResourceEnvironmentId,
+				})
+			if err != nil {
+				h.log.Error("!!!CreateUser--->", logger.Error(err))
+				h.handleResponse(c, http.GRPCError, "Struct data >>")
+				return
+			}
+
+		}
+	}
+
+	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
+
+	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
+		LoginData: convertedToAuthPb,
+		Tables:    []*pb.Object{},
+		ProjectId: ProjectId,
+	})
+
+	if err != nil {
+		h.log.Error("---> error in session and token generator", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, res)
 }
