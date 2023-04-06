@@ -5,6 +5,7 @@ import (
 	_ "encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -37,6 +38,8 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) SendMessageToEmail(c *gin.Context) {
+
+	log.Println("--- SendMessageToEmail ---")
 
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
@@ -318,6 +321,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("::::::: Register type body :", body.RegisterType)
 
 	switch body.RegisterType {
 		case cfg.Default:
@@ -341,6 +345,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 			}
 		case cfg.WithPhone:
 			{
+				fmt.Println("::::::: Register type with phone :", body.RegisterType)
 				if c.Param("otp") != "121212" {
 					_, err := h.services.SmsService().ConfirmOtp(
 						c.Request.Context(),
@@ -480,7 +485,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		body.Data["register_type"] = cfg.Default
 	}
 
-	var userId string
+
 	if body.Data["phone"] != "" {
 		body.Data["phone"] = helper.ConverPhoneNumberToMongoPhoneFormat(body.Data["phone"].(string))
 	}
@@ -504,7 +509,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					return
 				}
 
-				response, err := h.services.UserService().RegisterWithGoogle(
+				_, err = h.services.UserService().RegisterWithGoogle(
 					c.Request.Context(),
 					&pb.RegisterWithGoogleRequest{
 						Name:                  userInfo["name"].(string),
@@ -516,8 +521,6 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					},
 				)
 
-				userId = response.Id
-
 				body.Data["email"] = userInfo["email"]
 				body.Data["name"] = userInfo["name"]
 
@@ -528,50 +531,49 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 		case cfg.Default: {
 
-				if v, ok := body.Data["email"]; ok {
-					if !util.IsValidEmail(v.(string)) {
-						h.handleResponse(c, http.BadRequest, "Неверный формат email")
-						return
-					}
-				} else {
-					h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+			if v, ok := body.Data["email"]; ok {
+				if !util.IsValidEmail(v.(string)) {
+					h.handleResponse(c, http.BadRequest, "Неверный формат email")
 					return
 				}
+			} else {
+				h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+				return
+			}
 
-				if _, ok := body.Data["login"]; !ok {
-					h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
-					return
-				}
+			if _, ok := body.Data["login"]; !ok {
+				h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
+				return
+			}
 
-				if _, ok := body.Data["name"]; !ok {
-					h.handleResponse(c, http.BadRequest, "Поле name не заполнено")
-					return
-				}
+			if _, ok := body.Data["name"]; !ok {
+				h.handleResponse(c, http.BadRequest, "Поле name не заполнено")
+				return
+			}
 
-				if _, ok := body.Data["phone"]; !ok {
-					h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
-					return
-				}
+			if _, ok := body.Data["phone"]; !ok {
+				h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
+				return
+			}
 
-				response, err := h.services.UserService().RegisterUserViaEmail(
-					c.Request.Context(),
-					&pb.CreateUserRequest{
-						Login:                 body.Data["login"].(string),
-						Email:                 body.Data["email"].(string),
-						Name:                  body.Data["name"].(string),
-						Phone:                 body.Data["phone"].(string),
-						ProjectId:             ProjectId,
-						CompanyId:             CompanyId,
-						ClientTypeId:          "WEB_USER",
-						ResourceEnvironmentId: ResourceEnvironmentId,
-					},
-				)
-				if err != nil {
-					h.handleResponse(c, http.GRPCError, err.Error())
-					return
-				}
+			_, err := h.services.UserService().RegisterUserViaEmail(
+				c.Request.Context(),
+				&pb.CreateUserRequest{
+					Login:                 body.Data["login"].(string),
+					Email:                 body.Data["email"].(string),
+					Name:                  body.Data["name"].(string),
+					Phone:                 body.Data["phone"].(string),
+					ProjectId:             ProjectId,
+					CompanyId:             CompanyId,
+					ClientTypeId:          "WEB_USER",
+					ResourceEnvironmentId: ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
 
-				userId = response.Id
 		}
 	}
 
@@ -596,14 +598,19 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 
 		if body.Data["register_type"].(string) == cfg.Default {
-			body.Data["addational_table"].(map[string]interface{})["guid"] = userId
+			uuid, err := uuid.NewRandom()
+			if err != nil {
+				h.handleResponse(c, http.InternalServerError, err.Error())
+				return
+			}
+			body.Data["addational_table"].(map[string]interface{})["guid"] = uuid
 			body.Data["addational_table"].(map[string]interface{})["project_id"] = ProjectId
 			
 			mapedInterface := body.Data["addational_table"].(map[string]interface{})
 			structData, err := helper.ConvertRequestToSturct(mapedInterface)
 			if err != nil {
-				h.log.Error("!!!CreateUser--->", logger.Error(err))
-				h.handleResponse(c, http.GRPCError, "Struct data >>")
+				h.log.Error("Additional table struct table --->", logger.Error(err))
+				h.handleResponse(c, http.GRPCError, "Additional table struct table --->")
 				return
 			}
 
@@ -615,12 +622,13 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					ProjectId: ResourceEnvironmentId,
 				})
 			if err != nil {
-				h.log.Error("!!!CreateUser--->", logger.Error(err))
-				h.handleResponse(c, http.GRPCError, "Struct data >>")
+				h.log.Error("Object create error >>", logger.Error(err))
+				h.handleResponse(c, http.GRPCError, "Object create error >>")
 				return
 			}
 
 		}
+
 	}
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
