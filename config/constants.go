@@ -39,6 +39,7 @@ var (
 
 	WithGoogle = "google"
 	Default = "default"
+	WithPhone = "phone"
 
 	ObjectBuilderTableSlugs = map[string]int{
 		"field":               1,

@@ -2,7 +2,7 @@ package helper
 
 import (
 	"encoding/json"
-	"fmt"
+	_ "fmt"
 	"io/ioutil"
 	"log"
 	net_http "net/http"
@@ -71,9 +71,9 @@ func SendCodeToEmail(subject, to, code string) error {
 	message := `
 		Ваше код подверждение: ` + code
 
-	fmt.Println("Test 1 >>>>>>>>>>>>>>...: ", message)
+	
 	auth := smtp.PlainAuth("", from, password, host)
-	fmt.Println("Test 2 >>>>>>>>>>>>>>...: ", auth)
+
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + from + "\" <" + from + ">\n" +
 		"Subject: " + subject + "\n" +
