@@ -647,3 +647,167 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, res)
 }
+
+
+func (h *Handler) CreateEmailSettings(c *gin.Context) {
+
+	var body *pb.EmailSettings
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}	
+	
+	resourceId, ok := c.Get("resource_id")
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	ProjectId := resourceEnvironment.GetProjectId()
+
+	uuid, err := uuid.NewRandom()
+			if err != nil {
+				h.handleResponse(c, http.InternalServerError, err.Error())
+				return
+			}
+
+	resp, err := h.services.EmailService().CreateEmailSettings(
+		c.Request.Context(), 
+		&pb.EmailSettings{
+			Id: uuid.String(),
+			ProjectId: ProjectId,
+			Email: body.Email,
+			Password: body.Password,
+		},
+	)
+	if err != nil {
+		h.log.Error("---> error in create email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+func (h *Handler) UpdateEmailSettings(c *gin.Context) {
+
+	var body *pb.UpdateEmailSettingsRequest
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}	
+	
+	resourceId, ok := c.Get("resource_id")
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	_, err = h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	uuid, err := uuid.NewRandom()
+			if err != nil {
+				h.handleResponse(c, http.InternalServerError, err.Error())
+				return
+			}
+
+	resp, err := h.services.EmailService().UpdateEmailSettings(
+		c.Request.Context(), 
+		&pb.UpdateEmailSettingsRequest{
+			Id: uuid.String(),
+			Email: body.Email,
+			Password: body.Password,
+		},
+	)
+	if err != nil {
+		h.log.Error("---> error in create email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+func (h *Handler) GetEmailSettings(c *gin.Context) {
+	
+	resourceId, ok := c.Get("resource_id")
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	ProjectId := resourceEnvironment.GetProjectId()
+
+	resp, err := h.services.EmailService().GetListEmailSettings(
+		c.Request.Context(), 
+		&pb.GetListEmailSettingsRequest{
+			ProjectId: ProjectId,
+		},
+	)
+	if err != nil {
+		h.log.Error("---> error in create email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+
+	h.handleResponse(c, http.Created, resp)
+}

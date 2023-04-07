@@ -19,7 +19,7 @@ type ServiceManagerI interface {
 	ObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	SmsService() sms_service.SmsServiceClient
 	LoginService() object_builder_service.LoginServiceClient
-	EmailServie() auth_service.EmailOtpServiceClient
+	EmailService() auth_service.EmailOtpServiceClient
 	CompanyService() auth_service.CompanyServiceClient
 	ProjectService() auth_service.ProjectServiceClient
 	CompanyServiceClient() company_service.CompanyServiceClient

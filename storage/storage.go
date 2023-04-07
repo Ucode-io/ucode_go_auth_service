@@ -5,6 +5,8 @@ import (
 	"errors"
 	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+
+	"github.com/jackc/pgconn/internal/ctxwatch"
 )
 
 var ErrorTheSameId = errors.New("cannot use the same uuid for 'id' and 'parent_id' fields")
@@ -171,6 +173,9 @@ type SessionRepoI interface {
 type EmailRepoI interface {
 	Create(ctx context.Context, input *pb.Email) (*pb.Email, error)
 	GetByPK(ctx context.Context, input *pb.EmailOtpPrimaryKey) (*pb.Email, error)
+    CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error)
+	UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error)
+	GetListEmailSettings(ctx context.Context, input *pb.EmailOtpPrimaryKey) (*pb.UpdateEmailSettingsResponse, error)
 }
 
 type CompanyRepoI interface {

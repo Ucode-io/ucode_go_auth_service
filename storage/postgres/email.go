@@ -71,3 +71,105 @@ func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (r
 
 	return res, nil
 }
+
+
+func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error) {
+
+	var resp *pb.EmailSettings
+
+	query := `INSERT INTO "email_settings" (
+		id,
+		project_id,
+		email,
+		password,
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4
+	)
+	RETURNING *`
+
+	rows, err := e.db.Query(ctx, query,
+		input.Id,
+		input.ProjectId,
+		input.Email,
+		input.Password,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err = rows.Scan(
+			&resp.Id,
+			&resp.ProjectId,
+			&resp.Email,
+			&resp.Password,
+		)
+	}
+
+	return resp, nil
+}
+
+
+func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error) {
+
+	var resp *pb.EmailSettings
+
+	query := `UPDATE "email_settings" SET
+		email = $1,
+		password = $2
+	WHERE
+		id = $3
+	RETURNING *`
+
+	rows, err := e.db.Query(ctx, query,
+		input.Email,
+		input.Password,
+		input.Id,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+
+		err = rows.Scan(
+			&resp.Id,
+			&resp.ProjectId,
+			&resp.Email,
+			&resp.Password,
+		)
+	}
+	return resp, nil
+}
+
+func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error) {
+	arr := make([]pb.EmailSettings{})
+	res := &pb.EmailSettings{}
+
+
+	query := `SELECT
+		id,
+		email,
+		password
+	FROM
+		"email_settings"
+	WHERE
+		project_id = $1`
+
+	rows, err := e.db.QueryRow(ctx, query, input.ProjectId).Scan(
+		&res.Id,
+		&res.Email,
+		&res.Password,
+		&res.ProjectId,
+	)
+	if err != nil {
+		return arr, err
+	}
+	arr = append(arr, res)
+	return arr, nil
+}

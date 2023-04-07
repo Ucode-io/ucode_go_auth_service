@@ -52,3 +52,50 @@ func (e *emailService) GetEmailByID(ctx context.Context, req *pb.EmailOtpPrimary
 
 	return res, nil
 }
+
+
+func (e *emailService) CreateEmailSettings(ctx context.Context, req *pb.EmailSettings) (*pb.EmailSettings, error) {
+	e.log.Info("---EmailService.CreateEmailSettings--->", logger.Any("req", req))
+
+	res, err := e.strg.Email().CreateEmailSettings(
+		ctx,
+		req,
+	)
+	if err != nil {
+		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return res, nil
+}
+
+
+func (e *emailService) UpdateEmailSettings(ctx context.Context, req *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error) {
+	e.log.Info("---EmailService.CreateEmailSettings--->", logger.Any("req", req))
+
+	res, err := e.strg.Email().UpdateEmailSettings(
+		ctx,
+		req,
+	)
+	if err != nil {
+		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return res, nil
+}
+
+func (e *emailService) GetListEmailSettings(ctx context.Context, req *pb.UpdateEmailSettingsResponse) (*pb.EmailSettings, error) {
+	e.log.Info("---EmailService.CreateEmailSettings--->", logger.Any("req", req))
+
+	res, err := e.strg.Email().GetListEmailSettings(
+		ctx,
+		req,
+	)
+	if err != nil {
+		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return res, nil
+}

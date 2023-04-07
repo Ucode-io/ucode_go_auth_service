@@ -213,6 +213,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	v2.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	v2.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
+	v2.POST("/email-settings", h.CreateEmailSettings)
+	v2.PUT("/email-settings", h.UpdateEmailSettings)
+	v2.GET("/email-settings", h.GetEmailSettings)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return
