@@ -1998,6 +1998,25 @@ definitions:
       title:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_company_service.Currency:
+    properties:
+      code:
+        type: string
+      decimal_digits:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      name_plural:
+        type: string
+      rounding:
+        type: integer
+      symbol:
+        type: string
+      symbol_native:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentRes:
     properties:
       data:
@@ -2037,12 +2056,27 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project'
         type: array
     type: object
+  ucode_ucode_go_auth_service_genproto_company_service.Language:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      native_name:
+        type: string
+      short_name:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_company_service.Project:
     properties:
       company_id:
         type: string
+      currency:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Currency'
       k8s_namespace:
         type: string
+      language:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language'
       logo:
         type: string
       project_id:
@@ -2051,6 +2085,8 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword'
         type: array
+      timezone:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Timezone'
       title:
         type: string
     type: object
@@ -2060,11 +2096,15 @@ definitions:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Resource_Credentials'
       id:
         type: string
+      is_configured:
+        type: boolean
+      project_id:
+        type: string
       resource_type:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceType'
-      service_type:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ServiceType'
       title:
+        type: string
+      vault_path:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_company_service.Resource_Credentials:
@@ -2137,16 +2177,15 @@ definitions:
       resource_environment_id:
         type: string
     type: object
-  ucode_ucode_go_auth_service_genproto_company_service.ServiceType:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ServiceType_NOT_SPECIFIED
-    - ServiceType_BUILDER_SERVICE
-    - ServiceType_ANALYTICS_SERVICE
+  ucode_ucode_go_auth_service_genproto_company_service.Timezone:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataReq:
     properties:
       client_platform_id:
@@ -2521,7 +2560,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          $ref: '#/definitions/x509.ExtKeyUsage'
+          type: integer
         type: array
       extensions:
         description: |-
@@ -2556,7 +2595,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        $ref: '#/definitions/x509.KeyUsage'
+        type: integer
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -2614,7 +2653,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        $ref: '#/definitions/x509.PublicKeyAlgorithm'
+        type: integer
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -2648,7 +2687,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        $ref: '#/definitions/x509.SignatureAlgorithm'
+        type: integer
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -2684,123 +2723,6 @@ definitions:
       version:
         type: integer
     type: object
-  x509.ExtKeyUsage:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    type: integer
-    x-enum-varnames:
-    - ExtKeyUsageAny
-    - ExtKeyUsageServerAuth
-    - ExtKeyUsageClientAuth
-    - ExtKeyUsageCodeSigning
-    - ExtKeyUsageEmailProtection
-    - ExtKeyUsageIPSECEndSystem
-    - ExtKeyUsageIPSECTunnel
-    - ExtKeyUsageIPSECUser
-    - ExtKeyUsageTimeStamping
-    - ExtKeyUsageOCSPSigning
-    - ExtKeyUsageMicrosoftServerGatedCrypto
-    - ExtKeyUsageNetscapeServerGatedCrypto
-    - ExtKeyUsageMicrosoftCommercialCodeSigning
-    - ExtKeyUsageMicrosoftKernelCodeSigning
-  x509.KeyUsage:
-    enum:
-    - 1
-    - 2
-    - 4
-    - 8
-    - 16
-    - 32
-    - 64
-    - 128
-    - 256
-    type: integer
-    x-enum-varnames:
-    - KeyUsageDigitalSignature
-    - KeyUsageContentCommitment
-    - KeyUsageKeyEncipherment
-    - KeyUsageDataEncipherment
-    - KeyUsageKeyAgreement
-    - KeyUsageCertSign
-    - KeyUsageCRLSign
-    - KeyUsageEncipherOnly
-    - KeyUsageDecipherOnly
-  x509.PublicKeyAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-comments:
-      DSA: Unsupported.
-    x-enum-varnames:
-    - UnknownPublicKeyAlgorithm
-    - RSA
-    - DSA
-    - ECDSA
-    - Ed25519
-  x509.SignatureAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    - 14
-    - 15
-    - 16
-    type: integer
-    x-enum-comments:
-      DSAWithSHA1: Unsupported.
-      DSAWithSHA256: Unsupported.
-      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-      MD2WithRSA: Unsupported.
-      MD5WithRSA: Only supported for signing, not verification.
-      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-    x-enum-varnames:
-    - UnknownSignatureAlgorithm
-    - MD2WithRSA
-    - MD5WithRSA
-    - SHA1WithRSA
-    - SHA256WithRSA
-    - SHA384WithRSA
-    - SHA512WithRSA
-    - DSAWithSHA1
-    - DSAWithSHA256
-    - ECDSAWithSHA1
-    - ECDSAWithSHA256
-    - ECDSAWithSHA384
-    - ECDSAWithSHA512
-    - SHA256WithRSAPSS
-    - SHA384WithRSAPSS
-    - SHA512WithRSAPSS
-    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway

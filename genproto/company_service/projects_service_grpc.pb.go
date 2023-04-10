@@ -27,6 +27,7 @@ const (
 	ProjectService_GetProjects_FullMethodName            = "/company_service.ProjectService/GetProjects"
 	ProjectService_GetProjectsByCompanyId_FullMethodName = "/company_service.ProjectService/GetProjectsByCompanyId"
 	ProjectService_UpdateProjectUserData_FullMethodName  = "/company_service.ProjectService/UpdateProjectUserData"
+	ProjectService_GetListSetting_FullMethodName         = "/company_service.ProjectService/GetListSetting"
 )
 
 // ProjectServiceClient is the client API for ProjectService service.
@@ -41,6 +42,7 @@ type ProjectServiceClient interface {
 	GetProjects(ctx context.Context, in *GetProjectsRequest, opts ...grpc.CallOption) (*GetProjectsResponse, error)
 	GetProjectsByCompanyId(ctx context.Context, in *GetProjectsByCompanyIdReq, opts ...grpc.CallOption) (*GetProjectsByCompanyIdRes, error)
 	UpdateProjectUserData(ctx context.Context, in *UpdateProjectUserDataReq, opts ...grpc.CallOption) (*UpdateProjectUserDataRes, error)
+	GetListSetting(ctx context.Context, in *GetListSettingReq, opts ...grpc.CallOption) (*Setting, error)
 }
 
 type projectServiceClient struct {
@@ -123,6 +125,15 @@ func (c *projectServiceClient) UpdateProjectUserData(ctx context.Context, in *Up
 	return out, nil
 }
 
+func (c *projectServiceClient) GetListSetting(ctx context.Context, in *GetListSettingReq, opts ...grpc.CallOption) (*Setting, error) {
+	out := new(Setting)
+	err := c.cc.Invoke(ctx, ProjectService_GetListSetting_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -135,6 +146,7 @@ type ProjectServiceServer interface {
 	GetProjects(context.Context, *GetProjectsRequest) (*GetProjectsResponse, error)
 	GetProjectsByCompanyId(context.Context, *GetProjectsByCompanyIdReq) (*GetProjectsByCompanyIdRes, error)
 	UpdateProjectUserData(context.Context, *UpdateProjectUserDataReq) (*UpdateProjectUserDataRes, error)
+	GetListSetting(context.Context, *GetListSettingReq) (*Setting, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -165,6 +177,9 @@ func (UnimplementedProjectServiceServer) GetProjectsByCompanyId(context.Context,
 }
 func (UnimplementedProjectServiceServer) UpdateProjectUserData(context.Context, *UpdateProjectUserDataReq) (*UpdateProjectUserDataRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProjectUserData not implemented")
+}
+func (UnimplementedProjectServiceServer) GetListSetting(context.Context, *GetListSettingReq) (*Setting, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetListSetting not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -323,6 +338,24 @@ func _ProjectService_UpdateProjectUserData_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_GetListSetting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetListSettingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetListSetting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_GetListSetting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetListSetting(ctx, req.(*GetListSettingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -361,6 +394,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateProjectUserData",
 			Handler:    _ProjectService_UpdateProjectUserData_Handler,
+		},
+		{
+			MethodName: "GetListSetting",
+			Handler:    _ProjectService_GetListSetting_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

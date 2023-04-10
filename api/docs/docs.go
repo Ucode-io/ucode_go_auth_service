@@ -15441,6 +15441,35 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_company_service.Currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "decimal_digits": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "name_plural": {
+                    "type": "string"
+                },
+                "rounding": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "symbol_native": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentRes": {
             "type": "object",
             "properties": {
@@ -15501,14 +15530,37 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_company_service.Language": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_company_service.Project": {
             "type": "object",
             "properties": {
                 "company_id": {
                     "type": "string"
                 },
+                "currency": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Currency"
+                },
                 "k8s_namespace": {
                     "type": "string"
+                },
+                "language": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
                 },
                 "logo": {
                     "type": "string"
@@ -15521,6 +15573,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword"
                     }
+                },
+                "timezone": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Timezone"
                 },
                 "title": {
                     "type": "string"
@@ -15536,13 +15591,19 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceType"
                 },
-                "service_type": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ServiceType"
-                },
                 "title": {
+                    "type": "string"
+                },
+                "vault_path": {
                     "type": "string"
                 }
             }
@@ -15651,18 +15712,19 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_company_service.ServiceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ServiceType_NOT_SPECIFIED",
-                "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE"
-            ]
+        "ucode_ucode_go_auth_service_genproto_company_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
         },
         "ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataReq": {
             "type": "object",
@@ -16220,7 +16282,7 @@ const docTemplate = `{
                     "description": "Sequence of extended key usages.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/x509.ExtKeyUsage"
+                        "type": "integer"
                     }
                 },
                 "extensions": {
@@ -16259,7 +16321,7 @@ const docTemplate = `{
                     }
                 },
                 "keyUsage": {
-                    "$ref": "#/definitions/x509.KeyUsage"
+                    "type": "integer"
                 },
                 "maxPathLen": {
                     "description": "MaxPathLen and MaxPathLenZero indicate the presence and\nvalue of the BasicConstraints' \"pathLenConstraint\".\n\nWhen parsing a certificate, a positive non-zero MaxPathLen\nmeans that the field was specified, -1 means it was unset,\nand MaxPathLenZero being true mean that the field was\nexplicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false\nshould be treated equivalent to -1 (unset).\n\nWhen generating a certificate, an unset pathLenConstraint\ncan be requested with either MaxPathLen == -1 or using the\nzero value for both MaxPathLen and MaxPathLenZero.",
@@ -16319,7 +16381,7 @@ const docTemplate = `{
                 },
                 "publicKey": {},
                 "publicKeyAlgorithm": {
-                    "$ref": "#/definitions/x509.PublicKeyAlgorithm"
+                    "type": "integer"
                 },
                 "raw": {
                     "description": "Complete ASN.1 DER content (certificate, signature algorithm and signature).",
@@ -16366,7 +16428,7 @@ const docTemplate = `{
                     }
                 },
                 "signatureAlgorithm": {
-                    "$ref": "#/definitions/x509.SignatureAlgorithm"
+                    "type": "integer"
                 },
                 "subject": {
                     "$ref": "#/definitions/pkix.Name"
@@ -16407,135 +16469,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "x509.ExtKeyUsage": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13
-            ],
-            "x-enum-varnames": [
-                "ExtKeyUsageAny",
-                "ExtKeyUsageServerAuth",
-                "ExtKeyUsageClientAuth",
-                "ExtKeyUsageCodeSigning",
-                "ExtKeyUsageEmailProtection",
-                "ExtKeyUsageIPSECEndSystem",
-                "ExtKeyUsageIPSECTunnel",
-                "ExtKeyUsageIPSECUser",
-                "ExtKeyUsageTimeStamping",
-                "ExtKeyUsageOCSPSigning",
-                "ExtKeyUsageMicrosoftServerGatedCrypto",
-                "ExtKeyUsageNetscapeServerGatedCrypto",
-                "ExtKeyUsageMicrosoftCommercialCodeSigning",
-                "ExtKeyUsageMicrosoftKernelCodeSigning"
-            ]
-        },
-        "x509.KeyUsage": {
-            "type": "integer",
-            "enum": [
-                1,
-                2,
-                4,
-                8,
-                16,
-                32,
-                64,
-                128,
-                256
-            ],
-            "x-enum-varnames": [
-                "KeyUsageDigitalSignature",
-                "KeyUsageContentCommitment",
-                "KeyUsageKeyEncipherment",
-                "KeyUsageDataEncipherment",
-                "KeyUsageKeyAgreement",
-                "KeyUsageCertSign",
-                "KeyUsageCRLSign",
-                "KeyUsageEncipherOnly",
-                "KeyUsageDecipherOnly"
-            ]
-        },
-        "x509.PublicKeyAlgorithm": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-comments": {
-                "DSA": "Unsupported."
-            },
-            "x-enum-varnames": [
-                "UnknownPublicKeyAlgorithm",
-                "RSA",
-                "DSA",
-                "ECDSA",
-                "Ed25519"
-            ]
-        },
-        "x509.SignatureAlgorithm": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16
-            ],
-            "x-enum-comments": {
-                "DSAWithSHA1": "Unsupported.",
-                "DSAWithSHA256": "Unsupported.",
-                "ECDSAWithSHA1": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses.",
-                "MD2WithRSA": "Unsupported.",
-                "MD5WithRSA": "Only supported for signing, not verification.",
-                "SHA1WithRSA": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses."
-            },
-            "x-enum-varnames": [
-                "UnknownSignatureAlgorithm",
-                "MD2WithRSA",
-                "MD5WithRSA",
-                "SHA1WithRSA",
-                "SHA256WithRSA",
-                "SHA384WithRSA",
-                "SHA512WithRSA",
-                "DSAWithSHA1",
-                "DSAWithSHA256",
-                "ECDSAWithSHA1",
-                "ECDSAWithSHA256",
-                "ECDSAWithSHA384",
-                "ECDSAWithSHA512",
-                "SHA256WithRSAPSS",
-                "SHA384WithRSAPSS",
-                "SHA512WithRSAPSS",
-                "PureEd25519"
-            ]
         }
     }
 }`
