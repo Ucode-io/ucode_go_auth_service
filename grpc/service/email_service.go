@@ -95,7 +95,7 @@ func (e *emailService) GetListEmailSettings(ctx context.Context, req *pb.GetList
 		req,
 	)
 	if err != nil {
-		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
+		e.log.Error("!!!EmailService.GetEmailSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

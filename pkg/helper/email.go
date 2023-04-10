@@ -18,7 +18,7 @@ const (
 
 	// user we are authorizing as  old="gehwhgelispgqoql"  new="xkiaqodjfuielsug"
 	from     string = "ucode.udevs.io@gmail.com"
-	password string = "xkiaqodjfuielsug"
+	defaultPassword string = "xkiaqodjfuielsug"
 )
 
 func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
@@ -51,7 +51,7 @@ func SendEmail(subject, to, link, token string) error {
    
 	   ` + link + "?token=" + token
 
-	auth := smtp.PlainAuth("", from, password, host)
+	auth := smtp.PlainAuth("", from, defaultPassword, host)
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + from + "\" <" + from + ">\n" +
 		"Subject: " + subject + "\n" +
@@ -64,15 +64,21 @@ func SendEmail(subject, to, link, token string) error {
 	return nil
 }
 
-func SendCodeToEmail(subject, to, code string) error {
+func SendCodeToEmail(subject, to, code string, email string, password string) error {
 
 	log.Printf("---SendCodeEmail---> email: %s, code: %s", to, code)
 
 	message := `
 		Ваше код подверждение: ` + code
 
+	// if email == "" {
+	// 	email = from
+	// }
+	// if password == "" {
+	// 	password = defaultPassword
+	// }
 	
-	auth := smtp.PlainAuth("", from, password, host)
+	auth := smtp.PlainAuth("", email, password, host)
 
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + from + "\" <" + from + ">\n" +

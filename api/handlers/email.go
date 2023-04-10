@@ -142,18 +142,33 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 						ExpiresAt: expire.String()[:19],
 					},
 				)
-
 				if err != nil {
 					h.handleResponse(c, http.GRPCError, err.Error())
 					return
 				}
-
-				err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
+				
+				emailSettings, err := h.services.EmailService().GetListEmailSettings(
+					c.Request.Context(),
+					&pb.GetListEmailSettingsRequest{
+						ProjectId: resourceEnvironment.GetProjectId(),
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, err.Error())
+					return
+				}
+				
+				if len(emailSettings.Items) == 0 {
+					h.handleResponse(c, http.GRPCError, "No email settings for send otp message in project")
+					return
+				}
+				
+				err = helper.SendCodeToEmail("Код для подверждение", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 				if err != nil {
 					h.handleResponse(c, http.InvalidArgument, err.Error())
 					return
 				}
-
+				
 				if respObject == nil || !respObject.UserFound {
 					res := models.SendCodeResponse{
 						SmsId: resp.Id,
