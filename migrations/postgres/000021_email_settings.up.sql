@@ -2,5 +2,7 @@ CREATE TABLE IF NOT EXISTS email_settings (
     "id" UUID PRIMARY KEY,
     "email" VARCHAR NOT NULL,
     "password" VARCHAR NOT NULL,
-    "project_id" UUID NOT NULL UNIQUE
+    "project_id" UUID NOT NULL UNIQUE,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
