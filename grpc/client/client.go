@@ -171,3 +171,7 @@ func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
 func (g *grpcClients) EnvironmentService() company_service.EnvironmentServiceClient {
 	return g.environmentService
 }
+
+func (g *grpcClients) EmailService() auth_service.EmailOtpServiceClient {
+	return g.emailServie
+}

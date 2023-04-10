@@ -133,7 +133,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 					return
 				}
 
-				resp, err := h.services.EmailServie().Create(
+				resp, err := h.services.EmailService().Create(
 					c.Request.Context(),
 					&pb.Email{
 						Id:        id.String(),
@@ -327,7 +327,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		case cfg.Default:
 			{
 				if c.Param("otp") != "121212" {
-					resp, err := h.services.EmailServie().GetEmailByID(
+					resp, err := h.services.EmailService().GetEmailByID(
 						c.Request.Context(),
 						&pb.EmailOtpPrimaryKey{
 							Id: c.Param("sms_id"),
@@ -648,7 +648,20 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	h.handleResponse(c, http.Created, res)
 }
 
-
+// CreateEmailSettings godoc
+// @ID createEmailSettings
+// @Router /v2/email-settings [POST]
+// @Summary CreateEmailSettings
+// @Description CreateEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param registerBody body models.EmailSettingsRequest true "register_body"
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Success 201 {object} http.Response{data=pb.EmailSettings} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateEmailSettings(c *gin.Context) {
 
 	var body *pb.EmailSettings
@@ -658,6 +671,12 @@ func (h *Handler) CreateEmailSettings(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}	
+
+	valid := util.IsValidEmail(body.Email)
+	if !valid {
+		h.handleResponse(c, http.BadRequest, "Неверная почта")
+		return
+	}
 	
 	resourceId, ok := c.Get("resource_id")
 	if !ok || !util.IsValidUUID(resourceId.(string)) {
@@ -686,10 +705,10 @@ func (h *Handler) CreateEmailSettings(c *gin.Context) {
 	ProjectId := resourceEnvironment.GetProjectId()
 
 	uuid, err := uuid.NewRandom()
-			if err != nil {
-				h.handleResponse(c, http.InternalServerError, err.Error())
-				return
-			}
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
 
 	resp, err := h.services.EmailService().CreateEmailSettings(
 		c.Request.Context(), 
@@ -710,6 +729,20 @@ func (h *Handler) CreateEmailSettings(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
+// UpdateEmailSettings godoc
+// @ID updateEmailSettings
+// @Router /v2/email-settings [PUT]
+// @Summary UpdateEmailSettings
+// @Description UpdateEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param registerBody body pb.UpdateEmailSettingsRequest true "register_body"
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Success 201 {object} http.Response{data=pb.EmailSettings} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateEmailSettings(c *gin.Context) {
 
 	var body *pb.UpdateEmailSettingsRequest
@@ -744,22 +777,16 @@ func (h *Handler) UpdateEmailSettings(c *gin.Context) {
 		return
 	}
 
-	uuid, err := uuid.NewRandom()
-			if err != nil {
-				h.handleResponse(c, http.InternalServerError, err.Error())
-				return
-			}
-
 	resp, err := h.services.EmailService().UpdateEmailSettings(
 		c.Request.Context(), 
 		&pb.UpdateEmailSettingsRequest{
-			Id: uuid.String(),
+			Id: body.Id,
 			Email: body.Email,
 			Password: body.Password,
 		},
 	)
 	if err != nil {
-		h.log.Error("---> error in create email settings", logger.Error(err))
+		h.log.Error("---> error in update email settings", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
@@ -768,6 +795,19 @@ func (h *Handler) UpdateEmailSettings(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
+// GetListEmailSettings godoc
+// @ID getListEmailSettings
+// @Router /v2/email-settings [GET]
+// @Summary GetListEmailSettings
+// @Description GetListEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Success 201 {object} http.Response{data=pb.UpdateEmailSettingsResponse} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetEmailSettings(c *gin.Context) {
 	
 	resourceId, ok := c.Get("resource_id")
@@ -803,11 +843,72 @@ func (h *Handler) GetEmailSettings(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.log.Error("---> error in create email settings", logger.Error(err))
+		h.log.Error("---> error in get list email settings", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 
+	h.handleResponse(c, http.Created, resp)
+}
+
+// DeleteEmailSettings godoc
+// @ID deleteEmailSettings
+// @Router /v2/email-settings/{id} [DELETE]
+// @Summary DeleteEmailSettings
+// @Description DeleteEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Param Resource-Id header string true "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) DeleteEmailSettings(c *gin.Context) {
+
+	id := c.Param("id")
+	
+	resourceId, ok := c.Get("resource_id")
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	_, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	
+
+	resp, err := h.services.EmailService().DeleteEmailSettings(
+		c.Request.Context(), 
+		&pb.EmailSettingsPrimaryKey{
+			Id: id,
+		},
+	)
+	fmt.Println(">>>>>>>>>> handler test 1")
+	if err != nil {
+		h.log.Error("---> error in delete email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	fmt.Println(">>>>>>>>>>> service test 2")
 	h.handleResponse(c, http.Created, resp)
 }

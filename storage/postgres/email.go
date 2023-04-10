@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type emailRepo struct {
@@ -75,13 +76,13 @@ func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (r
 
 func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error) {
 
-	var resp *pb.EmailSettings
+	var resp  = &pb.EmailSettings{}
 
 	query := `INSERT INTO "email_settings" (
 		id,
 		project_id,
 		email,
-		password,
+		password
 	) VALUES (
 		$1,
 		$2,
@@ -117,7 +118,7 @@ func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSett
 
 func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error) {
 
-	var resp *pb.EmailSettings
+	var resp = &pb.EmailSettings{}
 
 	query := `UPDATE "email_settings" SET
 		email = $1,
@@ -144,24 +145,27 @@ func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEma
 			&resp.Password,
 		)
 	}
+	
 	return resp, nil
 }
 
+
 func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error) {
-	arr := make([]pb.EmailSettings{})
+	arr := &pb.UpdateEmailSettingsResponse{}
 	res := &pb.EmailSettings{}
 
 
 	query := `SELECT
 		id,
 		email,
-		password
+		password,
+		project_id
 	FROM
 		"email_settings"
 	WHERE
 		project_id = $1`
 
-	rows, err := e.db.QueryRow(ctx, query, input.ProjectId).Scan(
+	err := e.db.QueryRow(ctx, query, input.ProjectId).Scan(
 		&res.Id,
 		&res.Email,
 		&res.Password,
@@ -170,6 +174,21 @@ func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListE
 	if err != nil {
 		return arr, err
 	}
-	arr = append(arr, res)
+	arr.Items = append(arr.Items, res)
 	return arr, nil
+}
+
+func (e *emailRepo) DeleteEmailSettings(ctx context.Context, input *pb.EmailSettingsPrimaryKey) (*emptypb.Empty, error) {
+
+	var resp = &emptypb.Empty{}
+
+	query := `DELETE FROM "email_settings" WHERE id = $1`
+
+	_, err := e.db.Query( ctx, query, input.Id )
+
+	if err != nil {
+		return nil, err
+	}
+	
+	return resp, nil
 }

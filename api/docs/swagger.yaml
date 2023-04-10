@@ -640,6 +640,13 @@ definitions:
       register_type:
         type: string
     type: object
+  ucode_ucode_go_auth_service_api_models.EmailSettingsRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_api_models.RegisterOtp:
     properties:
       data:
@@ -1033,6 +1040,17 @@ definitions:
     properties:
       row_effected:
         type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      project_id:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq:
     properties:
@@ -1575,6 +1593,22 @@ definitions:
       name:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest:
     properties:
       client_platform_id:
@@ -1817,10 +1851,6 @@ definitions:
       sessions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session'
-        type: array
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
         type: array
       token:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
@@ -7625,6 +7655,214 @@ paths:
       summary: Get Connection By ID
       tags:
       - V2_Connection
+  /v2/email-settings:
+    get:
+      consumes:
+      - application/json
+      description: GetListEmailSettings
+      operationId: getListEmailSettings
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: GetListEmailSettings
+      tags:
+      - Email
+    post:
+      consumes:
+      - application/json
+      description: CreateEmailSettings
+      operationId: createEmailSettings
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.EmailSettingsRequest'
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: CreateEmailSettings
+      tags:
+      - Email
+    put:
+      consumes:
+      - application/json
+      description: UpdateEmailSettings
+      operationId: updateEmailSettings
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest'
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: UpdateEmailSettings
+      tags:
+      - Email
+  /v2/email-settings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteEmailSettings
+      operationId: deleteEmailSettings
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        required: true
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: DeleteEmailSettings
+      tags:
+      - Email
   /v2/login:
     post:
       consumes:

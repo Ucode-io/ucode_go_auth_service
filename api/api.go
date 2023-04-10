@@ -216,6 +216,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	v2.POST("/email-settings", h.CreateEmailSettings)
 	v2.PUT("/email-settings", h.UpdateEmailSettings)
 	v2.GET("/email-settings", h.GetEmailSettings)
+	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return

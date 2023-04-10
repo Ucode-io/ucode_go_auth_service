@@ -34,3 +34,8 @@ type Email struct {
 	GoogleToken string `json:"google_token"`
 	Phone    string `json:"phone"`
 }
+
+type EmailSettingsRequest struct {
+	Email string `json:"email"`
+	Password string `json:"password"`
+}

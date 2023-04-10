@@ -6,7 +6,8 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
-	"github.com/jackc/pgconn/internal/ctxwatch"
+	// "github.com/jackc/pgconn/internal/ctxwatch"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var ErrorTheSameId = errors.New("cannot use the same uuid for 'id' and 'parent_id' fields")
@@ -175,7 +176,8 @@ type EmailRepoI interface {
 	GetByPK(ctx context.Context, input *pb.EmailOtpPrimaryKey) (*pb.Email, error)
     CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error)
 	UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error)
-	GetListEmailSettings(ctx context.Context, input *pb.EmailOtpPrimaryKey) (*pb.UpdateEmailSettingsResponse, error)
+	GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error)
+	DeleteEmailSettings(ctx context.Context, input *pb.EmailSettingsPrimaryKey) (*emptypb.Empty, error)
 }
 
 type CompanyRepoI interface {
