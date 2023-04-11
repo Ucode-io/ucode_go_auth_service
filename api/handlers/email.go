@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	_ "encoding/json"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -20,6 +20,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	structpb "github.com/golang/protobuf/ptypes/struct"
 	"github.com/google/uuid"
 )
 
@@ -421,7 +422,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Param table_slug path string true "table_slug"
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
+// @Success 201 {object} http.Response{data=pbObject.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
@@ -614,7 +615,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			_, err = h.services.ObjectBuilderService().Create(
+			respObj, err := h.services.ObjectBuilderService().Create(
 				context.Background(),
 				&pbObject.CommonMessage{
 					TableSlug: mapedInterface["table_slug"].(string),
@@ -627,10 +628,24 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
+			data := respObj.Data.AsMap()
+			var addTable structpb.Struct
+
+			dataJson, err := json.Marshal(data)
+			if err != nil {
+				return
+			}
+
+			err = addTable.UnmarshalJSON(dataJson)
+			if err != nil {
+				return
+			}
+			fmt.Println(":::::::::::::::: Addational table", addTable)
+			resp.AddationalTable = &addTable
 		}
 
 	}
-
+	fmt.Println(":::::::::::::::::: resp resp resp", resp.AddationalTable)
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
 
 	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
@@ -643,6 +658,10 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.log.Error("---> error in session and token generator", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
+	}
+
+	if resp.AddationalTable != nil {
+		res.AddationalTable = resp.AddationalTable
 	}
 
 	h.handleResponse(c, http.Created, res)
