@@ -9,9 +9,11 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
 )
@@ -48,24 +50,24 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$8
 	)`
 
-	uuid, err := uuid.NewRandom()
+	id, err := uuid.NewRandom()
 	if err != nil {
 		return pKey, err
 	}
 
 	_, err = r.db.Exec(ctx, query,
-		uuid.String(),
-		entity.Name,
-		entity.PhotoUrl,
-		entity.Phone,
-		entity.Email,
-		entity.Login,
-		entity.Password,
-		entity.CompanyId,
+		id.String(),
+		entity.GetName(),
+		entity.GetPhotoUrl(),
+		entity.GetPhone(),
+		entity.GetEmail(),
+		entity.GetLogin(),
+		entity.GetPassword(),
+		entity.GetCompanyId(),
 	)
 
 	pKey = &pb.UserPrimaryKey{
-		Id: uuid.String(),
+		Id: id.String(),
 	}
 
 	return pKey, err
@@ -336,14 +338,28 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error) {
+
+	return 0, errors.New("you are not allowed to delete user")
+
 	queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
 
 	result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
 	if err != nil {
 		return 0, err
 	}
-
 	rowsAffected = result.RowsAffected()
+	if rowsAffected == 0 {
+		return 0, errors.New("user not found")
+	}
+
+	result, err = r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
+	if err != nil {
+		return 0, errors.Wrap(err, "delete user error")
+	}
+	rowsAffected = result.RowsAffected()
+	if rowsAffected == 0 {
+		return 0, errors.New("user not found")
+	}
 
 	return rowsAffected, err
 }
@@ -510,4 +526,47 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 	}
 
 	return &tmp, nil
+}
+
+func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
+
+	query := `SELECT
+				id
+			from "user" WHERE `
+	var filter string
+	params := map[string]interface{}{}
+	if req.Email != "" {
+		filter = "email = :email"
+		params["email"] = req.Email
+	}
+	if req.Login != "" {
+		if filter != "" {
+			filter += " OR login = :login"
+		} else {
+			filter = "login = :login"
+		}
+		params["login"] = req.Login
+	}
+	if req.Phone != "" {
+		if filter != "" {
+			filter += " OR phone = :login"
+		} else {
+			filter = "phone = :" + req.Phone
+		}
+		params["phone"] = req.Phone
+	}
+
+	query, args := helper.ReplaceQueryParams(query+filter, params)
+
+	var userId string
+	err := r.db.QueryRow(ctx, query, args...).Scan(&userId)
+	if err == pgx.ErrNoRows {
+		return nil, errors.New("not found")
+	} else if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetUserByLoginTypesResponse{
+		UserId: userId,
+	}, nil
 }

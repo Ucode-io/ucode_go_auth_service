@@ -27,11 +27,11 @@ func NewSessionRepo(db *pgxpool.Pool) storage.SessionRepoI {
 
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
 	log.Printf("--->STRG: CreateSessionRequest: %+v", entity)
-
+	
+	//client_platform_id,
 	query := `INSERT INTO "session" (
 		id,
 		project_id,
-		client_platform_id,
 		client_type_id,
 		user_id,
 		role_id,
@@ -46,10 +46,10 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		$5,
 		$6,
 		$7,
-		$8,
-		$9
-	)`
-
+		$8
+		)`
+		//$9
+		
 	uuid, err := uuid.NewRandom()
 	if err != nil {
 		return pKey, err
@@ -58,7 +58,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 	_, err = r.db.Exec(ctx, query,
 		uuid.String(),
 		entity.ProjectId,
-		entity.ClientPlatformId,
+		// entity.ClientPlatformId,
 		entity.ClientTypeId,
 		entity.UserId,
 		entity.RoleId,
@@ -114,10 +114,10 @@ func (r *sessionRepo) CreateSuperAdmin(ctx context.Context, entity *pb.CreateSes
 
 func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (res *pb.Session, err error) {
 	res = &pb.Session{}
+	// coalesce(client_platform_id::text, ''),
 	query := `SELECT
 		id,
 		coalesce(project_id::text, ''),
-		coalesce(client_platform_id::text, ''),
 		coalesce(client_type_id::text, ''),
 		user_id,
 		coalesce(role_id::text, ''),
@@ -143,7 +143,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
 		&res.ProjectId,
-		&res.ClientPlatformId,
+		// &res.ClientPlatformId,
 		&res.ClientTypeId,
 		&userID,
 		&res.RoleId,
@@ -349,10 +349,10 @@ func (r *sessionRepo) DeleteExpiredIntegrationSessions(ctx context.Context, inte
 func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error) {
 	res = &pb.GetSessionListResponse{}
 
+	//coalesce(client_platform_id::text, ''),
 	query := `SELECT
 		id,
 		coalesce(project_id::text, ''),
-		coalesce(client_platform_id::text, ''),
 		coalesce(client_type_id::text, ''),
 		user_id,
 		coalesce(role_id::text, ''),
@@ -377,7 +377,7 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 		err = rows.Scan(
 			&obj.Id,
 			&obj.ProjectId,
-			&obj.ClientPlatformId,
+			// &obj.ClientPlatformId,
 			&obj.ClientTypeId,
 			&obj.UserId,
 			&obj.RoleId,

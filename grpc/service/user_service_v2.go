@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -18,6 +19,264 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWithGoogleRequest) (resp *pb.User, err error) {
+
+	
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	email := emailRegex.MatchString(req.Email)
+	if !email {
+		err = fmt.Errorf("email is not valid")
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, err
+	}
+
+	pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+		Login:                 "",
+		Password:              "",
+		Email:                 req.Email,
+		Phone:                 "",
+		Name:                  req.Name,
+		CompanyId:             req.GetCompanyId(),
+		ProjectId:             req.GetProjectId(),
+		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
+		RoleId:                "",
+		ClientTypeId:          req.GetClientTypeId(),
+		ClientPlatformId:      "",
+		Active:                0,
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+		"guid":           pKey.GetId(),
+		"project_id":     req.GetProjectId(),
+		"role_id":        "",
+		"client_type_id": req.GetClientTypeId(),
+		"active":         0,
+		"expires_at":     "",
+		"email":          req.Email,
+		"phone":          "",
+		"name":           req.Name,
+		"login":          "",
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
+	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		TableSlug: "user",
+		Data:      structData,
+		ProjectId: req.GetResourceEnvironmentId(),
+	})
+	
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	
+	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+		UserId:    pKey.Id,
+		ProjectId: req.GetProjectId(),
+		CompanyId: req.GetCompanyId(),
+	})
+	
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	
+	resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+		Id: pKey.Id,
+	})
+	
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	
+	return resp, err
+}
+
+func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUserRequest) (resp *pb.User, err error) {
+
+	hashedPassword, err := security.HashPassword(req.Password)
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	req.Password = hashedPassword
+
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	email := emailRegex.MatchString(req.Email)
+	if !email {
+		err = fmt.Errorf("email is not valid")
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, err
+	}
+
+	foundUser, err := s.strg.User().GetByUsername(ctx, req.Email)
+	if foundUser.Id == "" {
+		foundUser, err = s.strg.User().GetByUsername(ctx, req.Phone)
+	}
+	
+	if foundUser.Id == "" {
+		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+			Login:                 req.GetLogin(),
+			Password:              req.GetPassword(),
+			Email:                 req.GetEmail(),
+			Phone:                 req.GetPhone(),
+			Name:                  req.GetName(),
+			CompanyId:             req.GetCompanyId(),
+			ProjectId:             req.GetProjectId(),
+			ResourceEnvironmentId: req.GetResourceEnvironmentId(),
+			RoleId:                req.GetRoleId(),
+			ClientTypeId:          req.GetClientTypeId(),
+			ClientPlatformId:      req.GetClientPlatformId(),
+			Active:                req.GetActive(),
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	
+		structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+			"guid":           pKey.GetId(),
+			"project_id":     req.GetProjectId(),
+			"role_id":        req.GetRoleId(),
+			"client_type_id": req.GetClientTypeId(),
+			"active":         req.GetActive(),
+			"expires_at":     req.GetExpiresAt(),
+			"email":          req.GetEmail(),
+			"phone":          req.GetPhone(),
+			"name":           req.GetName(),
+			"login":          req.GetLogin(),
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	
+		fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
+		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	
+		_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+			UserId:    pKey.Id,
+			ProjectId: req.GetProjectId(),
+			CompanyId: req.GetCompanyId(),
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	
+		resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+			Id: pKey.Id,
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	
+		return resp, err
+	} else {
+		var objUser *pbObject.V2LoginResponse
+
+		if req.Email != "" {
+			objUser, err = s.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+
+				Email:      req.Email,
+				ClientType: "WEB_USER",
+				ProjectId:  req.GetResourceEnvironmentId(),
+				TableSlug:  "user",
+			})
+			if err != nil {
+				s.log.Error("!!!Found user from obj--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+
+		if req.Phone != "" && !objUser.UserFound {
+			objUser, err = s.services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
+
+				PhoneNumber:      req.Phone,
+				ClientType: "WEB_USER",
+				ProjectId:  req.GetResourceEnvironmentId(),
+			})
+			if err != nil {
+				s.log.Error("!!!Found user from obj--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+
+		if objUser.UserFound {
+			s.log.Error("!!!Found user from obj--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, "User already exists")
+		} else {
+			structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+				"guid":           foundUser.Id,
+				"project_id":     req.GetProjectId(),
+				"role_id":        req.GetRoleId(),
+				"client_type_id": req.GetClientTypeId(),
+				"active":         req.GetActive(),
+				"expires_at":     req.GetExpiresAt(),
+				"email":          req.GetEmail(),
+				"phone":          req.GetPhone(),
+				"name":           req.GetName(),
+				"login":          req.GetLogin(),
+			})
+			if err != nil {
+				s.log.Error("!!!CreateUser--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		
+			fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
+			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				TableSlug: "user",
+				Data:      structData,
+				ProjectId: req.GetResourceEnvironmentId(),
+			})
+			if err != nil {
+				s.log.Error("!!!CreateUser--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		
+			// _, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+			// 	UserId:    foundUser.Id,
+			// 	ProjectId: req.GetProjectId(),
+			// 	CompanyId: req.GetCompanyId(),
+			// })
+			// if err != nil {
+			// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
+			// 	return nil, status.Error(codes.Internal, err.Error())
+			// }
+		
+			resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+				Id: foundUser.Id,
+			})
+			if err != nil {
+				s.log.Error("!!!CreateUser--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+		
+			return resp, err
+		}
+	}
+
+	
+}
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
 	s.log.Info("---CreateUser--->", logger.Any("req", req))
@@ -66,13 +325,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 	// objectBuilder -> auth service
 	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"guid":               pKey.Id,
-		"project_id":         req.ProjectId,
-		"role_id":            req.RoleId,
-		"client_type_id":     req.ClientTypeId,
-		"client_platform_id": req.ClientPlatformId,
-		"active":             req.Active,
-		"expires_at":         req.ExpiresAt,
+		"guid":               pKey.GetId(),
+		"project_id":         req.GetProjectId(),
+		"role_id":            req.GetRoleId(),
+		"client_type_id":     req.GetClientTypeId(),
+		"client_platform_id": req.GetClientPlatformId(),
+		"active":             req.GetActive(),
+		"expires_at":         req.GetExpiresAt(),
 	})
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -92,8 +351,8 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:    pKey.Id,
-		ProjectId: req.ProjectId,
-		CompanyId: req.CompanyId,
+		ProjectId: req.GetProjectId(),
+		CompanyId: req.GetCompanyId(),
 	})
 
 	if err != nil {
@@ -483,6 +742,17 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
 
 	res, err := s.strg.User().GetProjectsByUserId(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
+	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
+
+	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
 		return nil, err
 	}

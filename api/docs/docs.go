@@ -3615,96 +3615,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/register-email-otp/{table_slug}": {
-            "post": {
-                "description": "RegisterOtp",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "RegisterEmailOtp",
-                "operationId": "registerEmailOtp",
-                "parameters": [
-                    {
-                        "description": "register_body",
-                        "name": "registerBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/register-otp/{table_slug}": {
             "post": {
                 "description": "RegisterOtp",
@@ -4795,89 +4705,6 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Sms"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/send-message": {
-            "post": {
-                "description": "Send Message to Email",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "Send Message To Email",
-                "operationId": "send_message_to_email",
-                "parameters": [
-                    {
-                        "description": "SendMessageToEmailRequestBody",
-                        "name": "send_message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Email"
                         }
                     }
                 ],
@@ -9898,6 +9725,116 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/register-email-otp/{table_slug}": {
+            "post": {
+                "description": "RegisterOtp",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "RegisterEmailOtp",
+                "operationId": "registerEmailOtp",
+                "parameters": [
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "table_slug",
+                        "name": "table_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/relation": {
             "put": {
                 "description": "Update Relation",
@@ -11237,6 +11174,109 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/send-message": {
+            "post": {
+                "description": "Send Message to Email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "Send Message To Email",
+                "operationId": "send_message_to_email",
+                "parameters": [
+                    {
+                        "description": "SendMessageToEmailRequestBody",
+                        "name": "send_message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Email"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/user": {
             "get": {
                 "description": "Get User List",
@@ -11821,6 +11861,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/user/check": {
+            "post": {
+                "description": "Get User By Login type",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_User"
+                ],
+                "summary": "Get User By Login type",
+                "operationId": "get_user_by_login_type",
+                "parameters": [
+                    {
+                        "description": "user-check",
+                        "name": "user-check",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UserBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/user/{user-id}": {
             "get": {
                 "description": "Get User By ID",
@@ -12089,7 +12212,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/verify-email/{sms_id}/{otp}": {
+        "/v2/verify-email/{sms_id}/{otp}": {
             "post": {
                 "description": "Verify",
                 "consumes": [
@@ -12116,6 +12239,26 @@ const docTemplate = `{
                         "description": "otp",
                         "name": "otp",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -12864,6 +13007,15 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string"
+                },
+                "google_token": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "register_type": {
+                    "type": "string"
                 }
             }
         },
@@ -12881,6 +13033,9 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
+                },
+                "google_acces": {
+                    "type": "boolean"
                 },
                 "sms_id": {
                     "type": "string"
@@ -12915,6 +13070,9 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
+                },
+                "register_type": {
+                    "type": "string"
                 },
                 "tables": {
                     "type": "array",
@@ -13343,6 +13501,9 @@ const docTemplate = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_environment_id": {
+                    "type": "string"
                 }
             }
         },
@@ -13410,6 +13571,9 @@ const docTemplate = `{
                 "active": {
                     "type": "integer"
                 },
+                "base_url": {
+                    "type": "string"
+                },
                 "client_platform_id": {
                     "type": "string"
                 },
@@ -13447,6 +13611,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "role_id": {
+                    "type": "string"
+                },
+                "year_of_birth": {
                     "type": "string"
                 }
             }
@@ -13602,6 +13769,28 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse": {
+            "type": "object",
+            "properties": {
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -14601,6 +14790,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse": {
             "type": "object",
             "properties": {
+                "addational_table": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
                 "app_permissions": {
                     "type": "array",
                     "items": {
@@ -14637,8 +14829,17 @@ const docTemplate = `{
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session"
                     }
                 },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
+                    }
+                },
                 "token": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
+                },
+                "user": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -14859,6 +15060,35 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_company_service.Currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "decimal_digits": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "name_plural": {
+                    "type": "string"
+                },
+                "rounding": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "symbol_native": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentRes": {
             "type": "object",
             "properties": {
@@ -14919,14 +15149,37 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_company_service.Language": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_company_service.Project": {
             "type": "object",
             "properties": {
                 "company_id": {
                     "type": "string"
                 },
+                "currency": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Currency"
+                },
                 "k8s_namespace": {
                     "type": "string"
+                },
+                "language": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
                 },
                 "logo": {
                     "type": "string"
@@ -14939,6 +15192,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword"
                     }
+                },
+                "timezone": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Timezone"
                 },
                 "title": {
                     "type": "string"
@@ -14954,13 +15210,19 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceType"
                 },
-                "service_type": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ServiceType"
-                },
                 "title": {
+                    "type": "string"
+                },
+                "vault_path": {
                     "type": "string"
                 }
             }
@@ -15069,18 +15331,19 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_company_service.ServiceType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ServiceType_NOT_SPECIFIED",
-                "ServiceType_BUILDER_SERVICE",
-                "ServiceType_ANALYTICS_SERVICE"
-            ]
+        "ucode_ucode_go_auth_service_genproto_company_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
         },
         "ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataReq": {
             "type": "object",
@@ -15276,11 +15539,14 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table": {
             "type": "object",
             "properties": {
-                "automatic_filters": {
+                "action_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission"
                     }
+                },
+                "automatic_filters": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod"
                 },
                 "description": {
                     "type": "string"
@@ -15329,6 +15595,23 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission": {
+            "type": "object",
+            "properties": {
+                "custom_event_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "boolean"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter": {
             "type": "object",
             "properties": {
@@ -15340,6 +15623,35 @@ const docTemplate = `{
                 },
                 "object_field": {
                     "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                    }
+                },
+                "read": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                    }
+                },
+                "update": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                    }
+                },
+                "write": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                    }
                 }
             }
         },
@@ -15373,6 +15685,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_have_condition": {
+                    "type": "boolean"
+                },
+                "is_public": {
                     "type": "boolean"
                 },
                 "read": {
@@ -15429,6 +15744,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse": {
             "type": "object",
             "properties": {
+                "addational_table": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
                 "app_permissions": {
                     "type": "array",
                     "items": {
@@ -15475,6 +15793,10 @@ const docTemplate = `{
                 "host": {
                     "description": "host or host:port",
                     "type": "string"
+                },
+                "omitHost": {
+                    "description": "do not emit empty host (authority)",
+                    "type": "boolean"
                 },
                 "opaque": {
                     "description": "encoded opaque data",

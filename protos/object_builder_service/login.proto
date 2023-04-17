@@ -48,6 +48,8 @@ message EmailOtpRequest {
     string email = 1;
     string client_type = 2;
     string project_id = 3;
+    string table_slug = 4;
+    string guid = 5;
 }
 
 message PhoneOtpRequst {
@@ -136,4 +138,5 @@ message V2LoginResponse {
     repeated RecordPermission permissions = 6;
     string login_table_slug = 7;
     repeated RecordPermission app_permissions = 8;
+    google.protobuf.Struct addational_table = 9;
 }

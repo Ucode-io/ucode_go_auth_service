@@ -1,6 +1,11 @@
 package helper
 
 import (
+	"encoding/json"
+	_ "fmt"
+	"io/ioutil"
+	"log"
+	net_http "net/http"
 	"net/smtp"
 
 	"github.com/pkg/errors"
@@ -11,10 +16,34 @@ const (
 	host     = "smtp.gmail.com"
 	hostPort = ":587"
 
-	// user we are authorizing as
-	from     string = "upm.udevs.io@gmail.com"
-	password string = "gehwhgelispgqoql"
+	// user we are authorizing as  old="gehwhgelispgqoql"  new="xkiaqodjfuielsug"
+	from     string = "ucode.udevs.io@gmail.com"
+	password string = "xkiaqodjfuielsug"
 )
+
+func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
+	resp, err := net_http.Get("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken)
+	// fmt.Println("Request to https://www.googleapis.com/oauth2/v3/userinfo?access_token= " + accessToken)
+	if err != nil {
+	 return nil, err
+	}
+   
+	defer resp.Body.Close()
+   
+	userInfo := make(map[string]interface{})
+   
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+	 return nil, err
+	}
+   
+	err = json.Unmarshal(body, &userInfo)
+	if err != nil {
+	 return nil, err
+	}
+	
+	return userInfo, nil
+}
 
 func SendEmail(subject, to, link, token string) error {
 	message := `
@@ -23,14 +52,6 @@ func SendEmail(subject, to, link, token string) error {
 	   ` + link + "?token=" + token
 
 	auth := smtp.PlainAuth("", from, password, host)
-
-	//  // // NOTE: Using the backtick here ` works like a heredoc, which is why all the
-	//  // // rest of the lines are forced to the beginning of the line, otherwise the
-	//  // // formatting is wrong for the RFC 822 style
-	//  msg := `To: "` + to + `" <` + to + `>
-	// From: "` + from + `" <` + from + `>
-	// Subject: ` + subject + `
-	// ` + message
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + from + "\" <" + from + ">\n" +
 		"Subject: " + subject + "\n" +
@@ -44,18 +65,15 @@ func SendEmail(subject, to, link, token string) error {
 }
 
 func SendCodeToEmail(subject, to, code string) error {
+
+	log.Printf("---SendCodeEmail---> email: %s, code: %s", to, code)
+
 	message := `
 		Ваше код подверждение: ` + code
 
+	
 	auth := smtp.PlainAuth("", from, password, host)
 
-	//  // // NOTE: Using the backtick here ` works like a heredoc, which is why all the
-	//  // // rest of the lines are forced to the beginning of the line, otherwise the
-	//  // // formatting is wrong for the RFC 822 style
-	//  msg := `To: "` + to + `" <` + to + `>
-	// From: "` + from + `" <` + from + `>
-	// Subject: ` + subject + `
-	// ` + message
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + from + "\" <" + from + ">\n" +
 		"Subject: " + subject + "\n" +

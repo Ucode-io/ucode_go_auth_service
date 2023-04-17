@@ -44,11 +44,6 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(user.GetProjectId()) {
-		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
-		return
-	}
-
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
@@ -60,7 +55,8 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
+	fmt.Println("env::", environmentId)
+	fmt.Println("resource::", resourceId)
 	if util.IsValidUUID(resourceId.(string)) {
 		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 			c.Request.Context(),
@@ -73,7 +69,22 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		if user.CompanyId == "" {
+			project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+				ProjectId: resourceEnvironment.GetProjectId(),
+			})
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+			user.CompanyId = project.GetCompanyId()
+			user.ProjectId = resourceEnvironment.GetProjectId()
+		}
 	} else {
+		if !util.IsValidUUID(user.GetProjectId()) {
+			h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+			return
+		}
 		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
 			c.Request.Context(),
 			&company_service.GetDefaultResourceEnvironmentReq{
@@ -88,7 +99,6 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	}
 
 	user.ResourceEnvironmentId = resourceEnvironment.GetId()
-
 	resp, err := h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&user,
@@ -608,4 +618,48 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, res)
+}
+
+// V2GetUserByLoginType godoc
+// @ID get_user_by_login_type
+// @Router /v2/user/check [POST]
+// @Summary Get User By Login type
+// @Description Get User By Login type
+// @Tags V2_User
+// @Accept json
+// @Produce json
+// @Param user-check body auth_service.GetUserByLoginTypesRequest true "user-check"
+// @Success 200 {object} http.Response{data=auth_service.GetUserByLoginTypesResponse} "UserBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2GetUserByLoginType(c *gin.Context) {
+
+	var (
+		request auth_service.GetUserByLoginTypesRequest
+	)
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	if request.Email != "" {
+		var isValid = util.IsValidEmail(request.Email)
+		if !isValid {
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		}
+	}
+
+	resp, err := h.services.UserService().V2GetUserByLoginTypes(
+		c.Request.Context(),
+		&request,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
 }

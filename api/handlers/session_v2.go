@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -247,41 +248,46 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("COMPANY::::1")
 	companies, err := h.services.CompanyServiceClient().GetList(context.Background(), &obs.GetCompanyListRequest{
 		Offset:  0,
 		Limit:   128,
-		OwnerId: resp.UserId,
+		OwnerId: resp.GetUserId(),
 	})
+	fmt.Println("COMPANY::::2")
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("COMPANY::::3")
 
 	companiesResp := []*auth_service.Company{}
 
 	if len(companies.Companies) < 1 {
 		companiesById := make([]*obs.Company, 0)
-		user, err := h.services.UserService().GetUserByID(context.Background(), &auth_service.UserPrimaryKey{
-			Id: resp.UserId,
+		fmt.Println("COMPANY::::4")
+		user, err := h.services.UserService().GetUserByID(c.Request.Context(), &auth_service.UserPrimaryKey{
+			Id: resp.GetUserId(),
 		})
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		company, err := h.services.CompanyServiceClient().GetById(context.Background(), &obs.GetCompanyByIdRequest{
+		fmt.Println("COMPANY::::5")
+		company, err := h.services.CompanyServiceClient().GetById(c.Request.Context(), &obs.GetCompanyByIdRequest{
 			Id: user.GetCompanyId(),
 		})
 		if err != nil {
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return
 		}
+		fmt.Println("COMPANY::::6")
 		companiesById = append(companiesById, company.Company)
 		companies.Companies = companiesById
 		companies.Count = 1
-		
+
 	}
-	bytes, err := json.Marshal(companies.Companies)
+	bytes, err := json.Marshal(companies.GetCompanies())
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -292,13 +298,13 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
+	fmt.Println("COMPANY::::7")
 	res := &auth_service.V2LoginSuperAdminRes{
-		UserFound: resp.UserFound,
-		Token:     resp.Token,
+		UserFound: resp.GetUserFound(),
+		Token:     resp.GetToken(),
 		Companies: companiesResp,
-		UserId:    resp.UserId,
-		Sessions:  resp.Sessions,
+		UserId:    resp.GetUserId(),
+		Sessions:  resp.GetSessions(),
 	}
 
 	h.handleResponse(c, http.Created, res)

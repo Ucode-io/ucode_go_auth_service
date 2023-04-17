@@ -31,6 +31,29 @@ service UserService {
     rpc V2DeleteUser(UserPrimaryKey) returns (google.protobuf.Empty) {}
     rpc AddUserToProject(AddUserToProjectReq) returns (AddUserToProjectRes) {}
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
+    rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
+    rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
+    rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {} 
+}
+
+message RegisterWithGoogleRequest {
+    string email = 1;
+    string project_id = 2;
+    string company_id = 3;
+    string client_type_id = 4;
+    string resource_environment_id = 5;
+    string name = 6;
+
+}
+
+message GetUserByLoginTypesResponse {
+    string user_id = 1;
+}
+
+message GetUserByLoginTypesRequest {
+   string email = 1;
+   string phone = 2;
+   string login = 3;
 }
 
 message GetProjectsByUserIdReq {
@@ -76,6 +99,8 @@ message CreateUserRequest {
     int32 active = 12;
     string expires_at = 13;
     string resource_environment_id = 14;
+    string base_url = 15;
+    string year_of_birth = 16;
 }
 
 message UserPrimaryKey {
