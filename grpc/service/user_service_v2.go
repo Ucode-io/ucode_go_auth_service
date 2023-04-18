@@ -302,7 +302,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
-	if !email {
+	if !email && req.Email != "" {
 		err = fmt.Errorf("email is not valid")
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, err
