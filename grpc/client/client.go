@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
+	"ucode/ucode_go_auth_service/genproto/web_page_service"
 
 	"google.golang.org/grpc"
 )
@@ -28,26 +29,30 @@ type ServiceManagerI interface {
 	ApiKeysService() auth_service.ApiKeysClient
 	ResourceService() company_service.ResourceServiceClient
 	EnvironmentService() company_service.EnvironmentServiceClient
+	MicroServiceResourceService() company_service.MicroserviceResourceClient
+	WebPageAppService() web_page_service.AppServiceClient
 }
 
 type grpcClients struct {
-	integrationService       auth_service.IntegrationServiceClient
-	clientService            auth_service.ClientServiceClient
-	permissionService        auth_service.PermissionServiceClient
-	userService              auth_service.UserServiceClient
-	sessionService           auth_service.SessionServiceClient
-	objectBuilderService     object_builder_service.ObjectBuilderServiceClient
-	smsService               sms_service.SmsServiceClient
-	loginService             object_builder_service.LoginServiceClient
-	emailServie              auth_service.EmailOtpServiceClient
-	companyService           auth_service.CompanyServiceClient
-	projectService           auth_service.ProjectServiceClient
-	companyServiceClient     company_service.CompanyServiceClient
-	projectServiceClient     company_service.ProjectServiceClient
-	builderPermissionService object_builder_service.PermissionServiceClient
-	apiKeysClients           auth_service.ApiKeysClient
-	resourceService          company_service.ResourceServiceClient
-	environmentService       company_service.EnvironmentServiceClient
+	integrationService          auth_service.IntegrationServiceClient
+	clientService               auth_service.ClientServiceClient
+	permissionService           auth_service.PermissionServiceClient
+	userService                 auth_service.UserServiceClient
+	sessionService              auth_service.SessionServiceClient
+	objectBuilderService        object_builder_service.ObjectBuilderServiceClient
+	smsService                  sms_service.SmsServiceClient
+	loginService                object_builder_service.LoginServiceClient
+	emailServie                 auth_service.EmailOtpServiceClient
+	companyService              auth_service.CompanyServiceClient
+	projectService              auth_service.ProjectServiceClient
+	companyServiceClient        company_service.CompanyServiceClient
+	projectServiceClient        company_service.ProjectServiceClient
+	builderPermissionService    object_builder_service.PermissionServiceClient
+	apiKeysClients              auth_service.ApiKeysClient
+	resourceService             company_service.ResourceServiceClient
+	environmentService          company_service.EnvironmentServiceClient
+	microServiceResourceService company_service.MicroserviceResourceClient
+	webPageAppService           web_page_service.AppServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -83,24 +88,34 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		return nil, err
 	}
 
+	connWebPageService, err := grpc.Dial(
+		cfg.WebPageServiceHost+cfg.WebPageServicePort,
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &grpcClients{
-		clientService:            auth_service.NewClientServiceClient(connAuthService),
-		permissionService:        auth_service.NewPermissionServiceClient(connAuthService),
-		userService:              auth_service.NewUserServiceClient(connAuthService),
-		sessionService:           auth_service.NewSessionServiceClient(connAuthService),
-		integrationService:       auth_service.NewIntegrationServiceClient(connAuthService),
-		objectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
-		smsService:               sms_service.NewSmsServiceClient(connSmsService),
-		loginService:             object_builder_service.NewLoginServiceClient(connObjectBuilderService),
-		emailServie:              auth_service.NewEmailOtpServiceClient(connAuthService),
-		companyService:           auth_service.NewCompanyServiceClient(connAuthService),
-		projectService:           auth_service.NewProjectServiceClient(connAuthService),
-		companyServiceClient:     company_service.NewCompanyServiceClient(connCompanyService),
-		projectServiceClient:     company_service.NewProjectServiceClient(connCompanyService),
-		builderPermissionService: object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
-		apiKeysClients:           auth_service.NewApiKeysClient(connAuthService),
-		resourceService:          company_service.NewResourceServiceClient(connCompanyService),
-		environmentService:       company_service.NewEnvironmentServiceClient(connCompanyService),
+		clientService:               auth_service.NewClientServiceClient(connAuthService),
+		permissionService:           auth_service.NewPermissionServiceClient(connAuthService),
+		userService:                 auth_service.NewUserServiceClient(connAuthService),
+		sessionService:              auth_service.NewSessionServiceClient(connAuthService),
+		integrationService:          auth_service.NewIntegrationServiceClient(connAuthService),
+		objectBuilderService:        object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		smsService:                  sms_service.NewSmsServiceClient(connSmsService),
+		loginService:                object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		emailServie:                 auth_service.NewEmailOtpServiceClient(connAuthService),
+		companyService:              auth_service.NewCompanyServiceClient(connAuthService),
+		projectService:              auth_service.NewProjectServiceClient(connAuthService),
+		companyServiceClient:        company_service.NewCompanyServiceClient(connCompanyService),
+		projectServiceClient:        company_service.NewProjectServiceClient(connCompanyService),
+		builderPermissionService:    object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
+		apiKeysClients:              auth_service.NewApiKeysClient(connAuthService),
+		resourceService:             company_service.NewResourceServiceClient(connCompanyService),
+		environmentService:          company_service.NewEnvironmentServiceClient(connCompanyService),
+		microServiceResourceService: company_service.NewMicroserviceResourceClient(connCompanyService),
+		webPageAppService:           web_page_service.NewAppServiceClient(connWebPageService),
 	}, nil
 }
 
@@ -170,4 +185,12 @@ func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
 
 func (g *grpcClients) EnvironmentService() company_service.EnvironmentServiceClient {
 	return g.environmentService
+}
+
+func (g *grpcClients) MicroServiceResourceService() company_service.MicroserviceResourceClient {
+	return g.microServiceResourceService
+}
+
+func (g *grpcClients) WebPageAppService() web_page_service.AppServiceClient {
+	return g.webPageAppService
 }

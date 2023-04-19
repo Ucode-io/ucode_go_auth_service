@@ -52,6 +52,9 @@ type Config struct {
 
 	CompanyServiceHost string
 	CompanyGRPCPort    string
+
+	WebPageServiceHost string
+	WebPageServicePort string
 }
 
 // Load ...
@@ -99,6 +102,9 @@ func Load() Config {
 
 	config.CompanyServiceHost = cast.ToString(getOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
 	config.CompanyGRPCPort = cast.ToString(getOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
+
+	config.WebPageServiceHost = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", "localhost"))
+	config.WebPageServicePort = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ":8098"))
 
 	return config
 }
