@@ -496,6 +496,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		body.Data["phone"] = helper.ConverPhoneNumberToMongoPhoneFormat(body.Data["phone"].(string))
 	}
 
+	var userId string
+
 	switch body.Data["register_type"] {
 	case cfg.WithGoogle:
 		{
@@ -516,7 +518,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			_, err = h.services.UserService().RegisterWithGoogle(
+			resp, err := h.services.UserService().RegisterWithGoogle(
 				c.Request.Context(),
 				&pb.RegisterWithGoogleRequest{
 					Name:                  userInfo["name"].(string),
@@ -527,14 +529,16 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					ResourceEnvironmentId: ResourceEnvironmentId,
 				},
 			)
-
-			body.Data["email"] = userInfo["email"]
-			body.Data["name"] = userInfo["name"]
-
 			if err != nil {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+
+			body.Data["email"] = userInfo["email"]
+			body.Data["name"] = userInfo["name"]
+
+			userId = resp.Id
+
 		}
 	case cfg.Default:
 		{
@@ -564,7 +568,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			_, err := h.services.UserService().RegisterUserViaEmail(
+			resp, err := h.services.UserService().RegisterUserViaEmail(
 				c.Request.Context(),
 				&pb.CreateUserRequest{
 					Login:                 body.Data["login"].(string),
@@ -581,6 +585,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+
+			userId = resp.Id
 
 		}
 	}
@@ -606,12 +612,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 
 		if body.Data["register_type"].(string) == cfg.Default {
-			uuid, err := uuid.NewRandom()
-			if err != nil {
-				h.handleResponse(c, http.InternalServerError, err.Error())
-				return
-			}
-			body.Data["addational_table"].(map[string]interface{})["guid"] = uuid
+			// uuid, err := uuid.NewRandom()
+			// if err != nil {
+			// 	h.handleResponse(c, http.InternalServerError, err.Error())
+			// 	return
+			// }
+			body.Data["addational_table"].(map[string]interface{})["guid"] = userId
 			body.Data["addational_table"].(map[string]interface{})["project_id"] = ProjectId
 
 			mapedInterface := body.Data["addational_table"].(map[string]interface{})

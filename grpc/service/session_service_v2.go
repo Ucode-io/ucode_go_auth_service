@@ -84,6 +84,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ctx,
 		reqLoginData,
 	)
+
 	if err != nil {
 		errGetUserProjectData := errors.New("invalid user project data")
 		s.log.Error("!!!Login--->", logger.Error(err))
