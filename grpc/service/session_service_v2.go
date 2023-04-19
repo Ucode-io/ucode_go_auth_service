@@ -71,8 +71,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
-	fmt.Println("TEST::::6")
-	fmt.Println(req.ResourceEnvironmentId)
 
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                user.GetId(),
@@ -80,8 +78,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
-
-	log.Println("loginData --->", reqLoginData)
+	log.Println("reqLoginData--->", reqLoginData)
 
 	data, err := s.services.LoginService().LoginData(
 		ctx,
