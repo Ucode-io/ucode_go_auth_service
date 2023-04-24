@@ -6973,9 +6973,9 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       - description: table_slug
         in: path

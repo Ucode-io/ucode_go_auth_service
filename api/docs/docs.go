@@ -8905,8 +8905,8 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     },
                     {
