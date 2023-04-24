@@ -22,16 +22,23 @@ message ServiceResourceModel {
   string resource_environment_id = 6;
   string resource_id = 7;
   string environment_id = 8;
+  ResourceType resource_type = 9;
 }
 
 message GetListServiceResourceReq {
   string project_id = 1;
   string environment_id = 2;
+  string resource_id = 3;
 }
 
 message GetListServiceResourceRes {
+  message ResourceTypeList {
+    int32 id = 1;
+    string name = 2;
+  }
   map<string, ServiceResourceModel> service_resources = 1;
   repeated Resource resources = 2;
+  map<int32, string> resource_types = 3;
 }
 
 message GetSingleServiceResourceReq {

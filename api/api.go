@@ -179,6 +179,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
+		v2.GET("/webpage-app", h.GetListWebPageApp)
 
 		// connection
 		v2.POST("/connection", h.V2CreateConnection)
@@ -207,7 +208,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.POST("/send-code", h.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.Verify)
 	r.POST("/register-otp/:table_slug", h.RegisterOtp)
-	
+
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
 	v2.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)

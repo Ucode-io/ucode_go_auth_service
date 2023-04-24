@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/config"
@@ -70,17 +71,20 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
-	fmt.Println("TEST::::6")
-	fmt.Println(req.ResourceEnvironmentId)
+
+	reqLoginData := &pbObject.LoginDataReq{
+		UserId:                user.GetId(),
+		ClientType:            req.ClientType,
+		ProjectId:             req.GetProjectId(),
+		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
+	}
+	log.Println("reqLoginData--->", reqLoginData)
+
 	data, err := s.services.LoginService().LoginData(
 		ctx,
-		&pbObject.LoginDataReq{
-			UserId:                user.GetId(),
-			ClientType:            req.ClientType,
-			ProjectId:             req.GetProjectId(),
-			ResourceEnvironmentId: req.GetResourceEnvironmentId(),
-		},
+		reqLoginData,
 	)
+
 	if err != nil {
 		errGetUserProjectData := errors.New("invalid user project data")
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -130,7 +134,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	if req.Tables != nil {
 		// res.Tables = req.Tables
 	}
-	
+
 	return res, nil
 }
 
