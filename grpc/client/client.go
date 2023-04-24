@@ -31,6 +31,7 @@ type ServiceManagerI interface {
 	EnvironmentService() company_service.EnvironmentServiceClient
 	MicroServiceResourceService() company_service.MicroserviceResourceClient
 	WebPageAppService() web_page_service.AppServiceClient
+	ServiceResource() company_service.MicroserviceResourceClient
 }
 
 type grpcClients struct {
@@ -53,6 +54,7 @@ type grpcClients struct {
 	environmentService          company_service.EnvironmentServiceClient
 	microServiceResourceService company_service.MicroserviceResourceClient
 	webPageAppService           web_page_service.AppServiceClient
+	serviceResource             company_service.MicroserviceResourceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -116,6 +118,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		environmentService:          company_service.NewEnvironmentServiceClient(connCompanyService),
 		microServiceResourceService: company_service.NewMicroserviceResourceClient(connCompanyService),
 		webPageAppService:           web_page_service.NewAppServiceClient(connWebPageService),
+		serviceResource:             company_service.NewMicroserviceResourceClient(connCompanyService),
 	}, nil
 }
 
@@ -193,4 +196,8 @@ func (g *grpcClients) MicroServiceResourceService() company_service.Microservice
 
 func (g *grpcClients) WebPageAppService() web_page_service.AppServiceClient {
 	return g.webPageAppService
+}
+
+func (g *grpcClients) ServiceResource() company_service.MicroserviceResourceClient {
+	return g.serviceResource
 }
