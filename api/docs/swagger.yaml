@@ -6514,6 +6514,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: RemoveClientBody
         in: body
         name: remove-client
@@ -6560,6 +6565,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddClientRequestBody
@@ -6615,6 +6625,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateClientRequestBody
@@ -6685,9 +6700,9 @@ paths:
         in: query
         name: search
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -6731,11 +6746,15 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreateClientPlatformRequestBody
@@ -6793,9 +6812,9 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       - description: UpdateClientPlatformRequestBody
@@ -6859,9 +6878,9 @@ paths:
         name: client-platform-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -6919,9 +6938,9 @@ paths:
         name: client-platform-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -6971,9 +6990,9 @@ paths:
         name: client-platform-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -7037,9 +7056,9 @@ paths:
         in: query
         name: search
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -7087,6 +7106,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreateClientTypeRequestBody
@@ -7141,6 +7165,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateClientTypeRequestBody
@@ -7203,9 +7232,9 @@ paths:
         name: client-type-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -7253,9 +7282,9 @@ paths:
         name: client-type-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -7305,6 +7334,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       produces:
@@ -7364,9 +7398,10 @@ paths:
         in: query
         name: limit
         type: integer
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
+        required: true
         type: string
       - description: client_type_id
         in: query
@@ -7421,6 +7456,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: CreateConnectionRequestBody
         in: body
         name: connection
@@ -7473,6 +7513,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateConnectionRequestBody
@@ -7535,9 +7580,10 @@ paths:
         name: connection_id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
+        required: true
         type: string
       produces:
       - application/json
@@ -7585,9 +7631,9 @@ paths:
         name: connection_id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -7999,9 +8045,9 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       - description: table_slug
         in: path
@@ -8076,6 +8122,11 @@ paths:
         in: query
         name: search
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -8123,6 +8174,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreatePermissionRequestBody
@@ -8178,6 +8234,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdatePermissionRequestBody
@@ -8236,6 +8297,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: PermissionScopePrimaryKeyBody
         in: body
         name: permission-scope
@@ -8282,6 +8348,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddPermissionScopeRequestBody
@@ -8340,6 +8411,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: permission-id
         in: path
         name: permission-id
@@ -8385,6 +8461,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: permission-id
@@ -8595,6 +8676,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: AddRelationRequestBody
         in: body
         name: relation
@@ -8648,6 +8734,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateRelationRequestBody
@@ -8704,6 +8795,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: relation-id
@@ -8814,9 +8910,9 @@ paths:
         in: query
         name: client-type-id
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -8864,6 +8960,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddRoleRequestBody
@@ -8918,6 +9019,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateRoleRequestBody
@@ -8976,6 +9082,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: RolePermissionPrimaryKeyBody
         in: body
         name: role-permission
@@ -9022,6 +9133,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddRolePermissionRequestBody
@@ -9077,6 +9193,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateRoleRequestBody
@@ -9197,9 +9318,9 @@ paths:
         name: role-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -9247,9 +9368,9 @@ paths:
         name: role-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -9325,6 +9446,11 @@ paths:
       - description: order_type
         in: query
         name: order_type
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
         type: string
       produces:
       - application/json
@@ -9618,6 +9744,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: AddUserInfoFieldRequestBody
         in: body
         name: user-info-field
@@ -9671,6 +9802,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateUserInfoFieldRequestBody
@@ -9727,6 +9863,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: user-info-field-id
