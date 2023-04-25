@@ -179,6 +179,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
+		v2.GET("/webpage-app", h.GetListWebPageApp)
 
 		// connection
 		v2.POST("/connection", h.V2CreateConnection)
@@ -207,12 +208,16 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.POST("/send-code", h.SendCode)
 	r.POST("/verify/:sms_id/:otp", h.Verify)
 	r.POST("/register-otp/:table_slug", h.RegisterOtp)
-	
+
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
 	v2.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
 	v2.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
+	v2.POST("/email-settings", h.CreateEmailSettings)
+	v2.PUT("/email-settings", h.UpdateEmailSettings)
+	v2.GET("/email-settings", h.GetEmailSettings)
+	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return

@@ -52,8 +52,12 @@ definitions:
         type: string
       version:
         type: string
+      webPageServiceHost:
+        type: string
+      webPageServicePort:
+        type: string
     type: object
-  google_golang_org_protobuf_types_known_structpb.Struct:
+  github_com_golang_protobuf_ptypes_struct.Struct:
     properties:
       fields:
         additionalProperties:
@@ -640,6 +644,15 @@ definitions:
       register_type:
         type: string
     type: object
+  ucode_ucode_go_auth_service_api_models.EmailSettingsRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      project_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_api_models.RegisterOtp:
     properties:
       data:
@@ -852,7 +865,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage:
     properties:
       data:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       table_slug:
         type: string
     type: object
@@ -955,8 +968,6 @@ definitions:
         type: string
       parent_id:
         type: string
-      resource_environment_id:
-        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.CreateReq:
     properties:
@@ -1035,6 +1046,17 @@ definitions:
     properties:
       row_effected:
         type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      project_id:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq:
     properties:
@@ -1483,7 +1505,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -1576,6 +1598,22 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings'
+        type: array
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest:
     properties:
@@ -1797,7 +1835,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission'
@@ -2408,7 +2446,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       icon:
         type: string
       label:
@@ -2423,7 +2461,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission'
@@ -2445,6 +2483,43 @@ definitions:
       user_id:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_web_page_service.App:
+    properties:
+      Routes:
+        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+      environment_id:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      pages:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.Pages'
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      sub_domain:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes:
+    properties:
+      Apps:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.App'
+        type: array
+      count:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_web_page_service.Pages:
+    properties:
+      default_page:
+        type: string
+      login_page:
+        type: string
+    type: object
   url.URL:
     properties:
       forceQuery:
@@ -2456,9 +2531,6 @@ definitions:
       host:
         description: host or host:port
         type: string
-      omitHost:
-        description: do not emit empty host (authority)
-        type: boolean
       opaque:
         description: encoded opaque data
         type: string
@@ -2536,7 +2608,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          $ref: '#/definitions/x509.ExtKeyUsage'
+          type: integer
         type: array
       extensions:
         description: |-
@@ -2571,7 +2643,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        $ref: '#/definitions/x509.KeyUsage'
+        type: integer
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -2629,7 +2701,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        $ref: '#/definitions/x509.PublicKeyAlgorithm'
+        type: integer
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -2663,7 +2735,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        $ref: '#/definitions/x509.SignatureAlgorithm'
+        type: integer
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -2699,123 +2771,6 @@ definitions:
       version:
         type: integer
     type: object
-  x509.ExtKeyUsage:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    type: integer
-    x-enum-varnames:
-    - ExtKeyUsageAny
-    - ExtKeyUsageServerAuth
-    - ExtKeyUsageClientAuth
-    - ExtKeyUsageCodeSigning
-    - ExtKeyUsageEmailProtection
-    - ExtKeyUsageIPSECEndSystem
-    - ExtKeyUsageIPSECTunnel
-    - ExtKeyUsageIPSECUser
-    - ExtKeyUsageTimeStamping
-    - ExtKeyUsageOCSPSigning
-    - ExtKeyUsageMicrosoftServerGatedCrypto
-    - ExtKeyUsageNetscapeServerGatedCrypto
-    - ExtKeyUsageMicrosoftCommercialCodeSigning
-    - ExtKeyUsageMicrosoftKernelCodeSigning
-  x509.KeyUsage:
-    enum:
-    - 1
-    - 2
-    - 4
-    - 8
-    - 16
-    - 32
-    - 64
-    - 128
-    - 256
-    type: integer
-    x-enum-varnames:
-    - KeyUsageDigitalSignature
-    - KeyUsageContentCommitment
-    - KeyUsageKeyEncipherment
-    - KeyUsageDataEncipherment
-    - KeyUsageKeyAgreement
-    - KeyUsageCertSign
-    - KeyUsageCRLSign
-    - KeyUsageEncipherOnly
-    - KeyUsageDecipherOnly
-  x509.PublicKeyAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-comments:
-      DSA: Unsupported.
-    x-enum-varnames:
-    - UnknownPublicKeyAlgorithm
-    - RSA
-    - DSA
-    - ECDSA
-    - Ed25519
-  x509.SignatureAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    - 14
-    - 15
-    - 16
-    type: integer
-    x-enum-comments:
-      DSAWithSHA1: Unsupported.
-      DSAWithSHA256: Unsupported.
-      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-      MD2WithRSA: Unsupported.
-      MD5WithRSA: Only supported for signing, not verification.
-      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-    x-enum-varnames:
-    - UnknownSignatureAlgorithm
-    - MD2WithRSA
-    - MD5WithRSA
-    - SHA1WithRSA
-    - SHA256WithRSA
-    - SHA384WithRSA
-    - SHA512WithRSA
-    - DSAWithSHA1
-    - DSAWithSHA256
-    - ECDSAWithSHA1
-    - ECDSAWithSHA256
-    - ECDSAWithSHA384
-    - ECDSAWithSHA512
-    - SHA256WithRSAPSS
-    - SHA384WithRSAPSS
-    - SHA512WithRSAPSS
-    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -6561,6 +6516,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: RemoveClientBody
         in: body
         name: remove-client
@@ -6607,6 +6567,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddClientRequestBody
@@ -6662,6 +6627,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateClientRequestBody
@@ -6732,9 +6702,9 @@ paths:
         in: query
         name: search
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -6778,11 +6748,15 @@ paths:
       - description: Resource-Id
         in: header
         name: Resource-Id
-        required: true
         type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreateClientPlatformRequestBody
@@ -6840,9 +6814,9 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       - description: UpdateClientPlatformRequestBody
@@ -6906,9 +6880,9 @@ paths:
         name: client-platform-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -6966,9 +6940,9 @@ paths:
         name: client-platform-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -7018,9 +6992,9 @@ paths:
         name: client-platform-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -7084,9 +7058,9 @@ paths:
         in: query
         name: search
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -7134,6 +7108,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreateClientTypeRequestBody
@@ -7188,6 +7167,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateClientTypeRequestBody
@@ -7250,9 +7234,9 @@ paths:
         name: client-type-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -7300,9 +7284,9 @@ paths:
         name: client-type-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -7352,6 +7336,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       produces:
@@ -7411,9 +7400,10 @@ paths:
         in: query
         name: limit
         type: integer
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
+        required: true
         type: string
       - description: client_type_id
         in: query
@@ -7468,6 +7458,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: CreateConnectionRequestBody
         in: body
         name: connection
@@ -7520,6 +7515,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateConnectionRequestBody
@@ -7582,9 +7582,10 @@ paths:
         name: connection_id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
+        required: true
         type: string
       produces:
       - application/json
@@ -7632,9 +7633,9 @@ paths:
         name: connection_id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         required: true
         type: string
       produces:
@@ -7670,6 +7671,183 @@ paths:
       summary: Get Connection By ID
       tags:
       - V2_Connection
+  /v2/email-settings:
+    get:
+      consumes:
+      - application/json
+      description: GetListEmailSettings
+      operationId: getListEmailSettings
+      parameters:
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: GetListEmailSettings
+      tags:
+      - Email
+    post:
+      consumes:
+      - application/json
+      description: CreateEmailSettings
+      operationId: createEmailSettings
+      parameters:
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.EmailSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: CreateEmailSettings
+      tags:
+      - Email
+    put:
+      consumes:
+      - application/json
+      description: UpdateEmailSettings
+      operationId: updateEmailSettings
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: UpdateEmailSettings
+      tags:
+      - Email
+  /v2/email-settings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteEmailSettings
+      operationId: deleteEmailSettings
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: DeleteEmailSettings
+      tags:
+      - Email
   /v2/login:
     post:
       consumes:
@@ -7834,9 +8012,9 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       - description: table_slug
         in: path
@@ -7911,6 +8089,11 @@ paths:
         in: query
         name: search
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -7958,6 +8141,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: CreatePermissionRequestBody
@@ -8013,6 +8201,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdatePermissionRequestBody
@@ -8071,6 +8264,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: PermissionScopePrimaryKeyBody
         in: body
         name: permission-scope
@@ -8117,6 +8315,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddPermissionScopeRequestBody
@@ -8175,6 +8378,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: permission-id
         in: path
         name: permission-id
@@ -8220,6 +8428,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: permission-id
@@ -8370,10 +8583,6 @@ paths:
         name: table_slug
         required: true
         type: string
-      - description: X-API-KEY
-        in: header
-        name: X-API-KEY
-        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
@@ -8394,7 +8603,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -8432,6 +8641,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddRelationRequestBody
@@ -8489,6 +8703,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: UpdateRelationRequestBody
         in: body
         name: relation
@@ -8543,6 +8762,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: relation-id
@@ -8653,9 +8877,9 @@ paths:
         in: query
         name: client-type-id
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -8703,6 +8927,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddRoleRequestBody
@@ -8757,6 +8986,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateRoleRequestBody
@@ -8815,6 +9049,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: RolePermissionPrimaryKeyBody
         in: body
         name: role-permission
@@ -8861,6 +9100,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: AddRolePermissionRequestBody
@@ -8916,6 +9160,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateRoleRequestBody
@@ -9036,9 +9285,9 @@ paths:
         name: role-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -9086,9 +9335,9 @@ paths:
         name: role-id
         required: true
         type: string
-      - description: project_id
+      - description: project-id
         in: query
-        name: project_id
+        name: project-id
         type: string
       produces:
       - application/json
@@ -9164,6 +9413,11 @@ paths:
       - description: order_type
         in: query
         name: order_type
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
         type: string
       produces:
       - application/json
@@ -9457,6 +9711,11 @@ paths:
         name: Environment-Id
         required: true
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
       - description: AddUserInfoFieldRequestBody
         in: body
         name: user-info-field
@@ -9510,6 +9769,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: UpdateUserInfoFieldRequestBody
@@ -9566,6 +9830,11 @@ paths:
       - description: Environment-Id
         in: header
         name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
         required: true
         type: string
       - description: user-info-field-id
@@ -9871,6 +10140,56 @@ paths:
       summary: Verify
       tags:
       - Email
+  /v2/webpage-app:
+    get:
+      consumes:
+      - application/json
+      description: Get List webpage app
+      operationId: get_list_web_page_app
+      parameters:
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: environment-id
+        in: query
+        name: environment-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: AppBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get List webpage app
+      tags:
+      - WebPage
   /verify/{sms_id}/{otp}:
     post:
       consumes:
