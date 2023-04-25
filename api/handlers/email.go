@@ -702,8 +702,6 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 // @Produce json
 // @Param X-API-KEY header string false "X-API-KEY"
 // @Param registerBody body models.EmailSettingsRequest true "register_body"
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Success 201 {object} http.Response{data=pb.EmailSettings} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -723,32 +721,6 @@ func (h *Handler) CreateEmailSettings(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok || !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
-
-	ProjectId := resourceEnvironment.GetProjectId()
-
 	uuid, err := uuid.NewRandom()
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
@@ -759,7 +731,7 @@ func (h *Handler) CreateEmailSettings(c *gin.Context) {
 		c.Request.Context(),
 		&pb.EmailSettings{
 			Id:        uuid.String(),
-			ProjectId: ProjectId,
+			ProjectId: body.ProjectId,
 			Email:     body.Email,
 			Password:  body.Password,
 		},
@@ -782,8 +754,6 @@ func (h *Handler) CreateEmailSettings(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param registerBody body pb.UpdateEmailSettingsRequest true "register_body"
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Success 201 {object} http.Response{data=pb.EmailSettings} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -794,30 +764,6 @@ func (h *Handler) UpdateEmailSettings(c *gin.Context) {
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	resourceId, ok := c.Get("resource_id")
-	if !ok || !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-
-	_, err = h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -846,43 +792,17 @@ func (h *Handler) UpdateEmailSettings(c *gin.Context) {
 // @Tags Email
 // @Accept json
 // @Produce json
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
+// @Param project_id query string true "project_id"
 // @Success 201 {object} http.Response{data=pb.UpdateEmailSettingsResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetEmailSettings(c *gin.Context) {
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok || !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
-
-	ProjectId := resourceEnvironment.GetProjectId()
-
+	fmt.Println("::::::::; >>>>>>>>>>>> ", c.Query("project_id"))
 	resp, err := h.services.EmailService().GetListEmailSettings(
 		c.Request.Context(),
 		&pb.GetListEmailSettingsRequest{
-			ProjectId: ProjectId,
+			ProjectId: c.Query("project_id"),
 		},
 	)
 	if err != nil {
@@ -903,38 +823,12 @@ func (h *Handler) GetEmailSettings(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteEmailSettings(c *gin.Context) {
 
 	id := c.Param("id")
-
-	resourceId, ok := c.Get("resource_id")
-	if !ok || !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-
-	_, err := h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
 
 	resp, err := h.services.EmailService().DeleteEmailSettings(
 		c.Request.Context(),

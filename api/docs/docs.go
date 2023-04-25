@@ -8622,16 +8622,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -8714,20 +8707,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -8815,20 +8794,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.EmailSettingsRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -8909,20 +8874,6 @@ const docTemplate = `{
                         "description": "id",
                         "name": "id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
                         "required": true
                     }
                 ],
@@ -13675,6 +13626,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }
