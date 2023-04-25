@@ -73,10 +73,9 @@ func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (r
 	return res, nil
 }
 
-
 func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error) {
 
-	var resp  = &pb.EmailSettings{}
+	var resp = &pb.EmailSettings{}
 
 	query := `INSERT INTO "email_settings" (
 		id,
@@ -115,7 +114,6 @@ func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSett
 	return resp, nil
 }
 
-
 func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error) {
 
 	var resp = &pb.EmailSettings{}
@@ -145,15 +143,13 @@ func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEma
 			&resp.Password,
 		)
 	}
-	
+
 	return resp, nil
 }
-
 
 func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error) {
 	arr := &pb.UpdateEmailSettingsResponse{}
 	res := &pb.EmailSettings{}
-
 
 	query := `SELECT
 		id,
@@ -171,7 +167,9 @@ func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListE
 		&res.Password,
 		&res.ProjectId,
 	)
-	if err != nil {
+	if err == pgx.ErrNoRows {
+		return arr, nil
+	} else if err != nil {
 		return arr, err
 	}
 	arr.Items = append(arr.Items, res)
@@ -184,11 +182,11 @@ func (e *emailRepo) DeleteEmailSettings(ctx context.Context, input *pb.EmailSett
 
 	query := `DELETE FROM "email_settings" WHERE id = $1`
 
-	_, err := e.db.Query( ctx, query, input.Id )
+	_, err := e.db.Query(ctx, query, input.Id)
 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return resp, nil
 }
