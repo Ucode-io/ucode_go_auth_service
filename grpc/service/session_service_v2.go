@@ -1362,7 +1362,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 					return nil, status.Error(codes.NotFound, errGetProjects.Error())
 				}
-				p.ClientTypes = clientTypes
+				p.ClientTypes = clientTypes.Data
 
 			}
 		}

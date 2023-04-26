@@ -47,7 +47,7 @@ message Project2 {
     string created_at = 5;
     string updated_at = 6;
     repeated ResourceEnvironmentV2MultiCompany resource_environments = 7;
-    repeated ClientType client_types = 8;
+    repeated google.protobuf.Struct client_types = 8;
 }
 
 message Company2 {
