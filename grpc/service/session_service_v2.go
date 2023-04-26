@@ -1243,7 +1243,9 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 }
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
-	resp := pb.V2MultiCompanyOneLoginRes{}
+	resp := pb.V2MultiCompanyOneLoginRes{
+		Companies: []*pb.Company2{},
+	}
 
 	if len(req.Username) < 6 {
 		err := errors.New("invalid username")
@@ -1282,8 +1284,10 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
 
+	fmt.Println("userProjects", userProjects)
+
 	for _, item := range userProjects.Companies {
-		projects := make([]*pb.V2MultiCompanyLoginRes_Company_Project, 0, 20)
+		projects := make([]*pb.Project2, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
 			&company_service.GetCompanyByIdRequest{
 				Id: item.Id,
@@ -1310,7 +1314,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				return nil, status.Error(codes.NotFound, errGetProjects.Error())
 			}
 
-			projects = append(projects, &pb.V2MultiCompanyLoginRes_Company_Project{
+			projects = append(projects, &pb.Project2{
 				Id:        projectInfo.GetProjectId(),
 				CompanyId: projectInfo.GetCompanyId(),
 				Name:      projectInfo.GetTitle(),
@@ -1318,7 +1322,52 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			})
 		}
 
-		resp.Companies = append(resp.Companies, &pb.V2MultiCompanyLoginRes_Company{
+		for _, p := range projects {
+
+			// get environments
+			environments, err := s.services.ResourceService().GetListConfiguredResourceEnvironment(
+				ctx,
+				&company_service.GetListConfiguredResourceEnvironmentReq{
+					ProjectId: p.Id,
+				},
+			)
+			if err != nil {
+				errGetProjects := errors.New("cant get environments")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.NotFound, errGetProjects.Error())
+			}
+			for _, en := range environments.Data {
+				p.ResourceEnvironments = append(p.ResourceEnvironments, &pb.ResourceEnvironmentV2MultiCompany{
+					Id:            en.Id,
+					Name:          en.Name,
+					ProjectId:     en.ProjectId,
+					ResourceId:    en.ResourceId,
+					EnvironmentId: en.EnvironmentId,
+					IsConfigured:  en.IsConfigured,
+					ResourceType:  en.ResourceType,
+					ServiceType:   en.ServiceType,
+					DisplayColor:  en.DisplayColor,
+					Description:   en.Description,
+				})
+
+				// get client types
+				clientTypes, err := s.services.ClientService().V2GetClientTypeList(
+					ctx,
+					&pb.V2GetClientTypeListRequest{
+						ProjectId: en.Id,
+					},
+				)
+				if err != nil {
+					errGetProjects := errors.New("cant get environments")
+					s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+					return nil, status.Error(codes.NotFound, errGetProjects.Error())
+				}
+				p.ClientTypes = clientTypes
+
+			}
+		}
+
+		resp.Companies = append(resp.Companies, &pb.Company2{
 			Id:          company.GetCompany().GetId(),
 			Name:        company.GetCompany().GetName(),
 			Logo:        company.GetCompany().GetLogo(),
