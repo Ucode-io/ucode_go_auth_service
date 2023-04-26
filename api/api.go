@@ -165,6 +165,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin)
+		v2.POST("/multi-company/one-login", h.V2MultiCompanyLogin)
 		v2.POST("/user/invite", h.AddUserToProject)
 		v2.POST("/user/check", h.V2GetUserByLoginType)
 
