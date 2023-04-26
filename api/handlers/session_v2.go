@@ -421,15 +421,15 @@ func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 }
 
 // V2MultiCompanyOneLogin godoc
-// @ID multi_company_login_v2
-// @Router /v2multi-company/login [POST]
+// @ID multi_company_one_login_v2
+// @Router /v2/multi-company/one-login [POST]
 // @Summary V2MultiCompanyOneLogin
 // @Description V2MultiCompanyOneLogin
 // @Tags V2_Session
 // @Accept json
 // @Produce json
 // @Param login body auth_service.V2MultiCompanyLoginReq true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.V2MultiCompanyLoginRes} "User data"
+// @Success 201 {object} http.Response{data=auth_service.V2MultiCompanyOneLoginRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
@@ -441,7 +441,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.SessionService().V2MultiCompanyLogin(
+	resp, err := h.services.SessionService().V2MultiCompanyOneLogin(
 		c.Request.Context(),
 		&login,
 	)
