@@ -217,6 +217,15 @@ message GetResourceRequest {
 
 message ReconnectResourceRequest {
     string id = 1;
+    string project_id = 2;
+}
+
+message ReconnectResourceRes {
+    message ReconnectStatus {
+        ServiceType service_type = 1;
+        bool status = 2;
+    }
+    repeated ReconnectStatus reconnect_status = 1;
 }
 
 message GetResourceWithPathResponse {

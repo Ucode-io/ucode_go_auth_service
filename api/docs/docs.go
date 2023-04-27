@@ -6647,6 +6647,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateClientRequestBody",
                         "name": "client",
                         "in": "body",
@@ -6742,6 +6749,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "AddClientRequestBody",
                         "name": "client",
                         "in": "body",
@@ -6834,6 +6848,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -6938,8 +6959,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -7030,8 +7051,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query",
                         "required": true
                     },
@@ -7120,14 +7141,20 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -7236,8 +7263,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query",
                         "required": true
                     }
@@ -7338,8 +7365,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query",
                         "required": true
                     }
@@ -7438,8 +7465,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query",
                         "required": true
                     }
@@ -7535,8 +7562,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -7622,6 +7649,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -7716,6 +7750,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -7823,8 +7864,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -7921,8 +7962,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -7996,6 +8037,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -8099,9 +8147,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query"
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -8196,6 +8245,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateConnectionRequestBody",
                         "name": "connection",
                         "in": "body",
@@ -8287,6 +8343,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -8394,8 +8457,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query",
                         "required": true
                     }
@@ -8493,9 +8556,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query"
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -8504,6 +8568,321 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/email-settings": {
+            "get": {
+                "description": "GetListEmailSettings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "GetListEmailSettings",
+                "operationId": "getListEmailSettings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project_id",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "UpdateEmailSettings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "UpdateEmailSettings",
+                "operationId": "updateEmailSettings",
+                "parameters": [
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "CreateEmailSettings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "CreateEmailSettings",
+                "operationId": "createEmailSettings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.EmailSettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/email-settings/{id}": {
+            "delete": {
+                "description": "DeleteEmailSettings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "DeleteEmailSettings",
+                "operationId": "deleteEmailSettings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -8804,6 +9183,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/multi-company/one-login": {
+            "post": {
+                "description": "V2MultiCompanyOneLogin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "V2MultiCompanyOneLogin",
+                "operationId": "multi_company_one_login_v2",
+                "parameters": [
+                    {
+                        "description": "LoginRequestBody",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyOneLoginRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/object/get-list/{table_slug}": {
             "post": {
                 "description": "Get object list",
@@ -8834,8 +9296,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     },
                     {
@@ -8959,6 +9421,13 @@ const docTemplate = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -9044,6 +9513,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -9139,6 +9615,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -9239,6 +9722,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "AddPermissionScopeRequestBody",
                         "name": "permission-scope",
                         "in": "body",
@@ -9334,6 +9824,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "PermissionScopePrimaryKeyBody",
                         "name": "permission-scope",
                         "in": "body",
@@ -9413,6 +9910,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -9506,6 +10010,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -9758,12 +10269,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "X-API-KEY",
-                        "name": "X-API-KEY",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
                         "in": "header",
@@ -9789,7 +10294,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -9862,6 +10367,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -9960,6 +10472,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "AddRelationRequestBody",
                         "name": "relation",
                         "in": "body",
@@ -10054,6 +10573,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -10242,8 +10768,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -10329,6 +10855,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -10423,6 +10956,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -10523,6 +11063,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "AddRolePermissionRequestBody",
                         "name": "role-permission",
                         "in": "body",
@@ -10618,6 +11165,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "RolePermissionPrimaryKeyBody",
                         "name": "role-permission",
                         "in": "body",
@@ -10696,6 +11250,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -10903,8 +11464,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -11001,8 +11562,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "project-id",
+                        "name": "project-id",
                         "in": "query"
                     }
                 ],
@@ -11114,6 +11675,13 @@ const docTemplate = `{
                         "description": "order_type",
                         "name": "order_type",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -11619,6 +12187,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "UpdateUserInfoFieldRequestBody",
                         "name": "user-info-field",
                         "in": "body",
@@ -11711,6 +12286,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -11808,6 +12390,13 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -12262,20 +12851,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "description": "verify_body",
                         "name": "verifyBody",
                         "in": "body",
@@ -12306,6 +12881,94 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/webpage-app": {
+            "get": {
+                "description": "Get List webpage app",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebPage"
+                ],
+                "summary": "Get List webpage app",
+                "operationId": "get_list_web_page_app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "environment-id",
+                        "name": "environment-id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AppBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -12519,6 +13182,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                },
+                "webPageServiceHost": {
+                    "type": "string"
+                },
+                "webPageServicePort": {
                     "type": "string"
                 }
             }
@@ -13045,6 +13714,20 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_api_models.EmailSettingsRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_api_models.RegisterOtp": {
             "type": "object",
             "properties": {
@@ -13405,6 +14088,38 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.Company2": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Project2"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.CompleteClientType": {
             "type": "object",
             "properties": {
@@ -13527,9 +14242,6 @@ const docTemplate = `{
                 },
                 "parent_id": {
                     "type": "string"
-                },
-                "resource_environment_id": {
-                    "type": "string"
                 }
             }
         },
@@ -13649,6 +14361,23 @@ const docTemplate = `{
             "properties": {
                 "row_effected": {
                     "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
                 }
             }
         },
@@ -14119,6 +14848,38 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.Project2": {
+            "type": "object",
+            "properties": {
+                "client_types": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
+                "company_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resource_environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission": {
             "type": "object",
             "properties": {
@@ -14239,6 +15000,41 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -14477,6 +15273,31 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings"
+                    }
                 }
             }
         },
@@ -14986,6 +15807,17 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyOneLoginRes": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company2"
+                    }
                 }
             }
         },
@@ -15801,6 +16633,63 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_web_page_service.App": {
+            "type": "object",
+            "properties": {
+                "Routes": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pages": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.Pages"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "sub_domain": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes": {
+            "type": "object",
+            "properties": {
+                "Apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.App"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_web_page_service.Pages": {
+            "type": "object",
+            "properties": {
+                "default_page": {
+                    "type": "string"
+                },
+                "login_page": {
                     "type": "string"
                 }
             }

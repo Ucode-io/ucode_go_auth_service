@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	_ "encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -20,8 +21,8 @@ import (
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	structpb "github.com/golang/protobuf/ptypes/struct"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // SendMessageToEmail godoc
@@ -135,7 +136,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				return
 			}
 
-			resp, err := h.services.EmailServie().Create(
+			resp, err := h.services.EmailService().Create(
 				c.Request.Context(),
 				&pb.Email{
 					Id:        id.String(),
@@ -144,13 +145,28 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 					ExpiresAt: expire.String()[:19],
 				},
 			)
-
 			if err != nil {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
 
-			err = helper.SendCodeToEmail("Код для подверждение", request.Email, code)
+			emailSettings, err := h.services.EmailService().GetListEmailSettings(
+				c.Request.Context(),
+				&pb.GetListEmailSettingsRequest{
+					ProjectId: resourceEnvironment.GetProjectId(),
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+
+			if len(emailSettings.Items) == 0 {
+				h.handleResponse(c, http.GRPCError, "No email settings for send otp message in project")
+				return
+			}
+
+			err = helper.SendCodeToEmail("Код для подверждение", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 			if err != nil {
 				h.handleResponse(c, http.InvalidArgument, err.Error())
 				return
@@ -295,7 +311,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	return
 }
 
-// VerifyEmail godoc
+// Verify godoc
 // @ID verify_email
 // @Router /v2/verify-email/{sms_id}/{otp} [POST]
 // @Summary Verify
@@ -306,8 +322,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 // @Param sms_id path string true "sms_id"
 // @Param otp path string true "otp"
 // @Param X-API-KEY header string false "X-API-KEY"
-// @Param Resource-Id header string true "Resource-Id"
-// @Param Environment-Id header string true "Environment-Id"
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Param verifyBody body models.Verify true "verify_body"
@@ -332,7 +346,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	case cfg.Default:
 		{
 			if c.Param("otp") != "121212" {
-				resp, err := h.services.EmailServie().GetEmailByID(
+				resp, err := h.services.EmailService().GetEmailByID(
 					c.Request.Context(),
 					&pb.EmailOtpPrimaryKey{
 						Id: c.Param("sms_id"),
@@ -424,10 +438,9 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Produce json
 // @Param registerBody body models.RegisterOtp true "register_body"
 // @Param table_slug path string true "table_slug"
-// @Param X-API-KEY header string false "X-API-KEY"
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
-// @Success 201 {object} http.Response{data=pbObject.V2LoginResponse} "User data"
+// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
@@ -495,6 +508,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		body.Data["phone"] = helper.ConverPhoneNumberToMongoPhoneFormat(body.Data["phone"].(string))
 	}
 
+	var userId string
+
 	switch body.Data["register_type"] {
 	case cfg.WithGoogle:
 		{
@@ -515,7 +530,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			_, err = h.services.UserService().RegisterWithGoogle(
+			resp, err := h.services.UserService().RegisterWithGoogle(
 				c.Request.Context(),
 				&pb.RegisterWithGoogleRequest{
 					Name:                  userInfo["name"].(string),
@@ -526,14 +541,16 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					ResourceEnvironmentId: ResourceEnvironmentId,
 				},
 			)
-
-			body.Data["email"] = userInfo["email"]
-			body.Data["name"] = userInfo["name"]
-
 			if err != nil {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+
+			body.Data["email"] = userInfo["email"]
+			body.Data["name"] = userInfo["name"]
+
+			userId = resp.Id
+
 		}
 	case cfg.Default:
 		{
@@ -563,7 +580,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			_, err := h.services.UserService().RegisterUserViaEmail(
+			resp, err := h.services.UserService().RegisterUserViaEmail(
 				c.Request.Context(),
 				&pb.CreateUserRequest{
 					Login:                 body.Data["login"].(string),
@@ -580,6 +597,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+
+			userId = resp.Id
 
 		}
 	}
@@ -605,12 +624,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 
 		if body.Data["register_type"].(string) == cfg.Default {
-			uuid, err := uuid.NewRandom()
-			if err != nil {
-				h.handleResponse(c, http.InternalServerError, err.Error())
-				return
-			}
-			body.Data["addational_table"].(map[string]interface{})["guid"] = uuid
+			// uuid, err := uuid.NewRandom()
+			// if err != nil {
+			// 	h.handleResponse(c, http.InternalServerError, err.Error())
+			// 	return
+			// }
+			body.Data["addational_table"].(map[string]interface{})["guid"] = userId
 			body.Data["addational_table"].(map[string]interface{})["project_id"] = ProjectId
 
 			mapedInterface := body.Data["addational_table"].(map[string]interface{})
@@ -671,4 +690,159 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, res)
+}
+
+// CreateEmailSettings godoc
+// @ID createEmailSettings
+// @Router /v2/email-settings [POST]
+// @Summary CreateEmailSettings
+// @Description CreateEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param X-API-KEY header string false "X-API-KEY"
+// @Param registerBody body models.EmailSettingsRequest true "register_body"
+// @Success 201 {object} http.Response{data=pb.EmailSettings} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) CreateEmailSettings(c *gin.Context) {
+
+	var body *pb.EmailSettings
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	valid := util.IsValidEmail(body.Email)
+	if !valid {
+		h.handleResponse(c, http.BadRequest, "Неверная почта")
+		return
+	}
+
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	resp, err := h.services.EmailService().CreateEmailSettings(
+		c.Request.Context(),
+		&pb.EmailSettings{
+			Id:        uuid.String(),
+			ProjectId: body.ProjectId,
+			Email:     body.Email,
+			Password:  body.Password,
+		},
+	)
+	if err != nil {
+		h.log.Error("---> error in create email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+// UpdateEmailSettings godoc
+// @ID updateEmailSettings
+// @Router /v2/email-settings [PUT]
+// @Summary UpdateEmailSettings
+// @Description UpdateEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param registerBody body pb.UpdateEmailSettingsRequest true "register_body"
+// @Success 201 {object} http.Response{data=pb.EmailSettings} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) UpdateEmailSettings(c *gin.Context) {
+
+	var body *pb.UpdateEmailSettingsRequest
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.services.EmailService().UpdateEmailSettings(
+		c.Request.Context(),
+		&pb.UpdateEmailSettingsRequest{
+			Id:       body.Id,
+			Email:    body.Email,
+			Password: body.Password,
+		},
+	)
+	if err != nil {
+		h.log.Error("---> error in update email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+// GetListEmailSettings godoc
+// @ID getListEmailSettings
+// @Router /v2/email-settings [GET]
+// @Summary GetListEmailSettings
+// @Description GetListEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param project_id query string true "project_id"
+// @Success 201 {object} http.Response{data=pb.UpdateEmailSettingsResponse} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetEmailSettings(c *gin.Context) {
+
+	fmt.Println("::::::::; >>>>>>>>>>>> ", c.Query("project_id"))
+	resp, err := h.services.EmailService().GetListEmailSettings(
+		c.Request.Context(),
+		&pb.GetListEmailSettingsRequest{
+			ProjectId: c.Query("project_id"),
+		},
+	)
+	if err != nil {
+		h.log.Error("---> error in get list email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}
+
+// DeleteEmailSettings godoc
+// @ID deleteEmailSettings
+// @Router /v2/email-settings/{id} [DELETE]
+// @Summary DeleteEmailSettings
+// @Description DeleteEmailSettings
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) DeleteEmailSettings(c *gin.Context) {
+
+	id := c.Param("id")
+
+	resp, err := h.services.EmailService().DeleteEmailSettings(
+		c.Request.Context(),
+		&pb.EmailSettingsPrimaryKey{
+			Id: id,
+		},
+	)
+	fmt.Println(">>>>>>>>>> handler test 1")
+	if err != nil {
+		h.log.Error("---> error in delete email settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	fmt.Println(">>>>>>>>>>> service test 2")
+	h.handleResponse(c, http.Created, resp)
 }
