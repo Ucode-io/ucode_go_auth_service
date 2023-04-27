@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.5
-// source: postgres_table_folder.proto
+// source: table_folder.proto
 
-package postgres_object_builder_service
+package object_builder_service
 
 import (
 	context "context"
@@ -40,7 +40,7 @@ func NewTableFolderServiceClient(cc grpc.ClientConnInterface) TableFolderService
 
 func (c *tableFolderServiceClient) Create(ctx context.Context, in *TableFolderRequest, opts ...grpc.CallOption) (*CreateTableFolderResponse, error) {
 	out := new(CreateTableFolderResponse)
-	err := c.cc.Invoke(ctx, "/postgres_object_builder_service.TableFolderService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableFolderService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *tableFolderServiceClient) Create(ctx context.Context, in *TableFolderRe
 
 func (c *tableFolderServiceClient) GetByID(ctx context.Context, in *TableFolderPrimaryKey, opts ...grpc.CallOption) (*TableFolder, error) {
 	out := new(TableFolder)
-	err := c.cc.Invoke(ctx, "/postgres_object_builder_service.TableFolderService/GetByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableFolderService/GetByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *tableFolderServiceClient) GetByID(ctx context.Context, in *TableFolderP
 
 func (c *tableFolderServiceClient) GetAll(ctx context.Context, in *GetAllTableFoldersRequest, opts ...grpc.CallOption) (*GetAllTableFoldersResponse, error) {
 	out := new(GetAllTableFoldersResponse)
-	err := c.cc.Invoke(ctx, "/postgres_object_builder_service.TableFolderService/GetAll", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableFolderService/GetAll", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (c *tableFolderServiceClient) GetAll(ctx context.Context, in *GetAllTableFo
 
 func (c *tableFolderServiceClient) Update(ctx context.Context, in *TableFolder, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/postgres_object_builder_service.TableFolderService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableFolderService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *tableFolderServiceClient) Update(ctx context.Context, in *TableFolder, 
 
 func (c *tableFolderServiceClient) Delete(ctx context.Context, in *TableFolderPrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/postgres_object_builder_service.TableFolderService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/object_builder_service.TableFolderService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func _TableFolderService_Create_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/postgres_object_builder_service.TableFolderService/Create",
+		FullMethod: "/object_builder_service.TableFolderService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TableFolderServiceServer).Create(ctx, req.(*TableFolderRequest))
@@ -155,7 +155,7 @@ func _TableFolderService_GetByID_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/postgres_object_builder_service.TableFolderService/GetByID",
+		FullMethod: "/object_builder_service.TableFolderService/GetByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TableFolderServiceServer).GetByID(ctx, req.(*TableFolderPrimaryKey))
@@ -173,7 +173,7 @@ func _TableFolderService_GetAll_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/postgres_object_builder_service.TableFolderService/GetAll",
+		FullMethod: "/object_builder_service.TableFolderService/GetAll",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TableFolderServiceServer).GetAll(ctx, req.(*GetAllTableFoldersRequest))
@@ -191,7 +191,7 @@ func _TableFolderService_Update_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/postgres_object_builder_service.TableFolderService/Update",
+		FullMethod: "/object_builder_service.TableFolderService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TableFolderServiceServer).Update(ctx, req.(*TableFolder))
@@ -209,7 +209,7 @@ func _TableFolderService_Delete_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/postgres_object_builder_service.TableFolderService/Delete",
+		FullMethod: "/object_builder_service.TableFolderService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TableFolderServiceServer).Delete(ctx, req.(*TableFolderPrimaryKey))
@@ -221,7 +221,7 @@ func _TableFolderService_Delete_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TableFolderService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "postgres_object_builder_service.TableFolderService",
+	ServiceName: "object_builder_service.TableFolderService",
 	HandlerType: (*TableFolderServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -246,5 +246,5 @@ var TableFolderService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "postgres_table_folder.proto",
+	Metadata: "table_folder.proto",
 }
