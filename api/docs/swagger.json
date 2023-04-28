@@ -13181,7 +13181,7 @@
                 }
             }
         },
-        "github_com_golang_protobuf_ptypes_struct.Struct": {
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
             "type": "object",
             "properties": {
                 "fields": {
@@ -13634,7 +13634,13 @@
                 "client_type_id": {
                     "type": "string"
                 },
+                "field_slug": {
+                    "type": "string"
+                },
                 "guid": {
+                    "type": "string"
+                },
+                "main_table_slug": {
                     "type": "string"
                 },
                 "name": {
@@ -13655,6 +13661,12 @@
             "type": "object",
             "properties": {
                 "client_type_id": {
+                    "type": "string"
+                },
+                "field_slug": {
+                    "type": "string"
+                },
+                "main_table_slug": {
                     "type": "string"
                 },
                 "name": {
@@ -14035,7 +14047,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "table_slug": {
                     "type": "string"
@@ -14832,7 +14844,7 @@
             "type": "object",
             "properties": {
                 "client_types": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "company_id": {
                     "type": "string"
@@ -15111,7 +15123,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -15618,7 +15630,7 @@
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -16560,7 +16572,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -16583,7 +16595,7 @@
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -16621,7 +16633,7 @@
             "type": "object",
             "properties": {
                 "Routes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "environment_id": {
                     "type": "string"

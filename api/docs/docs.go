@@ -13192,7 +13192,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_golang_protobuf_ptypes_struct.Struct": {
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
             "type": "object",
             "properties": {
                 "fields": {
@@ -13645,7 +13645,13 @@ const docTemplate = `{
                 "client_type_id": {
                     "type": "string"
                 },
+                "field_slug": {
+                    "type": "string"
+                },
                 "guid": {
+                    "type": "string"
+                },
+                "main_table_slug": {
                     "type": "string"
                 },
                 "name": {
@@ -13666,6 +13672,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "client_type_id": {
+                    "type": "string"
+                },
+                "field_slug": {
+                    "type": "string"
+                },
+                "main_table_slug": {
                     "type": "string"
                 },
                 "name": {
@@ -14046,7 +14058,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "table_slug": {
                     "type": "string"
@@ -14843,7 +14855,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "client_types": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "company_id": {
                     "type": "string"
@@ -15122,7 +15134,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -15629,7 +15641,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -16571,7 +16583,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -16594,7 +16606,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -16632,7 +16644,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "Routes": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "environment_id": {
                     "type": "string"

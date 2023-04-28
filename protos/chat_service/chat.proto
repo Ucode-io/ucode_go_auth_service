@@ -17,7 +17,7 @@ service ChatService {
     rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
     rpc UpdateBotStatus(UpdateBotStatusRequest) returns (google.protobuf.Empty) {}
     rpc UpdateBotToken(UpdateBotTokenRequest) returns (google.protobuf.Empty) {}
-    rpc GetBotTokenList (GetBotTokenListRequest) returns (GetBotTokenListResponse) {}
+    rpc GetBotTokenList (google.protobuf.Empty) returns (GetBotTokenListResponse) {}
     rpc GetBotTokenByBotId (GetBotByBotIdRequest) returns (GetBotByBotIdResponse) {}
     rpc GetBotIDByChatId (GetBotIDByChatIDRequest) returns (GetBotIDByChatIDResponse) {}
     rpc DeleteBotToken(DeleteBotTokenRequest) returns (google.protobuf.Empty) {}

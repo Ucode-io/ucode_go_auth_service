@@ -57,7 +57,7 @@ definitions:
       webPageServicePort:
         type: string
     type: object
-  github_com_golang_protobuf_ptypes_struct.Struct:
+  google_golang_org_protobuf_types_known_structpb.Struct:
     properties:
       fields:
         additionalProperties:
@@ -607,7 +607,11 @@ definitions:
     properties:
       client_type_id:
         type: string
+      field_slug:
+        type: string
       guid:
+        type: string
+      main_table_slug:
         type: string
       name:
         type: string
@@ -621,6 +625,10 @@ definitions:
   ucode_ucode_go_auth_service_api_models.CreateConnectionRequest:
     properties:
       client_type_id:
+        type: string
+      field_slug:
+        type: string
+      main_table_slug:
         type: string
       name:
         type: string
@@ -867,7 +875,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       table_slug:
         type: string
     type: object
@@ -1389,7 +1397,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.Project2:
     properties:
       client_types:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       company_id:
         type: string
       created_at:
@@ -1572,7 +1580,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.Table:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       icon:
         type: string
       label:
@@ -1902,7 +1910,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission'
@@ -2520,7 +2528,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_object_builder_service.TableClientType:
     properties:
       data:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       icon:
         type: string
       label:
@@ -2535,7 +2543,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse:
     properties:
       addational_table:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       app_permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission'
@@ -2560,7 +2568,7 @@ definitions:
   ucode_ucode_go_auth_service_genproto_web_page_service.App:
     properties:
       Routes:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       environment_id:
         type: string
       id:
