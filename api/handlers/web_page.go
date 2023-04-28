@@ -101,8 +101,10 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	res, err := h.services.WebPageAppService().GetListApp(
 		context.Background(),
 		&web_page_service.GetListAppReq{
-			ProjectId:     resource.ResourceEnvironmentId,
+			ProjectId:     resource.GetProjectId(),
 			EnvironmentId: envId,
+			ResourceId: resource.GetResourceEnvironmentId(),
+
 		},
 	)
 
