@@ -341,7 +341,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 	if body.RegisterType == "" {
-		h.handleResponse(c, http.OK, "Register type is required")
+		h.handleResponse(c, http.BadRequest, "Register type is required")
 		return
 	}
 	fmt.Println("::::::: Register type body :", body.RegisterType)
