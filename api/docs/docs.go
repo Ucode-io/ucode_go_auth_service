@@ -13768,6 +13768,9 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
                 },
+                "google_token": {
+                    "type": "string"
+                },
                 "register_type": {
                     "type": "string"
                 },

@@ -21,6 +21,7 @@ type Verify struct {
 	Data         *pbObject.V2LoginResponse `json:"data"`
 	Tables       []*pb.Object              `json:"tables"`
 	RegisterType string                    `json:"register_type"`
+	GoogleToken  string                    `json:"google_token"`
 }
 
 type RegisterOtp struct {
