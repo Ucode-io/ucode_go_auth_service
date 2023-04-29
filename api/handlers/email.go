@@ -166,7 +166,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				return
 			}
 
-			err = helper.SendCodeToEmail("Код для подверждение", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
+			err = helper.SendCodeToEmail("Код для подтверждения", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 			if err != nil {
 				h.handleResponse(c, http.InvalidArgument, err.Error())
 				return
@@ -530,7 +530,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>. test 1")
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
@@ -542,7 +542,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	
 	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
 		ProjectId: resourceEnvironment.GetProjectId(),
 	})
@@ -550,36 +550,36 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	
 	ProjectId = resourceEnvironment.GetProjectId()
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
-
+	
 	if body.Data["register_type"] != cfg.WithGoogle {
 		body.Data["register_type"] = cfg.Default
 	}
-
-	if body.Data["phone"] != "" {
+	
+	if body.Data["phone"] != nil && body.Data["phone"] != "" {
 		body.Data["phone"] = helper.ConverPhoneNumberToMongoPhoneFormat(body.Data["phone"].(string))
 	}
 
 	var userId string
-
+	
 	switch body.Data["register_type"] {
 	case cfg.WithGoogle:
 		{
-
-			if _, ok := body.Data["google_token"]; !ok {
-				h.handleResponse(c, http.BadRequest, "google_type type required when register_type is google")
+			
+			if body.Data["google_token"] == nil || body.Data["google_token"] == "" {
+				h.handleResponse(c, http.BadRequest, "google_token  required when register_type is google")
 				return
 			}
-
+			
 			userInfo, err := helper.GetGoogleUserInfo(body.Data["google_token"].(string))
 			if err != nil {
 				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
 				return
 			}
-
+			
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
 				h.handleResponse(c, http.BadRequest, "Invalid google access token")
 				return

@@ -69,7 +69,7 @@ func SendCodeToEmail(subject, to, code string, email string, password string) er
 	log.Printf("---SendCodeEmail---> email: %s, code: %s", to, code)
 
 	message := `
-		Ваше код подверждение: ` + code
+		Код для подтверждения: ` + code
 
 	// if email == "" {
 	// 	email = from
