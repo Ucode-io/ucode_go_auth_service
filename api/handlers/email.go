@@ -580,12 +580,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
 				return
 			}
-
+			fmt.Println("::::::::::::: test 1")
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
 				h.handleResponse(c, http.BadRequest, "Invalid google access token")
 				return
 			}
-
+			fmt.Println("::::::::::::: test 2")
 			resp, err := h.services.UserService().RegisterWithGoogle(
 				c.Request.Context(),
 				&pb.RegisterWithGoogleRequest{
@@ -601,7 +601,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
-
+			fmt.Println("::::::::::::: test 3")
 			body.Data["email"] = userInfo["email"]
 			body.Data["name"] = userInfo["name"]
 
