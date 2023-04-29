@@ -196,7 +196,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	if foundUser.Id == "" {
 		foundUser, err = s.strg.User().GetByUsername(ctx, req.Phone)
 	}
-
+	fmt.Println("::::::::::::: test 4", foundUser)
 	if foundUser.Id == "" {
 		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
 			Login:                 req.GetLogin(),
