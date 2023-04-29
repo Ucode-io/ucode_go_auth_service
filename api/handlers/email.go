@@ -460,6 +460,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 			}
 
 			h.handleResponse(c, http.Created, res)
+			return
 		}
 	}
 	if !body.Data.UserFound {
@@ -542,7 +543,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	
+
 	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
 		ProjectId: resourceEnvironment.GetProjectId(),
 	})
@@ -550,36 +551,36 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	
+
 	ProjectId = resourceEnvironment.GetProjectId()
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
-	
+
 	if body.Data["register_type"] != cfg.WithGoogle {
 		body.Data["register_type"] = cfg.Default
 	}
-	
+
 	if body.Data["phone"] != nil && body.Data["phone"] != "" {
 		body.Data["phone"] = helper.ConverPhoneNumberToMongoPhoneFormat(body.Data["phone"].(string))
 	}
 
 	var userId string
-	
+
 	switch body.Data["register_type"] {
 	case cfg.WithGoogle:
 		{
-			
+
 			if body.Data["google_token"] == nil || body.Data["google_token"] == "" {
 				h.handleResponse(c, http.BadRequest, "google_token  required when register_type is google")
 				return
 			}
-			
+
 			userInfo, err := helper.GetGoogleUserInfo(body.Data["google_token"].(string))
 			if err != nil {
 				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
 				return
 			}
-			
+
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
 				h.handleResponse(c, http.BadRequest, "Invalid google access token")
 				return
