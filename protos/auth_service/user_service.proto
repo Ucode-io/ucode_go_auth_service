@@ -7,6 +7,7 @@ import "auth.proto";
 import "client_service.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
+//import "setting.proto";
 
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (User) {}
@@ -33,7 +34,28 @@ service UserService {
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
     rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
     rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
-    rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {} 
+    rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {}
+    rpc GetListSetting(GetListSettingReq) returns (Setting) {};
+}
+
+message Setting {
+    google.protobuf.Struct data = 1;
+    int32 count = 2;
+}
+
+
+enum SettingType {
+    LANGUAGE = 0;
+//    CURRENCY = 1;
+    TIMEZONE = 2;
+}
+
+message GetListSettingReq {
+    SettingType type = 1;
+    string search = 2;
+    string project_id = 3;
+    int32 limit = 4;
+    int32 offset = 5;
 }
 
 message RegisterWithGoogleRequest {
@@ -143,6 +165,8 @@ message UpdateUserRequest {
     string client_platform_id = 11;
     int32 active = 12;
     string expires_at = 13;
+    string language_id = 14;
+    string timezone_id = 15;
 }
 
 message AddUserRelationRequest {
