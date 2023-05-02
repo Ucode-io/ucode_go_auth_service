@@ -421,6 +421,9 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		// &res.CreatedAt,
 		// &res.UpdatedAt,
 	)
+	if err == pgx.ErrNoRows {
+		return res, nil
+	}
 	if err != nil {
 		return res, err
 	}

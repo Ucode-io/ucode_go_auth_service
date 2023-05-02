@@ -22,11 +22,11 @@ type ServiceManagerI interface {
 	EmailServie() auth_service.EmailOtpServiceClient
 	CompanyService() auth_service.CompanyServiceClient
 	ProjectService() auth_service.ProjectServiceClient
+	CompanyServiceClient() company_service.CompanyServiceClient
+	ProjectServiceClient() company_service.ProjectServiceClient
 	BuilderPermissionService() object_builder_service.PermissionServiceClient
 	ApiKeysService() auth_service.ApiKeysClient
 	ResourceService() company_service.ResourceServiceClient
-	ProjectServiceClient() company_service.ProjectServiceClient
-	CompanyServiceClient() company_service.CompanyServiceClient
 	EnvironmentService() company_service.EnvironmentServiceClient
 }
 

@@ -12,15 +12,16 @@ type Sms struct {
 }
 
 type SendCodeResponse struct {
-	SmsId       string `json:"sms_id"`
-	GoogleAcces bool `json:"google_acces"`
-	Data       *pbObject.V2LoginResponse `json:"data"`
+	SmsId       string                    `json:"sms_id"`
+	GoogleAcces bool                      `json:"google_acces"`
+	Data        *pbObject.V2LoginResponse `json:"data"`
 }
 
 type Verify struct {
-	Data              *pbObject.V2LoginResponse `json:"data"`
-	Tables            []*pb.Object     `json:"tables"`
-	RegisterType 	  string `json:"register_type"`
+	Data         *pbObject.V2LoginResponse `json:"data"`
+	Tables       []*pb.Object              `json:"tables"`
+	RegisterType string                    `json:"register_type"`
+	GoogleToken  string                    `json:"google_token"`
 }
 
 type RegisterOtp struct {
@@ -28,9 +29,15 @@ type RegisterOtp struct {
 }
 
 type Email struct {
-	Email      string `json:"email"`
-	ClientType string `json:"client_type"`
+	Email        string `json:"email"`
+	ClientType   string `json:"client_type"`
 	RegisterType string `json:"register_type"`
-	GoogleToken string `json:"google_token"`
-	Phone    string `json:"phone"`
+	GoogleToken  string `json:"google_token"`
+	Phone        string `json:"phone"`
+}
+
+type EmailSettingsRequest struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	ProjectId string `json:"project_id"`
 }
