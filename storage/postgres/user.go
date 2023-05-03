@@ -319,15 +319,15 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		name = :name,
-		company_id = :company_id,
-		photo_url = :photo_url,
-		phone = :phone,
-		email = :email,
-		login = :login,
+		name = name,
+		company_id = company_id,
+		photo_url = photo_url,
+		phone = phone,
+		email = email,
+		login = login,
 		updated_at = now(),
-    	language_id = :language_id,
-        timezone_id = :timezone_id
+    	language_id = language_id,
+        timezone_id = timezone_id
 	WHERE
 		id = :id`
 

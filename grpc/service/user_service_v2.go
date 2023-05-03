@@ -200,9 +200,9 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 
 	if foundUser.Id == "" {
 		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
-			Login:                 req.GetLogin(),
-			Password:              req.GetPassword(),
-			Email:                 req.GetEmail(),
+			Login:    req.GetLogin(),
+			Password: req.GetPassword(),
+			//	Email:                 req.GetEmail(),
 			Phone:                 req.GetPhone(),
 			Name:                  req.GetName(),
 			CompanyId:             req.GetCompanyId(),

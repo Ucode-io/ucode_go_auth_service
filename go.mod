@@ -58,7 +58,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
