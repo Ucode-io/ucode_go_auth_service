@@ -132,7 +132,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	fmt.Println("TEST::::9")
 
 	if req.Tables != nil {
-		// res.Tables = req.Tables
+		res.Tables = req.Tables
 	}
 
 	return res, nil
