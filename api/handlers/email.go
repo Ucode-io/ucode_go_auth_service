@@ -166,7 +166,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				return
 			}
 
-			err = helper.SendCodeToEmail("Код для подверждение", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
+			err = helper.SendCodeToEmail("Код для подтверждения", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 			if err != nil {
 				h.handleResponse(c, http.InvalidArgument, err.Error())
 				return
@@ -340,7 +340,38 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	if body.RegisterType == "" {
+		h.handleResponse(c, http.BadRequest, "Register type is required")
+		return
+	}
 	fmt.Println("::::::: Register type body :", body.RegisterType)
+
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+	if !util.IsValidUUID(resourceId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+		return
+	}
+	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	switch body.RegisterType {
 	case cfg.Default:
@@ -379,36 +410,61 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				}
 			}
 		}
-	}
+	case cfg.WithGoogle:
+		{
+			if body.GoogleToken == "" {
+				h.handleResponse(c, http.BadRequest, "google token is required when register type is google")
+				return
+			}
 
+			userInfo, err := helper.GetGoogleUserInfo(body.GoogleToken)
+			if err != nil {
+				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
+				return
+			}
+			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+				h.handleResponse(c, http.BadRequest, "Invalid google access token")
+				return
+			}
+
+			respObject, err := h.services.LoginService().LoginWithEmailOtp(
+				c.Request.Context(),
+				&pbObject.EmailOtpRequest{
+					ClientType: "WEB_USER",
+					TableSlug:  "user",
+					Email:      userInfo["email"].(string),
+					ProjectId:  resourceEnvironment.GetId(),
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+
+			if respObject == nil || !respObject.UserFound {
+				h.handleResponse(c, http.OK, "User verified with google token but not found")
+				return
+			}
+
+			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
+			res, err := h.services.SessionService().SessionAndTokenGenerator(
+				context.Background(),
+				&pb.SessionAndTokenRequest{
+					LoginData: convertedToAuthPb,
+					Tables:    body.Tables,
+					ProjectId: resourceEnvironment.GetProjectId(), //@TODO:: temp added hardcoded project id
+				})
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+
+			h.handleResponse(c, http.Created, res)
+			return
+		}
+	}
 	if !body.Data.UserFound {
 		h.handleResponse(c, http.OK, "User verified but not found")
-		return
-	}
-
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
-	if !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
@@ -475,7 +531,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>. test 1")
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
@@ -504,7 +560,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		body.Data["register_type"] = cfg.Default
 	}
 
-	if body.Data["phone"] != "" {
+	if body.Data["phone"] != nil && body.Data["phone"] != "" {
 		body.Data["phone"] = helper.ConverPhoneNumberToMongoPhoneFormat(body.Data["phone"].(string))
 	}
 
@@ -514,8 +570,8 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	case cfg.WithGoogle:
 		{
 
-			if _, ok := body.Data["google_token"]; !ok {
-				h.handleResponse(c, http.BadRequest, "google_type type required when register_type is google")
+			if body.Data["google_token"] == nil || body.Data["google_token"] == "" {
+				h.handleResponse(c, http.BadRequest, "google_token  required when register_type is google")
 				return
 			}
 
@@ -524,12 +580,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
 				return
 			}
-
+			fmt.Println("::::::::::::: test 1")
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
 				h.handleResponse(c, http.BadRequest, "Invalid google access token")
 				return
 			}
-
+			fmt.Println("::::::::::::: test 2")
 			resp, err := h.services.UserService().RegisterWithGoogle(
 				c.Request.Context(),
 				&pb.RegisterWithGoogleRequest{
@@ -545,7 +601,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
-
+			fmt.Println("::::::::::::: test 3")
 			body.Data["email"] = userInfo["email"]
 			body.Data["name"] = userInfo["name"]
 
