@@ -33,6 +33,7 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 	var (
 		connection models.CreateConnectionRequest
 		// resourceEnvironment *cps.ResourceEnvironment
+		resp *obs.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&connection)
@@ -111,18 +112,35 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 	fmt.Println(connection.ProjectId)
 
 	// This is create connection by client type id
-	resp, err := h.services.ObjectBuilderService().Create(
-		c.Request.Context(),
-		&obs.CommonMessage{
-			TableSlug: "connections",
-			ProjectId: connection.ProjectId,
-			Data:      structData,
-		},
-	)
+	switch resource.ResourceType {
+	case 1:
+		resp, err = h.services.ObjectBuilderService().Create(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: connection.ProjectId,
+				Data:      structData,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case 3:
+		resp, err = h.services.PostgresObjectBuilderService().Create(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: connection.ProjectId,
+				Data:      structData,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, http.Created, resp)
@@ -147,6 +165,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 	var (
 		connection models.Connection
 		// resourceEnvironment *cps.ResourceEnvironment
+		resp *obs.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&connection)
@@ -221,14 +240,26 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 	connection.ProjectId = resource.ResourceEnvironmentId
 
 	// This is create connection by client type id
-	resp, err := h.services.ObjectBuilderService().Update(
-		c.Request.Context(),
-		&obs.CommonMessage{
-			TableSlug: "connections",
-			ProjectId: connection.ProjectId,
-			Data:      structData,
-		},
-	)
+	switch resource.ResourceType {
+	case 1:
+		resp, err = h.services.ObjectBuilderService().Update(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: connection.ProjectId,
+				Data:      structData,
+			},
+		)
+	case 3:
+		resp, err = h.services.ObjectBuilderService().Update(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: connection.ProjectId,
+				Data:      structData,
+			},
+		)
+	}
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -341,22 +372,40 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-
 	fmt.Println("test")
 	// this is get list connection list from object builder
-	resp, err := h.services.ObjectBuilderService().GetList(
-		c.Request.Context(),
-		&obs.CommonMessage{
-			TableSlug: "connections",
-			ProjectId: resource.ResourceEnvironmentId,
-			Data:      structData,
-		},
-	)
-	fmt.Println("ress:::", resp.Data.AsMap()["response"])
+	var resp *obs.CommonMessage
+	switch resource.ResourceType {
+	case 1:
+		resp, err = h.services.ObjectBuilderService().GetList(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
+		fmt.Println("ress:::", resp.Data.AsMap()["response"])
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case 3:
+		resp, err = h.services.PostgresObjectBuilderService().GetList(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
+		fmt.Println("ress:::", resp.Data.AsMap()["response"])
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, http.OK, resp)
@@ -454,21 +503,39 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+	var resp *obs.CommonMessage
+	switch resource.ResourceType {
+	case 1:
+		resp, err = h.services.ObjectBuilderService().GetSingle(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case 3:
+		resp, err = h.services.PostgresObjectBuilderService().GetSingle(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
 
 	// this is get list connection list from object builder
-	resp, err := h.services.ObjectBuilderService().GetSingle(
-		c.Request.Context(),
-		&obs.CommonMessage{
-			TableSlug: "connections",
-			ProjectId: resource.ResourceEnvironmentId,
-			Data:      structData,
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
 
 	h.handleResponse(c, http.OK, resp)
 }
@@ -565,19 +632,36 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+	var resp *obs.CommonMessage
+	switch resource.ResourceType {
+	case 1:
+		resp, err = h.services.ObjectBuilderService().Delete(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := h.services.ObjectBuilderService().Delete(
-		c.Request.Context(),
-		&obs.CommonMessage{
-			TableSlug: "connections",
-			Data:      structData,
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case 3:
+		resp, err = h.services.ObjectBuilderService().Delete(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: "connections",
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, http.NoContent, resp)

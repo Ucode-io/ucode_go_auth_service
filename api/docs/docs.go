@@ -13160,6 +13160,12 @@ const docTemplate = `{
                 "postgresMaxConnections": {
                     "type": "integer"
                 },
+                "postgresObjectBuidlerServiceHost": {
+                    "type": "string"
+                },
+                "postgresObjectBuidlerServicePort": {
+                    "type": "string"
+                },
                 "postgresPassword": {
                     "type": "string"
                 },
@@ -13857,6 +13863,9 @@ const docTemplate = `{
                 "permission_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "role_id": {
                     "type": "string"
                 }
@@ -13870,6 +13879,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest"
                     }
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -13954,6 +13966,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "role_id": {
                     "type": "string"
@@ -14168,6 +14183,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "subdomain": {
                     "type": "string"
                 }
@@ -14242,6 +14260,9 @@ const docTemplate = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -14347,6 +14368,9 @@ const docTemplate = `{
                 },
                 "resource_environment_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "role_id": {
                     "type": "string"
@@ -14539,6 +14563,9 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -15199,6 +15226,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "subdomain": {
                     "type": "string"
                 }
@@ -15315,6 +15345,9 @@ const docTemplate = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -15448,6 +15481,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "role_id": {
                     "type": "string"
                 }
@@ -15573,6 +15609,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -15596,6 +15635,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "self_recover": {
                     "type": "boolean"
@@ -15622,6 +15664,9 @@ const docTemplate = `{
                 },
                 "resource_environment_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "tables": {
                     "type": "array",
@@ -15867,6 +15912,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "self_recover": {
                     "type": "boolean"
                 },
@@ -15895,6 +15943,9 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },

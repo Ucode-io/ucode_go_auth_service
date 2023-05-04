@@ -13149,6 +13149,12 @@
                 "postgresMaxConnections": {
                     "type": "integer"
                 },
+                "postgresObjectBuidlerServiceHost": {
+                    "type": "string"
+                },
+                "postgresObjectBuidlerServicePort": {
+                    "type": "string"
+                },
                 "postgresPassword": {
                     "type": "string"
                 },
@@ -13846,6 +13852,9 @@
                 "permission_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "role_id": {
                     "type": "string"
                 }
@@ -13859,6 +13868,9 @@
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest"
                     }
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -13943,6 +13955,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "role_id": {
                     "type": "string"
@@ -14157,6 +14172,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "subdomain": {
                     "type": "string"
                 }
@@ -14231,6 +14249,9 @@
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -14336,6 +14357,9 @@
                 },
                 "resource_environment_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "role_id": {
                     "type": "string"
@@ -14528,6 +14552,9 @@
                 },
                 "phone": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -15188,6 +15215,9 @@
                 "name": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "subdomain": {
                     "type": "string"
                 }
@@ -15304,6 +15334,9 @@
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -15437,6 +15470,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "role_id": {
                     "type": "string"
                 }
@@ -15562,6 +15598,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -15585,6 +15624,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "self_recover": {
                     "type": "boolean"
@@ -15611,6 +15653,9 @@
                 },
                 "resource_environment_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "tables": {
                     "type": "array",
@@ -15856,6 +15901,9 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "self_recover": {
                     "type": "boolean"
                 },
@@ -15884,6 +15932,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },

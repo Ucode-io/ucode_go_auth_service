@@ -70,6 +70,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 	}
 
 	login.ResourceEnvironmentId = resourceEnvironment.GetId()
+	login.ResourceType = resourceEnvironment.GetResourceType()
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),

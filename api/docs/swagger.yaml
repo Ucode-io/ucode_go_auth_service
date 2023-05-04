@@ -36,6 +36,10 @@ definitions:
         type: string
       postgresMaxConnections:
         type: integer
+      postgresObjectBuidlerServiceHost:
+        type: string
+      postgresObjectBuidlerServicePort:
+        type: string
       postgresPassword:
         type: string
       postgresPort:
@@ -745,6 +749,8 @@ definitions:
     properties:
       permission_id:
         type: string
+      resource_type:
+        type: integer
       role_id:
         type: string
     type: object
@@ -754,6 +760,8 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest'
         type: array
+      resource_type:
+        type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsResponse:
     properties:
@@ -808,6 +816,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
       role_id:
         type: string
       user_id:
@@ -948,6 +958,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
       subdomain:
         type: string
     type: object
@@ -997,6 +1009,8 @@ definitions:
         type: string
       parent_id:
         type: string
+      resource_type:
+        type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.CreateReq:
     properties:
@@ -1066,6 +1080,8 @@ definitions:
         type: string
       resource_environment_id:
         type: string
+      resource_type:
+        type: integer
       role_id:
         type: string
       year_of_birth:
@@ -1190,6 +1206,8 @@ definitions:
         type: string
       phone:
         type: string
+      resource_type:
+        type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse:
     properties:
@@ -1622,6 +1640,8 @@ definitions:
         type: string
       name:
         type: string
+      resource_type:
+        type: integer
       subdomain:
         type: string
     type: object
@@ -1698,6 +1718,8 @@ definitions:
         type: string
       parent_id:
         type: string
+      resource_type:
+        type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest:
     properties:
@@ -1784,6 +1806,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
       role_id:
         type: string
     type: object
@@ -1866,6 +1890,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2CreateClientTypeRequest:
     properties:
@@ -1881,6 +1907,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
       self_recover:
         type: boolean
       self_register:
@@ -1898,6 +1926,8 @@ definitions:
         type: string
       resource_environment_id:
         type: string
+      resource_type:
+        type: integer
       tables:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
@@ -2057,6 +2087,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
       self_recover:
         type: boolean
       self_register:
@@ -2076,6 +2108,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_type:
+        type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_company_service.CreateProjectRequest:
     properties:

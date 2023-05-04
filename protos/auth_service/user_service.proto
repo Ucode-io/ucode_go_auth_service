@@ -43,6 +43,7 @@ message RegisterWithGoogleRequest {
     string client_type_id = 4;
     string resource_environment_id = 5;
     string name = 6;
+    int32 resource_type = 7;
 
 }
 
@@ -54,6 +55,7 @@ message GetUserByLoginTypesRequest {
    string email = 1;
    string phone = 2;
    string login = 3;
+   int32 resource_type = 4;
 }
 
 message GetProjectsByUserIdReq {
@@ -70,6 +72,7 @@ message AddUserToProjectReq {
     string role_id = 3;
     int32 active = 4;
     string company_id = 5;
+    int32 resource_type = 6;
 }
 
 message AddUserToProjectRes {
@@ -101,16 +104,19 @@ message CreateUserRequest {
     string resource_environment_id = 14;
     string base_url = 15;
     string year_of_birth = 16;
+    int32 resource_type = 17;
 }
 
 message UserPrimaryKey {
     string id = 1;
     string project_id = 2;
+    int32 resource_type = 3;
 }
 
 message UserPrimaryKeyList {
     repeated string ids = 1;
     string project_id = 2;
+    int32 resource_type = 3;
 }
 
 message GetUserListRequest {
@@ -121,6 +127,7 @@ message GetUserListRequest {
     string client_type_id = 5;
     string project_id = 6;
     string resource_environment_id = 7;
+    int32 resource_type = 8;
 }
 
 message GetUserListResponse {
@@ -143,6 +150,7 @@ message UpdateUserRequest {
     string client_platform_id = 11;
     int32 active = 12;
     string expires_at = 13;
+    int32 resource_type = 14;
 }
 
 message AddUserRelationRequest {

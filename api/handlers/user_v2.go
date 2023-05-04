@@ -99,6 +99,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	}
 
 	user.ResourceEnvironmentId = resourceEnvironment.GetId()
+	user.ResourceType = resourceEnvironment.GetResourceType()
 	resp, err := h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&user,
@@ -199,6 +200,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 			ClientTypeId:          c.Query("client-type-id"),
 			ProjectId:             projectId,
 			ResourceEnvironmentId: resourceEnvironment.GetId(),
+			ResourceType:          resourceEnvironment.GetResourceType(),
 		},
 	)
 
@@ -285,8 +287,9 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id:        userID,
-			ProjectId: resourceEnvironment.GetId(),
+			Id:           userID,
+			ProjectId:    resourceEnvironment.GetId(),
+			ResourceType: resourceEnvironment.GetResourceType(),
 		},
 	)
 
@@ -368,6 +371,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	}
 
 	fmt.Println(resourceEnvironment.GetId())
+	user.ResourceType = resourceEnvironment.GetResourceType()
 
 	resp, err := h.services.UserService().V2UpdateUser(
 		c.Request.Context(),
@@ -458,8 +462,9 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	resp, err := h.services.UserService().V2DeleteUser(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id:        userID,
-			ProjectId: projectID,
+			Id:           userID,
+			ProjectId:    projectID,
+			ResourceType: resourceEnvironment.GetResourceType(),
 		},
 	)
 

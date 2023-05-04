@@ -22,7 +22,6 @@ import (
 
 func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWithGoogleRequest) (resp *pb.User, err error) {
 
-	
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
 	if !email {
@@ -68,37 +67,51 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 	}
 
 	fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
-	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "user",
-		Data:      structData,
-		ProjectId: req.GetResourceEnvironmentId(),
-	})
-	
-	if err != nil {
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	switch req.ResourceType {
+	case 1:
+		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+
+		if err != nil {
+			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case 3:
+		_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+
+		if err != nil {
+			s.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
-	
+
 	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:    pKey.Id,
 		ProjectId: req.GetProjectId(),
 		CompanyId: req.GetCompanyId(),
 	})
-	
+
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	
+
 	resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 		Id: pKey.Id,
 	})
-	
+
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	
+
 	return resp, err
 }
 
@@ -123,7 +136,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	if foundUser.Id == "" {
 		foundUser, err = s.strg.User().GetByUsername(ctx, req.Phone)
 	}
-	
+
 	if foundUser.Id == "" {
 		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
 			Login:                 req.GetLogin(),
@@ -143,7 +156,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			s.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-	
+
 		structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
 			"guid":           pKey.GetId(),
 			"project_id":     req.GetProjectId(),
@@ -160,18 +173,31 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			s.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-	
+
 		fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
-		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-			TableSlug: "user",
-			Data:      structData,
-			ProjectId: req.GetResourceEnvironmentId(),
-		})
-		if err != nil {
-			s.log.Error("!!!CreateUser--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+		switch req.ResourceType {
+		case 1:
+			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				TableSlug: "user",
+				Data:      structData,
+				ProjectId: req.GetResourceEnvironmentId(),
+			})
+			if err != nil {
+				s.log.Error("!!!CreateUser--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		case 3:
+			_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				TableSlug: "user",
+				Data:      structData,
+				ProjectId: req.GetResourceEnvironmentId(),
+			})
+			if err != nil {
+				s.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 		}
-	
+
 		_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 			UserId:    pKey.Id,
 			ProjectId: req.GetProjectId(),
@@ -181,7 +207,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			s.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-	
+
 		resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: pKey.Id,
 		})
@@ -189,7 +215,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			s.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-	
+
 		return resp, err
 	} else {
 		var objUser *pbObject.V2LoginResponse
@@ -211,9 +237,9 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		if req.Phone != "" && !objUser.UserFound {
 			objUser, err = s.services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
 
-				PhoneNumber:      req.Phone,
-				ClientType: "WEB_USER",
-				ProjectId:  req.GetResourceEnvironmentId(),
+				PhoneNumber: req.Phone,
+				ClientType:  "WEB_USER",
+				ProjectId:   req.GetResourceEnvironmentId(),
 			})
 			if err != nil {
 				s.log.Error("!!!Found user from obj--->", logger.Error(err))
@@ -241,18 +267,32 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 				s.log.Error("!!!CreateUser--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
-		
+
 			fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
-			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-				TableSlug: "user",
-				Data:      structData,
-				ProjectId: req.GetResourceEnvironmentId(),
-			})
-			if err != nil {
-				s.log.Error("!!!CreateUser--->", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
+			switch req.ResourceType {
+			case 1:
+				_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+					TableSlug: "user",
+					Data:      structData,
+					ProjectId: req.GetResourceEnvironmentId(),
+				})
+				if err != nil {
+					s.log.Error("!!!CreateUser--->", logger.Error(err))
+					return nil, status.Error(codes.InvalidArgument, err.Error())
+				}
+			case 3:
+				_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+					TableSlug: "user",
+					Data:      structData,
+					ProjectId: req.GetResourceEnvironmentId(),
+				})
+				if err != nil {
+					s.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
+					return nil, status.Error(codes.InvalidArgument, err.Error())
+				}
+
 			}
-		
+
 			// _, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 			// 	UserId:    foundUser.Id,
 			// 	ProjectId: req.GetProjectId(),
@@ -262,7 +302,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
 			// 	return nil, status.Error(codes.Internal, err.Error())
 			// }
-		
+
 			resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 				Id: foundUser.Id,
 			})
@@ -270,12 +310,11 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 				s.log.Error("!!!CreateUser--->", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-		
+
 			return resp, err
 		}
 	}
 
-	
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
@@ -337,16 +376,29 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	switch req.ResourceType {
+	case 1:
+		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
 
-	_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "user",
-		Data:      structData,
-		ProjectId: req.GetResourceEnvironmentId(),
-	})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
 
-	if err != nil {
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		if err != nil {
+			s.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
@@ -366,6 +418,9 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey) (*pb.User, error) {
 	s.log.Info("---GetUserByID--->", logger.Any("req", req))
 
+	var (
+		result *pbObject.CommonMessage
+	)
 	user, err := s.strg.User().GetByPK(ctx, req)
 
 	if err != nil {
@@ -381,14 +436,28 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-		TableSlug: "user",
-		Data:      structData,
-		ProjectId: req.ProjectId,
-	})
-	if err != nil {
-		s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		})
+		if err != nil {
+			s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		})
+		if err != nil {
+			s.log.Error("!!!GetUserByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
 	}
 
 	userData, ok := result.Data.AsMap()["response"].(map[string]interface{})
@@ -454,6 +523,9 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	s.log.Info("---GetUserList--->", logger.Any("req", req))
 
 	resp := &pb.GetUserListResponse{}
+	var (
+		usersResp *pbObject.CommonMessage
+	)
 
 	// res, err := s.strg.User().GetList(ctx, req)
 
@@ -483,9 +555,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	}
 
 	structReq := map[string]interface{}{
-		"guid": map[string]interface{}{
-			"$in": userIds,
-		},
+		"guid": userIds,
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
@@ -501,16 +571,31 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		s.log.Error("!!!GetUserList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	usersResp, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-		TableSlug: "user",
-		Data:      structData,
-		ProjectId: req.GetResourceEnvironmentId(),
-	})
-	if err != nil {
-		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	switch req.ResourceType {
+	case 1:
+		usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		usersResp, err = s.services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetUserList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		
 	}
+
+	
 
 	userCount, ok := usersResp.Data.AsMap()["count"].(float64)
 	if !ok {

@@ -22,17 +22,32 @@ func (s *clientService) V2CreateClientPlatform(ctx context.Context, req *pb.Crea
 		s.log.Error("!!!CreateClientPlatform--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	var result *pbObject.CommonMessage
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().Create(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: req.ProjectId,
+			})
 
-	result, err := s.services.ObjectBuilderService().Create(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_platform",
-			Data:      structData,
-			ProjectId: req.ProjectId,
-		})
+		if err != nil {
+			s.log.Error("!!!CreateClientPlatform.ObjectBuilderService.Create--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case 3:
+		result, err = s.services.ObjectBuilderService().Create(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: req.ProjectId,
+			})
 
-	if err != nil {
-		s.log.Error("!!!CreateClientPlatform.ObjectBuilderService.Create--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		if err != nil {
+			s.log.Error("!!!CreateClientPlatform.ObjectBuilderService.Create--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{
@@ -49,17 +64,33 @@ func (s *clientService) V2GetClientPlatformByID(ctx context.Context, req *pb.Cli
 		s.log.Error("!!!GetClientPlatformById--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	var result *pbObject.CommonMessage
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: req.ProjectId,
+			})
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_platform",
-			Data:      structData,
-			ProjectId: req.ProjectId,
-		})
+		if err != nil {
+			s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: req.ProjectId,
+			})
 
-	if err != nil {
-		s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
+		if err != nil {
+			s.log.Error("!!!GetClientPlatformByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+
 	}
 
 	return &pb.CommonMessage{
@@ -76,18 +107,34 @@ func (s *clientService) V2GetClientPlatformByIDDetailed(ctx context.Context, req
 		s.log.Error("!!!GetClientPlatformByIDDetailed--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	var result *pbObject.CommonMessage
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_platform",
-			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
-		})
+		if err != nil {
+			s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
 
-	if err != nil {
-		s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		if err != nil {
+			s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
+
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
 		Data:      result.Data,
@@ -105,17 +152,33 @@ func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.Get
 	if err != nil {
 		s.log.Error("!!!ClientPlatform--->", logger.Error(err))
 	}
+	var result *pbObject.CommonMessage
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetList(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: req.ProjectId,
+			})
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_platform",
-			Data:      structData,
-			ProjectId: req.ProjectId,
-		})
+		if err != nil {
+			s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: req.ProjectId,
+			})
 
-	if err != nil {
-		s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		if err != nil {
+			s.log.Error("!!!GetClientPlatformList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
 	}
 
 	return &pb.CommonMessage{
@@ -132,18 +195,59 @@ func (s *clientService) V2UpdateClientPlatform(ctx context.Context, req *pb.Upda
 		s.log.Error("!!!UpdateClientPlatform--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	var result *pbObject.CommonMessage
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().Update(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
 
-	result, err := s.services.ObjectBuilderService().Update(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_platform",
-			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
-		})
+		if err != nil {
+			s.log.Error("!!!UpdateClientPlatform.ObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
+			&pbObject.ManyToManyMessage{
+				TableFrom: "client_platform",
+				TableTo:   "client_type",
+				IdFrom:    req.Id,
+				IdTo:      req.ClientTypeIds,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
+		if err != nil {
+			s.log.Error("!!!UpdateClientType.ObjectBuilderService.ManyToManyAppend--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().Update(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
 
-	if err != nil {
-		s.log.Error("!!!UpdateClientPlatform.ObjectBuilderService.Update--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		if err != nil {
+			s.log.Error("!!!UpdateClientPlatform.PostgresObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
+			&pbObject.ManyToManyMessage{
+				TableFrom: "client_platform",
+				TableTo:   "client_type",
+				IdFrom:    req.Id,
+				IdTo:      req.ClientTypeIds,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
+		if err != nil {
+			s.log.Error("!!!UpdateClientType.ObjectBuilderService.ManyToManyAppend--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+
 	}
+
 	_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
 		&pbObject.ManyToManyMessage{
 			TableFrom: "client_platform",
@@ -172,17 +276,33 @@ func (s *clientService) V2DeleteClientPlatform(ctx context.Context, req *pb.Clie
 		s.log.Error("!!!DeleteClientPlatform--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	switch req.ResourceType {
+	case 1:
+		_, err = s.services.ObjectBuilderService().Delete(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
 
-	_, err = s.services.ObjectBuilderService().Delete(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_platform",
-			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
-		})
+		if err != nil {
+			s.log.Error("!!!DeleteClientPlatform.ObjectBuilderService.Delete--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
 
-	if err != nil {
-		s.log.Error("!!!DeleteClientPlatform.ObjectBuilderService.Delete--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		_, err = s.services.PostgresObjectBuilderService().Delete(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_platform",
+				Data:      structData,
+				ProjectId: config.UcodeDefaultProjectID,
+			})
+
+		if err != nil {
+			s.log.Error("!!!DeleteClientPlatform.PostgresObjectBuilderService.Delete--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
 	}
 
 	return res, nil
@@ -190,6 +310,9 @@ func (s *clientService) V2DeleteClientPlatform(ctx context.Context, req *pb.Clie
 
 func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2CreateClientTypeRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---CreateClientType--->", logger.Any("req", req))
+	var (
+		result *pbObject.CommonMessage
+	)
 
 	requestToObjBuilderService := &pb.CreateClientTypeRequestToObjService{
 		Name:         req.Name,
@@ -204,17 +327,31 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		s.log.Error("!!!CreateClientType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().Create(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
 
-	result, err := s.services.ObjectBuilderService().Create(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data:      structData,
-			ProjectId: req.GetProjectId(),
-		})
+		if err != nil {
+			s.log.Error("!!!CreateClientType.ObjectBuilderService.Create--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().Create(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
 
-	if err != nil {
-		s.log.Error("!!!CreateClientType.ObjectBuilderService.Create--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		if err != nil {
+			s.log.Error("!!!CreateClientType.PostgresObjectBuilderService.Create--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{
@@ -226,22 +363,40 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2ClientTypePrimaryKey) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeByID--->", logger.Any("req", req))
 
+	var (
+		result *pbObject.CommonMessage
+	)
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
 		s.log.Error("!!!GetClientTypeByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data:      structData,
-			ProjectId: req.GetProjectId(),
-		})
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
 
-	if err != nil {
-		s.log.Error("!!!GetClientTypeByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		if err != nil {
+			s.log.Error("!!!GetClientTypeByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
+
+		if err != nil {
+			s.log.Error("!!!GetClientTypeByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{
@@ -252,7 +407,9 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
-
+	var (
+		result *pbObject.CommonMessage
+	)
 	fmt.Println("req.ProjectId", req.ProjectId)
 
 	// @TODO limit offset error should fix
@@ -266,18 +423,35 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	switch req.ResourceType {
+	case 1:
+		fmt.Println("builder service")
+		result, err = s.services.ObjectBuilderService().GetList(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data:      structData,
-			ProjectId: req.GetProjectId(),
-		})
+		if err != nil {
+			s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case 3:
+		fmt.Println("postgres builder service")
+		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
 
-	if err != nil {
-		s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		if err != nil {
+			s.log.Error("!!!GetClientTypeList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
+	fmt.Println(result.Data.AsMap()["response"])
 
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
@@ -288,6 +462,9 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2UpdateClientTypeRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---UpdateClientType--->", logger.Any("req", req))
 
+	var (
+		result *pbObject.CommonMessage
+	)
 	requestToObjBuilderService := &pb.UpdateClientTypeRequestToObjService{
 		Name:              req.Name,
 		ConfirmBy:         req.ConfirmBy.String(),
@@ -304,15 +481,29 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().Update(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data:      structData,
-			ProjectId: req.GetProjectId(),
-		})
-	if err != nil {
-		s.log.Error("!!!UpdateClientType.ObjectBuilderService.Update--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().Update(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
+		if err != nil {
+			s.log.Error("!!!UpdateClientType.ObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().Update(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
+		if err != nil {
+			s.log.Error("!!!UpdateClientType.PostgresObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{
@@ -331,17 +522,31 @@ func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.V2Client
 		s.log.Error("!!!DeleteClientType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	switch req.ResourceType {
+	case 1:
+		_, err = s.services.ObjectBuilderService().Delete(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
 
-	_, err = s.services.ObjectBuilderService().Delete(ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data:      structData,
-			ProjectId: req.GetProjectId(),
-		})
+		if err != nil {
+			s.log.Error("!!!DeleteClientType.ObjectBuilderService.Delete--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		_, err = s.services.PostgresObjectBuilderService().Delete(ctx,
+			&pbObject.CommonMessage{
+				TableSlug: "client_type",
+				Data:      structData,
+				ProjectId: req.GetProjectId(),
+			})
 
-	if err != nil {
-		s.log.Error("!!!DeleteClientType.ObjectBuilderService.Delete--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		if err != nil {
+			s.log.Error("!!!DeleteClientType.PostgresObjectBuilderService.Delete--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	return res, nil
