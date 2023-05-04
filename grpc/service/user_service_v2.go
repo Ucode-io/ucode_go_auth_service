@@ -705,6 +705,8 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		s.log.Error("!!!GetUserList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("resource type:::", req.ResourceType)
+	fmt.Println("compare resource type:::", 1 == req.ResourceType)
 	switch req.ResourceType {
 	case 1:
 		usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
