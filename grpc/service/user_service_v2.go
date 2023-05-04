@@ -689,7 +689,9 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	}
 
 	structReq := map[string]interface{}{
-		"guid": userIds,
+		"guid": map[string]interface{}{
+			"$in": userIds,
+		},
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
