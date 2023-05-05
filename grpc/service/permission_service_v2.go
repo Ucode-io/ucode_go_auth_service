@@ -16,6 +16,9 @@ import (
 
 func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---AddRole--->", logger.Any("req", req))
+	var (
+		result *pbObject.CommonMessage
+	)
 
 	// pKey, err := s.strg.Role().Add(ctx, req)
 	structData, err := helper.ConvertRequestToSturct(req)
@@ -23,15 +26,27 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		s.log.Error("!!!AddRole--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-		TableSlug: "role",
-		Data:      structData,
-		ProjectId: req.GetProjectId(),
-	})
-	if err != nil {
-		s.log.Error("!!!AddRole.ObjectBuilderService.Create--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!AddRole.ObjectBuilderService.Create--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!AddRole.PostgresObjectBuilderService.Create--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{
@@ -43,20 +58,36 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
 	s.log.Info("---GetRoleById--->", logger.Any("req", req))
 
+	var (
+		result *pbObject.CommonMessage
+	)
+
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
 		s.log.Error("!!!GetRoleById--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-		TableSlug: "role",
-		Data:      structData,
-		ProjectId: req.GetProjectId(),
-	})
-	if err != nil {
-		s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRoleById.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{
@@ -68,24 +99,40 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRolesListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetRolesList--->", logger.Any("req", req))
 
+	var (
+		result *pbObject.CommonMessage
+	)
 	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
 		// "client_platform_id": req.GetClientPlatformId(),
-		"client_type_id":     req.GetClientTypeId(),
+		"client_type_id": req.GetClientTypeId(),
 	})
 	fmt.Println(structData.AsMap())
 	if err != nil {
 		s.log.Error("!!!GetRolesList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRolesList.ObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRolesList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-		TableSlug: "role",
-		Data:      structData,
-		ProjectId: req.GetProjectId(),
-	})
-	if err != nil {
-		s.log.Error("!!!GetRolesList.ObjectBuilderService.GetList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pb.CommonMessage{
@@ -97,7 +144,11 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRoleRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---UpdateRole--->", logger.Any("req", req))
 
-    projectId := req.GetProjectId()
+	var (
+		result *pbObject.CommonMessage
+	)
+
+	projectId := req.GetProjectId()
 	req.ProjectId = req.GetDbProjectId()
 
 	structData, err := helper.ConvertRequestToSturct(req)
@@ -105,15 +156,27 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 		s.log.Error("!!!UpdateRole--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	result, err := s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
-		TableSlug: "role",
-		Data:      structData,
-		ProjectId: projectId,
-	})
-	if err != nil {
-		s.log.Error("!!!UpdateRole.ObjectBuilderService.Update--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: projectId,
+		})
+		if err != nil {
+			s.log.Error("!!!UpdateRole.ObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: projectId,
+		})
+		if err != nil {
+			s.log.Error("!!!UpdateRole.PostgresObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{
@@ -131,24 +194,48 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 		s.log.Error("!!!GetRoleById--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-		TableSlug: "role",
-		Data:      structData,
-		ProjectId: req.GetProjectId(),
-	})
-	if err != nil {
-		s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
-		TableSlug: "role",
-		Data:      structData,
-		ProjectId: req.GetProjectId(),
-	})
-	if err != nil {
-		s.log.Error("!!!GetRoleById.ObjectBuilderService.Delete--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	var (
+		result *pbObject.CommonMessage
+	)
+	switch req.ResourceType {
+	case 1:
+		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRoleById.ObjectBuilderService.Delete--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRoleById.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		_, err = s.services.PostgresObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+			TableSlug: "role",
+			Data:      structData,
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRoleById.PostgresObjectBuilderService.Delete--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	return &pb.CommonMessage{

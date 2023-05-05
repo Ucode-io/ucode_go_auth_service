@@ -79,16 +79,32 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
 	log.Println("reqLoginData--->", reqLoginData)
-
-	data, err := s.services.LoginService().LoginData(
-		ctx,
-		reqLoginData,
-	)
-
-	if err != nil {
-		errGetUserProjectData := errors.New("invalid user project data")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+	var data *pbObject.LoginDataRes
+	fmt.Println("resours type::::", req.ResourceType)
+	switch req.ResourceType {
+	case 1:
+		data, err = s.services.LoginService().LoginData(
+			ctx,
+			reqLoginData,
+		)
+	
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+	case 3:
+		data, err = s.services.PostgresLoginService().LoginData(
+			ctx,
+			reqLoginData,
+		)
+	
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+		
 	}
 	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
 		fmt.Println("ConvertPbToAnotherPb", string(bytes))
@@ -132,7 +148,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	fmt.Println("TEST::::9")
 
 	if req.Tables != nil {
-		// res.Tables = req.Tables
+		res.Tables = req.Tables
 	}
 
 	return res, nil
