@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_auth_service/genproto/web_page_service"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ServiceManagerI interface {
@@ -68,7 +69,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 
 	connObjectBuilderService, err := grpc.Dial(
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
 	if err != nil {
 		return nil, err
