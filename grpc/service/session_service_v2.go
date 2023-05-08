@@ -87,7 +87,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			ctx,
 			reqLoginData,
 		)
-	
+
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!Login--->", logger.Error(err))
@@ -98,13 +98,13 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			ctx,
 			reqLoginData,
 		)
-	
+
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
-		
+
 	}
 	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
 		fmt.Println("ConvertPbToAnotherPb", string(bytes))
@@ -1063,6 +1063,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 			Description: company.GetCompany().GetLogo(),
 			OwnerId:     company.GetCompany().GetOwnerId(),
 			Projects:    projects,
+			UserId:      user.GetId(),
 		})
 	}
 
