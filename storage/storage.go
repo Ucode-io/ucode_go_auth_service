@@ -34,6 +34,7 @@ type StorageI interface {
 	Company() CompanyRepoI
 	Project() ProjectRepoI
 	ApiKeys() ApiKeysRepoI
+	AppleSettings() AppleSettingsI
 }
 
 type ClientPlatformRepoI interface {
@@ -205,4 +206,12 @@ type ApiKeysRepoI interface {
 	Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffected int64, err error)
 	GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error)
 	GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error)
+}
+
+type AppleSettingsI interface {
+	Create(ctx context.Context, input *pb.AppleIdSettings) (*pb.AppleIdSettings, error)
+	GetByPK(ctx context.Context, pKey *pb.AppleIdSettingsPrimaryKey) (res *pb.AppleIdSettings, err error)
+	UpdateAppleSettings(ctx context.Context, input *pb.AppleIdSettings) (string, error)
+	GetListAppleSettings(ctx context.Context, input *pb.GetListAppleIdSettingsRequest) (*pb.GetListAppleIdSettingsResponse, error) 
+	DeleteAppleSettings(ctx context.Context, input *pb.AppleIdSettingsPrimaryKey) (*emptypb.Empty, error)
 }

@@ -32,6 +32,7 @@ type ServiceManagerI interface {
 	MicroServiceResourceService() company_service.MicroserviceResourceClient
 	WebPageAppService() web_page_service.AppServiceClient
 	ServiceResource() company_service.MicroserviceResourceClient
+	AppleIdService()  auth_service.AppleIdLoginServiceClient
 }
 
 type grpcClients struct {
@@ -55,6 +56,7 @@ type grpcClients struct {
 	microServiceResourceService company_service.MicroserviceResourceClient
 	webPageAppService           web_page_service.AppServiceClient
 	serviceResource             company_service.MicroserviceResourceClient
+	appleIdService              auth_service.AppleIdLoginServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -119,6 +121,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		microServiceResourceService: company_service.NewMicroserviceResourceClient(connCompanyService),
 		webPageAppService:           web_page_service.NewAppServiceClient(connWebPageService),
 		serviceResource:             company_service.NewMicroserviceResourceClient(connCompanyService),
+		appleIdService:              auth_service.NewAppleIdLoginServiceClient(connAuthService),
 	}, nil
 }
 
@@ -200,4 +203,8 @@ func (g *grpcClients) WebPageAppService() web_page_service.AppServiceClient {
 
 func (g *grpcClients) ServiceResource() company_service.MicroserviceResourceClient {
 	return g.serviceResource
+}
+
+func (g *grpcClients) AppleIdService() auth_service.AppleIdLoginServiceClient {
+	return g.appleIdService
 }
