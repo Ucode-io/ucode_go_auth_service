@@ -99,6 +99,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 	}
 
 	role.ProjectId = resource.ResourceEnvironmentId
+	role.ResourceType = int32(resource.ResourceType)
 
 	resp, err := h.services.PermissionService().V2AddRole(
 		c.Request.Context(),
@@ -197,8 +198,9 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 	}
 
 	resp, err := h.services.PermissionService().V2GetRoleById(c.Request.Context(), &auth_service.V2RolePrimaryKey{
-		Id:        roleId,
-		ProjectId: resource.ResourceEnvironmentId,
+		Id:           roleId,
+		ProjectId:    resource.ResourceEnvironmentId,
+		ResourceType: int32(resource.ResourceType),
 	})
 
 	if err != nil {
@@ -309,6 +311,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 			ClientPlatformId: c.Query("client-platform-id"),
 			ClientTypeId:     c.Query("client-type-id"),
 			ProjectId:        resource.ResourceEnvironmentId,
+			ResourceType:     int32(resource.ResourceType),
 		},
 	)
 
@@ -405,6 +408,7 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 	}
 
 	role.ProjectId = resource.ResourceEnvironmentId
+	role.ResourceType = int32(resource.ResourceType)
 
 	resp, err := h.services.PermissionService().V2UpdateRole(
 		c.Request.Context(),
@@ -506,8 +510,9 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 	resp, err := h.services.PermissionService().V2RemoveRole(
 		c.Request.Context(),
 		&auth_service.V2RolePrimaryKey{
-			Id:        roleID,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:           roleID,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ResourceType: int32(resource.ResourceType),
 		},
 	)
 

@@ -97,6 +97,7 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 	}
 
 	clientPlatform.ProjectId = resource.ResourceEnvironmentId
+	clientPlatform.ResourceType = int32(resource.ResourceType)
 
 	resp, err := h.services.ClientService().V2CreateClientPlatform(
 		c.Request.Context(),
@@ -208,10 +209,11 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 	resp, err := h.services.ClientService().V2GetClientPlatformList(
 		c.Request.Context(),
 		&auth_service.GetClientPlatformListRequest{
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			Search:    c.Query("search"),
-			ProjectId: resource.ResourceEnvironmentId,
+			Limit:        int32(limit),
+			Offset:       int32(offset),
+			Search:       c.Query("search"),
+			ProjectId:    resource.ResourceEnvironmentId,
+			ResourceType: int32(resource.ResourceType),
 		},
 	)
 
@@ -311,8 +313,9 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 	resp, err := h.services.ClientService().V2GetClientPlatformByID(
 		c.Request.Context(),
 		&auth_service.ClientPlatformPrimaryKey{
-			Id:        clientPlatformid,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:           clientPlatformid,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ResourceType: int32(resource.ResourceType),
 		},
 	)
 
@@ -522,6 +525,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 	}
 
 	clientType.ProjectId = resource.ResourceEnvironmentId
+	clientType.ResourceType = int32(resource.ResourceType)
 
 	resp, err := h.services.ClientService().V2CreateClientType(
 		c.Request.Context(),
@@ -597,10 +601,11 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 	resp, err := h.services.ClientService().V2GetClientTypeList(
 		c.Request.Context(),
 		&auth_service.V2GetClientTypeListRequest{
-			Limit:     int32(limit),
-			Offset:    int32(offset),
-			Search:    c.Query("search"),
-			ProjectId: resource.ResourceEnvironmentId,
+			Limit:        int32(limit),
+			Offset:       int32(offset),
+			Search:       c.Query("search"),
+			ProjectId:    resource.ResourceEnvironmentId,
+			ResourceType: int32(resource.ResourceType),
 		},
 	)
 
@@ -700,8 +705,9 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 	resp, err := h.services.ClientService().V2GetClientTypeByID(
 		c.Request.Context(),
 		&auth_service.V2ClientTypePrimaryKey{
-			Id:        clientTypeid,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:           clientTypeid,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ResourceType: int32(resource.ResourceType),
 		},
 	)
 
@@ -798,6 +804,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	}
 
 	clientType.ProjectId = resource.ResourceEnvironmentId
+	clientType.ResourceType = int32(resource.ResourceType)
 
 	resp, err := h.services.ClientService().V2UpdateClientType(
 		c.Request.Context(),
@@ -900,8 +907,9 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 	resp, err := h.services.ClientService().V2DeleteClientType(
 		c.Request.Context(),
 		&auth_service.V2ClientTypePrimaryKey{
-			Id:        clientTypeid,
-			ProjectId: resource.ResourceEnvironmentId,
+			Id:           clientTypeid,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ResourceType: int32(resource.ResourceType),
 		},
 	)
 

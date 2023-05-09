@@ -33,6 +33,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 	var (
 		//resourceEnvironment *cps.ResourceEnvironment
 		body models.CommonMessage
+		resp *obs.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&body)
@@ -110,19 +111,25 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 
 	fmt.Println("test")
 	// this is get list objects list from object builder
-	resp, err := h.services.ObjectBuilderService().GetList(
-		c.Request.Context(),
-		&obs.CommonMessage{
-			TableSlug: c.Param("table_slug"),
-			ProjectId: resource.ResourceEnvironmentId,
-			Data:      structData,
-		},
-	)
-	//fmt.Println("ress:::", resp.Data.AsMap()["response"])
-
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+	switch resource.ResourceType {
+	case 1:
+		resp, err = h.services.ObjectBuilderService().GetList(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
+	case 3:
+		resp, err = h.services.PostgresObjectBuilderService().GetList(
+			c.Request.Context(),
+			&obs.CommonMessage{
+				TableSlug: c.Param("table_slug"),
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
 	}
 
 	h.handleResponse(c, http.OK, resp)
