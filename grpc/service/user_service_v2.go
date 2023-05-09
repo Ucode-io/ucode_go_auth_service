@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -240,11 +241,12 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		foundUser, err = s.strg.User().GetByUsername(ctx, req.Phone)
 	}
 	fmt.Println("::::::::::::: test 4", foundUser)
+
 	if foundUser.Id == "" {
 		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
-			Login:                 req.GetLogin(),
-			Password:              req.GetPassword(),
-			Email:                 req.GetEmail(),
+			Login:    req.GetLogin(),
+			Password: req.GetPassword(),
+			//	Email:                 req.GetEmail(),
 			Phone:                 req.GetPhone(),
 			Name:                  req.GetName(),
 			CompanyId:             req.GetCompanyId(),
@@ -569,9 +571,12 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("project id::", req.ProjectId)
+	fmt.Println("resource type::", req.ResourceType)
 
 	switch req.ResourceType {
 	case 1:
+		fmt.Println("enter to object builder")
 		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "user",
 			Data:      structData,
@@ -593,8 +598,9 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		}
 
 	}
-
+	log.Println("Data:   ", result)
 	userData, ok := result.Data.AsMap()["response"].(map[string]interface{})
+
 	if !ok {
 		err := errors.New("userData is nil")
 		s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -887,21 +893,21 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	email := emailRegex.MatchString(req.Email)
-	if !email {
-		err = fmt.Errorf("email is not valid")
-		s.log.Error("!!!UpdateUser--->", logger.Error(err))
-		return nil, err
-	}
-
-	phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
-	phone := phoneRegex.MatchString(req.Phone)
-	if !phone {
-		err = fmt.Errorf("phone number is not valid")
-		s.log.Error("!!!UpdateUser--->", logger.Error(err))
-		return nil, err
-	}
+	//emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	//email := emailRegex.MatchString(req.Email)
+	//if !email {
+	//	err = fmt.Errorf("email is not valid")
+	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
+	//	return nil, err
+	//}
+	//
+	//phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
+	//phone := phoneRegex.MatchString(req.Phone)
+	//if !phone {
+	//	err = fmt.Errorf("phone number is not valid")
+	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
+	//	return nil, err
+	//}
 
 	res, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: req.Id})
 	if err != nil {

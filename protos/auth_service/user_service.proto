@@ -33,7 +33,28 @@ service UserService {
     rpc GetProjectsByUserId(GetProjectsByUserIdReq) returns (GetProjectsByUserIdRes) {}
     rpc V2GetUserByLoginTypes(GetUserByLoginTypesRequest) returns (GetUserByLoginTypesResponse) {}
     rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
-    rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {} 
+    rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {}
+    rpc GetListSetting(GetListSettingReq) returns (Setting) {}
+}
+
+message Setting {
+    google.protobuf.Struct data = 1;
+    int32 count = 2;
+}
+
+
+enum SettingType {
+    LANGUAGE = 0;
+//    CURRENCY = 1;
+    TIMEZONE = 2;
+}
+
+message GetListSettingReq {
+    SettingType type = 1;
+    string search = 2;
+    string project_id = 3;
+    int32 limit = 4;
+    int32 offset = 5;
 }
 
 message RegisterWithGoogleRequest {
@@ -44,7 +65,6 @@ message RegisterWithGoogleRequest {
     string resource_environment_id = 5;
     string name = 6;
     int32 resource_type = 7;
-
 }
 
 message GetUserByLoginTypesResponse {
@@ -150,7 +170,9 @@ message UpdateUserRequest {
     string client_platform_id = 11;
     int32 active = 12;
     string expires_at = 13;
-    int32 resource_type = 14;
+    string language_id = 14;
+    string timezone_id = 15;
+    int32 resource_type = 16;
 }
 
 message AddUserRelationRequest {
