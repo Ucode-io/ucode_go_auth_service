@@ -1,4 +1,4 @@
-CREATE TABLE "language" (
+CREATE TABLE IF NOT EXISTS "language" (
                             id UUID PRIMARY KEY,
                             "name" VARCHAR(255) NOT NULL ,
                             short_name VARCHAR(255) NOT NULL UNIQUE ,
@@ -7,7 +7,7 @@ CREATE TABLE "language" (
                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE "timezone" (
+CREATE TABLE IF NOT EXISTS "timezone" (
                             id UUID PRIMARY KEY,
                             "name" VARCHAR(255) NOT NULL UNIQUE ,
                             "text" VARCHAR(255) NOT NULL ,
