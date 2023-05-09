@@ -15,7 +15,7 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	// Generate the client secret used to authenticate with Apple's validation servers
 	secretKey := fmt.Sprintf(`-----BEGIN PRIVATE KEY-----
 	%s
-	-----END PRIVATE KEY-----`, c.SecretKey)
+-----END PRIVATE KEY-----`, c.SecretKey)
 	secret, err := apple.GenerateClientSecret(secretKey, c.TeamId, c.ClientId, c.KeyId)
 	if err != nil {
 		fmt.Println("error generating secret: " + err.Error())
@@ -46,11 +46,11 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	}
 
 	// Get the unique user ID
-	unique, err := apple.GetUniqueID(resp.IDToken)
-	if err != nil {
-		fmt.Println("failed to get unique ID: " + err.Error())
-		return nil, err
-	}
+	// unique, err := apple.GetUniqueID(resp.IDToken)
+	// if err != nil {
+	// 	fmt.Println("failed to get unique ID: " + err.Error())
+	// 	return nil, err
+	// }
 
 	// Get the email
 	claim, err := apple.GetClaims(resp.IDToken)
@@ -59,15 +59,13 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 		return nil, err
 	}
 
-	email := (*claim)["email"]
-	emailVerified := (*claim)["email_verified"]
-	isPrivateEmail := (*claim)["is_private_email"]
-	name := (*claim)["name"]
+	email := (*claim)["email"].(string)
+	// emailVerified := (*claim)["email_verified"]
+	// isPrivateEmail := (*claim)["is_private_email"]
+	// name := (*claim)["name"]
 
-	fmt.Println(unique)
-	fmt.Println(email)
-	fmt.Println(emailVerified)
-	fmt.Println(isPrivateEmail)
-	fmt.Println(name)
-	return nil, nil
+	
+	return &models.AppleUserPayload{
+		Email: email,
+	}, nil
 }
