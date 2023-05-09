@@ -35,6 +35,7 @@ type ServiceManagerI interface {
 	EmailService() auth_service.EmailOtpServiceClient
 	PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	PostgresLoginService() object_builder_service.LoginServiceClient
+	AppleIdService()  auth_service.AppleIdLoginServiceClient
 }
 
 type grpcClients struct {
@@ -60,7 +61,9 @@ type grpcClients struct {
 	serviceResource              company_service.MicroserviceResourceClient
 	postgresObjectBuilderService object_builder_service.ObjectBuilderServiceClient
 	postgresLoginService         object_builder_service.LoginServiceClient
+	appleIdService               auth_service.AppleIdLoginServiceClient
 }
+
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 	connAuthService, err := grpc.Dial(
@@ -135,6 +138,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		serviceResource:              company_service.NewMicroserviceResourceClient(connCompanyService),
 		postgresObjectBuilderService: object_builder_service.NewObjectBuilderServiceClient(connPostgresObjectBuilderService),
 		postgresLoginService:         object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
+        appleIdService:              auth_service.NewAppleIdLoginServiceClient(connAuthService),
 	}, nil
 }
 
@@ -224,4 +228,8 @@ func (g *grpcClients) PostgresObjectBuilderService() object_builder_service.Obje
 
 func (g *grpcClients) PostgresLoginService() object_builder_service.LoginServiceClient {
 	return g.postgresLoginService
+}
+
+func (g *grpcClients) AppleIdService() auth_service.AppleIdLoginServiceClient {
+	return g.appleIdService
 }
