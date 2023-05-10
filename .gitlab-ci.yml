@@ -58,7 +58,7 @@ deploy-dev:
   variables:
     NAMESPACE: ucode-dev
     VALUES_FILE: .helm/values-dev.yml
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only:
     - dev
 
