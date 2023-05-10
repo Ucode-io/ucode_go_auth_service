@@ -240,7 +240,6 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	if foundUser.Id == "" {
 		foundUser, err = s.strg.User().GetByUsername(ctx, req.Phone)
 	}
-	fmt.Println("::::::::::::: test 4", foundUser)
 
 	if foundUser.Id == "" {
 		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
@@ -279,7 +278,6 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
 		switch req.ResourceType {
 		case 1:
 			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
@@ -354,8 +352,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			}
 
 		}
-
-		if req.Phone != "" && !objUser.UserFound {
+		if objUser != nil && req.Phone != "" && !objUser.UserFound {
 			switch req.ResourceType {
 			case 1:
 				objUser, err = s.services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
@@ -383,7 +380,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 
 		}
 
-		if objUser.UserFound {
+		if objUser != nil && objUser.UserFound {
 			s.log.Error("!!!Found user from obj--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, "User already exists")
 		} else {
@@ -404,7 +401,6 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
-			fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
 			switch req.ResourceType {
 			case 1:
 				_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
