@@ -531,7 +531,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>. test 1")
+
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
@@ -595,6 +595,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					CompanyId:             CompanyId,
 					ClientTypeId:          "WEB_USER",
 					ResourceEnvironmentId: ResourceEnvironmentId,
+					ResourceType:          resourceEnvironment.ResourceType,
 				},
 			)
 			if err != nil {
@@ -688,6 +689,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					CompanyId:             CompanyId,
 					ClientTypeId:          "WEB_USER",
 					ResourceEnvironmentId: ResourceEnvironmentId,
+					ResourceType:          resourceEnvironment.ResourceType,
 				},
 			)
 			if err != nil {
@@ -767,7 +769,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 
 	}
-	fmt.Println(":::::::::::::::::: resp resp resp", resp.AddationalTable)
+	fmt.Println(":::::::::::::::::: resp resp resp", resp)
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
 
 	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
