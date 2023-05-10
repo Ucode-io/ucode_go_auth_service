@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -104,8 +105,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.Login,
 		&res.Password,
 		&res.CompanyId,
-		&res.TimezoneId,
 		&res.LanguageId,
+		&res.TimezoneId,
 		// &res.ExpiresAt,
 		// &res.CreatedAt,
 		// &res.UpdatedAt,
@@ -113,6 +114,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	if err != nil {
 		return res, err
 	}
+	fmt.Println("resss:::", res)
 
 	return res, nil
 }
@@ -319,15 +321,15 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		name = name,
-		company_id = company_id,
-		photo_url = photo_url,
-		phone = phone,
-		email = email,
-		login = login,
+		name = :name,
+		company_id = :company_id,
+		photo_url = :photo_url,
+		phone = :phone,
+		email = :email,
+		login = :login,
 		updated_at = now(),
-    	language_id = language_id,
-        timezone_id = timezone_id
+    	language_id = :language_id,
+        timezone_id = :timezone_id
 	WHERE
 		id = :id`
 
