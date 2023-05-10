@@ -60,7 +60,7 @@ deploy-dev:
     VALUES_FILE: .helm/values-dev.yml
     K8SCONFIGJSON: $UCODE_KUBECONFIG
   only:
-    - staging
+    - dev
 
 deploy-staging:
   stage: deploy
