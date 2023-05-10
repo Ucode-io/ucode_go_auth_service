@@ -116,21 +116,25 @@ type RolePermissionRepoI interface {
 	GetByPK(ctx context.Context, pKey *pb.RolePermissionPrimaryKey) (res *pb.RolePermission, err error)
 }
 
-type UserRepoI interface {
-	GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyList) (res *pb.GetUserListResponse, err error)
-	Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error)
-	GetList(ctx context.Context, queryParam *pb.GetUserListRequest) (res *pb.GetUserListResponse, err error)
-	GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error)
-	Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error)
-	Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
-	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
-	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
-	GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
-	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
-	GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
-	GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
-	GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error)
-}
+type (
+	UserRepoI interface {
+		GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyList) (res *pb.GetUserListResponse, err error)
+		Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error)
+		GetList(ctx context.Context, queryParam *pb.GetUserListRequest) (res *pb.GetUserListResponse, err error)
+		GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error)
+		Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error)
+		Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
+		GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
+		ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
+		GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
+		AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
+		GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
+		GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
+		GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error)
+		GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error)
+		GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error)
+	}
+)
 
 type IntegrationRepoI interface {
 	GetListByPKs(ctx context.Context, pKeys *pb.IntegrationPrimaryKeyList) (res *pb.GetIntegrationListResponse, err error)

@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"log"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/company_service"
@@ -141,34 +142,44 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
+	log.Println("ofset :::::", offset)
+
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
 
+	log.Println("limit :::: ", limit)
+
 	projectId := c.DefaultQuery("project-id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.BadEnvironment, "project-id is required")
 		return
 	}
+	log.Println("project_id:::::", projectId)
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+
+	log.Println("evironment_id::::::", environmentId)
+
 	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &company_service.GetSingleServiceResourceReq{
 		ProjectId:     projectId,
 		EnvironmentId: environmentId.(string),
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
+	log.Println("rosource:::::", resource)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 	fmt.Println("res env id in user get list", resourceEnvironment.GetId())
 	resp, err := h.services.UserService().V2GetUserList(
+
 		c.Request.Context(),
 		&auth_service.GetUserListRequest{
 			Limit:                 int32(limit),
@@ -181,6 +192,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 			ResourceType:          int32(resource.GetResourceType()),
 		},
 	)
+	log.Println("resp :::", resp)
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -244,6 +256,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("resource in api::", resource)
 
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),

@@ -3,7 +3,7 @@ package client
 import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
+	company_service "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/genproto/web_page_service"
@@ -21,7 +21,6 @@ type ServiceManagerI interface {
 	ObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	SmsService() sms_service.SmsServiceClient
 	LoginService() object_builder_service.LoginServiceClient
-	EmailService() auth_service.EmailOtpServiceClient
 	CompanyService() auth_service.CompanyServiceClient
 	ProjectService() auth_service.ProjectServiceClient
 	CompanyServiceClient() company_service.CompanyServiceClient
@@ -30,9 +29,10 @@ type ServiceManagerI interface {
 	ApiKeysService() auth_service.ApiKeysClient
 	ResourceService() company_service.ResourceServiceClient
 	EnvironmentService() company_service.EnvironmentServiceClient
-	MicroServiceResourceService() company_service.MicroserviceResourceClient
-	WebPageAppService() web_page_service.AppServiceClient
 	ServiceResource() company_service.MicroserviceResourceClient
+	WebPageAppService() web_page_service.AppServiceClient
+	MicroServiceResourceService() company_service.MicroserviceResourceClient
+	EmailService() auth_service.EmailOtpServiceClient
 	PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	PostgresLoginService() object_builder_service.LoginServiceClient
 }
@@ -74,7 +74,8 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 
 	connObjectBuilderService, err := grpc.Dial(
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
 	if err != nil {
 		return nil, err
@@ -137,12 +138,24 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 	}, nil
 }
 
-func (g *grpcClients) ClientService() auth_service.ClientServiceClient {
-	return g.clientService
-}
-
 func (g *grpcClients) EmailService() auth_service.EmailOtpServiceClient {
 	return g.emailService
+}
+
+func (g *grpcClients) MicroServiceResourceService() company_service.MicroserviceResourceClient {
+	return g.microServiceResourceService
+}
+
+func (g *grpcClients) WebPageAppService() web_page_service.AppServiceClient {
+	return g.webPageAppService
+}
+
+func (g *grpcClients) ServiceResource() company_service.MicroserviceResourceClient {
+	return g.serviceResource
+}
+
+func (g *grpcClients) ClientService() auth_service.ClientServiceClient {
+	return g.clientService
 }
 
 func (g *grpcClients) PermissionService() auth_service.PermissionServiceClient {
@@ -203,18 +216,6 @@ func (g *grpcClients) ResourceService() company_service.ResourceServiceClient {
 
 func (g *grpcClients) EnvironmentService() company_service.EnvironmentServiceClient {
 	return g.environmentService
-}
-
-func (g *grpcClients) MicroServiceResourceService() company_service.MicroserviceResourceClient {
-	return g.microServiceResourceService
-}
-
-func (g *grpcClients) WebPageAppService() web_page_service.AppServiceClient {
-	return g.webPageAppService
-}
-
-func (g *grpcClients) ServiceResource() company_service.MicroserviceResourceClient {
-	return g.serviceResource
 }
 
 func (g *grpcClients) PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient {
