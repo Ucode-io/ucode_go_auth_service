@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"log"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -83,7 +84,9 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		email,
 		login,
 		password,
-		company_id
+		company_id,
+		coalesce(language_id::text, ''),
+		coalesce(timezone_id::text, '')
 		-- TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at
 		-- TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
 		-- TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
@@ -101,6 +104,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.Login,
 		&res.Password,
 		&res.CompanyId,
+		&res.TimezoneId,
+		&res.LanguageId,
 		// &res.ExpiresAt,
 		// &res.CreatedAt,
 		// &res.UpdatedAt,
@@ -125,7 +130,9 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 		password,
 		created_at,
 		updated_at,
-		company_id
+		company_id,
+		coalesce(language_id::text, ''),
+		coalesce(timezone_id::text, '')
 	FROM
 		"user"
 	WHERE
@@ -155,6 +162,8 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 			&createdAt,
 			&updatedAt,
 			&user.CompanyId,
+			&user.LanguageId,
+			&user.TimezoneId,
 		)
 
 		if err != nil {
@@ -197,7 +206,9 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 		login,
 		password,
 		created_at,
-		updated_at
+		updated_at,
+		language_id,
+		timezone_id
 	FROM
 		"user"`
 	filter := " WHERE 1=1"
@@ -276,6 +287,8 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 			&expiresAt,
 			&createdAt,
 			&updatedAt,
+			&obj.LanguageId,
+			&obj.TimezoneId,
 		)
 
 		if err != nil {
@@ -306,27 +319,32 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		name = :name,
-		company_id = :company_id,
-		photo_url = :photo_url,
-		phone = :phone,
-		email = :email,
-		login = :login,
-		updated_at = now()
+		name = name,
+		company_id = company_id,
+		photo_url = photo_url,
+		phone = phone,
+		email = email,
+		login = login,
+		updated_at = now(),
+    	language_id = language_id,
+        timezone_id = timezone_id
 	WHERE
 		id = :id`
 
 	params := map[string]interface{}{
-		"id":         entity.GetId(),
-		"name":       entity.GetName(),
-		"photo_url":  entity.GetPhotoUrl(),
-		"phone":      entity.GetPhone(),
-		"email":      entity.GetEmail(),
-		"login":      entity.GetLogin(),
-		"company_id": entity.GetCompanyId(),
+		"id":          entity.GetId(),
+		"name":        entity.GetName(),
+		"photo_url":   entity.GetPhotoUrl(),
+		"phone":       entity.GetPhone(),
+		"email":       entity.GetEmail(),
+		"login":       entity.GetLogin(),
+		"company_id":  entity.GetCompanyId(),
+		"language_id": entity.GetLanguageId(),
+		"timezone_id": entity.GetTimezoneId(),
 	}
-
+	log.Println("language_id", entity.LanguageId, "timezone_id", entity.TimezoneId)
 	q, arr := helper.ReplaceQueryParams(query, params)
+	log.Println("query", q, "arr", arr)
 	result, err := r.db.Exec(ctx, q, arr...)
 	if err != nil {
 		return 0, err
@@ -572,4 +590,151 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	return &pb.GetUserByLoginTypesResponse{
 		UserId: userId,
 	}, nil
+}
+
+func (c *userRepo) GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error) {
+	var (
+		res models.ListLanguage
+	)
+	params := make(map[string]interface{})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var arr []interface{}
+	query := `SELECT
+			id,
+			name,
+			short_name,
+			native_name
+		FROM
+			"language"`
+	filter := " "
+	offset := " OFFSET 0"
+	limit := " LIMIT 10"
+
+	if len(in.GetSearch()) > 0 {
+		params["search"] = in.GetSearch()
+		filter = " WHERE (((name) ILIKE ('%' || :search || '%'))" +
+			" OR ((short_name) ILIKE ('%' || :search || '%'))" +
+			" OR ((native_name) ILIKE ('%' || :search || '%')))"
+	}
+
+	if in.Offset > 0 {
+		params["offset"] = in.Offset
+		offset = " OFFSET :offset"
+	}
+
+	if in.Limit > 0 {
+		params["limit"] = in.Limit
+		limit = " LIMIT :limit"
+	}
+
+	cQ := `SELECT count(1) FROM "language"` + filter
+	cQ, arr = helper.ReplaceQueryParams(cQ, params)
+	err := c.db.QueryRow(ctx, cQ, arr...).Scan(
+		&res.Count,
+	)
+	if err != nil {
+		return &res, err
+	}
+
+	q := query + filter + offset + limit
+
+	q, arr = helper.ReplaceQueryParams(q, params)
+	rows, err := c.db.Query(ctx, q, arr...)
+	if err != nil {
+		return &res, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var obj models.Language
+
+		err = rows.Scan(
+			&obj.Id,
+			&obj.Name,
+			&obj.ShortName,
+			&obj.NativeName,
+		)
+
+		if err != nil {
+			return &res, err
+		}
+
+		res.Language = append(res.Language, &obj)
+	}
+
+	return &res, nil
+}
+
+func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error) {
+	var (
+		res models.ListTimezone
+	)
+	params := make(map[string]interface{})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var arr []interface{}
+	query := `SELECT
+			id,
+			"name",
+			"text"
+		FROM
+			"timezone"`
+	filter := " "
+	offset := " OFFSET 0"
+	limit := " LIMIT 10"
+
+	if len(in.GetSearch()) > 0 {
+		params["search"] = in.GetSearch()
+		filter = " WHERE (((name) ILIKE ('%' || :search || '%'))" +
+			"OR ((text) ILIKE ('%' || :search || '%')))"
+	}
+
+	if in.Offset > 0 {
+		params["offset"] = in.Offset
+		offset = " OFFSET :offset"
+	}
+
+	if in.Limit > 0 {
+		params["limit"] = in.Limit
+		limit = " LIMIT :limit"
+	}
+
+	cQ := `SELECT count(1) FROM "timezone"` + filter
+	cQ, arr = helper.ReplaceQueryParams(cQ, params)
+	err := c.db.QueryRow(ctx, cQ, arr...).Scan(
+		&res.Count,
+	)
+	if err != nil {
+		return &res, err
+	}
+
+	q := query + filter + offset + limit
+
+	q, arr = helper.ReplaceQueryParams(q, params)
+	rows, err := c.db.Query(ctx, q, arr...)
+	if err != nil {
+		return &res, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var obj models.Timezone
+
+		err = rows.Scan(
+			&obj.Id,
+			&obj.Name,
+			&obj.Text,
+		)
+
+		if err != nil {
+			return &res, err
+		}
+
+		res.Timezone = append(res.Timezone, &obj)
+	}
+
+	return &res, nil
 }

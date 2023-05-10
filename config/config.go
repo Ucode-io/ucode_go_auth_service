@@ -55,6 +55,9 @@ type Config struct {
 
 	WebPageServiceHost string
 	WebPageServicePort string
+
+	PostgresObjectBuidlerServiceHost string
+	PostgresObjectBuidlerServicePort string
 }
 
 // Load ...
@@ -111,6 +114,9 @@ func Load() Config {
 
 	config.WebPageServiceHost = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", "localhost"))
 	config.WebPageServicePort = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ":8098"))
+
+	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", "localhost"))
+	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":9202"))
 
 	return config
 }

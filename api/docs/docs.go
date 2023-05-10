@@ -3,16 +3,9 @@
 
 package docs
 
-import (
-	"bytes"
-	"encoding/json"
-	"strings"
+import "github.com/swaggo/swag"
 
-	"github.com/alecthomas/template"
-	"github.com/swaggo/swag"
-)
-
-var doc = `{
+const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
     "swagger": "2.0",
     "info": {
@@ -46,7 +39,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateClientRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientRequest"
                         }
                     }
                 ],
@@ -62,7 +55,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -127,7 +120,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddClientRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest"
                         }
                     }
                 ],
@@ -143,7 +136,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -208,13 +201,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.ClientPrimaryKey"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPrimaryKey"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -301,7 +294,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetClientPlatformListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetClientPlatformListResponse"
                                         }
                                     }
                                 }
@@ -366,7 +359,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateClientPlatformRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientPlatformRequest"
                         }
                     }
                 ],
@@ -382,7 +375,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -447,7 +440,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateClientPlatformRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientPlatformRequest"
                         }
                     }
                 ],
@@ -463,7 +456,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -544,7 +537,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -625,7 +618,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -694,7 +687,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -781,7 +774,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetClientTypeListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetClientTypeListResponse"
                                         }
                                     }
                                 }
@@ -846,7 +839,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateClientTypeRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientTypeRequest"
                         }
                     }
                 ],
@@ -862,7 +855,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.ClientType"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType"
                                         }
                                     }
                                 }
@@ -927,7 +920,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateClientTypeRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientTypeRequest"
                         }
                     }
                 ],
@@ -943,7 +936,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.ClientType"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType"
                                         }
                                     }
                                 }
@@ -1024,7 +1017,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CompleteClientType"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CompleteClientType"
                                         }
                                     }
                                 }
@@ -1093,7 +1086,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1169,7 +1162,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetClientMatrixResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetClientMatrixResponse"
                                         }
                                     }
                                 }
@@ -1236,7 +1229,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateCompanyRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateCompanyRequest"
                         }
                     }
                 ],
@@ -1317,7 +1310,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.RegisterCompanyRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest"
                         }
                     }
                 ],
@@ -1404,7 +1397,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -1505,7 +1498,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.HasAccessRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest"
                         }
                     }
                 ],
@@ -1521,7 +1514,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -1588,7 +1581,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.HasAccessSuperAdminReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminReq"
                         }
                     }
                 ],
@@ -1604,7 +1597,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.HasAccessSuperAdminRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminRes"
                                         }
                                     }
                                 }
@@ -1714,7 +1707,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetIntegrationListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationListResponse"
                                         }
                                     }
                                 }
@@ -1779,7 +1772,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateIntegrationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateIntegrationRequest"
                         }
                     }
                 ],
@@ -1795,7 +1788,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Integration"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Integration"
                                         }
                                     }
                                 }
@@ -1876,7 +1869,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Integration"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Integration"
                                         }
                                     }
                                 }
@@ -1945,7 +1938,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2021,7 +2014,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetIntegrationSessionsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationSessionsResponse"
                                         }
                                     }
                                 }
@@ -2093,7 +2086,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddSessionToIntegrationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddSessionToIntegrationRequest"
                         }
                     }
                 ],
@@ -2197,7 +2190,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Token"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
                                         }
                                     }
                                 }
@@ -2273,7 +2266,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2335,7 +2328,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.LoginRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest"
                         }
                     }
                 ],
@@ -2418,13 +2411,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.LogoutRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LogoutRequest"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2511,7 +2504,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -2576,7 +2569,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdatePermissionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest"
                         }
                     }
                 ],
@@ -2592,7 +2585,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -2657,7 +2650,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreatePermissionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreatePermissionRequest"
                         }
                     }
                 ],
@@ -2673,7 +2666,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -2740,7 +2733,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddPermissionScopeRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddPermissionScopeRequest"
                         }
                     }
                 ],
@@ -2756,7 +2749,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -2821,13 +2814,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.PermissionScopePrimaryKey"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.PermissionScopePrimaryKey"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -2840,7 +2833,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -2903,7 +2896,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -2972,7 +2965,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3098,7 +3091,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetProjectListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.GetProjectListResponse"
                                         }
                                     }
                                 }
@@ -3163,7 +3156,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.Project"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project"
                         }
                     }
                 ],
@@ -3179,7 +3172,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project"
                                         }
                                     }
                                 }
@@ -3250,7 +3243,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.CreateProjectRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.CreateProjectRequest"
                         }
                     }
                 ],
@@ -3266,7 +3259,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project"
                                         }
                                     }
                                 }
@@ -3347,7 +3340,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project"
                                         }
                                     }
                                 }
@@ -3416,7 +3409,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3478,7 +3471,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company_service.UpdateProjectUserDataReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataReq"
                         }
                     }
                 ],
@@ -3494,7 +3487,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.UpdateProjectUserDataRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataRes"
                                         }
                                     }
                                 }
@@ -3561,7 +3554,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.RefreshTokenRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest"
                         }
                     }
                 ],
@@ -3577,7 +3570,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -3644,7 +3637,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterOtp"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
                         }
                     },
                     {
@@ -3667,7 +3660,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -3734,7 +3727,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateRelationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest"
                         }
                     }
                 ],
@@ -3750,7 +3743,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -3815,7 +3808,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddRelationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRelationRequest"
                         }
                     }
                 ],
@@ -3831,7 +3824,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -3902,7 +3895,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -3995,7 +3988,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -4060,7 +4053,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateRoleRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRoleRequest"
                         }
                     }
                 ],
@@ -4076,7 +4069,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -4141,7 +4134,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddRoleRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRoleRequest"
                         }
                     }
                 ],
@@ -4157,7 +4150,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -4224,7 +4217,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddRolePermissionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest"
                         }
                     }
                 ],
@@ -4240,7 +4233,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -4305,13 +4298,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.RolePermissionPrimaryKey"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4373,7 +4366,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddRolePermissionsRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsRequest"
                         }
                     }
                 ],
@@ -4389,7 +4382,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.AddRolePermissionsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsResponse"
                                         }
                                     }
                                 }
@@ -4470,7 +4463,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CompleteClientType"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CompleteClientType"
                                         }
                                     }
                                 }
@@ -4539,7 +4532,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -4645,7 +4638,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -4712,7 +4705,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Sms"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Sms"
                         }
                     }
                 ],
@@ -4728,7 +4721,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.SendCodeResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse"
                                         }
                                     }
                                 }
@@ -4795,7 +4788,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpsertScopeRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpsertScopeRequest"
                         }
                     }
                 ],
@@ -4811,7 +4804,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Role"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role"
                                         }
                                     }
                                 }
@@ -4878,7 +4871,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.StructBody"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.StructBody"
                         }
                     },
                     {
@@ -4901,7 +4894,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Role"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role"
                                         }
                                     }
                                 }
@@ -5011,7 +5004,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetUserListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse"
                                         }
                                     }
                                 }
@@ -5076,7 +5069,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateUserRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserRequest"
                         }
                     }
                 ],
@@ -5092,7 +5085,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -5157,7 +5150,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateUserRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateUserRequest"
                         }
                     }
                 ],
@@ -5173,7 +5166,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -5240,7 +5233,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateUserInfoFieldRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserInfoFieldRequest"
                         }
                     }
                 ],
@@ -5274,7 +5267,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -5321,7 +5314,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddUserInfoFieldRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserInfoFieldRequest"
                         }
                     }
                 ],
@@ -5337,7 +5330,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -5408,7 +5401,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -5470,7 +5463,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddUserRelationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserRelationRequest"
                         }
                     }
                 ],
@@ -5486,7 +5479,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.UserRelation"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UserRelation"
                                         }
                                     }
                                 }
@@ -5551,13 +5544,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UserRelationPrimaryKey"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UserRelationPrimaryKey"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -5619,7 +5612,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.ResetPasswordRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ResetPasswordRequest"
                         }
                     }
                 ],
@@ -5702,13 +5695,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.SendMessageToEmailRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.SendMessageToEmailRequest"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -5784,7 +5777,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -5860,7 +5853,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -5935,7 +5928,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddUserToProjectReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectReq"
                         }
                     }
                 ],
@@ -5951,7 +5944,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.AddUserToProjectRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes"
                                         }
                                     }
                                 }
@@ -6018,7 +6011,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.GenerateApiTokenReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq"
                         }
                     }
                 ],
@@ -6034,7 +6027,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GenerateApiTokenRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenRes"
                                         }
                                     }
                                 }
@@ -6101,7 +6094,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.RefreshApiTokenReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshApiTokenReq"
                         }
                     }
                 ],
@@ -6117,7 +6110,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.RefreshApiTokenReq"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshApiTokenReq"
                                         }
                                     }
                                 }
@@ -6222,7 +6215,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetListRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListRes"
                                         }
                                     }
                                 }
@@ -6294,7 +6287,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateReq"
                         }
                     }
                 ],
@@ -6310,7 +6303,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CreateRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateRes"
                                         }
                                     }
                                 }
@@ -6398,7 +6391,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetRes"
                                         }
                                     }
                                 }
@@ -6477,7 +6470,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateReq"
                         }
                     }
                 ],
@@ -6493,7 +6486,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.UpdateRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRes"
                                         }
                                     }
                                 }
@@ -6579,7 +6572,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.DeleteRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.DeleteRes"
                                         }
                                     }
                                 }
@@ -6982,7 +6975,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateClientRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientRequest"
                         }
                     }
                 ],
@@ -6998,7 +6991,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7084,7 +7077,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddClientRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest"
                         }
                     }
                 ],
@@ -7100,7 +7093,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7186,13 +7179,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.ClientPrimaryKey"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPrimaryKey"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7299,7 +7292,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7385,7 +7378,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateClientPlatformRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientPlatformRequest"
                         }
                     }
                 ],
@@ -7401,7 +7394,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7486,7 +7479,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateClientPlatformRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientPlatformRequest"
                         }
                     }
                 ],
@@ -7502,7 +7495,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7604,7 +7597,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7706,7 +7699,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7796,7 +7789,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -7902,7 +7895,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -7987,7 +7980,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2UpdateClientTypeRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateClientTypeRequest"
                         }
                     }
                 ],
@@ -8003,7 +7996,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8088,7 +8081,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2CreateClientTypeRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2CreateClientTypeRequest"
                         }
                     }
                 ],
@@ -8104,7 +8097,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8204,7 +8197,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8292,7 +8285,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8382,7 +8375,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8495,7 +8488,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8580,7 +8573,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Connection"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Connection"
                         }
                     }
                 ],
@@ -8596,7 +8589,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8681,7 +8674,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateConnectionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.CreateConnectionRequest"
                         }
                     }
                 ],
@@ -8697,7 +8690,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8798,7 +8791,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8887,7 +8880,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8963,7 +8956,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.UpdateEmailSettingsResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse"
                                         }
                                     }
                                 }
@@ -9028,7 +9021,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateEmailSettingsRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest"
                         }
                     }
                 ],
@@ -9044,7 +9037,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.EmailSettings"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings"
                                         }
                                     }
                                 }
@@ -9115,7 +9108,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.EmailSettingsRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.EmailSettingsRequest"
                         }
                     }
                 ],
@@ -9131,7 +9124,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.EmailSettings"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings"
                                         }
                                     }
                                 }
@@ -9202,7 +9195,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -9278,7 +9271,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2LoginRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginRequest"
                         }
                     }
                 ],
@@ -9361,7 +9354,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2LoginSuperAdminReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminReq"
                         }
                     }
                 ],
@@ -9377,7 +9370,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginSuperAdminRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminRes"
                                         }
                                     }
                                 }
@@ -9444,7 +9437,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.MultiCompanyLoginRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginRequest"
                         }
                     }
                 ],
@@ -9460,7 +9453,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.MultiCompanyLoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse"
                                         }
                                     }
                                 }
@@ -9527,7 +9520,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2MultiCompanyLoginReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq"
                         }
                     }
                 ],
@@ -9543,7 +9536,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2MultiCompanyOneLoginRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyOneLoginRes"
                                         }
                                     }
                                 }
@@ -9636,7 +9629,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CommonMessage"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.CommonMessage"
                         }
                     }
                 ],
@@ -9765,7 +9758,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -9851,7 +9844,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdatePermissionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest"
                         }
                     }
                 ],
@@ -9867,7 +9860,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -9953,7 +9946,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreatePermissionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreatePermissionRequest"
                         }
                     }
                 ],
@@ -9969,7 +9962,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -10057,7 +10050,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddPermissionScopeRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddPermissionScopeRequest"
                         }
                     }
                 ],
@@ -10073,7 +10066,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -10159,13 +10152,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.PermissionScopePrimaryKey"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.PermissionScopePrimaryKey"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10178,7 +10171,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -10262,7 +10255,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -10352,7 +10345,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10414,7 +10407,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.RefreshTokenRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest"
                         }
                     }
                 ],
@@ -10430,7 +10423,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2RefreshTokenResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenResponse"
                                         }
                                     }
                                 }
@@ -10497,7 +10490,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.RefreshTokenRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest"
                         }
                     }
                 ],
@@ -10513,7 +10506,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2RefreshTokenSuperAdminResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenSuperAdminResponse"
                                         }
                                     }
                                 }
@@ -10580,7 +10573,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterOtp"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
                         }
                     },
                     {
@@ -10617,7 +10610,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -10705,7 +10698,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateRelationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest"
                         }
                     }
                 ],
@@ -10721,7 +10714,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -10807,7 +10800,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddRelationRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRelationRequest"
                         }
                     }
                 ],
@@ -10823,7 +10816,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -10915,7 +10908,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -10991,7 +10984,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.GetListConfiguredResourceEnvironmentRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentRes"
                                         }
                                     }
                                 }
@@ -11108,7 +11101,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -11193,7 +11186,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2UpdateRoleRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateRoleRequest"
                         }
                     }
                 ],
@@ -11209,7 +11202,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -11294,7 +11287,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2AddRoleRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2AddRoleRequest"
                         }
                     }
                 ],
@@ -11310,7 +11303,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -11398,7 +11391,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddRolePermissionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest"
                         }
                     }
                 ],
@@ -11414,7 +11407,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -11500,13 +11493,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.RolePermissionPrimaryKey"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -11588,7 +11581,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/object_builder_service.GetListWithRoleAppTablePermissionsResponse"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse"
                         }
                     }
                 ],
@@ -11604,7 +11597,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -11704,7 +11697,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -11804,7 +11797,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -11892,7 +11885,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12019,7 +12012,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -12086,7 +12079,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Email"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Email"
                         }
                     },
                     {
@@ -12122,7 +12115,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.SendCodeResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse"
                                         }
                                     }
                                 }
@@ -12231,7 +12224,8 @@ var doc = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -12246,7 +12240,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetUserListResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse"
                                         }
                                     }
                                 }
@@ -12324,7 +12318,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateUserRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserRequest"
                         }
                     }
                 ],
@@ -12340,7 +12334,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -12418,7 +12412,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.CreateUserRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateUserRequest"
                         }
                     }
                 ],
@@ -12434,7 +12428,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -12522,7 +12516,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateUserInfoFieldRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserInfoFieldRequest"
                         }
                     }
                 ],
@@ -12556,7 +12550,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -12624,7 +12618,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.AddUserInfoFieldRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserInfoFieldRequest"
                         }
                     }
                 ],
@@ -12640,7 +12634,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -12732,7 +12726,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -12794,7 +12788,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.GetUserByLoginTypesRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest"
                         }
                     }
                 ],
@@ -12810,7 +12804,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.GetUserByLoginTypesResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse"
                                         }
                                     }
                                 }
@@ -12911,7 +12905,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                                         }
                                     }
                                 }
@@ -13000,7 +12994,7 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -13062,7 +13056,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2MultiCompanyLoginReq"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq"
                         }
                     }
                 ],
@@ -13078,7 +13072,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes"
                                         }
                                     }
                                 }
@@ -13179,7 +13173,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Verify"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Verify"
                         }
                     }
                 ],
@@ -13195,7 +13189,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -13283,7 +13277,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/web_page_service.GetListAppRes"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes"
                                         }
                                     }
                                 }
@@ -13364,7 +13358,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Verify"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Verify"
                         }
                     }
                 ],
@@ -13380,7 +13374,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2LoginResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -13428,7 +13422,702 @@ var doc = `{
         }
     },
     "definitions": {
-        "auth_service.AddClientRequest": {
+        "big.Int": {
+            "type": "object"
+        },
+        "config.Config": {
+            "type": "object",
+            "properties": {
+                "authGRPCPort": {
+                    "type": "string"
+                },
+                "authServiceHost": {
+                    "type": "string"
+                },
+                "companyGRPCPort": {
+                    "type": "string"
+                },
+                "companyServiceHost": {
+                    "type": "string"
+                },
+                "defaultLimit": {
+                    "type": "string"
+                },
+                "defaultOffset": {
+                    "type": "string"
+                },
+                "environment": {
+                    "description": "debug, test, release",
+                    "type": "string"
+                },
+                "httpport": {
+                    "type": "string"
+                },
+                "httpscheme": {
+                    "type": "string"
+                },
+                "objectBuilderGRPCPort": {
+                    "type": "string"
+                },
+                "objectBuilderServiceHost": {
+                    "type": "string"
+                },
+                "passcodeLength": {
+                    "type": "integer"
+                },
+                "passcodePool": {
+                    "type": "string"
+                },
+                "postgresDatabase": {
+                    "type": "string"
+                },
+                "postgresHost": {
+                    "type": "string"
+                },
+                "postgresMaxConnections": {
+                    "type": "integer"
+                },
+                "postgresObjectBuidlerServiceHost": {
+                    "type": "string"
+                },
+                "postgresObjectBuidlerServicePort": {
+                    "type": "string"
+                },
+                "postgresPassword": {
+                    "type": "string"
+                },
+                "postgresPort": {
+                    "type": "integer"
+                },
+                "postgresUser": {
+                    "type": "string"
+                },
+                "secretKey": {
+                    "type": "string"
+                },
+                "serviceName": {
+                    "type": "string"
+                },
+                "smsGRPCPort": {
+                    "type": "string"
+                },
+                "smsServiceHost": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "webPageServiceHost": {
+                    "type": "string"
+                },
+                "webPageServicePort": {
+                    "type": "string"
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                }
+            }
+        },
+        "http.Header": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.Request": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "Body is the request's body.\n\nFor client requests, a nil body means the request has no\nbody, such as a GET request. The HTTP Client's Transport\nis responsible for calling the Close method.\n\nFor server requests, the Request Body is always non-nil\nbut will return EOF immediately when no body is present.\nThe Server will close the request body. The ServeHTTP\nHandler does not need to.\n\nBody must allow Read to be called concurrently with Close.\nIn particular, calling Close should unblock a Read waiting\nfor input."
+                },
+                "cancel": {
+                    "description": "Cancel is an optional channel whose closure indicates that the client\nrequest should be regarded as canceled. Not all implementations of\nRoundTripper may support Cancel.\n\nFor server requests, this field is not applicable.\n\nDeprecated: Set the Request's context with NewRequestWithContext\ninstead. If a Request's Cancel field and context are both\nset, it is undefined whether Cancel is respected.",
+                    "type": "object"
+                },
+                "close": {
+                    "description": "Close indicates whether to close the connection after\nreplying to this request (for servers) or after sending this\nrequest and reading its response (for clients).\n\nFor server requests, the HTTP server handles this automatically\nand this field is not needed by Handlers.\n\nFor client requests, setting this field prevents re-use of\nTCP connections between requests to the same hosts, as if\nTransport.DisableKeepAlives were set.",
+                    "type": "boolean"
+                },
+                "contentLength": {
+                    "description": "ContentLength records the length of the associated content.\nThe value -1 indicates that the length is unknown.\nValues \u003e= 0 indicate that the given number of bytes may\nbe read from Body.\n\nFor client requests, a value of 0 with a non-nil Body is\nalso treated as unknown.",
+                    "type": "integer"
+                },
+                "form": {
+                    "description": "Form contains the parsed form data, including both the URL\nfield's query parameters and the PATCH, POST, or PUT form data.\nThis field is only available after ParseForm is called.\nThe HTTP client ignores Form and uses Body instead.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/url.Values"
+                        }
+                    ]
+                },
+                "header": {
+                    "description": "Header contains the request header fields either received\nby the server or to be sent by the client.\n\nIf a server received a request with header lines,\n\n\tHost: example.com\n\taccept-encoding: gzip, deflate\n\tAccept-Language: en-us\n\tfOO: Bar\n\tfoo: two\n\nthen\n\n\tHeader = map[string][]string{\n\t\t\"Accept-Encoding\": {\"gzip, deflate\"},\n\t\t\"Accept-Language\": {\"en-us\"},\n\t\t\"Foo\": {\"Bar\", \"two\"},\n\t}\n\nFor incoming requests, the Host header is promoted to the\nRequest.Host field and removed from the Header map.\n\nHTTP defines that header names are case-insensitive. The\nrequest parser implements this by using CanonicalHeaderKey,\nmaking the first character and any characters following a\nhyphen uppercase and the rest lowercase.\n\nFor client requests, certain headers such as Content-Length\nand Connection are automatically written when needed and\nvalues in Header may be ignored. See the documentation\nfor the Request.Write method.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/http.Header"
+                        }
+                    ]
+                },
+                "host": {
+                    "description": "For server requests, Host specifies the host on which the\nURL is sought. For HTTP/1 (per RFC 7230, section 5.4), this\nis either the value of the \"Host\" header or the host name\ngiven in the URL itself. For HTTP/2, it is the value of the\n\":authority\" pseudo-header field.\nIt may be of the form \"host:port\". For international domain\nnames, Host may be in Punycode or Unicode form. Use\ngolang.org/x/net/idna to convert it to either format if\nneeded.\nTo prevent DNS rebinding attacks, server Handlers should\nvalidate that the Host header has a value for which the\nHandler considers itself authoritative. The included\nServeMux supports patterns registered to particular host\nnames and thus protects its registered Handlers.\n\nFor client requests, Host optionally overrides the Host\nheader to send. If empty, the Request.Write method uses\nthe value of URL.Host. Host may contain an international\ndomain name.",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "Method specifies the HTTP method (GET, POST, PUT, etc.).\nFor client requests, an empty string means GET.\n\nGo's HTTP client does not support sending a request with\nthe CONNECT method. See the documentation on Transport for\ndetails.",
+                    "type": "string"
+                },
+                "multipartForm": {
+                    "description": "MultipartForm is the parsed multipart form, including file uploads.\nThis field is only available after ParseMultipartForm is called.\nThe HTTP client ignores MultipartForm and uses Body instead.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/multipart.Form"
+                        }
+                    ]
+                },
+                "postForm": {
+                    "description": "PostForm contains the parsed form data from PATCH, POST\nor PUT body parameters.\n\nThis field is only available after ParseForm is called.\nThe HTTP client ignores PostForm and uses Body instead.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/url.Values"
+                        }
+                    ]
+                },
+                "proto": {
+                    "description": "The protocol version for incoming server requests.\n\nFor client requests, these fields are ignored. The HTTP\nclient code always uses either HTTP/1.1 or HTTP/2.\nSee the docs on Transport for details.",
+                    "type": "string"
+                },
+                "protoMajor": {
+                    "description": "1",
+                    "type": "integer"
+                },
+                "protoMinor": {
+                    "description": "0",
+                    "type": "integer"
+                },
+                "remoteAddr": {
+                    "description": "RemoteAddr allows HTTP servers and other software to record\nthe network address that sent the request, usually for\nlogging. This field is not filled in by ReadRequest and\nhas no defined format. The HTTP server in this package\nsets RemoteAddr to an \"IP:port\" address before invoking a\nhandler.\nThis field is ignored by the HTTP client.",
+                    "type": "string"
+                },
+                "requestURI": {
+                    "description": "RequestURI is the unmodified request-target of the\nRequest-Line (RFC 7230, Section 3.1.1) as sent by the client\nto a server. Usually the URL field should be used instead.\nIt is an error to set this field in an HTTP client request.",
+                    "type": "string"
+                },
+                "response": {
+                    "description": "Response is the redirect response which caused this request\nto be created. This field is only populated during client\nredirects.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/http.Response"
+                        }
+                    ]
+                },
+                "tls": {
+                    "description": "TLS allows HTTP servers and other software to record\ninformation about the TLS connection on which the request\nwas received. This field is not filled in by ReadRequest.\nThe HTTP server in this package sets the field for\nTLS-enabled connections before invoking a handler;\notherwise it leaves the field nil.\nThis field is ignored by the HTTP client.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tls.ConnectionState"
+                        }
+                    ]
+                },
+                "trailer": {
+                    "description": "Trailer specifies additional headers that are sent after the request\nbody.\n\nFor server requests, the Trailer map initially contains only the\ntrailer keys, with nil values. (The client declares which trailers it\nwill later send.)  While the handler is reading from Body, it must\nnot reference Trailer. After reading from Body returns EOF, Trailer\ncan be read again and will contain non-nil values, if they were sent\nby the client.\n\nFor client requests, Trailer must be initialized to a map containing\nthe trailer keys to later send. The values may be nil or their final\nvalues. The ContentLength must be 0 or -1, to send a chunked request.\nAfter the HTTP request is sent the map values can be updated while\nthe request body is read. Once the body returns EOF, the caller must\nnot mutate Trailer.\n\nFew HTTP clients, servers, or proxies support HTTP trailers.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/http.Header"
+                        }
+                    ]
+                },
+                "transferEncoding": {
+                    "description": "TransferEncoding lists the transfer encodings from outermost to\ninnermost. An empty list denotes the \"identity\" encoding.\nTransferEncoding can usually be ignored; chunked encoding is\nautomatically added and removed as necessary when sending and\nreceiving requests.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "url": {
+                    "description": "URL specifies either the URI being requested (for server\nrequests) or the URL to access (for client requests).\n\nFor server requests, the URL is parsed from the URI\nsupplied on the Request-Line as stored in RequestURI.  For\nmost requests, fields other than Path and RawQuery will be\nempty. (See RFC 7230, Section 5.3)\n\nFor client requests, the URL's Host specifies the server to\nconnect to, while the Request's Host field optionally\nspecifies the Host header value to send in the HTTP\nrequest.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/url.URL"
+                        }
+                    ]
+                }
+            }
+        },
+        "http.Response": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "Body represents the response body.\n\nThe response body is streamed on demand as the Body field\nis read. If the network connection fails or the server\nterminates the response, Body.Read calls return an error.\n\nThe http Client and Transport guarantee that Body is always\nnon-nil, even on responses without a body or responses with\na zero-length body. It is the caller's responsibility to\nclose Body. The default HTTP client's Transport may not\nreuse HTTP/1.x \"keep-alive\" TCP connections if the Body is\nnot read to completion and closed.\n\nThe Body is automatically dechunked if the server replied\nwith a \"chunked\" Transfer-Encoding.\n\nAs of Go 1.12, the Body will also implement io.Writer\non a successful \"101 Switching Protocols\" response,\nas used by WebSockets and HTTP/2's \"h2c\" mode."
+                },
+                "close": {
+                    "description": "Close records whether the header directed that the connection be\nclosed after reading Body. The value is advice for clients: neither\nReadResponse nor Response.Write ever closes a connection.",
+                    "type": "boolean"
+                },
+                "contentLength": {
+                    "description": "ContentLength records the length of the associated content. The\nvalue -1 indicates that the length is unknown. Unless Request.Method\nis \"HEAD\", values \u003e= 0 indicate that the given number of bytes may\nbe read from Body.",
+                    "type": "integer"
+                },
+                "header": {
+                    "description": "Header maps header keys to values. If the response had multiple\nheaders with the same key, they may be concatenated, with comma\ndelimiters.  (RFC 7230, section 3.2.2 requires that multiple headers\nbe semantically equivalent to a comma-delimited sequence.) When\nHeader values are duplicated by other fields in this struct (e.g.,\nContentLength, TransferEncoding, Trailer), the field values are\nauthoritative.\n\nKeys in the map are canonicalized (see CanonicalHeaderKey).",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/http.Header"
+                        }
+                    ]
+                },
+                "proto": {
+                    "description": "e.g. \"HTTP/1.0\"",
+                    "type": "string"
+                },
+                "protoMajor": {
+                    "description": "e.g. 1",
+                    "type": "integer"
+                },
+                "protoMinor": {
+                    "description": "e.g. 0",
+                    "type": "integer"
+                },
+                "request": {
+                    "description": "Request is the request that was sent to obtain this Response.\nRequest's Body is nil (having already been consumed).\nThis is only populated for Client requests.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/http.Request"
+                        }
+                    ]
+                },
+                "status": {
+                    "description": "e.g. \"200 OK\"",
+                    "type": "string"
+                },
+                "statusCode": {
+                    "description": "e.g. 200",
+                    "type": "integer"
+                },
+                "tls": {
+                    "description": "TLS contains information about the TLS connection on which the\nresponse was received. It is nil for unencrypted responses.\nThe pointer is shared between responses and should not be\nmodified.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tls.ConnectionState"
+                        }
+                    ]
+                },
+                "trailer": {
+                    "description": "Trailer maps trailer keys to values in the same\nformat as Header.\n\nThe Trailer initially contains only nil values, one for\neach key specified in the server's \"Trailer\" header\nvalue. Those values are not added to Header.\n\nTrailer must not be accessed concurrently with Read calls\non the Body.\n\nAfter Body.Read has returned io.EOF, Trailer will contain\nany trailer values sent by the server.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/http.Header"
+                        }
+                    ]
+                },
+                "transferEncoding": {
+                    "description": "Contains transfer encodings from outer-most to inner-most. Value is\nnil, means that \"identity\" encoding is used.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "uncompressed": {
+                    "description": "Uncompressed reports whether the response was sent compressed but\nwas decompressed by the http package. When true, reading from\nBody yields the uncompressed content instead of the compressed\ncontent actually set from the server, ContentLength is set to -1,\nand the \"Content-Length\" and \"Content-Encoding\" fields are deleted\nfrom the responseHeader. To get the original response from\nthe server, set Transport.DisableCompression to true.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "multipart.FileHeader": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "header": {
+                    "$ref": "#/definitions/textproto.MIMEHeader"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "multipart.Form": {
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/multipart.FileHeader"
+                        }
+                    }
+                },
+                "value": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "net.IPNet": {
+            "type": "object",
+            "properties": {
+                "ip": {
+                    "description": "network number",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "mask": {
+                    "description": "network mask",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "pkix.AttributeTypeAndValue": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "value": {}
+            }
+        },
+        "pkix.Extension": {
+            "type": "object",
+            "properties": {
+                "critical": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "pkix.Name": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "extraNames": {
+                    "description": "ExtraNames contains attributes to be copied, raw, into any marshaled\ndistinguished names. Values override any attributes with the same OID.\nThe ExtraNames field is not populated when parsing, see Names.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pkix.AttributeTypeAndValue"
+                    }
+                },
+                "locality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "names": {
+                    "description": "Names contains all parsed attributes. When parsing distinguished names,\nthis can be used to extract non-standard attributes that are not parsed\nby this package. When marshaling to RDNSequences, the Names field is\nignored, see ExtraNames.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pkix.AttributeTypeAndValue"
+                    }
+                },
+                "serialNumber": {
+                    "type": "string"
+                },
+                "streetAddress": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "textproto.MIMEHeader": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "tls.ConnectionState": {
+            "type": "object",
+            "properties": {
+                "cipherSuite": {
+                    "description": "CipherSuite is the cipher suite negotiated for the connection (e.g.\nTLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_AES_128_GCM_SHA256).",
+                    "type": "integer"
+                },
+                "didResume": {
+                    "description": "DidResume is true if this connection was successfully resumed from a\nprevious session with a session ticket or similar mechanism.",
+                    "type": "boolean"
+                },
+                "handshakeComplete": {
+                    "description": "HandshakeComplete is true if the handshake has concluded.",
+                    "type": "boolean"
+                },
+                "negotiatedProtocol": {
+                    "description": "NegotiatedProtocol is the application protocol negotiated with ALPN.",
+                    "type": "string"
+                },
+                "negotiatedProtocolIsMutual": {
+                    "description": "NegotiatedProtocolIsMutual used to indicate a mutual NPN negotiation.\n\nDeprecated: this value is always true.",
+                    "type": "boolean"
+                },
+                "ocspresponse": {
+                    "description": "OCSPResponse is a stapled Online Certificate Status Protocol (OCSP)\nresponse provided by the peer for the leaf certificate, if any.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "peerCertificates": {
+                    "description": "PeerCertificates are the parsed certificates sent by the peer, in the\norder in which they were sent. The first element is the leaf certificate\nthat the connection is verified against.\n\nOn the client side, it can't be empty. On the server side, it can be\nempty if Config.ClientAuth is not RequireAnyClientCert or\nRequireAndVerifyClientCert.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/x509.Certificate"
+                    }
+                },
+                "serverName": {
+                    "description": "ServerName is the value of the Server Name Indication extension sent by\nthe client. It's available both on the server and on the client side.",
+                    "type": "string"
+                },
+                "signedCertificateTimestamps": {
+                    "description": "SignedCertificateTimestamps is a list of SCTs provided by the peer\nthrough the TLS handshake for the leaf certificate, if any.",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tlsunique": {
+                    "description": "TLSUnique contains the \"tls-unique\" channel binding value (see RFC 5929,\nSection 3). This value will be nil for TLS 1.3 connections and for all\nresumed connections.\n\nDeprecated: there are conditions in which this value might not be unique\nto a connection. See the Security Considerations sections of RFC 5705 and\nRFC 7627, and https://mitls.org/pages/attacks/3SHAKE#channelbindings.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "verifiedChains": {
+                    "description": "VerifiedChains is a list of one or more chains where the first element is\nPeerCertificates[0] and the last element is from Config.RootCAs (on the\nclient side) or Config.ClientCAs (on the server side).\n\nOn the client side, it's set if Config.InsecureSkipVerify is false. On\nthe server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven\n(and the peer provided a certificate) or RequireAndVerifyClientCert.",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/x509.Certificate"
+                        }
+                    }
+                },
+                "version": {
+                    "description": "Version is the TLS version used by the connection (e.g. VersionTLS12).",
+                    "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.CommonMessage": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.Connection": {
+            "type": "object",
+            "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
+                "field_slug": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "main_table_slug": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.CreateConnectionRequest": {
+            "type": "object",
+            "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
+                "field_slug": {
+                    "type": "string"
+                },
+                "main_table_slug": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.Email": {
+            "type": "object",
+            "properties": {
+                "client_type": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "google_token": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "register_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.EmailSettingsRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.RegisterOtp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.SendCodeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
+                },
+                "google_acces": {
+                    "type": "boolean"
+                },
+                "sms_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.Sms": {
+            "type": "object",
+            "properties": {
+                "client_type": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.StructBody": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.Verify": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
+                },
+                "google_token": {
+                    "type": "string"
+                },
+                "register_type": {
+                    "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
+                    }
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -13438,10 +14127,10 @@ var doc = `{
                     "type": "string"
                 },
                 "login_strategy": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies"
                 },
                 "login_table": {
-                    "$ref": "#/definitions/auth_service.LoginTable"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginTable"
                 },
                 "login_value": {
                     "type": "string"
@@ -13454,7 +14143,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddPermissionScopeRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddPermissionScopeRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -13471,7 +14160,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddRelationRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddRelationRequest": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -13484,33 +14173,39 @@ var doc = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes"
                 }
             }
         },
-        "auth_service.AddRolePermissionRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest": {
             "type": "object",
             "properties": {
                 "permission_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 },
                 "role_id": {
                     "type": "string"
                 }
             }
         },
-        "auth_service.AddRolePermissionsRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsRequest": {
             "type": "object",
             "properties": {
                 "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.AddRolePermissionRequest"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest"
                     }
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
-        "auth_service.AddRolePermissionsResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsResponse": {
             "type": "object",
             "properties": {
                 "added_roles": {
@@ -13518,7 +14213,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddRoleRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddRoleRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -13535,7 +14230,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddSessionToIntegrationRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddSessionToIntegrationRequest": {
             "type": "object",
             "properties": {
                 "data": {
@@ -13552,7 +14247,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddUserInfoFieldRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddUserInfoFieldRequest": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -13569,7 +14264,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddUserRelationRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddUserRelationRequest": {
             "type": "object",
             "properties": {
                 "relation_id": {
@@ -13580,7 +14275,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddUserToProjectReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectReq": {
             "type": "object",
             "properties": {
                 "active": {
@@ -13592,6 +14287,9 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "role_id": {
                     "type": "string"
                 },
@@ -13600,7 +14298,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AddUserToProjectRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes": {
             "type": "object",
             "properties": {
                 "company_id": {
@@ -13614,30 +14312,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.AppleIdSettings": {
-            "type": "object",
-            "properties": {
-                "client_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "key_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "secret": {
-                    "type": "string"
-                },
-                "team_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.Client": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Client": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -13647,14 +14322,14 @@ var doc = `{
                     "type": "string"
                 },
                 "login_strategy": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies"
                 },
                 "project_id": {
                     "type": "string"
                 }
             }
         },
-        "auth_service.ClientPlatform": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform": {
             "type": "object",
             "properties": {
                 "id": {
@@ -13671,7 +14346,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.ClientPrimaryKey": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.ClientPrimaryKey": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -13682,11 +14357,11 @@ var doc = `{
                 }
             }
         },
-        "auth_service.ClientType": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.ClientType": {
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies"
                 },
                 "id": {
                     "type": "string"
@@ -13706,23 +14381,23 @@ var doc = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Table"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Table"
                     }
                 }
             }
         },
-        "auth_service.CommonMessage": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "table_slug": {
                     "type": "string"
                 }
             }
         },
-        "auth_service.Company": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Company": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -13748,7 +14423,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Company2": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Company2": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -13772,7 +14447,7 @@ var doc = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Project2"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Project2"
                     }
                 },
                 "updated_at": {
@@ -13780,33 +14455,46 @@ var doc = `{
                 }
             }
         },
-        "auth_service.CompleteClientType": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CompleteClientType": {
             "type": "object",
             "properties": {
                 "client_type": {
-                    "$ref": "#/definitions/auth_service.ClientType"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType"
                 },
                 "relations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Relation"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Relation"
                     }
                 },
                 "roles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Role"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role"
                     }
                 },
                 "user_info_fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.UserInfoField"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UserInfoField"
                     }
                 }
             }
         },
-        "auth_service.CreateClientPlatformRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.CreateClientPlatformRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -13815,16 +14503,19 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "subdomain": {
                     "type": "string"
                 }
             }
         },
-        "auth_service.CreateClientTypeRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CreateClientTypeRequest": {
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies"
                 },
                 "name": {
                     "type": "string"
@@ -13841,12 +14532,12 @@ var doc = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Table"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Table"
                     }
                 }
             }
         },
-        "auth_service.CreateIntegrationRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CreateIntegrationRequest": {
             "type": "object",
             "properties": {
                 "active": {
@@ -13878,7 +14569,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.CreatePermissionRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CreatePermissionRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -13889,10 +14580,13 @@ var doc = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
-        "auth_service.CreateReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CreateReq": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -13912,7 +14606,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.CreateRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CreateRes": {
             "type": "object",
             "properties": {
                 "app_id": {
@@ -13950,7 +14644,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.CreateUserRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "active": {
@@ -13995,6 +14689,9 @@ var doc = `{
                 "resource_environment_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "role_id": {
                     "type": "string"
                 },
@@ -14003,7 +14700,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.DeleteRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.DeleteRes": {
             "type": "object",
             "properties": {
                 "row_effected": {
@@ -14011,7 +14708,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.EmailSettings": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings": {
             "type": "object",
             "properties": {
                 "email": {
@@ -14028,7 +14725,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.GenerateApiTokenReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq": {
             "type": "object",
             "properties": {
                 "app_id": {
@@ -14039,44 +14736,44 @@ var doc = `{
                 }
             }
         },
-        "auth_service.GenerateApiTokenRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenRes": {
             "type": "object",
             "properties": {
                 "token": {
-                    "$ref": "#/definitions/auth_service.Token"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
                 }
             }
         },
-        "auth_service.GetClientMatrixResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetClientMatrixResponse": {
             "type": "object",
             "properties": {
                 "client_platforms": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.ClientPlatform"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform"
                     }
                 },
                 "client_types": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.ClientType"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType"
                     }
                 },
                 "clients": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Client"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Client"
                     }
                 }
             }
         },
-        "auth_service.GetClientPlatformListResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetClientPlatformListResponse": {
             "type": "object",
             "properties": {
                 "client_platforms": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.ClientPlatform"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform"
                     }
                 },
                 "count": {
@@ -14084,13 +14781,13 @@ var doc = `{
                 }
             }
         },
-        "auth_service.GetClientTypeListResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetClientTypeListResponse": {
             "type": "object",
             "properties": {
                 "client_types": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.ClientType"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType"
                     }
                 },
                 "count": {
@@ -14098,7 +14795,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.GetIntegrationListResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationListResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -14107,34 +14804,23 @@ var doc = `{
                 "integrations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Integration"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Integration"
                     }
                 }
             }
         },
-        "auth_service.GetIntegrationSessionsResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetIntegrationSessionsResponse": {
             "type": "object",
             "properties": {
                 "sessions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Session"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session"
                     }
                 }
             }
         },
-        "auth_service.GetListAppleIdSettingsResponse": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.AppleIdSettings"
-                    }
-                }
-            }
-        },
-        "auth_service.GetListRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetListRes": {
             "type": "object",
             "properties": {
                 "count": {
@@ -14143,12 +14829,12 @@ var doc = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.GetRes"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetRes"
                     }
                 }
             }
         },
-        "auth_service.GetRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetRes": {
             "type": "object",
             "properties": {
                 "app_id": {
@@ -14186,7 +14872,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.GetUserByLoginTypesRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -14197,10 +14883,13 @@ var doc = `{
                 },
                 "phone": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
-        "auth_service.GetUserByLoginTypesResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesResponse": {
             "type": "object",
             "properties": {
                 "user_id": {
@@ -14208,7 +14897,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.GetUserListResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetUserListResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -14217,12 +14906,12 @@ var doc = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.User"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                     }
                 }
             }
         },
-        "auth_service.HasAccessRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -14242,7 +14931,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.HasAccessSuperAdminReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminReq": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -14259,7 +14948,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.HasAccessSuperAdminRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminRes": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -14283,7 +14972,7 @@ var doc = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.TableBody"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.TableBody"
                     }
                 },
                 "updated_at": {
@@ -14294,7 +14983,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Integration": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Integration": {
             "type": "object",
             "properties": {
                 "active": {
@@ -14338,7 +15027,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.LoginRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest": {
             "type": "object",
             "properties": {
                 "password": {
@@ -14347,7 +15036,7 @@ var doc = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Object"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
                     }
                 },
                 "username": {
@@ -14355,7 +15044,22 @@ var doc = `{
                 }
             }
         },
-        "auth_service.LoginTable": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "LoginStrategies_UNKNOWN",
+                "LoginStrategies_STANDARD",
+                "LoginStrategies_PHONE_OTP",
+                "LoginStrategies_EMAIL_OTP"
+            ]
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.LoginTable": {
             "type": "object",
             "properties": {
                 "object_id": {
@@ -14372,7 +15076,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.LogoutRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.LogoutRequest": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -14380,7 +15084,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.MultiCompanyLoginRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginRequest": {
             "type": "object",
             "properties": {
                 "password": {
@@ -14391,24 +15095,24 @@ var doc = `{
                 }
             }
         },
-        "auth_service.MultiCompanyLoginResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse": {
             "type": "object",
             "properties": {
                 "client_types": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.ClientType"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType"
                     }
                 },
                 "companies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.MultiCompanyLoginResponse_Company"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company"
                     }
                 }
             }
         },
-        "auth_service.MultiCompanyLoginResponse_Company": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -14432,7 +15136,7 @@ var doc = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.MultiCompanyLoginResponse_Company_Project"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company_Project"
                     }
                 },
                 "updated_at": {
@@ -14440,7 +15144,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.MultiCompanyLoginResponse_Company_Project": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.MultiCompanyLoginResponse_Company_Project": {
             "type": "object",
             "properties": {
                 "company_id": {
@@ -14463,7 +15167,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Object": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Object": {
             "type": "object",
             "properties": {
                 "object_id": {
@@ -14474,7 +15178,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.PermissionScopePrimaryKey": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.PermissionScopePrimaryKey": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -14491,11 +15195,11 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Project2": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Project2": {
             "type": "object",
             "properties": {
                 "client_types": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "company_id": {
                     "type": "string"
@@ -14515,7 +15219,7 @@ var doc = `{
                 "resource_environments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.ResourceEnvironmentV2MultiCompany"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany"
                     }
                 },
                 "updated_at": {
@@ -14523,7 +15227,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.RecordPermission": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -14552,7 +15256,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.RefreshApiTokenReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.RefreshApiTokenReq": {
             "type": "object",
             "properties": {
                 "refresh_token": {
@@ -14560,7 +15264,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.RefreshTokenRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest": {
             "type": "object",
             "properties": {
                 "refresh_token": {
@@ -14568,18 +15272,18 @@ var doc = `{
                 }
             }
         },
-        "auth_service.RegisterCompanyRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string"
                 },
                 "user_info": {
-                    "$ref": "#/definitions/auth_service.RegisterCompanyRequest_RegisterUserInfo"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest_RegisterUserInfo"
                 }
             }
         },
-        "auth_service.RegisterCompanyRequest_RegisterUserInfo": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.RegisterCompanyRequest_RegisterUserInfo": {
             "type": "object",
             "properties": {
                 "email": {
@@ -14599,7 +15303,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Relation": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Relation": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -14615,11 +15319,24 @@ var doc = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes"
                 }
             }
         },
-        "auth_service.ResetPasswordRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "RelationTypes_UNREVEALED",
+                "RelationTypes_BRANCH",
+                "RelationTypes_REGION"
+            ]
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.ResetPasswordRequest": {
             "type": "object",
             "properties": {
                 "password": {
@@ -14633,7 +15350,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.ResourceEnvironmentV2MultiCompany": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany": {
             "type": "object",
             "properties": {
                 "description": {
@@ -14668,7 +15385,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Role": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Role": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -14688,7 +15405,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.RolePermissionPrimaryKey": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey": {
             "type": "object",
             "properties": {
                 "permission_id": {
@@ -14699,7 +15416,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.SendMessageToEmailRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.SendMessageToEmailRequest": {
             "type": "object",
             "properties": {
                 "base_url": {
@@ -14713,7 +15430,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Session": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Session": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -14757,11 +15474,11 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Table": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Table": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -14780,7 +15497,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.TableBody": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.TableBody": {
             "type": "object",
             "properties": {
                 "object_id": {
@@ -14791,7 +15508,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.Token": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.Token": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -14814,7 +15531,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateClientPlatformRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientPlatformRequest": {
             "type": "object",
             "properties": {
                 "client_type_ids": {
@@ -14829,12 +15546,15 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "subdomain": {
                     "type": "string"
                 }
             }
         },
-        "auth_service.UpdateClientRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -14844,10 +15564,10 @@ var doc = `{
                     "type": "string"
                 },
                 "login_strategy": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategies"
                 },
                 "login_table": {
-                    "$ref": "#/definitions/auth_service.LoginTable"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginTable"
                 },
                 "login_value": {
                     "type": "string"
@@ -14860,7 +15580,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateClientTypeRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientTypeRequest": {
             "type": "object",
             "properties": {
                 "client_platform_ids": {
@@ -14870,7 +15590,7 @@ var doc = `{
                     }
                 },
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies"
                 },
                 "id": {
                     "type": "string"
@@ -14890,12 +15610,12 @@ var doc = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Table"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Table"
                     }
                 }
             }
         },
-        "auth_service.UpdateCompanyRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateCompanyRequest": {
             "type": "object",
             "properties": {
                 "id": {
@@ -14906,7 +15626,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateEmailSettingsRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -14920,18 +15640,18 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateEmailSettingsResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateEmailSettingsResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.EmailSettings"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings"
                     }
                 }
             }
         },
-        "auth_service.UpdatePermissionRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -14945,10 +15665,13 @@ var doc = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
-        "auth_service.UpdateRelationRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -14964,11 +15687,11 @@ var doc = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RelationTypes"
                 }
             }
         },
-        "auth_service.UpdateReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateReq": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -14991,7 +15714,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateRes": {
             "type": "object",
             "properties": {
                 "row_effected": {
@@ -14999,7 +15722,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateRoleRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateRoleRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -15019,7 +15742,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateUserInfoFieldRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserInfoFieldRequest": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -15039,7 +15762,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UpdateUserRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserRequest": {
             "type": "object",
             "properties": {
                 "active": {
@@ -15061,6 +15784,9 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "language_id": {
                     "type": "string"
                 },
                 "login": {
@@ -15078,12 +15804,18 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "role_id": {
+                    "type": "string"
+                },
+                "timezone_id": {
                     "type": "string"
                 }
             }
         },
-        "auth_service.UpsertScopeRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpsertScopeRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -15097,7 +15829,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.User": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.User": {
             "type": "object",
             "properties": {
                 "active": {
@@ -15119,6 +15851,9 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "language_id": {
                     "type": "string"
                 },
                 "login": {
@@ -15141,10 +15876,13 @@ var doc = `{
                 },
                 "role_id": {
                     "type": "string"
+                },
+                "timezone_id": {
+                    "type": "string"
                 }
             }
         },
-        "auth_service.UserInfoField": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UserInfoField": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -15164,7 +15902,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UserRelation": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UserRelation": {
             "type": "object",
             "properties": {
                 "relation_id": {
@@ -15175,7 +15913,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.UserRelationPrimaryKey": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.UserRelationPrimaryKey": {
             "type": "object",
             "properties": {
                 "relation_id": {
@@ -15186,7 +15924,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2AddRoleRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2AddRoleRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -15203,10 +15941,13 @@ var doc = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
-        "auth_service.V2CreateClientTypeRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2CreateClientTypeRequest": {
             "type": "object",
             "properties": {
                 "client_platform_ids": {
@@ -15216,7 +15957,7 @@ var doc = `{
                     }
                 },
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies"
                 },
                 "db_project_id": {
                     "type": "string"
@@ -15227,6 +15968,9 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "self_recover": {
                     "type": "boolean"
                 },
@@ -15235,7 +15979,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2LoginRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2LoginRequest": {
             "type": "object",
             "properties": {
                 "client_type": {
@@ -15253,10 +15997,13 @@ var doc = `{
                 "resource_environment_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Object"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
                     }
                 },
                 "username": {
@@ -15264,23 +16011,23 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2LoginResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse": {
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.RecordPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission"
                     }
                 },
                 "client_platform": {
-                    "$ref": "#/definitions/auth_service.ClientPlatform"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPlatform"
                 },
                 "client_type": {
-                    "$ref": "#/definitions/auth_service.ClientType"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType"
                 },
                 "environment_id": {
                     "type": "string"
@@ -15291,32 +16038,32 @@ var doc = `{
                 "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.RecordPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission"
                     }
                 },
                 "resource_id": {
                     "type": "string"
                 },
                 "role": {
-                    "$ref": "#/definitions/auth_service.Role"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Role"
                 },
                 "sessions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Session"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session"
                     }
                 },
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Object"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
                     }
                 },
                 "token": {
-                    "$ref": "#/definitions/auth_service.Token"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
                 },
                 "user": {
-                    "$ref": "#/definitions/auth_service.User"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -15326,7 +16073,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2LoginSuperAdminReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminReq": {
             "type": "object",
             "properties": {
                 "password": {
@@ -15337,23 +16084,23 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2LoginSuperAdminRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminRes": {
             "type": "object",
             "properties": {
                 "companies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Company"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company"
                     }
                 },
                 "sessions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Session"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session"
                     }
                 },
                 "token": {
-                    "$ref": "#/definitions/auth_service.Token"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -15363,7 +16110,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2MultiCompanyLoginReq": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq": {
             "type": "object",
             "properties": {
                 "password": {
@@ -15374,18 +16121,18 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2MultiCompanyLoginRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes": {
             "type": "object",
             "properties": {
                 "companies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes_Company"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company"
                     }
                 }
             }
         },
-        "auth_service.V2MultiCompanyLoginRes_Company": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -15409,7 +16156,7 @@ var doc = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes_Company_Project"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company_Project"
                     }
                 },
                 "updated_at": {
@@ -15417,7 +16164,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2MultiCompanyLoginRes_Company_Project": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company_Project": {
             "type": "object",
             "properties": {
                 "company_id": {
@@ -15440,40 +16187,40 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2MultiCompanyOneLoginRes": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyOneLoginRes": {
             "type": "object",
             "properties": {
                 "companies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.Company2"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company2"
                     }
                 }
             }
         },
-        "auth_service.V2RefreshTokenResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenResponse": {
             "type": "object",
             "properties": {
                 "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/auth_service.RecordPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission"
                     }
                 },
                 "token": {
-                    "$ref": "#/definitions/auth_service.Token"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
                 }
             }
         },
-        "auth_service.V2RefreshTokenSuperAdminResponse": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenSuperAdminResponse": {
             "type": "object",
             "properties": {
                 "token": {
-                    "$ref": "#/definitions/auth_service.Token"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
                 }
             }
         },
-        "auth_service.V2UpdateClientTypeRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateClientTypeRequest": {
             "type": "object",
             "properties": {
                 "client_platform_ids": {
@@ -15483,7 +16230,7 @@ var doc = `{
                     }
                 },
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies"
                 },
                 "db_project_id": {
                     "type": "string"
@@ -15497,6 +16244,9 @@ var doc = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "self_recover": {
                     "type": "boolean"
                 },
@@ -15505,7 +16255,7 @@ var doc = `{
                 }
             }
         },
-        "auth_service.V2UpdateRoleRequest": {
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateRoleRequest": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -15525,10 +16275,13 @@ var doc = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
                 }
             }
         },
-        "company_service.CreateProjectRequest": {
+        "ucode_ucode_go_auth_service_genproto_company_service.CreateProjectRequest": {
             "type": "object",
             "properties": {
                 "company_id": {
@@ -15540,7 +16293,7 @@ var doc = `{
                 "resources": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.Resource"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Resource"
                     }
                 },
                 "title": {
@@ -15548,7 +16301,7 @@ var doc = `{
                 }
             }
         },
-        "company_service.Currency": {
+        "ucode_ucode_go_auth_service_genproto_company_service.Currency": {
             "type": "object",
             "properties": {
                 "code": {
@@ -15577,18 +16330,18 @@ var doc = `{
                 }
             }
         },
-        "company_service.GetListConfiguredResourceEnvironmentRes": {
+        "ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentRes": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment"
                     }
                 }
             }
         },
-        "company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment": {
+        "ucode_ucode_go_auth_service_genproto_company_service.GetListConfiguredResourceEnvironmentResResourceEnvironment": {
             "type": "object",
             "properties": {
                 "description": {
@@ -15623,7 +16376,7 @@ var doc = `{
                 }
             }
         },
-        "company_service.GetProjectListResponse": {
+        "ucode_ucode_go_auth_service_genproto_company_service.GetProjectListResponse": {
             "type": "object",
             "properties": {
                 "count": {
@@ -15632,12 +16385,12 @@ var doc = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.Project"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Project"
                     }
                 }
             }
         },
-        "company_service.Language": {
+        "ucode_ucode_go_auth_service_genproto_company_service.Language": {
             "type": "object",
             "properties": {
                 "id": {
@@ -15654,20 +16407,20 @@ var doc = `{
                 }
             }
         },
-        "company_service.Project": {
+        "ucode_ucode_go_auth_service_genproto_company_service.Project": {
             "type": "object",
             "properties": {
                 "company_id": {
                     "type": "string"
                 },
                 "currency": {
-                    "$ref": "#/definitions/company_service.Currency"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Currency"
                 },
                 "k8s_namespace": {
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/company_service.Language"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
                 },
                 "logo": {
                     "type": "string"
@@ -15678,22 +16431,22 @@ var doc = `{
                 "resources": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.ResourceWithoutPassword"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword"
                     }
                 },
                 "timezone": {
-                    "$ref": "#/definitions/company_service.Timezone"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Timezone"
                 },
                 "title": {
                     "type": "string"
                 }
             }
         },
-        "company_service.Resource": {
+        "ucode_ucode_go_auth_service_genproto_company_service.Resource": {
             "type": "object",
             "properties": {
                 "credentials": {
-                    "$ref": "#/definitions/company_service.Resource_Credentials"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Resource_Credentials"
                 },
                 "id": {
                     "type": "string"
@@ -15705,7 +16458,7 @@ var doc = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
@@ -15715,16 +16468,31 @@ var doc = `{
                 }
             }
         },
-        "company_service.ResourceWithoutPassword": {
+        "ucode_ucode_go_auth_service_genproto_company_service.ResourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ResourceType_NOT_DECIDED",
+                "ResourceType_MONGODB",
+                "ResourceType_CLICKHOUSE",
+                "ResourceType_POSTGRESQL"
+            ]
+        },
+        "ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword": {
             "type": "object",
             "properties": {
                 "credentials": {
-                    "$ref": "#/definitions/company_service.ResourceWithoutPassword_Credentials"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Credentials"
                 },
                 "environments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/company_service.ResourceWithoutPassword_Environment"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Environment"
                     }
                 },
                 "id": {
@@ -15734,14 +16502,14 @@ var doc = `{
                     "type": "string"
                 },
                 "resource_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceType"
                 },
                 "title": {
                     "type": "string"
                 }
             }
         },
-        "company_service.ResourceWithoutPassword_Credentials": {
+        "ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Credentials": {
             "type": "object",
             "properties": {
                 "database": {
@@ -15758,7 +16526,7 @@ var doc = `{
                 }
             }
         },
-        "company_service.ResourceWithoutPassword_Environment": {
+        "ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Environment": {
             "type": "object",
             "properties": {
                 "default": {
@@ -15784,7 +16552,7 @@ var doc = `{
                 }
             }
         },
-        "company_service.Resource_Credentials": {
+        "ucode_ucode_go_auth_service_genproto_company_service.Resource_Credentials": {
             "type": "object",
             "properties": {
                 "database": {
@@ -16060,13 +16828,13 @@ var doc = `{
                 }
             }
         },
-        "models.Sms": {
+        "ucode_ucode_go_auth_service_genproto_company_service.Timezone": {
             "type": "object",
             "properties": {
-                "client_type": {
+                "id": {
                     "type": "string"
                 },
-                "recipient": {
+                "name": {
                     "type": "string"
                 },
                 "text": {
@@ -16074,36 +16842,30 @@ var doc = `{
                 }
             }
         },
-        "models.StructBody": {
+        "ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataReq": {
             "type": "object",
             "properties": {
-                "body": {
-                    "type": "object",
-                    "additionalProperties": true
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
-        "models.Verify": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/object_builder_service.V2LoginResponse"
-                },
-                "google_token": {
-                    "type": "string"
-                },
-                "register_type": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.Object"
-                    }
-                }
-            }
+        "ucode_ucode_go_auth_service_genproto_company_service.UpdateProjectUserDataRes": {
+            "type": "object"
         },
-        "object_builder_service.ClientPlatform": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.ClientPlatform": {
             "type": "object",
             "properties": {
                 "guid": {
@@ -16120,11 +16882,11 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.ClientType": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.ClientType": {
             "type": "object",
             "properties": {
                 "confirm_by": {
-                    "type": "integer"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ConfirmStrategies"
                 },
                 "guid": {
                     "type": "string"
@@ -16144,23 +16906,36 @@ var doc = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.TableClientType"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.TableClientType"
                     }
                 }
             }
         },
-        "object_builder_service.GetListWithRoleAppTablePermissionsResponse": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.ConfirmStrategies": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ConfirmStrategies_UNDECIDED",
+                "ConfirmStrategies_PHONE",
+                "ConfirmStrategies_EMAIL"
+            ]
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions"
                 },
                 "project_id": {
                     "type": "string"
                 }
             }
         },
-        "object_builder_service.RecordPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
                 "client_type_id": {
@@ -16189,7 +16964,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.Role": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.Role": {
             "type": "object",
             "properties": {
                 "client_platform_id": {
@@ -16209,13 +16984,13 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions": {
             "type": "object",
             "properties": {
                 "apps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App"
                     }
                 },
                 "client_platform_id": {
@@ -16235,7 +17010,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App": {
             "type": "object",
             "properties": {
                 "description": {
@@ -16253,22 +17028,22 @@ var doc = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table"
                     }
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App_Table": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table": {
             "type": "object",
             "properties": {
                 "action_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission"
                     }
                 },
                 "automatic_filters": {
-                    "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod"
                 },
                 "description": {
                     "type": "string"
@@ -16279,7 +17054,7 @@ var doc = `{
                 "field_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission"
                     }
                 },
                 "icon": {
@@ -16295,7 +17070,7 @@ var doc = `{
                     "type": "string"
                 },
                 "record_permissions": {
-                    "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission"
                 },
                 "show_in_menu": {
                     "type": "boolean"
@@ -16309,7 +17084,7 @@ var doc = `{
                 "view_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission"
                     }
                 },
                 "with_increment_id": {
@@ -16317,7 +17092,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission": {
             "type": "object",
             "properties": {
                 "custom_event_id": {
@@ -16334,7 +17109,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter": {
             "type": "object",
             "properties": {
                 "custom_field": {
@@ -16348,36 +17123,36 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod": {
             "type": "object",
             "properties": {
                 "delete": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
                     }
                 },
                 "read": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
                     }
                 },
                 "update": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
                     }
                 },
                 "write": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
                     }
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission": {
             "type": "object",
             "properties": {
                 "edit_permission": {
@@ -16397,7 +17172,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission": {
             "type": "object",
             "properties": {
                 "delete": {
@@ -16423,7 +17198,7 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission": {
             "type": "object",
             "properties": {
                 "guid": {
@@ -16440,11 +17215,11 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.TableClientType": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.TableClientType": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -16463,23 +17238,23 @@ var doc = `{
                 }
             }
         },
-        "object_builder_service.V2LoginResponse": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse": {
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RecordPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission"
                     }
                 },
                 "client_platform": {
-                    "$ref": "#/definitions/object_builder_service.ClientPlatform"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientPlatform"
                 },
                 "client_type": {
-                    "$ref": "#/definitions/object_builder_service.ClientType"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientType"
                 },
                 "login_table_slug": {
                     "type": "string"
@@ -16487,11 +17262,11 @@ var doc = `{
                 "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/object_builder_service.RecordPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission"
                     }
                 },
                 "role": {
-                    "$ref": "#/definitions/object_builder_service.Role"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.Role"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -16501,35 +17276,11 @@ var doc = `{
                 }
             }
         },
-        "structpb.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/structpb.Value"
-                    }
-                }
-            }
-        },
-        "structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue",
-                    "$ref": "#/definitions/structpb.isValue_Kind"
-                }
-            }
-        },
-        "structpb.isValue_Kind": {
-            "type": "object"
-        },
-        "web_page_service.App": {
+        "ucode_ucode_go_auth_service_genproto_web_page_service.App": {
             "type": "object",
             "properties": {
                 "Routes": {
-                    "$ref": "#/definitions/structpb.Struct"
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "environment_id": {
                     "type": "string"
@@ -16544,7 +17295,7 @@ var doc = `{
                     "type": "string"
                 },
                 "pages": {
-                    "$ref": "#/definitions/web_page_service.Pages"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.Pages"
                 },
                 "project_id": {
                     "type": "string"
@@ -16557,13 +17308,13 @@ var doc = `{
                 }
             }
         },
-        "web_page_service.GetListAppRes": {
+        "ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes": {
             "type": "object",
             "properties": {
                 "Apps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/web_page_service.App"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.App"
                     }
                 },
                 "count": {
@@ -16571,7 +17322,7 @@ var doc = `{
                 }
             }
         },
-        "web_page_service.Pages": {
+        "ucode_ucode_go_auth_service_genproto_web_page_service.Pages": {
             "type": "object",
             "properties": {
                 "default_page": {
@@ -16581,53 +17332,460 @@ var doc = `{
                     "type": "string"
                 }
             }
+        },
+        "url.URL": {
+            "type": "object",
+            "properties": {
+                "forceQuery": {
+                    "description": "append a query ('?') even if RawQuery is empty",
+                    "type": "boolean"
+                },
+                "fragment": {
+                    "description": "fragment for references, without '#'",
+                    "type": "string"
+                },
+                "host": {
+                    "description": "host or host:port",
+                    "type": "string"
+                },
+                "opaque": {
+                    "description": "encoded opaque data",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "path (relative paths may omit leading slash)",
+                    "type": "string"
+                },
+                "rawFragment": {
+                    "description": "encoded fragment hint (see EscapedFragment method)",
+                    "type": "string"
+                },
+                "rawPath": {
+                    "description": "encoded path hint (see EscapedPath method)",
+                    "type": "string"
+                },
+                "rawQuery": {
+                    "description": "encoded query values, without '?'",
+                    "type": "string"
+                },
+                "scheme": {
+                    "type": "string"
+                },
+                "user": {
+                    "description": "username and password information",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/url.Userinfo"
+                        }
+                    ]
+                }
+            }
+        },
+        "url.Userinfo": {
+            "type": "object"
+        },
+        "url.Values": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "x509.Certificate": {
+            "type": "object",
+            "properties": {
+                "authorityKeyId": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "basicConstraintsValid": {
+                    "description": "BasicConstraintsValid indicates whether IsCA, MaxPathLen,\nand MaxPathLenZero are valid.",
+                    "type": "boolean"
+                },
+                "crldistributionPoints": {
+                    "description": "CRL Distribution Points",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "dnsnames": {
+                    "description": "Subject Alternate Name values. (Note that these values may not be valid\nif invalid values were contained within a parsed certificate. For\nexample, an element of DNSNames may not be a valid DNS domain name.)",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "emailAddresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "excludedDNSDomains": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "excludedEmailAddresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "excludedIPRanges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/net.IPNet"
+                    }
+                },
+                "excludedURIDomains": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "extKeyUsage": {
+                    "description": "Sequence of extended key usages.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/x509.ExtKeyUsage"
+                    }
+                },
+                "extensions": {
+                    "description": "Extensions contains raw X.509 extensions. When parsing certificates,\nthis can be used to extract non-critical extensions that are not\nparsed by this package. When marshaling certificates, the Extensions\nfield is ignored, see ExtraExtensions.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pkix.Extension"
+                    }
+                },
+                "extraExtensions": {
+                    "description": "ExtraExtensions contains extensions to be copied, raw, into any\nmarshaled certificates. Values override any extensions that would\notherwise be produced based on the other fields. The ExtraExtensions\nfield is not populated when parsing certificates, see Extensions.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pkix.Extension"
+                    }
+                },
+                "ipaddresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "isCA": {
+                    "type": "boolean"
+                },
+                "issuer": {
+                    "$ref": "#/definitions/pkix.Name"
+                },
+                "issuingCertificateURL": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "keyUsage": {
+                    "$ref": "#/definitions/x509.KeyUsage"
+                },
+                "maxPathLen": {
+                    "description": "MaxPathLen and MaxPathLenZero indicate the presence and\nvalue of the BasicConstraints' \"pathLenConstraint\".\n\nWhen parsing a certificate, a positive non-zero MaxPathLen\nmeans that the field was specified, -1 means it was unset,\nand MaxPathLenZero being true mean that the field was\nexplicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false\nshould be treated equivalent to -1 (unset).\n\nWhen generating a certificate, an unset pathLenConstraint\ncan be requested with either MaxPathLen == -1 or using the\nzero value for both MaxPathLen and MaxPathLenZero.",
+                    "type": "integer"
+                },
+                "maxPathLenZero": {
+                    "description": "MaxPathLenZero indicates that BasicConstraintsValid==true\nand MaxPathLen==0 should be interpreted as an actual\nmaximum path length of zero. Otherwise, that combination is\ninterpreted as MaxPathLen not being set.",
+                    "type": "boolean"
+                },
+                "notBefore": {
+                    "description": "Validity bounds.",
+                    "type": "string"
+                },
+                "ocspserver": {
+                    "description": "RFC 5280, 4.2.2.1 (Authority Information Access)",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "permittedDNSDomains": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "permittedDNSDomainsCritical": {
+                    "description": "Name constraints",
+                    "type": "boolean"
+                },
+                "permittedEmailAddresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "permittedIPRanges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/net.IPNet"
+                    }
+                },
+                "permittedURIDomains": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "policyIdentifiers": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "publicKey": {},
+                "publicKeyAlgorithm": {
+                    "$ref": "#/definitions/x509.PublicKeyAlgorithm"
+                },
+                "raw": {
+                    "description": "Complete ASN.1 DER content (certificate, signature algorithm and signature).",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "rawIssuer": {
+                    "description": "DER encoded Issuer",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "rawSubject": {
+                    "description": "DER encoded Subject",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "rawSubjectPublicKeyInfo": {
+                    "description": "DER encoded SubjectPublicKeyInfo.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "rawTBSCertificate": {
+                    "description": "Certificate part of raw ASN.1 DER content.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "serialNumber": {
+                    "$ref": "#/definitions/big.Int"
+                },
+                "signature": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "signatureAlgorithm": {
+                    "$ref": "#/definitions/x509.SignatureAlgorithm"
+                },
+                "subject": {
+                    "$ref": "#/definitions/pkix.Name"
+                },
+                "subjectKeyId": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "unhandledCriticalExtensions": {
+                    "description": "UnhandledCriticalExtensions contains a list of extension IDs that\nwere not (fully) processed when parsing. Verify will fail if this\nslice is non-empty, unless verification is delegated to an OS\nlibrary which understands all the critical extensions.\n\nUsers can access these extensions using Extensions and can remove\nelements from this slice if they believe that they have been\nhandled.",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "unknownExtKeyUsage": {
+                    "description": "Encountered extended key usages unknown to this package.",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "uris": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/url.URL"
+                    }
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "x509.ExtKeyUsage": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ],
+            "x-enum-varnames": [
+                "ExtKeyUsageAny",
+                "ExtKeyUsageServerAuth",
+                "ExtKeyUsageClientAuth",
+                "ExtKeyUsageCodeSigning",
+                "ExtKeyUsageEmailProtection",
+                "ExtKeyUsageIPSECEndSystem",
+                "ExtKeyUsageIPSECTunnel",
+                "ExtKeyUsageIPSECUser",
+                "ExtKeyUsageTimeStamping",
+                "ExtKeyUsageOCSPSigning",
+                "ExtKeyUsageMicrosoftServerGatedCrypto",
+                "ExtKeyUsageNetscapeServerGatedCrypto",
+                "ExtKeyUsageMicrosoftCommercialCodeSigning",
+                "ExtKeyUsageMicrosoftKernelCodeSigning"
+            ]
+        },
+        "x509.KeyUsage": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32,
+                64,
+                128,
+                256
+            ],
+            "x-enum-varnames": [
+                "KeyUsageDigitalSignature",
+                "KeyUsageContentCommitment",
+                "KeyUsageKeyEncipherment",
+                "KeyUsageDataEncipherment",
+                "KeyUsageKeyAgreement",
+                "KeyUsageCertSign",
+                "KeyUsageCRLSign",
+                "KeyUsageEncipherOnly",
+                "KeyUsageDecipherOnly"
+            ]
+        },
+        "x509.PublicKeyAlgorithm": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-comments": {
+                "DSA": "Unsupported."
+            },
+            "x-enum-varnames": [
+                "UnknownPublicKeyAlgorithm",
+                "RSA",
+                "DSA",
+                "ECDSA",
+                "Ed25519"
+            ]
+        },
+        "x509.SignatureAlgorithm": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16
+            ],
+            "x-enum-comments": {
+                "DSAWithSHA1": "Unsupported.",
+                "DSAWithSHA256": "Unsupported.",
+                "ECDSAWithSHA1": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses.",
+                "MD2WithRSA": "Unsupported.",
+                "MD5WithRSA": "Only supported for signing, not verification.",
+                "SHA1WithRSA": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses."
+            },
+            "x-enum-varnames": [
+                "UnknownSignatureAlgorithm",
+                "MD2WithRSA",
+                "MD5WithRSA",
+                "SHA1WithRSA",
+                "SHA256WithRSA",
+                "SHA384WithRSA",
+                "SHA512WithRSA",
+                "DSAWithSHA1",
+                "DSAWithSHA256",
+                "ECDSAWithSHA1",
+                "ECDSAWithSHA256",
+                "ECDSAWithSHA384",
+                "ECDSAWithSHA512",
+                "SHA256WithRSAPSS",
+                "SHA384WithRSAPSS",
+                "SHA512WithRSAPSS",
+                "PureEd25519"
+            ]
         }
     }
 }`
 
-type swaggerInfo struct {
-	Version     string
-	Host        string
-	BasePath    string
-	Schemes     []string
-	Title       string
-	Description string
-}
-
 // SwaggerInfo holds exported Swagger Info so clients can modify it
-var SwaggerInfo = swaggerInfo{
-	Version:     "",
-	Host:        "",
-	BasePath:    "",
-	Schemes:     []string{},
-	Title:       "",
-	Description: "This is a api gateway",
-}
-
-type s struct{}
-
-func (s *s) ReadDoc() string {
-	sInfo := SwaggerInfo
-	sInfo.Description = strings.Replace(sInfo.Description, "\n", "\\n", -1)
-
-	t, err := template.New("swagger_info").Funcs(template.FuncMap{
-		"marshal": func(v interface{}) string {
-			a, _ := json.Marshal(v)
-			return string(a)
-		},
-	}).Parse(doc)
-	if err != nil {
-		return doc
-	}
-
-	var tpl bytes.Buffer
-	if err := t.Execute(&tpl, sInfo); err != nil {
-		return doc
-	}
-
-	return tpl.String()
+var SwaggerInfo = &swag.Spec{
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
+	Schemes:          []string{},
+	Title:            "",
+	Description:      "This is a api gateway",
+	InfoInstanceName: "swagger",
+	SwaggerTemplate:  docTemplate,
 }
 
 func init() {
-	swag.Register(swag.Name, &s{})
+	swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
 }
