@@ -502,7 +502,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	fmt.Println(":::RegisterEmailOtp:::")
 	var (
-		body                  models.RegisterOtp
+		body models.RegisterOtp
 		resourceEnvironment   *obs.ResourceEnvironment
 		CompanyId             string
 		ProjectId             string
@@ -519,7 +519,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "register_type required")
 		return
 	}
-
+	
 	resourceId, ok := c.Get("resource_id")
 	if !ok || !util.IsValidUUID(resourceId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
@@ -556,7 +556,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
 
-	if body.Data["register_type"] != cfg.WithGoogle {
+	if body.Data["register_type"] != cfg.WithGoogle && body.Data["register_type"] != cfg.WithApple {
 		body.Data["register_type"] = cfg.Default
 	}
 
@@ -605,6 +605,47 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			fmt.Println("::::::::::::: test 3")
 			body.Data["email"] = userInfo["email"]
 			body.Data["name"] = userInfo["name"]
+
+			userId = resp.Id
+
+		}
+	case cfg.WithApple:
+		{
+
+			if body.Data["apple_code"] == nil || body.Data["apple_code"] == "" {
+				h.handleResponse(c, http.BadRequest, "apple_code  required when register_type is apple")
+				return
+			}
+
+			appleConfig, err := h.GetAppleConfig(ProjectId)
+
+			if err != nil {
+				h.handleResponse(c, http.BadRequest, "can't get apple configs to get user info")
+				return
+			}
+
+			userInfo, err := helper.GetAppleUserInfo(body.Data["apple_code"].(string), appleConfig)
+			if err != nil {
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+
+			fmt.Println("::::::::::::: test 1122....")
+			body.Data["email"] = userInfo.Email
+			resp, err := h.services.UserService().RegisterWithGoogle(
+				c.Request.Context(),
+				&pb.RegisterWithGoogleRequest{
+					Email:                 userInfo.Email,
+					ProjectId:             ProjectId,
+					CompanyId:             CompanyId,
+					ClientTypeId:          "WEB_USER",
+					ResourceEnvironmentId: ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
 
 			userId = resp.Id
 
@@ -660,7 +701,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 
 		}
 	}
-
+	
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 		Email:      body.Data["email"].(string),

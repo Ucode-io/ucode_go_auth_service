@@ -8,7 +8,6 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/saidamir98/udevs_pkg/logger"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -25,6 +24,7 @@ func SetUpServer(cfg config.Config, log logger.LoggerI, strg storage.StorageI, s
 	auth_service.RegisterCompanyServiceServer(grpcServer, service.NewCompanyService(cfg, log, strg, svcs))
 	auth_service.RegisterProjectServiceServer(grpcServer, service.NewProjectService(cfg, log, strg, svcs))
 	auth_service.RegisterApiKeysServer(grpcServer, service.NewApiKeysService(cfg, log, strg, svcs))
+    auth_service.RegisterAppleIdLoginServiceServer(grpcServer,service.NewAppleSettingsService(cfg,log,strg,svcs))
 	reflection.Register(grpcServer)
 	return
 }

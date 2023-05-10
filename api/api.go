@@ -220,6 +220,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	v2.GET("/email-settings", h.GetEmailSettings)
 	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
 
+	v2.POST("/apple-id-settings", h.CreateAppleIdSettings)
+	v2.PUT("/apple-id-settings", h.UpdateAppleIdSettings)
+	v2.GET("/apple-id-settings", h.GetAppleIdSettings)
+	v2.DELETE("/apple-id-settings/:id", h.DeleteAppleIdSettings)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return
 }

@@ -30,6 +30,7 @@ type Store struct {
 	company         storage.CompanyRepoI
 	project         storage.ProjectRepoI
 	apiKeys         storage.ApiKeysRepoI
+	appleId         storage.AppleSettingsI
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -212,4 +213,11 @@ func (s *Store) ApiKeys() storage.ApiKeysRepoI {
 		s.apiKeys = NewApiKeysRepo(s.db)
 	}
 	return s.apiKeys
+}
+
+func (s *Store) AppleSettings() storage.AppleSettingsI {
+	if s.appleId ==nil {
+		 s.appleId = NewAppleSettingsRepo(s.db)
+	}
+	return s.appleId
 }
