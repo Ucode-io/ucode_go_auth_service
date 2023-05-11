@@ -462,6 +462,62 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 			h.handleResponse(c, http.Created, res)
 			return
 		}
+	case cfg.WithApple:
+		{
+			if body.AppleCode == "" {
+				h.handleResponse(c, http.BadRequest, "apple code is required when register type is apple id")
+				return
+			}
+
+			appleConfig, err := h.GetAppleConfig(resourceEnvironment.ProjectId)
+
+			if err != nil {
+				h.handleResponse(c, http.BadRequest, "can't get apple configs to get user info")
+				return
+			}
+
+			userInfo, err := helper.GetAppleUserInfo(body.AppleCode, appleConfig)
+			if err != nil {
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+            
+		
+			respObject, err := h.services.LoginService().LoginWithEmailOtp(
+				c.Request.Context(),
+				&pbObject.EmailOtpRequest{
+					ClientType: "WEB_USER",
+					TableSlug:  "user",
+					Email:      userInfo.Email,
+					ProjectId:  resourceEnvironment.GetId(),
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+
+			if respObject == nil || !respObject.UserFound {
+				h.handleResponse(c, http.OK, "User verified with apple code but not found")
+				return
+			}
+
+			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
+			res, err := h.services.SessionService().SessionAndTokenGenerator(
+				context.Background(),
+				&pb.SessionAndTokenRequest{
+					LoginData: convertedToAuthPb,
+					Tables:    body.Tables,
+					ProjectId: resourceEnvironment.GetProjectId(), 
+				})
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+
+			h.handleResponse(c, http.Created, res)
+			return
+		}
 	}
 	if !body.Data.UserFound {
 		h.handleResponse(c, http.OK, "User verified but not found")
