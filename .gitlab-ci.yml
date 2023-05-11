@@ -48,7 +48,7 @@ migrate-dev:
   extends: .migrate_template
   variables:
     PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_AUTH_SERVICE_devDB
+    POSTGRES_LINK: $UCODE_AUTH_SERVICE_DEVDB
   only:
     - dev
 
