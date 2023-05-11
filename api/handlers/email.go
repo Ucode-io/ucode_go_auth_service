@@ -502,7 +502,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	fmt.Println(":::RegisterEmailOtp:::")
 	var (
-		body models.RegisterOtp
+		body                  models.RegisterOtp
 		resourceEnvironment   *obs.ResourceEnvironment
 		CompanyId             string
 		ProjectId             string
@@ -519,7 +519,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "register_type required")
 		return
 	}
-	
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok || !util.IsValidUUID(resourceId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
@@ -640,6 +640,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					CompanyId:             CompanyId,
 					ClientTypeId:          "WEB_USER",
 					ResourceEnvironmentId: ResourceEnvironmentId,
+					ResourceType:          resourceEnvironment.ResourceType,
 				},
 			)
 			if err != nil {
@@ -701,7 +702,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 
 		}
 	}
-	
+
 	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 		Email:      body.Data["email"].(string),
