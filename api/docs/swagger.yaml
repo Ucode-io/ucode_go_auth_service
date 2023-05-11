@@ -834,10 +834,7 @@ definitions:
       user_id:
         type: string
     type: object
-<<<<<<< HEAD
-  ucode_ucode_go_auth_service_genproto_auth_service.Client:
-=======
-  auth_service.AppleIdSettings:
+  ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings:
     properties:
       client_id:
         type: string
@@ -852,8 +849,7 @@ definitions:
       team_id:
         type: string
     type: object
-  auth_service.Client:
->>>>>>> 3c7168a3beb8c5f838ab4e4a9e00606aa665942d
+  ucode_ucode_go_auth_service_genproto_auth_service.Client:
     properties:
       client_platform_id:
         type: string
@@ -1185,18 +1181,14 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session'
         type: array
     type: object
-<<<<<<< HEAD
-  ucode_ucode_go_auth_service_genproto_auth_service.GetListRes:
-=======
-  auth_service.GetListAppleIdSettingsResponse:
+  ucode_ucode_go_auth_service_genproto_auth_service.GetListAppleIdSettingsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/auth_service.AppleIdSettings'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
         type: array
     type: object
-  auth_service.GetListRes:
->>>>>>> 3c7168a3beb8c5f838ab4e4a9e00606aa665942d
+  ucode_ucode_go_auth_service_genproto_auth_service.GetListRes:
     properties:
       count:
         type: integer
@@ -1329,6 +1321,17 @@ definitions:
       title:
         type: string
       updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Language:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      native_name:
+        type: string
+      short_name:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest:
@@ -1647,6 +1650,15 @@ definitions:
       table_slug:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Timezone:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.Token:
     properties:
       access_token:
@@ -1872,8 +1884,8 @@ definitions:
         type: string
       id:
         type: string
-      language_id:
-        type: string
+      language:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Language'
       login:
         type: string
       name:
@@ -1888,8 +1900,8 @@ definitions:
         type: string
       role_id:
         type: string
-      timezone_id:
-        type: string
+      timezone:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Timezone'
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UserInfoField:
     properties:
@@ -2074,6 +2086,8 @@ definitions:
         type: array
       updated_at:
         type: string
+      user_id:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company_Project:
     properties:
@@ -2176,18 +2190,9 @@ definitions:
         type: string
       name_plural:
         type: string
-<<<<<<< HEAD
       rounding:
         type: integer
       symbol:
-=======
-    type: object
-  http.Response:
-    properties:
-      data:
-        type: object
-      description:
->>>>>>> 3c7168a3beb8c5f838ab4e4a9e00606aa665942d
         type: string
       symbol_native:
         type: string
@@ -2646,27 +2651,7 @@ definitions:
       user_id:
         type: string
     type: object
-<<<<<<< HEAD
   ucode_ucode_go_auth_service_genproto_web_page_service.App:
-=======
-  structpb.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  structpb.Value:
-    properties:
-      kind:
-        $ref: '#/definitions/structpb.isValue_Kind'
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-    type: object
-  structpb.isValue_Kind:
-    type: object
-  web_page_service.App:
->>>>>>> 3c7168a3beb8c5f838ab4e4a9e00606aa665942d
     properties:
       Routes:
         $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
@@ -3876,7 +3861,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: show service config data when the service environment set to debug mode
+      description: show service config data when the service environment set to debug
+        mode
       operationId: get_config
       produces:
       - application/json
@@ -6820,7 +6806,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.GetListAppleIdSettingsResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListAppleIdSettingsResponse'
               type: object
         "400":
           description: Bad Request
@@ -6858,7 +6844,7 @@ paths:
         name: registerBody
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AppleIdSettings'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
       produces:
       - application/json
       responses:
@@ -6869,7 +6855,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.AppleIdSettings'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
               type: object
         "400":
           description: Bad Request
@@ -6903,7 +6889,7 @@ paths:
         name: registerBody
         required: true
         schema:
-          $ref: '#/definitions/auth_service.AppleIdSettings'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
       produces:
       - application/json
       responses:
@@ -6914,7 +6900,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.AppleIdSettings'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
               type: object
         "400":
           description: Bad Request
@@ -6953,7 +6939,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Bad Request
           schema:
