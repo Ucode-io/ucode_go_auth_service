@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS "client_platform";
+DROP TABLE IF EXISTS "scope";
+DROP TABLE IF EXISTS "client_type";
+DROP TABLE IF EXISTS "user_info_field";
+DROP TABLE IF EXISTS "role";
+DROP TABLE IF EXISTS "role_permission";
+DROP TABLE IF EXISTS "integration";
+DROP TABLE IF EXISTS "client";
+DROP TABLE IF EXISTS "user_relation";
+DROP TABLE IF EXISTS "relation";
+DROP TABLE IF EXISTS "user_info";
+DROP TABLE IF EXISTS "permission";
+DROP TABLE IF EXISTS "permission_scope";
+
+DROP TYPE IF EXISTS "confirm_strategies";
+DROP TYPE IF EXISTS "relation_types";
+DROP TYPE IF EXISTS "login_strategies";
+DROP TYPE IF EXISTS "confirm_strategies";
+DROP TYPE IF EXISTS "confirm_strategies";

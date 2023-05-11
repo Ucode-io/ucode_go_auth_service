@@ -495,10 +495,10 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
-		Id:        tokenInfo.ID,
-		IsChanged: false,
-	})
+	//_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
+	//	Id:        tokenInfo.ID,
+	//	IsChanged: false,
+	//})
 	if err != nil {
 		s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -693,7 +693,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
 	fmt.Println("TEST:::::2")
-	sessionPKey, err := s.strg.Session().CreateSuperAdmin(ctx, &pb.CreateSessionRequest{
+	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		UserId:    input.LoginData.UserId,
 		Ip:        "0.0.0.0",
 		Data:      "additional json data",

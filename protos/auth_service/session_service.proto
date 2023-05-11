@@ -186,6 +186,7 @@ message CreateSessionRequest {
     string data = 8;
     string expires_at = 9;
     string integration_id = 10;
+    string env_id = 11;
 }
 
 message UpdateSessionRequest {
@@ -199,6 +200,7 @@ message UpdateSessionRequest {
     string data = 8;
     string expires_at = 9;
     bool is_changed = 10;
+    string env_id = 11;
 }
 
 message SessionPrimaryKey {
