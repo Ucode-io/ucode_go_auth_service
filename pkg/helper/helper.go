@@ -3,7 +3,6 @@ package helper
 import (
 	"crypto/rand"
 	"encoding/json"
-	"fmt"
 	"log"
 	"math/big"
 	"strconv"
@@ -82,12 +81,12 @@ func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]interface
 func ConverPhoneNumberToMongoPhoneFormat(input string) string {
 	//input +998995677777
 	input = input[4:]
-	fmt.Println("::::::::::::::::::::::::::::::::: test 1 helper")
+
 	// input  = 995677777
 	changedEl := input[:2]
-	fmt.Println("::::::::::::::::::::::::::::::::: test 2 helper")
+
 	input = "(" + changedEl + ") " + input[2:5] + "-" + input[5:7] + "-" + input[7:]
-	fmt.Println("::::::::::::::::::::::::::::::::: test 3 helper")
+
 	// input = (99) 567-77-77
 	return input
 }

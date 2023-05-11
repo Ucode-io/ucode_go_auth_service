@@ -331,6 +331,7 @@ message V2MultiCompanyLoginRes {
         string updated_at = 6;
         string owner_id = 7;
         repeated Project projects = 8;
+        string user_id = 9;
     }
     repeated Company companies = 1;
 }

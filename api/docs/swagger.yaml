@@ -834,6 +834,21 @@ definitions:
       user_id:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings:
+    properties:
+      client_id:
+        type: string
+      id:
+        type: string
+      key_id:
+        type: string
+      project_id:
+        type: string
+      secret:
+        type: string
+      team_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.Client:
     properties:
       client_platform_id:
@@ -1166,6 +1181,13 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Session'
         type: array
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetListAppleIdSettingsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetListRes:
     properties:
       count:
@@ -1299,6 +1321,17 @@ definitions:
       title:
         type: string
       updated_at:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Language:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      native_name:
+        type: string
+      short_name:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest:
@@ -1617,6 +1650,15 @@ definitions:
       table_slug:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Timezone:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.Token:
     properties:
       access_token:
@@ -1842,8 +1884,8 @@ definitions:
         type: string
       id:
         type: string
-      language_id:
-        type: string
+      language:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Language'
       login:
         type: string
       name:
@@ -1858,8 +1900,8 @@ definitions:
         type: string
       role_id:
         type: string
-      timezone_id:
-        type: string
+      timezone:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Timezone'
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UserInfoField:
     properties:
@@ -2043,6 +2085,8 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company_Project'
         type: array
       updated_at:
+        type: string
+      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginRes_Company_Project:
@@ -6740,6 +6784,183 @@ paths:
       summary: Refresh Api Key Token
       tags:
       - V2_ApiKey
+  /v2/apple-id-settings:
+    get:
+      consumes:
+      - application/json
+      description: GetListAppleIdSettings
+      operationId: getListAppleIdSettings
+      parameters:
+      - description: project_id
+        in: query
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Apple Config data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListAppleIdSettingsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: GetListAppleIdSettings
+      tags:
+      - AppleId
+    post:
+      consumes:
+      - application/json
+      description: CreateAppleIdSettings
+      operationId: createAppleIdSettings
+      parameters:
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: CreateAppleIdSettings
+      tags:
+      - AppleId
+    put:
+      consumes:
+      - application/json
+      description: UpdateAppleIdSettings
+      operationId: updateAppleIdSettings
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Apple Config data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: UpdateAppleIdSettings
+      tags:
+      - AppleId
+  /v2/apple-id-settings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteAppleIdSettings
+      operationId: deleteAppleIdSettings
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: DeleteAppleIdSettings
+      tags:
+      - AppleId
   /v2/client:
     delete:
       consumes:
