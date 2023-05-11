@@ -640,6 +640,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 					CompanyId:             CompanyId,
 					ClientTypeId:          "WEB_USER",
 					ResourceEnvironmentId: ResourceEnvironmentId,
+					ResourceType:          resourceEnvironment.ResourceType,
 				},
 			)
 			if err != nil {
