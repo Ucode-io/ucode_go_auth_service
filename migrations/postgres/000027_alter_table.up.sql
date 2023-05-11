@@ -8,7 +8,7 @@ ALTER TABLE "passcode" ADD COLUMN "item" VARCHAR;
 -- EMAIL SETTINGS
 ALTER TABLE "email_settings" ADD COLUMN "env_id" UUID NOT NULL DEFAULT 'b826f23b-403f-4775-bfe3-4a1ccf4e006e'::UUID;
 ALTER TABLE "email_settings" DROP CONSTRAINT "email_settings_project_id_key";
-ALTER TABLE "email_settings" ADD CONSTRAINT UNIQUE(project_id, env_id);
+ALTER TABLE "email_settings" ADD CONSTRAINT "email_settings_project_id_env_id_key" UNIQUE(project_id, env_id);
 ALTER TABLE "email_settings" RENAME TO "email_setting";
 
 -- LOGIN STRATEGY
