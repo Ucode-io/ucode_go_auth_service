@@ -87,7 +87,7 @@ deploy-dev:
   variables:
     NAMESPACE: ucode-dev
     VALUES_FILE: .helm/values-dev.yml
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only:
     - dev
 
@@ -104,7 +104,7 @@ rollback-dev:
   extends: .rollback_template
   variables:
     NAMESPACE: ucode-dev
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   when: manual
 
 rollback-prod:
