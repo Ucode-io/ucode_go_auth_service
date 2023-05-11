@@ -380,7 +380,6 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 	var login auth_service.V2MultiCompanyLoginReq
-
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
