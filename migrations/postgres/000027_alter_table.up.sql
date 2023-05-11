@@ -21,8 +21,13 @@ ALTER TABLE "login_strategy" DROP COLUMN "name";
 ALTER TABLE "login_strategy" ADD COLUMN "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL;
 
 -- USER | INFO
-ALTER TABLE "user_info" ADD COLUMN "project_id" UUID NOT NULL;
-ALTER TABLE "user_info" ADD COLUMN "env_id" UUID NOT NULL;
+CREATE TABLE IF NOT EXISTS "user_info" (
+    "user_id" UUID REFERENCES "user"("id"),
+    "data" JSONB,
+    "project_id" UUID NOT NULL,
+    "env_id" UUID NOT NULL,
+    UNIQUE(user_id, project_id, env_id)
+);
 
 -- SESSION
 DELETE FROM "session";
