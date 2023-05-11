@@ -31,4 +31,4 @@ CREATE TABLE IF NOT EXISTS "user_info" (
 
 -- SESSION
 DELETE FROM "session";
-ALTER TABLE "session" ADD COLUMN "env_id" UUID NOT NULL;
+ALTER TABLE "session" ADD COLUMN IF NOT EXISTS "env_id" UUID;

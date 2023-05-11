@@ -112,7 +112,11 @@ message LogoutRequest {
 }
 
 message RefreshTokenRequest {
-    string refresh_token = 2;
+    string refresh_token = 1;
+    string role_id = 2;
+    string client_type_id = 3;
+    string env_id = 4;
+    string project_id = 5;
 }
 
 message RefreshTokenResponse {

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 	"ucode/ucode_go_auth_service/config"
@@ -98,6 +99,8 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 
 func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (res *pb.Session, err error) {
 
+	res = &pb.Session{}
+
 	query := `SELECT
 		id,
 		coalesce(project_id::text, ''),
@@ -107,7 +110,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		TEXT(ip) AS ip,
 		data,
 		COALESCE(is_changed, FALSE),
-		env_id,
+		coalesce(env_id::text, ''),
 		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
 		COALESCE(TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS created_at,
 		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at
@@ -223,7 +226,7 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 }
 
 func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionRequest) (rowsAffected int64, err error) {
-
+	fmt.Println("\n>>>>>>>>>>>>>>>>>>>>>>>>>> UPDATE SESSION\n")
 	params := make(map[string]interface{})
 	queryInitial := `UPDATE "session" SET
         ip = :ip,
@@ -262,7 +265,7 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
 	}
 
 	query := queryInitial + filter
-
+	fmt.Println("\n.>>>>>>>>>>>>>>>>>>  STORAGE QUERY", query, "\n")
 	cQuery, arr := helper.ReplaceQueryParams(query, params)
 	result, err := r.db.Exec(ctx, cQuery, arr...)
 	if err != nil {
