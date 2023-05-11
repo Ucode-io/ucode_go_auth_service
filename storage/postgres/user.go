@@ -130,6 +130,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	}
 	res.Language = &lan
 	res.Timezone = &time
+
 	return res, nil
 }
 
