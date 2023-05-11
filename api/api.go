@@ -160,11 +160,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.GET("/user/:user-id", h.V2GetUserByID)
 		v2.PUT("/user", h.V2UpdateUser)
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
-		v2.POST("/login", h.V2Login)
+		v2.POST("/login", h.V2Login) // @TODO
 		v2.PUT("/refresh", h.V2RefreshToken)
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
-		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
-		v2.POST("/multi-company/login", h.V2MultiCompanyLogin)
+		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)      // @TODO
+		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
 		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
 		v2.POST("/user/invite", h.AddUserToProject)
 		v2.POST("/user/check", h.V2GetUserByLoginType)
@@ -219,6 +219,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	v2.PUT("/email-settings", h.UpdateEmailSettings)
 	v2.GET("/email-settings", h.GetEmailSettings)
 	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
+
+	v2.POST("/apple-id-settings", h.CreateAppleIdSettings)
+	v2.PUT("/apple-id-settings", h.UpdateAppleIdSettings)
+	v2.GET("/apple-id-settings", h.GetAppleIdSettings)
+	v2.DELETE("/apple-id-settings/:id", h.DeleteAppleIdSettings)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return

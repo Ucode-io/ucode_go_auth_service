@@ -34,6 +34,7 @@ type StorageI interface {
 	Company() CompanyRepoI
 	Project() ProjectRepoI
 	ApiKeys() ApiKeysRepoI
+	AppleSettings() AppleSettingsI
 }
 
 type ClientPlatformRepoI interface {
@@ -116,25 +117,23 @@ type RolePermissionRepoI interface {
 	GetByPK(ctx context.Context, pKey *pb.RolePermissionPrimaryKey) (res *pb.RolePermission, err error)
 }
 
-type (
-	UserRepoI interface {
-		GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyList) (res *pb.GetUserListResponse, err error)
-		Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error)
-		GetList(ctx context.Context, queryParam *pb.GetUserListRequest) (res *pb.GetUserListResponse, err error)
-		GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error)
-		Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error)
-		Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
-		GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
-		ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
-		GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
-		AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
-		GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
-		GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
-		GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error)
-		GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error)
-		GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error)
-	}
-)
+type UserRepoI interface {
+	GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyList) (res *pb.GetUserListResponse, err error)
+	Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error)
+	GetList(ctx context.Context, queryParam *pb.GetUserListRequest) (res *pb.GetUserListResponse, err error)
+	GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error)
+	Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error)
+	Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
+	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
+	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
+	GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
+	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
+	GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
+	GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
+	GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error)
+	GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error)
+	GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error)
+}
 
 type IntegrationRepoI interface {
 	GetListByPKs(ctx context.Context, pKeys *pb.IntegrationPrimaryKeyList) (res *pb.GetIntegrationListResponse, err error)
@@ -162,7 +161,6 @@ type UserInfoRepoI interface {
 
 type SessionRepoI interface {
 	Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error)
-	CreateSuperAdmin(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error)
 	GetList(ctx context.Context, queryParam *pb.GetSessionListRequest) (res *pb.GetSessionListResponse, err error)
 	GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (res *pb.Session, err error)
 	Update(ctx context.Context, entity *pb.UpdateSessionRequest) (rowsAffected int64, err error)
@@ -172,13 +170,12 @@ type SessionRepoI interface {
 	GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	GetSessionListByIntegrationID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error)
-	UpdateBySessionId(ctx context.Context, entity *pb.UpdateSessionBySessionIdRequest) (rowsAffected int64, err error)
 }
 
 type EmailRepoI interface {
 	Create(ctx context.Context, input *pb.Email) (*pb.Email, error)
 	GetByPK(ctx context.Context, input *pb.EmailOtpPrimaryKey) (*pb.Email, error)
-    CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error)
+	CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error)
 	UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error)
 	GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error)
 	DeleteEmailSettings(ctx context.Context, input *pb.EmailSettingsPrimaryKey) (*emptypb.Empty, error)
@@ -209,4 +206,12 @@ type ApiKeysRepoI interface {
 	Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffected int64, err error)
 	GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error)
 	GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error)
+}
+
+type AppleSettingsI interface {
+	Create(ctx context.Context, input *pb.AppleIdSettings) (*pb.AppleIdSettings, error)
+	GetByPK(ctx context.Context, pKey *pb.AppleIdSettingsPrimaryKey) (res *pb.AppleIdSettings, err error)
+	UpdateAppleSettings(ctx context.Context, input *pb.AppleIdSettings) (string, error)
+	GetListAppleSettings(ctx context.Context, input *pb.GetListAppleIdSettingsRequest) (*pb.GetListAppleIdSettingsResponse, error)
+	DeleteAppleSettings(ctx context.Context, input *pb.AppleIdSettingsPrimaryKey) (*emptypb.Empty, error)
 }

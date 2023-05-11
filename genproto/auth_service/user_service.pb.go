@@ -26,7 +26,7 @@ type SettingType int32
 
 const (
 	SettingType_LANGUAGE SettingType = 0
-	//    CURRENCY = 1;
+	// CURRENCY = 1;
 	SettingType_TIMEZONE SettingType = 2
 )
 
