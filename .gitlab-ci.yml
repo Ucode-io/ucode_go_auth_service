@@ -100,25 +100,6 @@ deploy-prod:
   only:
     - master
 
-<<<<<<< HEAD
-rollback-dev:
-  stage: rollback
-  extends: .rollback_template
-  variables:
-    NAMESPACE: ucode-dev
-    K8SCONFIGJSON: $UCODE_KUBECONFIG
-  when: manual
-=======
-deploy-dev:
-  stage: deploy
-  extends: .deploy_template
-  variables:
-    NAMESPACE: ucode-dev
-    VALUES_FILE: .helm/values-dev.yml
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  only:
-    - dev
->>>>>>> 4efe383f8c04638e697390b59c3b1297ee84867f
 
 rollback-staging:
   stage: rollback
