@@ -16,6 +16,15 @@ build-staging:
   only:
     - staging
 
+build-dev:
+  stage: build
+  extends: .build_template
+  variables:
+    ENV_TAG: test
+    DOCKERFILE: Dockerfile
+  only:
+    - dev
+
 build-prod:
   stage: build
   extends: .build_template
@@ -72,11 +81,29 @@ deploy-prod:
   only:
     - master
 
+deploy-dev:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    NAMESPACE: ucode-dev
+    VALUES_FILE: .helm/values-dev.yml
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
+  only:
+    - dev
+
 rollback-staging:
   stage: rollback
   extends: .rollback_template
   variables:
     NAMESPACE: test
+    K8SCONFIGJSON: $UCODE_KUBECONFIG
+  when: manual
+
+rollback-dev:
+  stage: rollback
+  extends: .rollback_template
+  variables:
+    NAMESPACE: ucode-dev
     K8SCONFIGJSON: $UCODE_KUBECONFIG
   when: manual
 
