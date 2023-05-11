@@ -17,6 +17,7 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
 	github.com/stretchr/testify v1.8.1
 	github.com/swaggo/gin-swagger v1.2.0
+	github.com/swaggo/swag v1.8.9
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.8.0
 	google.golang.org/grpc v1.52.0
@@ -25,7 +26,6 @@ require (
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
-	github.com/swaggo/swag v1.8.9 // indirect
 	github.com/tideland/golib v4.24.2+incompatible // indirect
 	github.com/tideland/gorest v2.15.5+incompatible // indirect
 )
