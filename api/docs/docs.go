@@ -15060,6 +15060,23 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.Language": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest": {
             "type": "object",
             "properties": {
@@ -15556,6 +15573,20 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.Timezone": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.Token": {
             "type": "object",
             "properties": {
@@ -15901,8 +15932,8 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "language_id": {
-                    "type": "string"
+                "language": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Language"
                 },
                 "login": {
                     "type": "string"
@@ -15925,8 +15956,8 @@ const docTemplate = `{
                 "role_id": {
                     "type": "string"
                 },
-                "timezone_id": {
-                    "type": "string"
+                "timezone": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Timezone"
                 }
             }
         },

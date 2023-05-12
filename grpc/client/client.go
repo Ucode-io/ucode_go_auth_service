@@ -35,35 +35,36 @@ type ServiceManagerI interface {
 	EmailService() auth_service.EmailOtpServiceClient
 	PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	PostgresLoginService() object_builder_service.LoginServiceClient
-	AppleIdService()  auth_service.AppleIdLoginServiceClient
+	AppleIdService() auth_service.AppleIdLoginServiceClient
+	PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient
 }
 
 type grpcClients struct {
-	integrationService           auth_service.IntegrationServiceClient
-	clientService                auth_service.ClientServiceClient
-	permissionService            auth_service.PermissionServiceClient
-	userService                  auth_service.UserServiceClient
-	sessionService               auth_service.SessionServiceClient
-	objectBuilderService         object_builder_service.ObjectBuilderServiceClient
-	smsService                   sms_service.SmsServiceClient
-	loginService                 object_builder_service.LoginServiceClient
-	emailService                 auth_service.EmailOtpServiceClient
-	companyService               auth_service.CompanyServiceClient
-	projectService               auth_service.ProjectServiceClient
-	companyServiceClient         company_service.CompanyServiceClient
-	projectServiceClient         company_service.ProjectServiceClient
-	builderPermissionService     object_builder_service.PermissionServiceClient
-	apiKeysClients               auth_service.ApiKeysClient
-	resourceService              company_service.ResourceServiceClient
-	environmentService           company_service.EnvironmentServiceClient
-	microServiceResourceService  company_service.MicroserviceResourceClient
-	webPageAppService            web_page_service.AppServiceClient
-	serviceResource              company_service.MicroserviceResourceClient
-	postgresObjectBuilderService object_builder_service.ObjectBuilderServiceClient
-	postgresLoginService         object_builder_service.LoginServiceClient
-	appleIdService               auth_service.AppleIdLoginServiceClient
+	integrationService               auth_service.IntegrationServiceClient
+	clientService                    auth_service.ClientServiceClient
+	permissionService                auth_service.PermissionServiceClient
+	userService                      auth_service.UserServiceClient
+	sessionService                   auth_service.SessionServiceClient
+	objectBuilderService             object_builder_service.ObjectBuilderServiceClient
+	smsService                       sms_service.SmsServiceClient
+	loginService                     object_builder_service.LoginServiceClient
+	emailService                     auth_service.EmailOtpServiceClient
+	companyService                   auth_service.CompanyServiceClient
+	projectService                   auth_service.ProjectServiceClient
+	companyServiceClient             company_service.CompanyServiceClient
+	projectServiceClient             company_service.ProjectServiceClient
+	builderPermissionService         object_builder_service.PermissionServiceClient
+	apiKeysClients                   auth_service.ApiKeysClient
+	resourceService                  company_service.ResourceServiceClient
+	environmentService               company_service.EnvironmentServiceClient
+	microServiceResourceService      company_service.MicroserviceResourceClient
+	webPageAppService                web_page_service.AppServiceClient
+	serviceResource                  company_service.MicroserviceResourceClient
+	postgresObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
+	postgresLoginService             object_builder_service.LoginServiceClient
+	appleIdService                   auth_service.AppleIdLoginServiceClient
+	postgresBuilderPermissionService object_builder_service.PermissionServiceClient
 }
-
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 	connAuthService, err := grpc.Dial(
@@ -116,29 +117,30 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 	}
 
 	return &grpcClients{
-		clientService:                auth_service.NewClientServiceClient(connAuthService),
-		permissionService:            auth_service.NewPermissionServiceClient(connAuthService),
-		userService:                  auth_service.NewUserServiceClient(connAuthService),
-		sessionService:               auth_service.NewSessionServiceClient(connAuthService),
-		integrationService:           auth_service.NewIntegrationServiceClient(connAuthService),
-		objectBuilderService:         object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
-		smsService:                   sms_service.NewSmsServiceClient(connSmsService),
-		loginService:                 object_builder_service.NewLoginServiceClient(connObjectBuilderService),
-		emailService:                 auth_service.NewEmailOtpServiceClient(connAuthService),
-		companyService:               auth_service.NewCompanyServiceClient(connAuthService),
-		projectService:               auth_service.NewProjectServiceClient(connAuthService),
-		companyServiceClient:         company_service.NewCompanyServiceClient(connCompanyService),
-		projectServiceClient:         company_service.NewProjectServiceClient(connCompanyService),
-		builderPermissionService:     object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
-		apiKeysClients:               auth_service.NewApiKeysClient(connAuthService),
-		resourceService:              company_service.NewResourceServiceClient(connCompanyService),
-		environmentService:           company_service.NewEnvironmentServiceClient(connCompanyService),
-		microServiceResourceService:  company_service.NewMicroserviceResourceClient(connCompanyService),
-		webPageAppService:            web_page_service.NewAppServiceClient(connWebPageService),
-		serviceResource:              company_service.NewMicroserviceResourceClient(connCompanyService),
-		postgresObjectBuilderService: object_builder_service.NewObjectBuilderServiceClient(connPostgresObjectBuilderService),
-		postgresLoginService:         object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
-        appleIdService:              auth_service.NewAppleIdLoginServiceClient(connAuthService),
+		clientService:                    auth_service.NewClientServiceClient(connAuthService),
+		permissionService:                auth_service.NewPermissionServiceClient(connAuthService),
+		userService:                      auth_service.NewUserServiceClient(connAuthService),
+		sessionService:                   auth_service.NewSessionServiceClient(connAuthService),
+		integrationService:               auth_service.NewIntegrationServiceClient(connAuthService),
+		objectBuilderService:             object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		smsService:                       sms_service.NewSmsServiceClient(connSmsService),
+		loginService:                     object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		emailService:                     auth_service.NewEmailOtpServiceClient(connAuthService),
+		companyService:                   auth_service.NewCompanyServiceClient(connAuthService),
+		projectService:                   auth_service.NewProjectServiceClient(connAuthService),
+		companyServiceClient:             company_service.NewCompanyServiceClient(connCompanyService),
+		projectServiceClient:             company_service.NewProjectServiceClient(connCompanyService),
+		builderPermissionService:         object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
+		apiKeysClients:                   auth_service.NewApiKeysClient(connAuthService),
+		resourceService:                  company_service.NewResourceServiceClient(connCompanyService),
+		environmentService:               company_service.NewEnvironmentServiceClient(connCompanyService),
+		microServiceResourceService:      company_service.NewMicroserviceResourceClient(connCompanyService),
+		webPageAppService:                web_page_service.NewAppServiceClient(connWebPageService),
+		serviceResource:                  company_service.NewMicroserviceResourceClient(connCompanyService),
+		postgresObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connPostgresObjectBuilderService),
+		postgresLoginService:             object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
+		appleIdService:                   auth_service.NewAppleIdLoginServiceClient(connAuthService),
+		postgresBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connPostgresObjectBuilderService),
 	}, nil
 }
 
@@ -232,4 +234,8 @@ func (g *grpcClients) PostgresLoginService() object_builder_service.LoginService
 
 func (g *grpcClients) AppleIdService() auth_service.AppleIdLoginServiceClient {
 	return g.appleIdService
+}
+
+func (g *grpcClients) PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient {
+	return g.postgresBuilderPermissionService
 }

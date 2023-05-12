@@ -1323,6 +1323,17 @@ definitions:
       updated_at:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Language:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      native_name:
+        type: string
+      short_name:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest:
     properties:
       password:
@@ -1649,6 +1660,15 @@ definitions:
       table_slug:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.Timezone:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.Token:
     properties:
       access_token:
@@ -1874,8 +1894,8 @@ definitions:
         type: string
       id:
         type: string
-      language_id:
-        type: string
+      language:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Language'
       login:
         type: string
       name:
@@ -1890,8 +1910,8 @@ definitions:
         type: string
       role_id:
         type: string
-      timezone_id:
-        type: string
+      timezone:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Timezone'
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UserInfoField:
     properties:

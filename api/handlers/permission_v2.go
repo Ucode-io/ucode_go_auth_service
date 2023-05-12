@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/gin-gonic/gin"
 )
@@ -944,6 +945,9 @@ func (h *Handler) V2RemoveRolePermission(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
+	var (
+		resp *object_builder_service.GetListWithRoleAppTablePermissionsResponse
+	)
 	// offset, err := h.getOffsetParam(c)
 	// if err != nil {
 	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -1016,18 +1020,34 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+	switch resource.ResourceType {
+	case pbCompany.ResourceType_MONGODB:
+		resp, err = h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
+			c.Request.Context(),
+			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
+				RoleId:    c.Param("role-id"),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	resp, err := h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
-		c.Request.Context(),
-		&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
-			RoleId:    c.Param("role-id"),
-			ProjectId: resource.ResourceEnvironmentId,
-		},
-	)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case pbCompany.ResourceType_POSTGRESQL:
+		resp, err = h.services.PostgresBuilderPermissionService().GetListWithRoleAppTablePermissions(
+			c.Request.Context(),
+			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
+				RoleId:    c.Param("role-id"),
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+
 	}
 
 	resp.ProjectId = projectId
@@ -1057,6 +1077,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	var (
 		permission object_builder_service.UpdateRoleAppTablePermissionsRequest
+		resp       *emptypb.Empty
 		// resourceEnvironment *obs.ResourceEnvironment
 	)
 
@@ -1124,15 +1145,27 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	}
 
 	permission.ProjectId = resource.ResourceEnvironmentId
+	switch resource.ResourceType {
+	case pbCompany.ResourceType_MONGODB:
+		resp, err = h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
+			c.Request.Context(),
+			&permission,
+		)
 
-	resp, err := h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
-		c.Request.Context(),
-		&permission,
-	)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case pbCompany.ResourceType_POSTGRESQL:
+		resp, err = h.services.PostgresBuilderPermissionService().UpdateRoleAppTablePermissions(
+			c.Request.Context(),
+			&permission,
+		)
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, http.OK, resp)
