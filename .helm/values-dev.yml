@@ -132,7 +132,7 @@ ingress:
         kubernetes.io/ingress.class: nginx
       type: auth
       hosts:
-        - host: "dev-auth-api.u-code.io"
+        - host: "dev-auth-api.ucode.run"
           path: /swagger
           servicePort: 8080
       tls:
