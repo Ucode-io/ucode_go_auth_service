@@ -77,6 +77,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error) {
 	res = &pb.User{}
+	res.Language = &pb.Language{}
+	res.Timezone = &pb.Timezone{}
 	query := `SELECT
 		id,
 		name,
@@ -105,8 +107,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.Login,
 		&res.Password,
 		&res.CompanyId,
-		&res.LanguageId,
-		&res.TimezoneId,
+		&res.Language.Id,
+		&res.Timezone.Id,
 		// &res.ExpiresAt,
 		// &res.CreatedAt,
 		// &res.UpdatedAt,
@@ -164,8 +166,8 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 			&createdAt,
 			&updatedAt,
 			&user.CompanyId,
-			&user.LanguageId,
-			&user.TimezoneId,
+			&user.Language,
+			&user.Timezone,
 		)
 
 		if err != nil {
@@ -289,8 +291,8 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 			&expiresAt,
 			&createdAt,
 			&updatedAt,
-			&obj.LanguageId,
-			&obj.TimezoneId,
+			&obj.Language,
+			&obj.Timezone,
 		)
 
 		if err != nil {
