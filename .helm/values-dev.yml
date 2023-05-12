@@ -116,7 +116,7 @@ ingress:
           path: /
           servicePort: 8080
       tls:
-        - secretName: auth-api-tls
+        - secretName: ucode-star
           hosts:
             - "dev-auth-api.ucode.run"
     - annotations:
@@ -136,7 +136,7 @@ ingress:
           path: /swagger
           servicePort: 8080
       tls:
-        - secretName: auth-api-tls
+        - secretName: ucode-star
           hosts:
             - "dev-auth-api.ucode.run"
 
