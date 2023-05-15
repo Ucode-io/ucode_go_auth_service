@@ -170,6 +170,7 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
 	if err != nil {
 		s.log.Error("!!!SuperAdminLogin--->", logger.Error(err))
+		fmt.Println("\n\n\asdads", err, "n\n")
 		if err == sql.ErrNoRows {
 			customError := errors.New("User not found")
 			return nil, status.Error(codes.NotFound, customError.Error())

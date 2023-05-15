@@ -42,7 +42,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		:user_id,
 		:ip,
 		:data,
-		:expires_at,`
+		:expires_at`
 
 	queryReturn := ` RETURNING id`
 	random, err := uuid.NewRandom()
@@ -76,16 +76,14 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 
 	if util.IsValidUUID(entity.RoleId) {
 		params["role_id"] = entity.ClientTypeId
-		queryInitial += `, role_id)`
-		queryValue += `, :role_id)`
+		queryInitial += `, role_id`
+		queryValue += `, :role_id`
 	}
 
-	query := queryInitial + queryValue + queryReturn
-
+	query := queryInitial + ")" + queryValue + ")" + queryReturn
 	cQuery, arr := helper.ReplaceQueryParams(query, params)
 
 	_, err = r.db.Exec(ctx, cQuery, arr...)
-
 	if err != nil {
 		return nil, err
 	}
