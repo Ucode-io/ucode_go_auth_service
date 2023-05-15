@@ -568,5 +568,6 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		CreatedAt: session.CreatedAt,
 		UpdatedAt: session.UpdatedAt,
 		Tables:    authTables,
+		EnvId:     session.EnvId,
 	}, nil
 }
