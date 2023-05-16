@@ -464,7 +464,6 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 
 func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAccessSuperAdminReq) (*pb.HasAccessSuperAdminRes, error) {
 	s.log.Info("---HasAccessSuperAdmin--->", logger.Any("req", req))
-
 	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!HasAccess--->", logger.Error(err))
@@ -473,13 +472,13 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
+		s.log.Error("!!!HasAccess session--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
 	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
+		s.log.Error("!!!HasAccess user--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
