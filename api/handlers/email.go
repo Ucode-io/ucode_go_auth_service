@@ -481,8 +481,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				h.handleResponse(c, http.BadRequest, err.Error())
 				return
 			}
-            
-		
+
 			respObject, err := h.services.LoginService().LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
@@ -508,7 +507,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				&pb.SessionAndTokenRequest{
 					LoginData: convertedToAuthPb,
 					Tables:    body.Tables,
-					ProjectId: resourceEnvironment.GetProjectId(), 
+					ProjectId: resourceEnvironment.GetProjectId(),
 				})
 			if err != nil {
 				h.handleResponse(c, http.GRPCError, err.Error())
@@ -587,7 +586,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
+	fmt.Println(">>>>>>>>>>>. test 1")
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
@@ -599,6 +598,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println(">>>>>>>>>>>. test 2")
 
 	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
 		ProjectId: resourceEnvironment.GetProjectId(),
