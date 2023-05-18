@@ -9,8 +9,8 @@ const (
 	DatabaseQueryTimeLayout = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
 	// DatabaseTimeLayout
 	DatabaseTimeLayout string = time.RFC3339
-	// AccessTokenExpiresInTime ...
-	AccessTokenExpiresInTime time.Duration = 1 * 24 * 60 * time.Minute
+	// AccessTokenExpiresInTime ... 1 * 24 *
+	AccessTokenExpiresInTime time.Duration = 5 * time.Minute
 	// RefreshTokenExpiresInTime ...
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
@@ -38,9 +38,9 @@ var (
 	// these apis also manage by app's permission
 
 	WithGoogle = "google"
-	Default = "default"
-	WithPhone = "phone"
-	WithApple = "apple"
+	Default    = "default"
+	WithPhone  = "phone"
+	WithApple  = "apple"
 
 	ObjectBuilderTableSlugs = map[string]int{
 		"field":               1,
