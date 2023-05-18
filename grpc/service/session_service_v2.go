@@ -204,6 +204,7 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
+	fmt.Println("get project id:", user.ProjectId)
 	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
 			UserFound:      true,
@@ -216,7 +217,7 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 			LoginTableSlug: "",
 			AppPermissions: []*pb.RecordPermission{},
 		},
-		ProjectId: "",
+		ProjectId: user.ProjectId,
 	})
 	if resp == nil {
 		err := errors.New("User Not Found")
@@ -600,6 +601,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	if err != nil {
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
+	fmt.Println("test input::", input.GetLoginData().Role)
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.GetProjectId(),

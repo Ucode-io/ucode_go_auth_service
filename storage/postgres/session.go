@@ -75,7 +75,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 	}
 
 	if util.IsValidUUID(entity.RoleId) {
-		params["role_id"] = entity.ClientTypeId
+		params["role_id"] = entity.RoleId
 		queryInitial += `, role_id`
 		queryValue += `, :role_id`
 	}

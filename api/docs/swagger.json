@@ -14979,6 +14979,9 @@
                 "data": {
                     "type": "string"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "expires_at": {
                     "type": "string"
                 },
@@ -16840,11 +16843,40 @@
                 "name": {
                     "type": "string"
                 },
+                "permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Permission"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Permission": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "delete": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "update": {
+                    "type": "boolean"
                 }
             }
         },

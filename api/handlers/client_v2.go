@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 
@@ -597,6 +598,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("project id:::", resource.ResourceEnvironmentId)
 
 	resp, err := h.services.ClientService().V2GetClientTypeList(
 		c.Request.Context(),
