@@ -273,18 +273,6 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if user.Active < 0 {
-		err := errors.New("user is not active")
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if user.Active == 0 {
-		err := errors.New("user hasn't been activated yet")
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
