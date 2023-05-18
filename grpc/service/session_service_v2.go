@@ -728,7 +728,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		"data":           session.Data,
 		"tables":         input.Tables,
 	}
-	fmt.Println("TEST:::::6")
+	fmt.Println("TEST:::::6", m)
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
