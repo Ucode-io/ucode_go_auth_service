@@ -274,7 +274,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("COMPANY::::5")
+		fmt.Println("COMPANY::::5", user.GetCompanyId())
 		company, err := h.services.CompanyServiceClient().GetById(c.Request.Context(), &obs.GetCompanyByIdRequest{
 			Id: user.GetCompanyId(),
 		})

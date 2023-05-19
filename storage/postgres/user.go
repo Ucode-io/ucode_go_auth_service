@@ -82,8 +82,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	)
 	query := `SELECT
 		u.id,
-		u.name,
-		u.photo_url,
+		coalesce(u.name, ''),
+		coalesce(u.photo_url, ''),
 		u.phone,
 		u.email,
 		u.login,
@@ -397,7 +397,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	query := `SELECT
 		id,
 		name,
-		photo_url,
+		coalesce(photo_url, ''),
 		phone,
 		email,
 		login,

@@ -254,7 +254,7 @@ func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 
 func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
 	res := &pb.RefreshTokenResponse{}
-	fmt.Println("\n>>> REQUEST SERVICE ", req, "\n")
+
 	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
@@ -268,7 +268,7 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 
 	session, err = s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken session getbypk--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -464,22 +464,21 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 
 func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAccessSuperAdminReq) (*pb.HasAccessSuperAdminRes, error) {
 	s.log.Info("---HasAccessSuperAdmin--->", logger.Any("req", req))
-
 	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
+		s.log.Error("!!!HasAccess token parse--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
+		s.log.Error("!!!HasAccess session--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
 	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
+		s.log.Error("!!!HasAccess user--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -568,5 +567,6 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		CreatedAt: session.CreatedAt,
 		UpdatedAt: session.UpdatedAt,
 		Tables:    authTables,
+		EnvId:     session.EnvId,
 	}, nil
 }
