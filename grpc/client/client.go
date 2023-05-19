@@ -37,6 +37,7 @@ type ServiceManagerI interface {
 	PostgresLoginService() object_builder_service.LoginServiceClient
 	AppleIdService() auth_service.AppleIdLoginServiceClient
 	PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient
+	LoginStrategyService() auth_service.LoginStrategyServiceClient
 }
 
 type grpcClients struct {
@@ -64,6 +65,7 @@ type grpcClients struct {
 	postgresLoginService             object_builder_service.LoginServiceClient
 	appleIdService                   auth_service.AppleIdLoginServiceClient
 	postgresBuilderPermissionService object_builder_service.PermissionServiceClient
+	loginStrategyService             auth_service.LoginStrategyServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -141,6 +143,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		postgresLoginService:             object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
 		appleIdService:                   auth_service.NewAppleIdLoginServiceClient(connAuthService),
 		postgresBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connPostgresObjectBuilderService),
+		loginStrategyService:             auth_service.NewLoginStrategyServiceClient(connAuthService),
 	}, nil
 }
 
@@ -238,4 +241,8 @@ func (g *grpcClients) AppleIdService() auth_service.AppleIdLoginServiceClient {
 
 func (g *grpcClients) PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient {
 	return g.postgresBuilderPermissionService
+}
+
+func (g *grpcClients) LoginStrategyService() auth_service.LoginStrategyServiceClient {
+	return g.loginStrategyService
 }

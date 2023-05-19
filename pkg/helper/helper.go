@@ -108,3 +108,19 @@ func cryptoRandSecure(max int64) int64 {
 	}
 	return nBig.Int64()
 }
+
+func ParsePsqlTypeToEnum(arg string) int32 {
+	enum := map[string]int32{
+		"PHONE_V2":     0,
+		"EMAIL_V2":     1,
+		"LOGIN_V2":     2,
+		"PHONE_OTP_V2": 3,
+		"EMAIL_OTP_V2": 4,
+		"LOGIN_PWD_V2": 5,
+		"PHONE_PWD_V2": 6,
+		"EMAIL_PWD_V2": 7,
+		"GOOGLE_V2":    8,
+		"APPLE_V2":     9,
+	}
+	return enum[arg]
+}

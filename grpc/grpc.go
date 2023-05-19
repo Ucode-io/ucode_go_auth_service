@@ -24,7 +24,8 @@ func SetUpServer(cfg config.Config, log logger.LoggerI, strg storage.StorageI, s
 	auth_service.RegisterCompanyServiceServer(grpcServer, service.NewCompanyService(cfg, log, strg, svcs))
 	auth_service.RegisterProjectServiceServer(grpcServer, service.NewProjectService(cfg, log, strg, svcs))
 	auth_service.RegisterApiKeysServer(grpcServer, service.NewApiKeysService(cfg, log, strg, svcs))
-    auth_service.RegisterAppleIdLoginServiceServer(grpcServer,service.NewAppleSettingsService(cfg,log,strg,svcs))
+	auth_service.RegisterAppleIdLoginServiceServer(grpcServer, service.NewAppleSettingsService(cfg, log, strg, svcs))
+	auth_service.RegisterLoginStrategyServiceServer(grpcServer, service.NewLoginStrategyService(cfg, log, strg, svcs))
 	reflection.Register(grpcServer)
 	return
 }

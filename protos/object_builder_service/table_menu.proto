@@ -1,0 +1,54 @@
+syntax="proto3";
+
+package object_builder_service;
+option go_package="genproto/object_builder_service";
+
+import "google/protobuf/empty.proto";
+
+service TableMenuService {
+    rpc Create(TableMenuRequest) returns (CreateTableMenuResponse) {}
+    rpc GetByID(TableMenuPrimaryKey) returns (TableMenu) {}
+    rpc GetAll(GetAllTableMenusRequest) returns (GetAllTableMenusResponse) {}
+    rpc Update(TableMenu) returns (google.protobuf.Empty) {}
+    rpc Delete(TableMenuPrimaryKey) returns (google.protobuf.Empty) {}
+}
+
+message TableMenuRequest {
+    string title = 1;
+    string project_id = 2;
+    string parent_id = 3;
+    string icon = 4;
+}
+
+message CreateTableMenuResponse {
+    string id = 1;
+    string title = 2;
+    string project_id = 3;
+    string icon = 4;
+}
+
+message TableMenu {
+    string id = 1;
+    string title = 2;
+    string project_id = 3;
+    string parent_id = 4;
+    string icon = 5;
+}
+
+
+message GetAllTableMenusResponse {
+    repeated TableMenu Menus = 1;
+    int32 count = 2;
+}
+
+message TableMenuPrimaryKey {
+    string id = 1;
+    string project_id = 2;
+}
+
+message GetAllTableMenusRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+    string search = 3;
+    string project_id = 4;
+}
