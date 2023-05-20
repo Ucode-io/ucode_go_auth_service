@@ -1004,6 +1004,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("session:::::::::::::::", session)
 	// if session.IsChanged {
 	// 	err := errors.New("permission update")
 	// 	s.log.Error("!!!V2HasAccessUser->IsChanged--->", logger.Error(err))
