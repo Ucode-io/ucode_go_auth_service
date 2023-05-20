@@ -396,8 +396,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	query := `SELECT
 		id,
-		name,
-		coalesce(photo_url, ''),
+		-- name,
+		-- coalesce(photo_url, ''),
 		phone,
 		email,
 		login,
@@ -419,8 +419,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	err = r.db.QueryRow(ctx, query, username).Scan(
 		&res.Id,
-		&res.Name,
-		&res.PhotoUrl,
+		// &res.Name,
+		// &res.PhotoUrl,
 		&res.Phone,
 		&res.Email,
 		&res.Login,

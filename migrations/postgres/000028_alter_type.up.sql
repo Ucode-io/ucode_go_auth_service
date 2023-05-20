@@ -1,6 +1,0 @@
-ALTER TYPE "login_strategy_type" RENAME VALUE 'PHONE' TO 'PHONE_V2';
-ALTER TYPE "login_strategy_type" RENAME VALUE 'EMAIL' TO 'EMAIL_V2';
-ALTER TYPE "login_strategy_type" RENAME VALUE 'LOGIN' TO 'LOGIN_V2';
-ALTER TYPE "login_strategy_type" RENAME VALUE 'PHONE_OTP' TO 'PHONE_OTP_V2';
-ALTER TYPE "login_strategy_type" RENAME VALUE 'EMAIL_OTP' TO 'EMAIL_OTP_V2';
-ALTER TYPE "login_strategy_type" RENAME VALUE 'LOGIN_PWD' TO 'LOGIN_PWD_V2';

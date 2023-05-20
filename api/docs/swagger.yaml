@@ -1834,6 +1834,8 @@ definitions:
     type: object
   models.Verify:
     properties:
+      apple_code:
+        type: string
       data:
         $ref: '#/definitions/object_builder_service.V2LoginResponse'
       google_token:

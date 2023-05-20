@@ -22,6 +22,7 @@ type Verify struct {
 	Tables       []*pb.Object              `json:"tables"`
 	RegisterType string                    `json:"register_type"`
 	GoogleToken  string                    `json:"google_token"`
+	AppleCode    string                    `json:"apple_code"`
 }
 
 type RegisterOtp struct {

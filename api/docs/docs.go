@@ -16484,6 +16484,9 @@ const docTemplate = `{
         "models.Verify": {
             "type": "object",
             "properties": {
+                "apple_code": {
+                    "type": "string"
+                },
                 "data": {
                     "$ref": "#/definitions/object_builder_service.V2LoginResponse"
                 },
