@@ -46,7 +46,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$3,
 		$4,
 		$5,
-		$6,
+		$6
 		-- $7,
 		-- $8
 	)`
