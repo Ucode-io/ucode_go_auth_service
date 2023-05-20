@@ -101,8 +101,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		-- TO_CHAR(u.updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"user" u
-		LEFT JOIN "language" l on u.language_id = l.id
-		LEFT JOIN "timezone" t on u.timezone_id = t.id
+		-- LEFT JOIN "language" l on u.language_id = l.id
+		-- LEFT JOIN "timezone" t on u.timezone_id = t.id
 	WHERE
 		u.id = $1`
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
