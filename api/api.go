@@ -194,7 +194,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		// login strategy
 		v2.GET("/login-strategy", h.GetLoginStrategy)
-		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
+		v2.GET("/login-strategy/{login-strategy-id}", h.GetLoginStrategyById)
 		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
 	}
 
