@@ -433,7 +433,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 				Data:      structData,
 				ProjectId: req.GetProjectId(),
 			})
-
 		if err != nil {
 			s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())

@@ -33,8 +33,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	query := `INSERT INTO "user" (
 		id,
-		name,
-		photo_url,
+		-- name,
+		-- photo_url,
 		phone,
 		email,
 		login,
@@ -47,8 +47,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$4,
 		$5,
 		$6,
-		$7,
-		$8
+		-- $7,
+		-- $8
 	)`
 
 	id, err := uuid.NewRandom()
@@ -58,8 +58,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	_, err = r.db.Exec(ctx, query,
 		id.String(),
-		entity.GetName(),
-		entity.GetPhotoUrl(),
+		// entity.GetName(),
+		// entity.GetPhotoUrl(),
 		entity.GetPhone(),
 		entity.GetEmail(),
 		entity.GetLogin(),
@@ -139,8 +139,8 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 	res = &pb.GetUserListResponse{}
 	query := `SELECT
 		id,
-		name,
-		photo_url,
+		-- name,
+		-- photo_url,
 		phone,
 		email,
 		login,
@@ -168,8 +168,8 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 		user := &pb.User{}
 		err = rows.Scan(
 			&user.Id,
-			&user.Name,
-			&user.PhotoUrl,
+			// &user.Name,
+			// &user.PhotoUrl,
 			&user.Phone,
 			&user.Email,
 			&user.Login,
@@ -211,9 +211,9 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	var arr []interface{}
 	query := `SELECT
 		id,
-		name,
+		-- name,
 		company_id,
-		photo_url,
+		-- photo_url,
 		phone,
 		email,
 		login,
@@ -230,7 +230,7 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 	if len(queryParam.Search) > 0 {
 		params["search"] = queryParam.Search
-		filter += " AND ((name || phone || email || login) ILIKE ('%' || :search || '%'))"
+		filter += " AND ((phone || email || login) ILIKE ('%' || :search || '%'))"
 	}
 
 	//if len(queryParam.ClientPlatformId) > 0 {
@@ -287,9 +287,9 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 		err = rows.Scan(
 			&obj.Id,
-			&obj.Name,
+			// &obj.Name,
 			&companyID,
-			&obj.PhotoUrl,
+			// &obj.PhotoUrl,
 			&obj.Phone,
 			&obj.Email,
 			&obj.Login,
@@ -328,28 +328,28 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		name = :name,
+		-- name = :name,
 		company_id = :company_id,
-		photo_url = :photo_url,
+		-- photo_url = :photo_url,
 		phone = :phone,
 		email = :email,
 		login = :login,
 		updated_at = now(),
-    	language_id = :language_id,
-        timezone_id = :timezone_id
+    	-- language_id = :language_id,
+        -- timezone_id = :timezone_id
 	WHERE
 		id = :id`
 
 	params := map[string]interface{}{
 		"id":          entity.GetId(),
-		"name":        entity.GetName(),
-		"photo_url":   entity.GetPhotoUrl(),
+		// "name":        entity.GetName(),
+		// "photo_url":   entity.GetPhotoUrl(),
 		"phone":       entity.GetPhone(),
 		"email":       entity.GetEmail(),
 		"login":       entity.GetLogin(),
 		"company_id":  entity.GetCompanyId(),
-		"language_id": entity.GetLanguageId(),
-		"timezone_id": entity.GetTimezoneId(),
+		// "language_id": entity.GetLanguageId(),
+		// "timezone_id": entity.GetTimezoneId(),
 	}
 	log.Println("language_id", entity.LanguageId, "timezone_id", entity.TimezoneId)
 	q, arr := helper.ReplaceQueryParams(query, params)
