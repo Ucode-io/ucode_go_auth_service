@@ -5,6 +5,7 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/saidamir98/udevs_pkg/util"
@@ -73,7 +74,6 @@ func (h *Handler) GetLoginStrategyById(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
 	h.handleResponse(c, http.Created, res)
 }
 
@@ -97,13 +97,18 @@ func (h *Handler) UpsertLoginStrategy(c *gin.Context) {
 	var (
 		loginStrategy auth_service.UpdateRequest
 	)
-
 	err := c.ShouldBindJSON(&loginStrategy)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
+	for _, value := range loginStrategy.LoginStrategies {
+		err := helper.ParsePsqlTypeToEnum(value.Type)
+		if err != nil {
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		}
+	}
 	res, err := h.services.LoginStrategyService().Upsert(ctx, &auth_service.UpdateRequest{
 		LoginStrategies: loginStrategy.GetLoginStrategies(),
 	})

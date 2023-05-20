@@ -14658,7 +14658,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },

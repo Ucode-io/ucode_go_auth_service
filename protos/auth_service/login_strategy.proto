@@ -36,14 +36,14 @@ message GetListResponse {
 
 message CreateRequest {
     string id = 1;
-    LoginStrategyType type = 2;
+    string type = 2;
     string project_id = 3;
     string env_id = 4;
 }
 
 message LoginStrategy {
     string id = 1;
-    LoginStrategyType type = 2;
+    string type = 2;
     string project_id = 3;
     string env_id = 4;
 }

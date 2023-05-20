@@ -644,7 +644,7 @@ definitions:
       project_id:
         type: string
       type:
-        type: integer
+        type: string
     type: object
   auth_service.LoginTable:
     properties:

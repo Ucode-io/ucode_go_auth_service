@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -41,18 +40,16 @@ func (ls *loginStrategyRepoI) GetList(ctx context.Context, req *pb.GetListReques
 	for rows.Next() {
 		var (
 			row = pb.LoginStrategy{}
-			t   string
 		)
 		err = rows.Scan(
 			&row.Id,
-			&t,
+			&row.Type,
 			&row.ProjectId,
 			&row.EnvId,
 		)
 		if err != nil {
 			return nil, err
 		}
-		row.Type = pb.LoginStrategyType(helper.ParsePsqlTypeToEnum(t))
 		res.LoginStrategies = append(res.LoginStrategies, &row)
 	}
 	return &pb.GetListResponse{LoginStrategies: res.LoginStrategies}, nil
@@ -61,7 +58,6 @@ func (ls *loginStrategyRepoI) GetList(ctx context.Context, req *pb.GetListReques
 func (ls *loginStrategyRepoI) GetByID(ctx context.Context, req *pb.LoginStrategyPrimaryKey) (*pb.LoginStrategy, error) {
 	var (
 		res = pb.LoginStrategy{}
-		t   string
 	)
 	query := `SELECT
 				id,
@@ -72,14 +68,13 @@ func (ls *loginStrategyRepoI) GetByID(ctx context.Context, req *pb.LoginStrategy
 				login_strategy WHERE id = $1`
 	err := ls.db.QueryRow(ctx, query, req.GetId()).Scan(
 		&res.Id,
-		&t,
+		&res.Type,
 		&res.ProjectId,
 		&res.EnvId,
 	)
 	if err != nil {
 		return nil, err
 	}
-	res.Type = pb.LoginStrategyType(helper.ParsePsqlTypeToEnum(t))
 	return &res, nil
 }
 
@@ -105,7 +100,7 @@ func (ls *loginStrategyRepoI) Upsert(ctx context.Context, req *pb.UpdateRequest)
 		batch.Queue(
 			stmt,
 			entity.Id,
-			entity.Type.String(),
+			entity.Type,
 			entity.ProjectId,
 			entity.EnvId,
 		)
@@ -116,5 +111,6 @@ func (ls *loginStrategyRepoI) Upsert(ctx context.Context, req *pb.UpdateRequest)
 	if err != nil {
 		return nil, err
 	}
+	resp.RowsAffected = int32(len(req.LoginStrategies))
 	return &resp, nil
 }

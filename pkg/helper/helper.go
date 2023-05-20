@@ -3,6 +3,7 @@ package helper
 import (
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"log"
 	"math/big"
 	"strconv"
@@ -109,18 +110,22 @@ func cryptoRandSecure(max int64) int64 {
 	return nBig.Int64()
 }
 
-func ParsePsqlTypeToEnum(arg string) int32 {
+func ParsePsqlTypeToEnum(arg string) error {
 	enum := map[string]int32{
-		"PHONE_V2":     0,
-		"EMAIL_V2":     1,
-		"LOGIN_V2":     2,
-		"PHONE_OTP_V2": 3,
-		"EMAIL_OTP_V2": 4,
-		"LOGIN_PWD_V2": 5,
-		"PHONE_PWD_V2": 6,
-		"EMAIL_PWD_V2": 7,
-		"GOOGLE_V2":    8,
-		"APPLE_V2":     9,
+		"PHONE":     0,
+		"EMAIL":     1,
+		"LOGIN":     2,
+		"PHONE_OTP": 3,
+		"EMAIL_OTP": 4,
+		"LOGIN_PWD": 5,
+		"PHONE_PWD": 6,
+		"EMAIL_PWD": 7,
+		"GOOGLE":    8,
+		"APPLE":     9,
 	}
-	return enum[arg]
+	_, ok := enum[arg]
+	if !ok {
+		return errors.New("incorrect auth type")
+	}
+	return nil
 }
