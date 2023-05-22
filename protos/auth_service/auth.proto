@@ -155,6 +155,7 @@ message Session {
     string updated_at = 11;
     string integration_id = 12;
     bool is_changed = 13;
+    string env_id = 14;
 }
 
 message Passcode {

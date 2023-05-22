@@ -495,10 +495,10 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
-		Id:        tokenInfo.ID,
-		IsChanged: false,
-	})
+	//_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
+	//	Id:        tokenInfo.ID,
+	//	IsChanged: false,
+	//})
 	if err != nil {
 		s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -693,7 +693,7 @@ func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context,
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
 	fmt.Println("TEST:::::2")
-	sessionPKey, err := s.strg.Session().CreateSuperAdmin(ctx, &pb.CreateSessionRequest{
+	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		UserId:    input.LoginData.UserId,
 		Ip:        "0.0.0.0",
 		Data:      "additional json data",
@@ -1084,11 +1084,11 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if session.IsChanged {
-		err := errors.New("permission update")
-		s.log.Error("!!!V2HasAccessUser->IsChanged--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// if session.IsChanged {
+	// 	err := errors.New("permission update")
+	// 	s.log.Error("!!!V2HasAccessUser->IsChanged--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
 	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
 	if err != nil {
@@ -1101,116 +1101,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	//_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
-	//	ClientPlatformId: session.ClientPlatformId,
-	//	Path:             req.Path,
-	//	Method:           req.Method,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-
-	//var methodField string
-	//switch req.Method {
-	//case "GET":
-	//	methodField = "read"
-	//case "POST":
-	//	methodField = "write"
-	//case "PUT":
-	//	methodField = "update"
-	//case "DELETE":
-	//	methodField = "delete"
-	//}
-	//
-	//splitedPath := strings.Split(req.Path, "/")
-	//splitedPath = splitedPath[1:]
-	//
-	//var tableSlug string
-	//tableSlug = splitedPath[len(splitedPath)-1]
-	//if tableSlug[len(tableSlug)-2:] == "id" {
-	//	tableSlug = splitedPath[len(splitedPath)-2]
-	//}
-	//
-	//if _, ok := config.ObjectBuilderTableSlugs[tableSlug]; ok {
-	//	tableSlug = "app"
-	//}
-	//
-	//request := make(map[string]interface{})
-	//request["client_type_id"] = session.ClientTypeId
-	//request[methodField] = "Yes"
-	//request["table_slug"] = tableSlug
-
-	//clientType, err := s.services.ClientService().V2GetClientTypeByID(ctx, &pb.ClientTypePrimaryKey{
-	//	Id: session.ClientTypeId,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!V2HasAccess.ClientService.V2GetClientTypeByID--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-
-	//convertedClientType, err := helper.ConvertStructToResponse(clientType.Data)
-	//if err != nil {
-	//	s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-
-	//clientName, ok := convertedClientType["response"].(map[string]interface{})["name"]
-	//if !ok {
-	//	res := make(map[string]interface{})
-	//	resp := &pbObject.CommonMessage{}
-	//
-	//	if clientName == nil {
-	//		err := errors.New("Wrong client type")
-	//		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	//		return nil, status.Error(codes.Internal, err.Error())
-	//	}
-	//
-	//	structPb, err := helper.ConvertMapToStruct(request)
-	//	if err != nil {
-	//		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	//		return nil, status.Error(codes.Internal, err.Error())
-	//	}
-	//
-	//	if session.ClientTypeId != config.AdminClientPlatformID || clientName.(string) != config.AdminClientName {
-	//		resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-	//			TableSlug: "record_permission",
-	//			Data:      structPb,
-	//			ProjectId: config.UcodeDefaultProjectID,
-	//		})
-	//		if err != nil {
-	//			s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
-	//			return nil, status.Error(codes.Internal, err.Error())
-	//		}
-	//
-	//		res, err = helper.ConvertStructToResponse(resp.Data)
-	//		if err != nil {
-	//			s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
-	//			return nil, status.Error(codes.Internal, err.Error())
-	//		}
-	//
-	//		if len(res["response"].([]interface{})) == 0 {
-	//			err := errors.New("Permission denied")
-	//			s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	//			return nil, status.Error(codes.PermissionDenied, err.Error())
-	//		}
-	//	}
-	//}
-
-	// DONT FORGET TO UNCOMMENT THIS!!!
-
-	// hasAccess, err := s.strg.PermissionScope().HasAccess(ctx, user.RoleId, req.ClientPlatformId, req.Path, req.Method)
-	// if err != nil {
-	// 	s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// if !hasAccess {
-	// 	err = errors.New("access denied")
-	// 	s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
 
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
 		UserId: session.GetUserId(),
@@ -1256,6 +1146,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		ClientPlatformId: session.ClientPlatformId,
 		ClientTypeId:     session.ClientTypeId,
 		RoleId:           session.RoleId,
+		EnvId:            session.EnvId,
 	}, nil
 }
 

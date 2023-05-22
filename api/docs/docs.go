@@ -15317,7 +15317,19 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.RefreshTokenRequest": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
+                "env_id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
                 "refresh_token": {
+                    "type": "string"
+                },
+                "role_id": {
                     "type": "string"
                 }
             }
@@ -15493,6 +15505,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
+                    "type": "string"
+                },
+                "env_id": {
                     "type": "string"
                 },
                 "expires_at": {
