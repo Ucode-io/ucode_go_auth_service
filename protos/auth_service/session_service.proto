@@ -24,6 +24,7 @@ service SessionService {
     rpc MultiCompanyLogin(MultiCompanyLoginRequest) returns (MultiCompanyLoginResponse) {}
     rpc V2MultiCompanyLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyLoginRes) {}
     rpc V2MultiCompanyOneLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyOneLoginRes) {}
+    rpc V2LoginWithOption(V2LoginWithOptionRequest) returns (V2LoginSuperAdminRes) {}
 }
 
 message ResourceEnvironmentV2MultiCompany {
@@ -267,6 +268,11 @@ message V2LoginRequest {
     string project_id = 6;
     string resource_environment_id = 7;
     int32 resource_type = 8;
+}
+
+message V2LoginWithOptionRequest {
+    map<string, string> data = 1;
+    string login_strategy = 2;
 }
 
 message V2LoginSuperAdminRes {

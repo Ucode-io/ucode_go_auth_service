@@ -10,11 +10,14 @@ import (
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
+	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	secure "ucode/ucode_go_auth_service/pkg/security"
+	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
@@ -152,6 +155,256 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	}
 
 	return res, nil
+}
+
+func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginSuperAdminRes, error) {
+	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
+	switch strings.ToUpper(req.GetLoginStrategy()) {
+	case "LOGIN_PWD":
+		username, ok := req.GetData()["username"]
+		if ok {
+			if len(username) < 6 {
+				err := errors.New("invalid username")
+				s.log.Error("!!!Login--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("username is empty")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		password, ok := req.GetData()["password"]
+		if ok {
+			if len(password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!Login--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("password is empty")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		user, err := s.strg.User().GetByUsername(ctx, username)
+		if err != nil {
+			s.log.Error("!!!V2Login--->", logger.Error(err))
+			if err == sql.ErrNoRows {
+				errNoRows := errors.New("no user found")
+				return nil, status.Error(codes.Internal, errNoRows.Error())
+			}
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		match, err := security.ComparePassword(user.Password, password)
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		data, err := s.LoginMiddleware(ctx, user.GetId())
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		return data, nil
+	case "PHONE":
+		phone, ok := req.GetData()["phone"]
+		if !ok {
+			err := errors.New("phone is empty")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+			Phone: phone,
+		})
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		return data, nil
+	case "EMAIL":
+		email, ok := req.GetData()["email"]
+		if !ok {
+			err := errors.New("email is empty")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+			Email: email,
+		})
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		return data, nil
+	case "LOGIN":
+		username, ok := req.GetData()["username"]
+		if !ok {
+			err := errors.New("username is empty")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+			Login: username,
+		})
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		return data, nil
+	case "PHONE_OTP":
+		phone, ok := req.GetData()["phone"]
+		if !ok {
+			err := errors.New("phone is empty")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		id, err := uuid.NewRandom()
+		if err != nil {
+			return nil, err
+		}
+		valid := util.IsValidPhone(phone)
+		if !valid {
+			return nil, err
+		}
+
+		expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
+
+		code, err := util.GenerateCode(4)
+		if err != nil {
+			return nil, err
+		}
+
+		number := helper.ConverPhoneNumberToMongoPhoneFormat(phone)
+
+		respObject, err := s.services.LoginService().LoginWithOtp(ctx, &pbObject.PhoneOtpRequst{
+			PhoneNumber: number,
+			ClientType:  "ADMIN",
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if respObject == nil || !respObject.UserFound {
+			err := errors.New("Пользователь не найдено")
+			return nil, err
+		}
+		_, err = s.services.SmsService().Send(
+			ctx,
+			&sms_service.Sms{
+				Id:        id.String(),
+				Text:      "hi",
+				Otp:       code,
+				Recipient: phone,
+				ExpiresAt: expire.String()[:19],
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		// res := models.SendCodeResponse{
+		// 	SmsId: resp.SmsId,
+		// 	Data:  respObject,
+		// }
+		fmt.Println("sms: ", respObject)
+	}
+	return nil, nil
+}
+
+func (s *sessionService) LoginMiddleware(ctx context.Context, req string) (*pb.V2LoginSuperAdminRes, error) {
+	log.Println("reqLoginData--->", req)
+	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+		LoginData: &pb.V2LoginResponse{
+			UserFound:      true,
+			ClientPlatform: &pb.ClientPlatform{},
+			ClientType:     &pb.ClientType{},
+			Role:           &pb.Role{},
+			UserId:         req,
+			Permissions:    []*pb.RecordPermission{},
+			Sessions:       []*pb.Session{},
+			LoginTableSlug: "",
+			AppPermissions: []*pb.RecordPermission{},
+		},
+		ProjectId: "",
+	})
+	if resp == nil {
+		err := errors.New("User Not Found")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	companies, err := s.services.CompanyServiceClient().GetList(ctx, &company_service.GetCompanyListRequest{
+		Offset:  0,
+		Limit:   128,
+		OwnerId: req,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	companiesResp := []*auth_service.Company{}
+
+	if len(companies.Companies) < 1 {
+		companiesById := make([]*company_service.Company, 0)
+		user, err := s.services.UserService().GetUserByID(ctx, &auth_service.UserPrimaryKey{
+			Id: resp.GetUserId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		company, err := s.services.CompanyServiceClient().GetById(ctx, &company_service.GetCompanyByIdRequest{
+			Id: user.GetCompanyId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		companiesById = append(companiesById, company.Company)
+		companies.Companies = companiesById
+		companies.Count = 1
+
+	}
+	bytes, err := json.Marshal(companies.GetCompanies())
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(bytes, &companiesResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.V2LoginSuperAdminRes{
+		UserFound: true,
+		UserId:    req,
+		Token:     resp.Token,
+		Sessions:  resp.Sessions,
+		Companies: companiesResp,
+	}, nil
 }
 
 func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
@@ -611,13 +864,13 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 	})
 	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
+		s.log.Error("!!!Create--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
 	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
+		s.log.Error("!!!GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if input.Tables == nil {
@@ -669,6 +922,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 	input.LoginData.User = userData
 
+	fmt.Println("login: ", input)
 	return input.LoginData, nil
 }
 

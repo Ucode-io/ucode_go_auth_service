@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -341,13 +342,13 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		id = :id`
 
 	params := map[string]interface{}{
-		"id":          entity.GetId(),
+		"id": entity.GetId(),
 		// "name":        entity.GetName(),
 		// "photo_url":   entity.GetPhotoUrl(),
-		"phone":       entity.GetPhone(),
-		"email":       entity.GetEmail(),
-		"login":       entity.GetLogin(),
-		"company_id":  entity.GetCompanyId(),
+		"phone":      entity.GetPhone(),
+		"email":      entity.GetEmail(),
+		"login":      entity.GetLogin(),
+		"company_id": entity.GetCompanyId(),
 		// "language_id": entity.GetLanguageId(),
 		// "timezone_id": entity.GetTimezoneId(),
 	}
@@ -581,21 +582,22 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 		if filter != "" {
 			filter += " OR phone = :login"
 		} else {
-			filter = "phone = :" + req.Phone
+			filter = "phone = :phone"
 		}
 		params["phone"] = req.Phone
 	}
+	fmt.Println("params: ", params)
 
-	query, args := helper.ReplaceQueryParams(query+filter, params)
-
+	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
+	fmt.Println("query: ", lastQuery, args)
 	var userId string
-	err := r.db.QueryRow(ctx, query, args...).Scan(&userId)
+	err := r.db.QueryRow(ctx, lastQuery, args...).Scan(&userId)
 	if err == pgx.ErrNoRows {
 		return nil, errors.New("not found")
 	} else if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("user_id: ", userId)
 	return &pb.GetUserByLoginTypesResponse{
 		UserId: userId,
 	}, nil

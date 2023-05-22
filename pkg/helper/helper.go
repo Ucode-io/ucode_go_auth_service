@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"strconv"
@@ -29,6 +30,7 @@ func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (strin
 
 	for k, v := range params {
 		if k != "" && strings.Contains(namedQuery, ":"+k) {
+			fmt.Println("k: ", k)
 			namedQuery = strings.ReplaceAll(namedQuery, ":"+k, "$"+strconv.Itoa(i))
 			args = append(args, v)
 			i++
