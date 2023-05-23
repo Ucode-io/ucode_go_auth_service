@@ -81,7 +81,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 	}
 
 	query := queryInitial + queryValue + queryReturn
-
+	fmt.Println("\n\n Query ", query, "\n\n")
 	cQuery, arr := helper.ReplaceQueryParams(query, params)
 
 	_, err = r.db.Exec(ctx, cQuery, arr...)
