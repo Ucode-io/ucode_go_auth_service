@@ -25,6 +25,7 @@ type LoginStrategyServiceClient interface {
 	GetList(ctx context.Context, in *GetListRequest, opts ...grpc.CallOption) (*GetListResponse, error)
 	GetByID(ctx context.Context, in *LoginStrategyPrimaryKey, opts ...grpc.CallOption) (*LoginStrategy, error)
 	Upsert(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
+	GetByUserID(ctx context.Context, in *GetByUserIdRequest, opts ...grpc.CallOption) (*GetByUserIdResponse, error)
 }
 
 type loginStrategyServiceClient struct {
@@ -62,6 +63,15 @@ func (c *loginStrategyServiceClient) Upsert(ctx context.Context, in *UpdateReque
 	return out, nil
 }
 
+func (c *loginStrategyServiceClient) GetByUserID(ctx context.Context, in *GetByUserIdRequest, opts ...grpc.CallOption) (*GetByUserIdResponse, error) {
+	out := new(GetByUserIdResponse)
+	err := c.cc.Invoke(ctx, "/auth_service.LoginStrategyService/GetByUserID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoginStrategyServiceServer is the server API for LoginStrategyService service.
 // All implementations must embed UnimplementedLoginStrategyServiceServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type LoginStrategyServiceServer interface {
 	GetList(context.Context, *GetListRequest) (*GetListResponse, error)
 	GetByID(context.Context, *LoginStrategyPrimaryKey) (*LoginStrategy, error)
 	Upsert(context.Context, *UpdateRequest) (*UpdateResponse, error)
+	GetByUserID(context.Context, *GetByUserIdRequest) (*GetByUserIdResponse, error)
 	mustEmbedUnimplementedLoginStrategyServiceServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedLoginStrategyServiceServer) GetByID(context.Context, *LoginSt
 }
 func (UnimplementedLoginStrategyServiceServer) Upsert(context.Context, *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Upsert not implemented")
+}
+func (UnimplementedLoginStrategyServiceServer) GetByUserID(context.Context, *GetByUserIdRequest) (*GetByUserIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByUserID not implemented")
 }
 func (UnimplementedLoginStrategyServiceServer) mustEmbedUnimplementedLoginStrategyServiceServer() {}
 
@@ -152,6 +166,24 @@ func _LoginStrategyService_Upsert_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoginStrategyService_GetByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetByUserIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginStrategyServiceServer).GetByUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.LoginStrategyService/GetByUserID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginStrategyServiceServer).GetByUserID(ctx, req.(*GetByUserIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoginStrategyService_ServiceDesc is the grpc.ServiceDesc for LoginStrategyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var LoginStrategyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Upsert",
 			Handler:    _LoginStrategyService_Upsert_Handler,
+		},
+		{
+			MethodName: "GetByUserID",
+			Handler:    _LoginStrategyService_GetByUserID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -39,7 +39,7 @@ type SessionServiceClient interface {
 	MultiCompanyLogin(ctx context.Context, in *MultiCompanyLoginRequest, opts ...grpc.CallOption) (*MultiCompanyLoginResponse, error)
 	V2MultiCompanyLogin(ctx context.Context, in *V2MultiCompanyLoginReq, opts ...grpc.CallOption) (*V2MultiCompanyLoginRes, error)
 	V2MultiCompanyOneLogin(ctx context.Context, in *V2MultiCompanyLoginReq, opts ...grpc.CallOption) (*V2MultiCompanyOneLoginRes, error)
-	V2LoginWithOption(ctx context.Context, in *V2LoginWithOptionRequest, opts ...grpc.CallOption) (*V2LoginSuperAdminRes, error)
+	V2LoginWithOption(ctx context.Context, in *V2LoginWithOptionRequest, opts ...grpc.CallOption) (*V2LoginWithOptionsResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -194,8 +194,8 @@ func (c *sessionServiceClient) V2MultiCompanyOneLogin(ctx context.Context, in *V
 	return out, nil
 }
 
-func (c *sessionServiceClient) V2LoginWithOption(ctx context.Context, in *V2LoginWithOptionRequest, opts ...grpc.CallOption) (*V2LoginSuperAdminRes, error) {
-	out := new(V2LoginSuperAdminRes)
+func (c *sessionServiceClient) V2LoginWithOption(ctx context.Context, in *V2LoginWithOptionRequest, opts ...grpc.CallOption) (*V2LoginWithOptionsResponse, error) {
+	out := new(V2LoginWithOptionsResponse)
 	err := c.cc.Invoke(ctx, "/auth_service.SessionService/V2LoginWithOption", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -223,7 +223,7 @@ type SessionServiceServer interface {
 	MultiCompanyLogin(context.Context, *MultiCompanyLoginRequest) (*MultiCompanyLoginResponse, error)
 	V2MultiCompanyLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyLoginRes, error)
 	V2MultiCompanyOneLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyOneLoginRes, error)
-	V2LoginWithOption(context.Context, *V2LoginWithOptionRequest) (*V2LoginSuperAdminRes, error)
+	V2LoginWithOption(context.Context, *V2LoginWithOptionRequest) (*V2LoginWithOptionsResponse, error)
 	mustEmbedUnimplementedSessionServiceServer()
 }
 
@@ -279,7 +279,7 @@ func (UnimplementedSessionServiceServer) V2MultiCompanyLogin(context.Context, *V
 func (UnimplementedSessionServiceServer) V2MultiCompanyOneLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyOneLoginRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2MultiCompanyOneLogin not implemented")
 }
-func (UnimplementedSessionServiceServer) V2LoginWithOption(context.Context, *V2LoginWithOptionRequest) (*V2LoginSuperAdminRes, error) {
+func (UnimplementedSessionServiceServer) V2LoginWithOption(context.Context, *V2LoginWithOptionRequest) (*V2LoginWithOptionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method V2LoginWithOption not implemented")
 }
 func (UnimplementedSessionServiceServer) mustEmbedUnimplementedSessionServiceServer() {}
