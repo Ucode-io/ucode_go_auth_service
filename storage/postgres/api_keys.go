@@ -322,7 +322,8 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 
 	query := `
 		SELECT
-  			environment_id
+  			environment_id,
+			project_id
 		FROM
 			api_keys
 		WHERE
@@ -330,6 +331,7 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 
 	err := r.db.QueryRow(ctx, query, req.GetId()).Scan(
 		&res.EnvironmentId,
+		&res.ProjectId,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while scanning")
