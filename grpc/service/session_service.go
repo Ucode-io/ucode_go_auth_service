@@ -254,7 +254,7 @@ func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 
 func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
 	res := &pb.RefreshTokenResponse{}
-
+	fmt.Println("\n>>> REQUEST SERVICE ", req, "\n")
 	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
@@ -315,6 +315,26 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	// if user.Active == 0 {
+	// 	err := errors.New("user hasn't been activated yet")
+	// 	s.log.Error("!!!RefreshToken--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
+
+	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
+	// if err != nil {
+	// 	s.log.Error("!!!RefreshToken--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+
+	// if expiresAt.Unix() < time.Now().Unix() {
+	// 	err := errors.New("user has been expired")
+	// 	s.log.Error("!!!RefreshToken--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
+
+	// TODO - wrap in a function
 	m := map[string]interface{}{
 		"id":                 session.Id,
 		"project_id":         session.ProjectId,
