@@ -111,7 +111,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
 		fmt.Println("ConvertPbToAnotherPb", string(bytes))
 	}
-	fmt.Println("TEST::::7")
+	fmt.Println("TEST::::7>>#", data)
 	if !data.UserFound {
 		customError := errors.New("User not found")
 		s.log.Error("!!!Login--->", logger.Error(customError))
@@ -158,7 +158,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
 	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
-	pwd:
+pwd:
 	switch strings.ToUpper(req.GetLoginStrategy()) {
 	case "LOGIN_PWD":
 		username, ok := req.GetData()["username"]
@@ -1000,6 +1000,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
 
+	fmt.Println(">>Input role_id>>", input.GetLoginData().GetRole().GetId())
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.GetProjectId(),
 		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
