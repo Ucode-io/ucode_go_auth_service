@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -158,7 +159,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
 	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
-	pwd:
+	var (
+		userId string
+	)
+pwd:
 	switch strings.ToUpper(req.GetLoginStrategy()) {
 	case "LOGIN_PWD":
 		username, ok := req.GetData()["username"]
@@ -206,13 +210,7 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, user.GetId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
+		userId = user.Id
 	case "PHONE":
 		phone, ok := req.GetData()["phone"]
 		if !ok {
@@ -220,20 +218,14 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+		user, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
 			Phone: phone,
 		})
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
+		userId = user.GetUserId()
 	case "EMAIL":
 		email, ok := req.GetData()["email"]
 		if !ok {
@@ -241,20 +233,14 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+		user, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
 			Email: email,
 		})
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
+		userId = user.GetUserId()
 	case "LOGIN":
 		username, ok := req.GetData()["username"]
 		if !ok {
@@ -262,20 +248,14 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+		user, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
 			Login: username,
 		})
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
+		userId = user.GetUserId()
 	case "PHONE_OTP":
 		sms_id, ok := req.GetData()["sms_id"]
 		if !ok {
@@ -305,20 +285,14 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 		if err != nil {
 			return nil, err
 		}
-		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+		user, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
 			Phone: phone,
 		})
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
+		userId = user.GetUserId()
 	case "EMAIL_OTP":
 		sms_id, ok := req.GetData()["sms_id"]
 		if !ok {
@@ -348,20 +322,14 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 		if err != nil {
 			return nil, err
 		}
-		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+		user, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
 			Email: email,
 		})
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, userId.GetUserId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
+		userId = user.GetUserId()
 	case "PHONE_PWD":
 		phone, ok := req.GetData()["phone"]
 		if !ok {
@@ -381,7 +349,7 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+		userIdRes, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
 			Phone: phone,
 		})
 		if err != nil {
@@ -389,7 +357,7 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
-			Id: userId.GetUserId(),
+			Id: userIdRes.GetUserId(),
 		})
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
@@ -405,13 +373,7 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, user.GetId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
+		userId = user.GetId()
 	case "EMAIL_PWD":
 		email, ok := req.GetData()["email"]
 		if !ok {
@@ -431,7 +393,7 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		userId, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+		userIdRes, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
 			Email: email,
 		})
 		if err != nil {
@@ -439,7 +401,7 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
-			Id: userId.GetUserId(),
+			Id: userIdRes.GetUserId(),
 		})
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
@@ -455,34 +417,101 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		data, err := s.LoginMiddleware(ctx, user.GetId())
-		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
-		return data, nil
 	default:
 		req.LoginStrategy = "LOGIN_PWD"
 		goto pwd
 	}
+	req.Data["user_id"] = userId
+	data, err := s.LoginMiddleware(ctx, models.LoginMiddlewareReq{
+		Data:   req.Data,
+		Tables: req.Tables,
+	})
+	if err != nil {
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
+	return data, nil
 }
 
-func (s *sessionService) LoginMiddleware(ctx context.Context, req string) (*pb.V2LoginWithOptionsResponse, error) {
+func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMiddlewareReq) (*pb.V2LoginWithOptionsResponse, error) {
 	log.Println("reqLoginData--->", req)
+
+	var res *pb.V2LoginResponse
+
+	if req.Data["project_id"] != "" && req.Data["environment_id"] != "" {
+		serviceResource, err := s.services.ServiceResource().GetSingle(ctx, &company_service.GetSingleServiceResourceReq{
+			EnvironmentId: req.Data["environment_id"],
+			ProjectId:     req.Data["project_id"],
+			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+		})
+		fmt.Println("serviceResource", serviceResource)
+		reqLoginData := &pbObject.LoginDataReq{
+			UserId:                req.Data["user_id"],
+			ProjectId:             req.Data["project_id"],
+			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
+		}
+		log.Println("reqLoginData--->", reqLoginData)
+		var data *pbObject.LoginDataRes
+		fmt.Println("resours type::::", serviceResource.ResourceType)
+		switch serviceResource.ResourceType {
+		case 1:
+			data, err = s.services.LoginService().LoginDataByUserId(
+				ctx,
+				reqLoginData,
+			)
+
+			if err != nil {
+				errGetUserProjectData := errors.New("invalid user project data")
+				s.log.Error("!!!Login--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			}
+		case 3:
+			data, err = s.services.PostgresLoginService().LoginDataByUserId(
+				ctx,
+				reqLoginData,
+			)
+
+			if err != nil {
+				errGetUserProjectData := errors.New("invalid user project data")
+				s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			}
+
+		}
+		if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
+			fmt.Println("ConvertPbToAnotherPb", string(bytes))
+		}
+		fmt.Println("TEST::::7")
+		if !data.UserFound {
+			customError := errors.New("User not found")
+			s.log.Error("!!!Login--->", logger.Error(customError))
+			return nil, status.Error(codes.NotFound, customError.Error())
+		}
+
+		res = helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+			ClientPlatform: data.GetClientPlatform(),
+			ClientType:     data.GetClientType(),
+			UserFound:      data.GetUserFound(),
+			UserId:         data.GetUserId(),
+			Role:           data.GetRole(),
+			Permissions:    data.GetPermissions(),
+			LoginTableSlug: data.GetLoginTableSlug(),
+			AppPermissions: data.GetAppPermissions(),
+		})
+
+	}
+	if res == nil {
+		res = &pb.V2LoginResponse{}
+	}
+	if req.Tables == nil {
+		req.Tables = []*pb.Object{}
+	}
+
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData: &pb.V2LoginResponse{
-			UserFound:      true,
-			ClientPlatform: &pb.ClientPlatform{},
-			ClientType:     &pb.ClientType{},
-			Role:           &pb.Role{},
-			UserId:         req,
-			Permissions:    []*pb.RecordPermission{},
-			Sessions:       []*pb.Session{},
-			LoginTableSlug: "",
-			AppPermissions: []*pb.RecordPermission{},
-		},
-		ProjectId: "",
+		LoginData: res,
+		ProjectId: req.Data["project_id"],
+		Tables:    req.Tables,
 	})
 	if resp == nil {
 		err := errors.New("User Not Found")
@@ -497,7 +526,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req string) (*pb.V
 	companies, err := s.services.CompanyServiceClient().GetList(ctx, &company_service.GetCompanyListRequest{
 		Offset:  0,
 		Limit:   128,
-		OwnerId: req,
+		OwnerId: req.Data["user_id"],
 	})
 	if err != nil {
 		return nil, err
@@ -536,7 +565,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req string) (*pb.V
 
 	return &pb.V2LoginWithOptionsResponse{
 		UserFound:       true,
-		UserId:          req,
+		UserId:          req.Data["user_id"],
 		Token:           resp.GetToken(),
 		Sessions:        resp.GetSessions(),
 		Companies:       companiesResp,
@@ -1402,6 +1431,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("id::", tokenInfo.ID)
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -1548,6 +1578,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	exist := false
 	for _, item := range projects.GetProjectIds() {
 		if item == session.GetProjectId() {
+			fmt.Println("session has project id")
 			exist = true
 			break
 		}

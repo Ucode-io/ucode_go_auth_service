@@ -42,3 +42,16 @@ type EmailSettingsRequest struct {
 	Password  string `json:"password"`
 	ProjectId string `json:"project_id"`
 }
+
+type V2SendCodeRequest struct {
+	Text       string `json:"text"`
+	Recipient  string `json:"recipient"`
+	Type       string `json:"type"`
+	ClientType string `json:"client_type"`
+}
+
+type V2SendCodeResponse struct {
+	SmsId       string `json:"sms_id"`
+	GoogleAcces bool   `json:"google_acces"`
+	UserFound   bool   `json:"user_found"`
+}

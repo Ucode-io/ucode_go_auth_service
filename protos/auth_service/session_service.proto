@@ -291,6 +291,7 @@ message V2LoginRequest {
 message V2LoginWithOptionRequest {
     map<string, string> data = 1;
     string login_strategy = 2;
+    repeated Object tables = 3;
 }
 
 message V2LoginSuperAdminRes {
