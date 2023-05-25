@@ -229,7 +229,8 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
 	queryInitial := `UPDATE "session" SET
         ip = :ip,
         expires_at = :expires_at,
-        is_changed = TRUE`
+        is_changed = TRUE,
+		updated_at = now()`
 
 	filter := ` WHERE id = :id`
 	params["ip"] = entity.Ip
