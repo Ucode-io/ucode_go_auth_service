@@ -11825,7 +11825,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateRoleAppTablePermissionsRequest"
                         }
                     }
                 ],
@@ -17151,17 +17151,6 @@ const docTemplate = `{
                 "ConfirmStrategies_EMAIL"
             ]
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions"
-                },
-                "project_id": {
-                    "type": "string"
-                }
-            }
-        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
@@ -17490,6 +17479,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "view_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateRoleAppTablePermissionsRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions"
+                },
+                "project_id": {
                     "type": "string"
                 }
             }

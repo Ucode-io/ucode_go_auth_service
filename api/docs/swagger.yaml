@@ -2478,13 +2478,6 @@ definitions:
     - ConfirmStrategies_UNDECIDED
     - ConfirmStrategies_PHONE
     - ConfirmStrategies_EMAIL
-  ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse:
-    properties:
-      data:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions'
-      project_id:
-        type: string
-    type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission:
     properties:
       client_type_id:
@@ -2700,6 +2693,13 @@ definitions:
       view_label:
         type: string
       view_slug:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateRoleAppTablePermissionsRequest:
+    properties:
+      data:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions'
+      project_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse:
@@ -9892,7 +9892,7 @@ paths:
         name: permission
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateRoleAppTablePermissionsRequest'
       produces:
       - application/json
       responses:
