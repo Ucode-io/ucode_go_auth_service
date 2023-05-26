@@ -133,9 +133,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	//}
 	fmt.Println("TEST::::8")
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData: res,
-		Tables:    req.Tables,
-		ProjectId: req.GetProjectId(),
+		LoginData:     res,
+		Tables:        req.Tables,
+		ProjectId:     req.GetProjectId(),
+		EnvironmentId: req.GetEnvironmentId(),
 	})
 	if resp == nil {
 		errGenerateToken := errors.New("unable to generate token")
@@ -158,7 +159,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
 	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
-	pwd:
+pwd:
 	switch strings.ToUpper(req.GetLoginStrategy()) {
 	case "LOGIN_PWD":
 		username, ok := req.GetData()["username"]
@@ -648,6 +649,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("env id::", session.EnvId)
 	if session.IsChanged {
 		err := errors.New("permision update")
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
@@ -799,6 +801,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		UpdatedAt:        session.UpdatedAt,
 		Tables:           authTables,
 		LoginTableSlug:   tokenInfo.LoginTableSlug,
+		EnvId:            session.EnvId,
 	}, nil
 }
 
@@ -1010,6 +1013,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		Ip:               "0.0.0.0",
 		Data:             "additional json data",
 		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+		EnvId:            input.GetEnvironmentId(),
 	})
 	if err != nil {
 		s.log.Error("!!!Create--->", logger.Error(err))
@@ -1569,6 +1573,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		authTables = append(authTables, authTable)
 	}
 
+	fmt.Println("env id ::", session.EnvId)
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
