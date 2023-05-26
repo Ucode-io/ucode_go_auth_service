@@ -62,6 +62,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		queryValue += `, :project_id`
 	}
 
+	fmt.Println("entity.EnvId::", entity.EnvId)
 	if util.IsValidUUID(entity.EnvId) {
 		params["env_id"] = entity.EnvId
 		queryInitial += `, env_id`
@@ -134,6 +135,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 	if err != nil {
 		return res, errors.Wrap(err, "error while getting session by id: "+err.Error())
 	}
+	fmt.Println("res::", res)
 
 	return res, nil
 }

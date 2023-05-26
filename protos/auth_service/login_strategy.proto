@@ -7,7 +7,6 @@ service LoginStrategyService {
     rpc GetList (GetListRequest) returns (GetListResponse) {}
     rpc GetByID (LoginStrategyPrimaryKey) returns (LoginStrategy) {}
     rpc Upsert (UpdateRequest) returns (UpdateResponse) {}
-    rpc GetByUserID(GetByUserIdRequest) returns (GetByUserIdResponse) {}
 }
 
 enum LoginStrategyType {
@@ -55,12 +54,4 @@ message GetListRequest {
 
 message LoginStrategyPrimaryKey {
     string id = 1;
-}
-
-message GetByUserIdRequest {
-    string user_id = 1;
-}
-
-message GetByUserIdResponse {
-    repeated LoginStrategy login_strategies = 1;
 }
