@@ -1052,6 +1052,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 
 	resp.ProjectId = projectId
 
+	fmt.Println(resp.Data.Apps[0])
 	if bytes, err := json.Marshal(resp); err != nil {
 		fmt.Println("response", string(bytes))
 	}

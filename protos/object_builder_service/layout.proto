@@ -21,6 +21,7 @@ message Layout {
     string type = 5;
     repeated Tab tabs = 6;
     string icon = 7;
+    bool is_default = 8;
 }
 
 message GetListLayoutResponse {
@@ -36,7 +37,7 @@ message Tab {
     repeated Section sections = 6;
     int32 order = 7;
     string icon = 8;
-    repeated RelationForGetAll2 relations = 9;
+    RelationForGetAll2 relation = 9;
 }
 
 message IncrementID2 {
@@ -176,4 +177,5 @@ message LayoutPrimaryKey {
 message GetListLayoutRequest {
     string table_id = 1;
     string project_id = 2;
+    bool is_defualt = 3;
 }
