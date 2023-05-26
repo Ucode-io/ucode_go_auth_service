@@ -1052,6 +1052,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 
 	resp.ProjectId = projectId
 
+	fmt.Println(resp.Data.Apps[0])
 	if bytes, err := json.Marshal(resp); err != nil {
 		fmt.Println("response", string(bytes))
 	}
@@ -1070,7 +1071,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project-id query string true "project-id"
-// @Param permission body object_builder_service.GetListWithRoleAppTablePermissionsResponse true "UpdateRoleRequestBody"
+// @Param permission body object_builder_service.UpdateRoleAppTablePermissionsRequest true "UpdateRoleRequestBody"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
