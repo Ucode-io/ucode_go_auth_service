@@ -31,6 +31,7 @@ type Store struct {
 	project         storage.ProjectRepoI
 	apiKeys         storage.ApiKeysRepoI
 	appleId         storage.AppleSettingsI
+	loginStrategy   storage.LoginStrategyI
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -43,7 +44,7 @@ func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, erro
 		cfg.PostgresDatabase,
 	))
 	fmt.Println("psql creds::")
-	fmt.Printf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+	fmt.Printf("postgres://%s:%s@%s:%d/%s?sslmode=disable\n",
 		cfg.PostgresUser,
 		cfg.PostgresPassword,
 		cfg.PostgresHost,
@@ -216,8 +217,15 @@ func (s *Store) ApiKeys() storage.ApiKeysRepoI {
 }
 
 func (s *Store) AppleSettings() storage.AppleSettingsI {
-	if s.appleId ==nil {
-		 s.appleId = NewAppleSettingsRepo(s.db)
+	if s.appleId == nil {
+		s.appleId = NewAppleSettingsRepo(s.db)
 	}
 	return s.appleId
+}
+
+func (s *Store) LoginStrategy() storage.LoginStrategyI {
+	if s.loginStrategy == nil {
+		s.loginStrategy = NewLoginStrategy(s.db)
+	}
+	return s.loginStrategy
 }

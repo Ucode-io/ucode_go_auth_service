@@ -3,6 +3,8 @@ package helper
 import (
 	"crypto/rand"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"strconv"
@@ -28,6 +30,7 @@ func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (strin
 
 	for k, v := range params {
 		if k != "" && strings.Contains(namedQuery, ":"+k) {
+			fmt.Println("k: ", k)
 			namedQuery = strings.ReplaceAll(namedQuery, ":"+k, "$"+strconv.Itoa(i))
 			args = append(args, v)
 			i++
@@ -107,4 +110,24 @@ func cryptoRandSecure(max int64) int64 {
 		log.Println(err)
 	}
 	return nBig.Int64()
+}
+
+func ParsePsqlTypeToEnum(arg string) error {
+	enum := map[string]int32{
+		"PHONE":     0,
+		"EMAIL":     1,
+		"LOGIN":     2,
+		"PHONE_OTP": 3,
+		"EMAIL_OTP": 4,
+		"LOGIN_PWD": 5,
+		"PHONE_PWD": 6,
+		"EMAIL_PWD": 7,
+		"GOOGLE":    8,
+		"APPLE":     9,
+	}
+	_, ok := enum[arg]
+	if !ok {
+		return errors.New("incorrect auth type")
+	}
+	return nil
 }

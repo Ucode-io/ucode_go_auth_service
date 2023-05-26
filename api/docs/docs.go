@@ -9332,6 +9332,168 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/login-strategy": {
+            "get": {
+                "description": "Get List Login Strategy",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_LoginStrategy"
+                ],
+                "summary": "List Login Strategy",
+                "operationId": "login_strategy_list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "LoginStrategy data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/login-strategy/{login-strategy-id}": {
+            "get": {
+                "description": "Get By Id Login Strategy",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_LoginStrategy"
+                ],
+                "summary": "Get Login Strategy",
+                "operationId": "login_strategy_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "login-strategy-id",
+                        "name": "login-strategy-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "LoginStrategy data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/login/superadmin": {
             "post": {
                 "description": "V2LoginSuperAdmin",
@@ -9354,6 +9516,89 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/login/with-option": {
+            "post": {
+                "description": "V2LoginWithOption",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "V2LoginWithOption",
+                "operationId": "V2login_withoption",
+                "parameters": [
+                    {
+                        "description": "V2LoginRequest",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest"
                         }
                     }
                 ],
@@ -12160,6 +12405,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/upsert-login-strategy": {
+            "post": {
+                "description": "Upsert Login Strategy",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_LoginStrategy"
+                ],
+                "summary": "Upsert Login Strategy",
+                "operationId": "login_strategy_upsert",
+                "parameters": [
+                    {
+                        "description": "upsert login strategy request body",
+                        "name": "login-strategy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "LoginStrategy data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/user": {
             "get": {
                 "description": "Get User List",
@@ -14099,6 +14427,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_api_models.Verify": {
             "type": "object",
             "properties": {
+                "apple_code": {
+                    "type": "string"
+                },
                 "data": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse"
                 },
@@ -14867,6 +15198,17 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetListResponse": {
+            "type": "object",
+            "properties": {
+                "login_strategies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategy"
+                    }
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.GetRes": {
             "type": "object",
             "properties": {
@@ -15111,6 +15453,23 @@ const docTemplate = `{
                 "LoginStrategies_PHONE_OTP",
                 "LoginStrategies_EMAIL_OTP"
             ]
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategy": {
+            "type": "object",
+            "properties": {
+                "env_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
         },
         "ucode_ucode_go_auth_service_genproto_auth_service.LoginTable": {
             "type": "object",
@@ -15796,10 +16155,29 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateRequest": {
+            "type": "object",
+            "properties": {
+                "login_strategies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategy"
+                    }
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.UpdateRes": {
             "type": "object",
             "properties": {
                 "row_effected": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateResponse": {
+            "type": "object",
+            "properties": {
+                "rows_affected": {
                     "type": "integer"
                 }
             }
@@ -16189,6 +16567,26 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "login_strategy": {
+                    "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
+                    }
                 }
             }
         },

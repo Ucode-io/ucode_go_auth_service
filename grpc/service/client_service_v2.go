@@ -423,7 +423,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("req resource::", req.GetProjectId())
 	switch req.ResourceType {
 	case 1:
 		fmt.Println("builder service")
@@ -433,7 +432,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 				Data:      structData,
 				ProjectId: req.GetProjectId(),
 			})
-
 		if err != nil {
 			s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())

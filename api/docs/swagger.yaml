@@ -697,6 +697,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_api_models.Verify:
     properties:
+      apple_code:
+        type: string
       data:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse'
       google_token:
@@ -1197,6 +1199,13 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetRes'
         type: array
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetListResponse:
+    properties:
+      login_strategies:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategy'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetRes:
     properties:
       app_id:
@@ -1359,6 +1368,17 @@ definitions:
     - LoginStrategies_STANDARD
     - LoginStrategies_PHONE_OTP
     - LoginStrategies_EMAIL_OTP
+  ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategy:
+    properties:
+      env_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      type:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.LoginTable:
     properties:
       object_id:
@@ -1805,9 +1825,21 @@ definitions:
       status:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateRequest:
+    properties:
+      login_strategies:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginStrategy'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdateRes:
     properties:
       row_effected:
+        type: integer
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateResponse:
+    properties:
+      rows_affected:
         type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdateRoleRequest:
@@ -2063,6 +2095,19 @@ definitions:
         type: boolean
       user_id:
         type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest:
+    properties:
+      data:
+        additionalProperties:
+          type: string
+        type: object
+      login_strategy:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
+        type: array
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq:
     properties:
@@ -8397,6 +8442,96 @@ paths:
       summary: V2Login
       tags:
       - V2_Session
+  /v2/login-strategy:
+    get:
+      consumes:
+      - application/json
+      description: Get List Login Strategy
+      operationId: login_strategy_list
+      parameters:
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: LoginStrategy data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: List Login Strategy
+      tags:
+      - V2_LoginStrategy
+  /v2/login-strategy/{login-strategy-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get By Id Login Strategy
+      operationId: login_strategy_by_id
+      parameters:
+      - description: login-strategy-id
+        in: path
+        name: login-strategy-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: LoginStrategy data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Login Strategy
+      tags:
+      - V2_LoginStrategy
   /v2/login/superadmin:
     post:
       consumes:
@@ -8441,6 +8576,52 @@ paths:
                   type: string
               type: object
       summary: V2LoginSuperAdmin
+      tags:
+      - V2_Session
+  /v2/login/with-option:
+    post:
+      consumes:
+      - application/json
+      description: V2LoginWithOption
+      operationId: V2login_withoption
+      parameters:
+      - description: V2LoginRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: V2LoginWithOption
       tags:
       - V2_Session
   /v2/multi-company/login:
@@ -10051,6 +10232,52 @@ paths:
       summary: Send Message To Email
       tags:
       - Email
+  /v2/upsert-login-strategy:
+    post:
+      consumes:
+      - application/json
+      description: Upsert Login Strategy
+      operationId: login_strategy_upsert
+      parameters:
+      - description: upsert login strategy request body
+        in: body
+        name: login-strategy
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: LoginStrategy data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Upsert Login Strategy
+      tags:
+      - V2_LoginStrategy
   /v2/user:
     get:
       consumes:

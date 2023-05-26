@@ -268,7 +268,7 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 
 	session, err = s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken session getbypk--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -466,7 +466,7 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 	s.log.Info("---HasAccessSuperAdmin--->", logger.Any("req", req))
 	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
+		s.log.Error("!!!HasAccess token parse--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

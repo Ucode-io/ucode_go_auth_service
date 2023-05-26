@@ -311,6 +311,69 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 	h.handleResponse(c, http.Created, res)
 }
 
+// V2LoginWithOption godoc
+// @ID V2login_withoption
+// @Router /v2/login/with-option [POST]
+// @Summary V2LoginWithOption
+// @Description V2LoginWithOption
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
+// @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2LoginWithOption(c *gin.Context) {
+	var login auth_service.V2LoginWithOptionRequest
+	err := c.ShouldBindJSON(&login)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.services.SessionService().V2LoginWithOption(
+		c.Request.Context(),
+		&auth_service.V2LoginWithOptionRequest{
+			Data:          login.GetData(),
+			LoginStrategy: login.GetLoginStrategy(),
+		})
+
+	httpErrorStr := ""
+	if err != nil {
+		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+		httpErrorStr = strings.ToLower(httpErrorStr)
+	}
+	if httpErrorStr == "user not found" {
+		err := errors.New("Пользователь не найдено")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
+	} else if httpErrorStr == "user has been expired" {
+		err := errors.New("Срок действия пользователя истек")
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	} else if httpErrorStr == "invalid username" {
+		err := errors.New("Неверное имя пользователя")
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	} else if httpErrorStr == "invalid password" {
+		err := errors.New("Неверное пароль")
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	} else if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	res := &auth_service.V2LoginSuperAdminRes{
+		UserFound: resp.GetUserFound(),
+		Token:     resp.GetToken(),
+		Companies: resp.GetCompanies(),
+		UserId:    resp.GetUserId(),
+		Sessions:  resp.GetSessions(),
+	}
+
+	h.handleResponse(c, http.Created, res)
+}
+
 // MultiCompanyLogin godoc
 // @ID multi_company_login
 // @Router /v2/multi-company/login [POST]

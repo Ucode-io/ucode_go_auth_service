@@ -35,6 +35,7 @@ type StorageI interface {
 	Project() ProjectRepoI
 	ApiKeys() ApiKeysRepoI
 	AppleSettings() AppleSettingsI
+	LoginStrategy() LoginStrategyI
 }
 
 type ClientPlatformRepoI interface {
@@ -214,4 +215,10 @@ type AppleSettingsI interface {
 	UpdateAppleSettings(ctx context.Context, input *pb.AppleIdSettings) (string, error)
 	GetListAppleSettings(ctx context.Context, input *pb.GetListAppleIdSettingsRequest) (*pb.GetListAppleIdSettingsResponse, error)
 	DeleteAppleSettings(ctx context.Context, input *pb.AppleIdSettingsPrimaryKey) (*emptypb.Empty, error)
+}
+
+type LoginStrategyI interface {
+	GetList(ctx context.Context, req *pb.GetListRequest) (res *pb.GetListResponse, err error)
+	GetByID(ctx context.Context, req *pb.LoginStrategyPrimaryKey) (res *pb.LoginStrategy, err error)
+	Upsert(ctx context.Context, req *pb.UpdateRequest) (res *pb.UpdateResponse, err error)
 }

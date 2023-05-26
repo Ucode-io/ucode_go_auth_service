@@ -163,7 +163,8 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.POST("/login", h.V2Login) // @TODO
 		v2.PUT("/refresh", h.V2RefreshToken)
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
-		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)      // @TODO
+		v2.POST("/login/superadmin", h.V2LoginSuperAdmin) // @TODO
+		v2.POST("/login/with-option", h.V2LoginWithOption)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
 		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
 		v2.POST("/user/invite", h.AddUserToProject)
@@ -191,6 +192,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		// objects
 		v2.POST("/object/get-list/:table_slug", h.V2GetListObjects)
+
+		// login strategy
+		v2.GET("/login-strategy", h.GetLoginStrategy)
+		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
+		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
 	}
 
 	//COMPANY
