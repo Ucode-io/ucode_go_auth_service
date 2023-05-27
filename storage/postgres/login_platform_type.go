@@ -33,7 +33,6 @@ func (e *loginPlatformTypeRepo) CreateLogin(ctx context.Context, input *pb.Login
 		"email":     input.Data.Email,
 		"password":  input.Data.Password,
 	}
-
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		log.Fatal(err)
