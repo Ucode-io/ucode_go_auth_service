@@ -36,6 +36,7 @@ type StorageI interface {
 	ApiKeys() ApiKeysRepoI
 	AppleSettings() AppleSettingsI
 	LoginStrategy() LoginStrategyI
+	LoginPlatformType() LoginPlatformType
 }
 
 type ClientPlatformRepoI interface {
@@ -221,4 +222,13 @@ type LoginStrategyI interface {
 	GetList(ctx context.Context, req *pb.GetListRequest) (res *pb.GetListResponse, err error)
 	GetByID(ctx context.Context, req *pb.LoginStrategyPrimaryKey) (res *pb.LoginStrategy, err error)
 	Upsert(ctx context.Context, req *pb.UpdateRequest) (res *pb.UpdateResponse, err error)
+}
+
+// LoginPlatformType
+type LoginPlatformType interface {
+	CreateLogin(ctx context.Context, input *pb.LoginPlatform) (*pb.LoginPlatform, error)
+	GetLoginBysPK(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatform, err error)
+	UpdateLoginPlatformType(ctx context.Context, input *pb.LoginPlatform) (string, error)
+	GetListLoginPlatformType(ctx context.Context, input *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error)
+	DeleteLoginSettings(ctx context.Context, input *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error)
 }
