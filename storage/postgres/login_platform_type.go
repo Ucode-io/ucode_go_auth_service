@@ -88,7 +88,7 @@ func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.Logi
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	res = &pb.LoginPlatformType{
 		TeamId:   data["team_id"],
 		ClientId: data["client_id"],
@@ -186,12 +186,15 @@ func (e *loginPlatformTypeRepo) GetListLoginPlatformType(ctx context.Context, in
 			log.Fatal(err)
 		}
 
-		obj.Data.TeamId = data["team_id"]
-		obj.Data.ClientId = data["client_id"]
-		obj.Data.KeyId = data["key_id"]
-		obj.Data.Secret = data["secret"]
-		obj.Data.Email = data["email"]
-		obj.Data.Password = data["password"]
+		objdata := pb.LoginPlatformType{
+			TeamId:   data["team_id"],
+			ClientId: data["client_id"],
+			KeyId:    data["key_id"],
+			Secret:   data["secret"],
+			Email:    data["email"],
+			Password: data["password"],
+		}
+		obj.Data = &objdata
 
 		if err != nil {
 			return nil, err
