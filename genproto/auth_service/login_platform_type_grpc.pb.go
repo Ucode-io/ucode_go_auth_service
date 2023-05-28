@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LoginPlatformTypeLoginServiceClient interface {
 	CreateLoginPlatformType(ctx context.Context, in *LoginPlatform, opts ...grpc.CallOption) (*LoginPlatform, error)
-	UpdateLoginPlatformType(ctx context.Context, in *UpdateLoginPlatformTypeRequest, opts ...grpc.CallOption) (*LoginPlatform, error)
+	UpdateLoginPlatformType(ctx context.Context, in *UpdateLoginPlatformTypeRequest, opts ...grpc.CallOption) (*LoginPlatformType, error)
 	GetLoginPlatformType(ctx context.Context, in *LoginPlatformTypePrimaryKey, opts ...grpc.CallOption) (*LoginPlatformType, error)
 	GetListLoginPlatformType(ctx context.Context, in *GetListLoginPlatformTypeRequest, opts ...grpc.CallOption) (*GetListLoginPlatformTypeResponse, error)
 	DeleteLoginPlatformType(ctx context.Context, in *LoginPlatformTypePrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -47,8 +47,8 @@ func (c *loginPlatformTypeLoginServiceClient) CreateLoginPlatformType(ctx contex
 	return out, nil
 }
 
-func (c *loginPlatformTypeLoginServiceClient) UpdateLoginPlatformType(ctx context.Context, in *UpdateLoginPlatformTypeRequest, opts ...grpc.CallOption) (*LoginPlatform, error) {
-	out := new(LoginPlatform)
+func (c *loginPlatformTypeLoginServiceClient) UpdateLoginPlatformType(ctx context.Context, in *UpdateLoginPlatformTypeRequest, opts ...grpc.CallOption) (*LoginPlatformType, error) {
+	out := new(LoginPlatformType)
 	err := c.cc.Invoke(ctx, "/auth_service.LoginPlatformTypeLoginService/UpdateLoginPlatformType", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (c *loginPlatformTypeLoginServiceClient) DeleteLoginPlatformType(ctx contex
 // for forward compatibility
 type LoginPlatformTypeLoginServiceServer interface {
 	CreateLoginPlatformType(context.Context, *LoginPlatform) (*LoginPlatform, error)
-	UpdateLoginPlatformType(context.Context, *UpdateLoginPlatformTypeRequest) (*LoginPlatform, error)
+	UpdateLoginPlatformType(context.Context, *UpdateLoginPlatformTypeRequest) (*LoginPlatformType, error)
 	GetLoginPlatformType(context.Context, *LoginPlatformTypePrimaryKey) (*LoginPlatformType, error)
 	GetListLoginPlatformType(context.Context, *GetListLoginPlatformTypeRequest) (*GetListLoginPlatformTypeResponse, error)
 	DeleteLoginPlatformType(context.Context, *LoginPlatformTypePrimaryKey) (*emptypb.Empty, error)
@@ -102,7 +102,7 @@ type UnimplementedLoginPlatformTypeLoginServiceServer struct {
 func (UnimplementedLoginPlatformTypeLoginServiceServer) CreateLoginPlatformType(context.Context, *LoginPlatform) (*LoginPlatform, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateLoginPlatformType not implemented")
 }
-func (UnimplementedLoginPlatformTypeLoginServiceServer) UpdateLoginPlatformType(context.Context, *UpdateLoginPlatformTypeRequest) (*LoginPlatform, error) {
+func (UnimplementedLoginPlatformTypeLoginServiceServer) UpdateLoginPlatformType(context.Context, *UpdateLoginPlatformTypeRequest) (*LoginPlatformType, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateLoginPlatformType not implemented")
 }
 func (UnimplementedLoginPlatformTypeLoginServiceServer) GetLoginPlatformType(context.Context, *LoginPlatformTypePrimaryKey) (*LoginPlatformType, error) {

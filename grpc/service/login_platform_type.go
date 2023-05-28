@@ -44,7 +44,7 @@ func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb
 	return res, nil
 }
 
-func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatform, error) {
+func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatformType, error) {
 	e.log.Info("---LoginPlatformType.UpdateLoginPlatformType--->", logger.Any("req", req))
 
 	id, err := e.strg.LoginPlatformType().UpdateLoginPlatformType(
@@ -69,9 +69,7 @@ func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &pb.LoginPlatform{
-		Data: res,
-	}, nil
+	return res, nil
 }
 
 func (e *loginPlatformType) GetListLoginPlatformType(ctx context.Context, req *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error) {
