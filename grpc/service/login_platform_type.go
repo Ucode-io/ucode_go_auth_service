@@ -44,7 +44,7 @@ func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb
 	return res, nil
 }
 
-func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.LoginPlatform) (*pb.LoginPlatform, error) {
+func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.UpdateLoginPlatformType--->", logger.Any("req", req))
 
 	id, err := e.strg.LoginPlatformType().UpdateLoginPlatformType(
@@ -56,6 +56,7 @@ func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb
 		e.log.Error("!!!---LoginPlatformType.UpdateLoginPlatformType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
 	res, err := e.strg.LoginPlatformType().GetLoginBysPK(
 		ctx,
 		&pb.LoginPlatformTypePrimaryKey{
@@ -68,7 +69,9 @@ func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return res, nil
+	return &pb.LoginPlatform{
+		Data: res,
+	}, nil
 }
 
 func (e *loginPlatformType) GetListLoginPlatformType(ctx context.Context, req *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error) {

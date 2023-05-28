@@ -227,8 +227,8 @@ type LoginStrategyI interface {
 // LoginPlatformType
 type LoginPlatformType interface {
 	CreateLogin(ctx context.Context, input *pb.LoginPlatform) (*pb.LoginPlatform, error)
-	GetLoginBysPK(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatform, err error)
-	UpdateLoginPlatformType(ctx context.Context, input *pb.LoginPlatform) (string, error)
+	GetLoginBysPK(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatformType, err error)
+	UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest) (string, error)
 	GetListLoginPlatformType(ctx context.Context, input *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error)
 	DeleteLoginSettings(ctx context.Context, input *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error)
 }

@@ -66,13 +66,13 @@ func (h *Handler) CreateLoginPlatformType(c *gin.Context) {
 // @Tags LoginId
 // @Accept json
 // @Produce json
-// @Param registerBody body pb.LoginPlatform true "register_body"
+// @Param registerBody body pb.UpdateLoginPlatformTypeRequest true "register_body"
 // @Success 200 {object} http.Response{data=pb.LoginPlatformType} "Login Config data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateLoginPlatformType(c *gin.Context) {
 
-	var body *pb.LoginPlatform
+	var body *pb.UpdateLoginPlatformTypeRequest
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
@@ -82,11 +82,7 @@ func (h *Handler) UpdateLoginPlatformType(c *gin.Context) {
 
 	resp, err := h.services.LoginPlatformType().UpdateLoginPlatformType(
 		c.Request.Context(),
-		&pb.LoginPlatform{
-			Id:        body.Id,
-			ProjectId: body.ProjectId,
-			Data:      body.Data,
-		},
+		body,
 	)
 	if err != nil {
 		h.log.Error("---> error in update login Id settings", logger.Error(err))

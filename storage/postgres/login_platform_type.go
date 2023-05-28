@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -67,9 +67,9 @@ func (e *loginPlatformTypeRepo) CreateLogin(ctx context.Context, input *pb.Login
 	return input, nil
 }
 
-func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatform, err error) {
-	res = &pb.LoginPlatform{}
-	query := `SELECT id, data
+func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatformType, err error) {
+
+	query := `SELECT data
 	FROM "login_platform_setting"
 	WHERE id=$1;`
 
@@ -77,7 +77,6 @@ func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.Logi
 	data := map[string]string{}
 
 	err = e.db.QueryRow(ctx, query, pKey.Id).Scan(
-		&res.Id,
 		&resp,
 	)
 
@@ -89,13 +88,15 @@ func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.Logi
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	res.Data.TeamId = data["team_id"]
-	res.Data.ClientId = data["client_id"]
-	res.Data.KeyId = data["key_id"]
-	res.Data.Secret = data["secret"]
-	res.Data.Email = data["email"]
-	res.Data.Password = data["password"]
+	
+	res = &pb.LoginPlatformType{
+		TeamId:   data["team_id"],
+		ClientId: data["client_id"],
+		KeyId:    data["key_id"],
+		Secret:   data["secret"],
+		Email:    data["email"],
+		Password: data["password"],
+	}
 
 	if err == pgx.ErrNoRows {
 		err := errors.New("login settings not found")
@@ -107,17 +108,21 @@ func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.Logi
 	return res, nil
 }
 
-func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, input *pb.LoginPlatform) (string, error) {
+/*
+SELECT id,project_id,env_id,type,data FROM "login_platform_setting"	WHERE id='20ee409e-ac5c-4b91-8342-0a8d4a1fbdaf';
+*/
+
+func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest) (string, error) {
 
 	var resp = &pb.LoginPlatform{}
 
 	data := map[string]string{
-		"team_id":   input.Data.TeamId,
-		"client_id": input.Data.ClientId,
-		"key_id":    input.Data.KeyId,
-		"secret":    input.Data.Secret,
-		"email":     input.Data.Email,
-		"password":  input.Data.Password,
+		"team_id":   input.TeamId,
+		"client_id": input.ClientId,
+		"key_id":    input.KeyId,
+		"secret":    input.Secret,
+		"email":     input.Email,
+		"password":  input.Password,
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -176,7 +181,6 @@ func (e *loginPlatformTypeRepo) GetListLoginPlatformType(ctx context.Context, in
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		err = json.Unmarshal(resp, &data)
 		if err != nil {
 			log.Fatal(err)
