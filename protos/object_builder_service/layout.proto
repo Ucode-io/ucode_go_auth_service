@@ -21,6 +21,7 @@ message Layout {
     string type = 5;
     repeated Tab tabs = 6;
     string icon = 7;
+    bool is_default = 8;
 }
 
 message GetListLayoutResponse {
@@ -176,4 +177,5 @@ message LayoutPrimaryKey {
 message GetListLayoutRequest {
     string table_id = 1;
     string project_id = 2;
+    bool is_defualt = 3;
 }

@@ -44,10 +44,9 @@ type EmailSettingsRequest struct {
 }
 
 type V2SendCodeRequest struct {
-	Text       string `json:"text"`
-	Recipient  string `json:"recipient"`
-	Type       string `json:"type"`
-	ClientType string `json:"client_type"`
+	Text      string `json:"text"`
+	Recipient string `json:"recipient"`
+	Type      string `json:"type"`
 }
 
 type V2SendCodeResponse struct {

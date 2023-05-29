@@ -79,6 +79,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			Otp:       code,
 			Recipient: request.Recipient,
 			ExpiresAt: expire.String()[:19],
+			Type:      request.Type,
 		},
 	)
 	if err != nil {
@@ -90,5 +91,4 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, res)
-
 }
