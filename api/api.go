@@ -231,6 +231,12 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	v2.GET("/apple-id-settings", h.GetAppleIdSettings)
 	v2.DELETE("/apple-id-settings/:id", h.DeleteAppleIdSettings)
 
+	v2.POST("/login-platform-type", h.CreateLoginPlatformType)
+	v2.PUT("/login-platform-type", h.UpdateLoginPlatformType)
+	v2.GET("/login-platform-type", h.GetLoginPlatformType)
+	v2.GET("/login-platform-type/:id", h.LoginPlatformTypePrimaryKey)
+	v2.DELETE("/login-platform-type/:id", h.DeleteLoginPlatformType)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return
 }

@@ -111,7 +111,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
 		fmt.Println("ConvertPbToAnotherPb", string(bytes))
 	}
-	fmt.Println("TEST::::7")
+	fmt.Println("TEST::::7>>#", data)
 	if !data.UserFound {
 		customError := errors.New("User not found")
 		s.log.Error("!!!Login--->", logger.Error(customError))
@@ -1004,6 +1004,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 	fmt.Println("test input::", input.GetLoginData().Role)
 
+	fmt.Println(">>Input role_id>>", input.GetLoginData().GetRole().GetId())
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.GetProjectId(),
 		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
