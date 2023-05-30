@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -1027,7 +1028,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
+		fmt.Println("\nResponse ", resp, "\n\n")
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
