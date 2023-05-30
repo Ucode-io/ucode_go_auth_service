@@ -1031,7 +1031,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		fmt.Println("\nResponse ", resp, "\n\n")
+		fmt.Println("\nResponse perm 123", resp, "\n\n")
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
