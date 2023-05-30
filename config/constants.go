@@ -49,6 +49,7 @@ var (
 		"apple":   1,
 		"email":   1,
 	}
+	ErrUserNotFound = errors.New("user not found")
 
 	ObjectBuilderTableSlugs = map[string]int{
 		"field":               1,

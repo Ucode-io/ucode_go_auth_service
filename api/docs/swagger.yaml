@@ -697,14 +697,21 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_api_models.V2SendCodeRequest:
     properties:
-      client_type:
-        type: string
       recipient:
         type: string
       text:
         type: string
       type:
         type: string
+    type: object
+  ucode_ucode_go_auth_service_api_models.V2SendCodeResponse:
+    properties:
+      google_acces:
+        type: boolean
+      sms_id:
+        type: string
+      user_found:
+        type: boolean
     type: object
   ucode_ucode_go_auth_service_api_models.Verify:
     properties:
@@ -1201,6 +1208,13 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AppleIdSettings'
         type: array
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GetListLoginPlatformTypeResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetListRes:
     properties:
       count:
@@ -1354,6 +1368,34 @@ definitions:
       native_name:
         type: string
       short_name:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform:
+    properties:
+      data:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType'
+      environment_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      type:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType:
+    properties:
+      client_id:
+        type: string
+      email:
+        type: string
+      key_id:
+        type: string
+      password:
+        type: string
+      secret:
+        type: string
+      team_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.LoginRequest:
@@ -1795,6 +1837,23 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings'
         type: array
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.UpdateLoginPlatformTypeRequest:
+    properties:
+      client_id:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      key_id:
+        type: string
+      password:
+        type: string
+      secret:
+        type: string
+      team_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest:
     properties:
       client_platform_id:
@@ -2024,6 +2083,8 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.V2LoginRequest:
     properties:
       client_type:
+        type: string
+      environment_id:
         type: string
       login_strategy:
         type: string
@@ -2489,13 +2550,6 @@ definitions:
     - ConfirmStrategies_UNDECIDED
     - ConfirmStrategies_PHONE
     - ConfirmStrategies_EMAIL
-  ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse:
-    properties:
-      data:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions'
-      project_id:
-        type: string
-    type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission:
     properties:
       client_type_id:
@@ -2711,6 +2765,13 @@ definitions:
       view_label:
         type: string
       view_slug:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateRoleAppTablePermissionsRequest:
+    properties:
+      data:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions'
+      project_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse:
@@ -8453,6 +8514,227 @@ paths:
       summary: V2Login
       tags:
       - V2_Session
+  /v2/login-platform-type:
+    get:
+      consumes:
+      - application/json
+      description: GetListLoginPlatformType
+      operationId: getListLoginPlatformType
+      parameters:
+      - description: env_id
+        in: query
+        name: env_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login Config data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListLoginPlatformTypeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: GetListLoginPlatformType
+      tags:
+      - LoginId
+    post:
+      consumes:
+      - application/json
+      description: CreateLoginPlatformType
+      operationId: createLoginPlatformType
+      parameters:
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: CreateLoginPlatformType
+      tags:
+      - LoginId
+    put:
+      consumes:
+      - application/json
+      description: UpdateLoginPlatformType
+      operationId: updateLoginPlatformType
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateLoginPlatformTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login Config data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: UpdateLoginPlatformType
+      tags:
+      - LoginId
+  /v2/login-platform-type/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteLoginPlatformType
+      operationId: deleteLoginPlatformType
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: DeleteLoginPlatformType
+      tags:
+      - LoginId
+    get:
+      consumes:
+      - application/json
+      description: LoginPlatformTypePrimaryKey
+      operationId: LoginPlatformTypePrimaryKey
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login Platform Type data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: LoginPlatformTypePrimaryKey
+      tags:
+      - LoginId
   /v2/login-strategy:
     get:
       consumes:
@@ -9296,6 +9578,67 @@ paths:
       summary: V2Refresh Token
       tags:
       - V2_Session
+  /v2/register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        V2Register
+        in data must be have type, type must be one of the following values
+        ["google", "apple", "email", "phone"]
+      operationId: V2register
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: V2Register
+      tags:
+      - v2_register
   /v2/register-email-otp/{table_slug}:
     post:
       consumes:
@@ -9903,7 +10246,7 @@ paths:
         name: permission
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateRoleAppTablePermissionsRequest'
       produces:
       - application/json
       responses:
@@ -10188,8 +10531,20 @@ paths:
       consumes:
       - application/json
       description: SendCode type must be one of the following values ["EMAIL", "PHONE"]
-      operationId: v2SendCode
+      operationId: V2SendCode
       parameters:
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
       - description: SendCode
         in: body
         name: login
@@ -10206,7 +10561,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse'
               type: object
         "400":
           description: Bad Request
@@ -10228,7 +10583,7 @@ paths:
               type: object
       summary: SendCode
       tags:
-      - register
+      - v2_register
   /v2/send-message:
     post:
       consumes:

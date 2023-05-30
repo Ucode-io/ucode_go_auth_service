@@ -10,28 +10,29 @@ import (
 )
 
 type Store struct {
-	db              *pgxpool.Pool
-	clientPlatform  storage.ClientPlatformRepoI
-	clientType      storage.ClientTypeRepoI
-	client          storage.ClientRepoI
-	relation        storage.RelationRepoI
-	userInfoField   storage.UserInfoFieldRepoI
-	role            storage.RoleRepoI
-	permission      storage.PermissionRepoI
-	scope           storage.ScopeRepoI
-	permissionScope storage.PermissionScopeRepoI
-	rolePermission  storage.RolePermissionRepoI
-	user            storage.UserRepoI
-	integration     storage.IntegrationRepoI
-	userRelation    storage.UserRelationRepoI
-	userInfo        storage.UserInfoRepoI
-	session         storage.SessionRepoI
-	email           storage.EmailRepoI
-	company         storage.CompanyRepoI
-	project         storage.ProjectRepoI
-	apiKeys         storage.ApiKeysRepoI
-	appleId         storage.AppleSettingsI
-	loginStrategy   storage.LoginStrategyI
+	db                *pgxpool.Pool
+	clientPlatform    storage.ClientPlatformRepoI
+	clientType        storage.ClientTypeRepoI
+	client            storage.ClientRepoI
+	relation          storage.RelationRepoI
+	userInfoField     storage.UserInfoFieldRepoI
+	role              storage.RoleRepoI
+	permission        storage.PermissionRepoI
+	scope             storage.ScopeRepoI
+	permissionScope   storage.PermissionScopeRepoI
+	rolePermission    storage.RolePermissionRepoI
+	user              storage.UserRepoI
+	integration       storage.IntegrationRepoI
+	userRelation      storage.UserRelationRepoI
+	userInfo          storage.UserInfoRepoI
+	session           storage.SessionRepoI
+	email             storage.EmailRepoI
+	company           storage.CompanyRepoI
+	project           storage.ProjectRepoI
+	apiKeys           storage.ApiKeysRepoI
+	appleId           storage.AppleSettingsI
+	loginStrategy     storage.LoginStrategyI
+	loginPlatformType storage.LoginPlatformType
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -228,4 +229,11 @@ func (s *Store) LoginStrategy() storage.LoginStrategyI {
 		s.loginStrategy = NewLoginStrategy(s.db)
 	}
 	return s.loginStrategy
+}
+
+func (s *Store) LoginPlatformType() storage.LoginPlatformType {
+	if s.loginPlatformType == nil {
+		s.loginPlatformType = NewLoginPlatformTypeRepo(s.db)
+	}
+	return s.loginPlatformType
 }

@@ -71,6 +71,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 
 	login.ResourceEnvironmentId = resourceEnvironment.GetId()
 	login.ResourceType = resourceEnvironment.GetResourceType()
+	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
@@ -345,6 +346,10 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 	}
 	if httpErrorStr == "user not found" {
 		err := errors.New("Пользователь не найдено")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
+	} else if httpErrorStr == "user verified but not found" {
+		err := errors.New("Пользователь проверен, но не найден")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	} else if httpErrorStr == "user has been expired" {

@@ -39,6 +39,7 @@ type ServiceManagerI interface {
 	PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient
 	LoginStrategyService() auth_service.LoginStrategyServiceClient
 	RegisterService() auth_service.RegisterServiceClient
+	LoginPlatformType() auth_service.LoginPlatformTypeLoginServiceClient
 }
 
 type grpcClients struct {
@@ -68,6 +69,7 @@ type grpcClients struct {
 	postgresBuilderPermissionService object_builder_service.PermissionServiceClient
 	loginStrategyService             auth_service.LoginStrategyServiceClient
 	registerService                  auth_service.RegisterServiceClient
+	loginPlatformType                auth_service.LoginPlatformTypeLoginServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -147,6 +149,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		postgresBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connPostgresObjectBuilderService),
 		loginStrategyService:             auth_service.NewLoginStrategyServiceClient(connAuthService),
 		registerService:                  auth_service.NewRegisterServiceClient(connAuthService),
+		loginPlatformType:                auth_service.NewLoginPlatformTypeLoginServiceClient(connAuthService),
 	}, nil
 }
 
@@ -252,4 +255,7 @@ func (g *grpcClients) LoginStrategyService() auth_service.LoginStrategyServiceCl
 
 func (g *grpcClients) RegisterService() auth_service.RegisterServiceClient {
 	return g.registerService
+}
+func (g *grpcClients) LoginPlatformType() auth_service.LoginPlatformTypeLoginServiceClient {
+	return g.loginPlatformType
 }

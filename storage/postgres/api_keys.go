@@ -323,7 +323,7 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 	query := `
 		SELECT
   			environment_id,
-			project_id,
+			project_id
 		FROM
 			api_keys
 		WHERE
