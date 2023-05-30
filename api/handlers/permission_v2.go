@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -1051,11 +1049,6 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	}
 
 	resp.ProjectId = projectId
-
-	fmt.Println(resp.Data.Apps[0])
-	if bytes, err := json.Marshal(resp); err != nil {
-		fmt.Println("response", string(bytes))
-	}
 
 	h.handleResponse(c, http.OK, resp)
 }
