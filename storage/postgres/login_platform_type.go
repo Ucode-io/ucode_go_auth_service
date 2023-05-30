@@ -118,17 +118,23 @@ func (e *loginPlatformTypeRepo) GetLoginPlatformType(ctx context.Context, pKey *
 	return res, nil
 }
 
-func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest) (string, error) {
+func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest, types string) (string, error) {
 
 	var resp = &pb.LoginPlatform{}
 
-	data := map[string]string{
-		"team_id":   input.TeamId,
-		"client_id": input.ClientId,
-		"key_id":    input.KeyId,
-		"secret":    input.Secret,
-		"email":     input.Email,
-		"password":  input.Password,
+	var data map[string]string
+	if types == "APPLE" {
+		data = map[string]string{
+			"team_id":   input.TeamId,
+			"client_id": input.ClientId,
+			"key_id":    input.KeyId,
+			"secret":    input.Secret,
+		}
+	} else if types == "GOOGLE" {
+		data = map[string]string{
+			"email":    input.Email,
+			"password": input.Password,
+		}
 	}
 
 	jsonData, err := json.Marshal(data)
