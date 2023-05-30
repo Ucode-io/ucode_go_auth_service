@@ -220,7 +220,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 					Otp:         code,
 					Recipient:   request.Phone,
 					ExpiresAt:   expire.String()[:19],
-					PhoneNumber: request.Phone,
 				},
 			)
 			if err != nil {

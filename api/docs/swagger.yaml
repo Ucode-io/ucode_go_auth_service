@@ -554,8 +554,6 @@ definitions:
           On the client side, it can't be empty. On the server side, it can be
           empty if Config.ClientAuth is not RequireAnyClientCert or
           RequireAndVerifyClientCert.
-
-          PeerCertificates and its contents should not be modified.
         items:
           $ref: '#/definitions/x509.Certificate'
         type: array
@@ -594,8 +592,6 @@ definitions:
           On the client side, it's set if Config.InsecureSkipVerify is false. On
           the server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven
           (and the peer provided a certificate) or RequireAndVerifyClientCert.
-
-          VerifiedChains and its contents should not be modified.
         items:
           items:
             $ref: '#/definitions/x509.Certificate'
@@ -698,6 +694,24 @@ definitions:
       body:
         additionalProperties: true
         type: object
+    type: object
+  ucode_ucode_go_auth_service_api_models.V2SendCodeRequest:
+    properties:
+      recipient:
+        type: string
+      text:
+        type: string
+      type:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_api_models.V2SendCodeResponse:
+    properties:
+      google_acces:
+        type: boolean
+      sms_id:
+        type: string
+      user_found:
+        type: boolean
     type: object
   ucode_ucode_go_auth_service_api_models.Verify:
     properties:
@@ -2833,9 +2847,6 @@ definitions:
       host:
         description: host or host:port
         type: string
-      omitHost:
-        description: do not emit empty host (authority)
-        type: boolean
       opaque:
         description: encoded opaque data
         type: string
@@ -3139,7 +3150,7 @@ definitions:
     - 4
     type: integer
     x-enum-comments:
-      DSA: Only supported for parsing.
+      DSA: Unsupported.
     x-enum-varnames:
     - UnknownPublicKeyAlgorithm
     - RSA
@@ -8732,7 +8743,7 @@ paths:
       operationId: login_strategy_list
       parameters:
       - description: project-id
-        in: path
+        in: query
         name: project-id
         required: true
         type: string
@@ -9567,6 +9578,67 @@ paths:
       summary: V2Refresh Token
       tags:
       - V2_Session
+  /v2/register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        V2Register
+        in data must be have type, type must be one of the following values
+        ["google", "apple", "email", "phone"]
+      operationId: V2register
+      parameters:
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: V2Register
+      tags:
+      - v2_register
   /v2/register-email-otp/{table_slug}:
     post:
       consumes:
@@ -10454,6 +10526,64 @@ paths:
       summary: Get Scopes List
       tags:
       - V2_Scope
+  /v2/send-code:
+    post:
+      consumes:
+      - application/json
+      description: SendCode type must be one of the following values ["EMAIL", "PHONE"]
+      operationId: V2SendCode
+      parameters:
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: SendCode
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: SendCode
+      tags:
+      - v2_register
   /v2/send-message:
     post:
       consumes:

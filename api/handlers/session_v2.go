@@ -348,6 +348,10 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		err := errors.New("Пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
+	} else if httpErrorStr == "user verified but not found" {
+		err := errors.New("Пользователь проверен, но не найден")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
 	} else if httpErrorStr == "user has been expired" {
 		err := errors.New("Срок действия пользователя истек")
 		h.handleResponse(c, http.InvalidArgument, err.Error())

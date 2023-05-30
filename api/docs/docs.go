@@ -9745,7 +9745,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -11145,6 +11145,107 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenSuperAdminResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/register": {
+            "post": {
+                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2_register"
+                ],
+                "summary": "V2Register",
+                "operationId": "V2register",
+                "parameters": [
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -12659,6 +12760,107 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/send-code": {
+            "post": {
+                "description": "SendCode type must be one of the following values [\"EMAIL\", \"PHONE\"]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2_register"
+                ],
+                "summary": "SendCode",
+                "operationId": "V2SendCode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header"
+                    },
+                    {
+                        "description": "SendCode",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -14631,7 +14833,7 @@ const docTemplate = `{
                     }
                 },
                 "peerCertificates": {
-                    "description": "PeerCertificates are the parsed certificates sent by the peer, in the\norder in which they were sent. The first element is the leaf certificate\nthat the connection is verified against.\n\nOn the client side, it can't be empty. On the server side, it can be\nempty if Config.ClientAuth is not RequireAnyClientCert or\nRequireAndVerifyClientCert.\n\nPeerCertificates and its contents should not be modified.",
+                    "description": "PeerCertificates are the parsed certificates sent by the peer, in the\norder in which they were sent. The first element is the leaf certificate\nthat the connection is verified against.\n\nOn the client side, it can't be empty. On the server side, it can be\nempty if Config.ClientAuth is not RequireAnyClientCert or\nRequireAndVerifyClientCert.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/x509.Certificate"
@@ -14659,7 +14861,7 @@ const docTemplate = `{
                     }
                 },
                 "verifiedChains": {
-                    "description": "VerifiedChains is a list of one or more chains where the first element is\nPeerCertificates[0] and the last element is from Config.RootCAs (on the\nclient side) or Config.ClientCAs (on the server side).\n\nOn the client side, it's set if Config.InsecureSkipVerify is false. On\nthe server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven\n(and the peer provided a certificate) or RequireAndVerifyClientCert.\n\nVerifiedChains and its contents should not be modified.",
+                    "description": "VerifiedChains is a list of one or more chains where the first element is\nPeerCertificates[0] and the last element is from Config.RootCAs (on the\nclient side) or Config.ClientCAs (on the server side).\n\nOn the client side, it's set if Config.InsecureSkipVerify is false. On\nthe server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven\n(and the peer provided a certificate) or RequireAndVerifyClientCert.",
                     "type": "array",
                     "items": {
                         "type": "array",
@@ -14815,6 +15017,34 @@ const docTemplate = `{
                 "body": {
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.V2SendCodeRequest": {
+            "type": "object",
+            "properties": {
+                "recipient": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.V2SendCodeResponse": {
+            "type": "object",
+            "properties": {
+                "google_acces": {
+                    "type": "boolean"
+                },
+                "sms_id": {
+                    "type": "string"
+                },
+                "user_found": {
+                    "type": "boolean"
                 }
             }
         },
@@ -18081,10 +18311,6 @@ const docTemplate = `{
                     "description": "host or host:port",
                     "type": "string"
                 },
-                "omitHost": {
-                    "description": "do not emit empty host (authority)",
-                    "type": "boolean"
-                },
                 "opaque": {
                     "description": "encoded opaque data",
                     "type": "string"
@@ -18449,7 +18675,7 @@ const docTemplate = `{
                 4
             ],
             "x-enum-comments": {
-                "DSA": "Only supported for parsing."
+                "DSA": "Unsupported."
             },
             "x-enum-varnames": [
                 "UnknownPublicKeyAlgorithm",
