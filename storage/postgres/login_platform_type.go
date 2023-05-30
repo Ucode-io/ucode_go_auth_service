@@ -24,15 +24,23 @@ func NewLoginPlatformTypeRepo(db *pgxpool.Pool) storage.LoginPlatformType {
 	}
 }
 
-func (e *loginPlatformTypeRepo) CreateLogin(ctx context.Context, input *pb.LoginPlatform) (*pb.LoginPlatform, error) {
-	data := map[string]string{
-		"team_id":   input.Data.TeamId,
-		"client_id": input.Data.ClientId,
-		"key_id":    input.Data.KeyId,
-		"secret":    input.Data.Secret,
-		"email":     input.Data.Email,
-		"password":  input.Data.Password,
+func (e *loginPlatformTypeRepo) CreateLoginPlatformType(ctx context.Context, input *pb.LoginPlatform) (*pb.LoginPlatform, error) {
+
+	var data map[string]string
+	if input.Type == "APPLE" {
+		data = map[string]string{
+			"team_id":   input.Data.TeamId,
+			"client_id": input.Data.ClientId,
+			"key_id":    input.Data.KeyId,
+			"secret":    input.Data.Secret,
+		}
+	} else if input.Type == "GOOGLE" {
+		data = map[string]string{
+			"email":    input.Data.Email,
+			"password": input.Data.Password,
+		}
 	}
+
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		log.Fatal(err)
@@ -67,29 +75,38 @@ func (e *loginPlatformTypeRepo) CreateLogin(ctx context.Context, input *pb.Login
 	return input, nil
 }
 
-func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatformType, err error) {
-
-	query := `SELECT data
+func (e *loginPlatformTypeRepo) GetLoginPlatformType(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatform, err error) {
+	fmt.Println(":::::: GetLoginPlatform")
+	query := `SELECT id, project_id, env_id, type, data
 	FROM "login_platform_setting"
 	WHERE id=$1;`
+
+	res = &pb.LoginPlatform{}
 
 	var resp []byte
 	data := map[string]string{}
 
 	err = e.db.QueryRow(ctx, query, pKey.Id).Scan(
+		&res.Id,
+		&res.ProjectId,
+		&res.EnvironmentId,
+		&res.Type,
 		&resp,
 	)
-
-	if err != nil {
-		log.Fatal(err)
+	if err == pgx.ErrNoRows {
+		err := errors.New("login platform type not found")
+		return nil, err
+	} else if err != nil {
+		return res, err
 	}
 
 	err = json.Unmarshal(resp, &data)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return res, err
 	}
 
-	res = &pb.LoginPlatformType{
+	res.Data = &pb.LoginPlatformType{
 		TeamId:   data["team_id"],
 		ClientId: data["client_id"],
 		KeyId:    data["key_id"],
@@ -98,19 +115,8 @@ func (e *loginPlatformTypeRepo) GetLoginBysPK(ctx context.Context, pKey *pb.Logi
 		Password: data["password"],
 	}
 
-	if err == pgx.ErrNoRows {
-		err := errors.New("login settings not found")
-		return nil, err
-	} else if err != nil {
-		return res, err
-	}
-
 	return res, nil
 }
-
-/*
-SELECT id,project_id,env_id,type,data FROM "login_platform_setting"	WHERE id='20ee409e-ac5c-4b91-8342-0a8d4a1fbdaf';
-*/
 
 func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest) (string, error) {
 
@@ -159,9 +165,9 @@ func (e *loginPlatformTypeRepo) GetListLoginPlatformType(ctx context.Context, in
 	FROM
 		"login_platform_setting"
 	WHERE
-		project_id = $1`
+	env_id = $1`
 
-	rows, err := e.db.Query(ctx, query, input.ProjectId)
+	rows, err := e.db.Query(ctx, query, input.EnvironmentId)
 	if err != nil {
 		return nil, err
 	}

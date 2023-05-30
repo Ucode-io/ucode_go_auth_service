@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/saidamir98/udevs_pkg/util"
 )
 
 // CreateLoginPlatformType godoc
@@ -36,6 +38,16 @@ func (h *Handler) CreateLoginPlatformType(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
+	}
+	
+	if body.Type == "GOOGLE" {
+		if body.Data.Email != "" {
+			valid := util.IsValidEmail(body.Data.Email)
+			if !valid {
+				h.handleResponse(c, http.BadRequest, "Неверная почта")
+				return
+			}
+		}
 	}
 
 	resp, err := h.services.LoginPlatformType().CreateLoginPlatformType(
@@ -101,7 +113,7 @@ func (h *Handler) UpdateLoginPlatformType(c *gin.Context) {
 // @Tags LoginId
 // @Accept json
 // @Produce json
-// @Param project_id query string true "project_id"
+// @Param env_id query string true "env_id"
 // @Success 200 {object} http.Response{data=pb.GetListLoginPlatformTypeResponse} "Login Config data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -110,11 +122,43 @@ func (h *Handler) GetLoginPlatformType(c *gin.Context) {
 	resp, err := h.services.LoginPlatformType().GetListLoginPlatformType(
 		c.Request.Context(),
 		&pb.GetListLoginPlatformTypeRequest{
-			ProjectId: c.Query("project_id"),
+			EnvironmentId: c.Query("env_id"),
 		},
 	)
 	if err != nil {
 		h.log.Error("---> error in get list login settings", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+// LoginPlatformTypePrimaryKey godoc
+// @ID LoginPlatformTypePrimaryKey
+// @Router /v2/login-platform-type/{id} [GET]
+// @Summary LoginPlatformTypePrimaryKey
+// @Description LoginPlatformTypePrimaryKey
+// @Tags LoginId
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 200 {object} http.Response{data=pb.LoginPlatform} "Login Platform Type data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) LoginPlatformTypePrimaryKey(c *gin.Context) {
+	fmt.Println("handler login platform type primary key")
+	id := c.Param("id")
+
+	resp, err := h.services.LoginPlatformType().GetLoginPlatformType(
+		c.Request.Context(),
+		&pb.LoginPlatformTypePrimaryKey{
+			Id: id,
+		},
+	)
+
+	if err != nil {
+		h.log.Error("---> error in get login settings", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}

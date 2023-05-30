@@ -8510,9 +8510,9 @@ paths:
       description: GetListLoginPlatformType
       operationId: getListLoginPlatformType
       parameters:
-      - description: project_id
+      - description: env_id
         in: query
-        name: project_id
+        name: env_id
         required: true
         type: string
       produces:
@@ -8678,6 +8678,50 @@ paths:
                   type: string
               type: object
       summary: DeleteLoginPlatformType
+      tags:
+      - LoginId
+    get:
+      consumes:
+      - application/json
+      description: LoginPlatformTypePrimaryKey
+      operationId: LoginPlatformTypePrimaryKey
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login Platform Type data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: LoginPlatformTypePrimaryKey
       tags:
       - LoginId
   /v2/login-strategy:

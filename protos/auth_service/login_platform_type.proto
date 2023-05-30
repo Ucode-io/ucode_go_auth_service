@@ -7,14 +7,14 @@ import "google/protobuf/empty.proto";
 
 service LoginPlatformTypeLoginService {
     rpc CreateLoginPlatformType(LoginPlatform) returns (LoginPlatform) {}
-    rpc UpdateLoginPlatformType(UpdateLoginPlatformTypeRequest) returns (LoginPlatformType) {}
-    rpc GetLoginPlatformType(LoginPlatformTypePrimaryKey) returns (LoginPlatformType){}
+    rpc UpdateLoginPlatformType(UpdateLoginPlatformTypeRequest) returns (LoginPlatform) {}
+    rpc GetLoginPlatformType(LoginPlatformTypePrimaryKey) returns (LoginPlatform){}
     rpc GetListLoginPlatformType(GetListLoginPlatformTypeRequest) returns (GetListLoginPlatformTypeResponse) {}
     rpc DeleteLoginPlatformType(LoginPlatformTypePrimaryKey) returns (google.protobuf.Empty) {}
 }
 
 message GetListLoginPlatformTypeRequest {
-    string project_id = 1;
+    string environment_id = 1;
 }
 
 message LoginPlatformTypePrimaryKey {

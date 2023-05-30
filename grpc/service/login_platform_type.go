@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -32,7 +33,7 @@ func NewLoginPlatformTypeService(cfg config.Config, log logger.LoggerI, strg sto
 
 func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb.LoginPlatform) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.CreateLoginPlatformType--->", logger.Any("req", req))
-	res, err := e.strg.LoginPlatformType().CreateLogin(
+	res, err := e.strg.LoginPlatformType().CreateLoginPlatformType(
 		ctx,
 		req,
 	)
@@ -44,7 +45,7 @@ func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb
 	return res, nil
 }
 
-func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatformType, error) {
+func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.UpdateLoginPlatformType--->", logger.Any("req", req))
 
 	id, err := e.strg.LoginPlatformType().UpdateLoginPlatformType(
@@ -57,7 +58,7 @@ func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	res, err := e.strg.LoginPlatformType().GetLoginBysPK(
+	res, err := e.strg.LoginPlatformType().GetLoginPlatformType(
 		ctx,
 		&pb.LoginPlatformTypePrimaryKey{
 			Id: id,
@@ -81,6 +82,24 @@ func (e *loginPlatformType) GetListLoginPlatformType(ctx context.Context, req *p
 	)
 	if err != nil {
 		e.log.Error("!!!---LoginPlatformType.GetListLoginPlatformType--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return res, nil
+}
+
+func (e *loginPlatformType) GetLoginPlatformType(ctx context.Context, req *pb.LoginPlatformTypePrimaryKey) (*pb.LoginPlatform, error) {
+	e.log.Info("---LoginPlatformType.GetLoginPlatformTypeByPK--->", logger.Any("req", req))
+
+	fmt.Println("req", req)
+	res, err := e.strg.LoginPlatformType().GetLoginPlatformType(
+		ctx,
+		req,
+	)
+
+	fmt.Println(">>> >>> >>> >>> >>> ", res)
+	if err != nil {
+		e.log.Error("!!!---LoginPlatformType.GetLoginPlatformTypeByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

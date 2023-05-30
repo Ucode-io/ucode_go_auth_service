@@ -9349,8 +9349,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
+                        "description": "env_id",
+                        "name": "env_id",
                         "in": "query",
                         "required": true
                     }
@@ -9582,6 +9582,85 @@ const docTemplate = `{
             }
         },
         "/v2/login-platform-type/{id}": {
+            "get": {
+                "description": "LoginPlatformTypePrimaryKey",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LoginId"
+                ],
+                "summary": "LoginPlatformTypePrimaryKey",
+                "operationId": "LoginPlatformTypePrimaryKey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login Platform Type data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "DeleteLoginPlatformType",
                 "consumes": [
