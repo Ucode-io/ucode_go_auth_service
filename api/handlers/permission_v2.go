@@ -1019,8 +1019,11 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	fmt.Println("\n Resource type ", resource.ResourceType)
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
+		fmt.Println("\n Mongo db")
 		resp, err = h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
 			c.Request.Context(),
 			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
