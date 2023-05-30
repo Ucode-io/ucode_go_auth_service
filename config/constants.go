@@ -37,10 +37,18 @@ const (
 var (
 	// these apis also manage by app's permission
 
-	WithGoogle = "google"
-	Default    = "default"
-	WithPhone  = "phone"
-	WithApple  = "apple"
+	WithGoogle    = "google"
+	Default       = "default"
+	WithPhone     = "phone"
+	WithApple     = "apple"
+	WithEmail     = "email"
+	RegisterTypes = map[string]int{
+		"google":  1,
+		"default": 1,
+		"phone":   1,
+		"apple":   1,
+		"email":   1,
+	}
 
 	ObjectBuilderTableSlugs = map[string]int{
 		"field":               1,

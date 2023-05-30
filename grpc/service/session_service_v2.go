@@ -417,6 +417,45 @@ pwd:
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+	case "GOOGLE_AUTH":
+		email, ok := req.GetData()["email"]
+		if !ok {
+			err := errors.New("email is empty")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		gooleToken, ok := req.GetData()["google_token"]
+		if ok {
+			userInfo, err := helper.GetGoogleUserInfo(gooleToken)
+			if err != nil {
+				err = errors.New("Invalid arguments google auth")
+				s.log.Error("!!!Login--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+				err = errors.New("Invalid arguments google auth")
+				s.log.Error("!!!Login--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("google token is required when login type is google auth")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userIdRes, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+			Email: email,
+		})
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = userIdRes.GetUserId()
+	case "APPLE_AUTH":
+
+		//
+		err := errors.New("not implemented")
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+
 	default:
 		req.LoginStrategy = "LOGIN_PWD"
 		goto pwd
@@ -500,9 +539,6 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			AppPermissions: data.GetAppPermissions(),
 		})
 
-	}
-	if res == nil {
-		res = &pb.V2LoginResponse{}
 	}
 	if req.Tables == nil {
 		req.Tables = []*pb.Object{}
