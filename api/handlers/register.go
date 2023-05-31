@@ -25,6 +25,7 @@ import (
 // @Tags register
 // @Accept json
 // @Produce json
+// @Enum 
 // @Param login body models.Sms true "SendCode"
 // @Success 201 {object} http.Response{data=models.SendCodeResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"

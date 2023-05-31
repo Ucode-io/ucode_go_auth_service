@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
+	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -317,9 +319,13 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 // @Router /v2/login/with-option [POST]
 // @Summary V2LoginWithOption
 // @Description V2LoginWithOption
+// @Description in body you must be give environment_id and project_id
+// @Description login strategy must be one of the following values
+// @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
 // @Tags V2_Session
 // @Accept json
 // @Produce json
+// // @Param login_strategy header string true "login_strategy" Enums(PHONE, EMAIL, LOGIN, PHONE_OTP, EMAIL_OTP, LOGIN_PWD, GOOGLE_AUTH, APPLE_AUTH)
 // @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
 // @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -331,12 +337,25 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	if !util.IsValidUUID(login.Data["environment_id"]) {
+		h.handleResponse(c, http.BadRequest, "invalid environment id")
+		return
+	}
+	if !util.IsValidUUID(login.Data["project_id"]) {
+		h.handleResponse(c, http.BadRequest, "invalid environment id")
+		return
+	}
+	if _, ok := config.LoginStrategyTypes[login.GetLoginStrategy()]; !ok {
+		h.handleResponse(c, http.InvalidArgument, "invalid login strategy")
+		return
+	}
 
 	resp, err := h.services.SessionService().V2LoginWithOption(
 		c.Request.Context(),
 		&auth_service.V2LoginWithOptionRequest{
 			Data:          login.GetData(),
 			LoginStrategy: login.GetLoginStrategy(),
+			Tables:        login.GetTables(),
 		})
 
 	httpErrorStr := ""
@@ -346,6 +365,10 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 	}
 	if httpErrorStr == "user not found" {
 		err := errors.New("Пользователь не найдено")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
+	} else if httpErrorStr == "user verified but not found" {
+		err := errors.New("Пользователь проверен, но не найден")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	} else if httpErrorStr == "user has been expired" {

@@ -9332,6 +9332,400 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/login-platform-type": {
+            "get": {
+                "description": "GetListLoginPlatformType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LoginId"
+                ],
+                "summary": "GetListLoginPlatformType",
+                "operationId": "getListLoginPlatformType",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "env_id",
+                        "name": "env_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login Config data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GetListLoginPlatformTypeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "UpdateLoginPlatformType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LoginId"
+                ],
+                "summary": "UpdateLoginPlatformType",
+                "operationId": "updateLoginPlatformType",
+                "parameters": [
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateLoginPlatformTypeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login Config data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "CreateLoginPlatformType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LoginId"
+                ],
+                "summary": "CreateLoginPlatformType",
+                "operationId": "createLoginPlatformType",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/login-platform-type/{id}": {
+            "get": {
+                "description": "LoginPlatformTypePrimaryKey",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LoginId"
+                ],
+                "summary": "LoginPlatformTypePrimaryKey",
+                "operationId": "LoginPlatformTypePrimaryKey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login Platform Type data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "DeleteLoginPlatformType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LoginId"
+                ],
+                "summary": "DeleteLoginPlatformType",
+                "operationId": "deleteLoginPlatformType",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/login-strategy": {
             "get": {
                 "description": "Get List Login Strategy",
@@ -9351,7 +9745,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -9579,7 +9973,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption",
+                "description": "V2LoginWithOption\nin body you must be give environment_id and project_id\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH]",
                 "consumes": [
                     "application/json"
                 ],
@@ -10751,6 +11145,107 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenSuperAdminResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/register": {
+            "post": {
+                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2_register"
+                ],
+                "summary": "V2Register",
+                "operationId": "V2register",
+                "parameters": [
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -12265,6 +12760,107 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/send-code": {
+            "post": {
+                "description": "SendCode type must be one of the following values [\"EMAIL\", \"PHONE\"]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2_register"
+                ],
+                "summary": "SendCode",
+                "operationId": "V2SendCode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header"
+                    },
+                    {
+                        "description": "SendCode",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "allOf": [
                                 {
@@ -14424,6 +15020,34 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_api_models.V2SendCodeRequest": {
+            "type": "object",
+            "properties": {
+                "recipient": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_api_models.V2SendCodeResponse": {
+            "type": "object",
+            "properties": {
+                "google_acces": {
+                    "type": "boolean"
+                },
+                "sms_id": {
+                    "type": "string"
+                },
+                "user_found": {
+                    "type": "boolean"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_api_models.Verify": {
             "type": "object",
             "properties": {
@@ -15184,6 +15808,17 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GetListLoginPlatformTypeResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform"
+                    }
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.GetListRes": {
             "type": "object",
             "properties": {
@@ -15418,6 +16053,49 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "short_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatform": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "key_id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "team_id": {
                     "type": "string"
                 }
             }
@@ -16089,6 +16767,32 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.EmailSettings"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.UpdateLoginPlatformTypeRequest": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "key_id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "team_id": {
+                    "type": "string"
                 }
             }
         },
@@ -17713,7 +18417,7 @@ const docTemplate = `{
                     "description": "Sequence of extended key usages.",
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/x509.ExtKeyUsage"
                     }
                 },
                 "extensions": {
@@ -17752,7 +18456,7 @@ const docTemplate = `{
                     }
                 },
                 "keyUsage": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.KeyUsage"
                 },
                 "maxPathLen": {
                     "description": "MaxPathLen and MaxPathLenZero indicate the presence and\nvalue of the BasicConstraints' \"pathLenConstraint\".\n\nWhen parsing a certificate, a positive non-zero MaxPathLen\nmeans that the field was specified, -1 means it was unset,\nand MaxPathLenZero being true mean that the field was\nexplicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false\nshould be treated equivalent to -1 (unset).\n\nWhen generating a certificate, an unset pathLenConstraint\ncan be requested with either MaxPathLen == -1 or using the\nzero value for both MaxPathLen and MaxPathLenZero.",
@@ -17812,7 +18516,7 @@ const docTemplate = `{
                 },
                 "publicKey": {},
                 "publicKeyAlgorithm": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.PublicKeyAlgorithm"
                 },
                 "raw": {
                     "description": "Complete ASN.1 DER content (certificate, signature algorithm and signature).",
@@ -17859,7 +18563,7 @@ const docTemplate = `{
                     }
                 },
                 "signatureAlgorithm": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.SignatureAlgorithm"
                 },
                 "subject": {
                     "$ref": "#/definitions/pkix.Name"
@@ -17900,6 +18604,135 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "x509.ExtKeyUsage": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ],
+            "x-enum-varnames": [
+                "ExtKeyUsageAny",
+                "ExtKeyUsageServerAuth",
+                "ExtKeyUsageClientAuth",
+                "ExtKeyUsageCodeSigning",
+                "ExtKeyUsageEmailProtection",
+                "ExtKeyUsageIPSECEndSystem",
+                "ExtKeyUsageIPSECTunnel",
+                "ExtKeyUsageIPSECUser",
+                "ExtKeyUsageTimeStamping",
+                "ExtKeyUsageOCSPSigning",
+                "ExtKeyUsageMicrosoftServerGatedCrypto",
+                "ExtKeyUsageNetscapeServerGatedCrypto",
+                "ExtKeyUsageMicrosoftCommercialCodeSigning",
+                "ExtKeyUsageMicrosoftKernelCodeSigning"
+            ]
+        },
+        "x509.KeyUsage": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32,
+                64,
+                128,
+                256
+            ],
+            "x-enum-varnames": [
+                "KeyUsageDigitalSignature",
+                "KeyUsageContentCommitment",
+                "KeyUsageKeyEncipherment",
+                "KeyUsageDataEncipherment",
+                "KeyUsageKeyAgreement",
+                "KeyUsageCertSign",
+                "KeyUsageCRLSign",
+                "KeyUsageEncipherOnly",
+                "KeyUsageDecipherOnly"
+            ]
+        },
+        "x509.PublicKeyAlgorithm": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-comments": {
+                "DSA": "Unsupported."
+            },
+            "x-enum-varnames": [
+                "UnknownPublicKeyAlgorithm",
+                "RSA",
+                "DSA",
+                "ECDSA",
+                "Ed25519"
+            ]
+        },
+        "x509.SignatureAlgorithm": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16
+            ],
+            "x-enum-comments": {
+                "DSAWithSHA1": "Unsupported.",
+                "DSAWithSHA256": "Unsupported.",
+                "ECDSAWithSHA1": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses.",
+                "MD2WithRSA": "Unsupported.",
+                "MD5WithRSA": "Only supported for signing, not verification.",
+                "SHA1WithRSA": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses."
+            },
+            "x-enum-varnames": [
+                "UnknownSignatureAlgorithm",
+                "MD2WithRSA",
+                "MD5WithRSA",
+                "SHA1WithRSA",
+                "SHA256WithRSA",
+                "SHA384WithRSA",
+                "SHA512WithRSA",
+                "DSAWithSHA1",
+                "DSAWithSHA256",
+                "ECDSAWithSHA1",
+                "ECDSAWithSHA256",
+                "ECDSAWithSHA384",
+                "ECDSAWithSHA512",
+                "SHA256WithRSAPSS",
+                "SHA384WithRSAPSS",
+                "SHA512WithRSAPSS",
+                "PureEd25519"
+            ]
         }
     }
 }`

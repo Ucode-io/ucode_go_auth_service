@@ -11,6 +11,6 @@ func IsValidEmail(email string) bool {
 	if len(email) > 254 {
 		return false
 	}
-	r := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
+	r := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,10}$`)
 	return r.MatchString(email)
 }
