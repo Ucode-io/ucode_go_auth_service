@@ -345,13 +345,16 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "invalid environment id")
 		return
 	}
-	fmt.Println(":::", c.GetHeader("login_strategy"))
+	loginStrategy, ok := c.Get("login_strategy")
+	if !ok {
+		h.handleResponse(c, http.InvalidArgument, "invalid login strategy")
+	}
 
 	resp, err := h.services.SessionService().V2LoginWithOption(
 		c.Request.Context(),
 		&auth_service.V2LoginWithOptionRequest{
 			Data:          login.Data,
-			LoginStrategy: c.GetHeader("login_strategy"),
+			LoginStrategy: loginStrategy.(string),
 			Tables:        login.Tables,
 		})
 
