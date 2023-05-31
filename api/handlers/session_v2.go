@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
-	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -325,13 +325,13 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 // @Tags V2_Session
 // @Accept json
 // @Produce json
-// @Param login_strategy header string true "login_strategy" Enums(PHONE, EMAIL, LOGIN, PHONE_OTP, EMAIL_OTP, LOGIN_PWD, GOOGLE_AUTH, APPLE_AUTH)
-// @Param login body models.LoginMiddlewareReq true "V2LoginRequest"
+// // @Param login_strategy header string true "login_strategy" Enums(PHONE, EMAIL, LOGIN, PHONE_OTP, EMAIL_OTP, LOGIN_PWD, GOOGLE_AUTH, APPLE_AUTH)
+// @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
 // @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginWithOption(c *gin.Context) {
-	var login models.LoginMiddlewareReq
+	var login auth_service.V2LoginWithOptionRequest
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -345,17 +345,17 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "invalid environment id")
 		return
 	}
-	loginStrategy, ok := c.Get("login_strategy")
-	if !ok {
+	if _, ok := config.LoginStrategyTypes[login.GetLoginStrategy()]; !ok {
 		h.handleResponse(c, http.InvalidArgument, "invalid login strategy")
+		return
 	}
 
 	resp, err := h.services.SessionService().V2LoginWithOption(
 		c.Request.Context(),
 		&auth_service.V2LoginWithOptionRequest{
-			Data:          login.Data,
-			LoginStrategy: loginStrategy.(string),
-			Tables:        login.Tables,
+			Data:          login.GetData(),
+			LoginStrategy: login.GetLoginStrategy(),
+			Tables:        login.GetTables(),
 		})
 
 	httpErrorStr := ""
