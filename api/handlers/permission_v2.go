@@ -1145,15 +1145,17 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	permission.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
+		fmt.Println("test permission before update builder")
 		resp, err = h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
 			c.Request.Context(),
 			&permission,
 		)
-
+		fmt.Println("test permission before error update builder")
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("test permission after update builder")
 	case pbCompany.ResourceType_POSTGRESQL:
 		resp, err = h.services.PostgresBuilderPermissionService().UpdateRoleAppTablePermissions(
 			c.Request.Context(),
