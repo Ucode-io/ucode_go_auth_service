@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
@@ -1147,7 +1148,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	case pbCompany.ResourceType_MONGODB:
 		fmt.Println("test permission before update builder")
 		resp, err = h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
-			c.Request.Context(),
+			context.Background(),
 			&permission,
 		)
 		fmt.Println("test permission before error update builder")
