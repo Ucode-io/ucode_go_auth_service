@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
+	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -317,26 +319,40 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 // @Router /v2/login/with-option [POST]
 // @Summary V2LoginWithOption
 // @Description V2LoginWithOption
+// @Description in body you must be give environment_id and project_id
+// @Description login strategy must be one of the following values
+// @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
 // @Tags V2_Session
 // @Accept json
 // @Produce json
-// @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
+// @Param login_strategy header string true "login_strategy" Enums(PHONE, EMAIL, LOGIN, PHONE_OTP, EMAIL_OTP, LOGIN_PWD, GOOGLE_AUTH, APPLE_AUTH)
+// @Param login body models.LoginMiddlewareReq true "V2LoginRequest"
 // @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginWithOption(c *gin.Context) {
-	var login auth_service.V2LoginWithOptionRequest
+	var login models.LoginMiddlewareReq
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	if !util.IsValidUUID(login.Data["environment_id"]) {
+		h.handleResponse(c, http.BadRequest, "invalid environment id")
+		return
+	}
+	if !util.IsValidUUID(login.Data["project_id"]) {
+		h.handleResponse(c, http.BadRequest, "invalid environment id")
+		return
+	}
+	fmt.Println(":::", c.GetHeader("login_strategy"))
 
 	resp, err := h.services.SessionService().V2LoginWithOption(
 		c.Request.Context(),
 		&auth_service.V2LoginWithOptionRequest{
-			Data:          login.GetData(),
-			LoginStrategy: login.GetLoginStrategy(),
+			Data:          login.Data,
+			LoginStrategy: c.GetHeader("login_strategy"),
+			Tables:        login.Tables,
 		})
 
 	httpErrorStr := ""

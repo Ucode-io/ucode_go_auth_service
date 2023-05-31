@@ -665,6 +665,17 @@ definitions:
       project_id:
         type: string
     type: object
+  ucode_ucode_go_auth_service_api_models.LoginMiddlewareReq:
+    properties:
+      data:
+        additionalProperties:
+          type: string
+        type: object
+      tables:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_api_models.RegisterOtp:
     properties:
       data:
@@ -2167,19 +2178,6 @@ definitions:
         type: boolean
       user_id:
         type: string
-    type: object
-  ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest:
-    properties:
-      data:
-        additionalProperties:
-          type: string
-        type: object
-      login_strategy:
-        type: string
-      tables:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
-        type: array
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq:
     properties:
@@ -8875,15 +8873,33 @@ paths:
     post:
       consumes:
       - application/json
-      description: V2LoginWithOption
+      description: |-
+        V2LoginWithOption
+        in body you must be give environment_id and project_id
+        login strategy must be one of the following values
+        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
       operationId: V2login_withoption
       parameters:
+      - description: login_strategy
+        enum:
+        - PHONE
+        - EMAIL
+        - LOGIN
+        - PHONE_OTP
+        - EMAIL_OTP
+        - LOGIN_PWD
+        - GOOGLE_AUTH
+        - APPLE_AUTH
+        in: header
+        name: login_strategy
+        required: true
+        type: string
       - description: V2LoginRequest
         in: body
         name: login
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.LoginMiddlewareReq'
       produces:
       - application/json
       responses:
