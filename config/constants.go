@@ -51,6 +51,17 @@ var (
 	}
 	ErrUserNotFound = errors.New("user not found")
 
+	LoginStrategyTypes = map[string]int{
+		"EMAIL":       1,
+		"PHONE":       1,
+		"EMAIL_OTP":   1,
+		"PHONE_OTP":   1,
+		"LOGIN":       1,
+		"LOGIN_PWD":   1,
+		"GOOGLE_AUTH": 1,
+		"APPLE_AUTH":  1,
+	}
+
 	ObjectBuilderTableSlugs = map[string]int{
 		"field":               1,
 		"view":                1,
