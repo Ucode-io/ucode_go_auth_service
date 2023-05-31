@@ -215,6 +215,7 @@ pwd:
 		userId = user.Id
 	case "PHONE":
 		phone, ok := req.GetData()["phone"]
+		fmt.Println("test login with phone number")
 		if !ok {
 			err := errors.New("phone is empty")
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
@@ -226,6 +227,7 @@ pwd:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = user.GetId()
+		fmt.Println("user id:", userId)
 	case "EMAIL":
 		email, ok := req.GetData()["email"]
 		if !ok {
@@ -544,14 +546,17 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	if req.Tables == nil {
 		req.Tables = []*pb.Object{}
 	}
+	fmt.Println(res.GetUserId())
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData: res,
-		ProjectId: req.Data["project_id"],
-		Tables:    req.Tables,
+		LoginData:     res,
+		ProjectId:     req.Data["project_id"],
+		Tables:        req.Tables,
+		EnvironmentId: req.Data["environment_id"],
 	})
+	fmt.Println("err: ", err)
 	if resp == nil {
-		err := errors.New("User Verified But Not Found")
+		err := errors.New("error while generating token")
 		s.log.Error("!!!LoginMiddleware--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}

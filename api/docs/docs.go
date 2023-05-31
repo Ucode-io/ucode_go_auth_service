@@ -9973,7 +9973,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption",
+                "description": "V2LoginWithOption\nin body you must be give environment_id and project_id\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH]",
                 "consumes": [
                     "application/json"
                 ],
@@ -9987,12 +9987,29 @@ const docTemplate = `{
                 "operationId": "V2login_withoption",
                 "parameters": [
                     {
+                        "enum": [
+                            "PHONE",
+                            "EMAIL",
+                            "LOGIN",
+                            "PHONE_OTP",
+                            "EMAIL_OTP",
+                            "LOGIN_PWD",
+                            "GOOGLE_AUTH",
+                            "APPLE_AUTH"
+                        ],
+                        "type": "string",
+                        "description": "login_strategy",
+                        "name": "login_strategy",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "V2LoginRequest",
                         "name": "login",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest"
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.LoginMiddlewareReq"
                         }
                     }
                 ],
@@ -14974,6 +14991,23 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_api_models.LoginMiddlewareReq": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
+                    }
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_api_models.RegisterOtp": {
             "type": "object",
             "properties": {
@@ -17274,26 +17308,6 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "login_strategy": {
-                    "type": "string"
-                },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
-                    }
                 }
             }
         },
