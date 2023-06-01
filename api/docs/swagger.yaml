@@ -554,6 +554,8 @@ definitions:
           On the client side, it can't be empty. On the server side, it can be
           empty if Config.ClientAuth is not RequireAnyClientCert or
           RequireAndVerifyClientCert.
+
+          PeerCertificates and its contents should not be modified.
         items:
           $ref: '#/definitions/x509.Certificate'
         type: array
@@ -592,6 +594,8 @@ definitions:
           On the client side, it's set if Config.InsecureSkipVerify is false. On
           the server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven
           (and the peer provided a certificate) or RequireAndVerifyClientCert.
+
+          VerifiedChains and its contents should not be modified.
         items:
           items:
             $ref: '#/definitions/x509.Certificate'
@@ -1839,19 +1843,9 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdateLoginPlatformTypeRequest:
     properties:
-      client_id:
-        type: string
-      email:
-        type: string
+      data:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType'
       id:
-        type: string
-      key_id:
-        type: string
-      password:
-        type: string
-      secret:
-        type: string
-      team_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest:
@@ -2847,6 +2841,9 @@ definitions:
       host:
         description: host or host:port
         type: string
+      omitHost:
+        description: do not emit empty host (authority)
+        type: boolean
       opaque:
         description: encoded opaque data
         type: string
@@ -3150,7 +3147,7 @@ definitions:
     - 4
     type: integer
     x-enum-comments:
-      DSA: Unsupported.
+      DSA: Only supported for parsing.
     x-enum-varnames:
     - UnknownPublicKeyAlgorithm
     - RSA
