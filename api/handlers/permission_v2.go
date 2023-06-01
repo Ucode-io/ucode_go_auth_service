@@ -941,7 +941,7 @@ func (h *Handler) V2RemoveRolePermission(c *gin.Context) {
 // @Produce json
 // @Param project-id path string false "project-id"
 // @Param role-id path string false "role-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetPermissionListResponseBody"
+// @Success 200 {object} http.Response{data=object_builder_service.GetListWithRoleAppTablePermissionsResponse} "GetPermissionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
