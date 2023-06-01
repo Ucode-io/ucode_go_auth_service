@@ -26,10 +26,10 @@ type TableMenuRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	Title     string `protobuf:"bytes,1,opt,name=title,proto3" json:"title"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ParentId  string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon"`
 }
 
 func (x *TableMenuRequest) Reset() {
@@ -97,10 +97,10 @@ type CreateTableMenuResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	Icon      string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon"`
 }
 
 func (x *CreateTableMenuResponse) Reset() {
@@ -168,11 +168,11 @@ type TableMenu struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Icon      string `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Title     string `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id"`
+	ParentId  string `protobuf:"bytes,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id"`
+	Icon      string `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon"`
 }
 
 func (x *TableMenu) Reset() {
@@ -247,8 +247,8 @@ type GetAllTableMenusResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Menus []*TableMenu `protobuf:"bytes,1,rep,name=Menus,proto3" json:"Menus,omitempty"`
-	Count int32        `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Menus []*TableMenu `protobuf:"bytes,1,rep,name=Menus,proto3" json:"Menus"`
+	Count int32        `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (x *GetAllTableMenusResponse) Reset() {
@@ -302,8 +302,8 @@ type TableMenuPrimaryKey struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *TableMenuPrimaryKey) Reset() {
@@ -357,10 +357,10 @@ type GetAllTableMenusRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
-	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Offset    int32  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset"`
+	Limit     int32  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit"`
+	Search    string `protobuf:"bytes,3,opt,name=search,proto3" json:"search"`
+	ProjectId string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id"`
 }
 
 func (x *GetAllTableMenusRequest) Reset() {
