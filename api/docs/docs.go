@@ -14833,7 +14833,7 @@ const docTemplate = `{
                     }
                 },
                 "peerCertificates": {
-                    "description": "PeerCertificates are the parsed certificates sent by the peer, in the\norder in which they were sent. The first element is the leaf certificate\nthat the connection is verified against.\n\nOn the client side, it can't be empty. On the server side, it can be\nempty if Config.ClientAuth is not RequireAnyClientCert or\nRequireAndVerifyClientCert.",
+                    "description": "PeerCertificates are the parsed certificates sent by the peer, in the\norder in which they were sent. The first element is the leaf certificate\nthat the connection is verified against.\n\nOn the client side, it can't be empty. On the server side, it can be\nempty if Config.ClientAuth is not RequireAnyClientCert or\nRequireAndVerifyClientCert.\n\nPeerCertificates and its contents should not be modified.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/x509.Certificate"
@@ -14861,7 +14861,7 @@ const docTemplate = `{
                     }
                 },
                 "verifiedChains": {
-                    "description": "VerifiedChains is a list of one or more chains where the first element is\nPeerCertificates[0] and the last element is from Config.RootCAs (on the\nclient side) or Config.ClientCAs (on the server side).\n\nOn the client side, it's set if Config.InsecureSkipVerify is false. On\nthe server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven\n(and the peer provided a certificate) or RequireAndVerifyClientCert.",
+                    "description": "VerifiedChains is a list of one or more chains where the first element is\nPeerCertificates[0] and the last element is from Config.RootCAs (on the\nclient side) or Config.ClientCAs (on the server side).\n\nOn the client side, it's set if Config.InsecureSkipVerify is false. On\nthe server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven\n(and the peer provided a certificate) or RequireAndVerifyClientCert.\n\nVerifiedChains and its contents should not be modified.",
                     "type": "array",
                     "items": {
                         "type": "array",
@@ -16773,25 +16773,10 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.UpdateLoginPlatformTypeRequest": {
             "type": "object",
             "properties": {
-                "client_id": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType"
                 },
                 "id": {
-                    "type": "string"
-                },
-                "key_id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "secret": {
-                    "type": "string"
-                },
-                "team_id": {
                     "type": "string"
                 }
             }
@@ -18311,6 +18296,10 @@ const docTemplate = `{
                     "description": "host or host:port",
                     "type": "string"
                 },
+                "omitHost": {
+                    "description": "do not emit empty host (authority)",
+                    "type": "boolean"
+                },
                 "opaque": {
                     "description": "encoded opaque data",
                     "type": "string"
@@ -18675,7 +18664,7 @@ const docTemplate = `{
                 4
             ],
             "x-enum-comments": {
-                "DSA": "Unsupported."
+                "DSA": "Only supported for parsing."
             },
             "x-enum-varnames": [
                 "UnknownPublicKeyAlgorithm",
