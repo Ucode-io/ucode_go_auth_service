@@ -9,9 +9,9 @@ const (
 	DatabaseQueryTimeLayout = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
 	// DatabaseTimeLayout
 	DatabaseTimeLayout string = time.RFC3339
-	// AccessTokenExpiresInTime ...
+	// AccessTokenExpiresInTime ... 1 * 24 *
 	AccessTokenExpiresInTime time.Duration = 1 * 24 * 60 * time.Minute
-	// RefreshTokenExpiresInTime ...
+	// RefreshTokenExpiresInTime ... 30 * 24 * 60
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
 	// ProjectID
@@ -37,10 +37,30 @@ const (
 var (
 	// these apis also manage by app's permission
 
-	WithGoogle = "google"
-	Default = "default"
-	WithPhone = "phone"
-	WithApple = "apple"
+	WithGoogle    = "google"
+	Default       = "default"
+	WithPhone     = "phone"
+	WithApple     = "apple"
+	WithEmail     = "email"
+	RegisterTypes = map[string]int{
+		"google":  1,
+		"default": 1,
+		"phone":   1,
+		"apple":   1,
+		"email":   1,
+	}
+	ErrUserNotFound = errors.New("user not found")
+
+	LoginStrategyTypes = map[string]int{
+		"EMAIL":       1,
+		"PHONE":       1,
+		"EMAIL_OTP":   1,
+		"PHONE_OTP":   1,
+		"LOGIN":       1,
+		"LOGIN_PWD":   1,
+		"GOOGLE_AUTH": 1,
+		"APPLE_AUTH":  1,
+	}
 
 	ObjectBuilderTableSlugs = map[string]int{
 		"field":               1,

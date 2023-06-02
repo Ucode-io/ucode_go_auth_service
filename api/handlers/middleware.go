@@ -64,6 +64,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		//c.Set("Auth", res)
 		c.Set("resource_id", resourceId)
 		c.Set("environment_id", environmentId)
+		c.Set("login_strategy", c.GetHeader("login_strategy"))
 		//c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}

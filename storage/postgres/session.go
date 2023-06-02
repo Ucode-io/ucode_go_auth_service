@@ -2,12 +2,13 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 	"log"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
@@ -27,94 +28,78 @@ func NewSessionRepo(db *pgxpool.Pool) storage.SessionRepoI {
 
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
 	log.Printf("--->STRG: CreateSessionRequest: %+v", entity)
-	
-	//client_platform_id,
-	query := `INSERT INTO "session" (
-		id,
-		project_id,
-		client_type_id,
-		user_id,
-		role_id,
-		ip,
-		data,
-		expires_at
-	) VALUES (
-		$1,
-		$2,
-		$3,
-		$4,
-		$5,
-		$6,
-		$7,
-		$8
-		)`
-		//$9
-		
-	uuid, err := uuid.NewRandom()
-	if err != nil {
-		return pKey, err
-	}
 
-	_, err = r.db.Exec(ctx, query,
-		uuid.String(),
-		entity.ProjectId,
-		// entity.ClientPlatformId,
-		entity.ClientTypeId,
-		entity.UserId,
-		entity.RoleId,
-		entity.Ip,
-		entity.Data,
-		entity.ExpiresAt,
-	)
-
-	pKey = &pb.SessionPrimaryKey{
-		Id: uuid.String(),
-	}
-
-	return pKey, err
-}
-
-func (r *sessionRepo) CreateSuperAdmin(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
-	query := `INSERT INTO "session" (
+	params := make(map[string]interface{})
+	queryInitial := `INSERT INTO "session" (
 		id,
 		user_id,
 		ip,
 		data,
-		expires_at,
-		project_id
-	) VALUES (
-		$1,
-		$2,
-		$3,
-		$4,
-		$5,
-		$6
-	)`
+		expires_at`
 
-	uuid, err := uuid.NewRandom()
+	queryValue := ` VALUES (
+		:id,
+		:user_id,
+		:ip,
+		:data,
+		:expires_at`
+
+	queryReturn := ` RETURNING id`
+	random, err := uuid.NewRandom()
 	if err != nil {
 		return pKey, err
 	}
 
-	_, err = r.db.Exec(ctx, query,
-		uuid.String(),
-		entity.GetUserId(),
-		entity.GetIp(),
-		entity.GetData(),
-		entity.GetExpiresAt(),
-		entity.GetProjectId(),
-	)
+	params["id"] = random.String()
+	params["user_id"] = entity.UserId
+	params["ip"] = entity.Ip
+	params["data"] = entity.Data
+	params["expires_at"] = entity.ExpiresAt
+
+	if util.IsValidUUID(entity.ProjectId) {
+		params["project_id"] = entity.ProjectId
+		queryInitial += `, project_id`
+		queryValue += `, :project_id`
+	}
+
+	fmt.Println("entity.EnvId::", entity.EnvId)
+	if util.IsValidUUID(entity.EnvId) {
+		params["env_id"] = entity.EnvId
+		queryInitial += `, env_id`
+		queryValue += `, :env_id`
+	}
+
+	if util.IsValidUUID(entity.ClientTypeId) {
+		params["client_type_id"] = entity.ClientTypeId
+		queryInitial += `, client_type_id`
+		queryValue += `, :client_type_id`
+	}
+
+	if util.IsValidUUID(entity.RoleId) {
+		params["role_id"] = entity.RoleId
+		queryInitial += `, role_id`
+		queryValue += `, :role_id`
+	}
+
+	query := queryInitial + ")" + queryValue + ")" + queryReturn
+	cQuery, arr := helper.ReplaceQueryParams(query, params)
+
+	_, err = r.db.Exec(ctx, cQuery, arr...)
+	if err != nil {
+		return nil, err
+	}
 
 	pKey = &pb.SessionPrimaryKey{
-		Id: uuid.String(),
+		Id: random.String(),
 	}
 
 	return pKey, err
 }
 
 func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (res *pb.Session, err error) {
+
 	res = &pb.Session{}
-	// coalesce(client_platform_id::text, ''),
+
 	query := `SELECT
 		id,
 		coalesce(project_id::text, ''),
@@ -123,67 +108,40 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		coalesce(role_id::text, ''),
 		TEXT(ip) AS ip,
 		data,
-		is_changed,
-		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
-		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
+		COALESCE(is_changed, FALSE),
+		coalesce(env_id::text, ''),
+		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
+		COALESCE(TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS created_at,
+		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at
 	FROM
 		"session"
 	WHERE
 		id = $1`
 
-	var (
-		expiresAt sql.NullString
-		createdAt sql.NullString
-		updatedAt sql.NullString
-		userID    sql.NullString
-		isChanged sql.NullBool
-	)
-
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
 		&res.ProjectId,
-		// &res.ClientPlatformId,
 		&res.ClientTypeId,
-		&userID,
+		&res.UserId,
 		&res.RoleId,
 		&res.Ip,
 		&res.Data,
-		&isChanged,
-		// &res.ExpiresAt,
-		&expiresAt,
-		// &res.CreatedAt,
-		&createdAt,
-		// &res.UpdatedAt,
-		&updatedAt,
+		&res.IsChanged,
+		&res.EnvId,
+		&res.ExpiresAt,
+		&res.CreatedAt,
+		&res.UpdatedAt,
 	)
 	if err != nil {
 		return res, errors.Wrap(err, "error while getting session by id: "+err.Error())
 	}
-
-	if userID.Valid {
-		res.UserId = userID.String
-	}
-
-	if expiresAt.Valid {
-		res.ExpiresAt = expiresAt.String
-	}
-
-	if createdAt.Valid {
-		res.CreatedAt = createdAt.String
-	}
-
-	if updatedAt.Valid {
-		res.UpdatedAt = updatedAt.String
-	}
-	if isChanged.Valid {
-		res.IsChanged = isChanged.Bool
-	}
+	fmt.Println("res::", res)
 
 	return res, nil
 }
 
 func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionListRequest) (res *pb.GetSessionListResponse, err error) {
+	// @TODO refactor
 	res = &pb.GetSessionListResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -268,35 +226,48 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 }
 
 func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionRequest) (rowsAffected int64, err error) {
-	query := `UPDATE "session" SET
-		project_id = :project_id,
-		client_platform_id = :client_platform_id,
-		client_type_id = :client_type_id,
-		user_id = :user_id,
-		role_id = :role_id,
-		ip = :ip,
-		data = :data,
-		is_changed = :is_changed,
-		expires_at = :expires_at,
-		updated_at = now()
-	WHERE
-		id = :id`
+	fmt.Println("\n>>>>>>>>>>>>>>>>>>>>>>>>>> UPDATE SESSION\n")
+	params := make(map[string]interface{})
+	queryInitial := `UPDATE "session" SET
+        ip = :ip,
+        expires_at = :expires_at,
+        is_changed = TRUE,
+		updated_at = now()`
 
-	params := map[string]interface{}{
-		"id":                 entity.Id,
-		"project_id":         entity.ProjectId,
-		"client_platform_id": entity.ClientPlatformId,
-		"client_type_id":     entity.ClientTypeId,
-		"user_id":            entity.UserId,
-		"role_id":            entity.RoleId,
-		"ip":                 entity.Ip,
-		"data":               entity.Data,
-		"is_changed":         entity.IsChanged,
-		"expires_at":         entity.ExpiresAt,
+	filter := ` WHERE id = :id`
+	params["ip"] = entity.Ip
+	params["expires_at"] = entity.ExpiresAt
+	params["id"] = entity.Id
+
+	if util.IsValidUUID(entity.ProjectId) {
+		params["project_id"] = entity.ProjectId
+		queryInitial += `, project_id = :project_id`
 	}
 
-	q, arr := helper.ReplaceQueryParams(query, params)
-	result, err := r.db.Exec(ctx, q, arr...)
+	if util.IsValidUUID(entity.EnvId) {
+		params["env_id"] = entity.EnvId
+		queryInitial += `, env_id = :env_id`
+	}
+
+	if util.IsValidUUID(entity.ClientTypeId) {
+		params["client_type_id"] = entity.ClientTypeId
+		queryInitial += `, client_type_id = :client_type_id`
+	}
+
+	if util.IsValidUUID(entity.RoleId) {
+		params["role_id"] = entity.RoleId
+		queryInitial += `, role_id = :role_id`
+	}
+
+	if entity.Data != "" {
+		params["data"] = entity.Data
+		queryInitial += `, data = :data`
+	}
+
+	query := queryInitial + filter
+	fmt.Println("\n.>>>>>>>>>>>>>>>>>>  STORAGE QUERY", query, "\n")
+	cQuery, arr := helper.ReplaceQueryParams(query, params)
+	result, err := r.db.Exec(ctx, cQuery, arr...)
 	if err != nil {
 		return 0, err
 	}
@@ -321,6 +292,7 @@ func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (r
 
 func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error) {
 	log.Printf("---STRG->DeleteExpiredUserSessions---> %s", userID)
+
 	query := `DELETE FROM "session" WHERE user_id = $1 AND expires_at < $2`
 
 	result, err := r.db.Exec(ctx, query, userID, time.Now().Format("2006-01-02 15:04:05"))
@@ -452,28 +424,13 @@ func (r *sessionRepo) GetSessionListByIntegrationID(ctx context.Context, integra
 }
 
 func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error) {
+	// @TODO remove if not used
 	query := `UPDATE "session" SET
 		is_changed = $2
 	WHERE
 		role_id = $1`
 
 	result, err := r.db.Exec(ctx, query, entity.RoleId, entity.IsChanged)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected = result.RowsAffected()
-
-	return rowsAffected, err
-}
-
-func (r *sessionRepo) UpdateBySessionId(ctx context.Context, entity *pb.UpdateSessionBySessionIdRequest) (rowsAffected int64, err error) {
-	query := `UPDATE "session" SET
-		is_changed = $2
-	WHERE
-		id = $1`
-
-	result, err := r.db.Exec(ctx, query, entity.Id, entity.IsChanged)
 	if err != nil {
 		return 0, err
 	}

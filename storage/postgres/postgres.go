@@ -10,27 +10,29 @@ import (
 )
 
 type Store struct {
-	db              *pgxpool.Pool
-	clientPlatform  storage.ClientPlatformRepoI
-	clientType      storage.ClientTypeRepoI
-	client          storage.ClientRepoI
-	relation        storage.RelationRepoI
-	userInfoField   storage.UserInfoFieldRepoI
-	role            storage.RoleRepoI
-	permission      storage.PermissionRepoI
-	scope           storage.ScopeRepoI
-	permissionScope storage.PermissionScopeRepoI
-	rolePermission  storage.RolePermissionRepoI
-	user            storage.UserRepoI
-	integration     storage.IntegrationRepoI
-	userRelation    storage.UserRelationRepoI
-	userInfo        storage.UserInfoRepoI
-	session         storage.SessionRepoI
-	email           storage.EmailRepoI
-	company         storage.CompanyRepoI
-	project         storage.ProjectRepoI
-	apiKeys         storage.ApiKeysRepoI
-	appleId         storage.AppleSettingsI
+	db                *pgxpool.Pool
+	clientPlatform    storage.ClientPlatformRepoI
+	clientType        storage.ClientTypeRepoI
+	client            storage.ClientRepoI
+	relation          storage.RelationRepoI
+	userInfoField     storage.UserInfoFieldRepoI
+	role              storage.RoleRepoI
+	permission        storage.PermissionRepoI
+	scope             storage.ScopeRepoI
+	permissionScope   storage.PermissionScopeRepoI
+	rolePermission    storage.RolePermissionRepoI
+	user              storage.UserRepoI
+	integration       storage.IntegrationRepoI
+	userRelation      storage.UserRelationRepoI
+	userInfo          storage.UserInfoRepoI
+	session           storage.SessionRepoI
+	email             storage.EmailRepoI
+	company           storage.CompanyRepoI
+	project           storage.ProjectRepoI
+	apiKeys           storage.ApiKeysRepoI
+	appleId           storage.AppleSettingsI
+	loginStrategy     storage.LoginStrategyI
+	loginPlatformType storage.LoginPlatformType
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -43,7 +45,7 @@ func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, erro
 		cfg.PostgresDatabase,
 	))
 	fmt.Println("psql creds::")
-	fmt.Printf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+	fmt.Printf("postgres://%s:%s@%s:%d/%s?sslmode=disable\n",
 		cfg.PostgresUser,
 		cfg.PostgresPassword,
 		cfg.PostgresHost,
@@ -216,8 +218,22 @@ func (s *Store) ApiKeys() storage.ApiKeysRepoI {
 }
 
 func (s *Store) AppleSettings() storage.AppleSettingsI {
-	if s.appleId ==nil {
-		 s.appleId = NewAppleSettingsRepo(s.db)
+	if s.appleId == nil {
+		s.appleId = NewAppleSettingsRepo(s.db)
 	}
 	return s.appleId
+}
+
+func (s *Store) LoginStrategy() storage.LoginStrategyI {
+	if s.loginStrategy == nil {
+		s.loginStrategy = NewLoginStrategy(s.db)
+	}
+	return s.loginStrategy
+}
+
+func (s *Store) LoginPlatformType() storage.LoginPlatformType {
+	if s.loginPlatformType == nil {
+		s.loginPlatformType = NewLoginPlatformTypeRepo(s.db)
+	}
+	return s.loginPlatformType
 }

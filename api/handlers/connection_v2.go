@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -109,7 +108,6 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 	cm.Data = structData
 
 	connection.ProjectId = resource.ResourceEnvironmentId
-	fmt.Println(connection.ProjectId)
 
 	// This is create connection by client type id
 	switch resource.ResourceType {
@@ -372,7 +370,6 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	fmt.Println("test")
 	// this is get list connection list from object builder
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
@@ -385,7 +382,6 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 				Data:      structData,
 			},
 		)
-		fmt.Println("ress:::", resp.Data.AsMap()["response"])
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
@@ -400,7 +396,6 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 				Data:      structData,
 			},
 		)
-		fmt.Println("ress:::", resp.Data.AsMap()["response"])
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())

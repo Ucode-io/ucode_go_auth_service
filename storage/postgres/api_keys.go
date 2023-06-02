@@ -111,6 +111,16 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 		params["environment_id"] = req.GetEnvironmentId()
 	}
 
+	if util.IsValidUUID(req.ClientTypeId) {
+		filter += ` AND client_type_id = :client_type_id`
+		params["client_type_id"] = req.ClientTypeId
+	}
+
+	if util.IsValidUUID(req.RoleId) {
+		filter += ` AND role_id = :role_id`
+		params["role_id"] = req.RoleId
+	}
+
 	countQuery := `SELECT count(*) from api_keys` + filter
 	countStmt, countArgs := helper.ReplaceQueryParams(countQuery, params)
 
@@ -322,7 +332,8 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 
 	query := `
 		SELECT
-  			environment_id
+  			environment_id,
+			project_id
 		FROM
 			api_keys
 		WHERE
@@ -330,6 +341,7 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 
 	err := r.db.QueryRow(ctx, query, req.GetId()).Scan(
 		&res.EnvironmentId,
+		&res.ProjectId,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while scanning")

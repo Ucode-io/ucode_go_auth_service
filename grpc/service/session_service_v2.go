@@ -9,10 +9,13 @@ import (
 	"log"
 	"strings"
 	"time"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
+	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	secure "ucode/ucode_go_auth_service/pkg/security"
 
@@ -109,7 +112,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
 		fmt.Println("ConvertPbToAnotherPb", string(bytes))
 	}
-	fmt.Println("TEST::::7")
+	fmt.Println("TEST::::7>>#", data)
 	if !data.UserFound {
 		customError := errors.New("User not found")
 		s.log.Error("!!!Login--->", logger.Error(customError))
@@ -131,9 +134,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	//}
 	fmt.Println("TEST::::8")
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData: res,
-		Tables:    req.Tables,
-		ProjectId: req.GetProjectId(),
+		LoginData:     res,
+		Tables:        req.Tables,
+		ProjectId:     req.GetProjectId(),
+		EnvironmentId: req.GetEnvironmentId(),
 	})
 	if resp == nil {
 		errGenerateToken := errors.New("unable to generate token")
@@ -154,10 +158,477 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	return res, nil
 }
 
+func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
+	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
+	var (
+		userId   string
+		verified bool
+	)
+pwd:
+	switch strings.ToUpper(req.GetLoginStrategy()) {
+	case "LOGIN_PWD":
+		username, ok := req.GetData()["username"]
+		if ok {
+			if len(username) < 6 {
+				err := errors.New("invalid username")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("username is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		password, ok := req.GetData()["password"]
+		if ok {
+			if len(password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("password is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		user, err := s.strg.User().GetByUsername(ctx, username)
+		if err != nil {
+			s.log.Error("!!!V2V2LoginWithOption--->", logger.Error(err))
+			if err == sql.ErrNoRows {
+				errNoRows := errors.New("no user found")
+				return nil, status.Error(codes.Internal, errNoRows.Error())
+			}
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		match, err := security.ComparePassword(user.Password, password)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.Id
+	case "PHONE":
+		phone, ok := req.GetData()["phone"]
+		fmt.Println("test login with phone number")
+		if !ok {
+			err := errors.New("phone is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user, err := s.strg.User().GetByUsername(ctx, phone)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.GetId()
+		fmt.Println("user id:", userId)
+	case "EMAIL":
+		email, ok := req.GetData()["email"]
+		if !ok {
+			err := errors.New("email is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user, err := s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.GetId()
+	case "LOGIN":
+		username, ok := req.GetData()["username"]
+		if !ok {
+			err := errors.New("username is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user, err := s.strg.User().GetByUsername(ctx, username)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.GetId()
+	case "PHONE_OTP":
+		sms_id, ok := req.GetData()["sms_id"]
+		if !ok {
+			err := errors.New("sms_id is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		otp, ok := req.GetData()["otp"]
+		if !ok {
+			err := errors.New("otp is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		phone, ok := req.GetData()["phone"]
+		if !ok {
+			err := errors.New("phone is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		_, err := s.services.SmsService().ConfirmOtp(
+			ctx,
+			&sms_service.ConfirmOtpRequest{
+				SmsId: sms_id,
+				Otp:   otp,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		verified = true
+		user, err := s.strg.User().GetByUsername(ctx, phone)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		fmt.Println("user:: ", user)
+		userId = user.GetId()
+	case "EMAIL_OTP":
+		sms_id, ok := req.GetData()["sms_id"]
+		if !ok {
+			err := errors.New("sms_id is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		otp, ok := req.GetData()["otp"]
+		if !ok {
+			err := errors.New("otp is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		email, ok := req.GetData()["email"]
+		if !ok {
+			err := errors.New("email is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		_, err := s.services.SmsService().ConfirmOtp(
+			ctx,
+			&sms_service.ConfirmOtpRequest{
+				SmsId: sms_id,
+				Otp:   otp,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		verified = true
+		user, err := s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.GetId()
+	case "PHONE_PWD":
+		phone, ok := req.GetData()["phone"]
+		if !ok {
+			err := errors.New("phone is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		password, ok := req.GetData()["password"]
+		if ok {
+			if len(password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("password is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userIdRes, err := s.strg.User().GetByUsername(ctx, phone)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+			Id: userIdRes.GetId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		match, err := security.ComparePassword(user.Password, password)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.GetId()
+	case "EMAIL_PWD":
+		email, ok := req.GetData()["email"]
+		if !ok {
+			err := errors.New("email is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		password, ok := req.GetData()["password"]
+		if ok {
+			if len(password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("password is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userIdRes, err := s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+			Id: userIdRes.GetId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		match, err := security.ComparePassword(user.Password, password)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case "GOOGLE_AUTH":
+		email, ok := req.GetData()["email"]
+		if !ok {
+			err := errors.New("email is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		gooleToken, ok := req.GetData()["google_token"]
+		if ok {
+			userInfo, err := helper.GetGoogleUserInfo(gooleToken)
+			if err != nil {
+				err = errors.New("Invalid arguments google auth")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+				err = errors.New("Invalid arguments google auth")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		} else {
+			err := errors.New("google token is required when login type is google auth")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userIdRes, err := s.strg.User().GetUserByLoginType(ctx, &pb.GetUserByLoginTypesRequest{
+			Email: email,
+		})
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = userIdRes.GetUserId()
+	case "APPLE_AUTH":
+
+		//
+		err := errors.New("not implemented")
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+
+	default:
+		req.LoginStrategy = "LOGIN_PWD"
+		goto pwd
+	}
+	req.Data["user_id"] = userId
+	data, err := s.LoginMiddleware(ctx, models.LoginMiddlewareReq{
+		Data:   req.Data,
+		Tables: req.Tables,
+	})
+	if err != nil {
+		httpErrorStr := ""
+
+		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+		httpErrorStr = strings.ToLower(httpErrorStr)
+
+		if httpErrorStr == "user not found" && verified {
+			err := errors.New("user verified but not found")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
+	return data, nil
+}
+
+func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMiddlewareReq) (*pb.V2LoginWithOptionsResponse, error) {
+	log.Println("reqLoginData--->", req)
+
+	var res *pb.V2LoginResponse
+
+	if req.Data["project_id"] != "" && req.Data["environment_id"] != "" {
+		serviceResource, err := s.services.ServiceResource().GetSingle(ctx, &company_service.GetSingleServiceResourceReq{
+			EnvironmentId: req.Data["environment_id"],
+			ProjectId:     req.Data["project_id"],
+			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+		})
+		fmt.Println("serviceResource", serviceResource)
+		reqLoginData := &pbObject.LoginDataReq{
+			UserId:                req.Data["user_id"],
+			ProjectId:             req.Data["project_id"],
+			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
+		}
+		log.Println("reqLoginData--->", reqLoginData)
+		var data *pbObject.LoginDataRes
+		fmt.Println("resours type::::", serviceResource.ResourceType)
+		switch serviceResource.ResourceType {
+		case 1:
+			data, err = s.services.LoginService().LoginDataByUserId(
+				ctx,
+				reqLoginData,
+			)
+
+			if err != nil {
+				errGetUserProjectData := errors.New("invalid user project data")
+				s.log.Error("!!!LoginMiddleware--->LoginService()", logger.Error(err))
+				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			}
+		case 3:
+			data, err = s.services.PostgresLoginService().LoginDataByUserId(
+				ctx,
+				reqLoginData,
+			)
+
+			if err != nil {
+				errGetUserProjectData := errors.New("invalid user project data")
+				s.log.Error("!!!LoginMiddleware--->PostgresLoginService", logger.Error(err))
+				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			}
+
+		}
+		if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
+			fmt.Println("ConvertPbToAnotherPb", string(bytes))
+		}
+		fmt.Println("TEST::::7")
+		if !data.UserFound {
+			customError := errors.New("User not found")
+			s.log.Error("!!!LoginMiddleware--->", logger.Error(customError))
+			return nil, status.Error(codes.NotFound, customError.Error())
+		}
+
+		res = helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+			ClientPlatform: data.GetClientPlatform(),
+			ClientType:     data.GetClientType(),
+			UserFound:      data.GetUserFound(),
+			UserId:         data.GetUserId(),
+			Role:           data.GetRole(),
+			Permissions:    data.GetPermissions(),
+			LoginTableSlug: data.GetLoginTableSlug(),
+			AppPermissions: data.GetAppPermissions(),
+		})
+
+	}
+	if req.Tables == nil {
+		req.Tables = []*pb.Object{}
+	}
+	fmt.Println(res.GetUserId())
+
+	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+		LoginData:     res,
+		ProjectId:     req.Data["project_id"],
+		Tables:        req.Tables,
+		EnvironmentId: req.Data["environment_id"],
+	})
+	fmt.Println("err: ", err)
+	if resp == nil {
+		err := errors.New("error while generating token")
+		s.log.Error("!!!LoginMiddleware--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if err != nil {
+		s.log.Error("!!!LoginMiddleware--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	companies, err := s.services.CompanyServiceClient().GetList(ctx, &company_service.GetCompanyListRequest{
+		Offset:  0,
+		Limit:   128,
+		OwnerId: req.Data["user_id"],
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	companiesResp := []*auth_service.Company{}
+
+	if len(companies.Companies) < 1 {
+		companiesById := make([]*company_service.Company, 0)
+		user, err := s.services.UserService().GetUserByID(ctx, &auth_service.UserPrimaryKey{
+			Id: resp.GetUserId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		company, err := s.services.CompanyServiceClient().GetById(ctx, &company_service.GetCompanyByIdRequest{
+			Id: user.GetCompanyId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		companiesById = append(companiesById, company.Company)
+		companies.Companies = companiesById
+		companies.Count = 1
+
+	}
+	bytes, err := json.Marshal(companies.GetCompanies())
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(bytes, &companiesResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.V2LoginWithOptionsResponse{
+		UserFound:       true,
+		UserId:          req.Data["user_id"],
+		Token:           resp.GetToken(),
+		Sessions:        resp.GetSessions(),
+		Companies:       companiesResp,
+		ClientPlatform:  resp.GetClientPlatform(),
+		ClientType:      resp.GetClientType(),
+		Role:            resp.GetRole(),
+		Permissions:     resp.GetPermissions(),
+		AppPermissions:  resp.GetAppPermissions(),
+		Tables:          resp.GetTables(),
+		LoginTableSlug:  resp.GetLoginTableSlug(),
+		AddationalTable: resp.GetAddationalTable(),
+		ResourceId:      resp.GetResourceId(),
+		EnvironmentId:   resp.GetEnvironmentId(),
+		User:            resp.GetUser(),
+	}, nil
+}
+
 func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
 	if len(req.Username) < 6 {
 		err := errors.New("invalid username")
-		s.log.Error("!!!Login--->", logger.Error(err))
+		s.log.Error("!!!V2LoginSuperAdmin--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -203,7 +674,7 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
 	// }
-	resp, err := s.SessionAndTokenGeneratorSuperAdmin(ctx, &pb.SessionAndTokenRequest{
+	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
 			UserFound:      true,
 			ClientPlatform: &pb.ClientPlatform{},
@@ -215,7 +686,7 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 			LoginTableSlug: "",
 			AppPermissions: []*pb.RecordPermission{},
 		},
-		ProjectId: "",
+		ProjectId: user.ProjectId,
 	})
 	if resp == nil {
 		err := errors.New("User Not Found")
@@ -248,6 +719,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("env id::", session.EnvId)
 	if session.IsChanged {
 		err := errors.New("permision update")
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
@@ -399,6 +871,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		UpdatedAt:        session.UpdatedAt,
 		Tables:           authTables,
 		LoginTableSlug:   tokenInfo.LoginTableSlug,
+		EnvId:            session.EnvId,
 	}, nil
 }
 
@@ -495,10 +968,10 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
-		Id:        tokenInfo.ID,
-		IsChanged: false,
-	})
+	//_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
+	//	Id:        tokenInfo.ID,
+	//	IsChanged: false,
+	//})
 	if err != nil {
 		s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -573,6 +1046,7 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
 	s.log.Info("--->SessionAndTokenGenerator--->", logger.Any("req", input))
+	fmt.Print("user id:::", input.GetLoginData().GetUserId())
 
 	if _, err := uuid.Parse(input.GetLoginData().GetUserId()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
@@ -580,7 +1054,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// // TODO - Delete all old sessions & refresh token has this function too
+	// TODO - Delete all old sessions & refresh token has this function too
 	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.GetLoginData().GetUserId())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -599,7 +1073,9 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	if err != nil {
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
+	fmt.Println("test input::", input.GetLoginData().Role)
 
+	fmt.Println(">>Input role_id>>", input.GetLoginData().GetRole().GetId())
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.GetProjectId(),
 		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
@@ -609,20 +1085,23 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		Ip:               "0.0.0.0",
 		Data:             "additional json data",
 		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+		EnvId:            input.GetEnvironmentId(),
 	})
 	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
+		s.log.Error("!!!Create--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
 	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
+		s.log.Error("!!!GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if input.Tables == nil {
 		input.Tables = []*pb.Object{}
 	}
+
+	fmt.Println("session: ", session)
 
 	userData, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 		ProjectId: input.GetProjectId(),
@@ -632,6 +1111,8 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		s.log.Error("!!!Login->GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	fmt.Println("user data: ", userData)
 
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
@@ -669,86 +1150,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 	input.LoginData.User = userData
 
-	return input.LoginData, nil
-}
-
-func (s *sessionService) SessionAndTokenGeneratorSuperAdmin(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
-	// // TODO - Delete all old sessions & refresh token has this function too
-	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.LoginData.UserId)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-	s.log.Info("---SessionAndTokenGeneratorSuperAdmin--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
-	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.LoginData.UserId)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-	fmt.Println("TEST:::::1")
-	input.LoginData.Sessions = userSessionList.Sessions
-
-	_, err = uuid.Parse(input.ProjectId)
-	if err != nil {
-		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
-	}
-	fmt.Println("TEST:::::2")
-	sessionPKey, err := s.strg.Session().CreateSuperAdmin(ctx, &pb.CreateSessionRequest{
-		UserId:    input.LoginData.UserId,
-		Ip:        "0.0.0.0",
-		Data:      "additional json data",
-		ExpiresAt: time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
-		ProjectId: input.ProjectId,
-	})
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	fmt.Println("TEST:::::3")
-	session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	fmt.Println("TEST:::::4")
-	if input.Tables == nil {
-		input.Tables = []*pb.Object{}
-	}
-	fmt.Println("TEST:::::5")
-	// // TODO - wrap in a function
-	m := map[string]interface{}{
-		"id":         session.Id,
-		"project_id": session.ProjectId,
-		// "client_platform_id": session.ClientPlatformId,
-		"client_type_id": session.ClientTypeId,
-		"user_id":        session.UserId,
-		"role_id":        session.RoleId,
-		"ip":             session.Data,
-		"data":           session.Data,
-		"tables":         input.Tables,
-	}
-	fmt.Println("TEST:::::6")
-	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	fmt.Println("TEST:::::7")
-	input.LoginData.Token = &pb.Token{
-		AccessToken:      accessToken,
-		RefreshToken:     refreshToken,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		ExpiresAt:        session.ExpiresAt,
-		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
-	}
-	fmt.Println("TEST:::::8")
 	return input.LoginData, nil
 }
 
@@ -1078,17 +1479,19 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("id::", tokenInfo.ID)
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if session.IsChanged {
-		err := errors.New("permission update")
-		s.log.Error("!!!V2HasAccessUser->IsChanged--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	fmt.Println("session:::::::::::::::", session)
+	// if session.IsChanged {
+	// 	err := errors.New("permission update")
+	// 	s.log.Error("!!!V2HasAccessUser->IsChanged--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
 	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
 	if err != nil {
@@ -1223,6 +1626,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	exist := false
 	for _, item := range projects.GetProjectIds() {
 		if item == session.GetProjectId() {
+			fmt.Println("session has project id")
 			exist = true
 			break
 		}
@@ -1243,6 +1647,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		authTables = append(authTables, authTable)
 	}
 
+	fmt.Println("env id ::", session.EnvId)
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -1256,6 +1661,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		ClientPlatformId: session.ClientPlatformId,
 		ClientTypeId:     session.ClientTypeId,
 		RoleId:           session.RoleId,
+		EnvId:            session.EnvId,
 	}, nil
 }
 

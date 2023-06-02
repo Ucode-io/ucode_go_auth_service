@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
+	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -71,6 +73,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 
 	login.ResourceEnvironmentId = resourceEnvironment.GetId()
 	login.ResourceType = resourceEnvironment.GetResourceType()
+	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
@@ -274,7 +277,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("COMPANY::::5")
+		fmt.Println("COMPANY::::5", user.GetCompanyId())
 		company, err := h.services.CompanyServiceClient().GetById(c.Request.Context(), &obs.GetCompanyByIdRequest{
 			Id: user.GetCompanyId(),
 		})
@@ -304,6 +307,90 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		UserFound: resp.GetUserFound(),
 		Token:     resp.GetToken(),
 		Companies: companiesResp,
+		UserId:    resp.GetUserId(),
+		Sessions:  resp.GetSessions(),
+	}
+
+	h.handleResponse(c, http.Created, res)
+}
+
+// V2LoginWithOption godoc
+// @ID V2login_withoption
+// @Router /v2/login/with-option [POST]
+// @Summary V2LoginWithOption
+// @Description V2LoginWithOption
+// @Description in body you must be give environment_id and project_id
+// @Description login strategy must be one of the following values
+// @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// // @Param login_strategy header string true "login_strategy" Enums(PHONE, EMAIL, LOGIN, PHONE_OTP, EMAIL_OTP, LOGIN_PWD, GOOGLE_AUTH, APPLE_AUTH)
+// @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
+// @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2LoginWithOption(c *gin.Context) {
+	var login auth_service.V2LoginWithOptionRequest
+	err := c.ShouldBindJSON(&login)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	if !util.IsValidUUID(login.Data["environment_id"]) {
+		h.handleResponse(c, http.BadRequest, "invalid environment id")
+		return
+	}
+	if !util.IsValidUUID(login.Data["project_id"]) {
+		h.handleResponse(c, http.BadRequest, "invalid environment id")
+		return
+	}
+	if _, ok := config.LoginStrategyTypes[login.GetLoginStrategy()]; !ok {
+		h.handleResponse(c, http.InvalidArgument, "invalid login strategy")
+		return
+	}
+
+	resp, err := h.services.SessionService().V2LoginWithOption(
+		c.Request.Context(),
+		&auth_service.V2LoginWithOptionRequest{
+			Data:          login.GetData(),
+			LoginStrategy: login.GetLoginStrategy(),
+			Tables:        login.GetTables(),
+		})
+
+	httpErrorStr := ""
+	if err != nil {
+		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+		httpErrorStr = strings.ToLower(httpErrorStr)
+	}
+	if httpErrorStr == "user not found" {
+		err := errors.New("Пользователь не найдено")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
+	} else if httpErrorStr == "user verified but not found" {
+		err := errors.New("Пользователь проверен, но не найден")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
+	} else if httpErrorStr == "user has been expired" {
+		err := errors.New("Срок действия пользователя истек")
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	} else if httpErrorStr == "invalid username" {
+		err := errors.New("Неверное имя пользователя")
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	} else if httpErrorStr == "invalid password" {
+		err := errors.New("Неверное пароль")
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	} else if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	res := &auth_service.V2LoginSuperAdminRes{
+		UserFound: resp.GetUserFound(),
+		Token:     resp.GetToken(),
+		Companies: resp.GetCompanies(),
 		UserId:    resp.GetUserId(),
 		Sessions:  resp.GetSessions(),
 	}
@@ -380,7 +467,6 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 	var login auth_service.V2MultiCompanyLoginReq
-
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

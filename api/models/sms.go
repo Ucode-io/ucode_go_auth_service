@@ -22,6 +22,7 @@ type Verify struct {
 	Tables       []*pb.Object              `json:"tables"`
 	RegisterType string                    `json:"register_type"`
 	GoogleToken  string                    `json:"google_token"`
+	AppleCode    string                    `json:"apple_code"`
 }
 
 type RegisterOtp struct {
@@ -40,4 +41,16 @@ type EmailSettingsRequest struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	ProjectId string `json:"project_id"`
+}
+
+type V2SendCodeRequest struct {
+	Text      string `json:"text"`
+	Recipient string `json:"recipient"`
+	Type      string `json:"type"`
+}
+
+type V2SendCodeResponse struct {
+	SmsId       string `json:"sms_id"`
+	GoogleAcces bool   `json:"google_acces"`
+	UserFound   bool   `json:"user_found"`
 }

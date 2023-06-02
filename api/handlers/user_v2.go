@@ -266,7 +266,6 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 			ResourceType: int32(resource.GetResourceType()),
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

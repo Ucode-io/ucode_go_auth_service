@@ -34,8 +34,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	query := `INSERT INTO "user" (
 		id,
-		name,
-		photo_url,
+		-- name,
+		-- photo_url,
 		phone,
 		email,
 		login,
@@ -47,9 +47,9 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$3,
 		$4,
 		$5,
-		$6,
-		$7,
-		$8
+		$6
+		-- $7,
+		-- $8
 	)`
 
 	id, err := uuid.NewRandom()
@@ -59,8 +59,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	_, err = r.db.Exec(ctx, query,
 		id.String(),
-		entity.GetName(),
-		entity.GetPhotoUrl(),
+		// entity.GetName(),
+		// entity.GetPhotoUrl(),
 		entity.GetPhone(),
 		entity.GetEmail(),
 		entity.GetLogin(),
@@ -77,36 +77,51 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error) {
 	res = &pb.User{}
+	var (
+		lan  pb.Language
+		time pb.Timezone
+	)
 	query := `SELECT
-		id,
-		name,
-		photo_url,
-		phone,
-		email,
-		login,
-		password,
-		company_id,
-		coalesce(language_id::text, ''),
-		coalesce(timezone_id::text, '')
-		-- TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at
-		-- TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		-- TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
+		u.id,
+		-- coalesce(u.name, ''),
+		-- coalesce(u.photo_url, ''),
+		u.phone,
+		u.email,
+		u.login,
+		u.password,
+		u.company_id
+		-- coalesce(t.id::VARCHAR, ''),
+		-- coalesce(t.name, ''),
+		-- coalesce(t.text, ''),
+		-- coalesce(l.id::VARCHAR, ''),
+		-- coalesce(l.name, ''),
+		-- coalesce(l.short_name, ''),
+		-- coalesce(l.native_name, '')
+		-- TO_CHAR(u.expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at
+		-- TO_CHAR(u.created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
+		-- TO_CHAR(u.updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
-		"user"
+		"user" u
+		-- LEFT JOIN "language" l on u.language_id = l.id
+		-- LEFT JOIN "timezone" t on u.timezone_id = t.id
 	WHERE
-		id = $1`
-
+		u.id = $1`
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
-		&res.Name,
-		&res.PhotoUrl,
+		// &res.Name,
+		// &res.PhotoUrl,
 		&res.Phone,
 		&res.Email,
 		&res.Login,
 		&res.Password,
 		&res.CompanyId,
-		&res.LanguageId,
-		&res.TimezoneId,
+		// &time.Id,
+		// &time.Name,
+		// &time.Text,
+		// &lan.Id,
+		// &lan.Name,
+		// &lan.ShortName,
+		// &lan.NativeName,
 		// &res.ExpiresAt,
 		// &res.CreatedAt,
 		// &res.UpdatedAt,
@@ -114,7 +129,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	if err != nil {
 		return res, err
 	}
-	fmt.Println("resss:::", res)
+	res.Language = &lan
+	res.Timezone = &time
 
 	return res, nil
 }
@@ -124,17 +140,15 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 	res = &pb.GetUserListResponse{}
 	query := `SELECT
 		id,
-		name,
-		photo_url,
+		-- name,
+		-- photo_url,
 		phone,
 		email,
 		login,
 		password,
 		created_at,
 		updated_at,
-		company_id,
-		coalesce(language_id::text, ''),
-		coalesce(timezone_id::text, '')
+		company_id
 	FROM
 		"user"
 	WHERE
@@ -155,8 +169,8 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 		user := &pb.User{}
 		err = rows.Scan(
 			&user.Id,
-			&user.Name,
-			&user.PhotoUrl,
+			// &user.Name,
+			// &user.PhotoUrl,
 			&user.Phone,
 			&user.Email,
 			&user.Login,
@@ -164,8 +178,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 			&createdAt,
 			&updatedAt,
 			&user.CompanyId,
-			&user.LanguageId,
-			&user.TimezoneId,
 		)
 
 		if err != nil {
@@ -200,17 +212,15 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	var arr []interface{}
 	query := `SELECT
 		id,
-		name,
+		-- name,
 		company_id,
-		photo_url,
+		-- photo_url,
 		phone,
 		email,
 		login,
 		password,
 		created_at,
-		updated_at,
-		language_id,
-		timezone_id
+		updated_at
 	FROM
 		"user"`
 	filter := " WHERE 1=1"
@@ -221,7 +231,7 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 	if len(queryParam.Search) > 0 {
 		params["search"] = queryParam.Search
-		filter += " AND ((name || phone || email || login) ILIKE ('%' || :search || '%'))"
+		filter += " AND ((phone || email || login) ILIKE ('%' || :search || '%'))"
 	}
 
 	//if len(queryParam.ClientPlatformId) > 0 {
@@ -278,9 +288,9 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 		err = rows.Scan(
 			&obj.Id,
-			&obj.Name,
+			// &obj.Name,
 			&companyID,
-			&obj.PhotoUrl,
+			// &obj.PhotoUrl,
 			&obj.Phone,
 			&obj.Email,
 			&obj.Login,
@@ -289,8 +299,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 			&expiresAt,
 			&createdAt,
 			&updatedAt,
-			&obj.LanguageId,
-			&obj.TimezoneId,
 		)
 
 		if err != nil {
@@ -321,28 +329,28 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		name = :name,
+		-- name = :name,
 		company_id = :company_id,
-		photo_url = :photo_url,
+		-- photo_url = :photo_url,
 		phone = :phone,
 		email = :email,
 		login = :login,
 		updated_at = now(),
-    	language_id = :language_id,
-        timezone_id = :timezone_id
+    	-- language_id = :language_id,
+        -- timezone_id = :timezone_id
 	WHERE
 		id = :id`
 
 	params := map[string]interface{}{
-		"id":          entity.GetId(),
-		"name":        entity.GetName(),
-		"photo_url":   entity.GetPhotoUrl(),
-		"phone":       entity.GetPhone(),
-		"email":       entity.GetEmail(),
-		"login":       entity.GetLogin(),
-		"company_id":  entity.GetCompanyId(),
-		"language_id": entity.GetLanguageId(),
-		"timezone_id": entity.GetTimezoneId(),
+		"id": entity.GetId(),
+		// "name":        entity.GetName(),
+		// "photo_url":   entity.GetPhotoUrl(),
+		"phone":      entity.GetPhone(),
+		"email":      entity.GetEmail(),
+		"login":      entity.GetLogin(),
+		"company_id": entity.GetCompanyId(),
+		// "language_id": entity.GetLanguageId(),
+		// "timezone_id": entity.GetTimezoneId(),
 	}
 	log.Println("language_id", entity.LanguageId, "timezone_id", entity.TimezoneId)
 	q, arr := helper.ReplaceQueryParams(query, params)
@@ -389,8 +397,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	query := `SELECT
 		id,
-		name,
-		photo_url,
+		-- name,
+		-- coalesce(photo_url, ''),
 		phone,
 		email,
 		login,
@@ -412,8 +420,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	err = r.db.QueryRow(ctx, query, username).Scan(
 		&res.Id,
-		&res.Name,
-		&res.PhotoUrl,
+		// &res.Name,
+		// &res.PhotoUrl,
 		&res.Phone,
 		&res.Email,
 		&res.Login,
@@ -574,21 +582,22 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 		if filter != "" {
 			filter += " OR phone = :login"
 		} else {
-			filter = "phone = :" + req.Phone
+			filter = "phone = :phone"
 		}
 		params["phone"] = req.Phone
 	}
+	fmt.Println("params: ", params)
 
-	query, args := helper.ReplaceQueryParams(query+filter, params)
-
+	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
+	fmt.Println("query: ", lastQuery, args)
 	var userId string
-	err := r.db.QueryRow(ctx, query, args...).Scan(&userId)
+	err := r.db.QueryRow(ctx, lastQuery, args...).Scan(&userId)
 	if err == pgx.ErrNoRows {
 		return nil, errors.New("not found")
 	} else if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("user_id: ", userId)
 	return &pb.GetUserByLoginTypesResponse{
 		UserId: userId,
 	}, nil
