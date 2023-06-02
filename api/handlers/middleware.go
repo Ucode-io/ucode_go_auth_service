@@ -26,11 +26,11 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		//}
 		resourceId := c.GetHeader("Resource-Id")
 		environmentId := c.GetHeader("Environment-Id")
-
+		projectId := c.DefaultQuery("project-id", "")
 		bearerToken := c.GetHeader("Authorization")
 		if bearerToken != "" {
 			strArr := strings.Split(bearerToken, " ")
-	
+
 			if strArr[0] == "API-KEY" {
 				app_id := c.GetHeader("X-API-KEY")
 				apikeys, err := h.services.ApiKeysService().GetEnvID(
@@ -44,7 +44,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 					c.Abort()
 					return
 				}
-	
+
 				resource, err := h.services.ResourceService().GetResourceByEnvID(
 					c.Request.Context(),
 					&company_service.GetResourceByEnvIDRequest{
@@ -58,12 +58,14 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				}
 				resourceId = resource.GetResource().GetId()
 				environmentId = apikeys.GetEnvironmentId()
+				projectId = apikeys.GetProjectId()
 			}
 		}
 
 		//c.Set("Auth", res)
 		c.Set("resource_id", resourceId)
 		c.Set("environment_id", environmentId)
+		c.Set("project_id", projectId)
 		//c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
