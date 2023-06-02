@@ -6200,6 +6200,18 @@ const docTemplate = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "client_type_id",
+                        "name": "client_type_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "role_id",
+                        "name": "role_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -12436,7 +12448,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse"
                                         }
                                     }
                                 }
@@ -17858,6 +17870,17 @@ const docTemplate = `{
                 "ConfirmStrategies_EMAIL"
             ]
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
@@ -18058,6 +18081,9 @@ const docTemplate = `{
                 },
                 "permission": {
                     "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -18071,6 +18097,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "object_field": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 }
             }
@@ -18119,6 +18148,9 @@ const docTemplate = `{
                 "label": {
                     "type": "string"
                 },
+                "table_slug": {
+                    "type": "string"
+                },
                 "view_permission": {
                     "type": "boolean"
                 }
@@ -18160,6 +18192,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "relation_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "view_permission": {
