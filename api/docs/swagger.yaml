@@ -5665,6 +5665,14 @@ paths:
         in: query
         name: search
         type: string
+      - description: client_type_id
+        in: query
+        name: client_type_id
+        type: string
+      - description: role_id
+        in: query
+        name: role_id
+        type: string
       produces:
       - application/json
       responses:

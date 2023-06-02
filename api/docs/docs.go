@@ -6207,6 +6207,18 @@ var doc = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "client_type_id",
+                        "name": "client_type_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "role_id",
+                        "name": "role_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
