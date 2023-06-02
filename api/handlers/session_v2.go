@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
-	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -337,18 +336,20 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	if !util.IsValidUUID(login.Data["environment_id"]) {
-		h.handleResponse(c, http.BadRequest, "invalid environment id")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	if !util.IsValidUUID(login.Data["project_id"]) {
-		h.handleResponse(c, http.BadRequest, "invalid environment id")
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		err = errors.New("error getting environment id | not valid")
+		h.handleResponse(c, http.BadRequest, err)
 		return
 	}
-	if _, ok := config.LoginStrategyTypes[login.GetLoginStrategy()]; !ok {
-		h.handleResponse(c, http.InvalidArgument, "invalid login strategy")
-		return
-	}
+	login.Data["environment_id"] = environmentId.(string)
+	login.Data["project_id"] = projectId.(string)
 
 	resp, err := h.services.SessionService().V2LoginWithOption(
 		c.Request.Context(),
