@@ -19,7 +19,7 @@ import (
 // @Tags V2_LoginStrategy
 // @Accept json
 // @Produce json
-// @Param project-id path string true "project-id"
+// @Param project-id query string true "project-id"
 // @Success 201 {object} http.Response{data=auth_service.GetListResponse} "LoginStrategy data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
