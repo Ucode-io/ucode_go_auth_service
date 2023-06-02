@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
 	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
@@ -941,7 +941,7 @@ func (h *Handler) V2RemoveRolePermission(c *gin.Context) {
 // @Produce json
 // @Param project-id path string false "project-id"
 // @Param role-id path string false "role-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetPermissionListResponseBody"
+// @Success 200 {object} http.Response{data=object_builder_service.GetListWithRoleAppTablePermissionsResponse} "GetPermissionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
@@ -1020,8 +1020,11 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	fmt.Println("\n Resource type ", resource.ResourceType)
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
+		fmt.Println("\n Mongo db")
 		resp, err = h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
 			c.Request.Context(),
 			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
@@ -1029,7 +1032,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-
+		fmt.Println("\nResponse perm 123", resp, "\n\n")
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -1051,11 +1054,6 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	}
 
 	resp.ProjectId = projectId
-
-	fmt.Println(resp.Data.Apps[0])
-	if bytes, err := json.Marshal(resp); err != nil {
-		fmt.Println("response", string(bytes))
-	}
 
 	h.handleResponse(c, http.OK, resp)
 }
@@ -1148,15 +1146,17 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	permission.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
+		fmt.Println("test permission before update builder")
 		resp, err = h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
-			c.Request.Context(),
+			context.Background(),
 			&permission,
 		)
-
+		fmt.Println("test permission before error update builder")
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("test permission after update builder")
 	case pbCompany.ResourceType_POSTGRESQL:
 		resp, err = h.services.PostgresBuilderPermissionService().UpdateRoleAppTablePermissions(
 			c.Request.Context(),

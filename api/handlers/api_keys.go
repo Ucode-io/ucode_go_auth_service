@@ -123,6 +123,8 @@ func (h *Handler) GetApiKey(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
+// @Param client_type_id query string false "client_type_id"
+// @Param role_id query string false "role_id"
 // @Success 201 {object} http.Response{data=auth_service.GetListRes} "ApiKey data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -148,6 +150,8 @@ func (h *Handler) GetListApiKeys(c *gin.Context) {
 			Offset:        int32(offset),
 			Limit:         int32(limit),
 			Search:        c.Query("search"),
+			ClientTypeId:  c.DefaultQuery("client_type_id", ""),
+			RoleId:        c.DefaultQuery("role_id", ""),
 		},
 	)
 
