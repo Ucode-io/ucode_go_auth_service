@@ -108,17 +108,17 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
 		return
 	}
-	// resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	// 	c.Request.Context(),
-	// 	&obs.GetResourceEnvironmentReq{
-	// 		EnvironmentId: environmentId.(string),
-	// 		ResourceId:    resourceId.(string),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
+	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 	fmt.Println(":::::::: Register type :", request.RegisterType)
 	switch request.RegisterType {
 	case cfg.Default:
@@ -221,6 +221,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 					Otp:       code,
 					Recipient: request.Phone,
 					ExpiresAt: expire.String()[:19],
+					Type:      request.RegisterType,
 					// PhoneNumber: request.Phone,
 				},
 			)
