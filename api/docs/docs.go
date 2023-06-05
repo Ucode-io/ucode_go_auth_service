@@ -9985,7 +9985,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption",
+                "description": "V2LoginWithOption\nin body you must be give environment_id and project_id\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH]",
                 "consumes": [
                     "application/json"
                 ],
@@ -16785,25 +16785,10 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.UpdateLoginPlatformTypeRequest": {
             "type": "object",
             "properties": {
-                "client_id": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
+                "data": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginPlatformType"
                 },
                 "id": {
-                    "type": "string"
-                },
-                "key_id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "secret": {
-                    "type": "string"
-                },
-                "team_id": {
                     "type": "string"
                 }
             }

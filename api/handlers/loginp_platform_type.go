@@ -39,7 +39,7 @@ func (h *Handler) CreateLoginPlatformType(c *gin.Context) {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
-	
+
 	if body.Type == "GOOGLE" {
 		if body.Data.Email != "" {
 			valid := util.IsValidEmail(body.Data.Email)
