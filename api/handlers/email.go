@@ -56,6 +56,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("request: ", request)
 
 	if request.RegisterType == "" {
 		h.handleResponse(c, http.BadRequest, "Must be register type(default, google, phone)")
@@ -107,17 +108,17 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
 		return
 	}
-	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+	// 	c.Request.Context(),
+	// 	&obs.GetResourceEnvironmentReq{
+	// 		EnvironmentId: environmentId.(string),
+	// 		ResourceId:    resourceId.(string),
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 	fmt.Println(":::::::: Register type :", request.RegisterType)
 	switch request.RegisterType {
 	case cfg.Default:
@@ -215,11 +216,11 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 			resp, err := h.services.SmsService().Send(
 				c.Request.Context(),
 				&pbSms.Sms{
-					Id:          id.String(),
-					Text:        "Your one time password, don't get it to anyone: ",
-					Otp:         code,
-					Recipient:   request.Phone,
-					ExpiresAt:   expire.String()[:19],
+					Id:        id.String(),
+					Text:      "Your one time password, don't get it to anyone: ",
+					Otp:       code,
+					Recipient: request.Phone,
+					ExpiresAt: expire.String()[:19],
 					// PhoneNumber: request.Phone,
 				},
 			)
