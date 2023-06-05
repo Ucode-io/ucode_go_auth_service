@@ -11,6 +11,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
+	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -161,8 +162,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Register(c *gin.Context) {
 	var (
-		body                models.RegisterOtp
-		resourceEnvironment *obs.ResourceEnvironment
+		body models.RegisterOtp
 	)
 
 	err := c.ShouldBindJSON(&body)
@@ -179,9 +179,9 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok || !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id"))
 		return
 	}
 
@@ -190,11 +190,12 @@ func (h *Handler) V2Register(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+	serviceResource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
+		&obs.GetSingleServiceResourceReq{
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ProjectId:     projectId.(string),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
@@ -203,7 +204,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
-		ProjectId: resourceEnvironment.GetProjectId(),
+		ProjectId: serviceResource.GetProjectId(),
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -265,11 +266,11 @@ func (h *Handler) V2Register(c *gin.Context) {
 			return
 		}
 	}
-	body.Data["project_id"] = resourceEnvironment.GetProjectId()
-	body.Data["resource_environment_id"] = resourceEnvironment.GetId()
-	body.Data["environment_id"] = resourceEnvironment.GetEnvironmentId()
+	body.Data["project_id"] = serviceResource.GetProjectId()
+	body.Data["resource_environment_id"] = serviceResource.GetResourceEnvironmentId()
+	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["company_id"] = project.GetCompanyId()
-	body.Data["resource_type"] = resourceEnvironment.GetResourceType()
+	body.Data["resource_type"] = serviceResource.GetResourceType()
 
 	structData, err := helper.ConvertMapToStruct(body.Data)
 	if err != nil {
