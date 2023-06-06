@@ -1537,46 +1537,49 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if endPoints[arr_path[len(arr_path)-2]] {
-		tableSlug := arr_path[len(arr_path)-1]
+	// guess role check
+	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" {
+		if endPoints[arr_path[len(arr_path)-2]] {
+			tableSlug := arr_path[len(arr_path)-1]
 
-		filter := map[string]interface{}{
-			"role_id":    session.RoleId,
-			"table_slug": tableSlug,
-		}
-		filter[methodField] = "yes"
+			filter := map[string]interface{}{
+				"role_id":    session.RoleId,
+				"table_slug": tableSlug,
+			}
+			filter[methodField] = "yes"
 
-		structData, err := helper.ConvertMapToStruct(filter)
-		if err != nil {
-			return nil, err
-		}
+			structData, err := helper.ConvertMapToStruct(filter)
+			if err != nil {
+				return nil, err
+			}
 
-		resource, err := s.services.ServiceResource().GetSingle(
-			ctx,
-			&company_service.GetSingleServiceResourceReq{
-				ProjectId:     session.ProjectId,
-				EnvironmentId: session.EnvId,
-				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
+			resource, err := s.services.ServiceResource().GetSingle(
+				ctx,
+				&company_service.GetSingleServiceResourceReq{
+					ProjectId:     session.ProjectId,
+					EnvironmentId: session.EnvId,
+					ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
 
-		resp, err := s.services.ObjectBuilderService().GetList(
-			context.Background(),
-			&pbObject.CommonMessage{
-				TableSlug: "record_permission",
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
+			resp, err := s.services.ObjectBuilderService().GetList(
+				context.Background(),
+				&pbObject.CommonMessage{
+					TableSlug: "record_permission",
+					Data:      structData,
+					ProjectId: resource.ResourceEnvironmentId,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
 
-		if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
-			return nil, fmt.Errorf("Permission denied")
+			if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
+				return nil, fmt.Errorf("Permission denied")
+			}
 		}
 	}
 
