@@ -49,6 +49,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		request             models.Email
 		respObject          *pbObject.V2LoginResponse
 		phone               string
+		text                string
 	)
 
 	err := c.ShouldBindJSON(&request)
@@ -212,12 +213,17 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+			if request.Text == "" {
+				text = "Your one time password, don't get it to anyone: "
+			} else {
+				text = request.Text
+			}
 			fmt.Println("::::::: LoginWith O response :", respObject)
 			resp, err := h.services.SmsService().Send(
 				c.Request.Context(),
 				&pbSms.Sms{
 					Id:        id.String(),
-					Text:      "Your one time password, don't get it to anyone: ",
+					Text:      text,
 					Otp:       code,
 					Recipient: request.Phone,
 					ExpiresAt: expire.String()[:19],
