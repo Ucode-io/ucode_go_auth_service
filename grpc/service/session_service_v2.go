@@ -1578,7 +1578,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			}
 
 			if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
-				return nil, fmt.Errorf("Permission denied")
+				err := status.Error(codes.PermissionDenied, "Permission denied")
+				return nil, err //fmt.Errorf("Permission denied")
 			}
 		}
 	}
