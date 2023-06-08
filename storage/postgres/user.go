@@ -367,7 +367,7 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error) {
 
-	return 0, errors.New("you are not allowed to delete user")
+	// return 0, errors.New("you are not allowed to delete user")
 
 	queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
 

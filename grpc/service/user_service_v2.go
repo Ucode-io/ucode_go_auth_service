@@ -918,7 +918,6 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	s.log.Info("---DeleteUser--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
-
 	//structData, err := helper.ConvertRequestToSturct(req)
 	//if err != nil {
 	//	s.log.Error("!!!DeleteUser--->", logger.Error(err))
