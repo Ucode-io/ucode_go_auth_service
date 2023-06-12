@@ -426,7 +426,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 	switch req.ResourceType {
 	case 1:
 		fmt.Println("builder service")
-		result, err = s.services.ObjectBuilderService().GetList(ctx,
+		result, err = s.services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
