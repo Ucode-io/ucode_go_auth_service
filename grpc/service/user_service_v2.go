@@ -934,16 +934,16 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	//	return nil, status.Error(codes.Internal, err.Error())
 	//}
 
-	rowsAffected, err := s.strg.User().Delete(ctx, req)
+	_, err := s.strg.User().Delete(ctx, req)
 
 	if err != nil {
 		s.log.Error("!!!DeleteUser--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
+	// if rowsAffected <= 0 {
+	// 	return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+	// }
 
 	return res, nil
 }
