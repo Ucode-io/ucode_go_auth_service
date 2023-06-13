@@ -813,7 +813,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		user.Active = int32(active)
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
-		user.ClientPlatformId = clientPlatformId
+		// user.ClientPlatformId = clientPlatformId
 		user.ProjectId = projectId
 
 		resp.Users = append(resp.Users, user)
