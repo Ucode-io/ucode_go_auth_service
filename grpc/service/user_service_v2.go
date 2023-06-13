@@ -782,12 +782,12 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		clientPlatformId, ok := userItem["client_platform_id"].(string)
-		if !ok {
-			err := errors.New("clientPlatformId is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+		// clientPlatformId, ok := userItem["client_platform_id"].(string)
+		// if !ok {
+		// 	err := errors.New("clientPlatformId is nil")
+		// 	s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+		// 	return nil, status.Error(codes.Internal, err.Error())
+		// }
 
 		projectId, ok := userItem["project_id"].(string)
 		if !ok {
