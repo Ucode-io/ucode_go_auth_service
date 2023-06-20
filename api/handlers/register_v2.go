@@ -184,6 +184,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 	fmt.Println("::::::::::TESTTEST:::::::::::::4")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
+		fmt.Println(":::::::::::::::::::HERE:::::::::::::::::1")
 		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id"))
 		return
 	}
