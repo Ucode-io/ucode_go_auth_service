@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -66,6 +67,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		c.Set("resource_id", resourceId)
 		c.Set("environment_id", environmentId)
 		c.Set("project_id", projectId)
+		fmt.Println("resource_id:environment_id:project_id", resourceId, environmentId, projectId)
 		//c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
