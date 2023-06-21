@@ -150,8 +150,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	if body["addational_table"] != nil {
 		validRegisterForAddationalTable := map[string]bool{
-			"PHONE": true,
-			"EMAIL": true,
+			"phone": true,
+			"email": true,
 		}
 		if _, ok := validRegisterForAddationalTable[body["type"].(string)]; ok {
 			body["addational_table"].(map[string]interface{})["guid"] = userId
