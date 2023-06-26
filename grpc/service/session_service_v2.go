@@ -410,6 +410,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+		userId = userIdRes.GetId()
 	case "GOOGLE_AUTH":
 		email, ok := req.GetData()["email"]
 		if !ok {
@@ -487,6 +488,11 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			ProjectId:     req.Data["project_id"],
 			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 		})
+		if err != nil {
+			errGetUserProjectData := errors.New("unable to get resource")
+			s.log.Error("!!!LoginMiddleware--->LoginService()", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
 		fmt.Println("serviceResource", serviceResource)
 		reqLoginData := &pbObject.LoginDataReq{
 			UserId:                req.Data["user_id"],
