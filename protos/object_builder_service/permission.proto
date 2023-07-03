@@ -17,7 +17,6 @@ service PermissionService {
     rpc GetViewRelationPermissions (GetActionPermissionRequest) returns (CommonMessage) {}
     rpc GetListWithRoleAppTablePermissions(GetListWithRoleAppTablePermissionsRequest) returns (GetListWithRoleAppTablePermissionsResponse) {}
     rpc UpdateRoleAppTablePermissions(UpdateRoleAppTablePermissionsRequest) returns (google.protobuf.Empty) {}
-
 }
 
 message GetAllPermissionRequest {
