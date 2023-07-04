@@ -300,10 +300,10 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(user.GetProjectId()) {
-		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
-		return
-	}
+	// if !util.IsValidUUID(user.GetProjectId()) {
+	// 	h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+	// 	return
+	// }
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
