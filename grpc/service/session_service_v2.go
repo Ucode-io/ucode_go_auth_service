@@ -389,6 +389,7 @@ pwd:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userIdRes, err := s.strg.User().GetByUsername(ctx, email)
+		fmt.Println("aaaaa:", userIdRes)
 		if err != nil {
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
