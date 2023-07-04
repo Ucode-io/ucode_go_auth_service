@@ -35,6 +35,7 @@ type Email struct {
 	RegisterType string `json:"register_type"`
 	GoogleToken  string `json:"google_token"`
 	Phone        string `json:"phone"`
+	Text         string `json:"text"`
 }
 
 type EmailSettingsRequest struct {

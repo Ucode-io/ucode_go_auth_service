@@ -9985,7 +9985,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption\nin body you must be give environment_id and project_id\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH]",
+                "description": "V2LoginWithOption\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH]",
                 "consumes": [
                     "application/json"
                 ],
@@ -9998,6 +9998,24 @@ const docTemplate = `{
                 "summary": "V2LoginWithOption",
                 "operationId": "V2login_withoption",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "X-API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
                     {
                         "description": "V2LoginRequest",
                         "name": "login",
@@ -11204,7 +11222,7 @@ const docTemplate = `{
         },
         "/v2/register": {
             "post": {
-                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]",
+                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]\n\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder",
                 "consumes": [
                     "application/json"
                 ],
@@ -11217,15 +11235,6 @@ const docTemplate = `{
                 "summary": "V2Register",
                 "operationId": "V2register",
                 "parameters": [
-                    {
-                        "description": "register_body",
-                        "name": "registerBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
-                        }
-                    },
                     {
                         "type": "string",
                         "description": "X-API-KEY",
@@ -11243,6 +11252,21 @@ const docTemplate = `{
                         "description": "Environment-Id",
                         "name": "Environment-Id",
                         "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "description": "register_body",
+                        "name": "registerBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp"
+                        }
                     }
                 ],
                 "responses": {
@@ -14968,6 +14992,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "register_type": {
+                    "type": "string"
+                },
+                "text": {
                     "type": "string"
                 }
             }

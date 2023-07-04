@@ -49,6 +49,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		request             models.Email
 		respObject          *pbObject.V2LoginResponse
 		phone               string
+		text                string
 	)
 
 	err := c.ShouldBindJSON(&request)
@@ -56,6 +57,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("request: ", request)
 
 	if request.RegisterType == "" {
 		h.handleResponse(c, http.BadRequest, "Must be register type(default, google, phone)")
@@ -211,15 +213,21 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+			if request.Text == "" {
+				text = "Your one time password, don't get it to anyone: "
+			} else {
+				text = request.Text
+			}
 			fmt.Println("::::::: LoginWith O response :", respObject)
 			resp, err := h.services.SmsService().Send(
 				c.Request.Context(),
 				&pbSms.Sms{
-					Id:          id.String(),
-					Text:        "Your one time password, don't get it to anyone: ",
-					Otp:         code,
-					Recipient:   request.Phone,
-					ExpiresAt:   expire.String()[:19],
+					Id:        id.String(),
+					Text:      text,
+					Otp:       code,
+					Recipient: request.Phone,
+					ExpiresAt: expire.String()[:19],
+					Type:      request.RegisterType,
 					// PhoneNumber: request.Phone,
 				},
 			)

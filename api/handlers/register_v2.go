@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -11,6 +12,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
+	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -149,67 +151,77 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Description V2Register
 // @Description in data must be have type, type must be one of the following values
 // @Description ["google", "apple", "email", "phone"]
+// @Description
+// @Description you must be give environment_id and project_id in body or
+// @Description Environment-Id hearder and project-id in query parameters or
+// @Description X-API-KEY in hearder
 // @Tags v2_register
 // @Accept json
 // @Produce json
-// @Param registerBody body models.RegisterOtp true "register_body"
 // @Param X-API-KEY header string false "X-API-KEY"
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string false "Environment-Id"
+// @Param project-id query string false "project-id"
+// @Param registerBody body models.RegisterOtp true "register_body"
 // @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Register(c *gin.Context) {
 	var (
-		body                models.RegisterOtp
-		resourceEnvironment *obs.ResourceEnvironment
+		body models.RegisterOtp
 	)
-
+	fmt.Println("::::::::::TESTTEST:::::::::::::1")
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("::::::::::TESTTEST:::::::::::::2")
 	if _, ok := body.Data["type"]; !ok {
 		h.handleResponse(c, http.BadRequest, "register type is required")
 		return
 	}
+	fmt.Println("::::::::::TESTTEST:::::::::::::3")
 	if _, ok := cfg.RegisterTypes[body.Data["type"].(string)]; !ok {
 		h.handleResponse(c, http.BadRequest, "invalid register type")
 		return
 	}
-
-	resourceId, ok := c.Get("resource_id")
-	if !ok || !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+	fmt.Println("::::::::::TESTTEST:::::::::::::4")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		fmt.Println(":::::::::::::::::::HERE:::::::::::::::::1")
+		h.handleResponse(c, http.BadRequest, "cant get project_id")
 		return
 	}
-
+	fmt.Println("::::::::::TESTTEST:::::::::::::5")
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+	fmt.Println("::::::::::TESTTEST:::::::::::::6")
+	serviceResource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
+		&obs.GetSingleServiceResourceReq{
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
+			ProjectId:     projectId.(string),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 		},
 	)
+	fmt.Println("::::::::::TESTTEST:::::::::::::7")
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("::::::::::TESTTEST:::::::::::::8")
 	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
-		ProjectId: resourceEnvironment.GetProjectId(),
+		ProjectId: serviceResource.GetProjectId(),
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("::::::::::TESTTEST:::::::::::::9")
 	switch body.Data["type"] {
 	case cfg.WithGoogle:
 		{
@@ -258,6 +270,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 			}
 		}
 	}
+	fmt.Println("::::::::::TESTTEST:::::::::::::10")
 	if body.Data["addational_table"] != nil {
 		if body.Data["addational_table"].(map[string]interface{})["table_slug"] == nil {
 			h.log.Error("Addational user create >>>> ")
@@ -265,18 +278,19 @@ func (h *Handler) V2Register(c *gin.Context) {
 			return
 		}
 	}
-	body.Data["project_id"] = resourceEnvironment.GetProjectId()
-	body.Data["resource_environment_id"] = resourceEnvironment.GetId()
-	body.Data["environment_id"] = resourceEnvironment.GetEnvironmentId()
+	fmt.Println("::::::::::TESTTEST:::::::::::::11")
+	body.Data["project_id"] = serviceResource.GetProjectId()
+	body.Data["resource_environment_id"] = serviceResource.GetResourceEnvironmentId()
+	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["company_id"] = project.GetCompanyId()
-	body.Data["resource_type"] = resourceEnvironment.GetResourceType()
-
+	body.Data["resource_type"] = serviceResource.GetResourceType()
+	fmt.Println("::::::::::TESTTEST:::::::::::::12")
 	structData, err := helper.ConvertMapToStruct(body.Data)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
+	fmt.Println("::::::::::TESTTEST:::::::::::::16")
 	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &auth_service.RegisterUserRequest{
 		Data: structData,
 	})
@@ -284,6 +298,6 @@ func (h *Handler) V2Register(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("::::::::::TESTTEST:::::::::::::17")
 	h.handleResponse(c, http.Created, response)
 }

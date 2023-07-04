@@ -655,6 +655,8 @@ definitions:
         type: string
       register_type:
         type: string
+      text:
+        type: string
     type: object
   ucode_ucode_go_auth_service_api_models.EmailSettingsRequest:
     properties:
@@ -8890,11 +8892,25 @@ paths:
       - application/json
       description: |-
         V2LoginWithOption
-        in body you must be give environment_id and project_id
+        you must be give environment_id and project_id in body or
+        Environment-Id hearder and project-id in query parameters or
+        X-API-KEY in hearder
         login strategy must be one of the following values
         ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
       operationId: V2login_withoption
       parameters:
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
       - description: V2LoginRequest
         in: body
         name: login
@@ -9603,14 +9619,12 @@ paths:
         V2Register
         in data must be have type, type must be one of the following values
         ["google", "apple", "email", "phone"]
+
+        you must be give environment_id and project_id in body or
+        Environment-Id hearder and project-id in query parameters or
+        X-API-KEY in hearder
       operationId: V2register
       parameters:
-      - description: register_body
-        in: body
-        name: registerBody
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
       - description: X-API-KEY
         in: header
         name: X-API-KEY
@@ -9623,6 +9637,16 @@ paths:
         in: header
         name: Environment-Id
         type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: register_body
+        in: body
+        name: registerBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
       produces:
       - application/json
       responses:

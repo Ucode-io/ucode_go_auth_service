@@ -318,13 +318,17 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 // @Router /v2/login/with-option [POST]
 // @Summary V2LoginWithOption
 // @Description V2LoginWithOption
-// @Description in body you must be give environment_id and project_id
+// @Description you must be give environment_id and project_id in body or
+// @Description Environment-Id hearder and project-id in query parameters or
+// @Description X-API-KEY in hearder
 // @Description login strategy must be one of the following values
 // @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
 // @Tags V2_Session
 // @Accept json
 // @Produce json
-// // @Param login_strategy header string true "login_strategy" Enums(PHONE, EMAIL, LOGIN, PHONE_OTP, EMAIL_OTP, LOGIN_PWD, GOOGLE_AUTH, APPLE_AUTH)
+// @Param Environment-Id header string false "Environment-Id"
+// @Param X-API-KEY header string false "X-API-KEY"
+// @Param project-id query string false "project-id"
 // @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
 // @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -370,7 +374,7 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		return
 	} else if httpErrorStr == "user verified but not found" {
 		err := errors.New("Пользователь проверен, но не найден")
-		h.handleResponse(c, http.NotFound, err.Error())
+		h.handleResponse(c, http.OK, err.Error())
 		return
 	} else if httpErrorStr == "user has been expired" {
 		err := errors.New("Срок действия пользователя истек")

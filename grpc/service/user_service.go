@@ -110,7 +110,6 @@ func (s *userService) GetUserListByIDs(ctx context.Context, req *pb.UserPrimaryK
 	return res, err
 }
 
-//
 func (s *userService) GetUserList(ctx context.Context, req *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
 	s.log.Info("---GetUserList--->", logger.Any("req", req))
 
@@ -168,16 +167,16 @@ func (s *userService) DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*
 
 	res := &emptypb.Empty{}
 
-	rowsAffected, err := s.strg.User().Delete(ctx, req)
+	_, err := s.strg.User().Delete(ctx, req)
 
 	if err != nil {
 		s.log.Error("!!!DeleteUser--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
+	// if rowsAffected <= 0 {
+	// 	return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+	// }
 
 	return res, nil
 }
