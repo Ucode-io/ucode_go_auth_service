@@ -82,6 +82,9 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		if _, ok := body["phone"]; ok {
 			phone = body["phone"].(string)
 		}
+		if _, ok := body["email"]; ok {
+			email = body["email"].(string)
+		}
 		fmt.Println("::::::::::TEST:::::::::::3")
 		pKey, err := rs.services.UserService().V2CreateUser(ctx, &auth_service.CreateUserRequest{
 			Login:     login,

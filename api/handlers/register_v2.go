@@ -151,13 +151,18 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Description V2Register
 // @Description in data must be have type, type must be one of the following values
 // @Description ["google", "apple", "email", "phone"]
+// @Description
+// @Description you must be give environment_id and project_id in body or
+// @Description Environment-Id hearder and project-id in query parameters or
+// @Description X-API-KEY in hearder
 // @Tags v2_register
 // @Accept json
 // @Produce json
-// @Param registerBody body models.RegisterOtp true "register_body"
 // @Param X-API-KEY header string false "X-API-KEY"
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string false "Environment-Id"
+// @Param project-id query string false "project-id"
+// @Param registerBody body models.RegisterOtp true "register_body"
 // @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
