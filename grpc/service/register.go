@@ -115,18 +115,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 	fmt.Println("::::::::::TEST:::::::::::5")
 	fmt.Println("user id in convert ::", userId)
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"guid":           userId,
-		"project_id":     body["project_id"],
-		"role_id":        body["role_id"],
-		"client_type_id": body["client_type_id"],
-		"active":         body["active"],
-		"expires_at":     body["expires_at"],
-		"email":          body["email"],
-		"phone":          body["phone"],
-		"name":           body["name"],
-		"login":          body["login"],
-	})
+	body["guid"] = userId
+	structData, err := helper.ConvertMapToStruct(body)
 	fmt.Println("::::::::::TEST:::::::::::6")
 	if err != nil {
 		rs.log.Error("!!!CreateUser--->", logger.Error(err))
