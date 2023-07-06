@@ -80,7 +80,10 @@ message RoleWithAppTablePermissions {
             string label = 2;
             string relation_id = 3;
             bool view_permission = 4;
-            string table_slug = 5;
+            bool edit_permission = 5;
+            bool create_permission = 6;
+            bool delete_permission = 7;
+            string table_slug = 8;
         }
         message AutomaticFilter {
             string guid = 1;

@@ -18148,6 +18148,15 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission": {
             "type": "object",
             "properties": {
+                "create_permission": {
+                    "type": "boolean"
+                },
+                "delete_permission": {
+                    "type": "boolean"
+                },
+                "edit_permission": {
+                    "type": "boolean"
+                },
                 "guid": {
                     "type": "string"
                 },
