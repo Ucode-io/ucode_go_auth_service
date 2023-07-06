@@ -981,11 +981,11 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 
 func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
-
+	fmt.Println("\n V2GetUserByLoginTypes test >>> #1")
 	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("\n V2GetUserByLoginTypes test >>> #2")
 	return res, nil
 }

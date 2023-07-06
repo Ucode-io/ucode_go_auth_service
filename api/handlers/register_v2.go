@@ -91,6 +91,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			return
 		}
 	case "EMAIL":
+		fmt.Println("\n email type case >>> #1")
 		valid = util.IsValidEmail(request.Recipient)
 		if !valid {
 			h.handleResponse(c, http.BadRequest, "Email is not valid")
@@ -107,36 +108,43 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 				ResourceId:    resourceId.(string),
 			},
 		)
+		fmt.Println("\n email type case >>> #2")
 		emailSettings, err := h.services.EmailService().GetListEmailSettings(
 			c.Request.Context(),
 			&pb.GetListEmailSettingsRequest{
 				ProjectId: resourceEnvironment.GetProjectId(),
 			},
 		)
+		fmt.Println("\n email type case >>> #3")
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("\n email type case >>> #4")
 		if len(emailSettings.Items) < 1 {
 			h.handleResponse(c, http.InvalidArgument, errors.New("email settings not found"))
 			return
 		}
+		fmt.Println("\n email type case >>> #5")
 		body.DevEmail = emailSettings.Items[0].Email
 		body.DevEmailPassword = emailSettings.Items[0].Password
 	}
+	fmt.Println("\n total test >>> #6")
 	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
-
+	fmt.Println("\n total test >>> #7")
 	resp, err := h.services.SmsService().Send(
 		c.Request.Context(),
 		body,
 	)
+	fmt.Println("\n total test >>> #8")
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("\n total test >>> #9")
 	res := models.V2SendCodeResponse{
 		SmsId: resp.SmsId,
 	}
