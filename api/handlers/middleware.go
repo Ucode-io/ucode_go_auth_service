@@ -57,6 +57,9 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 					c.Abort()
 					return
 				}
+
+				fmt.Println("\n\n RESOURCE >>> TEST ", resource)
+
 				resourceId = resource.GetResource().GetId()
 				environmentId = apikeys.GetEnvironmentId()
 				projectId = apikeys.GetProjectId()
