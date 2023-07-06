@@ -172,7 +172,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 					ProjectId: body["resource_environment_id"].(string),
 				})
 			if errorInAdditionalObject != nil {
-				rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(err))
+				fmt.Println("\n Addational table error ", errorInAdditionalObject)
+				rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(errorInAdditionalObject))
 			}
 		}
 		fmt.Println("::::::::::TEST:::::::::::12")
