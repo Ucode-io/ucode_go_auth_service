@@ -172,29 +172,31 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 					ProjectId: body["resource_environment_id"].(string),
 				})
 			if errorInAdditionalObject != nil {
+				fmt.Println("::::::::::TEST:::::::::::12")
+				defer func(userId string) {
+					// delete user from object builder user table if has any error while create additional object
+					if errorInAdditionalObject != nil {
+						structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
+							"id": userId,
+						})
+						_, errorInAdditionalObject = rs.services.ObjectBuilderService().Delete(
+							context.Background(),
+							&pbObject.CommonMessage{
+								TableSlug: "user",
+								Data:      structData,
+								ProjectId: body["resource_environment_id"].(string),
+							})
+						if errorInAdditionalObject != nil {
+							rs.log.Error("!!!RegisterUser--->delete user if have error while create additional user >>", logger.Error(err))
+						}
+					}
+				}(userId)
 				fmt.Println("\n Addational table error ", errorInAdditionalObject)
 				rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(errorInAdditionalObject))
+				return nil, status.Error(codes.Internal, errorInAdditionalObject.Error())
 			}
 		}
-		fmt.Println("::::::::::TEST:::::::::::12")
-		defer func(userId string) {
-			// delete user from object builder user table if has any error while create additional object
-			if errorInAdditionalObject != nil {
-				structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
-					"id": userId,
-				})
-				_, errorInAdditionalObject = rs.services.ObjectBuilderService().Delete(
-					context.Background(),
-					&pbObject.CommonMessage{
-						TableSlug: "user",
-						Data:      structData,
-						ProjectId: body["resource_environment_id"].(string),
-					})
-				if errorInAdditionalObject != nil {
-					rs.log.Error("!!!RegisterUser--->delete user if have error while create additional user >>", logger.Error(err))
-				}
-			}
-		}(userId)
+
 	}
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                userId,
