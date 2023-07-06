@@ -163,7 +163,8 @@ message MenuPermission {
     };
     string id = 1;
     string label = 2;
-    Permission permission = 3;
+    string type = 3;
+    Permission permission = 4;
 }
 
 message GetAllMenuPermissionsRequest {

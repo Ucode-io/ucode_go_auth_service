@@ -18126,6 +18126,9 @@ const docTemplate = `{
                 },
                 "permission": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission_Permission"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
