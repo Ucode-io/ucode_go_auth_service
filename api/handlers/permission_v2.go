@@ -1171,3 +1171,166 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, resp)
 }
+
+// GetListMenuPermissions godoc
+// @ID get_list_menu_permissions
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Router /v2/menu-permission/detailed/{project-id}/{role-id}/{parent-id} [GET]
+// @Summary Get Permission List
+// @Description  Get Permission List
+// @Tags V2_Permission
+// @Accept json
+// @Produce json
+// @Param project-id path string true "project-id"
+// @Param role-id path string true "role-id"
+// @Param parent-id path string true "parent-id"
+// @Success 200 {object} http.Response{data=object_builder_service.GetAllMenuPermissionsResponse} "GetMenuPermissionListResponseBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetListMenuPermissions(c *gin.Context) {
+	var (
+		resp *object_builder_service.GetAllMenuPermissionsResponse
+		err  error
+	)
+
+	projectId := c.Param("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	fmt.Println("\n Resource type ", resource.ResourceType)
+	switch resource.ResourceType {
+	case pbCompany.ResourceType_MONGODB:
+		fmt.Println("\n Mongo db")
+		resp, err = h.services.BuilderPermissionService().GetAllMenuPermissions(
+			c.Request.Context(),
+			&object_builder_service.GetAllMenuPermissionsRequest{
+				RoleId:    c.Param("role-id"),
+				ProjectId: resource.ResourceEnvironmentId,
+				ParentId:  c.Param("parent-id"),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case pbCompany.ResourceType_POSTGRESQL:
+		resp, err = h.services.PostgresBuilderPermissionService().GetAllMenuPermissions(
+			c.Request.Context(),
+			&object_builder_service.GetAllMenuPermissionsRequest{
+				RoleId:    c.Param("role-id"),
+				ProjectId: resource.ResourceEnvironmentId,
+				ParentId:  c.Param("parent-id"),
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+
+	}
+	h.handleResponse(c, http.OK, resp)
+}
+
+// UpdateMenuPermissions godoc
+// @ID update_menu_permissions
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Router /v2/menu-permission/detailed [PUT]
+// @Summary Update Permission
+// @Description Update Permission
+// @Tags V2_Permission
+// @Accept json
+// @Produce json
+// @Param project-id query string true "project-id"
+// @Param permission body object_builder_service.UpdateMenuPermissionsRequest true "UpdateMenuPermissionRequestBody"
+// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
+	var (
+		permission object_builder_service.UpdateMenuPermissionsRequest
+		resp       *emptypb.Empty
+		// resourceEnvironment *obs.ResourceEnvironment
+	)
+
+	err := c.ShouldBindJSON(&permission)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	permission.ProjectId = resource.ResourceEnvironmentId
+	switch resource.ResourceType {
+	case pbCompany.ResourceType_MONGODB:
+		fmt.Println("test permission before update builder")
+		resp, err = h.services.BuilderPermissionService().UpdateMenuPermissions(
+			context.Background(),
+			&permission,
+		)
+		fmt.Println("test permission before error update builder")
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		fmt.Println("test permission after update builder")
+	case pbCompany.ResourceType_POSTGRESQL:
+		resp, err = h.services.PostgresBuilderPermissionService().UpdateMenuPermissions(
+			c.Request.Context(),
+			&permission,
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
