@@ -18138,6 +18138,9 @@ const docTemplate = `{
                 "delete": {
                     "type": "boolean"
                 },
+                "menu_settings": {
+                    "type": "boolean"
+                },
                 "read": {
                     "type": "boolean"
                 },
