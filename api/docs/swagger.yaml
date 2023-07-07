@@ -2542,12 +2542,43 @@ definitions:
     - ConfirmStrategies_UNDECIDED
     - ConfirmStrategies_PHONE
     - ConfirmStrategies_EMAIL
+  ucode_ucode_go_auth_service_genproto_object_builder_service.GetAllMenuPermissionsResponse:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission'
+        type: array
+    type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.GetListWithRoleAppTablePermissionsResponse:
     properties:
       data:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions'
       project_id:
         type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      permission:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission_Permission'
+      type:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission_Permission:
+    properties:
+      delete:
+        type: boolean
+      menu_settings:
+        type: boolean
+      read:
+        type: boolean
+      update:
+        type: boolean
+      write:
+        type: boolean
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission:
     properties:
@@ -2591,6 +2622,8 @@ definitions:
         type: string
       client_type_id:
         type: string
+      grant_access:
+        type: boolean
       guid:
         type: string
       name:
@@ -2772,6 +2805,17 @@ definitions:
       view_label:
         type: string
       view_slug:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateMenuPermissionsRequest:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission'
+        type: array
+      project_id:
+        type: string
+      role_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateRoleAppTablePermissionsRequest:
@@ -8950,6 +8994,130 @@ paths:
       summary: V2LoginWithOption
       tags:
       - V2_Session
+  /v2/menu-permission/detailed:
+    put:
+      consumes:
+      - application/json
+      description: Update Permission
+      operationId: update_menu_permissions
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: UpdateMenuPermissionRequestBody
+        in: body
+        name: permission
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.UpdateMenuPermissionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update Permission
+      tags:
+      - V2_Permission
+  /v2/menu-permission/detailed/{project-id}/{role-id}/{parent-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Permission List
+      operationId: get_list_menu_permissions
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: project-id
+        in: path
+        name: project-id
+        required: true
+        type: string
+      - description: role-id
+        in: path
+        name: role-id
+        required: true
+        type: string
+      - description: parent-id
+        in: path
+        name: parent-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetMenuPermissionListResponseBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetAllMenuPermissionsResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Permission List
+      tags:
+      - V2_Permission
   /v2/multi-company/login:
     post:
       consumes:
