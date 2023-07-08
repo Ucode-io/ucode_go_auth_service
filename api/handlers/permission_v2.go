@@ -1021,6 +1021,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("resource.ResourceEnvironmentId::", resource.ResourceEnvironmentId)
 	fmt.Println("\n Resource type ", resource.ResourceType)
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
@@ -1054,6 +1055,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	}
 
 	resp.ProjectId = projectId
+	fmt.Println("resp::", resp.Data.Tables)
 
 	h.handleResponse(c, http.OK, resp)
 }
