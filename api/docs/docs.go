@@ -18204,12 +18204,6 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions": {
             "type": "object",
             "properties": {
-                "apps": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App"
-                    }
-                },
                 "client_platform_id": {
                     "type": "string"
                 },
@@ -18227,72 +18221,26 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
-                }
-            }
-        },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "permission": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Permission"
                 },
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table"
                     }
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Permission": {
-            "type": "object",
-            "properties": {
-                "app_id": {
-                    "type": "string"
-                },
-                "create": {
-                    "type": "boolean"
-                },
-                "delete": {
-                    "type": "boolean"
-                },
-                "guid": {
-                    "type": "string"
-                },
-                "read": {
-                    "type": "boolean"
-                },
-                "role_id": {
-                    "type": "string"
-                },
-                "update": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table": {
             "type": "object",
             "properties": {
                 "action_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ActionPermission"
                     }
                 },
                 "automatic_filters": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod"
                 },
                 "description": {
                     "type": "string"
@@ -18303,7 +18251,7 @@ const docTemplate = `{
                 "field_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission"
                     }
                 },
                 "icon": {
@@ -18319,7 +18267,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "record_permissions": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission"
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission"
                 },
                 "show_in_menu": {
                     "type": "boolean"
@@ -18333,7 +18281,7 @@ const docTemplate = `{
                 "view_permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission"
                     }
                 },
                 "with_increment_id": {
@@ -18341,7 +18289,7 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ActionPermission": {
             "type": "object",
             "properties": {
                 "custom_event_id": {
@@ -18361,7 +18309,7 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter": {
             "type": "object",
             "properties": {
                 "custom_field": {
@@ -18378,36 +18326,36 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod": {
             "type": "object",
             "properties": {
                 "delete": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
                     }
                 },
                 "read": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
                     }
                 },
                 "update": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
                     }
                 },
                 "write": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter"
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
                     }
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission": {
             "type": "object",
             "properties": {
                 "edit_permission": {
@@ -18430,7 +18378,7 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission": {
             "type": "object",
             "properties": {
                 "delete": {
@@ -18456,9 +18404,18 @@ const docTemplate = `{
                 }
             }
         },
-        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission": {
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission": {
             "type": "object",
             "properties": {
+                "create_permission": {
+                    "type": "boolean"
+                },
+                "delete_permission": {
+                    "type": "boolean"
+                },
+                "edit_permission": {
+                    "type": "boolean"
+                },
                 "guid": {
                     "type": "string"
                 },

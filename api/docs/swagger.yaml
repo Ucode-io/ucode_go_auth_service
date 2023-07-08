@@ -2614,10 +2614,6 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions:
     properties:
-      apps:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App'
-        type: array
       client_platform_id:
         type: string
       client_type_id:
@@ -2630,56 +2626,26 @@ definitions:
         type: string
       project_id:
         type: string
-    type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App:
-    properties:
-      description:
-        type: string
-      icon:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      permission:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Permission'
       tables:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table'
         type: array
     type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Permission:
-    properties:
-      app_id:
-        type: string
-      create:
-        type: boolean
-      delete:
-        type: boolean
-      guid:
-        type: string
-      read:
-        type: boolean
-      role_id:
-        type: string
-      update:
-        type: boolean
-    type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table:
     properties:
       action_permissions:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ActionPermission'
         type: array
       automatic_filters:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod'
       description:
         type: string
       digit_number:
         type: integer
       field_permissions:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission'
         type: array
       icon:
         type: string
@@ -2690,7 +2656,7 @@ definitions:
       label:
         type: string
       record_permissions:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission'
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission'
       show_in_menu:
         type: boolean
       slug:
@@ -2699,12 +2665,12 @@ definitions:
         type: string
       view_permissions:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission'
         type: array
       with_increment_id:
         type: boolean
     type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ActionPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ActionPermission:
     properties:
       custom_event_id:
         type: string
@@ -2717,7 +2683,7 @@ definitions:
       table_slug:
         type: string
     type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter:
     properties:
       custom_field:
         type: string
@@ -2728,26 +2694,26 @@ definitions:
       table_slug:
         type: string
     type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilterWithMethod:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod:
     properties:
       delete:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
         type: array
       read:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
         type: array
       update:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
         type: array
       write:
         items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_AutomaticFilter'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
         type: array
     type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_FieldPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission:
     properties:
       edit_permission:
         type: boolean
@@ -2762,7 +2728,7 @@ definitions:
       view_permission:
         type: boolean
     type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_RecordPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission:
     properties:
       delete:
         type: string
@@ -2779,8 +2745,14 @@ definitions:
       write:
         type: string
     type: object
-  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_App_Table_ViewPermission:
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission:
     properties:
+      create_permission:
+        type: boolean
+      delete_permission:
+        type: boolean
+      edit_permission:
+        type: boolean
       guid:
         type: string
       label:
