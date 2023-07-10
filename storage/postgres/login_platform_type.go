@@ -125,15 +125,15 @@ func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, inp
 	var data map[string]string
 	if types == "APPLE" {
 		data = map[string]string{
-			"team_id":   input.TeamId,
-			"client_id": input.ClientId,
-			"key_id":    input.KeyId,
-			"secret":    input.Secret,
+			"team_id":   input.Data.TeamId,
+			"client_id": input.Data.ClientId,
+			"key_id":    input.Data.KeyId,
+			"secret":    input.Data.Secret,
 		}
 	} else if types == "GOOGLE" {
 		data = map[string]string{
-			"email":    input.Email,
-			"password": input.Password,
+			"email":    input.Data.Email,
+			"password": input.Data.Password,
 		}
 	}
 
