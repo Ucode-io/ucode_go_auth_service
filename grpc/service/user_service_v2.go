@@ -503,6 +503,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		"client_platform_id": req.GetClientPlatformId(),
 		"active":             req.GetActive(),
 		"expires_at":         req.GetExpiresAt(),
+		"name":               req.GetName(),
+		"email":              req.GetEmail(),
+		"photo":              req.GetPhotoUrl(),
+		"password":           req.GetPassword(),
+		"login":              req.GetLogin(),
+		"birth_day":          req.GetYearOfBirth(),
+		"phone":              req.GetPhone(),
 	})
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -974,11 +981,11 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 
 func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
-
+	fmt.Println("\n V2GetUserByLoginTypes test >>> #1")
 	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("\n V2GetUserByLoginTypes test >>> #2")
 	return res, nil
 }

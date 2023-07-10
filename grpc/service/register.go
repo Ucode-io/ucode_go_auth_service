@@ -115,18 +115,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 	fmt.Println("::::::::::TEST:::::::::::5")
 	fmt.Println("user id in convert ::", userId)
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"guid":           userId,
-		"project_id":     body["project_id"],
-		"role_id":        body["role_id"],
-		"client_type_id": body["client_type_id"],
-		"active":         body["active"],
-		"expires_at":     body["expires_at"],
-		"email":          body["email"],
-		"phone":          body["phone"],
-		"name":           body["name"],
-		"login":          body["login"],
-	})
+	body["guid"] = userId
+	structData, err := helper.ConvertMapToStruct(body)
 	fmt.Println("::::::::::TEST:::::::::::6")
 	if err != nil {
 		rs.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -182,28 +172,34 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 					ProjectId: body["resource_environment_id"].(string),
 				})
 			if errorInAdditionalObject != nil {
-				rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(err))
+				fmt.Println("::::::::::TEST:::::::::::12")
+				defer func(userId string) {
+					fmt.Println("\n\n Come to defer >>> ")
+					// delete user from object builder user table if has any error while create additional object
+					if errorInAdditionalObject != nil {
+						structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
+							"id": userId,
+						})
+						_, errorInAdditionalObject = rs.services.ObjectBuilderService().Delete(
+							context.Background(),
+							&pbObject.CommonMessage{
+								TableSlug: "user",
+								Data:      structData,
+								ProjectId: body["resource_environment_id"].(string),
+							})
+						if errorInAdditionalObject != nil {
+							rs.log.Error("!!!RegisterUser--->delete user if have error while create additional user >>", logger.Error(err))
+						}
+					}
+				}(userId)
+				fmt.Println("\n Addational table error ", errorInAdditionalObject)
+				rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(errorInAdditionalObject))
+				fmt.Println("\n\n Error after return")
+				return nil, status.Error(codes.Internal, errorInAdditionalObject.Error())
+				fmt.Println("\n\n Error before return")
 			}
 		}
-		fmt.Println("::::::::::TEST:::::::::::12")
-		defer func(userId string) {
-			// delete user from object builder user table if has any error while create additional object
-			if errorInAdditionalObject != nil {
-				structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
-					"id": userId,
-				})
-				_, errorInAdditionalObject = rs.services.ObjectBuilderService().Delete(
-					context.Background(),
-					&pbObject.CommonMessage{
-						TableSlug: "user",
-						Data:      structData,
-						ProjectId: body["resource_environment_id"].(string),
-					})
-				if errorInAdditionalObject != nil {
-					rs.log.Error("!!!RegisterUser--->delete user if have error while create additional user >>", logger.Error(err))
-				}
-			}
-		}(userId)
+
 	}
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                userId,
