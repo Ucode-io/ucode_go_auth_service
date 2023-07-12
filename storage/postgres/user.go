@@ -503,11 +503,24 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	res := pb.AddUserToProjectRes{}
 
 	query := `INSERT INTO
-			user_project(user_id, company_id, project_id)
-			VALUES ($1, $2, $3)
-			RETURNING user_id, company_id, project_id`
+			user_project(user_id, company_id, project_id, client_type_id, role_id)
+			VALUES ($1, $2, $3, $4, $5)
+			RETURNING user_id, company_id, project_id, client_type_id, role_id`
 
-	err := r.db.QueryRow(ctx, query, req.GetUserId(), req.GetCompanyId(), req.GetProjectId()).Scan(&res.UserId, &res.CompanyId, &res.ProjectId)
+	err := r.db.QueryRow(ctx,
+		query,
+		req.GetUserId(),
+		req.GetCompanyId(),
+		req.GetProjectId(),
+		req.GetClientTypeId(),
+		req.GetRoleId(),
+	).Scan(
+		&res.UserId,
+		&res.CompanyId,
+		&res.ProjectId,
+		&res.ClientTypeId,
+		&res.RoleId,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -725,7 +738,7 @@ func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq
 	q := query + filter + offset + limit
 
 	q, arr = helper.ReplaceQueryParams(q, params)
-	rows, err := c.db.Query(ctx, q, arr...)
+	rows, err := c.db.Query(ctx, q, arr...)	
 	if err != nil {
 		return &res, err
 	}
@@ -748,4 +761,34 @@ func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq
 	}
 
 	return &res, nil
+}
+
+func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error) {
+
+	var (
+		isExists bool
+		count    int
+	)
+	query := `SELECT
+			COUNT(1)
+		FROM
+			"user_project"
+		WHERE user_id = $1 AND project_id = $2 AND company_id = $3
+		AND client_type_id = $4 AND role_id = $5`
+	err := c.db.QueryRow(
+		ctx,
+		query,
+		req.UserId,
+		req.ProjectId,
+		req.CompanyId,
+		req.ClientTypeId,
+		req.RoleId,
+	).Scan(&count)
+	if err != nil {
+		return isExists, nil
+	}
+	if count > 0 {
+		isExists = true
+	}
+	return isExists, nil
 }

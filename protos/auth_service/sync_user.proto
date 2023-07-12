@@ -8,22 +8,43 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 
 service SyncUserService {
-    rpc SyncUserWithAuth(SyncUserWithAuthRequest) returns (SyncUserWithAuthResponse) {}
+    rpc CreateUser(CreateSyncUserRequest) returns (SyncUserResponse) {}
+    rpc UpdateUser(UpdateSyncUserRequest) returns (SyncUserResponse) {}
+    rpc DeleteUser(SyncUserRequest) returns (SyncUserResponse) {}
 }
 
-message SyncUserWithAuthRequest {
+message CreateSyncUserRequest {
     string client_type_id = 1;
     string role_id = 2;
     string login = 3;
     string email = 4;
     string phone = 5;
-    string project_id = 6;
-    string company_id = 7;
-    string table_id = 8;
-    string password = 9;
+    string resource_environment_id = 6;
+    string table_slug = 7;
+    string password = 8;
+    string project_id = 9;
 }
 
-message SyncUserWithAuthResponse {
+message UpdateSyncUserRequest {
+    string client_type_id = 1;
+    string role_id = 2;
+    string login = 3;
+    string email = 4;
+    string phone = 5;
+    string resource_environment_id = 6;
+    string table_slug = 7;
+    string password = 8;
+    string guid = 9;
+    string project_id = 10;
+}
+
+message SyncUserResponse {
     bool is_user_exists = 1;
     string user_id = 2;
+}
+
+message SyncUserRequest {
+    string user_id = 1;
+    string resource_environment_id = 2;
+    string project_id = 3;
 }
