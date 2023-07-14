@@ -345,6 +345,7 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 		"ip":                 session.Data,
 		"data":               session.Data,
 		"env_id":             session.EnvId,
+		"tables":             tokenInfo.Table,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)

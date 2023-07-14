@@ -1120,6 +1120,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 
 	fmt.Println("user data: ", userData)
+	fmt.Println("table data ->>: ", input.GetTables(), input.Tables)
 
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
