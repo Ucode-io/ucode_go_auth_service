@@ -132,7 +132,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	//if bytes, err := json.MarshalIndent(res, "", "  "); err == nil {
 	//	fmt.Println("ConvertPbToAnotherPb", string(bytes))
 	//}
-	fmt.Println("TEST::::8")
+	fmt.Println("TEST::::8>>", req.Tables)
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
 		Tables:        req.Tables,
@@ -1486,7 +1486,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("id::", tokenInfo.ID)
+	fmt.Println("id:: >> TOKEN>>>", tokenInfo)
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -1655,6 +1655,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	fmt.Println("env id ::", session.EnvId)
+	fmt.Println(">>>>> test last >", authTables)
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
