@@ -836,6 +836,8 @@ definitions:
     properties:
       active:
         type: integer
+      client_type_id:
+        type: string
       company_id:
         type: string
       project_id:
@@ -844,14 +846,22 @@ definitions:
         type: integer
       role_id:
         type: string
+      table_slug:
+        type: string
       user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes:
     properties:
+      client_type_id:
+        type: string
       company_id:
         type: string
       project_id:
+        type: string
+      role_id:
+        type: string
+      table_slug:
         type: string
       user_id:
         type: string
@@ -2377,7 +2387,9 @@ definitions:
       k8s_namespace:
         type: string
       language:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language'
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language'
+        type: array
       logo:
         type: string
       project_id:
@@ -9759,7 +9771,7 @@ paths:
         V2Register
         in data must be have type, type must be one of the following values
         ["google", "apple", "email", "phone"]
-
+        client_type_id and role_id must be in body parameters
         you must be give environment_id and project_id in body or
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder

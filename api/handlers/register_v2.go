@@ -91,6 +91,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			return
 		}
 	case "EMAIL":
+		fmt.Println("\n email type case >>> #1")
 		valid = util.IsValidEmail(request.Recipient)
 		if !valid {
 			h.handleResponse(c, http.BadRequest, "Email is not valid")
@@ -107,36 +108,43 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 				ResourceId:    resourceId.(string),
 			},
 		)
+		fmt.Println("\n email type case >>> #2")
 		emailSettings, err := h.services.EmailService().GetListEmailSettings(
 			c.Request.Context(),
 			&pb.GetListEmailSettingsRequest{
 				ProjectId: resourceEnvironment.GetProjectId(),
 			},
 		)
+		fmt.Println("\n email type case >>> #3")
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("\n email type case >>> #4")
 		if len(emailSettings.Items) < 1 {
 			h.handleResponse(c, http.InvalidArgument, errors.New("email settings not found"))
 			return
 		}
+		fmt.Println("\n email type case >>> #5")
 		body.DevEmail = emailSettings.Items[0].Email
 		body.DevEmailPassword = emailSettings.Items[0].Password
 	}
+	fmt.Println("\n total test >>> #6")
 	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
-
+	fmt.Println("\n total test >>> #7")
 	resp, err := h.services.SmsService().Send(
 		c.Request.Context(),
 		body,
 	)
+	fmt.Println("\n total test >>> #8")
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("\n total test >>> #9")
 	res := models.V2SendCodeResponse{
 		SmsId: resp.SmsId,
 	}
@@ -151,7 +159,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Description V2Register
 // @Description in data must be have type, type must be one of the following values
 // @Description ["google", "apple", "email", "phone"]
-// @Description
+// @Description client_type_id and role_id must be in body parameters
 // @Description you must be give environment_id and project_id in body or
 // @Description Environment-Id hearder and project-id in query parameters or
 // @Description X-API-KEY in hearder
@@ -184,6 +192,22 @@ func (h *Handler) V2Register(c *gin.Context) {
 	fmt.Println("::::::::::TESTTEST:::::::::::::3")
 	if _, ok := cfg.RegisterTypes[body.Data["type"].(string)]; !ok {
 		h.handleResponse(c, http.BadRequest, "invalid register type")
+		return
+	}
+	if _, ok := body.Data["client_type_id"].(string); !ok {
+		if !util.IsValidUUID(body.Data["client_type_id"].(string)) {
+			h.handleResponse(c, http.BadRequest, "client_type_id is an invalid uuid")
+			return
+		}
+		h.handleResponse(c, http.BadRequest, "client_type_id is required")
+		return
+	}
+	if _, ok := body.Data["role_id"].(string); !ok {
+		if !util.IsValidUUID(body.Data["role_id"].(string)) {
+			h.handleResponse(c, http.BadRequest, "role_id is an invalid uuid")
+			return
+		}
+		h.handleResponse(c, http.BadRequest, "role_id is required")
 		return
 	}
 	fmt.Println("::::::::::TESTTEST:::::::::::::4")

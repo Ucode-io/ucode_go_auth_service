@@ -11433,7 +11433,7 @@ const docTemplate = `{
         },
         "/v2/register": {
             "post": {
-                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]\n\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder",
+                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]\nclient_type_id and role_id must be in body parameters\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder",
                 "consumes": [
                     "application/json"
                 ],
@@ -15485,6 +15485,9 @@ const docTemplate = `{
                 "active": {
                     "type": "integer"
                 },
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
@@ -15497,6 +15500,9 @@ const docTemplate = `{
                 "role_id": {
                     "type": "string"
                 },
+                "table_slug": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "string"
                 }
@@ -15505,10 +15511,19 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "user_id": {
@@ -17845,7 +17860,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
+                    }
                 },
                 "logo": {
                     "type": "string"
