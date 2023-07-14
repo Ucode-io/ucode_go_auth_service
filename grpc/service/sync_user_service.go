@@ -8,10 +8,13 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type syncUserService struct {
@@ -57,28 +60,36 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("aaaaa:: get project")
-	resEnv, err := sus.services.ResourceService().GetResourceByResEnvironId(context.Background(), &pbCompany.GetResourceRequest{
-		Id: req.GetResourceEnvironmentId(),
-	})
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("user id", userId)
 
 	if userId == "" {
 		// if user not found in auth service db we have to create it
-		user, err = sus.services.UserService().V2CreateUser(context.Background(), &pb.CreateUserRequest{
-			Login:                 req.GetLogin(),
-			Password:              req.GetPassword(),
-			Phone:                 req.GetPhone(),
-			Email:                 req.GetEmail(),
-			ResourceEnvironmentId: req.GetResourceEnvironmentId(),
-			ProjectId:             req.GetProjectId(),
-			RoleId:                req.GetRoleId(),
-			ClientTypeId:          req.GetClientTypeId(),
-			CompanyId:             project.GetCompanyId(),
-			ResourceType:          int32(resEnv.GetResourceType()),
+		if req.GetPassword() != "" {
+			hashedPassword, err := security.HashPassword(req.GetPassword())
+			if err != nil {
+				sus.log.Error("!!!CreateUser--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			req.Password = hashedPassword
+		}
+
+		user, err := sus.strg.User().Create(ctx, &pb.CreateUserRequest{
+			Login:     req.GetLogin(),
+			Password:  req.GetPassword(),
+			Email:     req.GetEmail(),
+			Phone:     req.GetPhone(),
+			CompanyId: project.GetCompanyId(),
+		})
+		if err != nil {
+			sus.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.GetId()
+		_, err = sus.strg.User().AddUserToProject(context.Background(), &pb.AddUserToProjectReq{
+			UserId:       userId,
+			CompanyId:    project.GetCompanyId(),
+			RoleId:       req.GetRoleId(),
+			ProjectId:    req.GetProjectId(),
+			ClientTypeId: req.GetClientTypeId(),
 		})
 		if err != nil {
 			return nil, err

@@ -5,17 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 
-	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
@@ -41,10 +43,10 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 	body := data.Data.AsMap()
 	var (
-		foundUser                    *pb.User
-		err, errorInAdditionalObject error
-		userId                       string
-		userData                     *pbObject.LoginDataRes
+		foundUser *pb.User
+		err       error
+		userId    string
+		userData  *pbObject.LoginDataRes
 	)
 	fmt.Println("::::::::::TEST:::::::::::1")
 	switch strings.ToUpper(body["type"].(string)) {
@@ -69,10 +71,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	fmt.Println("user found::", foundUser)
 	if foundUser.Id == "" {
 		// create user in auth service
-		var name, login, email, password, phone string
-		if _, ok := body["name"]; ok {
-			name = body["name"].(string)
-		}
+		var login, email, password, phone string
+
 		if _, ok := body["login"]; ok {
 			login = body["login"].(string)
 		}
@@ -85,60 +85,109 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		if _, ok := body["email"]; ok {
 			email = body["email"].(string)
 		}
-		fmt.Println("::::::::::TEST:::::::::::3")
-		pKey, err := rs.services.UserService().V2CreateUser(ctx, &auth_service.CreateUserRequest{
+		emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		checkEmail := emailRegex.MatchString(email)
+		if !checkEmail && email != "" {
+			err = fmt.Errorf("email is not valid")
+			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, err
+		}
+		hashedPassword, err := security.HashPassword(password)
+		if err != nil {
+			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		password = hashedPassword
+
+		pKey, err := rs.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:     login,
 			Password:  password,
 			Email:     email,
 			Phone:     phone,
-			Name:      name,
 			CompanyId: body["company_id"].(string),
-			ProjectId: body["project_id"].(string),
 		})
 
-		// pKey, err := rs.strg.User().Create(ctx, &auth_service.CreateUserRequest{
-		// 	Login:     login,
-		// 	Password:  password,
-		// 	Email:     email,
-		// 	Phone:     phone,
-		// 	Name:      name,
-		// 	CompanyId: body["company_id"].(string),
-		// })
-		fmt.Println("::::::::::TEST:::::::::::4")
 		if err != nil {
-			rs.log.Error("!!!RegisterUser.User().Create--->", logger.Error(err))
+			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+		fmt.Println("::::::::::TEST:::::::::::3")
 		userId = pKey.GetId()
 	} else {
 		userId = foundUser.GetId()
 	}
-	fmt.Println("::::::::::TEST:::::::::::5")
-	fmt.Println("user id in convert ::", userId)
+	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+		UserId:       userId,
+		ProjectId:    body["project_id"].(string),
+		CompanyId:    body["company_id"].(string),
+		ClientTypeId: body["client_type_id"].(string),
+		RoleId:       body["role_id"].(string),
+	})
+	if err != nil {
+		rs.log.Error("!RegisterUser --->", logger.Error(err))
+		return nil, err
+	}
+
 	body["guid"] = userId
+	body["from_auth_service"] = true
 	structData, err := helper.ConvertMapToStruct(body)
 	fmt.Println("::::::::::TEST:::::::::::6")
 	if err != nil {
 		rs.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	var tableSlug = "user"
+	switch body["resource_type"].(float64) {
+	case 1:
+		response, err := rs.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"id": structpb.NewStringValue(body["client_type_id"].(string)),
+				},
+			},
+		})
+		if err != nil {
+			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if clientTypeTableSlug, ok := response.Data.AsMap()["table_slug"]; ok {
+			tableSlug = clientTypeTableSlug.(string)
+		}
+	case 3:
+		response, err := rs.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"id": structpb.NewStringValue(body["client_type_id"].(string)),
+				},
+			},
+		})
+		if err != nil {
+			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if clientTypeTableSlug, ok := response.Data.AsMap()["table_slug"]; ok {
+			tableSlug = clientTypeTableSlug.(string)
+		}
+	}
+
 	// create user in object builder service
-	fmt.Println("::::::::::TEST:::::::::::7")
 	switch body["resource_type"].(float64) {
 	case 1:
 		_, err = rs.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-			TableSlug: "user",
+			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
 		})
-		fmt.Println("::::::::::TEST:::::::::::8")
+		fmt.Println("::::::::::TEST:::::::::::8", tableSlug)
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
 		_, err = rs.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-			TableSlug: "user",
+			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
 		})
@@ -148,68 +197,69 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 	}
 	fmt.Println("::::::::::TEST:::::::::::9")
-	if body["addational_table"] != nil {
-		validRegisterForAddationalTable := map[string]bool{
-			"phone": true,
-			"email": true,
-		}
-		fmt.Println("::::::::::TEST:::::::::::10")
-		if _, ok := validRegisterForAddationalTable[body["type"].(string)]; ok {
-			body["addational_table"].(map[string]interface{})["guid"] = userId
-			body["addational_table"].(map[string]interface{})["project_id"] = body["project_id"]
+	// if body["addational_table"] != nil {
+	// 	validRegisterForAddationalTable := map[string]bool{
+	// 		"phone": true,
+	// 		"email": true,
+	// 	}
+	// 	fmt.Println("::::::::::TEST:::::::::::10")
+	// 	if _, ok := validRegisterForAddationalTable[body["type"].(string)]; ok {
+	// 		body["addational_table"].(map[string]interface{})["guid"] = userId
+	// 		body["addational_table"].(map[string]interface{})["project_id"] = body["project_id"]
 
-			mapedInterface := body["addational_table"].(map[string]interface{})
-			structData, errorInAdditionalObject = helper.ConvertRequestToSturct(mapedInterface)
-			if errorInAdditionalObject != nil {
-				rs.log.Error("Additional table struct table --->", logger.Error(err))
-			}
-			fmt.Println("::::::::::TEST:::::::::::11")
-			_, errorInAdditionalObject = rs.services.ObjectBuilderService().Create(
-				context.Background(),
-				&pbObject.CommonMessage{
-					TableSlug: mapedInterface["table_slug"].(string),
-					Data:      structData,
-					ProjectId: body["resource_environment_id"].(string),
-				})
-			if errorInAdditionalObject != nil {
-				fmt.Println("::::::::::TEST:::::::::::12")
-				defer func(userId string) {
-					fmt.Println("\n\n Come to defer >>> ")
-					// delete user from object builder user table if has any error while create additional object
-					if errorInAdditionalObject != nil {
-						structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
-							"id": userId,
-						})
-						_, errorInAdditionalObject = rs.services.ObjectBuilderService().Delete(
-							context.Background(),
-							&pbObject.CommonMessage{
-								TableSlug: "user",
-								Data:      structData,
-								ProjectId: body["resource_environment_id"].(string),
-							})
-						if errorInAdditionalObject != nil {
-							rs.log.Error("!!!RegisterUser--->delete user if have error while create additional user >>", logger.Error(err))
-						}
-					}
-				}(userId)
-				fmt.Println("\n Addational table error ", errorInAdditionalObject)
-				rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(errorInAdditionalObject))
-				fmt.Println("\n\n Error after return")
-				return nil, status.Error(codes.Internal, errorInAdditionalObject.Error())
-				fmt.Println("\n\n Error before return")
-			}
-		}
+	// 		mapedInterface := body["addational_table"].(map[string]interface{})
+	// 		structData, errorInAdditionalObject = helper.ConvertRequestToSturct(mapedInterface)
+	// 		if errorInAdditionalObject != nil {
+	// 			rs.log.Error("Additional table struct table --->", logger.Error(err))
+	// 		}
+	// 		fmt.Println("::::::::::TEST:::::::::::11")
+	// 		_, errorInAdditionalObject = rs.services.ObjectBuilderService().Create(
+	// 			context.Background(),
+	// 			&pbObject.CommonMessage{
+	// 				TableSlug: mapedInterface["table_slug"].(string),
+	// 				Data:      structData,
+	// 				ProjectId: body["resource_environment_id"].(string),
+	// 			})
+	// 		if errorInAdditionalObject != nil {
+	// 			fmt.Println("::::::::::TEST:::::::::::12")
+	// 			defer func(userId string) {
+	// 				fmt.Println("\n\n Come to defer >>> ")
+	// 				// delete user from object builder user table if has any error while create additional object
+	// 				if errorInAdditionalObject != nil {
+	// 					structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
+	// 						"id": userId,
+	// 					})
+	// 					_, errorInAdditionalObject = rs.services.ObjectBuilderService().Delete(
+	// 						context.Background(),
+	// 						&pbObject.CommonMessage{
+	// 							TableSlug: "user",
+	// 							Data:      structData,
+	// 							ProjectId: body["resource_environment_id"].(string),
+	// 						})
+	// 					if errorInAdditionalObject != nil {
+	// 						rs.log.Error("!!!RegisterUser--->delete user if have error while create additional user >>", logger.Error(err))
+	// 					}
+	// 				}
+	// 			}(userId)
+	// 			fmt.Println("\n Addational table error ", errorInAdditionalObject)
+	// 			rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(errorInAdditionalObject))
+	// 			fmt.Println("\n\n Error after return")
+	// 			return nil, status.Error(codes.Internal, errorInAdditionalObject.Error())
+	// 			fmt.Println("\n\n Error before return")
+	// 		}
+	// 	}
 
-	}
+	// }
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                userId,
+		ClientType:            body["client_type_id"].(string),
 		ProjectId:             body["project_id"].(string),
 		ResourceEnvironmentId: body["resource_environment_id"].(string),
 	}
 	fmt.Println("::::::::::TEST:::::::::::13")
 	switch body["resource_type"].(float64) {
 	case 1:
-		userData, err = rs.services.LoginService().LoginDataByUserId(
+		userData, err = rs.services.LoginService().LoginData(
 			ctx,
 			reqLoginData,
 		)
@@ -220,7 +270,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-		userData, err = rs.services.PostgresLoginService().LoginDataByUserId(
+		userData, err = rs.services.PostgresLoginService().LoginData(
 			ctx,
 			reqLoginData,
 		)
@@ -250,7 +300,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		Role:           userData.GetRole(),
 		Permissions:    userData.GetPermissions(),
 		LoginTableSlug: userData.GetLoginTableSlug(),
-		AppPermissions: userData.GetAppPermissions(),
 	})
 
 	resp, err := rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
