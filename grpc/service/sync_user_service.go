@@ -118,7 +118,8 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			}
 		}
 	}
-	response.UserId = user.GetId()
+	fmt.Println("userId ", userId)
+	response.UserId = userId
 	return &response, nil
 }
 
