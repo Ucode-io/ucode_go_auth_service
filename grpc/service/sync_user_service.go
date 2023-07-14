@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -9,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/saidamir98/udevs_pkg/logger"
 )
 
@@ -48,18 +50,21 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		return nil, err
 	}
 	userId := user.GetId()
-	project, err := sus.services.ProjectService().GetByPK(context.Background(), &pb.ProjectPrimaryKey{
-		Id: req.GetProjectId(),
+	fmt.Println("before:: get project", req.GetProjectId())
+	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("aaaaa:: get project")
 	resEnv, err := sus.services.ResourceService().GetResourceByResEnvironId(context.Background(), &pbCompany.GetResourceRequest{
 		Id: req.GetResourceEnvironmentId(),
 	})
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("user id", userId)
 
 	if userId == "" {
 		// if user not found in auth service db we have to create it
@@ -104,4 +109,30 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	}
 	response.UserId = user.GetId()
 	return &response, nil
+}
+
+func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
+	var (
+		response = pb.SyncUserResponse{}
+		user     *pb.User
+	)
+	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+		ProjectId: req.GetProjectId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = sus.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+		UserId:       req.GetUserId(),
+		CompanyId:    project.GetCompanyId(),
+		RoleId:       req.GetRoleId(),
+		ProjectId:    req.GetProjectId(),
+		ClientTypeId: req.GetClientTypeId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	response.UserId = user.GetId()
+	return &empty.Empty{}, nil
 }

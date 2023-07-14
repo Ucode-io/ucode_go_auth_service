@@ -63,6 +63,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 		&obs.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
+			ProjectId: login.GetProjectId(),
 		},
 	)
 	if err != nil {

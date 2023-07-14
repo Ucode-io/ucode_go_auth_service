@@ -11,10 +11,12 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
@@ -502,6 +504,26 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.
 func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
 	res := pb.AddUserToProjectRes{}
 
+	var (
+		clientTypeId, roleId pgtype.UUID
+	)
+	if req.GetClientTypeId() != "" {
+		err := clientTypeId.Set(req.GetClientTypeId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		clientTypeId.Status = pgtype.Null
+	}
+	if req.GetRoleId() != "" {
+		err := roleId.Set(req.GetRoleId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		roleId.Status = pgtype.Null
+	}
+
 	query := `INSERT INTO
 			user_project(user_id, company_id, project_id, client_type_id, role_id)
 			VALUES ($1, $2, $3, $4, $5)
@@ -512,17 +534,23 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 		req.GetUserId(),
 		req.GetCompanyId(),
 		req.GetProjectId(),
-		req.GetClientTypeId(),
-		req.GetRoleId(),
+		clientTypeId,
+		roleId,
 	).Scan(
 		&res.UserId,
 		&res.CompanyId,
 		&res.ProjectId,
-		&res.ClientTypeId,
-		&res.RoleId,
+		&clientTypeId,
+		&roleId,
 	)
 	if err != nil {
 		return nil, err
+	}
+	if roleId.Status != pgtype.Null {
+		req.RoleId = fmt.Sprintf("%v", roleId.Status)
+	}
+	if clientTypeId.Status != pgtype.Null {
+		req.ClientTypeId = fmt.Sprintf("%v", clientTypeId.Status)
 	}
 
 	return &res, nil
@@ -738,7 +766,7 @@ func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq
 	q := query + filter + offset + limit
 
 	q, arr = helper.ReplaceQueryParams(q, params)
-	rows, err := c.db.Query(ctx, q, arr...)	
+	rows, err := c.db.Query(ctx, q, arr...)
 	if err != nil {
 		return &res, err
 	}
@@ -791,4 +819,28 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 		isExists = true
 	}
 	return isExists, nil
+}
+
+func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
+
+	query := `DELETE FROM "user_project" 
+				WHERE 
+				project_id = $1 AND 
+				user_id = $2 AND 
+				role_id = $3 AND 
+				client_type_id = $4 AND company_id = $5`
+
+	_, err := r.db.Exec(ctx,
+		query,
+		req.GetProjectId(),
+		req.GetUserId(),
+		req.GetRoleId(),
+		req.GetClientTypeId(),
+		req.GetCompanyId(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
 }

@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWithGoogleRequest) (resp *pb.User, err error) {
@@ -510,15 +511,33 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		"login":              req.GetLogin(),
 		"birth_day":          req.GetYearOfBirth(),
 		"phone":              req.GetPhone(),
+		"from_auth_service":  true,
 	})
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	var tableSlug = "user"
+	clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		TableSlug: "client_type",
+		Data: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"id": structpb.NewStringValue(req.GetClientTypeId()),
+			},
+		},
+	})
+	if err != nil {
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+	if ok {
+		tableSlug = clientTypeTableSlug.(string)
+	}
 	switch req.ResourceType {
 	case 1:
 		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-			TableSlug: "user",
+			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
@@ -529,7 +548,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		}
 	case 3:
 		_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
-			TableSlug: "user",
+			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
@@ -541,9 +560,11 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-		UserId:    pKey.Id,
-		ProjectId: req.GetProjectId(),
-		CompanyId: req.GetCompanyId(),
+		UserId:       pKey.Id,
+		ProjectId:    req.GetProjectId(),
+		CompanyId:    req.GetCompanyId(),
+		ClientTypeId: req.GetClientTypeId(),
+		RoleId:       req.GetRoleId(),
 	})
 
 	if err != nil {

@@ -77,7 +77,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                user.GetId(),
-		ClientType:            req.ClientType,
+		ClientType:            req.GetClientType(),
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
@@ -499,13 +499,14 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			UserId:                req.Data["user_id"],
 			ProjectId:             req.Data["project_id"],
 			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
+			ClientType:            req.Data["client_type_id"],
 		}
 		log.Println("reqLoginData--->", reqLoginData)
 		var data *pbObject.LoginDataRes
 		fmt.Println("resours type::::", serviceResource.ResourceType)
 		switch serviceResource.ResourceType {
 		case 1:
-			data, err = s.services.LoginService().LoginDataByUserId(
+			data, err = s.services.LoginService().LoginData(
 				ctx,
 				reqLoginData,
 			)
@@ -516,7 +517,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
 		case 3:
-			data, err = s.services.PostgresLoginService().LoginDataByUserId(
+			data, err = s.services.PostgresLoginService().LoginData(
 				ctx,
 				reqLoginData,
 			)
@@ -546,7 +547,6 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			Role:           data.GetRole(),
 			Permissions:    data.GetPermissions(),
 			LoginTableSlug: data.GetLoginTableSlug(),
-			AppPermissions: data.GetAppPermissions(),
 		})
 
 	}
@@ -599,7 +599,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		}
 		companiesById = append(companiesById, company.Company)
 		companies.Companies = companiesById
-		companies.Count = 1
+		companies.Count = int32(len(companiesById))
 
 	}
 	bytes, err := json.Marshal(companies.GetCompanies())

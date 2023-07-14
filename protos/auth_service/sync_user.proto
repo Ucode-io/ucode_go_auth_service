@@ -10,7 +10,7 @@ import "google/protobuf/struct.proto";
 service SyncUserService {
     rpc CreateUser(CreateSyncUserRequest) returns (SyncUserResponse) {}
     rpc UpdateUser(UpdateSyncUserRequest) returns (SyncUserResponse) {}
-    rpc DeleteUser(SyncUserRequest) returns (SyncUserResponse) {}
+    rpc DeleteUser(DeleteSyncUserRequest) returns (google.protobuf.Empty) {}
 }
 
 message CreateSyncUserRequest {
@@ -43,8 +43,10 @@ message SyncUserResponse {
     string user_id = 2;
 }
 
-message SyncUserRequest {
+message DeleteSyncUserRequest {
     string user_id = 1;
-    string resource_environment_id = 2;
+    string company_id = 2;
     string project_id = 3;
+    string client_type_id = 4;
+    string role_id = 5;
 }
