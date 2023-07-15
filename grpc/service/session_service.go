@@ -254,7 +254,6 @@ func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 
 func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
 	res := &pb.RefreshTokenResponse{}
-	fmt.Println("\n>>> REQUEST SERVICE ", req, "\n")
 	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
