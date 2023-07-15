@@ -132,7 +132,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	//if bytes, err := json.MarshalIndent(res, "", "  "); err == nil {
 	//	fmt.Println("ConvertPbToAnotherPb", string(bytes))
 	//}
-	fmt.Println("TEST::::8")
+	fmt.Println("TEST::::8>>", req.Tables)
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
 		Tables:        req.Tables,
@@ -904,16 +904,16 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
-		ClientTypeId: session.ClientTypeId,
-		UserId:       session.UserId,
-		ProjectId:    session.GetProjectId(),
-	})
+	// userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
+	// 	ClientTypeId: session.ClientTypeId,
+	// 	UserId:       session.UserId,
+	// 	ProjectId:    session.GetProjectId(),
+	// })
 	if err != nil {
 		s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	convertedData := helper.ConvertPbToAnotherPb(userData)
+	// convertedData := helper.ConvertPbToAnotherPb(userData)
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
@@ -937,7 +937,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		"ip":                 session.Data,
 		"data":               session.Data,
 		"tables":             authTables,
-		"login_table_slug":   convertedData.LoginTableSlug,
+		"login_table_slug":   tokenInfo.LoginTableSlug,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -962,7 +962,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	}
 	res := &pb.V2RefreshTokenResponse{
 		Token:       token,
-		Permissions: convertedData.Permissions,
+		// Permissions: convertedData.Permissions,
 	}
 
 	return res, nil
@@ -1120,6 +1120,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 
 	fmt.Println("user data: ", userData)
+	fmt.Println("table data ->>: ", input.GetTables(), input.Tables)
 
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
@@ -1490,7 +1491,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("id::", tokenInfo.ID)
+	fmt.Println("id:: >> TOKEN>>>", tokenInfo)
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -1601,6 +1602,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	fmt.Println("env id ::", session.EnvId)
+	fmt.Println(">>>>> test last >", authTables)
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
