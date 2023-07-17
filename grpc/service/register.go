@@ -146,13 +146,17 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 					"id": structpb.NewStringValue(body["client_type_id"].(string)),
 				},
 			},
+			ProjectId: body["resource_environment_id"].(string),
 		})
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if clientTypeTableSlug, ok := response.Data.AsMap()["table_slug"]; ok {
-			tableSlug = clientTypeTableSlug.(string)
+		clientType, ok := response.Data.AsMap()["response"]
+		if ok {
+			if clientTypeTableSlug, ok := clientType.(map[string]interface{})["table_slug"]; ok {
+				tableSlug = clientTypeTableSlug.(string)
+			}
 		}
 	case 3:
 		response, err := rs.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
@@ -162,13 +166,17 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 					"id": structpb.NewStringValue(body["client_type_id"].(string)),
 				},
 			},
+			ProjectId: body["resource_environment_id"].(string),
 		})
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if clientTypeTableSlug, ok := response.Data.AsMap()["table_slug"]; ok {
-			tableSlug = clientTypeTableSlug.(string)
+		clientType, ok := response.Data.AsMap()["response"]
+		if ok {
+			if clientTypeTableSlug, ok := clientType.(map[string]interface{})["table_slug"]; ok {
+				tableSlug = clientTypeTableSlug.(string)
+			}
 		}
 	}
 
