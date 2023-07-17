@@ -100,7 +100,7 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 		for _, item := range claims["tables"].([]interface{}) {
 			var table Table
 			if (item != nil) {
-				if (item.(map[string]interface{})["object_id"] != nil && item.(map[string]interface{})["table_slug"] != nil ){
+				if (item.(map[string]interface{})["object_id"] != nil && item.(map[string]interface{})["table_slug"] != nil) {
 					table.ObjectID = item.(map[string]interface{})["object_id"].(string)
 					table.TableSlug = item.(map[string]interface{})["table_slug"].(string)
 					result.Tables = append(result.Tables, table)
