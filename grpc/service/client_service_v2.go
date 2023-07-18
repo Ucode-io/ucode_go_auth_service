@@ -320,6 +320,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		SelfRegister: req.SelfRegister,
 		SelfRecover:  req.SelfRecover,
 		ProjectId:    req.DbProjectId,
+		TableSlug:    req.GetTableSlug(),
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
@@ -472,6 +473,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		ProjectId:         req.DbProjectId,
 		Guid:              req.Guid,
 		ClientPlatformIds: req.ClientPlatformIds,
+		TableSlug:         req.GetTableSlug(),
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)

@@ -17350,6 +17350,9 @@ const docTemplate = `{
                 "db_project_id": {
                     "type": "string"
                 },
+                "grant_access": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -17390,6 +17393,9 @@ const docTemplate = `{
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -17692,6 +17698,9 @@ const docTemplate = `{
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -17706,6 +17715,9 @@ const docTemplate = `{
                 },
                 "db_project_id": {
                     "type": "string"
+                },
+                "grant_access": {
+                    "type": "boolean"
                 },
                 "guid": {
                     "type": "string"

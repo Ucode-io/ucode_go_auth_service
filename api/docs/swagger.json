@@ -17339,6 +17339,9 @@
                 "db_project_id": {
                     "type": "string"
                 },
+                "grant_access": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -17379,6 +17382,9 @@
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -17681,6 +17687,9 @@
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -17695,6 +17704,9 @@
                 },
                 "db_project_id": {
                     "type": "string"
+                },
+                "grant_access": {
+                    "type": "boolean"
                 },
                 "guid": {
                     "type": "string"
