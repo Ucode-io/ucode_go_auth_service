@@ -80,7 +80,10 @@ message RoleWithAppTablePermissions {
             string label = 2;
             string relation_id = 3;
             bool view_permission = 4;
-            string table_slug = 5;
+            bool edit_permission = 5;
+            bool create_permission = 6;
+            bool delete_permission = 7;
+            string table_slug = 8;
         }
         message AutomaticFilter {
             string guid = 1;
@@ -143,10 +146,12 @@ message MenuPermission {
         bool write = 3;
         bool update = 4;
         bool delete = 5;
+        bool menu_settings = 6;
     };
     string id = 1;
     string label = 2;
-    Permission permission = 3;
+    string type = 3;
+    Permission permission = 4;
 }
 
 message GetAllMenuPermissionsRequest {
