@@ -465,19 +465,18 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 	var (
 		result *pbObject.CommonMessage
 	)
-	requestToObjBuilderService := &pb.UpdateClientTypeRequestToObjService{
-		Name:              req.Name,
-		ConfirmBy:         req.ConfirmBy.String(),
-		SelfRegister:      req.SelfRegister,
-		SelfRecover:       req.SelfRecover,
-		ProjectId:         req.DbProjectId,
-		Guid:              req.Guid,
-		ClientPlatformIds: req.ClientPlatformIds,
-		TableSlug:         req.GetTableSlug(),
+	requestToObjBuilderService := map[string]interface{}{
+		"mame":            req.Name,
+		"confirm_by":      req.ConfirmBy.String(),
+		"self_register":   req.SelfRegister,
+		"self_recorder":   req.SelfRecover,
+		"project_id":      req.DbProjectId,
+		"guid":            req.Guid,
+		"client_type_ids": req.ClientPlatformIds,
+		"table_slug":      req.TableSlug,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
-	fmt.Println(structData.AsMap())
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
