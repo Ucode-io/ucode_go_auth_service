@@ -2395,9 +2395,7 @@ definitions:
       k8s_namespace:
         type: string
       language:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language'
-        type: array
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language'
       logo:
         type: string
       project_id:
@@ -2736,12 +2734,6 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission:
     properties:
-      create_permission:
-        type: boolean
-      delete_permission:
-        type: boolean
-      edit_permission:
-        type: boolean
       guid:
         type: string
       label:

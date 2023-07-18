@@ -17661,10 +17661,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "language": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
-                    }
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
                 },
                 "logo": {
                     "type": "string"
@@ -18178,15 +18175,6 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission": {
             "type": "object",
             "properties": {
-                "create_permission": {
-                    "type": "boolean"
-                },
-                "delete_permission": {
-                    "type": "boolean"
-                },
-                "edit_permission": {
-                    "type": "boolean"
-                },
                 "guid": {
                     "type": "string"
                 },

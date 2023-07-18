@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -30,8 +29,6 @@ type CompanyServiceClient interface {
 	Delete(ctx context.Context, in *DeleteCompanyRequest, opts ...grpc.CallOption) (*Empty, error)
 	GetListWithProjects(ctx context.Context, in *GetListWithProjectsRequest, opts ...grpc.CallOption) (*GetListWithProjectsResponse, error)
 	GetCompaniesByOwnerId(ctx context.Context, in *GetCompaniesByOwnerIdReq, opts ...grpc.CallOption) (*GetCompaniesByOwnerIdRes, error)
-	GetAllMenuTemplate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GatAllMenuTemplateResponse, error)
-	GetMenuTemplateById(ctx context.Context, in *GetMenuTemplateRequest, opts ...grpc.CallOption) (*MenuTemplate, error)
 }
 
 type companyServiceClient struct {
@@ -105,24 +102,6 @@ func (c *companyServiceClient) GetCompaniesByOwnerId(ctx context.Context, in *Ge
 	return out, nil
 }
 
-func (c *companyServiceClient) GetAllMenuTemplate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GatAllMenuTemplateResponse, error) {
-	out := new(GatAllMenuTemplateResponse)
-	err := c.cc.Invoke(ctx, "/company_service.CompanyService/GetAllMenuTemplate", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *companyServiceClient) GetMenuTemplateById(ctx context.Context, in *GetMenuTemplateRequest, opts ...grpc.CallOption) (*MenuTemplate, error) {
-	out := new(MenuTemplate)
-	err := c.cc.Invoke(ctx, "/company_service.CompanyService/GetMenuTemplateById", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // CompanyServiceServer is the server API for CompanyService service.
 // All implementations must embed UnimplementedCompanyServiceServer
 // for forward compatibility
@@ -134,8 +113,6 @@ type CompanyServiceServer interface {
 	Delete(context.Context, *DeleteCompanyRequest) (*Empty, error)
 	GetListWithProjects(context.Context, *GetListWithProjectsRequest) (*GetListWithProjectsResponse, error)
 	GetCompaniesByOwnerId(context.Context, *GetCompaniesByOwnerIdReq) (*GetCompaniesByOwnerIdRes, error)
-	GetAllMenuTemplate(context.Context, *emptypb.Empty) (*GatAllMenuTemplateResponse, error)
-	GetMenuTemplateById(context.Context, *GetMenuTemplateRequest) (*MenuTemplate, error)
 	mustEmbedUnimplementedCompanyServiceServer()
 }
 
@@ -163,12 +140,6 @@ func (UnimplementedCompanyServiceServer) GetListWithProjects(context.Context, *G
 }
 func (UnimplementedCompanyServiceServer) GetCompaniesByOwnerId(context.Context, *GetCompaniesByOwnerIdReq) (*GetCompaniesByOwnerIdRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCompaniesByOwnerId not implemented")
-}
-func (UnimplementedCompanyServiceServer) GetAllMenuTemplate(context.Context, *emptypb.Empty) (*GatAllMenuTemplateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllMenuTemplate not implemented")
-}
-func (UnimplementedCompanyServiceServer) GetMenuTemplateById(context.Context, *GetMenuTemplateRequest) (*MenuTemplate, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMenuTemplateById not implemented")
 }
 func (UnimplementedCompanyServiceServer) mustEmbedUnimplementedCompanyServiceServer() {}
 
@@ -309,42 +280,6 @@ func _CompanyService_GetCompaniesByOwnerId_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CompanyService_GetAllMenuTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CompanyServiceServer).GetAllMenuTemplate(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.CompanyService/GetAllMenuTemplate",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CompanyServiceServer).GetAllMenuTemplate(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _CompanyService_GetMenuTemplateById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMenuTemplateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CompanyServiceServer).GetMenuTemplateById(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/company_service.CompanyService/GetMenuTemplateById",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CompanyServiceServer).GetMenuTemplateById(ctx, req.(*GetMenuTemplateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // CompanyService_ServiceDesc is the grpc.ServiceDesc for CompanyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -379,14 +314,6 @@ var CompanyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCompaniesByOwnerId",
 			Handler:    _CompanyService_GetCompaniesByOwnerId_Handler,
-		},
-		{
-			MethodName: "GetAllMenuTemplate",
-			Handler:    _CompanyService_GetAllMenuTemplate_Handler,
-		},
-		{
-			MethodName: "GetMenuTemplateById",
-			Handler:    _CompanyService_GetMenuTemplateById_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
