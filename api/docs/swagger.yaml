@@ -1517,6 +1517,8 @@ definitions:
         type: string
       password:
         type: string
+      user_id:
+        type: string
     type: object
   auth_service.V2UpdateClientTypeRequest:
     properties:
