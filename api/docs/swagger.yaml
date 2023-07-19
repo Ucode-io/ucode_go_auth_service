@@ -1511,6 +1511,13 @@ definitions:
       token:
         $ref: '#/definitions/auth_service.Token'
     type: object
+  auth_service.V2ResetPasswordRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   auth_service.V2UpdateClientTypeRequest:
     properties:
       client_platform_ids:
@@ -9192,6 +9199,52 @@ paths:
       summary: Delete Relation
       tags:
       - V2_Relation
+  /v2/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Reset Password
+      operationId: v2_reset_password
+      parameters:
+      - description: ResetPasswordRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.V2ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: ResetPassword
+      tags:
+      - V2_Session
   /v2/resource-environment:
     get:
       consumes:
