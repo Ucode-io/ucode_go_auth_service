@@ -589,7 +589,7 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 		request auth_service.ForgotPasswordRequest
 	)
 
-	ctx, cancel := context.WithCancel(c.Request.Context())
+	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
 	defer cancel()
 
 	err := c.ShouldBindJSON(&request)
@@ -663,4 +663,42 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 		LoginFound: true,
 		SmsId:      resp.GetId(),
 	})
+}
+
+// V2ResetPassword godoc
+// @ID v2_reset_password
+// @Router /v2/reset-password [PUT]
+// @Summary ResetPassword
+// @Description Reset Password
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param body body auth_service.V2ResetPasswordRequest true "ResetPasswordRequest"
+// @Success 201 {object} http.Response{data=string} "Response"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2ResetPassword(c *gin.Context) {
+	var (
+		request auth_service.V2ResetPasswordRequest
+	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
+	defer cancel()
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	res, err := h.services.SessionService().ResetPassword(ctx, &pb.V2ResetPasswordRequest{
+		Email:    request.GetEmail(),
+		Password: request.GetPassword(),
+		UserId:   request.GetUserId(),
+	})
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	h.handleResponse(c, http.OK, res)
 }

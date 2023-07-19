@@ -844,3 +844,38 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 
 	return &empty.Empty{}, nil
 }
+
+func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
+	var (
+		subQuery string
+		params   = make(map[string]interface{})
+	)
+	if req.GetEmail() == "" {
+		subQuery = ""
+	} else {
+		subQuery = ` email = := email, `
+		params = map[string]interface{}{
+			"email": req.GetEmail(),
+		}
+	}
+	query := `UPDATE "user" SET
+		password = :password,` + subQuery + `
+		updated_at = now()
+	WHERE
+		id = :id`
+
+	params = map[string]interface{}{
+		"id":       req.GetUserId(),
+		"password": req.GetPassword(),
+	}
+
+	q, arr := helper.ReplaceQueryParams(query, params)
+	result, err := r.db.Exec(ctx, q, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected := result.RowsAffected()
+
+	return rowsAffected, err
+}

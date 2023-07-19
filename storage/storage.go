@@ -137,6 +137,7 @@ type UserRepoI interface {
 	GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error)
 	GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error)
 	DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*emptypb.Empty, error)
+	V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error)
 }
 
 type IntegrationRepoI interface {
