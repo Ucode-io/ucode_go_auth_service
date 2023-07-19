@@ -1010,3 +1010,13 @@ func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUser
 	fmt.Println("\n V2GetUserByLoginTypes test >>> #2")
 	return res, nil
 }
+
+func (s *userService) GetUserByUsername(ctx context.Context, req auth_service.GetUserByUsernameRequest) (*pb.User, error) {
+	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
+	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		return nil, err
+	}
+	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
+	return res, nil
+}
