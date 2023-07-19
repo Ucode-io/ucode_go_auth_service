@@ -203,6 +203,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.GET("/login-strategy", h.GetLoginStrategy)
 		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
 		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
+		v2.POST("/forgot-password", h.ForgotPassword)
 	}
 
 	//COMPANY
