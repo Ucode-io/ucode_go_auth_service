@@ -35,14 +35,12 @@ service UserService {
     rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
     rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {}
-<<<<<<< HEAD
     rpc GetUserByUsername(GetUserByUsernameRequest) returns (User) {}
+    rpc GetUserProjects(UserPrimaryKey) returns (GetUserProjectsRes) {}
 }
 
 message GetUserByUsernameRequest {
     string username = 1;
-=======
-    rpc GetUserProjects(UserPrimaryKey) returns (GetUserProjectsRes) {}
 }
 
 message UserCompany {
@@ -52,7 +50,6 @@ message UserCompany {
 
 message GetUserProjectsRes {
     repeated UserCompany companies = 1;
->>>>>>> 4c67310e6962b602a94f90f94939fd7c221afd7a
 }
 
 message Setting {
