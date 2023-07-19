@@ -464,8 +464,8 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	return rowsAffected, err
 }
 
-func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error) {
-	res := models.GetUserProjects{}
+func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error) {
+	res := pb.GetUserProjectsRes{}
 
 	query := `SELECT company_id,
       			array_agg(project_id)
@@ -490,9 +490,9 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.
 			return nil, err
 		}
 
-		res.Companies = append(res.Companies, models.Companie{
-			Id:       company,
-			Projects: projects,
+		res.Companies = append(res.Companies, &pb.UserCompany{
+			Id:         company,
+			ProjectIds: projects,
 		})
 	}
 

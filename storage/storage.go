@@ -128,7 +128,7 @@ type UserRepoI interface {
 	Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
 	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
 	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
-	GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error)
+	GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error)
 	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
 	GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
