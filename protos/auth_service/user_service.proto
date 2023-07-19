@@ -35,6 +35,11 @@ service UserService {
     rpc RegisterUserViaEmail(CreateUserRequest) returns (User) {}
     rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {}
+    rpc GetUserByUsername(GetUserByUsernameRequest) returns (User) {}
+}
+
+message GetUserByUsernameRequest {
+    string username = 1;
 }
 
 message Setting {

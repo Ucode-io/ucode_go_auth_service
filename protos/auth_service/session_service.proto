@@ -25,6 +25,17 @@ service SessionService {
     rpc V2MultiCompanyLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyLoginRes) {}
     rpc V2MultiCompanyOneLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyOneLoginRes) {}
     rpc V2LoginWithOption(V2LoginWithOptionRequest) returns (V2LoginWithOptionsResponse) {}
+    rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {}
+}
+
+message ForgotPasswordRequest {
+    string login = 1;
+    string project_id = 2;
+}
+
+message ForgotPasswordResponse {
+    bool login_found = 1;
+    string sms_id = 2;
 }
 
 message ResourceEnvironmentV2MultiCompany {
