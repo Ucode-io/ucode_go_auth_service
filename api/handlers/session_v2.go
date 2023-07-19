@@ -691,7 +691,7 @@ func (h *Handler) V2ResetPassword(c *gin.Context) {
 		return
 	}
 
-	res, err := h.services.SessionService().ResetPassword(ctx, &pb.V2ResetPasswordRequest{
+	res, err := h.services.SessionService().V2ResetPassword(ctx, &pb.V2ResetPasswordRequest{
 		Email:    request.GetEmail(),
 		Password: request.GetPassword(),
 		UserId:   request.GetUserId(),

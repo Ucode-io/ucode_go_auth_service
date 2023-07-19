@@ -27,13 +27,14 @@ service SessionService {
     rpc V2MultiCompanyOneLogin(V2MultiCompanyLoginReq) returns (V2MultiCompanyOneLoginRes) {}
     rpc V2LoginWithOption(V2LoginWithOptionRequest) returns (V2LoginWithOptionsResponse) {}
     rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {}
-    rpc ResetPassword(V2ResetPasswordRequest) returns (User) {}
+    rpc V2ResetPassword(V2ResetPasswordRequest) returns (User) {}
 }
 
 message V2ResetPasswordRequest {
     string email = 1;
     string password = 2;
     string user_id = 3;
+    string token = 4;
 }
 
 message ForgotPasswordRequest {

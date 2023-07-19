@@ -1773,7 +1773,14 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	tokenInfo, err := security.ParseClaims(req.Token, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!ResetPassword--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	req.Password = hashedPassword
+	req.UserId = tokenInfo.ID
 	rowsAffected, err := s.strg.User().V2ResetPassword(ctx, req)
 	if err != nil {
 		s.log.Error("!!!ResetPassword--->", logger.Error(err))
