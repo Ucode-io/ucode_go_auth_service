@@ -41,7 +41,7 @@ type SessionServiceClient interface {
 	V2MultiCompanyOneLogin(ctx context.Context, in *V2MultiCompanyLoginReq, opts ...grpc.CallOption) (*V2MultiCompanyOneLoginRes, error)
 	V2LoginWithOption(ctx context.Context, in *V2LoginWithOptionRequest, opts ...grpc.CallOption) (*V2LoginWithOptionsResponse, error)
 	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error)
-	ResetPassword(ctx context.Context, in *V2ResetPasswordRequest, opts ...grpc.CallOption) (*User, error)
+	V2ResetPassword(ctx context.Context, in *V2ResetPasswordRequest, opts ...grpc.CallOption) (*User, error)
 }
 
 type sessionServiceClient struct {
@@ -214,9 +214,9 @@ func (c *sessionServiceClient) ForgotPassword(ctx context.Context, in *ForgotPas
 	return out, nil
 }
 
-func (c *sessionServiceClient) ResetPassword(ctx context.Context, in *V2ResetPasswordRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *sessionServiceClient) V2ResetPassword(ctx context.Context, in *V2ResetPasswordRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/auth_service.SessionService/ResetPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth_service.SessionService/V2ResetPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +245,7 @@ type SessionServiceServer interface {
 	V2MultiCompanyOneLogin(context.Context, *V2MultiCompanyLoginReq) (*V2MultiCompanyOneLoginRes, error)
 	V2LoginWithOption(context.Context, *V2LoginWithOptionRequest) (*V2LoginWithOptionsResponse, error)
 	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
-	ResetPassword(context.Context, *V2ResetPasswordRequest) (*User, error)
+	V2ResetPassword(context.Context, *V2ResetPasswordRequest) (*User, error)
 	mustEmbedUnimplementedSessionServiceServer()
 }
 
@@ -307,8 +307,8 @@ func (UnimplementedSessionServiceServer) V2LoginWithOption(context.Context, *V2L
 func (UnimplementedSessionServiceServer) ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ForgotPassword not implemented")
 }
-func (UnimplementedSessionServiceServer) ResetPassword(context.Context, *V2ResetPasswordRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
+func (UnimplementedSessionServiceServer) V2ResetPassword(context.Context, *V2ResetPasswordRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method V2ResetPassword not implemented")
 }
 func (UnimplementedSessionServiceServer) mustEmbedUnimplementedSessionServiceServer() {}
 
@@ -647,20 +647,20 @@ func _SessionService_ForgotPassword_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SessionService_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SessionService_V2ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(V2ResetPasswordRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SessionServiceServer).ResetPassword(ctx, in)
+		return srv.(SessionServiceServer).V2ResetPassword(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/auth_service.SessionService/ResetPassword",
+		FullMethod: "/auth_service.SessionService/V2ResetPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServiceServer).ResetPassword(ctx, req.(*V2ResetPasswordRequest))
+		return srv.(SessionServiceServer).V2ResetPassword(ctx, req.(*V2ResetPasswordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -745,8 +745,8 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SessionService_ForgotPassword_Handler,
 		},
 		{
-			MethodName: "ResetPassword",
-			Handler:    _SessionService_ResetPassword_Handler,
+			MethodName: "V2ResetPassword",
+			Handler:    _SessionService_V2ResetPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
