@@ -14227,6 +14227,13 @@ const docTemplate = `{
                         "name": "project-id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "client_type_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {

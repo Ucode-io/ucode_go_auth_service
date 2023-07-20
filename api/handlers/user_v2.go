@@ -214,6 +214,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Produce json
 // @Param user-id path string true "user-id"
 // @Param project-id query string true "project-id"
+// @Param client_type_id query string true "project-id"
 // @Success 200 {object} http.Response{data=auth_service.User} "UserBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -264,6 +265,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 			Id:           userID,
 			ProjectId:    resource.GetResourceEnvironmentId(),
 			ResourceType: int32(resource.GetResourceType()),
+			ClientTypeId: c.Query("client_type_id"),
 		},
 	)
 	if err != nil {
@@ -376,7 +378,6 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteUser(c *gin.Context) {
 	var (
-		userDataToMap       = make(map[string]interface{})
 		resourceEnvironment *company_service.ResourceEnvironment
 		err                 error
 	)
@@ -438,32 +439,12 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 			Id:           userID,
 			ProjectId:    projectID,
 			ResourceType: resourceEnvironment.GetResourceType(),
+			ClientTypeId: c.Query("client_type_id"),
 		},
 	)
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
-
-	userDataToMap["id"] = userID
-	structData, err := helper.ConvertMapToStruct(userDataToMap)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
-
-	_, err = h.services.ObjectBuilderService().Delete(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: "user",
-			Data:      structData,
-			ProjectId: resourceEnvironment.GetId(),
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
 
