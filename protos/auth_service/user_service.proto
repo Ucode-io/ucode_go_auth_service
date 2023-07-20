@@ -36,10 +36,20 @@ service UserService {
     rpc RegisterWithGoogle(RegisterWithGoogleRequest) returns (User) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {}
     rpc GetUserByUsername(GetUserByUsernameRequest) returns (User) {}
+    rpc GetUserProjects(UserPrimaryKey) returns (GetUserProjectsRes) {}
 }
 
 message GetUserByUsernameRequest {
     string username = 1;
+}
+
+message UserCompany {
+    string id = 1;
+    repeated string project_ids = 2;
+}
+
+message GetUserProjectsRes {
+    repeated UserCompany companies = 1;
 }
 
 message Setting {

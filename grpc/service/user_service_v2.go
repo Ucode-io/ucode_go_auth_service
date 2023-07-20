@@ -1020,3 +1020,14 @@ func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.G
 	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
 	return res, nil
 }
+func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKey) (*pb.GetUserProjectsRes, error) {
+
+	userProjects, err := s.strg.User().GetUserProjects(ctx, req.Id)
+	if err != nil {
+		errGetProjects := errors.New("cant get user projects")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, errGetProjects.Error())
+	}
+
+	return userProjects, nil
+}
