@@ -528,6 +528,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
@@ -555,6 +556,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
@@ -625,6 +627,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
@@ -644,6 +647,23 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
+		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+			TableSlug: "client_type",
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"id": structpb.NewStringValue(req.GetClientTypeId()),
+				},
+			},
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		if ok {
+			tableSlug = clientTypeTableSlug.(string)
+		}
 		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -764,6 +784,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
@@ -790,6 +811,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
@@ -912,6 +934,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	//	TableSlug: result.TableSlug,
 	//	Data:      result.Data,
 	//}, nil
+	fmt.Println("req::", req)
 
 	rowsAffected, err := s.strg.User().Update(ctx, req)
 
@@ -938,6 +961,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
@@ -950,7 +974,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
@@ -964,6 +988,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
@@ -976,7 +1001,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		_, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: config.UcodeDefaultProjectID,
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
@@ -1030,6 +1055,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
@@ -1060,6 +1086,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))

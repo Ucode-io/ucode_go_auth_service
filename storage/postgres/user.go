@@ -337,7 +337,7 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		phone = :phone,
 		email = :email,
 		login = :login,
-		updated_at = now(),
+		updated_at = now()
     	-- language_id = :language_id,
         -- timezone_id = :timezone_id
 	WHERE
