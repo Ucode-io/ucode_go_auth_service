@@ -265,7 +265,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 			Id:           userID,
 			ProjectId:    resource.GetResourceEnvironmentId(),
 			ResourceType: int32(resource.GetResourceType()),
-			ClientTypeId: c.Query("client_type_id"),
+			ClientTypeId: c.Query("client-type-id"),
 		},
 	)
 	if err != nil {
@@ -440,7 +440,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 			Id:           userID,
 			ProjectId:    projectID,
 			ResourceType: resourceEnvironment.GetResourceType(),
-			ClientTypeId: c.Query("client_type_id"),
+			ClientTypeId: c.Query("client-type-id"),
 		},
 	)
 
