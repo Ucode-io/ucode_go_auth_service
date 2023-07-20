@@ -903,17 +903,40 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	if req.ClientTypeId != "" {
+		session.ClientTypeId = req.ClientTypeId
+	}
+	if req.ProjectId != "" {
+		session.ProjectId = req.ProjectId
+	}
+	if req.RoleId != "" {
+		session.RoleId = req.RoleId
+	}
+	if req.EnvId != "" {
+		session.EnvId = req.EnvId
+	}
 
-	// userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
-	// 	ClientTypeId: session.ClientTypeId,
-	// 	UserId:       session.UserId,
-	// 	ProjectId:    session.GetProjectId(),
-	// })
+	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
+		Id:               session.Id,
+		ProjectId:        session.ProjectId,
+		ClientPlatformId: session.ClientPlatformId,
+		ClientTypeId:     session.ClientTypeId,
+		UserId:           session.UserId,
+		RoleId:           session.RoleId,
+		Ip:               session.Ip,
+		Data:             session.Data,
+		ExpiresAt:        session.ExpiresAt,
+		IsChanged:        session.IsChanged,
+		EnvId:            session.EnvId,
+	})
+	if err != nil {
+		s.log.Error("!!!V2RefreshToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	if err != nil {
 		s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	// convertedData := helper.ConvertPbToAnotherPb(userData)
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
@@ -962,7 +985,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	}
 	res := &pb.V2RefreshTokenResponse{
 		Token: token,
-		// Permissions: convertedData.Permissions,
 	}
 
 	return res, nil
