@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -70,7 +71,7 @@ type TokenInfo struct {
 	// ProjectID        string
 	// ClientPlatformID string
 	// ClientTypeID     string
-	// UserID           string
+	UserID string
 	// RoleID           string
 	// IP               string
 	// Data             string

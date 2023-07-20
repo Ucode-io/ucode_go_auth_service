@@ -853,23 +853,24 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 	if req.GetEmail() == "" {
 		subQuery = ""
 	} else {
-		subQuery = ` email = := email, `
-		params = map[string]interface{}{
-			"email": req.GetEmail(),
-		}
+		subQuery = ` email = :email, `
 	}
 	query := `UPDATE "user" SET
 		password = :password,` + subQuery + `
 		updated_at = now()
 	WHERE
 		id = :id`
-
-	params = map[string]interface{}{
-		"id":       req.GetUserId(),
-		"password": req.GetPassword(),
+	if subQuery != "" {
+		params["email"] = req.GetEmail()
 	}
+	params["id"] = req.GetUserId()
+	params["password"] = req.GetPassword()
+
+	fmt.Println("query: ", query)
+	fmt.Print("\n\nParams: ", params)
 
 	q, arr := helper.ReplaceQueryParams(query, params)
+	fmt.Println("q: ", q)
 	result, err := r.db.Exec(ctx, q, arr...)
 	if err != nil {
 		return 0, err
