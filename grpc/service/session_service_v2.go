@@ -1464,7 +1464,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 			return nil, status.Error(codes.NotFound, errGetProjects.Error())
 		}
 
-		for _, projectId := range item.Projects {
+		for _, projectId := range item.ProjectIds {
 			fmt.Println("hello")
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
@@ -1753,7 +1753,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			return nil, status.Error(codes.NotFound, errGetProjects.Error())
 		}
 
-		for _, projectId := range item.Projects {
+		for _, projectId := range item.ProjectIds {
 			fmt.Println("hello")
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
