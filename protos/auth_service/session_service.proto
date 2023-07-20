@@ -34,7 +34,6 @@ message V2ResetPasswordRequest {
     string email = 1;
     string password = 2;
     string user_id = 3;
-    string token = 4;
 }
 
 message ForgotPasswordRequest {
