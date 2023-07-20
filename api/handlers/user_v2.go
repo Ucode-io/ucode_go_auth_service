@@ -214,7 +214,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Produce json
 // @Param user-id path string true "user-id"
 // @Param project-id query string true "project-id"
-// @Param client_type_id query string true "project-id"
+// @Param client-type-id query string false "client-type-id"
 // @Success 200 {object} http.Response{data=auth_service.User} "UserBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -265,7 +265,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 			Id:           userID,
 			ProjectId:    resource.GetResourceEnvironmentId(),
 			ResourceType: int32(resource.GetResourceType()),
-			ClientTypeId: c.Query("client_type_id"),
+			ClientTypeId: c.Query("client-type-id"),
 		},
 	)
 	if err != nil {
@@ -373,6 +373,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Produce json
 // @Param user-id path string true "user-id"
 // @Param project-id query string true "project-id"
+// @Param client-type-id query string false "client-type-id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -439,7 +440,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 			Id:           userID,
 			ProjectId:    projectID,
 			ResourceType: resourceEnvironment.GetResourceType(),
-			ClientTypeId: c.Query("client_type_id"),
+			ClientTypeId: c.Query("client-type-id"),
 		},
 	)
 
