@@ -18350,6 +18350,26 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "chat": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                },
+                "view_create": {
+                    "type": "boolean"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission": {
             "type": "object",
             "properties": {
@@ -18445,6 +18465,9 @@ const docTemplate = `{
                 "client_type_id": {
                     "type": "string"
                 },
+                "global_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission"
+                },
                 "grant_access": {
                     "type": "boolean"
                 },
@@ -18512,6 +18535,12 @@ const docTemplate = `{
                 },
                 "subtitle_field_slug": {
                     "type": "string"
+                },
+                "table_view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission"
+                    }
                 },
                 "view_permissions": {
                     "type": "array",
@@ -18635,6 +18664,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "write": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "boolean"
+                },
+                "edit": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "view": {
+                    "type": "boolean"
+                },
+                "view_id": {
                     "type": "string"
                 }
             }
