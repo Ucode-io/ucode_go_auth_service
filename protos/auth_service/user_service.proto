@@ -136,6 +136,7 @@ message UserPrimaryKey {
     string id = 1;
     string project_id = 2;
     int32 resource_type = 3;
+    string client_type_id = 4;
 }
 
 message UserPrimaryKeyList {
