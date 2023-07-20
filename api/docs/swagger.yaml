@@ -11100,6 +11100,10 @@ paths:
         name: project-id
         required: true
         type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
+        type: string
       produces:
       - application/json
       responses:
@@ -11150,6 +11154,10 @@ paths:
         in: query
         name: project-id
         required: true
+        type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
         type: string
       produces:
       - application/json

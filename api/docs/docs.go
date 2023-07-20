@@ -13850,6 +13850,12 @@ const docTemplate = `{
                         "name": "project-id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "client-type-id",
+                        "name": "client-type-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -13949,6 +13955,12 @@ const docTemplate = `{
                         "name": "project-id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "client-type-id",
+                        "name": "client-type-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {

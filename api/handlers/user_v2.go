@@ -214,7 +214,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Produce json
 // @Param user-id path string true "user-id"
 // @Param project-id query string true "project-id"
-// @Param client_type_id query string true "project-id"
+// @Param client-type-id query string false "client-type-id"
 // @Success 200 {object} http.Response{data=auth_service.User} "UserBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -373,6 +373,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Produce json
 // @Param user-id path string true "user-id"
 // @Param project-id query string true "project-id"
+// @Param client-type-id query string false "client-type-id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
