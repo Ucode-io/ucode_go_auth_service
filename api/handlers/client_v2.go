@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
+	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -134,96 +135,97 @@ func (h *Handler) V2GetClientPlatformList(c *gin.Context) {
 	var (
 	// resourceEnvironment *obs.ResourceEnvironment
 	)
-	offset, err := h.getOffsetParam(c)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
+	// offset, err := h.getOffsetParam(c)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
+	// limit, err := h.getLimitParam(c)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
+	h.handleResponse(c, http.OK, &pb.CommonMessage{})
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
+	// projectId := c.Query("project-id")
+	// if !util.IsValidUUID(projectId) {
+	// 	h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+	// 	return
+	// }
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
+	// //resourceId, ok := c.Get("resource_id")
+	// //if !ok {
+	// //	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+	// //	return
+	// //}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+	// environmentId, ok := c.Get("environment_id")
+	// if !ok || !util.IsValidUUID(environmentId.(string)) {
+	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+	// 	return
+	// }
 
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		if errors.Is(err, pgx.ErrNoRows) {
-	//			h.handleResponse(c, http.GRPCError, "У вас нет ресурса по умолчанию, установите один ресурс по умолчанию")
-	//			return
-	//		}
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
+	// //if util.IsValidUUID(resourceId.(string)) {
+	// //	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+	// //		c.Request.Context(),
+	// //		&obs.GetResourceEnvironmentReq{
+	// //			EnvironmentId: environmentId.(string),
+	// //			ResourceId:    resourceId.(string),
+	// //		},
+	// //	)
+	// //	if err != nil {
+	// //		h.handleResponse(c, http.GRPCError, err.Error())
+	// //		return
+	// //	}
+	// //} else {
+	// //	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+	// //		c.Request.Context(),
+	// //		&obs.GetDefaultResourceEnvironmentReq{
+	// //			ResourceId: resourceId.(string),
+	// //			ProjectId:  projectId,
+	// //		},
+	// //	)
+	// //	if err != nil {
+	// //		if errors.Is(err, pgx.ErrNoRows) {
+	// //			h.handleResponse(c, http.GRPCError, "У вас нет ресурса по умолчанию, установите один ресурс по умолчанию")
+	// //			return
+	// //		}
+	// //		h.handleResponse(c, http.GRPCError, err.Error())
+	// //		return
+	// //	}
+	// //}
 
-	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// resource, err := h.services.ServiceResource().GetSingle(
+	// 	c.Request.Context(),
+	// 	&pbCompany.GetSingleServiceResourceReq{
+	// 		ProjectId:     projectId,
+	// 		EnvironmentId: environmentId.(string),
+	// 		ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	resp, err := h.services.ClientService().V2GetClientPlatformList(
-		c.Request.Context(),
-		&auth_service.GetClientPlatformListRequest{
-			Limit:        int32(limit),
-			Offset:       int32(offset),
-			Search:       c.Query("search"),
-			ProjectId:    resource.ResourceEnvironmentId,
-			ResourceType: int32(resource.ResourceType),
-		},
-	)
+	// resp, err := h.services.ClientService().V2GetClientPlatformList(
+	// 	c.Request.Context(),
+	// 	&auth_service.GetClientPlatformListRequest{
+	// 		Limit:        int32(limit),
+	// 		Offset:       int32(offset),
+	// 		Search:       c.Query("search"),
+	// 		ProjectId:    resource.ResourceEnvironmentId,
+	// 		ResourceType: int32(resource.ResourceType),
+	// 	},
+	// )
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	h.handleResponse(c, http.OK, resp)
+	// h.handleResponse(c, http.OK, resp)
 }
 
 // V2GetClientPlatformByID godoc

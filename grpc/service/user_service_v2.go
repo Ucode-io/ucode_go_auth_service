@@ -756,6 +756,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
+		fmt.Println("aaaa:", userIds)
 		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
