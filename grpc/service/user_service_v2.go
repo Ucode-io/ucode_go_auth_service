@@ -885,6 +885,10 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+		name, ok := userItem["name"].(string)
+		if ok {
+			user.Name = name
+		}
 
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
