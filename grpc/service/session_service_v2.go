@@ -585,7 +585,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 
 	if len(companies.Companies) < 1 {
 		companiesById := make([]*company_service.Company, 0)
-		user, err := s.services.UserService().GetUserByID(ctx, &auth_service.UserPrimaryKey{
+		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
 			Id: resp.GetUserId(),
 		})
 		if err != nil {
@@ -933,10 +933,16 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!V2RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if err != nil {
-		s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
+	// 	ClientTypeId: session.ClientTypeId,
+	// 	UserId:       session.UserId,
+	// 	ProjectId:    session.GetProjectId(),
+	// })
+	// if err != nil {
+	// 	s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+	// convertedData := helper.ConvertPbToAnotherPb(userData)
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
