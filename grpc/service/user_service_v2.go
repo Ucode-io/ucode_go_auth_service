@@ -989,3 +989,15 @@ func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUser
 	fmt.Println("\n V2GetUserByLoginTypes test >>> #2")
 	return res, nil
 }
+
+func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKey) (*pb.GetUserProjectsRes, error) {
+
+	userProjects, err := s.strg.User().GetUserProjects(ctx, req.Id)
+	if err != nil {
+		errGetProjects := errors.New("cant get user projects")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, errGetProjects.Error())
+	}
+
+	return userProjects, nil
+}
