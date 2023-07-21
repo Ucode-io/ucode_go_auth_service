@@ -19,6 +19,12 @@ service PermissionService {
     rpc UpdateRoleAppTablePermissions(UpdateRoleAppTablePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetAllMenuPermissions(GetAllMenuPermissionsRequest) returns (GetAllMenuPermissionsResponse) {}
     rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
+    rpc GetGlobalPermissionByRoleId(GetGlobalPermissionsByRoleIdRequest) returns (GlobalPermission) {}
+}
+
+message GetGlobalPermissionsByRoleIdRequest {
+    string project_id = 1;
+    string role_id = 2;
 }
 
 message GetAllPermissionRequest {
@@ -112,6 +118,13 @@ message RoleWithAppTablePermissions {
             bool delete = 5;
             string view_id = 6;
         }
+        message CustomPermission {
+            string view_create = 1;
+            string share_modal = 2;
+            string settings = 3;
+            string automation = 4;
+            string language_btn = 5;
+        }
 
         string label = 1;
         string slug = 2;
@@ -129,6 +142,7 @@ message RoleWithAppTablePermissions {
         AutomaticFilterWithMethod automatic_filters = 14;
         repeated ActionPermission action_permissions = 15;
         repeated TableViewPermission table_view_permissions = 16;
+        CustomPermission custom_permission = 17;
     }
     string name = 1;
     string guid = 2;
@@ -145,7 +159,13 @@ message GlobalPermission {
     bool menu_button = 2;
     bool chat = 3;
     bool settings_button = 4;
-    bool view_create = 5;
+    bool project_settings_button = 5;
+    bool profile_settings_button = 6;
+    bool menu_setting_button = 7;
+    bool redirects_button = 8;
+    bool api_keys_button = 9;
+    bool environments_button = 10;
+    bool projects_button = 11;
 }
 
 message GetListWithRoleAppTablePermissionsResponse {

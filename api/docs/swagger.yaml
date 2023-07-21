@@ -2560,15 +2560,27 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission:
     properties:
+      api_keys_button:
+        type: boolean
       chat:
+        type: boolean
+      environments_button:
         type: boolean
       id:
         type: string
       menu_button:
         type: boolean
-      settings_button:
+      menu_setting_button:
         type: boolean
-      view_create:
+      profile_settings_button:
+        type: boolean
+      project_settings_button:
+        type: boolean
+      projects_button:
+        type: boolean
+      redirects_button:
+        type: boolean
+      settings_button:
         type: boolean
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission:
@@ -2656,6 +2668,8 @@ definitions:
         type: array
       automatic_filters:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod'
+      custom_permission:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission'
       description:
         type: string
       digit_number:
@@ -2733,6 +2747,19 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
         type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission:
+    properties:
+      automation:
+        type: string
+      language_btn:
+        type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
+      view_create:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission:
     properties:
@@ -2983,7 +3010,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          type: integer
+          $ref: '#/definitions/x509.ExtKeyUsage'
         type: array
       extensions:
         description: |-
@@ -3018,7 +3045,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        type: integer
+        $ref: '#/definitions/x509.KeyUsage'
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -3076,7 +3103,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.PublicKeyAlgorithm'
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -3110,7 +3137,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.SignatureAlgorithm'
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -3146,6 +3173,123 @@ definitions:
       version:
         type: integer
     type: object
+  x509.ExtKeyUsage:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    type: integer
+    x-enum-varnames:
+    - ExtKeyUsageAny
+    - ExtKeyUsageServerAuth
+    - ExtKeyUsageClientAuth
+    - ExtKeyUsageCodeSigning
+    - ExtKeyUsageEmailProtection
+    - ExtKeyUsageIPSECEndSystem
+    - ExtKeyUsageIPSECTunnel
+    - ExtKeyUsageIPSECUser
+    - ExtKeyUsageTimeStamping
+    - ExtKeyUsageOCSPSigning
+    - ExtKeyUsageMicrosoftServerGatedCrypto
+    - ExtKeyUsageNetscapeServerGatedCrypto
+    - ExtKeyUsageMicrosoftCommercialCodeSigning
+    - ExtKeyUsageMicrosoftKernelCodeSigning
+  x509.KeyUsage:
+    enum:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 16
+    - 32
+    - 64
+    - 128
+    - 256
+    type: integer
+    x-enum-varnames:
+    - KeyUsageDigitalSignature
+    - KeyUsageContentCommitment
+    - KeyUsageKeyEncipherment
+    - KeyUsageDataEncipherment
+    - KeyUsageKeyAgreement
+    - KeyUsageCertSign
+    - KeyUsageCRLSign
+    - KeyUsageEncipherOnly
+    - KeyUsageDecipherOnly
+  x509.PublicKeyAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      DSA: Unsupported.
+    x-enum-varnames:
+    - UnknownPublicKeyAlgorithm
+    - RSA
+    - DSA
+    - ECDSA
+    - Ed25519
+  x509.SignatureAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    type: integer
+    x-enum-comments:
+      DSAWithSHA1: Unsupported.
+      DSAWithSHA256: Unsupported.
+      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+      MD2WithRSA: Unsupported.
+      MD5WithRSA: Only supported for signing, not verification.
+      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+    x-enum-varnames:
+    - UnknownSignatureAlgorithm
+    - MD2WithRSA
+    - MD5WithRSA
+    - SHA1WithRSA
+    - SHA256WithRSA
+    - SHA384WithRSA
+    - SHA512WithRSA
+    - DSAWithSHA1
+    - DSAWithSHA256
+    - ECDSAWithSHA1
+    - ECDSAWithSHA256
+    - ECDSAWithSHA384
+    - ECDSAWithSHA512
+    - SHA256WithRSAPSS
+    - SHA384WithRSAPSS
+    - SHA512WithRSAPSS
+    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -10206,6 +10350,64 @@ paths:
       summary: Update Role
       tags:
       - V2_Role
+  /v2/role-golabal-permission/{project-id}/{role-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Global Role By ID
+      operationId: get_global_permission_by_role_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: role-id
+        in: path
+        name: role-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ClientTypeBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Global Role By ID
+      tags:
+      - V2_Permission
   /v2/role-permission:
     delete:
       consumes:
