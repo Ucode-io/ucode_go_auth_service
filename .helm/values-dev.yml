@@ -115,10 +115,10 @@ ingress:
         - host: "dev-auth-api.ucode.run"
           path: /
           servicePort: 8080
-      tls:
-        - secretName: ucode-star
-          hosts:
-            - "dev-auth-api.ucode.run"
+          #tls:
+          #- secretName: ucode-star
+          #hosts:
+          # - "dev-auth-api.ucode.run"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -135,10 +135,10 @@ ingress:
         - host: "dev-auth-api.ucode.run"
           path: /swagger
           servicePort: 8080
-      tls:
-        - secretName: ucode-star
-          hosts:
-            - "dev-auth-api.ucode.run"
+          # tls:
+          #- secretName: ucode-star
+          #hosts:
+          # - "dev-auth-api.ucode.run"
 
 # resources:
 #    limits:
