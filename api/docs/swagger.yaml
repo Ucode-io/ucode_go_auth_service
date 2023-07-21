@@ -8882,7 +8882,7 @@ paths:
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder
         login strategy must be one of the following values
-        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
+        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH", "PHONE_PWD", "EMAIL_PWD"]
       operationId: V2login_withoption
       parameters:
       - description: Environment-Id
@@ -11103,6 +11103,7 @@ paths:
       - description: client-type-id
         in: query
         name: client-type-id
+        required: true
         type: string
       produces:
       - application/json

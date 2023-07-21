@@ -627,7 +627,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
@@ -640,7 +640,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: req.ProjectId,
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -654,7 +654,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
@@ -667,7 +667,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: req.ProjectId,
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!GetUserByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
@@ -720,7 +720,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	// return nil, status.Error(codes.Internal, err.Error())
 	// }
 
-	// user.ProjectId = projectId
+	user.ProjectId = req.GetProjectId()
 
 	return user, nil
 }
@@ -950,11 +950,13 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
+
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
 		s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	structData.Fields["from_auth_service"] = structpb.NewBoolValue(true)
 	var tableSlug = "user"
 	switch req.GetResourceType() {
 	case 1:
@@ -1042,6 +1044,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	s.log.Info("---V2DeleteUser--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
+	responseFromDeleteUser := &pbObject.CommonMessage{}
 
 	_, err := s.strg.User().Delete(ctx, req)
 
@@ -1059,7 +1062,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
@@ -1069,14 +1072,15 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		if ok {
 			tableSlug = clientTypeTableSlug.(string)
 		}
-		_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+		responseFromDeleteUser, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.Id),
+					"id":                structpb.NewStringValue(req.Id),
+					"from_auth_service": structpb.NewBoolValue(true),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser.ObjectBuilderService.Update--->", logger.Error(err))
@@ -1090,7 +1094,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
@@ -1100,19 +1104,27 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		if ok {
 			tableSlug = clientTypeTableSlug.(string)
 		}
-		_, err = s.services.PostgresObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+		responseFromDeleteUser, err = s.services.PostgresObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.Id),
+					"id":                structpb.NewStringValue(req.Id),
+					"from_auth_service": structpb.NewBoolValue(true),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+			UserId:       req.GetId(),
+			ProjectId:    req.GetProjectId(),
+			CompanyId:    req.GetCompanyId(),
+			ClientTypeId: req.GetClientTypeId(),
+			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+		})
 	}
 
 	return res, nil

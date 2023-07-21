@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
@@ -229,6 +230,16 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "user-id is an invalid uuid")
 		return
 	}
+	clientTypeID := c.Query("client-type-id")
+	if clientTypeID == "" {
+		h.handleResponse(c, http.InvalidArgument, "client type id is required")
+		return
+	}
+
+	if !util.IsValidUUID(clientTypeID) {
+		h.handleResponse(c, http.InvalidArgument, "client type id is an invalid uuid")
+		return
+	}
 
 	projectID := c.Query("project-id")
 
@@ -262,10 +273,11 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id:           userID,
-			ProjectId:    resource.GetResourceEnvironmentId(),
-			ResourceType: int32(resource.GetResourceType()),
-			ClientTypeId: c.Query("client-type-id"),
+			Id:                    userID,
+			ResourceEnvironmentId: resource.ResourceEnvironmentId,
+			ResourceType:          int32(resource.GetResourceType()),
+			ClientTypeId:          clientTypeID,
+			ProjectId:             resource.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -373,7 +385,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Produce json
 // @Param user-id path string true "user-id"
 // @Param project-id query string true "project-id"
-// @Param client-type-id query string false "client-type-id"
+// @Param client-type-id query string true "client-type-id"
 // @Success 204
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
@@ -386,6 +398,16 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 
 	if !util.IsValidUUID(userID) {
 		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+		return
+	}
+	clientTypeID := c.Query("client-type-id")
+	if clientTypeID == "" {
+		h.handleResponse(c, http.InvalidArgument, "client type id is required")
+		return
+	}
+
+	if !util.IsValidUUID(clientTypeID) {
+		h.handleResponse(c, http.InvalidArgument, "client type id is an invalid uuid")
 		return
 	}
 
@@ -407,6 +429,9 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &pb.GetProjectByIdRequest{
+		ProjectId: projectID,
+	})
 
 	if util.IsValidUUID(resourceId.(string)) {
 		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
@@ -437,10 +462,12 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	resp, err := h.services.UserService().V2DeleteUser(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id:           userID,
-			ProjectId:    projectID,
-			ResourceType: resourceEnvironment.GetResourceType(),
-			ClientTypeId: c.Query("client-type-id"),
+			Id:                    userID,
+			ProjectId:             projectID,
+			ResourceType:          resourceEnvironment.ResourceType,
+			ResourceEnvironmentId: resourceEnvironment.Id,
+			ClientTypeId:          clientTypeID,
+			CompanyId:             project.CompanyId,
 		},
 	)
 
@@ -482,6 +509,10 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 
 	if !util.IsValidUUID(req.GetProjectId()) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+		return
+	}
+	if req.ClientTypeId == "" {
+		h.handleResponse(c, http.InvalidArgument, "client_type_id is required")
 		return
 	}
 
@@ -535,8 +566,12 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	user, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
-			Id:        req.UserId,
-			ProjectId: req.ProjectId,
+			Id:                    req.UserId,
+			ResourceEnvironmentId: resourceEnvironment.Id,
+			ProjectId:             resourceEnvironment.GetProjectId(),
+			ClientTypeId:          req.ClientTypeId,
+			ResourceType:          resourceEnvironment.ResourceType,
+			// CompanyId:             req.CompanyId,
 		},
 	)
 	if err != nil {
@@ -556,25 +591,71 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	userDataToMap["role_id"] = req.RoleId
 	userDataToMap["client_type_id"] = user.ClientTypeId
 	userDataToMap["client_platform_id"] = user.ClientPlatformId
+	userDataToMap["from_auth_service"] = true
 
 	structData, err := helper.ConvertMapToStruct(userDataToMap)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-
-	_, err = h.services.ObjectBuilderService().Create(
-		context.Background(),
-		&obs.CommonMessage{
-			TableSlug: "user",
-			Data:      structData,
-			ProjectId: resourceEnvironment.GetId(),
-		},
-	)
-
-	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
-		return
+	var tableSlug = "user"
+	switch resourceEnvironment.ResourceType {
+	case 1:
+		clientType, err := h.services.ObjectBuilderService().GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: "client_type",
+				Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"id": structpb.NewStringValue(req.ClientTypeId),
+					},
+				},
+				ProjectId: resourceEnvironment.GetId(),
+			},
+		)
+		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
+			tableSlug = clientTypeTableSlug
+		}
+		_, err = h.services.ObjectBuilderService().Create(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: tableSlug,
+				Data:      structData,
+				ProjectId: resourceEnvironment.GetId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+	case 3:
+		clientType, err := h.services.PostgresObjectBuilderService().GetSingle(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: "client_type",
+				Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"id": structpb.NewStringValue(req.ClientTypeId),
+					},
+				},
+				ProjectId: resourceEnvironment.GetId(),
+			},
+		)
+		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
+			tableSlug = clientTypeTableSlug
+		}
+		_, err = h.services.PostgresObjectBuilderService().Create(
+			context.Background(),
+			&obs.CommonMessage{
+				TableSlug: tableSlug,
+				Data:      structData,
+				ProjectId: resourceEnvironment.GetId(),
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, http.Created, res)
