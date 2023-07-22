@@ -108,7 +108,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.POST("/has-access-super-admin", h.HasAccessSuperAdmin)
 
 	v2 := r.Group("/v2")
-	v2.Use(h.AuthMiddleware())
+	// v2.Use(h.AuthMiddleware())
 	{
 		v2.POST("/client-platform", h.V2CreateClientPlatform)
 		v2.GET("/client-platform", h.V2GetClientPlatformList) //project_id
