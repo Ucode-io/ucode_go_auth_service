@@ -2013,15 +2013,27 @@ definitions:
     type: object
   object_builder_service.GlobalPermission:
     properties:
+      api_keys_button:
+        type: boolean
       chat:
+        type: boolean
+      environments_button:
         type: boolean
       id:
         type: string
       menu_button:
         type: boolean
-      settings_button:
+      menu_setting_button:
         type: boolean
-      view_create:
+      profile_settings_button:
+        type: boolean
+      project_settings_button:
+        type: boolean
+      projects_button:
+        type: boolean
+      redirects_button:
+        type: boolean
+      settings_button:
         type: boolean
     type: object
   object_builder_service.MenuPermission:
@@ -2109,6 +2121,8 @@ definitions:
         type: array
       automatic_filters:
         $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod'
+      custom_permission:
+        $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission'
       description:
         type: string
       digit_number:
@@ -2186,6 +2200,19 @@ definitions:
         items:
           $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
         type: array
+    type: object
+  object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission:
+    properties:
+      automation:
+        type: string
+      language_btn:
+        type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
+      view_create:
+        type: string
     type: object
   object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission:
     properties:
@@ -8092,7 +8119,7 @@ paths:
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder
         login strategy must be one of the following values
-        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
+        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH", "PHONE_PWD", "EMAIL_PWD"]
       operationId: V2login_withoption
       parameters:
       - description: Environment-Id
@@ -9513,6 +9540,64 @@ paths:
       summary: Update Role
       tags:
       - V2_Role
+  /v2/role-golabal-permission/{project-id}/{role-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Global Role By ID
+      operationId: get_global_permission_by_role_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: role-id
+        in: path
+        name: role-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ClientTypeBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/object_builder_service.GlobalPermission'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Global Role By ID
+      tags:
+      - V2_Permission
   /v2/role-permission:
     delete:
       consumes:
@@ -10480,6 +10565,11 @@ paths:
         name: project-id
         required: true
         type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -10530,6 +10620,10 @@ paths:
         in: query
         name: project-id
         required: true
+        type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
         type: string
       produces:
       - application/json

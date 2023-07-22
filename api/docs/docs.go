@@ -10068,7 +10068,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH]",
+                "description": "V2LoginWithOption\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH\", \"PHONE_PWD\", \"EMAIL_PWD\"]",
                 "consumes": [
                     "application/json"
                 ],
@@ -12501,6 +12501,106 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/role-golabal-permission/{project-id}/{role-id}": {
+            "get": {
+                "description": "Get Global Role By ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Permission"
+                ],
+                "summary": "Get Global Role By ID",
+                "operationId": "get_global_permission_by_role_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "role-id",
+                        "name": "role-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ClientTypeBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/object_builder_service.GlobalPermission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/role-permission": {
             "post": {
                 "description": "Create RolePermission",
@@ -14227,6 +14327,12 @@ const docTemplate = `{
                         "name": "project-id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "client-type-id",
+                        "name": "client-type-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -14324,6 +14430,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "client-type-id",
+                        "name": "client-type-id",
                         "in": "query",
                         "required": true
                     }
@@ -17852,7 +17965,13 @@ const docTemplate = `{
         "object_builder_service.GlobalPermission": {
             "type": "object",
             "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
                 "chat": {
+                    "type": "boolean"
+                },
+                "environments_button": {
                     "type": "boolean"
                 },
                 "id": {
@@ -17861,10 +17980,22 @@ const docTemplate = `{
                 "menu_button": {
                     "type": "boolean"
                 },
-                "settings_button": {
+                "menu_setting_button": {
                     "type": "boolean"
                 },
-                "view_create": {
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
                     "type": "boolean"
                 }
             }
@@ -17999,6 +18130,9 @@ const docTemplate = `{
                 "automatic_filters": {
                     "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod"
                 },
+                "custom_permission": {
+                    "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -18115,6 +18249,26 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
                     }
+                }
+            }
+        },
+        "object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission": {
+            "type": "object",
+            "properties": {
+                "automation": {
+                    "type": "string"
+                },
+                "language_btn": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
+                "view_create": {
+                    "type": "string"
                 }
             }
         },

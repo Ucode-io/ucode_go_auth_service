@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func (s *clientService) V2CreateClientPlatform(ctx context.Context, req *pb.CreateClientPlatformRequest) (*pb.CommonMessage, error) {
@@ -144,46 +145,46 @@ func (s *clientService) V2GetClientPlatformByIDDetailed(ctx context.Context, req
 func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.GetClientPlatformListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
 
-	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		// "offset": req.Offset,
-		// "limit":  req.Limit,
-		// "search": req.Search,
-	})
-	if err != nil {
-		s.log.Error("!!!ClientPlatform--->", logger.Error(err))
-	}
-	var result *pbObject.CommonMessage
-	switch req.ResourceType {
-	case 1:
-		result, err = s.services.ObjectBuilderService().GetList(ctx,
-			&pbObject.CommonMessage{
-				TableSlug: "client_platform",
-				Data:      structData,
-				ProjectId: req.ProjectId,
-			})
+	// structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+	// 	// "offset": req.Offset,
+	// 	// "limit":  req.Limit,
+	// 	// "search": req.Search,
+	// })
+	// if err != nil {
+	// 	s.log.Error("!!!ClientPlatform--->", logger.Error(err))
+	// }
+	// var result *pbObject.CommonMessage
+	// switch req.ResourceType {
+	// case 1:
+	// 	result, err = s.services.ObjectBuilderService().GetList(ctx,
+	// 		&pbObject.CommonMessage{
+	// 			TableSlug: "client_platform",
+	// 			Data:      structData,
+	// 			ProjectId: req.ProjectId,
+	// 		})
 
-		if err != nil {
-			s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-	case 3:
-		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
-			&pbObject.CommonMessage{
-				TableSlug: "client_platform",
-				Data:      structData,
-				ProjectId: req.ProjectId,
-			})
+	// 	if err != nil {
+	// 		s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+	// case 3:
+	// 	result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
+	// 		&pbObject.CommonMessage{
+	// 			TableSlug: "client_platform",
+	// 			Data:      structData,
+	// 			ProjectId: req.ProjectId,
+	// 		})
 
-		if err != nil {
-			s.log.Error("!!!GetClientPlatformList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	// 	if err != nil {
+	// 		s.log.Error("!!!GetClientPlatformList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
 
-	}
+	// }
 
 	return &pb.CommonMessage{
-		TableSlug: result.TableSlug,
-		Data:      result.Data,
+		TableSlug: "client_platform",
+		Data:      &structpb.Struct{},
 	}, nil
 }
 
