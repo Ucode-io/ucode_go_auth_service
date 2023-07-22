@@ -415,14 +415,16 @@ definitions:
     properties:
       login:
         type: string
-      project_id:
-        type: string
     type: object
   auth_service.ForgotPasswordResponse:
     properties:
+      email:
+        type: string
       login_found:
         type: boolean
       sms_id:
+        type: string
+      user_id:
         type: string
     type: object
   auth_service.GenerateApiTokenReq:
@@ -1513,8 +1515,6 @@ definitions:
     type: object
   auth_service.V2ResetPasswordRequest:
     properties:
-      email:
-        type: string
       password:
         type: string
       user_id:

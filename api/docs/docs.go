@@ -15396,19 +15396,22 @@ const docTemplate = `{
             "properties": {
                 "login": {
                     "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
                 }
             }
         },
         "auth_service.ForgotPasswordResponse": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "login_found": {
                     "type": "boolean"
                 },
                 "sms_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -17087,9 +17090,6 @@ const docTemplate = `{
         "auth_service.V2ResetPasswordRequest": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
-                },
                 "password": {
                     "type": "string"
                 },

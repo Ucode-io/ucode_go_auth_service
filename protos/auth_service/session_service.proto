@@ -31,19 +31,19 @@ service SessionService {
 }
 
 message V2ResetPasswordRequest {
-    string email = 1;
-    string password = 2;
-    string user_id = 3;
+    string password = 1;
+    string user_id = 2;
 }
 
 message ForgotPasswordRequest {
     string login = 1;
-    string project_id = 2;
 }
 
 message ForgotPasswordResponse {
     bool login_found = 1;
     string sms_id = 2;
+    string user_id = 3;
+    string email = 4;
 }
 
 message ResourceEnvironmentV2MultiCompany {
