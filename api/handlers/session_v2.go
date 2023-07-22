@@ -662,6 +662,8 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 	h.handleResponse(c, http.OK, auth_service.ForgotPasswordResponse{
 		LoginFound: true,
 		SmsId:      resp.GetId(),
+		UserId:     user.GetId(),
+		Email:      user.GetEmail(),
 	})
 }
 
@@ -692,7 +694,6 @@ func (h *Handler) V2ResetPassword(c *gin.Context) {
 	}
 
 	res, err := h.services.SessionService().V2ResetPassword(ctx, &pb.V2ResetPasswordRequest{
-		Email:    request.GetEmail(),
 		Password: request.GetPassword(),
 		UserId:   request.GetUserId(),
 	})
