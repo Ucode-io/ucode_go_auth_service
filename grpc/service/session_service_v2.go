@@ -890,14 +890,15 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	_, err = s.strg.Session().UpdateByRoleId(ctx, &pb.UpdateSessionByRoleIdRequest{
-		RoleId:    tokenInfo.RoleID,
-		IsChanged: false,
-	})
-	if err != nil {
-		s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	fmt.Println("\n\n tokenInfo >>>>>>>>>>>> #1", tokenInfo.RoleID)
+	// _, err = s.strg.Session().UpdateByRoleId(ctx, &pb.UpdateSessionByRoleIdRequest{
+	// 	RoleId:    tokenInfo.RoleID,
+	// 	IsChanged: false,
+	// })
+	// if err != nil {
+	// 	s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -916,7 +917,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	if req.EnvId != "" {
 		session.EnvId = req.EnvId
 	}
-
+	fmt.Println("\n\n session >>>>>>>>>>>> #2", session)
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
