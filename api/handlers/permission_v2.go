@@ -1240,6 +1240,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 		)
 		fmt.Println("test permission before error update builder")
 		if err != nil {
+			fmt.Println("test permission before error update builder error >>>>>>> ", err)
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
