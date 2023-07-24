@@ -578,7 +578,7 @@ func (h *Handler) VerifyOnlyEmailOtp(c *gin.Context) {
 	switch body.RegisterType {
 	case cfg.Default:
 		{
-			if c.Param("otp") != "121212" {
+			if body.Otp != "121212" {
 				resp, err := h.services.EmailService().GetEmailByID(
 					c.Request.Context(),
 					&pb.EmailOtpPrimaryKey{
