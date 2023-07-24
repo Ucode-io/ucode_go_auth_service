@@ -1283,6 +1283,31 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User'
         type: array
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.GlobalPermission:
+    properties:
+      api_keys_button:
+        type: boolean
+      chat:
+        type: boolean
+      environments_button:
+        type: boolean
+      id:
+        type: string
+      menu_button:
+        type: boolean
+      menu_setting_button:
+        type: boolean
+      profile_settings_button:
+        type: boolean
+      project_settings_button:
+        type: boolean
+      projects_button:
+        type: boolean
+      redirects_button:
+        type: boolean
+      settings_button:
+        type: boolean
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest:
     properties:
       access_token:
@@ -1545,19 +1570,29 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission:
     properties:
+      automation:
+        type: string
       client_type_id:
         type: string
       delete:
         type: string
       id:
         type: string
+      language_btn:
+        type: string
       read:
         type: string
       role_id:
         type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
       table_slug:
         type: string
       update:
+        type: string
+      view_create:
         type: string
       write:
         type: string
@@ -2109,6 +2144,8 @@ definitions:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientType'
       environment_id:
         type: string
+      global_permission:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GlobalPermission'
       login_table_slug:
         type: string
       permissions:
@@ -2558,6 +2595,31 @@ definitions:
       project_id:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission:
+    properties:
+      api_keys_button:
+        type: boolean
+      chat:
+        type: boolean
+      environments_button:
+        type: boolean
+      id:
+        type: string
+      menu_button:
+        type: boolean
+      menu_setting_button:
+        type: boolean
+      profile_settings_button:
+        type: boolean
+      project_settings_button:
+        type: boolean
+      projects_button:
+        type: boolean
+      redirects_button:
+        type: boolean
+      settings_button:
+        type: boolean
+    type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission:
     properties:
       id:
@@ -2584,19 +2646,29 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission:
     properties:
+      automation:
+        type: string
       client_type_id:
         type: string
       delete:
         type: string
       guid:
         type: string
+      language_btn:
+        type: string
       read:
         type: string
       role_id:
         type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
       table_slug:
         type: string
       update:
+        type: string
+      view_create:
         type: string
       write:
         type: string
@@ -2620,6 +2692,8 @@ definitions:
         type: string
       client_type_id:
         type: string
+      global_permission:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission'
       grant_access:
         type: boolean
       guid:
@@ -2641,6 +2715,8 @@ definitions:
         type: array
       automatic_filters:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod'
+      custom_permission:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission'
       description:
         type: string
       digit_number:
@@ -2665,6 +2741,10 @@ definitions:
         type: string
       subtitle_field_slug:
         type: string
+      table_view_permissions:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission'
+        type: array
       view_permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission'
@@ -2715,6 +2795,19 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
         type: array
     type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission:
+    properties:
+      automation:
+        type: string
+      language_btn:
+        type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
+      view_create:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission:
     properties:
       edit_permission:
@@ -2745,6 +2838,21 @@ definitions:
       update:
         type: string
       write:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission:
+    properties:
+      delete:
+        type: boolean
+      edit:
+        type: boolean
+      guid:
+        type: string
+      name:
+        type: string
+      view:
+        type: boolean
+      view_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission:
@@ -2811,6 +2919,8 @@ definitions:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientPlatform'
       client_type:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientType'
+      global_permission:
+        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission'
       login_table_slug:
         type: string
       permissions:
@@ -10289,6 +10399,64 @@ paths:
       summary: Update Role
       tags:
       - V2_Role
+  /v2/role-golabal-permission/{project-id}/{role-id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Global Role By ID
+      operationId: get_global_permission_by_role_id
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: role-id
+        in: path
+        name: role-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ClientTypeBody
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Global Role By ID
+      tags:
+      - V2_Permission
   /v2/role-permission:
     delete:
       consumes:

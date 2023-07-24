@@ -12335,6 +12335,106 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/role-golabal-permission/{project-id}/{role-id}": {
+            "get": {
+                "description": "Get Global Role By ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Permission"
+                ],
+                "summary": "Get Global Role By ID",
+                "operationId": "get_global_permission_by_role_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "role-id",
+                        "name": "role-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ClientTypeBody",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/role-permission": {
             "post": {
                 "description": "Create RolePermission",
@@ -16171,6 +16271,44 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest": {
             "type": "object",
             "properties": {
@@ -16570,6 +16708,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -16579,16 +16720,28 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -17434,6 +17587,9 @@ const docTemplate = `{
                 "environment_id": {
                     "type": "string"
                 },
+                "global_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GlobalPermission"
+                },
                 "login_table_slug": {
                     "type": "string"
                 },
@@ -18118,6 +18274,44 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission": {
             "type": "object",
             "properties": {
@@ -18158,6 +18352,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -18167,16 +18364,28 @@ const docTemplate = `{
                 "guid": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -18213,6 +18422,9 @@ const docTemplate = `{
                 "client_type_id": {
                     "type": "string"
                 },
+                "global_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission"
+                },
                 "grant_access": {
                     "type": "boolean"
                 },
@@ -18244,6 +18456,9 @@ const docTemplate = `{
                 },
                 "automatic_filters": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod"
+                },
+                "custom_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission"
                 },
                 "description": {
                     "type": "string"
@@ -18280,6 +18495,12 @@ const docTemplate = `{
                 },
                 "subtitle_field_slug": {
                     "type": "string"
+                },
+                "table_view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission"
+                    }
                 },
                 "view_permissions": {
                     "type": "array",
@@ -18358,6 +18579,26 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission": {
+            "type": "object",
+            "properties": {
+                "automation": {
+                    "type": "string"
+                },
+                "language_btn": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
+                "view_create": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission": {
             "type": "object",
             "properties": {
@@ -18403,6 +18644,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "write": {
+                    "type": "string"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "boolean"
+                },
+                "edit": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "view": {
+                    "type": "boolean"
+                },
+                "view_id": {
                     "type": "string"
                 }
             }
@@ -18504,6 +18768,9 @@ const docTemplate = `{
                 },
                 "client_type": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientType"
+                },
+                "global_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission"
                 },
                 "login_table_slug": {
                     "type": "string"

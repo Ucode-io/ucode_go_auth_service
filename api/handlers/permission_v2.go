@@ -15,6 +15,90 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetGlobalPermissionByRoleId godoc
+// @ID get_global_permission_by_role_id
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Router /v2/role-golabal-permission/{project-id}/{role-id} [GET]
+// @Summary Get Global Role By ID
+// @Description Get Global Role By ID
+// @Tags V2_Permission
+// @Accept json
+// @Produce json
+// @Param role-id path string true "role-id"
+// @Param project-id query string false "project-id"
+// @Success 200 {object} http.Response{data=object_builder_service.GlobalPermission} "ClientTypeBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetGlobalPermission(c *gin.Context) {
+	var (
+		err  error
+		resp *object_builder_service.GlobalPermission
+	)
+	roleId := c.Param("role-id")
+	if !util.IsValidUUID(roleId) {
+		h.handleResponse(c, http.InvalidArgument, "role id is an invalid uuid")
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	fmt.Println(">>>>>>>>>>>>>>>   test #1")
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	fmt.Println(">>>>>>>>>>>>>>>   test #2")
+	switch resource.ResourceType {
+	case pbCompany.ResourceType_MONGODB:
+		resp, err = h.services.BuilderPermissionService().GetGlobalPermissionByRoleId(
+			c.Request.Context(),
+			&object_builder_service.GetGlobalPermissionsByRoleIdRequest{
+				RoleId:    roleId,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case pbCompany.ResourceType_POSTGRESQL:
+		// resp, err = h.services.PostgresBuilderPermissionService().GetGlobalPermissionByRoleId(
+		// 	c.Request.Context(),
+		// 	&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
+		// 		RoleId:    c.Param("role-id"),
+		// 		ProjectId: resource.ResourceEnvironmentId,
+		// 	},
+		// )
+
+		// if err != nil {
+		// 	h.handleResponse(c, http.GRPCError, err.Error())
+		// 	return
+		// }
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
 // V2AddRole godoc
 // @ID create_role_v2
 // @Param Resource-Id header string false "Resource-Id"
