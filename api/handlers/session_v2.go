@@ -6,12 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
+	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // V2Login godoc
@@ -565,4 +568,136 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, resp)
+}
+
+// V2ForgotPassword godoc
+// @ID forgot_password
+// @Router /v2/forgot-password [POST]
+// @Summary ForgotPassword
+// @Description Forgot Password
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param login body auth_service.ForgotPasswordRequest true "ForgotPasswordRequest"
+// @Success 201 {object} http.Response{data=auth_service.ForgotPasswordResponse} "Response"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) ForgotPassword(c *gin.Context) {
+	var (
+		request auth_service.ForgotPasswordRequest
+	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
+	defer cancel()
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.services.UserService().GetUserByUsername(ctx, &auth_service.GetUserByUsernameRequest{
+		Username: request.Login,
+	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	if user.GetEmail() == "" {
+		h.handleResponse(c, http.OK, auth_service.ForgotPasswordResponse{
+			LoginFound: false,
+		})
+	}
+	code, err := util.GenerateCode(6)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+	expire := time.Now().Add(time.Hour * 5).Add(time.Minute * 5)
+
+	id, err := uuid.NewRandom()
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	resp, err := h.services.EmailService().Create(
+		c.Request.Context(),
+		&auth_service.Email{
+			Id:        id.String(),
+			Email:     user.GetEmail(),
+			Otp:       code,
+			ExpiresAt: expire.String()[:19],
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	emailSettings, err := h.services.EmailService().GetListEmailSettings(
+		c.Request.Context(),
+		&auth_service.GetListEmailSettingsRequest{
+			ProjectId: "62d6f9d4-dd9c-425b-84f6-cb90860967a8",
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	if len(emailSettings.Items) == 0 {
+		h.handleResponse(c, http.GRPCError, "No email settings for send otp message in project")
+		return
+	}
+
+	err = helper.SendCodeToEmail("Код для подтверждения", user.GetEmail(), code, emailSettings.GetItems()[0].GetEmail(), emailSettings.GetItems()[0].GetPassword())
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, auth_service.ForgotPasswordResponse{
+		LoginFound: true,
+		SmsId:      resp.GetId(),
+		UserId:     user.GetId(),
+		Email:      user.GetEmail(),
+	})
+}
+
+// V2ResetPassword godoc
+// @ID v2_reset_password
+// @Router /v2/reset-password [PUT]
+// @Summary ResetPassword
+// @Description Reset Password
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param body body auth_service.V2ResetPasswordRequest true "ResetPasswordRequest"
+// @Success 201 {object} http.Response{data=string} "Response"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2ResetPassword(c *gin.Context) {
+	var (
+		request auth_service.V2ResetPasswordRequest
+	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
+	defer cancel()
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	res, err := h.services.SessionService().V2ResetPassword(ctx, &auth_service.V2ResetPasswordRequest{
+		Password: request.GetPassword(),
+		UserId:   request.GetUserId(),
+	})
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	h.handleResponse(c, http.OK, res)
 }
