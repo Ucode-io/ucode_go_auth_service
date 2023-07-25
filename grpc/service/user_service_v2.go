@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -534,9 +533,12 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -562,9 +564,12 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -630,12 +635,15 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+			s.log.Error("!!!GetUserByID--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -657,12 +665,15 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+			s.log.Error("!!!GetUserByID--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -675,7 +686,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		}
 
 	}
-	log.Println("Data:   ", result)
 	userData, ok := result.Data.AsMap()["response"].(map[string]interface{})
 
 	if !ok {
@@ -790,9 +800,12 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -817,9 +830,12 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		usersResp, err = s.services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -973,9 +989,12 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -1000,9 +1019,12 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		_, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -1068,9 +1090,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		responseFromDeleteUser, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
@@ -1100,9 +1125,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"]
+		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			tableSlug = clientTypeTableSlug.(string)
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok {
+				tableSlug = clientTypeTableSlug
+			}
 		}
 		responseFromDeleteUser, err = s.services.PostgresObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
