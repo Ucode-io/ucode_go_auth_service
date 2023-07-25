@@ -1550,13 +1550,6 @@ definitions:
       token:
         $ref: '#/definitions/auth_service.Token'
     type: object
-  auth_service.V2ResetPasswordRequest:
-    properties:
-      password:
-        type: string
-      user_id:
-        type: string
-    type: object
   auth_service.V2UpdateClientTypeRequest:
     properties:
       client_platform_ids:
@@ -1947,6 +1940,13 @@ definitions:
         additionalProperties: true
         type: object
     type: object
+  models.ResetPassword:
+    properties:
+      password:
+        type: string
+      user_id:
+        type: string
+    type: object
   models.SendCodeResponse:
     properties:
       data:
@@ -1954,6 +1954,13 @@ definitions:
       google_acces:
         type: boolean
       sms_id:
+        type: string
+    type: object
+  models.SetEmail:
+    properties:
+      email:
+        type: string
+      user_id:
         type: string
     type: object
   models.Sms:
@@ -9332,7 +9339,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/auth_service.V2ResetPasswordRequest'
+          $ref: '#/definitions/models.ResetPassword'
       produces:
       - application/json
       responses:
@@ -10194,6 +10201,52 @@ paths:
       summary: Send Message To Email
       tags:
       - Email
+  /v2/set-email/send-code:
+    put:
+      consumes:
+      - application/json
+      description: Set Email
+      operationId: set_email
+      parameters:
+      - description: SetEmailRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/models.SetEmail'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.ForgotPasswordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: SetEmail
+      tags:
+      - V2_Session
   /v2/upsert-login-strategy:
     post:
       consumes:

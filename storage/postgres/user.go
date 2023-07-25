@@ -847,15 +847,23 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 
 func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
 	var (
-		params   = make(map[string]interface{})
+		params                      = make(map[string]interface{})
+		subQueryEmail, subQueryPass string
 	)
-	query := `UPDATE "user" SET
-		password = :password,
+	if req.GetPassword() != "" {
+		subQueryPass = "password = :password, "
+		params["password"] = req.GetPassword()
+	}
+	if req.GetEmail() != "" {
+		subQueryEmail = "email = :email, "
+		params["email"] = req.GetEmail()
+	}
+
+	query := `UPDATE "user" SET ` + subQueryPass + subQueryEmail + `
 		updated_at = now()
 	WHERE
 		id = :id`
 	params["id"] = req.GetUserId()
-	params["password"] = req.GetPassword()
 
 	fmt.Println("query: ", query)
 	fmt.Print("\n\nParams: ", params)
