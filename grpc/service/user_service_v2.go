@@ -536,7 +536,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -567,7 +567,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -641,7 +641,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -671,7 +671,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -803,7 +803,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -833,7 +833,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -992,7 +992,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -1022,7 +1022,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -1093,7 +1093,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -1128,7 +1128,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok {
+			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
