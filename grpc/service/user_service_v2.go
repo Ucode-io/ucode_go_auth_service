@@ -1001,3 +1001,13 @@ func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKe
 
 	return userProjects, nil
 }
+
+func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
+	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
+	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		return nil, err
+	}
+	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
+	return res, nil
+}
