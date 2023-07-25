@@ -635,23 +635,23 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	emailSettings, err := h.services.EmailService().GetListEmailSettings(
-		c.Request.Context(),
-		&auth_service.GetListEmailSettingsRequest{
-			ProjectId: "cc62c41e-8796-4a5c-8081-17e4c8f5c67a",
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// emailSettings, err := h.services.EmailService().GetListEmailSettings(
+	// 	c.Request.Context(),
+	// 	&auth_service.GetListEmailSettingsRequest{
+	// 		ProjectId: "cc62c41e-8796-4a5c-8081-17e4c8f5c67a",
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	if len(emailSettings.Items) == 0 {
-		h.handleResponse(c, http.GRPCError, "No email settings for send otp message in project")
-		return
-	}
+	// if len(emailSettings.Items) == 0 {
+	// 	h.handleResponse(c, http.GRPCError, "No email settings for send otp message in project")
+	// 	return
+	// }
 
-	err = helper.SendCodeToEmail("Код для подтверждения", user.GetEmail(), code, emailSettings.GetItems()[0].GetEmail(), emailSettings.GetItems()[0].GetPassword())
+	err = helper.SendCodeToEmail("Код для подтверждения", user.GetEmail(), code, "ucode.udevs.io@gmail.com", "xkiaqodjfuielsug")
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
