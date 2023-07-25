@@ -14571,6 +14571,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/verify-only-email": {
+            "post": {
+                "description": "Verify",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Email"
+                ],
+                "summary": "Verify",
+                "operationId": "verify_only_email",
+                "parameters": [
+                    {
+                        "description": "verify_body",
+                        "name": "verifyBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.VerifyEmail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/webpage-app": {
             "get": {
                 "description": "Get List webpage app",
@@ -17751,6 +17834,20 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/auth_service.Object"
                     }
+                }
+            }
+        },
+        "models.VerifyEmail": {
+            "type": "object",
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "register_type": {
+                    "type": "string"
+                },
+                "sms_id": {
+                    "type": "string"
                 }
             }
         },

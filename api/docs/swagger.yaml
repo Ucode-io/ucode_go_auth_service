@@ -1949,6 +1949,15 @@ definitions:
           $ref: '#/definitions/auth_service.Object'
         type: array
     type: object
+  models.VerifyEmail:
+    properties:
+      otp:
+        type: string
+      register_type:
+        type: string
+      sms_id:
+        type: string
+    type: object
   object_builder_service.ClientPlatform:
     properties:
       guid:
@@ -10652,6 +10661,52 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Verify
+      tags:
+      - Email
+  /v2/verify-only-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify
+      operationId: verify_only_email
+      parameters:
+      - description: verify_body
+        in: body
+        name: verifyBody
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyEmail'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "400":
           description: Bad Request
