@@ -12039,7 +12039,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_service.V2ResetPasswordRequest"
+                            "$ref": "#/definitions/models.ResetPassword"
                         }
                     }
                 ],
@@ -13469,6 +13469,89 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/set-email/send-code": {
+            "put": {
+                "description": "Set Email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "SetEmail",
+                "operationId": "set_email",
+                "parameters": [
+                    {
+                        "description": "SetEmailRequest",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SetEmail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.ForgotPasswordResponse"
                                         }
                                     }
                                 }
@@ -17339,17 +17422,6 @@ const docTemplate = `{
                 }
             }
         },
-        "auth_service.V2ResetPasswordRequest": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "auth_service.V2UpdateClientTypeRequest": {
             "type": "object",
             "properties": {
@@ -17945,6 +18017,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ResetPassword": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SendCodeResponse": {
             "type": "object",
             "properties": {
@@ -17955,6 +18038,17 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "sms_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SetEmail": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

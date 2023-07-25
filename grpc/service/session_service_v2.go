@@ -1791,19 +1791,21 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
 	s.log.Info("V2ResetPassword -> ", logger.Any("req: ", req))
 
-	if len(req.GetPassword()) < 6 {
-		err := fmt.Errorf("password must not be less than 6 characters")
-		s.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, err
-	}
+	if req.GetPassword() != "" {
+		if len(req.GetPassword()) < 6 {
+			err := fmt.Errorf("password must not be less than 6 characters")
+			s.log.Error("!!!ResetPassword--->", logger.Error(err))
+			return nil, err
+		}
 
-	hashedPassword, err := security.HashPassword(req.GetPassword())
-	if err != nil {
-		s.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+		hashedPassword, err := security.HashPassword(req.GetPassword())
+		if err != nil {
+			s.log.Error("!!!ResetPassword--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 
-	req.Password = hashedPassword
+		req.Password = hashedPassword
+	}
 	rowsAffected, err := s.strg.User().V2ResetPassword(ctx, req)
 	if err != nil {
 		s.log.Error("!!!ResetPassword--->", logger.Error(err))
