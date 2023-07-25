@@ -638,7 +638,7 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 	emailSettings, err := h.services.EmailService().GetListEmailSettings(
 		c.Request.Context(),
 		&auth_service.GetListEmailSettingsRequest{
-			ProjectId: "62d6f9d4-dd9c-425b-84f6-cb90860967a8",
+			ProjectId: "cc62c41e-8796-4a5c-8081-17e4c8f5c67a",
 		},
 	)
 	if err != nil {
