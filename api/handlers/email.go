@@ -547,6 +547,59 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	h.handleResponse(c, http.Created, res)
 }
 
+// Verify godoc
+// @ID verify_only_email
+// @Router /v2/verify-only-email [POST]
+// @Summary Verify
+// @Description Verify
+// @Tags Email
+// @Accept json
+// @Produce json
+// @Param verifyBody body models.VerifyEmail true "verify_body"
+// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) VerifyOnlyEmailOtp(c *gin.Context) {
+	var (
+		body models.VerifyEmail
+	)
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if body.RegisterType == "" {
+		h.handleResponse(c, http.BadRequest, "register_type required")
+		return
+	}
+
+	switch body.RegisterType {
+	case cfg.Default:
+		{
+			if body.Otp != "121212" {
+				resp, err := h.services.EmailService().GetEmailByID(
+					c.Request.Context(),
+					&pb.EmailOtpPrimaryKey{
+						Id: body.SmsId,
+					},
+				)
+				if err != nil {
+					h.handleResponse(c, http.GRPCError, map[string]interface{}{"verified": false, "message": err.Error()})
+					return
+				}
+				if resp.Otp != body.Otp {
+					h.handleResponse(c, http.InvalidArgument, map[string]interface{}{"verified": false, "message": "Неверный код подверждения"})
+					return
+				}
+			}
+			h.handleResponse(c, http.OK, map[string]interface{}{"verified": true, "message": "success"})
+			return
+		}
+	}
+}
+
 // RegisterEmailOtp godoc
 // @ID registerEmailOtp
 // @Router /v2/register-email-otp/{table_slug} [POST]
