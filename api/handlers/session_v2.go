@@ -623,7 +623,7 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 
 	resp, err := h.services.EmailService().Create(
 		c.Request.Context(),
-		&pb.Email{
+		&auth_service.Email{
 			Id:        id.String(),
 			Email:     user.GetEmail(),
 			Otp:       code,
@@ -637,7 +637,7 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 
 	emailSettings, err := h.services.EmailService().GetListEmailSettings(
 		c.Request.Context(),
-		&pb.GetListEmailSettingsRequest{
+		&auth_service.GetListEmailSettingsRequest{
 			ProjectId: "62d6f9d4-dd9c-425b-84f6-cb90860967a8",
 		},
 	)
@@ -691,7 +691,7 @@ func (h *Handler) V2ResetPassword(c *gin.Context) {
 		return
 	}
 
-	res, err := h.services.SessionService().V2ResetPassword(ctx, &pb.V2ResetPasswordRequest{
+	res, err := h.services.SessionService().V2ResetPassword(ctx, &auth_service.V2ResetPasswordRequest{
 		Password: request.GetPassword(),
 		UserId:   request.GetUserId(),
 	})
