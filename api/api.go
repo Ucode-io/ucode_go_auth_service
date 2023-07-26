@@ -204,6 +204,8 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.GET("/login-strategy", h.GetLoginStrategy)
 		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
 		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
+		v2.POST("/forgot-password", h.ForgotPassword)
+		v2.PUT("/reset-password", h.V2ResetPassword)
 	}
 
 	//COMPANY
@@ -226,6 +228,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
 	v2.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
+	v2.POST("/verify-only-email", h.VerifyOnlyEmailOtp)
 	v2.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	v2.POST("/email-settings", h.CreateEmailSettings)

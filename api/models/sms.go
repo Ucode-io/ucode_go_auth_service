@@ -29,6 +29,12 @@ type RegisterOtp struct {
 	Data map[string]interface{} `json:"data"`
 }
 
+type VerifyEmail struct {
+	RegisterType string `json:"register_type"`
+	SmsId        string `json:"sms_id"`
+	Otp          string `json:"otp"`
+}
+
 type Email struct {
 	Email        string `json:"email"`
 	ClientType   string `json:"client_type"`

@@ -623,14 +623,15 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	user.RoleId = roleId
 
-	// clientPlatformId, ok := userData["client_platform_id"].(string)
-	// if !ok {
-	// 	err := errors.New("client_platform_id is nil")
-	// 	s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
+	clientPlatformId, ok := userData["client_platform_id"].(string)
+	if !ok {
+		// err := errors.New("client_platform_id is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		clientPlatformId = ""
+	}
 
-	// user.ClientPlatformId = clientPlatformId
+	user.ClientPlatformId = clientPlatformId
 
 	clientTypeId, ok := userData["client_type_id"].(string)
 	if !ok {
@@ -808,10 +809,10 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 
 		active, ok := userItem["active"].(float64)
 		if !ok {
-			active = 0
 			// err := errors.New("active is nil")
 			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
 			// return nil, status.Error(codes.Internal, err.Error())
+			active = 0
 		}
 
 		user, ok := usersMap[userId]
@@ -1004,4 +1005,14 @@ func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKe
 	}
 
 	return userProjects, nil
+}
+
+func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
+	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
+	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		return nil, err
+	}
+	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
+	return res, nil
 }
