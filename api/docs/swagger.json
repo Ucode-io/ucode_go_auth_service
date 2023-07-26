@@ -17765,6 +17765,9 @@
                 "db_project_id": {
                     "type": "string"
                 },
+                "grant_access": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -18135,6 +18138,9 @@
                 },
                 "db_project_id": {
                     "type": "string"
+                },
+                "grant_access": {
+                    "type": "boolean"
                 },
                 "guid": {
                     "type": "string"
