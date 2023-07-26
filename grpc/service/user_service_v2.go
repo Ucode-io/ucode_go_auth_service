@@ -625,9 +625,10 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	clientPlatformId, ok := userData["client_platform_id"].(string)
 	if !ok {
-		err := errors.New("client_platform_id is nil")
-		s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		// err := errors.New("client_platform_id is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		clientPlatformId = ""
 	}
 
 	user.ClientPlatformId = clientPlatformId
@@ -643,18 +644,20 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	active, ok := userData["active"].(float64)
 	if !ok {
-		err := errors.New("active is nil")
-		s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		// err := errors.New("active is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		active = 0
 	}
 
 	user.Active = int32(active)
 
 	projectId, ok := userData["project_id"].(string)
 	if !ok {
-		err := errors.New("projectId is nil")
-		s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		projectId = ""
 	}
 
 	user.ProjectId = projectId
@@ -798,16 +801,18 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 
 		projectId, ok := userItem["project_id"].(string)
 		if !ok {
-			err := errors.New("projectId is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			// err := errors.New("projectId is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			projectId = ""
 		}
 
 		active, ok := userItem["active"].(float64)
 		if !ok {
-			err := errors.New("active is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			// err := errors.New("active is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			active = 0
 		}
 
 		user, ok := usersMap[userId]
