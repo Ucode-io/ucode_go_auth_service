@@ -154,7 +154,6 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 		v2.GET("/role-permission/detailed/:project-id/:role-id", h.GetListWithRoleAppTablePermissions)
 		v2.PUT("/role-permission/detailed", h.UpdateRoleAppTablePermissions)
-		v2.GET("/role-golabal-permission/:project-id/:role-id", h.GetGlobalPermission)
 
 		v2.GET("/menu-permission/detailed/:project-id/:role-id/:parent-id", h.GetListMenuPermissions)
 		v2.PUT("/menu-permission/detailed", h.UpdateMenuPermissions)
