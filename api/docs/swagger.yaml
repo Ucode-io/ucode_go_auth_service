@@ -730,6 +730,15 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
         type: array
     type: object
+  ucode_ucode_go_auth_service_api_models.VerifyEmail:
+    properties:
+      otp:
+        type: string
+      register_type:
+        type: string
+      sms_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest:
     properties:
       client_platform_id:
@@ -1140,6 +1149,22 @@ definitions:
       password:
         type: string
       project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest:
+    properties:
+      login:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse:
+    properties:
+      email:
+        type: string
+      login_found:
+        type: boolean
+      sms_id:
+        type: string
+      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq:
@@ -2245,6 +2270,13 @@ definitions:
     properties:
       token:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2ResetPasswordRequest:
+    properties:
+      password:
+        type: string
+      user_id:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateClientTypeRequest:
     properties:
@@ -8491,6 +8523,52 @@ paths:
       summary: DeleteEmailSettings
       tags:
       - Email
+  /v2/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Forgot Password
+      operationId: forgot_password
+      parameters:
+      - description: ForgotPasswordRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: ForgotPassword
+      tags:
+      - V2_Session
   /v2/login:
     post:
       consumes:
@@ -10057,6 +10135,52 @@ paths:
       summary: Delete Relation
       tags:
       - V2_Relation
+  /v2/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Reset Password
+      operationId: v2_reset_password
+      parameters:
+      - description: ResetPasswordRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: ResetPassword
+      tags:
+      - V2_Session
   /v2/resource-environment:
     get:
       consumes:
@@ -11480,6 +11604,52 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Verify
+      tags:
+      - Email
+  /v2/verify-only-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify
+      operationId: verify_only_email
+      parameters:
+      - description: verify_body
+        in: body
+        name: verifyBody
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.VerifyEmail'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
               type: object
         "400":
           description: Bad Request

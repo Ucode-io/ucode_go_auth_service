@@ -749,3 +749,30 @@ func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq
 
 	return &res, nil
 }
+
+func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
+	var (
+		params = make(map[string]interface{})
+	)
+	query := `UPDATE "user" SET
+		password = :password,
+		updated_at = now()
+	WHERE
+		id = :id`
+	params["id"] = req.GetUserId()
+	params["password"] = req.GetPassword()
+
+	fmt.Println("query: ", query)
+	fmt.Print("\n\nParams: ", params)
+
+	q, arr := helper.ReplaceQueryParams(query, params)
+	fmt.Println("q: ", q)
+	result, err := r.db.Exec(ctx, q, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected := result.RowsAffected()
+
+	return rowsAffected, err
+}

@@ -135,6 +135,7 @@ type UserRepoI interface {
 	GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error)
 	GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error)
 	GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error)
+	V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error)
 }
 
 type IntegrationRepoI interface {
