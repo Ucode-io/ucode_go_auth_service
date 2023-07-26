@@ -890,14 +890,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	_, err = s.strg.Session().UpdateByRoleId(ctx, &pb.UpdateSessionByRoleIdRequest{
-		RoleId:    tokenInfo.RoleID,
-		IsChanged: false,
-	})
-	if err != nil {
-		s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
