@@ -120,14 +120,15 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	}
 
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-		ClientPlatform: data.GetClientPlatform(),
-		ClientType:     data.GetClientType(),
-		UserFound:      data.GetUserFound(),
-		UserId:         data.GetUserId(),
-		Role:           data.GetRole(),
-		Permissions:    data.GetPermissions(),
-		LoginTableSlug: data.GetLoginTableSlug(),
-		AppPermissions: data.GetAppPermissions(),
+		ClientPlatform:   data.GetClientPlatform(),
+		ClientType:       data.GetClientType(),
+		UserFound:        data.GetUserFound(),
+		UserId:           data.GetUserId(),
+		Role:             data.GetRole(),
+		Permissions:      data.GetPermissions(),
+		LoginTableSlug:   data.GetLoginTableSlug(),
+		AppPermissions:   data.GetAppPermissions(),
+		GlobalPermission: data.GetGlobalPermission(),
 	})
 	//if bytes, err := json.MarshalIndent(res, "", "  "); err == nil {
 	//	fmt.Println("ConvertPbToAnotherPb", string(bytes))

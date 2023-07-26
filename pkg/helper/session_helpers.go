@@ -52,6 +52,11 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		permission.Update = v.GetUpdate()
 		permission.RoleId = v.GetRoleId()
 		permission.TableSlug = v.GetTableSlug()
+		permission.Automation = v.GetAutomation()
+		permission.LanguageBtn = v.GetLanguageBtn()
+		permission.Settings = v.GetSettings()
+		permission.ShareModal = v.GetShareModal()
+		permission.ViewCreate = v.GetViewCreate()
 		permissions = append(permissions, permission)
 	}
 
@@ -76,6 +81,20 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		Name:             data.GetRole().GetName(),
 		ClientPlatformId: data.GetRole().GetClientPlatformId(),
 		ProjectId:        data.GetRole().GetProjectId(),
+	}
+
+	res.GlobalPermission = &pb.GlobalPermission{
+		Id:                    data.GlobalPermission.Id,
+		MenuButton:            data.GlobalPermission.MenuButton,
+		Chat:                  data.GlobalPermission.Chat,
+		SettingsButton:        data.GlobalPermission.SettingsButton,
+		ProjectSettingsButton: data.GlobalPermission.ProjectSettingsButton,
+		ProfileSettingsButton: data.GlobalPermission.ProfileSettingsButton,
+		MenuSettingButton:     data.GlobalPermission.MenuSettingButton,
+		RedirectsButton:       data.GlobalPermission.RedirectsButton,
+		ApiKeysButton:         data.GlobalPermission.ApiKeysButton,
+		EnvironmentsButton:    data.GlobalPermission.EnvironmentsButton,
+		ProjectsButton:        data.GlobalPermission.ProjectsButton,
 	}
 	return res
 }
