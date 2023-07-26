@@ -25,6 +25,9 @@ type Config struct {
 	HTTPPort   string
 	HTTPScheme string
 
+	Email    string
+	Password string
+
 	PostgresHost     string
 	PostgresPort     int
 	PostgresUser     string
@@ -77,6 +80,8 @@ func Load() Config {
 
 	config.HTTPPort = cast.ToString(getOrReturnDefaultValue("HTTP_PORT", ":9107"))
 	config.HTTPScheme = cast.ToString(getOrReturnDefaultValue("HTTP_SCHEME", "http"))
+	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", "ucode.udevs.io@gmail.com"))
+	config.Password = cast.ToString(getOrReturnDefaultValue("PASSWORD", "xkiaqodjfuielsug"))
 
 	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "65.109.239.69"))
 	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 5432))
