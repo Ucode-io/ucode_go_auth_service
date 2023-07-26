@@ -9284,7 +9284,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.ForgotPasswordResponse"
+                                            "$ref": "#/definitions/models.ForgotPasswordResponse"
                                         }
                                     }
                                 }
@@ -13551,7 +13551,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.ForgotPasswordResponse"
+                                            "$ref": "#/definitions/models.ForgotPasswordResponse"
                                         }
                                     }
                                 }
@@ -15646,23 +15646,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "login": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.ForgotPasswordResponse": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "login_found": {
-                    "type": "boolean"
-                },
-                "sms_id": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
@@ -17976,6 +17959,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ForgotPasswordResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "email_found": {
+                    "type": "boolean"
+                },
+                "sms_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

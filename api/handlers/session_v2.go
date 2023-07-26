@@ -580,7 +580,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body auth_service.ForgotPasswordRequest true "ForgotPasswordRequest"
-// @Success 201 {object} http.Response{data=auth_service.ForgotPasswordResponse} "Response"
+// @Success 201 {object} http.Response{data=models.ForgotPasswordResponse} "Response"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) ForgotPassword(c *gin.Context) {
@@ -662,7 +662,7 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body models.SetEmail true "SetEmailRequest"
-// @Success 201 {object} http.Response{data=auth_service.ForgotPasswordResponse} "Response"
+// @Success 201 {object} http.Response{data=models.ForgotPasswordResponse} "Response"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) EmailEnter(c *gin.Context) {

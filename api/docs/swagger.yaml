@@ -406,17 +406,6 @@ definitions:
       login:
         type: string
     type: object
-  auth_service.ForgotPasswordResponse:
-    properties:
-      email:
-        type: string
-      login_found:
-        type: boolean
-      sms_id:
-        type: string
-      user_id:
-        type: string
-    type: object
   auth_service.GenerateApiTokenReq:
     properties:
       app_id:
@@ -1922,6 +1911,17 @@ definitions:
       password:
         type: string
       project_id:
+        type: string
+    type: object
+  models.ForgotPasswordResponse:
+    properties:
+      email:
+        type: string
+      email_found:
+        type: boolean
+      sms_id:
+        type: string
+      user_id:
         type: string
     type: object
   models.RegisterOtp:
@@ -7728,7 +7728,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.ForgotPasswordResponse'
+                  $ref: '#/definitions/models.ForgotPasswordResponse'
               type: object
         "400":
           description: Bad Request
@@ -10214,7 +10214,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.ForgotPasswordResponse'
+                  $ref: '#/definitions/models.ForgotPasswordResponse'
               type: object
         "400":
           description: Bad Request
