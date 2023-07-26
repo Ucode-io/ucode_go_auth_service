@@ -17792,6 +17792,9 @@ const docTemplate = `{
                 "defaultOffset": {
                     "type": "string"
                 },
+                "email": {
+                    "type": "string"
+                },
                 "environment": {
                     "description": "debug, test, release",
                     "type": "string"
@@ -17812,6 +17815,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "passcodePool": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 },
                 "postgresDatabase": {
