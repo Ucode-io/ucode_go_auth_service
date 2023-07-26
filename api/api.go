@@ -205,6 +205,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
 		v2.POST("/forgot-password", h.ForgotPassword)
 		v2.PUT("/reset-password", h.V2ResetPassword)
+		v2.PUT("set-email/send-code", h.EmailEnter)
 	}
 
 	//COMPANY
