@@ -11,6 +11,23 @@ type Language struct {
 	NativeName string `json:"native_name"`
 }
 
+type SetEmail struct {
+	Email  string `json:"email"`
+	UserId string `json:"user_id"`
+}
+
+type ResetPassword struct {
+	Password string `json:"password"`
+	UserId   string `json:"user_id"`
+}
+
+type ForgotPasswordResponse struct {
+	UserId     string `json:"user_id"`
+	EmailFound bool   `json:"email_found"`
+	SmsId      string `json:"sms_id"`
+	Email      string `json:"email"`
+}
+
 type Timezone struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
