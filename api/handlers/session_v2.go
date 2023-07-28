@@ -681,7 +681,7 @@ func (h *Handler) EmailEnter(c *gin.Context) {
 
 	res, err := h.services.SessionService().V2ResetPassword(ctx, &auth_service.V2ResetPasswordRequest{
 		UserId: request.UserId,
-		// Email:  request.Email,
+		Email:  request.Email,
 	})
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
