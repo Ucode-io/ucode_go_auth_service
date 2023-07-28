@@ -15,6 +15,8 @@ definitions:
         type: string
       defaultOffset:
         type: string
+      email:
+        type: string
       environment:
         description: debug, test, release
         type: string
@@ -29,6 +31,8 @@ definitions:
       passcodeLength:
         type: integer
       passcodePool:
+        type: string
+      password:
         type: string
       postgresDatabase:
         type: string
@@ -667,11 +671,29 @@ definitions:
       project_id:
         type: string
     type: object
+  ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse:
+    properties:
+      email:
+        type: string
+      email_found:
+        type: boolean
+      sms_id:
+        type: string
+      user_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_api_models.RegisterOtp:
     properties:
       data:
         additionalProperties: true
         type: object
+    type: object
+  ucode_ucode_go_auth_service_api_models.ResetPassword:
+    properties:
+      password:
+        type: string
+      user_id:
+        type: string
     type: object
   ucode_ucode_go_auth_service_api_models.SendCodeResponse:
     properties:
@@ -680,6 +702,13 @@ definitions:
       google_acces:
         type: boolean
       sms_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_api_models.SetEmail:
+    properties:
+      email:
+        type: string
+      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_api_models.Sms:
@@ -1154,17 +1183,6 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest:
     properties:
       login:
-        type: string
-    type: object
-  ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse:
-    properties:
-      email:
-        type: string
-      login_found:
-        type: boolean
-      sms_id:
-        type: string
-      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq:
@@ -2310,13 +2328,6 @@ definitions:
       token:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token'
     type: object
-  ucode_ucode_go_auth_service_genproto_auth_service.V2ResetPasswordRequest:
-    properties:
-      password:
-        type: string
-      user_id:
-        type: string
-    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateClientTypeRequest:
     properties:
       client_platform_ids:
@@ -3095,7 +3106,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          type: integer
+          $ref: '#/definitions/x509.ExtKeyUsage'
         type: array
       extensions:
         description: |-
@@ -3130,7 +3141,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        type: integer
+        $ref: '#/definitions/x509.KeyUsage'
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -3188,7 +3199,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.PublicKeyAlgorithm'
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -3222,7 +3233,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.SignatureAlgorithm'
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -3258,6 +3269,123 @@ definitions:
       version:
         type: integer
     type: object
+  x509.ExtKeyUsage:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    type: integer
+    x-enum-varnames:
+    - ExtKeyUsageAny
+    - ExtKeyUsageServerAuth
+    - ExtKeyUsageClientAuth
+    - ExtKeyUsageCodeSigning
+    - ExtKeyUsageEmailProtection
+    - ExtKeyUsageIPSECEndSystem
+    - ExtKeyUsageIPSECTunnel
+    - ExtKeyUsageIPSECUser
+    - ExtKeyUsageTimeStamping
+    - ExtKeyUsageOCSPSigning
+    - ExtKeyUsageMicrosoftServerGatedCrypto
+    - ExtKeyUsageNetscapeServerGatedCrypto
+    - ExtKeyUsageMicrosoftCommercialCodeSigning
+    - ExtKeyUsageMicrosoftKernelCodeSigning
+  x509.KeyUsage:
+    enum:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 16
+    - 32
+    - 64
+    - 128
+    - 256
+    type: integer
+    x-enum-varnames:
+    - KeyUsageDigitalSignature
+    - KeyUsageContentCommitment
+    - KeyUsageKeyEncipherment
+    - KeyUsageDataEncipherment
+    - KeyUsageKeyAgreement
+    - KeyUsageCertSign
+    - KeyUsageCRLSign
+    - KeyUsageEncipherOnly
+    - KeyUsageDecipherOnly
+  x509.PublicKeyAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      DSA: Unsupported.
+    x-enum-varnames:
+    - UnknownPublicKeyAlgorithm
+    - RSA
+    - DSA
+    - ECDSA
+    - Ed25519
+  x509.SignatureAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    type: integer
+    x-enum-comments:
+      DSAWithSHA1: Unsupported.
+      DSAWithSHA256: Unsupported.
+      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+      MD2WithRSA: Unsupported.
+      MD5WithRSA: Only supported for signing, not verification.
+      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+    x-enum-varnames:
+    - UnknownSignatureAlgorithm
+    - MD2WithRSA
+    - MD5WithRSA
+    - SHA1WithRSA
+    - SHA256WithRSA
+    - SHA384WithRSA
+    - SHA512WithRSA
+    - DSAWithSHA1
+    - DSAWithSHA256
+    - ECDSAWithSHA1
+    - ECDSAWithSHA256
+    - ECDSAWithSHA384
+    - ECDSAWithSHA512
+    - SHA256WithRSAPSS
+    - SHA384WithRSAPSS
+    - SHA512WithRSAPSS
+    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -8543,7 +8671,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
               type: object
         "400":
           description: Bad Request
@@ -10144,7 +10272,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2ResetPasswordRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ResetPassword'
       produces:
       - application/json
       responses:
@@ -11006,6 +11134,52 @@ paths:
       summary: Send Message To Email
       tags:
       - Email
+  /v2/set-email/send-code:
+    put:
+      consumes:
+      - application/json
+      description: Set Email
+      operationId: set_email
+      parameters:
+      - description: SetEmailRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.SetEmail'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: SetEmail
+      tags:
+      - V2_Session
   /v2/upsert-login-strategy:
     post:
       consumes:

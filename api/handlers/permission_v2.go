@@ -69,18 +69,18 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 	fmt.Println(">>>>>>>>>>>>>>>   test #2")
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-		resp, err = h.services.BuilderPermissionService().GetGlobalPermissionByRoleId(
-			c.Request.Context(),
-			&object_builder_service.GetGlobalPermissionsByRoleIdRequest{
-				RoleId:    roleId,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+		// resp, err = h.services.BuilderPermissionService().GetGlobalPermissionByRoleId(
+		// 	c.Request.Context(),
+		// 	&object_builder_service.GetGlobalPermissionsByRoleIdRequest{
+		// 		RoleId:    roleId,
+		// 		ProjectId: resource.ResourceEnvironmentId,
+		// 	},
+		// )
 
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
+		// if err != nil {
+		// 	h.handleResponse(c, http.GRPCError, err.Error())
+		// 	return
+		// }
 	case pbCompany.ResourceType_POSTGRESQL:
 		// resp, err = h.services.PostgresBuilderPermissionService().GetGlobalPermissionByRoleId(
 		// 	c.Request.Context(),
