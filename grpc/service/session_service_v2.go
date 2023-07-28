@@ -1556,6 +1556,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	case "DELETE":
 		methodField = "delete"
 	}
+	// this condition need our object/get-list api because this api's method is post we change it to get
+	if strings.Contains(req.GetPath(), "object/get-list") && req.GetMethod() != "GET" {
+		methodField = "read"
+	}
 
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
 		UserId: session.GetUserId(),
@@ -1653,6 +1657,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		EnvId:            session.EnvId,
 	}, nil
 }
+
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
 	resp := pb.V2MultiCompanyOneLoginRes{
