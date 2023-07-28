@@ -1790,7 +1790,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
 	s.log.Info("V2ResetPassword -> ", logger.Any("req: ", req))
-
 	if req.GetPassword() != "" {
 		if len(req.GetPassword()) < 6 {
 			err := fmt.Errorf("password must not be less than 6 characters")

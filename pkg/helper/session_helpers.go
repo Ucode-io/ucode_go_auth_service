@@ -84,17 +84,17 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	}
 
 	res.GlobalPermission = &pb.GlobalPermission{
-		Id:                    data.GlobalPermission.Id,
-		MenuButton:            data.GlobalPermission.MenuButton,
-		Chat:                  data.GlobalPermission.Chat,
-		SettingsButton:        data.GlobalPermission.SettingsButton,
-		ProjectSettingsButton: data.GlobalPermission.ProjectSettingsButton,
-		ProfileSettingsButton: data.GlobalPermission.ProfileSettingsButton,
-		MenuSettingButton:     data.GlobalPermission.MenuSettingButton,
-		RedirectsButton:       data.GlobalPermission.RedirectsButton,
-		ApiKeysButton:         data.GlobalPermission.ApiKeysButton,
-		EnvironmentsButton:    data.GlobalPermission.EnvironmentsButton,
-		ProjectsButton:        data.GlobalPermission.ProjectsButton,
+		Id:                    data.GetGlobalPermission().GetId(),
+		MenuButton:            data.GetGlobalPermission().GetMenuButton(),
+		Chat:                  data.GetGlobalPermission().GetChat(),
+		SettingsButton:        data.GetGlobalPermission().GetSettingsButton(),
+		ProjectSettingsButton: data.GetGlobalPermission().GetProjectSettingsButton(),
+		ProfileSettingsButton: data.GetGlobalPermission().GetProfileSettingsButton(),
+		MenuSettingButton:     data.GetGlobalPermission().GetMenuSettingButton(),
+		RedirectsButton:       data.GetGlobalPermission().GetRedirectsButton(),
+		ApiKeysButton:         data.GetGlobalPermission().GetApiKeysButton(),
+		EnvironmentsButton:    data.GetGlobalPermission().GetEnvironmentsButton(),
+		ProjectsButton:        data.GetGlobalPermission().GetProjectsButton(),
 	}
 	return res
 }

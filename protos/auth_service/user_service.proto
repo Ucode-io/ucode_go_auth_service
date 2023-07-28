@@ -39,6 +39,7 @@ service UserService {
     rpc GetUserProjects(UserPrimaryKey) returns (GetUserProjectsRes) {}
 }
 
+
 message GetUserByUsernameRequest {
     string username = 1;
 }
