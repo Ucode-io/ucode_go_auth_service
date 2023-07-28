@@ -768,7 +768,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		methodField = "delete"
 	}
 	// this is for object get list api because our object/get-list api is post method.
-	if strings.Contains(req.GetMethod(), "object/get-list/") || strings.Contains(req.GetMethod(), "object-slim/get-list") {
+	if strings.Contains(req.GetPath(), "object/get-list/") || strings.Contains(req.GetPath(), "object-slim/get-list") {
 		methodField = "read"
 	}
 
