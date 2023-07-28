@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -660,4 +661,101 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.NoContent, resp)
+}
+
+// GetConnectionOptions godoc
+// @ID get_connection_options
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Router /v2/get-connection-options/{connection_id}/{user_id} [GET]
+// @Summary Get Connection Options
+// @Description Get Connection Options
+// @Tags V2_Connection
+// @Accept json
+// @Produce json
+// @Param connection_id path string true "connection_id"
+// @Param user_id path string true "user_id"
+// @Param project-id query string true "project-id"
+// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ConnectionOptionsBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetConnectionOptions(c *gin.Context) {
+	var (
+		// resourceEnvironment *cps.ResourceEnvironment
+		err error
+	)
+	connectionId := c.Param("connection_id")
+
+	if !util.IsValidUUID(connectionId) {
+		h.handleResponse(c, http.InvalidArgument, "connection id is an invalid uuid")
+		return
+	}
+
+	userId := c.Param("user_id")
+
+	if !util.IsValidUUID(userId) {
+		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+		return
+	}
+
+	projectId := c.Query("project-id")
+	if !util.IsValidUUID(projectId) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     projectId,
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	var resp *obs.GetConnectionOptionsResponse
+	fmt.Println("resource.ResourceEnvironmentId", resource.ResourceEnvironmentId)
+	switch resource.ResourceType {
+	case 1:
+		resp, err = h.services.LoginService().GetConnetionOptions(
+			c.Request.Context(),
+			&obs.GetConnetionOptionsRequest{
+				ConnectionId:          connectionId,
+				ResourceEnvironmentId: resource.ResourceEnvironmentId,
+				UserId:                userId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	case 3:
+		resp, err = h.services.PostgresLoginService().GetConnetionOptions(
+			c.Request.Context(),
+			&obs.GetConnetionOptionsRequest{
+				ConnectionId:          connectionId,
+				ResourceEnvironmentId: resource.ResourceEnvironmentId,
+				UserId:                userId,
+			},
+		)
+
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	// this is get list connection list from object builder
+
+	h.handleResponse(c, http.OK, resp)
 }
