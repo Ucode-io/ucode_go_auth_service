@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"

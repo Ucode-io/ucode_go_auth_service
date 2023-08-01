@@ -48,7 +48,7 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	// Get the unique user ID
 	// unique, err := apple.GetUniqueID(resp.IDToken)
 	// if err != nil {
-	/
+	
 	// 	return nil, err
 	// }
 

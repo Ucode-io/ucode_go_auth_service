@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 

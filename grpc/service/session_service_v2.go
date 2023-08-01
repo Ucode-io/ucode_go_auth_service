@@ -109,9 +109,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		}
 
 	}
-	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
-
-	}
 
 	if !data.UserFound {
 		customError := errors.New("User not found")
@@ -526,9 +523,6 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				s.log.Error("!!!LoginMiddleware--->PostgresLoginService", logger.Error(err))
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
-
-		}
-		if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
 
 		}
 
@@ -1193,7 +1187,6 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 }
 
 func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCompanyLoginRequest) (*pb.MultiCompanyLoginResponse, error) {
-	now := time.Now()
 
 	resp := &pb.MultiCompanyLoginResponse{}
 

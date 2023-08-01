@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -46,7 +44,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		userId                       string
 		userData                     *pbObject.LoginDataRes
 	)
-	
+
 	switch strings.ToUpper(body["type"].(string)) {
 	case "EMAIL":
 		{
@@ -65,8 +63,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 	}
-	
-	
+
 	if foundUser.Id == "" {
 		// create user in auth service
 		var name, login, email, password, phone string
@@ -85,7 +82,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		if _, ok := body["email"]; ok {
 			email = body["email"].(string)
 		}
-		
+
 		pKey, err := rs.services.UserService().V2CreateUser(ctx, &auth_service.CreateUserRequest{
 			Login:     login,
 			Password:  password,
@@ -104,7 +101,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		// 	Name:      name,
 		// 	CompanyId: body["company_id"].(string),
 		// })
-		
+
 		if err != nil {
 			rs.log.Error("!!!RegisterUser.User().Create--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -113,17 +110,16 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	} else {
 		userId = foundUser.GetId()
 	}
-	
-	
+
 	body["guid"] = userId
 	structData, err := helper.ConvertMapToStruct(body)
-	
+
 	if err != nil {
 		rs.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	// create user in object builder service
-	
+
 	switch body["resource_type"].(float64) {
 	case 1:
 		_, err = rs.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
@@ -131,7 +127,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
 		})
-		
+
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -147,13 +143,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	
+
 	if body["addational_table"] != nil {
 		validRegisterForAddationalTable := map[string]bool{
 			"phone": true,
 			"email": true,
 		}
-		
+
 		if _, ok := validRegisterForAddationalTable[body["type"].(string)]; ok {
 			body["addational_table"].(map[string]interface{})["guid"] = userId
 			body["addational_table"].(map[string]interface{})["project_id"] = body["project_id"]
@@ -163,7 +159,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			if errorInAdditionalObject != nil {
 				rs.log.Error("Additional table struct table --->", logger.Error(err))
 			}
-			
+
 			_, errorInAdditionalObject = rs.services.ObjectBuilderService().Create(
 				context.Background(),
 				&pbObject.CommonMessage{
@@ -172,9 +168,9 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 					ProjectId: body["resource_environment_id"].(string),
 				})
 			if errorInAdditionalObject != nil {
-				
+
 				defer func(userId string) {
-					
+
 					// delete user from object builder user table if has any error while create additional object
 					if errorInAdditionalObject != nil {
 						structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
@@ -192,11 +188,11 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 						}
 					}
 				}(userId)
-				
+
 				rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(errorInAdditionalObject))
-				
+
 				return nil, status.Error(codes.Internal, errorInAdditionalObject.Error())
-				
+
 			}
 		}
 
@@ -206,14 +202,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ProjectId:             body["project_id"].(string),
 		ResourceEnvironmentId: body["resource_environment_id"].(string),
 	}
-	
+
 	switch body["resource_type"].(float64) {
 	case 1:
 		userData, err = rs.services.LoginService().LoginDataByUserId(
 			ctx,
 			reqLoginData,
 		)
-		
+
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			rs.log.Error("!!!Login--->", logger.Error(err))
@@ -232,16 +228,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 
 	}
-	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
-		
-	}
-	
+
 	if !userData.UserFound {
 		customError := errors.New("User not found")
 		rs.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
-	
+
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
 		ClientPlatform: userData.GetClientPlatform(),
 		ClientType:     userData.GetClientType(),

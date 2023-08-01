@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
@@ -255,24 +254,23 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	
+
 	companies, err := h.services.CompanyServiceClient().GetList(context.Background(), &obs.GetCompanyListRequest{
 		Offset:  0,
 		Limit:   128,
 		OwnerId: resp.GetUserId(),
 	})
-	
+
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	
 
 	companiesResp := []*auth_service.Company{}
 
 	if len(companies.Companies) < 1 {
 		companiesById := make([]*obs.Company, 0)
-		
+
 		user, err := h.services.UserService().GetUserByID(c.Request.Context(), &auth_service.UserPrimaryKey{
 			Id: resp.GetUserId(),
 		})
@@ -280,7 +278,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		
+
 		company, err := h.services.CompanyServiceClient().GetById(c.Request.Context(), &obs.GetCompanyByIdRequest{
 			Id: user.GetCompanyId(),
 		})
@@ -288,7 +286,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return
 		}
-		
+
 		companiesById = append(companiesById, company.Company)
 		companies.Companies = companiesById
 		companies.Count = 1
@@ -305,7 +303,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	
+
 	res := &auth_service.V2LoginSuperAdminRes{
 		UserFound: resp.GetUserFound(),
 		Token:     resp.GetToken(),

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"
+
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -40,7 +40,7 @@ func NewSessionService(cfg config.Config, log logger.LoggerI, strg storage.Stora
 }
 
 func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	
+
 	res := &pb.LoginResponse{}
 
 	if len(req.Username) < 6 {
@@ -262,7 +262,6 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 
 	session := &pb.Session{}
 
-	
 	// session, err = s.strg.Session().Update(ctx, )
 
 	session, err = s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
@@ -302,13 +301,12 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	
 	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	
+
 	if user.Active < 0 {
 		err := errors.New("user is not active")
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
