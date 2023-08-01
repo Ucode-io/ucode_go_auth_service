@@ -23,7 +23,7 @@ const (
 
 func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
 	resp, err := net_http.Get("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken)
-	// fmt.Println("Request to https://www.googleapis.com/oauth2/v3/userinfo?access_token= " + accessToken)
+
 	if err != nil {
 		return nil, err
 	}

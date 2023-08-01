@@ -562,7 +562,6 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 	var (
 	// resourceEnvironment *obs.ResourceEnvironment
 	)
-	fmt.Println(">>>>>>>>> V2GetClientTypeList")
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -586,7 +585,6 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	fmt.Println(">>> test 1")
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
@@ -596,11 +594,9 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		fmt.Println("-------->  ERROR ", err.Error())
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println(">>> test 2")
 	resp, err := h.services.ClientService().V2GetClientTypeList(
 		c.Request.Context(),
 		&auth_service.V2GetClientTypeListRequest{
@@ -611,7 +607,6 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 			ResourceType: int32(resource.ResourceType),
 		},
 	)
-	fmt.Println(">>> test 3")
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
