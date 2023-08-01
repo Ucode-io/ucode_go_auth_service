@@ -1478,9 +1478,6 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
 	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
-	endPoints := make(map[string]bool)
-	endPoints["get-list"] = true
-	endPoints["object-slim"] = true
 
 	arr_path := strings.Split(req.Path, "/")
 
@@ -1519,8 +1516,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	case "DELETE":
 		methodField = "delete"
 	}
-	fmt.Println("path::", req.GetPath())
-	fmt.Println("arr_path::", arr_path)
 	// this condition need our object/get-list api because this api's method is post we change it to get
 	if (strings.Contains(req.GetPath(), "object/get-list")) && req.GetMethod() != "GET" {
 		methodField = "read"
@@ -1611,7 +1606,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			err := status.Error(codes.PermissionDenied, "Permission denied")
 			return nil, err //fmt.Errorf("Permission denied")
 		}
-		// }
 	}
 
 	var authTables []*pb.TableBody
