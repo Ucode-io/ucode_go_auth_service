@@ -302,7 +302,6 @@ func (h *Handler) GetClientTypeList(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("client_types:::::", resp.ClientTypes)
 
 	h.handleResponse(c, http.OK, resp)
 }

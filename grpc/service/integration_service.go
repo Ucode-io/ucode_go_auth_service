@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -52,7 +51,6 @@ func (s *integrationService) CreateIntegration(ctx context.Context, req *pb.Crea
 func (s *integrationService) AddSessionToIntegration(ctx context.Context, req *pb.AddSessionToIntegrationRequest) (*pb.AddSessionToIntegrationResponse, error) {
 	res := &pb.AddSessionToIntegrationResponse{}
 
-	fmt.Println("REQ", req)
 	if len(req.SecretKey) < 6 {
 		err := errors.New("invalid key")
 		s.log.Error("!!!Login--->", logger.Error(err))

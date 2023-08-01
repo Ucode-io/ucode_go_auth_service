@@ -57,8 +57,8 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	fmt.Println("env::", environmentId)
-	fmt.Println("resource::", resourceId)
+	
+	
 	if util.IsValidUUID(resourceId.(string)) {
 		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 			c.Request.Context(),
@@ -177,7 +177,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("res env id in user get list", resourceEnvironment.GetId())
+	
 	resp, err := h.services.UserService().V2GetUserList(
 
 		c.Request.Context(),
@@ -256,7 +256,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("resource in api::", resource)
+	
 
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
@@ -343,7 +343,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		}
 	}
 
-	fmt.Println(resourceEnvironment.GetId())
+	
 	user.ResourceType = resourceEnvironment.GetResourceType()
 
 	resp, err := h.services.UserService().V2UpdateUser(

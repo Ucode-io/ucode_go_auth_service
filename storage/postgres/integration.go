@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -129,7 +128,7 @@ func (r *IntegrationRepo) GetByPK(ctx context.Context, pKey *pb.IntegrationPrima
 
 func (r *IntegrationRepo) GetIntegrationSessions(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (res *pb.GetIntegrationSessionsResponse, err error) {
 	res = &pb.GetIntegrationSessionsResponse{}
-	fmt.Println("PKEY: ", pKey)
+
 	query := `
 		SELECT 
 			id,
@@ -177,7 +176,6 @@ func (r *IntegrationRepo) GetIntegrationSessions(ctx context.Context, pKey *pb.I
 			temp.Ip = ip.String
 		}
 		if err != nil {
-			fmt.Println("ERROREREROSASKAS HERE")
 			return nil, err
 		}
 

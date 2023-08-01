@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -61,12 +60,12 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 		},
 	)
-	fmt.Println(">>>>>>>>>>>>>>>   test #1")
+
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println(">>>>>>>>>>>>>>>   test #2")
+
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
 		// resp, err = h.services.BuilderPermissionService().GetGlobalPermissionByRoleId(
@@ -1105,11 +1104,9 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("resource.ResourceEnvironmentId::", resource.ResourceEnvironmentId)
-	fmt.Println("\n Resource type ", resource.ResourceType)
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-		fmt.Println("\n Mongo db")
+
 		resp, err = h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
 			c.Request.Context(),
 			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
@@ -1117,7 +1114,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		fmt.Println("\nResponse perm 123", resp, "\n\n")
+
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -1139,7 +1136,6 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	}
 
 	resp.ProjectId = projectId
-	fmt.Println("resp::", resp.Data.Tables)
 
 	h.handleResponse(c, http.OK, resp)
 }
@@ -1232,17 +1228,17 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	permission.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-		fmt.Println("test permission before update builder")
+
 		resp, err = h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
 			context.Background(),
 			&permission,
 		)
-		fmt.Println("test permission before error update builder")
+
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("test permission after update builder")
+
 	case pbCompany.ResourceType_POSTGRESQL:
 		resp, err = h.services.PostgresBuilderPermissionService().UpdateRoleAppTablePermissions(
 			c.Request.Context(),
@@ -1304,10 +1300,9 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("\n Resource type ", resource.ResourceType)
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-		fmt.Println("\n Mongo db")
+
 		resp, err = h.services.BuilderPermissionService().GetAllMenuPermissions(
 			c.Request.Context(),
 			&object_builder_service.GetAllMenuPermissionsRequest{
@@ -1395,17 +1390,17 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 	permission.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-		fmt.Println("test permission before update builder")
+
 		resp, err = h.services.BuilderPermissionService().UpdateMenuPermissions(
 			context.Background(),
 			&permission,
 		)
-		fmt.Println("test permission before error update builder")
+
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("test permission after update builder")
+
 	case pbCompany.ResourceType_POSTGRESQL:
 		resp, err = h.services.PostgresBuilderPermissionService().UpdateMenuPermissions(
 			c.Request.Context(),

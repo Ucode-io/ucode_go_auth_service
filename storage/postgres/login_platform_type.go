@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
@@ -68,7 +67,7 @@ func (e *loginPlatformTypeRepo) CreateLoginPlatformType(ctx context.Context, inp
 	)
 
 	if err != nil {
-		fmt.Println("Error executing query ", err)
+
 		return nil, err
 	}
 
@@ -76,7 +75,7 @@ func (e *loginPlatformTypeRepo) CreateLoginPlatformType(ctx context.Context, inp
 }
 
 func (e *loginPlatformTypeRepo) GetLoginPlatformType(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatform, err error) {
-	fmt.Println(":::::: GetLoginPlatform")
+
 	query := `SELECT id, project_id, env_id, type, data
 	FROM "login_platform_setting"
 	WHERE id=$1;`

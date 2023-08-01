@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -109,7 +108,6 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("test")
 	// this is get list objects list from object builder
 	switch resource.ResourceType {
 	case 1:

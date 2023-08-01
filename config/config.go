@@ -104,7 +104,6 @@ func Load() Config {
 
 	config.ObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
 	config.ObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
-	fmt.Println("OBJECT_BUILDER_SERVICE_HOST", config.ObjectBuilderServiceHost, "OBJECT_BUILDER_GRPC_PORT", config.ObjectBuilderGRPCPort)
 
 	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", "localhost"))
 	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ":9105"))

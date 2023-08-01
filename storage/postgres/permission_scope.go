@@ -110,7 +110,6 @@ func (r *permissionScopeRepo) HasAccess(ctx context.Context, roleID, clientPlatf
 		return hasAccess, err
 	}
 
-	fmt.Println(count)
 
 	if count > 0 {
 		return true, nil

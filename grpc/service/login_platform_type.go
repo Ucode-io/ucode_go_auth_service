@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -99,13 +98,11 @@ func (e *loginPlatformType) GetListLoginPlatformType(ctx context.Context, req *p
 func (e *loginPlatformType) GetLoginPlatformType(ctx context.Context, req *pb.LoginPlatformTypePrimaryKey) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.GetLoginPlatformTypeByPK--->", logger.Any("req", req))
 
-	fmt.Println("req", req)
 	res, err := e.strg.LoginPlatformType().GetLoginPlatformType(
 		ctx,
 		req,
 	)
 
-	fmt.Println(">>> >>> >>> >>> >>> ", res)
 	if err != nil {
 		e.log.Error("!!!---LoginPlatformType.GetLoginPlatformTypeByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
