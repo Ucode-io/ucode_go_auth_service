@@ -1511,6 +1511,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
 	endPoints := make(map[string]bool)
 	endPoints["get-list"] = true
+	endPoints["object-slim"] = true
 
 	arr_path := strings.Split(req.Path, "/")
 
@@ -1550,8 +1551,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	case "DELETE":
 		methodField = "delete"
 	}
+	fmt.Println("path::", req.GetPath())
+	fmt.Println("arr_path::", arr_path)
 	// this condition need our object/get-list api because this api's method is post we change it to get
-	if strings.Contains(req.GetPath(), "object/get-list") && req.GetMethod() != "GET" {
+	if (strings.Contains(req.GetPath(), "object/get-list")) && req.GetMethod() != "GET" {
 		methodField = "read"
 	}
 
@@ -1579,49 +1582,68 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 	// guess role check
 	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" {
-		if endPoints[arr_path[len(arr_path)-2]] {
-			tableSlug := arr_path[len(arr_path)-1]
+		var tableSlug string
+		if arr_path[len(arr_path)-1] == ":object_id" {
+			tableSlug = arr_path[len(arr_path)-2]
+		} else {
+			tableSlug = arr_path[len(arr_path)-1]
+		}
 
-			filter := map[string]interface{}{
-				"role_id":    session.RoleId,
-				"table_slug": tableSlug,
-			}
-			filter[methodField] = "yes"
+		filter := map[string]interface{}{
+			"role_id":    session.RoleId,
+			"table_slug": tableSlug,
+		}
+		filter[methodField] = "Yes"
 
-			structData, err := helper.ConvertMapToStruct(filter)
-			if err != nil {
-				return nil, err
-			}
+		structData, err := helper.ConvertMapToStruct(filter)
+		if err != nil {
+			return nil, err
+		}
 
-			resource, err := s.services.ServiceResource().GetSingle(
-				ctx,
-				&company_service.GetSingleServiceResourceReq{
-					ProjectId:     session.ProjectId,
-					EnvironmentId: session.EnvId,
-					ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
+		resource, err := s.services.ServiceResource().GetSingle(
+			ctx,
+			&company_service.GetSingleServiceResourceReq{
+				ProjectId:     session.ProjectId,
+				EnvironmentId: session.EnvId,
+				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
 
-			resp, err := s.services.ObjectBuilderService().GetList(
-				context.Background(),
-				&pbObject.CommonMessage{
-					TableSlug: "record_permission",
-					Data:      structData,
-					ProjectId: resource.ResourceEnvironmentId,
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
+		resp, err := s.services.ObjectBuilderService().GetList(
+			context.Background(),
+			&pbObject.CommonMessage{
+				TableSlug: "record_permission",
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		var isHavePermission = false
 
-			if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
-				err := status.Error(codes.PermissionDenied, "Permission denied")
-				return nil, err //fmt.Errorf("Permission denied")
+		if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
+			err := status.Error(codes.PermissionDenied, "Permission denied")
+			return nil, err //fmt.Errorf("Permission denied")
+		} else {
+			if response, ok := resp.Data.AsMap()["response"].([]interface{}); ok {
+				for _, v := range response {
+					if res, ok := v.(map[string]interface{}); ok {
+						if res["table_slug"] == tableSlug {
+							isHavePermission = true
+						}
+					}
+				}
 			}
 		}
+		if !isHavePermission {
+			err := status.Error(codes.PermissionDenied, "Permission denied")
+			return nil, err //fmt.Errorf("Permission denied")
+		}
+		// }
 	}
 
 	var authTables []*pb.TableBody
@@ -1633,8 +1655,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		authTables = append(authTables, authTable)
 	}
 
-	fmt.Println("env id ::", session.EnvId)
-	fmt.Println(">>>>> test last >", authTables)
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -1651,7 +1671,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		EnvId:            session.EnvId,
 	}, nil
 }
-
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
 	resp := pb.V2MultiCompanyOneLoginRes{
