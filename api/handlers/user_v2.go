@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
@@ -57,8 +56,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	fmt.Println("env::", environmentId)
-	fmt.Println("resource::", resourceId)
+
 	if util.IsValidUUID(resourceId.(string)) {
 		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 			c.Request.Context(),
@@ -135,7 +133,6 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserList(c *gin.Context) {
-	var resourceEnvironment *company_service.ResourceEnvironment
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -177,7 +174,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("res env id in user get list", resourceEnvironment.GetId())
+
 	resp, err := h.services.UserService().V2GetUserList(
 
 		c.Request.Context(),
@@ -256,7 +253,6 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("resource in api::", resource)
 
 	resp, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(),
@@ -343,7 +339,6 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		}
 	}
 
-	fmt.Println(resourceEnvironment.GetId())
 	user.ResourceType = resourceEnvironment.GetResourceType()
 
 	resp, err := h.services.UserService().V2UpdateUser(

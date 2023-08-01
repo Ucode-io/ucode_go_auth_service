@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -47,7 +46,6 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetClientTypeId(),
 	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId)
 
-	fmt.Println("err::", err)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +64,6 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	var (
 		res = pb.GetListRes{Count: 0}
 	)
-	fmt.Println("teststets")
 
 	query := `SELECT
 				id,
@@ -160,12 +157,10 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&row.ProjectId,
 			&clientTypeId,
 		)
-		fmt.Println("bbbbbbbbbb")
-		fmt.Println(err)
+
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("Aaaaa")
 
 		if createdAt.Valid {
 			row.CreatedAt = createdAt.String
