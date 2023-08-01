@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -48,7 +47,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		userId    string
 		userData  *pbObject.LoginDataRes
 	)
-	fmt.Println("::::::::::TEST:::::::::::1")
+
 	switch strings.ToUpper(body["type"].(string)) {
 	case "EMAIL":
 		{
@@ -67,8 +66,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 	}
-	fmt.Println("::::::::::TEST:::::::::::2")
-	fmt.Println("user found::", foundUser)
+
 	if foundUser.Id == "" {
 		// create user in auth service
 		var login, email, password, phone string
@@ -131,7 +129,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	body["guid"] = userId
 	body["from_auth_service"] = true
 	structData, err := helper.ConvertMapToStruct(body)
-	fmt.Println("::::::::::TEST:::::::::::6")
+
 	if err != nil {
 		rs.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -188,7 +186,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
 		})
-		fmt.Println("::::::::::TEST:::::::::::8", tableSlug)
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -264,14 +261,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ProjectId:             body["project_id"].(string),
 		ResourceEnvironmentId: body["resource_environment_id"].(string),
 	}
-	fmt.Println("::::::::::TEST:::::::::::13")
+
 	switch body["resource_type"].(float64) {
 	case 1:
 		userData, err = rs.services.LoginService().LoginData(
 			ctx,
 			reqLoginData,
 		)
-		fmt.Println("::::::::::TEST:::::::::::14")
+
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			rs.log.Error("!!!Login--->", logger.Error(err))
@@ -290,16 +287,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 
 	}
-	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
-		fmt.Println("ConvertPbToAnotherPb", string(bytes))
-	}
-	fmt.Println("::::::::::TEST:::::::::::15")
+
 	if !userData.UserFound {
 		customError := errors.New("User not found")
 		rs.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
-	fmt.Println("::::::::::TEST:::::::::::16")
+
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
 		ClientPlatform: userData.GetClientPlatform(),
 		ClientType:     userData.GetClientType(),

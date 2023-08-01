@@ -627,10 +627,9 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 		}
 		params["phone"] = req.Phone
 	}
-	fmt.Println("params: ", params)
 
 	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
-	fmt.Println("query: ", lastQuery, args)
+
 	var userId string
 	err := r.db.QueryRow(ctx, lastQuery, args...).Scan(&userId)
 	if err == pgx.ErrNoRows {
@@ -638,7 +637,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	} else if err != nil {
 		return nil, err
 	}
-	fmt.Println("user_id: ", userId)
+
 	return &pb.GetUserByLoginTypesResponse{
 		UserId: userId,
 	}, nil
@@ -865,11 +864,10 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 		id = :id`
 	params["id"] = req.GetUserId()
 
-	fmt.Println("query: ", query)
 	fmt.Print("\n\nParams: ", params)
 
 	q, arr := helper.ReplaceQueryParams(query, params)
-	fmt.Println("q: ", q)
+
 	result, err := r.db.Exec(ctx, q, arr...)
 	if err != nil {
 		return 0, err

@@ -51,7 +51,8 @@ message CreateRelationRequest {
     bool default_editable = 32;
     string function_path = 33;
     bool relation_buttons = 34;
-    
+    string title_uz = 35;
+    string title_en = 36;
 }
 
 message AutoFilter {
@@ -100,6 +101,8 @@ message UpdateRelationRequest {
     bool default_editable = 33;
     string function_path = 34;
     bool relation_buttons = 35;
+    string title_uz = 36;
+    string title_en = 37;
 }
 
 

@@ -44,7 +44,6 @@ func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, erro
 		cfg.PostgresPort,
 		cfg.PostgresDatabase,
 	))
-	fmt.Println("psql creds::")
 	fmt.Printf("postgres://%s:%s@%s:%d/%s?sslmode=disable\n",
 		cfg.PostgresUser,
 		cfg.PostgresPassword,

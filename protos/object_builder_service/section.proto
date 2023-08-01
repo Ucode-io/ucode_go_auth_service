@@ -23,6 +23,8 @@ message Section {
     repeated FieldForSection fields = 5;
     string icon = 6;
     bool is_summary_section = 7;
+    string label_uz = 8;
+    string label_en = 9;
 }
 
 message ViewRelationReq {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -162,7 +161,6 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, errComparePass.Error())
 	}
-	fmt.Println("errr:", err, "mathc::", match)
 	if !match {
 		errComparePass := errors.New("invalid api id or api secret")
 		s.log.Error("!!!GenerateApiToken--->", logger.String("match", "false"))

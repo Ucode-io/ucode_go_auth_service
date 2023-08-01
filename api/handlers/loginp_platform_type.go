@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/logger"
@@ -147,7 +146,6 @@ func (h *Handler) GetLoginPlatformType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) LoginPlatformTypePrimaryKey(c *gin.Context) {
-	fmt.Println("handler login platform type primary key")
 	id := c.Param("id")
 
 	resp, err := h.services.LoginPlatformType().GetLoginPlatformType(

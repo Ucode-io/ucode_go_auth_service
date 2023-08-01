@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	_ "encoding/json"
 	"errors"
-	"fmt"
-	"log"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -42,8 +40,6 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
-	log.Println("--- SendMessageToEmail ---")
-
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 		request             models.Email
@@ -57,7 +53,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println("request: ", request)
 
 	if request.RegisterType == "" {
 		h.handleResponse(c, http.BadRequest, "Must be register type(default, google, phone)")
@@ -120,7 +115,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println(":::::::: Register type :", request.RegisterType)
 	switch request.RegisterType {
 	case cfg.Default:
 		{
@@ -218,7 +212,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 			} else {
 				text = request.Text
 			}
-			fmt.Println("::::::: LoginWith O response :", respObject)
 			resp, err := h.services.SmsService().Send(
 				c.Request.Context(),
 				&pbSms.Sms{
@@ -235,7 +228,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
-			fmt.Println("::::::: Phone response :", resp)
 			if respObject == nil || !respObject.UserFound {
 				res := models.SendCodeResponse{
 					SmsId: resp.SmsId,
@@ -353,7 +345,6 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "Register type is required")
 		return
 	}
-	fmt.Println("::::::: Register type body :", body.RegisterType)
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -403,7 +394,6 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		}
 	case cfg.WithPhone:
 		{
-			fmt.Println("::::::: Register type with phone :", body.RegisterType)
 			if c.Param("otp") != "121212" {
 				_, err := h.services.SmsService().ConfirmOtp(
 					c.Request.Context(),
@@ -616,7 +606,6 @@ func (h *Handler) VerifyOnlyEmailOtp(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RegisterEmailOtp(c *gin.Context) {
-	fmt.Println(":::RegisterEmailOtp:::")
 	var (
 		body                  models.RegisterOtp
 		resourceEnvironment   *obs.ResourceEnvironment
@@ -647,7 +636,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	fmt.Println(">>>>>>>>>>>. test 1")
+
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
@@ -659,7 +648,6 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println(">>>>>>>>>>>. test 2")
 
 	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
 		ProjectId: resourceEnvironment.GetProjectId(),
@@ -697,12 +685,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.BadRequest, "Invalid arguments google auth")
 				return
 			}
-			fmt.Println("::::::::::::: test 1")
+
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
 				h.handleResponse(c, http.BadRequest, "Invalid google access token")
 				return
 			}
-			fmt.Println("::::::::::::: test 2")
+
 			resp, err := h.services.UserService().RegisterWithGoogle(
 				c.Request.Context(),
 				&pb.RegisterWithGoogleRequest{
@@ -719,7 +707,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
-			fmt.Println("::::::::::::: test 3")
+
 			body.Data["email"] = userInfo["email"]
 			body.Data["name"] = userInfo["name"]
 
@@ -747,7 +735,6 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("::::::::::::: test 1122....")
 			body.Data["email"] = userInfo.Email
 			resp, err := h.services.UserService().RegisterWithGoogle(
 				c.Request.Context(),
@@ -882,12 +869,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 			if err != nil {
 				return
 			}
-			fmt.Println(":::::::::::::::: Addational table", addTable)
+
 			resp.AddationalTable = &addTable
 		}
 
 	}
-	fmt.Println(":::::::::::::::::: resp resp resp", resp)
+
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(resp)
 
 	res, err := h.services.SessionService().SessionAndTokenGenerator(context.Background(), &pb.SessionAndTokenRequest{
@@ -1015,7 +1002,6 @@ func (h *Handler) UpdateEmailSettings(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetEmailSettings(c *gin.Context) {
 
-	fmt.Println("::::::::; >>>>>>>>>>>> ", c.Query("project_id"))
 	resp, err := h.services.EmailService().GetListEmailSettings(
 		c.Request.Context(),
 		&pb.GetListEmailSettingsRequest{
@@ -1053,13 +1039,12 @@ func (h *Handler) DeleteEmailSettings(c *gin.Context) {
 			Id: id,
 		},
 	)
-	fmt.Println(">>>>>>>>>> handler test 1")
+
 	if err != nil {
 		h.log.Error("---> error in delete email settings", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
-	fmt.Println(">>>>>>>>>>> service test 2")
 	h.handleResponse(c, http.Created, resp)
 }

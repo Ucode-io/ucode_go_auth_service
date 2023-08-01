@@ -74,7 +74,6 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
 		switch req.ResourceType {
 		case 1:
 			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
@@ -171,7 +170,6 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
-			fmt.Println("Environment id ::::::::::::::::::::; ", req.GetResourceEnvironmentId())
 			switch req.ResourceType {
 			case 1:
 				_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
@@ -619,8 +617,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("project id::", req.ProjectId)
-	fmt.Println("resource type::", req.ResourceType)
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
@@ -1222,12 +1218,12 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 
 func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
-	fmt.Println("\n V2GetUserByLoginTypes test >>> #1")
+
 	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("\n V2GetUserByLoginTypes test >>> #2")
+
 	return res, nil
 }
 

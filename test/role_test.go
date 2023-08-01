@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 	"testing"
@@ -28,7 +27,6 @@ func TestCreateRole(t *testing.T) {
 
 	wg.Wait()
 
-	fmt.Println("s: ", s)
 }
 
 func createRole(t *testing.T) string {

@@ -23,6 +23,8 @@ message LayoutRequest {
     string icon = 7;
     bool is_default = 8;
     repeated FieldForSection summary_fields = 9;
+    string label_uz = 10;
+    string label_en = 11;
 }
 
 message LayoutResponse {
@@ -50,6 +52,8 @@ message TabRequest {
     repeated Section sections = 6;
     int32 order = 7;
     string icon = 8;
+    string label_uz = 10;
+    string label_en = 11;
 }
 
 message TabResponse {

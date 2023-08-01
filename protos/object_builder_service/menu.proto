@@ -114,6 +114,8 @@ message CreateMenuRequest {
     string project_id = 7;
     string microfrontend_id = 8;
     string webpage_id = 9;
+    string label_uz = 10;
+    string label_en = 11;
 }
 
 message Menu {
@@ -128,6 +130,8 @@ message Menu {
     string microfrontend_id = 9;
     int32 order = 10;
     string webpage_id = 11;
+    string label_uz = 12;
+    string label_en = 13;
 }
 
 message MenuForGetAll {

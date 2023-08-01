@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -723,7 +722,6 @@ func (h *Handler) GetConnectionOptions(c *gin.Context) {
 		return
 	}
 	var resp *obs.GetConnectionOptionsResponse
-	fmt.Println("resource.ResourceEnvironmentId", resource.ResourceEnvironmentId)
 	switch resource.ResourceType {
 	case 1:
 		resp, err = h.services.LoginService().GetConnetionOptions(

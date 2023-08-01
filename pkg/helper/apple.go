@@ -18,7 +18,7 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 -----END PRIVATE KEY-----`, c.SecretKey)
 	secret, err := apple.GenerateClientSecret(secretKey, c.TeamId, c.ClientId, c.KeyId)
 	if err != nil {
-		fmt.Println("error generating secret: " + err.Error())
+		
 		return nil, err
 	}
 
@@ -36,7 +36,7 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	// Do the verification
 	err = client.VerifyAppToken(context.Background(), vReq, &resp)
 	if err != nil {
-		fmt.Println("error verifying: " + err.Error())
+		
 		return nil, err
 	}
 
@@ -48,14 +48,14 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	// Get the unique user ID
 	// unique, err := apple.GetUniqueID(resp.IDToken)
 	// if err != nil {
-	// 	fmt.Println("failed to get unique ID: " + err.Error())
+	
 	// 	return nil, err
 	// }
 
 	// Get the email
 	claim, err := apple.GetClaims(resp.IDToken)
 	if err != nil {
-		fmt.Println("failed to get claims: " + err.Error())
+		
 		return nil, err
 	}
 
