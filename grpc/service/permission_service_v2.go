@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -106,7 +105,6 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 		// "client_platform_id": req.GetClientPlatformId(),
 		"client_type_id": req.GetClientTypeId(),
 	})
-	fmt.Println(structData.AsMap())
 	if err != nil {
 		s.log.Error("!!!GetRolesList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

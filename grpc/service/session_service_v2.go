@@ -28,7 +28,7 @@ import (
 )
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
-	fmt.Println("TEST::::1")
+
 	if len(req.Username) < 6 {
 		err := errors.New("invalid username")
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -50,25 +50,25 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	fmt.Println("TEST::::2")
+
 	match, err := security.ComparePassword(user.Password, req.Password)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	fmt.Println("TEST::::3")
+
 	if !match {
 		err := errors.New("username or password is wrong")
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("TEST::::4")
+
 	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
 	// if err != nil {
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
 	// 	return nil, status.Error(codes.Internal, err.Error())
 	// }
-	// fmt.Println("TEST::::5")
+	//
 	// if expiresAt.Unix() < time.Now().Unix() {
 	// 	err := errors.New("User has been expired")
 	// 	s.log.Error("!!!Login--->", logger.Error(err))
@@ -83,7 +83,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	}
 	log.Println("reqLoginData--->", reqLoginData)
 	var data *pbObject.LoginDataRes
-	fmt.Println("resours type::::", req.ResourceType)
+
 	switch req.ResourceType {
 	case 1:
 		data, err = s.services.LoginService().LoginData(
@@ -109,10 +109,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		}
 
 	}
-	if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
-		fmt.Println("ConvertPbToAnotherPb", string(bytes))
-	}
-	fmt.Println("TEST::::7>>#", data)
+
 	if !data.UserFound {
 		customError := errors.New("User not found")
 		s.log.Error("!!!Login--->", logger.Error(customError))
@@ -131,9 +128,9 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		GlobalPermission: data.GetGlobalPermission(),
 	})
 	//if bytes, err := json.MarshalIndent(res, "", "  "); err == nil {
-	//	fmt.Println("ConvertPbToAnotherPb", string(bytes))
+	//
 	//}
-	fmt.Println("TEST::::8>>", req.Tables)
+
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
 		Tables:        req.Tables,
@@ -150,7 +147,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, errGenerateToken.Error())
 	}
-	fmt.Println("TEST::::9")
 
 	if req.Tables != nil {
 		res.Tables = req.Tables
@@ -216,7 +212,7 @@ pwd:
 		userId = user.Id
 	case "PHONE":
 		phone, ok := req.GetData()["phone"]
-		fmt.Println("test login with phone number")
+
 		if !ok {
 			err := errors.New("phone is empty")
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
@@ -228,7 +224,7 @@ pwd:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = user.GetId()
-		fmt.Println("user id:", userId)
+
 	case "EMAIL":
 		email, ok := req.GetData()["email"]
 		if !ok {
@@ -290,7 +286,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		fmt.Println("user:: ", user)
+
 		userId = user.GetId()
 	case "EMAIL_OTP":
 		sms_id, ok := req.GetData()["sms_id"]
@@ -390,7 +386,7 @@ pwd:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userIdRes, err := s.strg.User().GetByUsername(ctx, email)
-		fmt.Println("aaaaa:", userIdRes)
+
 		if err != nil {
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -495,7 +491,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			s.log.Error("!!!LoginMiddleware--->LoginService()", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
-		fmt.Println("serviceResource", serviceResource)
+
 		reqLoginData := &pbObject.LoginDataReq{
 			UserId:                req.Data["user_id"],
 			ProjectId:             req.Data["project_id"],
@@ -503,7 +499,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		}
 		log.Println("reqLoginData--->", reqLoginData)
 		var data *pbObject.LoginDataRes
-		fmt.Println("resours type::::", serviceResource.ResourceType)
+
 		switch serviceResource.ResourceType {
 		case 1:
 			data, err = s.services.LoginService().LoginDataByUserId(
@@ -529,10 +525,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			}
 
 		}
-		if bytes, err := json.MarshalIndent(data, "", "  "); err == nil {
-			fmt.Println("ConvertPbToAnotherPb", string(bytes))
-		}
-		fmt.Println("TEST::::7")
+
 		if !data.UserFound {
 			customError := errors.New("User not found")
 			s.log.Error("!!!LoginMiddleware--->", logger.Error(customError))
@@ -554,7 +547,6 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	if req.Tables == nil {
 		req.Tables = []*pb.Object{}
 	}
-	fmt.Println(res.GetUserId())
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
@@ -562,7 +554,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		Tables:        req.Tables,
 		EnvironmentId: req.Data["environment_id"],
 	})
-	fmt.Println("err: ", err)
+
 	if resp == nil {
 		err := errors.New("error while generating token")
 		s.log.Error("!!!LoginMiddleware--->", logger.Error(err))
@@ -668,7 +660,7 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	//fmt.Println(":::::::::user.GetExpiresAt():::::::::", user.GetExpiresAt())
+	//
 
 	// @TODO:: get user expires from builder
 	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
@@ -727,7 +719,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("env id::", session.EnvId)
+
 	if session.IsChanged {
 		err := errors.New("permision update")
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
@@ -1108,9 +1100,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	if err != nil {
 		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	}
-	fmt.Println("test input::", input.GetLoginData().Role)
 
-	fmt.Println(">>Input role_id>>", input.GetLoginData().GetRole().GetId())
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
 		ProjectId:        input.GetProjectId(),
 		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
@@ -1136,8 +1126,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		input.Tables = []*pb.Object{}
 	}
 
-	fmt.Println("session: ", session)
-
 	userData, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 		ProjectId: input.GetProjectId(),
 		Id:        input.GetLoginData().GetUserId(),
@@ -1146,9 +1134,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		s.log.Error("!!!Login->GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	fmt.Println("user data: ", userData)
-	fmt.Println("table data ->>: ", input.GetTables(), input.Tables)
 
 	// // TODO - wrap in a function
 	m := map[string]interface{}{
@@ -1202,8 +1187,7 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 }
 
 func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCompanyLoginRequest) (*pb.MultiCompanyLoginResponse, error) {
-	now := time.Now()
-	fmt.Println("TIME1", time.Since(now))
+
 	resp := &pb.MultiCompanyLoginResponse{}
 
 	if len(req.Username) < 6 {
@@ -1258,8 +1242,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	fmt.Println("TIME2", time.Since(now))
-
 	userDatas, ok := userResp.Data.AsMap()["response"].([]interface{})
 	if !ok {
 		err := errors.New("invalid assertion")
@@ -1291,8 +1273,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	fmt.Println("TIME3", time.Since(now))
-
 	clientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
 		"id": clientTypeId,
 	})
@@ -1301,7 +1281,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	fmt.Println("Client Type Request ================>: ", clientTypeReq)
 	clientTypeResp, err := s.services.ObjectBuilderService().GetSingle(
 		ctx,
 		&pbObject.CommonMessage{
@@ -1314,8 +1293,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	fmt.Println("TIME4", time.Since(now))
 
 	clientTypeData, ok := clientTypeResp.Data.AsMap()["response"].(map[string]interface{})
 	if !ok {
@@ -1355,8 +1332,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	fmt.Println("TIME5", time.Since(now))
-
 	// confirmBy, ok := clientTypeData["confirm_by"].(string)
 	// if !ok {
 	// 	err := errors.New("invalid assertion")
@@ -1394,8 +1369,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	fmt.Println("TIME6", time.Since(now))
-
 	bytes, err := json.Marshal(userCompanyProjects.GetCompanies())
 	if err != nil {
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
@@ -1407,8 +1380,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	fmt.Println("TIME7", time.Since(now))
 
 	return resp, nil
 }
@@ -1455,8 +1426,6 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
 
-	fmt.Println("userProjects", userProjects)
-
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.V2MultiCompanyLoginRes_Company_Project, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
@@ -1471,7 +1440,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 		}
 
 		for _, projectId := range item.ProjectIds {
-			fmt.Println("hello")
+
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
 				&company_service.GetProjectByIdRequest{
@@ -1520,7 +1489,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("id:: >> TOKEN>>>", tokenInfo)
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -1569,7 +1537,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	exist := false
 	for _, item := range projects.GetProjectIds() {
 		if item == session.GetProjectId() {
-			fmt.Println("session has project id")
+
 			exist = true
 			break
 		}
@@ -1714,8 +1682,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
 
-	fmt.Println("userProjects", userProjects)
-
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
@@ -1730,7 +1696,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		}
 
 		for _, projectId := range item.ProjectIds {
-			fmt.Println("hello")
+
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
 				&company_service.GetProjectByIdRequest{

@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -109,8 +108,6 @@ func (r *permissionScopeRepo) HasAccess(ctx context.Context, roleID, clientPlatf
 	if err != nil {
 		return hasAccess, err
 	}
-
-	fmt.Println(count)
 
 	if count > 0 {
 		return true, nil

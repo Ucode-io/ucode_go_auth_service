@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -302,7 +301,6 @@ func (h *Handler) GetClientTypeList(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("client_types:::::", resp.ClientTypes)
 
 	h.handleResponse(c, http.OK, resp)
 }
