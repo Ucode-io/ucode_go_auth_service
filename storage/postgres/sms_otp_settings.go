@@ -37,7 +37,7 @@ func (s *smsOtpSettingsRepo) Create(ctx context.Context, req *pb.CreateSmsOtpSet
 				"default_otp"
 			) VALUES (
 				$1, $2, $3, $4, $5, $6, $7
-			) RETURNING id, login, password, project_id, environment_id, number_of_otp, default_otp`,
+			)`,
 		id,
 		req.Login,
 		req.Password,
@@ -63,6 +63,7 @@ func (s *smsOtpSettingsRepo) Create(ctx context.Context, req *pb.CreateSmsOtpSet
 func (s *smsOtpSettingsRepo) Update(ctx context.Context, req *pb.SmsOtpSettings) (int64, error) {
 
 	query := `UPDATE "sms_otp_settings" SET
+		updated_at = now(),
 		login = :login,
 		password = :password,
 		number_of_otp = :number_of_otp,
@@ -94,6 +95,7 @@ func (s *smsOtpSettingsRepo) GetById(ctx context.Context, req *pb.SmsOtpSettings
 			environment_id, 
 			number_of_otp,
 			default_otp
+		FROM "sms_otp_settings"
 		WHERE id = $1
 		`,
 		req.Id,
@@ -122,6 +124,7 @@ func (s *smsOtpSettingsRepo) GetList(ctx context.Context, req *pb.GetListSmsOtpS
 			environment_id, 
 			number_of_otp,
 			default_otp
+		FROM "sms_otp_settings"
 		WHERE project_id = $1 AND environment_id = $2
 		`,
 		req.ProjectId, req.EnvironmentId,

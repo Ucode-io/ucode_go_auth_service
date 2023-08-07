@@ -44,12 +44,12 @@ func (h *Handler) CreateSmsOtpSettings(c *gin.Context) {
 		return
 	}
 	ok = util.IsValidUUID(projectId.(string))
-	if ok {
+	if !ok {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid UUID")
 		return
 	}
 	ok = util.IsValidUUID(envId.(string))
-	if ok {
+	if !ok {
 		h.handleResponse(c, http.InvalidArgument, "environment-id is an invalid UUID")
 		return
 	}
@@ -103,12 +103,12 @@ func (h *Handler) UpdateSmsOtpSettings(c *gin.Context) {
 		return
 	}
 	ok = util.IsValidUUID(projectId.(string))
-	if ok {
+	if !ok {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid UUID")
 		return
 	}
 	ok = util.IsValidUUID(envId.(string))
-	if ok {
+	if !ok {
 		h.handleResponse(c, http.InvalidArgument, "environment-id is an invalid UUID")
 		return
 	}
@@ -166,12 +166,12 @@ func (h *Handler) GetListSmsOtpSettings(c *gin.Context) {
 		return
 	}
 	ok = util.IsValidUUID(projectId.(string))
-	if ok {
+	if !ok {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid UUID")
 		return
 	}
 	ok = util.IsValidUUID(envId.(string))
-	if ok {
+	if !ok {
 		h.handleResponse(c, http.InvalidArgument, "environment-id is an invalid UUID")
 		return
 	}
@@ -244,9 +244,18 @@ func (h *Handler) GetByIdSmsOtpSettings(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteSmsOtpSettings(c *gin.Context) {
 
-	res, err := h.services.ApiKeysService().Delete(
+	id := c.Param("id")
+	if id == "" {
+		h.handleResponse(c, http.BadRequest, "id is required")
+		return
+	}
+	if !util.IsValidUUID(id) {
+		h.handleResponse(c, http.InvalidArgument, "id is an invalid uuid")
+		return
+	}
+	res, err := h.services.SmsOtpSettingsService().Delete(
 		c.Request.Context(),
-		&auth_service.DeleteReq{Id: c.Param("id")},
+		&auth_service.SmsOtpSettingsPrimaryKey{Id: id},
 	)
 
 	if err != nil {
