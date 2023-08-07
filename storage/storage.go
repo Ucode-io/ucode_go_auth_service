@@ -37,6 +37,7 @@ type StorageI interface {
 	AppleSettings() AppleSettingsI
 	LoginStrategy() LoginStrategyI
 	LoginPlatformType() LoginPlatformType
+	SmsOtpSettings() SmsOtpSettingsRepoI
 }
 
 type ClientPlatformRepoI interface {
@@ -232,4 +233,13 @@ type LoginPlatformType interface {
 	UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest, types string) (string, error)
 	GetListLoginPlatformType(ctx context.Context, input *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error)
 	DeleteLoginSettings(ctx context.Context, input *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error)
+}
+
+//sms otp settings repo is used to save otp creds for each project and environment
+type SmsOtpSettingsRepoI interface {
+	Create(context.Context, *pb.CreateSmsOtpSettingsRequest) (*pb.SmsOtpSettings, error)
+	Update(context.Context, *pb.SmsOtpSettings) (int64, error)
+	GetById(context.Context, *pb.SmsOtpSettingsPrimaryKey) (*pb.SmsOtpSettings, error)
+	GetList(context.Context, *pb.GetListSmsOtpSettingsRequest) (*pb.SmsOtpSettingsResponse, error)
+	Delete(context.Context, *pb.SmsOtpSettingsPrimaryKey) (int64, error)
 }

@@ -40,6 +40,7 @@ type ServiceManagerI interface {
 	LoginStrategyService() auth_service.LoginStrategyServiceClient
 	RegisterService() auth_service.RegisterServiceClient
 	LoginPlatformType() auth_service.LoginPlatformTypeLoginServiceClient
+	SmsOtpSettingsService() auth_service.SmsOtpSettingsServiceClient
 }
 
 type grpcClients struct {
@@ -70,6 +71,7 @@ type grpcClients struct {
 	loginStrategyService             auth_service.LoginStrategyServiceClient
 	registerService                  auth_service.RegisterServiceClient
 	loginPlatformType                auth_service.LoginPlatformTypeLoginServiceClient
+	smsOtpSettingsService            auth_service.SmsOtpSettingsServiceClient
 }
 
 func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
@@ -150,6 +152,7 @@ func NewGrpcClients(cfg config.Config) (ServiceManagerI, error) {
 		loginStrategyService:             auth_service.NewLoginStrategyServiceClient(connAuthService),
 		registerService:                  auth_service.NewRegisterServiceClient(connAuthService),
 		loginPlatformType:                auth_service.NewLoginPlatformTypeLoginServiceClient(connAuthService),
+		smsOtpSettingsService:            auth_service.NewSmsOtpSettingsServiceClient(connAuthService),
 	}, nil
 }
 
@@ -258,4 +261,8 @@ func (g *grpcClients) RegisterService() auth_service.RegisterServiceClient {
 }
 func (g *grpcClients) LoginPlatformType() auth_service.LoginPlatformTypeLoginServiceClient {
 	return g.loginPlatformType
+}
+
+func (g *grpcClients) SmsOtpSettingsService() auth_service.SmsOtpSettingsServiceClient {
+	return g.smsOtpSettingsService
 }
