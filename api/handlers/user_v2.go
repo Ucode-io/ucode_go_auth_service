@@ -700,3 +700,32 @@ func (h *Handler) V2GetUserByLoginType(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, resp)
 }
+
+// V2UserResetPassword godoc
+// @ID v2_user_reset_password
+// @Router /v2/user/reset-password [PUT]
+// @Summary Reset User password
+// @Description Reset User Password
+// @Tags V2_User
+// @Accept json
+// @Produce json
+// @Param reset_password body auth_service.V2UserResetPasswordRequest true "ResetPasswordRequestBody"
+// @Success 200 {object} http.Response{data=string} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2UserResetPassword(c *gin.Context) {
+
+	var userPassword = &auth_service.V2UserResetPasswordRequest{}
+	err := c.ShouldBindJSON(&userPassword)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err)
+		return
+	}
+
+	user, err := h.services.UserService().V2ResetPassword(context.Background(), userPassword)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err)
+		return
+	}
+	h.handleResponse(c, http.OK, user)
+}
