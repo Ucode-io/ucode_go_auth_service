@@ -1010,3 +1010,51 @@ func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.G
 	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
 	return res, nil
 }
+
+func (s *userService) V2UserResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
+
+	var (
+		user = &pb.User{}
+		err  error
+	)
+	if len(req.GetPassword()) > 6 {
+		user, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+			Id: req.UserId,
+		})
+		if err != nil {
+			return nil, err
+		}
+		match, err := security.ComparePassword(user.GetPassword(), req.OldPassword)
+		if err != nil {
+			return nil, err
+		}
+		if !match {
+			err := errors.New("wrong old password")
+			s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+			return nil, err
+		}
+		hashedPassword, err := security.HashPassword(req.Password)
+		if err != nil {
+			s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+			return nil, err
+		}
+		req.Password = hashedPassword
+		rowsAffected, err := s.strg.User().V2ResetPassword(ctx, &pb.V2ResetPasswordRequest{
+			UserId:   req.UserId,
+			Password: req.Password,
+		})
+		if err != nil {
+			s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+			return nil, err
+		}
+		if rowsAffected <= 0 {
+			return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+		}
+		user.Password = hashedPassword
+	} else {
+		err := fmt.Errorf("password must not be less than 6 characters")
+		s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+		return nil, err
+	}
+	return user, nil
+}

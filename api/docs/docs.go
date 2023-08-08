@@ -14477,6 +14477,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/user/reset-password": {
+            "put": {
+                "description": "Reset User Password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Reset User password",
+                "operationId": "v2_user_reset_password",
+                "parameters": [
+                    {
+                        "description": "ResetPasswordRequestBody",
+                        "name": "reset_password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2UserResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/user/{user-id}": {
             "get": {
                 "description": "Get User By ID",
@@ -18372,6 +18455,20 @@ const docTemplate = `{
                 },
                 "resource_type": {
                     "type": "integer"
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_auth_service.V2UserResetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "old_password": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
