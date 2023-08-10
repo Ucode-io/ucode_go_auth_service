@@ -7,9 +7,10 @@ stages:
   - migrate
   - deploy
   - rollback
-  
+
 test-dev:
   stage: test
+  image: golang:1.18
   script:
     - go test -v ./...
   only:
