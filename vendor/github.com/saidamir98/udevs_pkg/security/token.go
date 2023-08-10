@@ -69,7 +69,7 @@ type TokenInfo struct {
 	// ProjectID        string
 	// ClientPlatformID string
 	// ClientTypeID     string
-	UserID string
+	// UserID           string
 	// RoleID           string
 	// IP               string
 	// Data             string

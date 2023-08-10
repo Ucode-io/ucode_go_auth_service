@@ -28,7 +28,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/manveru/gobdd v0.0.0-20131210092515-f1a17fdd710b // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/stretchr/testify v1.8.4
 	github.com/tideland/golib v4.24.2+incompatible // indirect
 	github.com/tideland/gorest v2.15.5+incompatible // indirect
@@ -56,7 +55,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
-	github.com/jackc/pgtype v1.12.0 // indirect
+	github.com/jackc/pgtype v1.12.0
 	github.com/jackc/puddle v1.3.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
