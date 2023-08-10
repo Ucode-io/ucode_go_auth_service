@@ -43,6 +43,9 @@ swag-init:
 run:
 	go run cmd/main.go
 
+test:
+	go test -v ./...
+
 linter:
 	golangci-lint run
 
