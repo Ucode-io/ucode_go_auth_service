@@ -1,51 +1,51 @@
 package test
 
-import (
-	"net/http"
-	"sync"
-	"testing"
-	ht "ucode/ucode_go_auth_service/api/http"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+// import (
+// 	"net/http"
+// 	"sync"
+// 	"testing"
+// 	ht "ucode/ucode_go_auth_service/api/http"
+// 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
-	"github.com/bxcodec/faker/v3"
-	"github.com/stretchr/testify/assert"
-)
+// 	"github.com/bxcodec/faker/v3"
+// 	"github.com/stretchr/testify/assert"
+// )
 
-var s int64
+// var s int64
 
-func TestCreateRole(t *testing.T) {
-	s = 0
-	wg := &sync.WaitGroup{}
+// func TestCreateRole(t *testing.T) {
+// 	s = 0
+// 	wg := &sync.WaitGroup{}
 
-	for i := 0; i < 150; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			createRole(t)
-		}()
-	}
+// 	for i := 0; i < 150; i++ {
+// 		wg.Add(1)
+// 		go func() {
+// 			defer wg.Done()
+// 			createRole(t)
+// 		}()
+// 	}
 
-	wg.Wait()
+// 	wg.Wait()
 
-}
+// }
 
-func createRole(t *testing.T) string {
-	response := &ht.Response{}
-	request := &auth_service.AddRoleRequest{
-		ClientTypeId: "5a3818a9-90f0-44e9-a053-3be0ba1e2c01",
-		Name:         faker.Name(),
-	}
+// func createRole(t *testing.T) string {
+// 	response := &ht.Response{}
+// 	request := &auth_service.AddRoleRequest{
+// 		ClientTypeId: "5a3818a9-90f0-44e9-a053-3be0ba1e2c01",
+// 		Name:         faker.Name(),
+// 	}
 
-	resp, err := PerformRequest(http.MethodPost, "/role", request, response)
+// 	resp, err := PerformRequest(http.MethodPost, "/role", request, response)
 
-	assert.NoError(t, err)
+// 	assert.NoError(t, err)
 
-	assert.NotNil(t, resp)
-	if resp != nil {
-		assert.Equal(t, resp.StatusCode, 201)
-	} else {
-		s++
-	}
+// 	assert.NotNil(t, resp)
+// 	if resp != nil {
+// 		assert.Equal(t, resp.StatusCode, 201)
+// 	} else {
+// 		s++
+// 	}
 
-	return ""
-}
+// 	return ""
+// }

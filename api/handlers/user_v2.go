@@ -387,6 +387,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteUser(c *gin.Context) {
 	var (
+		// userDataToMap       = make(map[string]interface{})
 		resourceEnvironment *company_service.ResourceEnvironment
 		err                 error
 	)
@@ -471,6 +472,27 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	// userDataToMap["id"] = userID
+	// structData, err := helper.ConvertMapToStruct(userDataToMap)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
+
+	// _, err = h.services.ObjectBuilderService().Delete(
+	// 	context.Background(),
+	// 	&obs.CommonMessage{
+	// 		TableSlug: "user",
+	// 		Data:      structData,
+	// 		ProjectId: resourceEnvironment.GetId(),
+	// 	},
+	// )
+
+	// if err != nil {
+	// 	h.handleResponse(c, http.InternalServerError, err.Error())
+	// 	return
+	// }
 
 	h.handleResponse(c, http.NoContent, resp)
 }
