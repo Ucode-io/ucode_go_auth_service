@@ -2,11 +2,19 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
+  - test
   - build
   - migrate
   - deploy
   - rollback
-
+  
+test-dev:
+  stage: test
+  script:
+    - go test -v ./...
+  only:
+    - dev
+  
 build-dev:
   stage: build
   extends: .build_template
