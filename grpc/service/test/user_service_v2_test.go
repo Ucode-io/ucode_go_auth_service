@@ -205,7 +205,7 @@ func TestV2DeleteUser(t *testing.T) {
 				// ClientTypeId:          config.CreadentialsForTest[conf.Environment]["clientTypeId"],
 				// CompanyId:             config.CreadentialsForTest[conf.Environment]["companyId"],
 				// ProjectId:             config.CreadentialsForTest[conf.Environment]["projectId"],
-				// IsTest:                true,
+				IsTest: true,
 			},
 		)
 		assert.NoError(t, err)
