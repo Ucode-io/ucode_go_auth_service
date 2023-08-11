@@ -2418,6 +2418,15 @@ definitions:
       resource_type:
         type: integer
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.V2UserResetPasswordRequest:
+    properties:
+      old_password:
+        type: string
+      password:
+        type: string
+      user_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_company_service.CreateProjectRequest:
     properties:
       company_id:
@@ -12111,6 +12120,52 @@ paths:
       summary: Get User By Login type
       tags:
       - V2_User
+  /v2/user/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Reset User Password
+      operationId: v2_user_reset_password
+      parameters:
+      - description: ResetPasswordRequestBody
+        in: body
+        name: reset_password
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2UserResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Reset User password
+      tags:
+      - User
   /v2/v2multi-company/login:
     post:
       consumes:

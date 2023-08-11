@@ -170,6 +170,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.GET("/user/:user-id", h.V2GetUserByID)
 		v2.PUT("/user", h.V2UpdateUser)
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
+		v2.PUT("/user/reset-password", h.V2UserResetPassword)
 		v2.POST("/login", h.V2Login) // @TODO
 		v2.PUT("/refresh", h.V2RefreshToken)
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
