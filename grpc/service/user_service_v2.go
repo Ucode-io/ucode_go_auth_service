@@ -655,6 +655,13 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		// return nil, status.Error(codes.Internal, err.Error())
 		projectId = ""
 	}
+	name, ok := userData["name"].(string)
+	if ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		user.Name = name
+	}
 
 	user.ProjectId = projectId
 
@@ -815,6 +822,13 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+		name, ok := userItem["name"].(string)
+		if ok {
+			// err := errors.New("active is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			user.Name = name
+		}
 
 		user.Active = int32(active)
 		user.RoleId = roleId
@@ -832,22 +846,34 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
 	s.log.Info("---UpdateUser--->", logger.Any("req", req))
 
-	//structData, err := helper.ConvertRequestToSturct(req)
-	//if err != nil {
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-	//
-	//_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
-	//	TableSlug: "user",
-	//	Data:      structData,
-	//	ProjectId: config.UcodeDefaultProjectID,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
+	structData, err := helper.ConvertRequestToSturct(req)
+	if err != nil {
+		s.log.Error("!!!UpdateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	switch req.ResourceType {
+	case 1:
+		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		})
+		if err != nil {
+			s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		_, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		})
+		if err != nil {
+			s.log.Error("!!!UpdateUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+
 	//emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	//email := emailRegex.MatchString(req.Email)
 	//if !email {
