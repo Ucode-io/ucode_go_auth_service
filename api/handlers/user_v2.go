@@ -286,7 +286,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateUser(c *gin.Context) {
 	var (
-		user                auth_service.UpdateUserRequest
+		user auth_service.UpdateUserRequest
 	)
 
 	err := c.ShouldBindJSON(&user)
@@ -319,6 +319,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     projectId.(string),
+		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
 
 	user.ResourceType = int32(resource.GetResourceType())
