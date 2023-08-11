@@ -1263,7 +1263,7 @@ func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKe
 	return userProjects, nil
 }
 
-func (s *userService) V2UserResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
+func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
 
 	var (
 		user = &pb.User{}
