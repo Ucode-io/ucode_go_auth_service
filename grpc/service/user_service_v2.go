@@ -1011,7 +1011,7 @@ func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.G
 	return res, nil
 }
 
-func (s *userService) V2UserResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
+func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
 
 	var (
 		user = &pb.User{}
