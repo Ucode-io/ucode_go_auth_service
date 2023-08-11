@@ -851,15 +851,27 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		s.log.Error("!!!UpdateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
-		TableSlug: "user",
-		Data:      structData,
-		ProjectId: req.ProjectId,
-	})
-	if err != nil {
-		s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	switch req.ResourceType {
+	case 1:
+		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		})
+		if err != nil {
+			s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		_, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+			TableSlug: "user",
+			Data:      structData,
+			ProjectId: req.ProjectId,
+		})
+		if err != nil {
+			s.log.Error("!!!UpdateUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	//emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
