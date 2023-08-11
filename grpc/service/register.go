@@ -67,19 +67,19 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	if foundUser.Id == "" {
 		// create user in auth service
 		var name, login, email, password, phone string
-		if _, ok := body["name"]; ok {
+		if _, ok := body["name"].(string); ok {
 			name = body["name"].(string)
 		}
-		if _, ok := body["login"]; ok {
+		if _, ok := body["login"].(string); ok {
 			login = body["login"].(string)
 		}
-		if _, ok := body["password"]; ok {
+		if _, ok := body["password"].(string); ok {
 			password = body["password"].(string)
 		}
-		if _, ok := body["phone"]; ok {
+		if _, ok := body["phone"].(string); ok {
 			phone = body["phone"].(string)
 		}
-		if _, ok := body["email"]; ok {
+		if _, ok := body["email"].(string); ok {
 			email = body["email"].(string)
 		}
 
