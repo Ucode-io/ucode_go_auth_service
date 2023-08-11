@@ -110,6 +110,13 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	v2 := r.Group("/v2")
 	v2.Use(h.AuthMiddleware())
 	{
+		// sms-otp-settings
+		v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
+		v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)
+		v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
+		v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
+		v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
+
 		v2.POST("/client-platform", h.V2CreateClientPlatform)
 		v2.GET("/client-platform", h.V2GetClientPlatformList) //project_id
 		v2.GET("/client-platform/:client-platform-id", h.V2GetClientPlatformByID)

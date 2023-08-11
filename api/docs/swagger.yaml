@@ -647,6 +647,17 @@ definitions:
       view_slug:
         type: string
     type: object
+  ucode_ucode_go_auth_service_api_models.CreateSmsOtpSettingsRequest:
+    properties:
+      default_otp:
+        type: string
+      login:
+        type: string
+      number_of_otp:
+        type: integer
+      password:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_api_models.Email:
     properties:
       client_type:
@@ -725,6 +736,19 @@ definitions:
       body:
         additionalProperties: true
         type: object
+    type: object
+  ucode_ucode_go_auth_service_api_models.UpdateSmsOtpSettingsRequest:
+    properties:
+      default_otp:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      number_of_otp:
+        type: integer
+      password:
+        type: string
     type: object
   ucode_ucode_go_auth_service_api_models.V2SendCodeRequest:
     properties:
@@ -1792,6 +1816,30 @@ definitions:
         type: string
       user_id:
         type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.SmsOtpSettings:
+    properties:
+      default_otp:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      number_of_otp:
+        type: integer
+      password:
+        type: string
+      project_id:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.SmsOtpSettingsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.SmsOtpSettings'
+        type: array
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.Table:
     properties:
@@ -11244,6 +11292,266 @@ paths:
       summary: SetEmail
       tags:
       - V2_Session
+  /v2/sms-otp-settings:
+    get:
+      consumes:
+      - application/json
+      description: Get Sms Otp Settings
+      operationId: get_list_sms_otp_settings
+      parameters:
+      - description: environment-id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.SmsOtpSettingsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Sms Otp Settings
+      tags:
+      - V2_SMS_OTP_SETTINGS
+    post:
+      consumes:
+      - application/json
+      description: Create sms otp settings
+      operationId: create_api_keys
+      parameters:
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: environment-id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: SmsOtpRequest ReqBody
+        in: body
+        name: sms-otp-settings
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.CreateSmsOtpSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: SmsOtpRequest  data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.SmsOtpSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create sms otp settings
+      tags:
+      - V2_SMS_OTP_SETTINGS
+    put:
+      consumes:
+      - application/json
+      description: Update sms otp settings
+      operationId: update_api_keys
+      parameters:
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: environment-id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: SmsOtpSettingsReqBody
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.UpdateSmsOtpSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ApiKey data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.SmsOtpSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update sms otp settings
+      tags:
+      - V2_SMS_OTP_SETTINGS
+  /v2/sms-otp-settings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete sms otp settings
+      operationId: delete_sms_otp_settings
+      parameters:
+      - description: project-id
+        in: query
+        name: project-id
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete sms otp settings
+      tags:
+      - V2_SMS_OTP_SETTINGS
+    get:
+      consumes:
+      - application/json
+      description: Get sms otp settings by id
+      operationId: get_sms_otp_settings_by_id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: SmsOtpSettings data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.SmsOtpSettings'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get sms otp settings by id
+      tags:
+      - V2_SMS_OTP_SETTINGS
   /v2/upsert-login-strategy:
     post:
       consumes:
