@@ -68,6 +68,17 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	}
 	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
 
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&obs.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 	code, err := util.GenerateCode(4)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
@@ -89,6 +100,26 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
+		smsOtpSettings, err := h.services.SmsOtpSettingsService().GetList(context.Background(), &auth_service.GetListSmsOtpSettingsRequest{
+			ProjectId:     resourceEnvironment.ProjectId,
+			EnvironmentId: environmentId.(string),
+		})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		if len(smsOtpSettings.GetItems()) > 0 {
+			if smsOtpSettings.GetItems()[0].GetNumberOfOtp() != 0 {
+				code, err := util.GenerateCode(int(smsOtpSettings.GetItems()[0].GetNumberOfOtp()))
+				if err != nil {
+					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+					return
+				}
+				body.Otp = code
+			}
+			body.DevEmail = smsOtpSettings.GetItems()[0].Login
+			body.DevEmailPassword = smsOtpSettings.GetItems()[0].Password
+		}
 	case "EMAIL":
 
 		valid = util.IsValidEmail(request.Recipient)
@@ -96,17 +127,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Email is not valid")
 			return
 		}
-		if !util.IsValidUUID(resourceId.(string)) {
-			h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
-			return
-		}
-		resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-			c.Request.Context(),
-			&obs.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
 
 		emailSettings, err := h.services.EmailService().GetListEmailSettings(
 			c.Request.Context(),

@@ -33,6 +33,7 @@ type Store struct {
 	appleId           storage.AppleSettingsI
 	loginStrategy     storage.LoginStrategyI
 	loginPlatformType storage.LoginPlatformType
+	smsOtpSettings    storage.SmsOtpSettingsRepoI
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -54,7 +55,6 @@ func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, erro
 		return nil, err
 	}
 
-	
 	config.MaxConns = cfg.PostgresMaxConnections
 
 	pool, err := pgxpool.ConnectConfig(ctx, config)
@@ -236,4 +236,11 @@ func (s *Store) LoginPlatformType() storage.LoginPlatformType {
 		s.loginPlatformType = NewLoginPlatformTypeRepo(s.db)
 	}
 	return s.loginPlatformType
+}
+
+func (s *Store) SmsOtpSettings() storage.SmsOtpSettingsRepoI {
+	if s.smsOtpSettings == nil {
+		s.smsOtpSettings = NewSmsOtpSettingsRepo(s.db)
+	}
+	return s.smsOtpSettings
 }

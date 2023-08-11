@@ -270,15 +270,31 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		_, err := s.services.SmsService().ConfirmOtp(
-			ctx,
-			&sms_service.ConfirmOtpRequest{
-				SmsId: sms_id,
-				Otp:   otp,
-			},
-		)
+		smsOtpSettings, err := s.services.SmsOtpSettingsService().GetList(ctx, &pb.GetListSmsOtpSettingsRequest{
+			EnvironmentId: req.Data["environment_id"],
+			ProjectId:     req.Data["project_id"],
+		})
 		if err != nil {
-			return nil, err
+			s.log.Error("!!!V2LoginWithOption.SmsOtpSettingsService().GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		var defaultOtp string
+		if len(smsOtpSettings.GetItems()) > 0 {
+			if smsOtpSettings.GetItems()[0].GetDefaultOtp() != "" {
+				defaultOtp = smsOtpSettings.GetItems()[0].GetDefaultOtp()
+			}
+		}
+		if defaultOtp != otp {
+			_, err = s.services.SmsService().ConfirmOtp(
+				ctx,
+				&sms_service.ConfirmOtpRequest{
+					SmsId: sms_id,
+					Otp:   otp,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
 		}
 		verified = true
 		user, err := s.strg.User().GetByUsername(ctx, phone)
@@ -1547,7 +1563,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	for _, path := range arr_path {
 		if path == "object" || path == "object-slim" {
 			checkPermission = true
-			break;
+			break
 		}
 	}
 	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" && checkPermission {
