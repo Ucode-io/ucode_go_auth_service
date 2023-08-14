@@ -74,13 +74,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		if _, ok := body["login"]; ok {
 			login = body["login"].(string)
 		}
-		if _, ok := body["password"]; ok {
+		if _, ok := body["password"].(string); ok {
 			password = body["password"].(string)
 		}
-		if _, ok := body["phone"]; ok {
+		if _, ok := body["phone"].(string); ok {
 			phone = body["phone"].(string)
 		}
-		if _, ok := body["email"]; ok {
+		if _, ok := body["email"].(string); ok {
 			email = body["email"].(string)
 		}
 		emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")

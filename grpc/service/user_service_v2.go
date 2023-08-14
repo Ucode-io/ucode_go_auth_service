@@ -738,6 +738,13 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		// return nil, status.Error(codes.Internal, err.Error())
 		projectId = ""
 	}
+	name, ok := userData["name"].(string)
+	if ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		user.Name = name
+	}
 
 	user.ProjectId = projectId
 
