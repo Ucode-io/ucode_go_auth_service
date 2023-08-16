@@ -95,6 +95,10 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		ApiKeysButton:         data.GetGlobalPermission().GetApiKeysButton(),
 		EnvironmentsButton:    data.GetGlobalPermission().GetEnvironmentsButton(),
 		ProjectsButton:        data.GetGlobalPermission().GetProjectsButton(),
+		VersionButton:         data.GetGlobalPermission().GetVersionButton(),
+		EnvironmentButton:     data.GetGlobalPermission().GetEnvironmentButton(),
+		ProjectButton:         data.GetGlobalPermission().GetProjectButton(),
+		SmsButton:             data.GetGlobalPermission().GetSmsButton(),
 	}
 	return res
 }
