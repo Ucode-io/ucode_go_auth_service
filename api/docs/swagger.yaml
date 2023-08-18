@@ -1356,6 +1356,8 @@ definitions:
         type: boolean
       chat:
         type: boolean
+      environment_button:
+        type: boolean
       environments_button:
         type: boolean
       id:
@@ -1366,6 +1368,8 @@ definitions:
         type: boolean
       profile_settings_button:
         type: boolean
+      project_button:
+        type: boolean
       project_settings_button:
         type: boolean
       projects_button:
@@ -1373,6 +1377,10 @@ definitions:
       redirects_button:
         type: boolean
       settings_button:
+        type: boolean
+      sms_button:
+        type: boolean
+      version_button:
         type: boolean
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest:
@@ -2705,6 +2713,8 @@ definitions:
         type: boolean
       chat:
         type: boolean
+      environment_button:
+        type: boolean
       environments_button:
         type: boolean
       id:
@@ -2715,6 +2725,8 @@ definitions:
         type: boolean
       profile_settings_button:
         type: boolean
+      project_button:
+        type: boolean
       project_settings_button:
         type: boolean
       projects_button:
@@ -2722,6 +2734,10 @@ definitions:
       redirects_button:
         type: boolean
       settings_button:
+        type: boolean
+      sms_button:
+        type: boolean
+      version_button:
         type: boolean
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission:

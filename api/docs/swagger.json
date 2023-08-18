@@ -17349,6 +17349,9 @@
                 "chat": {
                     "type": "boolean"
                 },
+                "environment_button": {
+                    "type": "boolean"
+                },
                 "environments_button": {
                     "type": "boolean"
                 },
@@ -17364,6 +17367,9 @@
                 "profile_settings_button": {
                     "type": "boolean"
                 },
+                "project_button": {
+                    "type": "boolean"
+                },
                 "project_settings_button": {
                     "type": "boolean"
                 },
@@ -17374,6 +17380,12 @@
                     "type": "boolean"
                 },
                 "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
                     "type": "boolean"
                 }
             }
@@ -19409,6 +19421,9 @@
                 "chat": {
                     "type": "boolean"
                 },
+                "environment_button": {
+                    "type": "boolean"
+                },
                 "environments_button": {
                     "type": "boolean"
                 },
@@ -19424,6 +19439,9 @@
                 "profile_settings_button": {
                     "type": "boolean"
                 },
+                "project_button": {
+                    "type": "boolean"
+                },
                 "project_settings_button": {
                     "type": "boolean"
                 },
@@ -19434,6 +19452,12 @@
                     "type": "boolean"
                 },
                 "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
                     "type": "boolean"
                 }
             }
