@@ -1639,6 +1639,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 }
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
+	fmt.Println("\n\n >>>>>>> test #1")
 	resp := pb.V2MultiCompanyOneLoginRes{
 		Companies: []*pb.Company2{},
 	}
@@ -1679,20 +1680,20 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
-
+	fmt.Println("\n\n >>>>>>> test #2")
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
 			&company_service.GetCompanyByIdRequest{
 				Id: item.Id,
 			})
-
+		fmt.Println("\n\n >>>>>>> test #3")
 		if err != nil {
 			errGetProjects := errors.New("cant get user projects")
 			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 			return nil, status.Error(codes.NotFound, errGetProjects.Error())
 		}
-
+		fmt.Println("\n\n >>>>>>> test #4")
 		for _, projectId := range item.ProjectIds {
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
@@ -1708,21 +1709,10 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				return nil, status.Error(codes.NotFound, errGetProjects.Error())
 			}
 
-			projects = append(projects, &pb.Project2{
-				Id:        projectInfo.GetProjectId(),
-				CompanyId: projectInfo.GetCompanyId(),
-				Name:      projectInfo.GetTitle(),
-				Domain:    projectInfo.GetK8SNamespace(),
-			})
-		}
-
-		for _, p := range projects {
-
-			// get environments
 			environments, err := s.services.ResourceService().GetListConfiguredResourceEnvironment(
 				ctx,
 				&company_service.GetListConfiguredResourceEnvironmentReq{
-					ProjectId: p.Id,
+					ProjectId: projectInfo.GetProjectId(),
 				},
 			)
 			if err != nil {
@@ -1730,8 +1720,16 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 				return nil, status.Error(codes.NotFound, errGetProjects.Error())
 			}
+
+			resProject := &pb.Project2{
+				Id:        projectInfo.GetProjectId(),
+				CompanyId: projectInfo.GetCompanyId(),
+				Name:      projectInfo.GetTitle(),
+				Domain:    projectInfo.GetK8SNamespace(),
+			}
+
 			for _, en := range environments.Data {
-				p.ResourceEnvironments = append(p.ResourceEnvironments, &pb.ResourceEnvironmentV2MultiCompany{
+				resProject.ResourceEnvironments = append(resProject.ResourceEnvironments, &pb.ResourceEnvironmentV2MultiCompany{
 					Id:            en.Id,
 					Name:          en.Name,
 					ProjectId:     en.ProjectId,
@@ -1744,11 +1742,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					Description:   en.Description,
 				})
 
-				// get client types
 				clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 					ctx,
 					&pb.V2GetClientTypeListRequest{
-						ProjectId: en.Id,
+						ProjectId:    en.Id,
+						ResourceType: en.ResourceType,
 					},
 				)
 				if err != nil {
@@ -1756,10 +1754,13 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 					return nil, status.Error(codes.NotFound, errGetProjects.Error())
 				}
-				p.ClientTypes = clientTypes.Data
 
+				resProject.ClientTypes = clientTypes.Data
 			}
+
+			projects = append(projects, resProject)
 		}
+		fmt.Println("\n\n >>>>>>> test #5")
 
 		resp.Companies = append(resp.Companies, &pb.Company2{
 			Id:          company.GetCompany().GetId(),
@@ -1769,7 +1770,9 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			OwnerId:     company.GetCompany().GetOwnerId(),
 			Projects:    projects,
 		})
+		fmt.Println("\n\n >>>>>>> test #6")
 	}
+	fmt.Println("\n\n >>>>>>> test #last")
 
 	return &resp, nil
 }

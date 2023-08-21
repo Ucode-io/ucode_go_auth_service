@@ -409,9 +409,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
-	var (
-		result *pbObject.CommonMessage
-	)
+	result := &pbObject.CommonMessage{}
 
 	// @TODO limit offset error should fix
 	structReq := map[string]interface{}{
@@ -419,14 +417,17 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		"offset": req.GetOffset(),
 		//"search": req.GetSearch(),
 	}
+	fmt.Println(">>>>>>>>>>. test service 5 >> #1")
 	structData, err := helper.ConvertRequestToSturct(structReq)
+	fmt.Println(">>>>>>>>>>. test service 5 >> #2")
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println(">>>>>>>>>>. test service 5 >> #3", req)
 	switch req.ResourceType {
 	case 1:
-		
+
 		result, err = s.services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -438,7 +439,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		
+
 		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -451,8 +452,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	
-
+	fmt.Println(">>>>>>>>>>. test service 5 >> #4")
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
 		Data:      result.Data,
