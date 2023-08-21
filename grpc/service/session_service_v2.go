@@ -1729,7 +1729,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			}
 
 			for _, en := range environments.Data {
-				resProject.ResourceEnvironments = append(resProject.ResourceEnvironments, &pb.ResourceEnvironmentV2MultiCompany{
+				respResourceEnvironment := &pb.ResourceEnvironmentV2MultiCompany{
 					Id:            en.Id,
 					Name:          en.Name,
 					ProjectId:     en.ProjectId,
@@ -1740,7 +1740,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					ServiceType:   en.ServiceType,
 					DisplayColor:  en.DisplayColor,
 					Description:   en.Description,
-				})
+				}
 
 				clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 					ctx,
@@ -1754,8 +1754,9 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 					return nil, status.Error(codes.NotFound, errGetProjects.Error())
 				}
+				respResourceEnvironment.ClientTypes = clientTypes.Data
 
-				resProject.ClientTypes = clientTypes.Data
+				resProject.ResourceEnvironments = append(resProject.ResourceEnvironments, respResourceEnvironment)
 			}
 
 			projects = append(projects, resProject)

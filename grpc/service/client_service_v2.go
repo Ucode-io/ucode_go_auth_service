@@ -400,7 +400,6 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
 		Data:      result.Data,
@@ -412,6 +411,9 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 	result := &pbObject.CommonMessage{}
 
 	// @TODO limit offset error should fix
+	if req.Limit == 0 {
+		req.Limit = 1000
+	}
 	structReq := map[string]interface{}{
 		"limit":  req.GetLimit(),
 		"offset": req.GetOffset(),
@@ -424,6 +426,9 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	// if req.ProjectId != "ecb08c73-3b52-42e9-970b-56be9b7c4e81" {
+	// 	return &pb.CommonMessage{}, nil
+	// }
 	fmt.Println(">>>>>>>>>>. test service 5 >> #3", req)
 	switch req.ResourceType {
 	case 1:
@@ -452,7 +457,8 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	fmt.Println(">>>>>>>>>>. test service 5 >> #4")
+	fmt.Println("\n\n >>>>>>>>>>>>>>> client types", result.Data)
+
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
 		Data:      result.Data,

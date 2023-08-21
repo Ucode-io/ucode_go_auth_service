@@ -17967,6 +17967,9 @@
         "ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany": {
             "type": "object",
             "properties": {
+                "client_types": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
                 "description": {
                     "type": "string"
                 },
