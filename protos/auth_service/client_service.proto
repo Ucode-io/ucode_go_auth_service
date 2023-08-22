@@ -295,6 +295,7 @@ message V2GetClientTypeListRequest {
     string search = 3;
     string project_id = 4;
     int32 resource_type = 5;
+    repeated string guids = 6;
 }
 
 message V2UpdateClientTypeRequest {

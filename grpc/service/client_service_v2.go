@@ -419,17 +419,18 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		"offset": req.GetOffset(),
 		//"search": req.GetSearch(),
 	}
-	fmt.Println(">>>>>>>>>>. test service 5 >> #1")
+
+	if req.Guids != nil {
+		structReq["guid"] = req.Guids
+	}
+
 	structData, err := helper.ConvertRequestToSturct(structReq)
-	fmt.Println(">>>>>>>>>>. test service 5 >> #2")
+
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	// if req.ProjectId != "ecb08c73-3b52-42e9-970b-56be9b7c4e81" {
-	// 	return &pb.CommonMessage{}, nil
-	// }
-	fmt.Println(">>>>>>>>>>. test service 5 >> #3", req)
+
 	switch req.ResourceType {
 	case 1:
 
