@@ -441,7 +441,8 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			})
 		if err != nil {
 			s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return &pb.CommonMessage{}, nil
+			// return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
 
