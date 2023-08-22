@@ -464,6 +464,27 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	return rowsAffected, err
 }
 
+func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
+	res = &models.UserProjectClientTypeResponse{}
+
+	query := `SELECT 
+				array_agg(client_type_id) as client_type_ids
+			FROM user_project 
+			WHERE user_id = $1
+			AND project_id = $2
+			AND client_type_id IS NOT NULL
+			GROUP BY  user_id`
+
+	err = r.db.QueryRow(ctx, query, req.UserId, req.ProjectId).Scan(
+		&res.ClientTypeIds,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
 func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error) {
 	res := pb.GetUserProjectsRes{}
 

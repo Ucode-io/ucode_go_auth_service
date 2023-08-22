@@ -43,3 +43,11 @@ type ListTimezone struct {
 	Timezone []*Timezone `json:"timezone"`
 	Count    int         `json:"count"`
 }
+
+type UserProjectClientTypeRequest struct {
+	UserId    string `json:"user_id"`
+	ProjectId string `json:"project_id"`
+}
+type UserProjectClientTypeResponse struct {
+	ClientTypeIds []string `json:"client_type_ids"`
+}

@@ -407,24 +407,32 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
-	var (
-		result *pbObject.CommonMessage
-	)
+	result := &pbObject.CommonMessage{}
 
 	// @TODO limit offset error should fix
+	if req.Limit == 0 {
+		req.Limit = 1000
+	}
 	structReq := map[string]interface{}{
 		"limit":  req.GetLimit(),
 		"offset": req.GetOffset(),
 		//"search": req.GetSearch(),
 	}
+
+	if req.Guids != nil {
+		structReq["guid"] = req.Guids
+	}
+
 	structData, err := helper.ConvertRequestToSturct(structReq)
+
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
 	switch req.ResourceType {
 	case 1:
-		
+
 		result, err = s.services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -433,10 +441,11 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			})
 		if err != nil {
 			s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return &pb.CommonMessage{}, nil
+			// return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		
+
 		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -449,7 +458,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	
+	fmt.Println("\n\n >>>>>>>>>>>>>>> client types", result.Data)
 
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
@@ -474,7 +483,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
-	
+
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
