@@ -1000,7 +1000,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
@@ -1016,7 +1016,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
@@ -1030,7 +1030,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
@@ -1046,7 +1046,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		_, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
