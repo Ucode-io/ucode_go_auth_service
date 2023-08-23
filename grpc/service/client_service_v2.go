@@ -414,17 +414,25 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 	)
 	fmt.Println("req.ProjectId", req.ProjectId)
 
+	if req.Limit == 0 {
+		req.Limit = 1000
+	}
+
 	// @TODO limit offset error should fix
 	structReq := map[string]interface{}{
 		"limit":  req.GetLimit(),
 		"offset": req.GetOffset(),
 		//"search": req.GetSearch(),
 	}
+	if req.Guids != nil {
+		structReq["guid"] = req.Guids
+	}
 	structData, err := helper.ConvertRequestToSturct(structReq)
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("\n\n >>> structData >>", structReq)
 	switch req.ResourceType {
 	case 1:
 		fmt.Println("builder service")

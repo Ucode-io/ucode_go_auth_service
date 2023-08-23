@@ -466,8 +466,29 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	return rowsAffected, err
 }
 
-func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.GetUserProjects, error) {
-	res := models.GetUserProjects{}
+func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
+	res = &models.UserProjectClientTypeResponse{}
+
+	query := `SELECT 
+				array_agg(client_type_id) as client_type_ids
+			FROM user_project 
+			WHERE user_id = $1
+			AND project_id = $2
+			AND client_type_id IS NOT NULL
+			GROUP BY  user_id`
+
+	err = r.db.QueryRow(ctx, query, req.UserId, req.ProjectId).Scan(
+		&res.ClientTypeIds,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error) {
+	res := pb.GetUserProjectsRes{}
 
 	query := `SELECT company_id,
       			array_agg(project_id)
@@ -492,9 +513,9 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*models.
 			return nil, err
 		}
 
-		res.Companies = append(res.Companies, models.Companie{
-			Id:       company,
-			Projects: projects,
+		res.Companies = append(res.Companies, &pb.UserCompany{
+			Id:         company,
+			ProjectIds: projects,
 		})
 	}
 
@@ -682,10 +703,9 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 		}
 		params["phone"] = req.Phone
 	}
-	fmt.Println("params: ", params)
 
 	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
-	fmt.Println("query: ", lastQuery, args)
+
 	var userId string
 	err := r.db.QueryRow(ctx, lastQuery, args...).Scan(&userId)
 	if err == pgx.ErrNoRows {
@@ -693,7 +713,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	} else if err != nil {
 		return nil, err
 	}
-	fmt.Println("user_id: ", userId)
+
 	return &pb.GetUserByLoginTypesResponse{
 		UserId: userId,
 	}, nil
@@ -844,6 +864,40 @@ func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq
 	}
 
 	return &res, nil
+}
+
+func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
+	var (
+		params                      = make(map[string]interface{})
+		subQueryEmail, subQueryPass string
+	)
+	if req.GetPassword() != "" {
+		subQueryPass = "password = :password, "
+		params["password"] = req.GetPassword()
+	}
+	if req.GetEmail() != "" {
+		subQueryEmail = "email = :email, "
+		params["email"] = req.GetEmail()
+	}
+
+	query := `UPDATE "user" SET ` + subQueryPass + subQueryEmail + `
+		updated_at = now()
+	WHERE
+		id = :id`
+	params["id"] = req.GetUserId()
+
+	fmt.Print("\n\nParams: ", params)
+
+	q, arr := helper.ReplaceQueryParams(query, params)
+
+	result, err := r.db.Exec(ctx, q, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected := result.RowsAffected()
+
+	return rowsAffected, err
 }
 
 func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error) {

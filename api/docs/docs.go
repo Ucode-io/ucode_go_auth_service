@@ -15988,6 +15988,56 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environment_button": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest": {
             "type": "object",
             "properties": {
@@ -16387,6 +16437,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -16396,16 +16449,28 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -16522,6 +16587,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany": {
             "type": "object",
             "properties": {
+                "client_types": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -17020,6 +17088,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_environment_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "type": "integer"
                 },
@@ -17256,6 +17327,9 @@ const docTemplate = `{
                 },
                 "environment_id": {
                     "type": "string"
+                },
+                "global_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.GlobalPermission"
                 },
                 "login_table_slug": {
                     "type": "string"
@@ -17674,7 +17748,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_company_service.Language"
+                    }
                 },
                 "logo": {
                     "type": "string"
@@ -17933,9 +18010,62 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environment_button": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission": {
             "type": "object",
             "properties": {
+                "automation": {
+                    "type": "string"
+                },
                 "client_type_id": {
                     "type": "string"
                 },
@@ -17945,16 +18075,28 @@ const docTemplate = `{
                 "guid": {
                     "type": "string"
                 },
+                "language_btn": {
+                    "type": "string"
+                },
                 "read": {
                     "type": "string"
                 },
                 "role_id": {
                     "type": "string"
                 },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
                 "table_slug": {
                     "type": "string"
                 },
                 "update": {
+                    "type": "string"
+                },
+                "view_create": {
                     "type": "string"
                 },
                 "write": {
@@ -17991,6 +18133,9 @@ const docTemplate = `{
                 "client_type_id": {
                     "type": "string"
                 },
+                "global_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission"
+                },
                 "grant_access": {
                     "type": "boolean"
                 },
@@ -18022,6 +18167,9 @@ const docTemplate = `{
                 },
                 "automatic_filters": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod"
+                },
+                "custom_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission"
                 },
                 "description": {
                     "type": "string"
@@ -18058,6 +18206,12 @@ const docTemplate = `{
                 },
                 "subtitle_field_slug": {
                     "type": "string"
+                },
+                "table_view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission"
+                    }
                 },
                 "view_permissions": {
                     "type": "array",
@@ -18136,6 +18290,26 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission": {
+            "type": "object",
+            "properties": {
+                "automation": {
+                    "type": "string"
+                },
+                "language_btn": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
+                "view_create": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission": {
             "type": "object",
             "properties": {
@@ -18185,9 +18359,41 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "boolean"
+                },
+                "edit": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "view": {
+                    "type": "boolean"
+                },
+                "view_id": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission": {
             "type": "object",
             "properties": {
+                "create_permission": {
+                    "type": "boolean"
+                },
+                "delete_permission": {
+                    "type": "boolean"
+                },
+                "edit_permission": {
+                    "type": "boolean"
+                },
                 "guid": {
                     "type": "string"
                 },
@@ -18256,6 +18462,9 @@ const docTemplate = `{
                 },
                 "client_type": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ClientType"
+                },
+                "global_permission": {
+                    "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GlobalPermission"
                 },
                 "login_table_slug": {
                     "type": "string"
@@ -18455,7 +18664,7 @@ const docTemplate = `{
                     "description": "Sequence of extended key usages.",
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/x509.ExtKeyUsage"
                     }
                 },
                 "extensions": {
@@ -18494,7 +18703,7 @@ const docTemplate = `{
                     }
                 },
                 "keyUsage": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.KeyUsage"
                 },
                 "maxPathLen": {
                     "description": "MaxPathLen and MaxPathLenZero indicate the presence and\nvalue of the BasicConstraints' \"pathLenConstraint\".\n\nWhen parsing a certificate, a positive non-zero MaxPathLen\nmeans that the field was specified, -1 means it was unset,\nand MaxPathLenZero being true mean that the field was\nexplicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false\nshould be treated equivalent to -1 (unset).\n\nWhen generating a certificate, an unset pathLenConstraint\ncan be requested with either MaxPathLen == -1 or using the\nzero value for both MaxPathLen and MaxPathLenZero.",
@@ -18554,7 +18763,7 @@ const docTemplate = `{
                 },
                 "publicKey": {},
                 "publicKeyAlgorithm": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.PublicKeyAlgorithm"
                 },
                 "raw": {
                     "description": "Complete ASN.1 DER content (certificate, signature algorithm and signature).",
@@ -18601,7 +18810,7 @@ const docTemplate = `{
                     }
                 },
                 "signatureAlgorithm": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.SignatureAlgorithm"
                 },
                 "subject": {
                     "$ref": "#/definitions/pkix.Name"
@@ -18642,6 +18851,135 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "x509.ExtKeyUsage": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ],
+            "x-enum-varnames": [
+                "ExtKeyUsageAny",
+                "ExtKeyUsageServerAuth",
+                "ExtKeyUsageClientAuth",
+                "ExtKeyUsageCodeSigning",
+                "ExtKeyUsageEmailProtection",
+                "ExtKeyUsageIPSECEndSystem",
+                "ExtKeyUsageIPSECTunnel",
+                "ExtKeyUsageIPSECUser",
+                "ExtKeyUsageTimeStamping",
+                "ExtKeyUsageOCSPSigning",
+                "ExtKeyUsageMicrosoftServerGatedCrypto",
+                "ExtKeyUsageNetscapeServerGatedCrypto",
+                "ExtKeyUsageMicrosoftCommercialCodeSigning",
+                "ExtKeyUsageMicrosoftKernelCodeSigning"
+            ]
+        },
+        "x509.KeyUsage": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32,
+                64,
+                128,
+                256
+            ],
+            "x-enum-varnames": [
+                "KeyUsageDigitalSignature",
+                "KeyUsageContentCommitment",
+                "KeyUsageKeyEncipherment",
+                "KeyUsageDataEncipherment",
+                "KeyUsageKeyAgreement",
+                "KeyUsageCertSign",
+                "KeyUsageCRLSign",
+                "KeyUsageEncipherOnly",
+                "KeyUsageDecipherOnly"
+            ]
+        },
+        "x509.PublicKeyAlgorithm": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-comments": {
+                "DSA": "Unsupported."
+            },
+            "x-enum-varnames": [
+                "UnknownPublicKeyAlgorithm",
+                "RSA",
+                "DSA",
+                "ECDSA",
+                "Ed25519"
+            ]
+        },
+        "x509.SignatureAlgorithm": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16
+            ],
+            "x-enum-comments": {
+                "DSAWithSHA1": "Unsupported.",
+                "DSAWithSHA256": "Unsupported.",
+                "ECDSAWithSHA1": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses.",
+                "MD2WithRSA": "Unsupported.",
+                "MD5WithRSA": "Only supported for signing, not verification.",
+                "SHA1WithRSA": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses."
+            },
+            "x-enum-varnames": [
+                "UnknownSignatureAlgorithm",
+                "MD2WithRSA",
+                "MD5WithRSA",
+                "SHA1WithRSA",
+                "SHA256WithRSA",
+                "SHA384WithRSA",
+                "SHA512WithRSA",
+                "DSAWithSHA1",
+                "DSAWithSHA256",
+                "ECDSAWithSHA1",
+                "ECDSAWithSHA256",
+                "ECDSAWithSHA384",
+                "ECDSAWithSHA512",
+                "SHA256WithRSAPSS",
+                "SHA384WithRSAPSS",
+                "SHA512WithRSAPSS",
+                "PureEd25519"
+            ]
         }
     }
 }`
