@@ -1540,7 +1540,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField = "delete"
 	}
 	// this condition need our object/get-list api because this api's method is post we change it to get
-	if (strings.Contains(req.GetPath(), "object/get-list")) && req.GetMethod() != "GET" {
+	// this condition need our object/get-list-group-by api because this api's method is post we change it to get
+	if ((strings.Contains(req.GetPath(), "object/get-list")) || (strings.Contains(req.GetPath(), "object/get-list-group-by"))) && req.GetMethod() != "GET" {
 		methodField = "read"
 	}
 
@@ -1575,7 +1576,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" && checkPermission {
 		var tableSlug string
-		if arr_path[len(arr_path)-1] == ":object_id" {
+		if strings.Contains(arr_path[len(arr_path)-1], ":") {
 			tableSlug = arr_path[len(arr_path)-2]
 		} else {
 			tableSlug = arr_path[len(arr_path)-1]
