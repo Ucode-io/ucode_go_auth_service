@@ -1004,7 +1004,8 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
 	res := &pb.V2RefreshTokenResponse{
-		Token: token,
+		Token:       token,
+		// Permissions: convertedData.Permissions,
 	}
 
 	return res, nil

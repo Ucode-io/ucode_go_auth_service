@@ -66,6 +66,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 		&obs.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
+			ProjectId: login.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -324,7 +325,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 // @Description Environment-Id hearder and project-id in query parameters or
 // @Description X-API-KEY in hearder
 // @Description login strategy must be one of the following values
-// @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
+// @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH", "PHONE_PWD", "EMAIL_PWD"]
 // @Tags V2_Session
 // @Accept json
 // @Produce json

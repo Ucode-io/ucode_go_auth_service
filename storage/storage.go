@@ -138,6 +138,8 @@ type UserRepoI interface {
 	GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error)
 	GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error)
 	V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error)
+	GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error)
+	DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*emptypb.Empty, error)
 }
 
 type IntegrationRepoI interface {

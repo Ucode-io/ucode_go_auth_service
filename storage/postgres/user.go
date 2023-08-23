@@ -11,10 +11,12 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
@@ -523,14 +525,53 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
 	res := pb.AddUserToProjectRes{}
 
-	query := `INSERT INTO
-			user_project(user_id, company_id, project_id)
-			VALUES ($1, $2, $3)
-			RETURNING user_id, company_id, project_id`
+	var (
+		clientTypeId, roleId pgtype.UUID
+	)
+	if req.GetClientTypeId() != "" {
+		err := clientTypeId.Set(req.GetClientTypeId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		clientTypeId.Status = pgtype.Null
+	}
+	if req.GetRoleId() != "" {
+		err := roleId.Set(req.GetRoleId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		roleId.Status = pgtype.Null
+	}
 
-	err := r.db.QueryRow(ctx, query, req.GetUserId(), req.GetCompanyId(), req.GetProjectId()).Scan(&res.UserId, &res.CompanyId, &res.ProjectId)
+	query := `INSERT INTO
+			user_project(user_id, company_id, project_id, client_type_id, role_id)
+			VALUES ($1, $2, $3, $4, $5)
+			RETURNING user_id, company_id, project_id, client_type_id, role_id`
+
+	err := r.db.QueryRow(ctx,
+		query,
+		req.GetUserId(),
+		req.GetCompanyId(),
+		req.GetProjectId(),
+		clientTypeId,
+		roleId,
+	).Scan(
+		&res.UserId,
+		&res.CompanyId,
+		&res.ProjectId,
+		&clientTypeId,
+		&roleId,
+	)
 	if err != nil {
 		return nil, err
+	}
+	if roleId.Status != pgtype.Null {
+		req.RoleId = fmt.Sprintf("%v", roleId.Status)
+	}
+	if clientTypeId.Status != pgtype.Null {
+		req.ClientTypeId = fmt.Sprintf("%v", clientTypeId.Status)
 	}
 
 	return &res, nil
@@ -802,4 +843,58 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 	rowsAffected := result.RowsAffected()
 
 	return rowsAffected, err
+}
+
+func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error) {
+
+	var (
+		isExists bool
+		count    int
+	)
+	query := `SELECT
+			COUNT(1)
+		FROM
+			"user_project"
+		WHERE user_id = $1 AND project_id = $2 AND company_id = $3
+		AND client_type_id = $4 AND role_id = $5`
+	err := c.db.QueryRow(
+		ctx,
+		query,
+		req.UserId,
+		req.ProjectId,
+		req.CompanyId,
+		req.ClientTypeId,
+		req.RoleId,
+	).Scan(&count)
+	if err != nil {
+		return isExists, nil
+	}
+	if count > 0 {
+		isExists = true
+	}
+	return isExists, nil
+}
+
+func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
+
+	query := `DELETE FROM "user_project" 
+				WHERE 
+				project_id = $1 AND 
+				user_id = $2 AND 
+				role_id = $3 AND 
+				client_type_id = $4 AND company_id = $5`
+
+	_, err := r.db.Exec(ctx,
+		query,
+		req.GetProjectId(),
+		req.GetUserId(),
+		req.GetRoleId(),
+		req.GetClientTypeId(),
+		req.GetCompanyId(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
 }

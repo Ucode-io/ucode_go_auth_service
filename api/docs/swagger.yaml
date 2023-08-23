@@ -898,6 +898,8 @@ definitions:
     properties:
       active:
         type: integer
+      client_type_id:
+        type: string
       company_id:
         type: string
       project_id:
@@ -906,14 +908,22 @@ definitions:
         type: integer
       role_id:
         type: string
+      table_slug:
+        type: string
       user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes:
     properties:
+      client_type_id:
+        type: string
       company_id:
         type: string
       project_id:
+        type: string
+      role_id:
+        type: string
+      table_slug:
         type: string
       user_id:
         type: string
@@ -1744,6 +1754,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany:
     properties:
+      client_types:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       description:
         type: string
       display_color:
@@ -2207,6 +2219,8 @@ definitions:
         type: boolean
       self_register:
         type: boolean
+      table_slug:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2LoginRequest:
     properties:
@@ -2406,6 +2420,8 @@ definitions:
         type: boolean
       self_register:
         type: boolean
+      table_slug:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateRoleRequest:
     properties:
@@ -9254,7 +9270,7 @@ paths:
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder
         login strategy must be one of the following values
-        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
+        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH", "PHONE_PWD", "EMAIL_PWD"]
       operationId: V2login_withoption
       parameters:
       - description: Environment-Id
@@ -10101,7 +10117,7 @@ paths:
         V2Register
         in data must be have type, type must be one of the following values
         ["google", "apple", "email", "phone"]
-
+        client_type_id and role_id must be in body parameters
         you must be give environment_id and project_id in body or
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder
@@ -12006,6 +12022,11 @@ paths:
         name: project-id
         required: true
         type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -12056,6 +12077,10 @@ paths:
         in: query
         name: project-id
         required: true
+        type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
         type: string
       produces:
       - application/json
