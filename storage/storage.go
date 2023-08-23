@@ -132,6 +132,7 @@ type UserRepoI interface {
 	GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error)
 	GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (*models.UserProjectClientTypeResponse, error)
 	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
+	UpdateUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
 	GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
 	GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error)
