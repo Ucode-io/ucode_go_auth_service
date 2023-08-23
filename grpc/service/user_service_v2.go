@@ -954,7 +954,6 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	//	TableSlug: result.TableSlug,
 	//	Data:      result.Data,
 	//}, nil
-	fmt.Println("req::", req)
 
 	rowsAffected, err := s.strg.User().Update(ctx, req)
 
@@ -966,6 +965,26 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
+
+	userProject, err := s.strg.User().UpdateUserToProject(
+		ctx,
+		&pb.AddUserToProjectReq{
+			UserId:       req.Id,
+			CompanyId:    req.CompanyId,
+			ProjectId:    req.ProjectId,
+			ClientTypeId: req.ClientTypeId,
+			RoleId:       req.RoleId,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!V2UpdateUser Update user project--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if userProject.UserId == "" {
+		s.log.Error("!!!V2UpdateUser user project not update", logger.Error(err))
+	}
+
+	// update user project
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
