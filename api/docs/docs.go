@@ -10176,7 +10176,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH]",
+                "description": "V2LoginWithOption\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH\", \"PHONE_PWD\", \"EMAIL_PWD\"]",
                 "consumes": [
                     "application/json"
                 ],
@@ -11624,7 +11624,7 @@ const docTemplate = `{
         },
         "/v2/register": {
             "post": {
-                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]\n\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder",
+                "description": "V2Register\nin data must be have type, type must be one of the following values\n[\"google\", \"apple\", \"email\", \"phone\"]\nclient_type_id and role_id must be in body parameters\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder",
                 "consumes": [
                     "application/json"
                 ],
@@ -13808,7 +13808,7 @@ const docTemplate = `{
                     "V2_SMS_OTP_SETTINGS"
                 ],
                 "summary": "Update sms otp settings",
-                "operationId": "update_api_keys",
+                "operationId": "update_sms_otp_settings",
                 "parameters": [
                     {
                         "type": "string",
@@ -13907,7 +13907,7 @@ const docTemplate = `{
                     "V2_SMS_OTP_SETTINGS"
                 ],
                 "summary": "Create sms otp settings",
-                "operationId": "create_api_keys",
+                "operationId": "create_sms_otp_settings",
                 "parameters": [
                     {
                         "type": "string",
@@ -15054,6 +15054,12 @@ const docTemplate = `{
                         "name": "project-id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "client-type-id",
+                        "name": "client-type-id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -15151,6 +15157,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "client-type-id",
+                        "name": "client-type-id",
                         "in": "query",
                         "required": true
                     }
@@ -16657,6 +16670,9 @@ const docTemplate = `{
                 "active": {
                     "type": "integer"
                 },
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
@@ -16669,6 +16685,9 @@ const docTemplate = `{
                 "role_id": {
                     "type": "string"
                 },
+                "table_slug": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "string"
                 }
@@ -16677,10 +16696,19 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "company_id": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "table_slug": {
                     "type": "string"
                 },
                 "user_id": {
@@ -17950,6 +17978,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany": {
             "type": "object",
             "properties": {
+                "client_types": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -18485,6 +18516,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_environment_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "type": "integer"
                 },
@@ -18660,6 +18694,9 @@ const docTemplate = `{
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -18965,6 +19002,9 @@ const docTemplate = `{
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },

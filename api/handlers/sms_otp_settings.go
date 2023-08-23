@@ -10,7 +10,7 @@ import (
 )
 
 // CreateSmsOtpSettings godoc
-// @ID create_api_keys
+// @ID create_sms_otp_settings
 // @Router /v2/sms-otp-settings [POST]
 // @Summary Create sms otp settings
 // @Description Create sms otp settings
@@ -75,7 +75,7 @@ func (h *Handler) CreateSmsOtpSettings(c *gin.Context) {
 }
 
 // UpdateSmsOtpSettings godoc
-// @ID update_api_keys
+// @ID update_sms_otp_settings
 // @Router /v2/sms-otp-settings [PUT]
 // @Summary Update sms otp settings
 // @Description Update sms otp settings
