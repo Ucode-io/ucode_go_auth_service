@@ -83,8 +83,8 @@ func Load() Config {
 	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", "ucode.udevs.io@gmail.com"))
 	config.Password = cast.ToString(getOrReturnDefaultValue("PASSWORD", "xkiaqodjfuielsug"))
 
-	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "95.217.155.57"))
-	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 30034))
+	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "142.93.164.37"))
+	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 30032))
 	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", "auth_service"))
 	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "IeX7ieso"))
 	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "auth_service"))

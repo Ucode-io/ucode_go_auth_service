@@ -18945,6 +18945,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company2"
                     }
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
