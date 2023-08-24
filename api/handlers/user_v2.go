@@ -337,7 +337,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	})
 
 	user.ResourceType = int32(resource.GetResourceType())
-	user.ProjectId = resource.ResourceEnvironmentId
+	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
 
 	resp, err := h.services.UserService().V2UpdateUser(
 		c.Request.Context(),

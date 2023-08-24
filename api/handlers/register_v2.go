@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -100,6 +101,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
+		fmt.Println("test 10")
 		smsOtpSettings, err := h.services.SmsOtpSettingsService().GetList(context.Background(), &auth_service.GetListSmsOtpSettingsRequest{
 			ProjectId:     resourceEnvironment.ProjectId,
 			EnvironmentId: environmentId.(string),
@@ -108,6 +110,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("test 11")
 		if len(smsOtpSettings.GetItems()) > 0 {
 			if smsOtpSettings.GetItems()[0].GetNumberOfOtp() != 0 {
 				code, err := util.GenerateCode(int(smsOtpSettings.GetItems()[0].GetNumberOfOtp()))

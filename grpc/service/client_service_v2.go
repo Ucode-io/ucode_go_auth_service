@@ -410,6 +410,10 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 	result := &pbObject.CommonMessage{}
 
+	if req.Limit == 0 {
+		req.Limit = 1000
+	}
+
 	// @TODO limit offset error should fix
 	if req.Limit == 0 {
 		req.Limit = 1000
@@ -430,7 +434,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
 	switch req.ResourceType {
 	case 1:
 

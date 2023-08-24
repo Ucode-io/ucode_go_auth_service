@@ -578,6 +578,61 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	return &res, nil
 }
 
+func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
+	res := pb.AddUserToProjectRes{}
+
+	var (
+		clientTypeId, roleId pgtype.UUID
+	)
+	if req.GetClientTypeId() != "" {
+		err := clientTypeId.Set(req.GetClientTypeId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		clientTypeId.Status = pgtype.Null
+	}
+	if req.GetRoleId() != "" {
+		err := roleId.Set(req.GetRoleId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		roleId.Status = pgtype.Null
+	}
+	fmt.Println(">\n\n req", req.ProjectId)
+	query := `UPDATE user_project 
+			  SET client_type_id = $3,
+			  role_id = $4
+			  WHERE user_id = $1 AND project_id = $2
+			  RETURNING user_id, company_id, project_id, client_type_id, role_id`
+
+	err := r.db.QueryRow(ctx,
+		query,
+		req.UserId,
+		req.ProjectId,
+		clientTypeId,
+		roleId,
+	).Scan(
+		&res.UserId,
+		&res.CompanyId,
+		&res.ProjectId,
+		&clientTypeId,
+		&roleId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if roleId.Status != pgtype.Null {
+		req.RoleId = fmt.Sprintf("%v", roleId.Status)
+	}
+	if clientTypeId.Status != pgtype.Null {
+		req.ClientTypeId = fmt.Sprintf("%v", clientTypeId.Status)
+	}
+
+	return &res, nil
+}
+
 func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
 	res := pb.GetProjectsByUserIdRes{}
 
@@ -812,6 +867,40 @@ func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq
 	return &res, nil
 }
 
+func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
+	var (
+		params                      = make(map[string]interface{})
+		subQueryEmail, subQueryPass string
+	)
+	if req.GetPassword() != "" {
+		subQueryPass = "password = :password, "
+		params["password"] = req.GetPassword()
+	}
+	if req.GetEmail() != "" {
+		subQueryEmail = "email = :email, "
+		params["email"] = req.GetEmail()
+	}
+
+	query := `UPDATE "user" SET ` + subQueryPass + subQueryEmail + `
+		updated_at = now()
+	WHERE
+		id = :id`
+	params["id"] = req.GetUserId()
+
+	fmt.Print("\n\nParams: ", params)
+
+	q, arr := helper.ReplaceQueryParams(query, params)
+
+	result, err := r.db.Exec(ctx, q, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected := result.RowsAffected()
+
+	return rowsAffected, err
+}
+
 func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error) {
 
 	var (
@@ -864,38 +953,4 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	}
 
 	return &empty.Empty{}, nil
-}
-
-func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
-	var (
-		params                      = make(map[string]interface{})
-		subQueryEmail, subQueryPass string
-	)
-	if req.GetPassword() != "" {
-		subQueryPass = "password = :password, "
-		params["password"] = req.GetPassword()
-	}
-	if req.GetEmail() != "" {
-		subQueryEmail = "email = :email, "
-		params["email"] = req.GetEmail()
-	}
-
-	query := `UPDATE "user" SET ` + subQueryPass + subQueryEmail + `
-		updated_at = now()
-	WHERE
-		id = :id`
-	params["id"] = req.GetUserId()
-
-	fmt.Print("\n\nParams: ", params)
-
-	q, arr := helper.ReplaceQueryParams(query, params)
-
-	result, err := r.db.Exec(ctx, q, arr...)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected := result.RowsAffected()
-
-	return rowsAffected, err
 }

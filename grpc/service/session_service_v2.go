@@ -929,7 +929,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	if req.EnvId != "" {
 		session.EnvId = req.EnvId
 	}
-	fmt.Println("\n\n session >>>>>>>>>>>> #2", session)
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -1763,11 +1762,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					Description:   en.Description,
 				}
 
+				fmt.Println("\n\n >>> ", resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "")
 				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
 					continue
 				}
-				fmt.Println(">>>>>>>>>>>>>>>> test #1", len(clientType.ClientTypeIds), clientType.ClientTypeIds)
-				fmt.Println(">>>>>>>>>>>>>>>> test #2", clientType == nil || len(clientType.ClientTypeIds) == 0)
+
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
 					fmt.Println(">>>>>>>>>>>>>>>> test")
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
@@ -1815,6 +1814,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			Projects:    projects,
 		})
 	}
+	resp.UserId = user.Id
 
 	return &resp, nil
 }

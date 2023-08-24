@@ -702,16 +702,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	user.RoleId = roleId
 
-	clientPlatformId, ok := userData["client_platform_id"].(string)
-	if !ok {
-		// err := errors.New("client_platform_id is nil")
-		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		// return nil, status.Error(codes.Internal, err.Error())
-		clientPlatformId = ""
-	}
-
-	user.ClientPlatformId = clientPlatformId
-
 	clientTypeId, ok := userData["client_type_id"].(string)
 	if !ok {
 		err := errors.New("client_type_id is nil")
@@ -723,9 +713,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	active, ok := userData["active"].(float64)
 	if !ok {
-		// err := errors.New("active is nil")
-		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		// return nil, status.Error(codes.Internal, err.Error())
 		active = 0
 	}
 
@@ -994,7 +981,6 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	//	TableSlug: result.TableSlug,
 	//	Data:      result.Data,
 	//}, nil
-	fmt.Println("req::", req)
 
 	rowsAffected, err := s.strg.User().Update(ctx, req)
 
@@ -1006,6 +992,26 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
+
+	userProject, err := s.strg.User().UpdateUserToProject(
+		ctx,
+		&pb.AddUserToProjectReq{
+			UserId:       req.Id,
+			CompanyId:    req.CompanyId,
+			ProjectId:    req.ProjectId,
+			ClientTypeId: req.ClientTypeId,
+			RoleId:       req.RoleId,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!V2UpdateUser Update user project--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if userProject.UserId == "" {
+		s.log.Error("!!!V2UpdateUser user project not update", logger.Error(err))
+	}
+
+	// update user project
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
@@ -1023,7 +1029,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
@@ -1039,7 +1045,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!UpdateUser.ObjectBuilderService.Update--->", logger.Error(err))
@@ -1053,7 +1059,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 					"id": structpb.NewStringValue(req.GetClientTypeId()),
 				},
 			},
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
@@ -1069,7 +1075,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		_, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: req.GetProjectId(),
+			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
