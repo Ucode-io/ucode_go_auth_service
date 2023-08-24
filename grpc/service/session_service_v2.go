@@ -1834,6 +1834,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			Projects:    projects,
 		})
 	}
+	resp.UserId = user.Id
 
 	return &resp, nil
 }
