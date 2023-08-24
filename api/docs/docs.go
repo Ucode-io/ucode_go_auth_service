@@ -18516,6 +18516,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_environment_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "type": "integer"
                 },
@@ -18942,6 +18945,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company2"
                     }
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },

@@ -19,9 +19,10 @@ service PermissionService {
     rpc UpdateRoleAppTablePermissions(UpdateRoleAppTablePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetAllMenuPermissions(GetAllMenuPermissionsRequest) returns (GetAllMenuPermissionsResponse) {}
     rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
-    rpc GetGlobalPermissionByRoleId(GetGlobalPermissionsByRoleIdRequest) returns (GlobalPermission) {}
     rpc UpdatePermissionsByTableSlug(UpdatePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetPermissionsByTableSlug(GetPermissionsByTableSlugRequest) returns (GetPermissionsByTableSlugResponse) {}
+    rpc GetGlobalPermissionByRoleId(GetGlobalPermissionsByRoleIdRequest) returns (GlobalPermission) {}
+    rpc GetTablePermission(GetTablePermissionRequest) returns (GetTablePermissionResponse) {}
 }
 
 message GetGlobalPermissionsByRoleIdRequest {
@@ -273,4 +274,15 @@ message GetPermissionsByTableSlugRequest {
 message GetPermissionsByTableSlugResponse {
     UpdatePermissionsRequest current_user_permission = 1;
     UpdatePermissionsRequest selected_user_permission = 2;
+}
+
+message GetTablePermissionRequest {
+    string role_id = 1;
+    string table_slug = 2;
+    string resource_environment_id = 3;
+    string method = 4;
+}
+
+message GetTablePermissionResponse {
+    bool is_have_permission = 1;
 }
