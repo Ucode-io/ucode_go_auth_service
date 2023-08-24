@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -279,7 +280,8 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 // @Produce json
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
-// @Param project-id query string true "project-id"
+// @Param project-id query string false "project-id"
+// @Param user-id query string true "user-id"
 // @Param client_type_id query string true "client_type_id"
 // @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetConnectionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
@@ -306,47 +308,11 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		if errors.Is(err, pgx.ErrNoRows) {
-	//			h.handleResponse(c, http.GRPCError, "У вас нет ресурса по умолчанию, установите один ресурс по умолчанию")
-	//			return
-	//		}
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -402,8 +368,45 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			return
 		}
 	}
-
-	h.handleResponse(c, http.OK, resp)
+	response, ok := resp.Data.AsMap()["response"].([]interface{})
+	responseWithOptions := make([]interface{}, 0, len(response))
+	if ok && c.Query("user-id") != "" {
+		for _, v := range response {
+			if res, ok := v.(map[string]interface{}); ok {
+				if guid, ok := res["guid"].(string); ok {
+					options, err := h.services.LoginService().GetConnetionOptions(
+						c.Request.Context(),
+						&obs.GetConnetionOptionsRequest{
+							ConnectionId:          guid,
+							ResourceEnvironmentId: resource.ResourceEnvironmentId,
+							UserId:                c.Query("user-id"),
+						},
+					)
+					if err != nil {
+						continue
+					}
+					fmt.Println("options response::", options.Data.AsMap()["response"])
+					res["options"] = options.Data.AsMap()["response"]
+				}
+				v = res
+			}
+			responseWithOptions = append(responseWithOptions, v)
+		}
+	}
+	if len(responseWithOptions) < 0 {
+		if res, ok := resp.Data.AsMap()["response"].([]interface{}); ok {
+			responseWithOptions = res
+		} else {
+			responseWithOptions = []interface{}{}
+		}
+	}
+	h.handleResponse(c, http.OK, map[string]interface{}{
+		"data": map[string]interface{}{
+			"response": responseWithOptions,
+			"count":    resp.Data.AsMap()["count"],
+		},
+	},
+	)
 }
 
 // V2GetConnectionByID godoc
