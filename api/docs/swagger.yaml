@@ -11393,7 +11393,7 @@ paths:
       consumes:
       - application/json
       description: Create sms otp settings
-      operationId: create_api_keys
+      operationId: create_sms_otp_settings
       parameters:
       - description: project-id
         in: query
@@ -11450,7 +11450,7 @@ paths:
       consumes:
       - application/json
       description: Update sms otp settings
-      operationId: update_api_keys
+      operationId: update_sms_otp_settings
       parameters:
       - description: project-id
         in: query

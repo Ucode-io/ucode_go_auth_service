@@ -13808,7 +13808,7 @@ const docTemplate = `{
                     "V2_SMS_OTP_SETTINGS"
                 ],
                 "summary": "Update sms otp settings",
-                "operationId": "update_api_keys",
+                "operationId": "update_sms_otp_settings",
                 "parameters": [
                     {
                         "type": "string",
@@ -13907,7 +13907,7 @@ const docTemplate = `{
                     "V2_SMS_OTP_SETTINGS"
                 ],
                 "summary": "Create sms otp settings",
-                "operationId": "create_api_keys",
+                "operationId": "create_sms_otp_settings",
                 "parameters": [
                     {
                         "type": "string",

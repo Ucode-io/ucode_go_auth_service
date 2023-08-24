@@ -929,7 +929,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	if req.EnvId != "" {
 		session.EnvId = req.EnvId
 	}
-	fmt.Println("\n\n session >>>>>>>>>>>> #2", session)
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -947,16 +946,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!V2RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	// userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
-	// 	ClientTypeId: session.ClientTypeId,
-	// 	UserId:       session.UserId,
-	// 	ProjectId:    session.GetProjectId(),
-	// })
-	// if err != nil {
-	// 	s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-	// convertedData := helper.ConvertPbToAnotherPb(userData)
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
@@ -1407,185 +1396,6 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 	return resp, nil
 }
 
-func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
-	resp := pb.V2MultiCompanyOneLoginRes{
-		Companies: []*pb.Company2{},
-	}
-
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
-	if err != nil {
-		errGetProjects := errors.New("cant get user projects")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, errGetProjects.Error())
-	}
-
-	for _, item := range userProjects.Companies {
-		projects := make([]*pb.Project2, 0, 20)
-		company, err := s.services.CompanyServiceClient().GetById(ctx,
-			&company_service.GetCompanyByIdRequest{
-				Id: item.Id,
-			})
-
-		if err != nil {
-			errGetProjects := errors.New("cant get user projects")
-			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-			return nil, status.Error(codes.NotFound, errGetProjects.Error())
-		}
-
-		for _, projectId := range item.ProjectIds {
-
-			clientType, _ := s.strg.User().GetUserProjectClientTypes(
-				ctx,
-				&models.UserProjectClientTypeRequest{
-					UserId:    user.GetId(),
-					ProjectId: projectId,
-				},
-			)
-
-			projectInfo, err := s.services.ProjectServiceClient().GetById(
-				ctx,
-				&company_service.GetProjectByIdRequest{
-					ProjectId: projectId,
-					CompanyId: item.Id,
-				})
-			if err != nil {
-				errGetProjects := errors.New("cant get user projects")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-				return nil, status.Error(codes.NotFound, errGetProjects.Error())
-			}
-
-			resProject := &pb.Project2{
-				Id:        projectInfo.GetProjectId(),
-				CompanyId: projectInfo.GetCompanyId(),
-				Name:      projectInfo.GetTitle(),
-				Domain:    projectInfo.GetK8SNamespace(),
-			}
-
-			environments, err := s.services.EnvironmentService().GetList(
-				ctx,
-				&company_service.GetEnvironmentListRequest{
-					ProjectId: projectId,
-					Limit:     1000,
-				},
-			)
-			if err != nil {
-				errGetProjects := errors.New("cant get environments")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-				return nil, status.Error(codes.NotFound, errGetProjects.Error())
-			}
-
-			for _, en := range environments.Environments {
-				resourceEnv, err := s.services.ServiceResource().GetList(
-					ctx,
-					&company_service.GetListServiceResourceReq{
-						ProjectId:     projectId,
-						EnvironmentId: en.Id,
-					},
-				)
-				if err != nil {
-					errGetProjects := errors.New("cant get resourse environments")
-					s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-					return nil, status.Error(codes.NotFound, errGetProjects.Error())
-				}
-
-				respResourceEnvironment := &pb.ResourceEnvironmentV2MultiCompany{
-					Id:            resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
-					Name:          en.Name,
-					ProjectId:     en.ProjectId,
-					ResourceId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceId,
-					EnvironmentId: en.Id,
-					IsConfigured:  true,
-					ResourceType:  int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
-					ServiceType:   int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ServiceType.Number()),
-					DisplayColor:  en.DisplayColor,
-					Description:   en.Description,
-				}
-
-				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
-					continue
-				}
-
-				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
-					fmt.Println(">>>>>>>>>>>>>>>> test")
-					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
-						ctx,
-						&pb.V2GetClientTypeListRequest{
-							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
-							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
-						},
-					)
-					if err != nil {
-						errGetProjects := errors.New("cant get client types")
-						s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-						return nil, status.Error(codes.NotFound, errGetProjects.Error())
-					}
-					respResourceEnvironment.ClientTypes = clientTypes.Data
-				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
-					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
-						ctx,
-						&pb.V2GetClientTypeListRequest{
-							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
-							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
-							Guids:        clientType.ClientTypeIds,
-						},
-					)
-					if err != nil {
-						errGetProjects := errors.New("cant get client types")
-						s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-						return nil, status.Error(codes.NotFound, errGetProjects.Error())
-					}
-					respResourceEnvironment.ClientTypes = clientTypes.Data
-				}
-
-				resProject.ResourceEnvironments = append(resProject.ResourceEnvironments, respResourceEnvironment)
-			}
-
-			projects = append(projects, resProject)
-		}
-
-		resp.Companies = append(resp.Companies, &pb.Company2{
-			Id:          company.GetCompany().GetId(),
-			Name:        company.GetCompany().GetName(),
-			Logo:        company.GetCompany().GetLogo(),
-			Description: company.GetCompany().GetLogo(),
-			OwnerId:     company.GetCompany().GetOwnerId(),
-			Projects:    projects,
-		})
-	}
-
-	return &resp, nil
-}
-
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
 	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
 
@@ -1748,6 +1558,188 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		RoleId:           session.RoleId,
 		EnvId:            session.EnvId,
 	}, nil
+}
+
+func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
+	resp := pb.V2MultiCompanyOneLoginRes{
+		Companies: []*pb.Company2{},
+	}
+
+	if len(req.Username) < 6 {
+		err := errors.New("invalid username")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if len(req.Password) < 6 {
+		err := errors.New("invalid password")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	match, err := security.ComparePassword(user.Password, req.Password)
+	if err != nil {
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !match {
+		err := errors.New("username or password is wrong")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
+	if err != nil {
+		errGetProjects := errors.New("cant get user projects")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, errGetProjects.Error())
+	}
+
+	for _, item := range userProjects.Companies {
+		projects := make([]*pb.Project2, 0, 20)
+		company, err := s.services.CompanyServiceClient().GetById(ctx,
+			&company_service.GetCompanyByIdRequest{
+				Id: item.Id,
+			})
+
+		if err != nil {
+			errGetProjects := errors.New("cant get user projects")
+			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, errGetProjects.Error())
+		}
+
+		for _, projectId := range item.ProjectIds {
+
+			clientType, _ := s.strg.User().GetUserProjectClientTypes(
+				ctx,
+				&models.UserProjectClientTypeRequest{
+					UserId:    user.GetId(),
+					ProjectId: projectId,
+				},
+			)
+
+			projectInfo, err := s.services.ProjectServiceClient().GetById(
+				ctx,
+				&company_service.GetProjectByIdRequest{
+					ProjectId: projectId,
+					CompanyId: item.Id,
+				})
+			if err != nil {
+				errGetProjects := errors.New("cant get user projects")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.NotFound, errGetProjects.Error())
+			}
+
+			resProject := &pb.Project2{
+				Id:        projectInfo.GetProjectId(),
+				CompanyId: projectInfo.GetCompanyId(),
+				Name:      projectInfo.GetTitle(),
+				Domain:    projectInfo.GetK8SNamespace(),
+			}
+
+			environments, err := s.services.EnvironmentService().GetList(
+				ctx,
+				&company_service.GetEnvironmentListRequest{
+					ProjectId: projectId,
+					Limit:     1000,
+				},
+			)
+			if err != nil {
+				errGetProjects := errors.New("cant get environments")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.NotFound, errGetProjects.Error())
+			}
+
+			for _, en := range environments.Environments {
+				resourceEnv, err := s.services.ServiceResource().GetList(
+					ctx,
+					&company_service.GetListServiceResourceReq{
+						ProjectId:     projectId,
+						EnvironmentId: en.Id,
+					},
+				)
+				if err != nil {
+					errGetProjects := errors.New("cant get resourse environments")
+					s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+					return nil, status.Error(codes.NotFound, errGetProjects.Error())
+				}
+
+				respResourceEnvironment := &pb.ResourceEnvironmentV2MultiCompany{
+					Id:            resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
+					Name:          en.Name,
+					ProjectId:     en.ProjectId,
+					ResourceId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceId,
+					EnvironmentId: en.Id,
+					IsConfigured:  true,
+					ResourceType:  int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
+					ServiceType:   int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ServiceType.Number()),
+					DisplayColor:  en.DisplayColor,
+					Description:   en.Description,
+				}
+
+				fmt.Println("\n\n >>> ", resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "")
+				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
+					continue
+				}
+
+				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
+					fmt.Println(">>>>>>>>>>>>>>>> test")
+					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
+						ctx,
+						&pb.V2GetClientTypeListRequest{
+							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
+							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
+						},
+					)
+					if err != nil {
+						errGetProjects := errors.New("cant get client types")
+						s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+						return nil, status.Error(codes.NotFound, errGetProjects.Error())
+					}
+					respResourceEnvironment.ClientTypes = clientTypes.Data
+				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
+					fmt.Println("\n >> have client type id in user", clientType.ClientTypeIds)
+					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
+						ctx,
+						&pb.V2GetClientTypeListRequest{
+							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
+							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
+							Guids:        clientType.ClientTypeIds,
+						},
+					)
+					if err != nil {
+						errGetProjects := errors.New("cant get client types")
+						s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+						return nil, status.Error(codes.NotFound, errGetProjects.Error())
+					}
+					respResourceEnvironment.ClientTypes = clientTypes.Data
+				}
+
+				resProject.ResourceEnvironments = append(resProject.ResourceEnvironments, respResourceEnvironment)
+			}
+
+			projects = append(projects, resProject)
+		}
+
+		resp.Companies = append(resp.Companies, &pb.Company2{
+			Id:          company.GetCompany().GetId(),
+			Name:        company.GetCompany().GetName(),
+			Logo:        company.GetCompany().GetLogo(),
+			Description: company.GetCompany().GetLogo(),
+			OwnerId:     company.GetCompany().GetOwnerId(),
+			Projects:    projects,
+		})
+	}
+	resp.UserId = user.Id
+
+	return &resp, nil
 }
 
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
