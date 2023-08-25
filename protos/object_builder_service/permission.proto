@@ -21,13 +21,7 @@ service PermissionService {
     rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
     rpc UpdatePermissionsByTableSlug(UpdatePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetPermissionsByTableSlug(GetPermissionsByTableSlugRequest) returns (GetPermissionsByTableSlugResponse) {}
-    rpc GetGlobalPermissionByRoleId(GetGlobalPermissionsByRoleIdRequest) returns (GlobalPermission) {}
     rpc GetTablePermission(GetTablePermissionRequest) returns (GetTablePermissionResponse) {}
-}
-
-message GetGlobalPermissionsByRoleIdRequest {
-    string project_id = 1;
-    string role_id = 2;
 }
 
 message GetAllPermissionRequest {

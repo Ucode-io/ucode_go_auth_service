@@ -36,8 +36,6 @@ message CreateFieldRequest {
     bool show_label = 18;
     bool enable_multilanguage = 19;
     bool hide_multilanguage = 20;
-    string label_uz = 21;
-    string label_en = 22;
 }
 
 message CreateFieldsRequest {
@@ -80,8 +78,6 @@ message Field {
     bool show_label = 21;
     bool enable_multilanguage = 22;
     bool hide_multilanguage = 23;
-    string label_uz = 24;
-    string label_en = 25;
 }
 
 message GetAllFieldsResponse {

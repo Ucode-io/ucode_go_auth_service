@@ -56,8 +56,6 @@ message CreateViewRequest {
     string commit_guid = 27;
     bool default_editable = 28;
     int32 order = 29;
-    string name_uz = 30;
-    string name_en = 31;
 }
 
 message QuickFilter {
@@ -96,8 +94,6 @@ message View {
     Navigate navigate = 28;
     string function_path = 29;
     int32 order = 30;
-    string name_uz = 31;
-    string name_en = 32;
 }
 
 message Navigate {
