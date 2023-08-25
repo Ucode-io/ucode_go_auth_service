@@ -2329,7 +2329,17 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq:
     properties:
+      email:
+        type: string
+      otp:
+        type: string
       password:
+        type: string
+      phone:
+        type: string
+      sms_id:
+        type: string
+      type:
         type: string
       username:
         type: string
@@ -11117,6 +11127,52 @@ paths:
                   type: string
               type: object
       summary: SendCode
+      tags:
+      - v2_register
+  /v2/send-code-app:
+    post:
+      consumes:
+      - application/json
+      description: SendCode type must be one of the following values ["EMAIL", "PHONE"]
+      operationId: V2SendCodeApp
+      parameters:
+      - description: SendCode
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: SendCodeApp
       tags:
       - v2_register
   /v2/send-message:

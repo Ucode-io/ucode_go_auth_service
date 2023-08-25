@@ -14,7 +14,7 @@ const (
 	// A2IDtime is the number of iterations (or passes) over the memory used by the algorithm Argon2id
 	A2IDtime = 3
 
-	// A2IDmemory is the amount of memory used by the algorithm Argon2id
+	// A2IDmemory is the amount of memory used by thepassword algorithm Argon2id
 	A2IDmemory = 64 * 1024
 
 	// A2IDthreads is the number of threads used by the algorithm Argon2id

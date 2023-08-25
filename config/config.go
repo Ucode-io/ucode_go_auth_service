@@ -91,7 +91,7 @@ func Load() Config {
 	}
 
 	config := Config{}
-	// postgres://auth_service:IeX7ieso@95.217.155.57:30034/auth_service?sslmode=disable
+	// sudo psql -h 95.217.155.57 -p 30034 -U auth_service -d auth_service
 	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "ucode_go_auth_service"))
 	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0"))

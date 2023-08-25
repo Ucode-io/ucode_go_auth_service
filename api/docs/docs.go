@@ -13525,6 +13525,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/send-code-app": {
+            "post": {
+                "description": "SendCode type must be one of the following values [\"EMAIL\", \"PHONE\"]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2_register"
+                ],
+                "summary": "SendCodeApp",
+                "operationId": "V2SendCodeApp",
+                "parameters": [
+                    {
+                        "description": "SendCode",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/send-message": {
             "post": {
                 "description": "Send Message to Email",
@@ -18866,7 +18949,22 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                },
                 "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "sms_id": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 },
                 "username": {

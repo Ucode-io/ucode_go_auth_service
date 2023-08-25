@@ -8,6 +8,7 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
@@ -547,11 +548,71 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 		return
 	}
 
+	if login.Type == "" {
+		login.Type = config.Default
+	}
+
+	switch login.Type {
+	case config.Default:
+		{
+			if login.Username == "" {
+				err := errors.New("Username is required")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+
+			if login.Password == "" {
+				err := errors.New("Password is required")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+		}
+	case config.WithPhone:
+		{
+			if login.SmsId == "" {
+				err := errors.New("SmsId is required when type is not default")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+
+			if login.Otp == "" {
+				err := errors.New("Otp is required when type is not default")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+
+			if login.Phone == "" {
+				err := errors.New("Phone is required when type is phone")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+		}
+	case config.WithEmail:
+		{
+			if login.SmsId == "" {
+				err := errors.New("SmsId is required when type is not default")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+
+			if login.Otp == "" {
+				err := errors.New("Otp is required when type is not default")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+
+			if login.Email == "" {
+				err := errors.New("Email is required when type is email")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+		}
+	}
+
 	resp, err := h.services.SessionService().V2MultiCompanyOneLogin(
 		c.Request.Context(),
 		&login,
 	)
-
 	if err != nil {
 		httpErrorStr := strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
