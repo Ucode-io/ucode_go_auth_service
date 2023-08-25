@@ -10182,7 +10182,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH\", \"PHONE_PWD\", \"EMAIL_PWD\"]",
+                "description": "V2LoginWithOption\ninside the data you must be passed client_type_id field\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH\", \"PHONE_PWD\", \"EMAIL_PWD\"]",
                 "consumes": [
                     "application/json"
                 ],
