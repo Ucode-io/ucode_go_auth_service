@@ -8179,6 +8179,10 @@ paths:
       - description: project-id
         in: query
         name: project-id
+        type: string
+      - description: user-id
+        in: query
+        name: user-id
         required: true
         type: string
       - description: client_type_id

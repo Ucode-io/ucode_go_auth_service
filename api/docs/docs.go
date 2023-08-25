@@ -8476,6 +8476,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "user-id",
+                        "name": "user-id",
                         "in": "query",
                         "required": true
                     },
