@@ -9157,6 +9157,7 @@ paths:
       - application/json
       description: |-
         V2LoginWithOption
+        inside the data you must be passed client_type_id field
         you must be give environment_id and project_id in body or
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder
