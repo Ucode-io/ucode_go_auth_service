@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -243,6 +244,7 @@ func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApi
 func (s *apiKeysService) GetEnvID(ctx context.Context, req *pb.GetReq) (resp *pb.GetRes, err error) {
 	s.log.Info("---GetEnvID--->>>>", logger.Any("req", req))
 
+	fmt.Println("req::", req)
 	resp, err = s.strg.ApiKeys().GetEnvID(context.Background(), req)
 	if err != nil {
 		s.log.Error("---GetEnvID->Error--->>>", logger.Error(err))

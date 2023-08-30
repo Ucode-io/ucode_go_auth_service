@@ -898,6 +898,8 @@ definitions:
     properties:
       active:
         type: integer
+      client_type_id:
+        type: string
       company_id:
         type: string
       project_id:
@@ -906,14 +908,22 @@ definitions:
         type: integer
       role_id:
         type: string
+      table_slug:
+        type: string
       user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes:
     properties:
+      client_type_id:
+        type: string
       company_id:
         type: string
       project_id:
+        type: string
+      role_id:
+        type: string
+      table_slug:
         type: string
       user_id:
         type: string
@@ -1356,6 +1366,8 @@ definitions:
         type: boolean
       chat:
         type: boolean
+      environment_button:
+        type: boolean
       environments_button:
         type: boolean
       id:
@@ -1366,6 +1378,8 @@ definitions:
         type: boolean
       profile_settings_button:
         type: boolean
+      project_button:
+        type: boolean
       project_settings_button:
         type: boolean
       projects_button:
@@ -1373,6 +1387,10 @@ definitions:
       redirects_button:
         type: boolean
       settings_button:
+        type: boolean
+      sms_button:
+        type: boolean
+      version_button:
         type: boolean
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.HasAccessRequest:
@@ -1736,6 +1754,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.ResourceEnvironmentV2MultiCompany:
     properties:
+      client_types:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       description:
         type: string
       display_color:
@@ -2084,6 +2104,8 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_environment_id:
+        type: string
       resource_type:
         type: integer
       role_id:
@@ -2199,6 +2221,8 @@ definitions:
         type: boolean
       self_register:
         type: boolean
+      table_slug:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2LoginRequest:
     properties:
@@ -2361,6 +2385,8 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company2'
         type: array
+      user_id:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2RefreshTokenResponse:
     properties:
@@ -2398,6 +2424,8 @@ definitions:
         type: boolean
       self_register:
         type: boolean
+      table_slug:
+        type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2UpdateRoleRequest:
     properties:
@@ -2705,6 +2733,8 @@ definitions:
         type: boolean
       chat:
         type: boolean
+      environment_button:
+        type: boolean
       environments_button:
         type: boolean
       id:
@@ -2715,6 +2745,8 @@ definitions:
         type: boolean
       profile_settings_button:
         type: boolean
+      project_button:
+        type: boolean
       project_settings_button:
         type: boolean
       projects_button:
@@ -2722,6 +2754,10 @@ definitions:
       redirects_button:
         type: boolean
       settings_button:
+        type: boolean
+      sms_button:
+        type: boolean
+      version_button:
         type: boolean
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission:
@@ -3163,7 +3199,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          type: integer
+          $ref: '#/definitions/x509.ExtKeyUsage'
         type: array
       extensions:
         description: |-
@@ -3198,7 +3234,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        type: integer
+        $ref: '#/definitions/x509.KeyUsage'
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -3256,7 +3292,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.PublicKeyAlgorithm'
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -3290,7 +3326,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.SignatureAlgorithm'
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -3326,6 +3362,123 @@ definitions:
       version:
         type: integer
     type: object
+  x509.ExtKeyUsage:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    type: integer
+    x-enum-varnames:
+    - ExtKeyUsageAny
+    - ExtKeyUsageServerAuth
+    - ExtKeyUsageClientAuth
+    - ExtKeyUsageCodeSigning
+    - ExtKeyUsageEmailProtection
+    - ExtKeyUsageIPSECEndSystem
+    - ExtKeyUsageIPSECTunnel
+    - ExtKeyUsageIPSECUser
+    - ExtKeyUsageTimeStamping
+    - ExtKeyUsageOCSPSigning
+    - ExtKeyUsageMicrosoftServerGatedCrypto
+    - ExtKeyUsageNetscapeServerGatedCrypto
+    - ExtKeyUsageMicrosoftCommercialCodeSigning
+    - ExtKeyUsageMicrosoftKernelCodeSigning
+  x509.KeyUsage:
+    enum:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 16
+    - 32
+    - 64
+    - 128
+    - 256
+    type: integer
+    x-enum-varnames:
+    - KeyUsageDigitalSignature
+    - KeyUsageContentCommitment
+    - KeyUsageKeyEncipherment
+    - KeyUsageDataEncipherment
+    - KeyUsageKeyAgreement
+    - KeyUsageCertSign
+    - KeyUsageCRLSign
+    - KeyUsageEncipherOnly
+    - KeyUsageDecipherOnly
+  x509.PublicKeyAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      DSA: Unsupported.
+    x-enum-varnames:
+    - UnknownPublicKeyAlgorithm
+    - RSA
+    - DSA
+    - ECDSA
+    - Ed25519
+  x509.SignatureAlgorithm:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    type: integer
+    x-enum-comments:
+      DSAWithSHA1: Unsupported.
+      DSAWithSHA256: Unsupported.
+      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+      MD2WithRSA: Unsupported.
+      MD5WithRSA: Only supported for signing, not verification.
+      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
+        OCSP responses.
+    x-enum-varnames:
+    - UnknownSignatureAlgorithm
+    - MD2WithRSA
+    - MD5WithRSA
+    - SHA1WithRSA
+    - SHA256WithRSA
+    - SHA384WithRSA
+    - SHA512WithRSA
+    - DSAWithSHA1
+    - DSAWithSHA256
+    - ECDSAWithSHA1
+    - ECDSAWithSHA256
+    - ECDSAWithSHA384
+    - ECDSAWithSHA512
+    - SHA256WithRSAPSS
+    - SHA384WithRSAPSS
+    - SHA512WithRSAPSS
+    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -8143,6 +8296,10 @@ paths:
       - description: project-id
         in: query
         name: project-id
+        type: string
+      - description: user-id
+        in: query
+        name: user-id
         required: true
         type: string
       - description: client_type_id
@@ -9117,11 +9274,12 @@ paths:
       - application/json
       description: |-
         V2LoginWithOption
+        inside the data you must be passed client_type_id field
         you must be give environment_id and project_id in body or
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder
         login strategy must be one of the following values
-        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
+        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH", "PHONE_PWD", "EMAIL_PWD"]
       operationId: V2login_withoption
       parameters:
       - description: Environment-Id
@@ -9968,7 +10126,7 @@ paths:
         V2Register
         in data must be have type, type must be one of the following values
         ["google", "apple", "email", "phone"]
-
+        client_type_id and role_id must be in body parameters
         you must be give environment_id and project_id in body or
         Environment-Id hearder and project-id in query parameters or
         X-API-KEY in hearder
@@ -11240,7 +11398,7 @@ paths:
       consumes:
       - application/json
       description: Create sms otp settings
-      operationId: create_api_keys
+      operationId: create_sms_otp_settings
       parameters:
       - description: project-id
         in: query
@@ -11297,7 +11455,7 @@ paths:
       consumes:
       - application/json
       description: Update sms otp settings
-      operationId: update_api_keys
+      operationId: update_sms_otp_settings
       parameters:
       - description: project-id
         in: query
@@ -11873,6 +12031,11 @@ paths:
         name: project-id
         required: true
         type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -11923,6 +12086,10 @@ paths:
         in: query
         name: project-id
         required: true
+        type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
         type: string
       produces:
       - application/json

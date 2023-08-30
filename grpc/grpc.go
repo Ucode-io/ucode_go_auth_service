@@ -28,6 +28,7 @@ func SetUpServer(cfg config.Config, log logger.LoggerI, strg storage.StorageI, s
 	auth_service.RegisterLoginStrategyServiceServer(grpcServer, service.NewLoginStrategyService(cfg, log, strg, svcs))
 	auth_service.RegisterLoginPlatformTypeLoginServiceServer(grpcServer, service.NewLoginPlatformTypeService(cfg, log, strg, svcs))
 	auth_service.RegisterRegisterServiceServer(grpcServer, service.NewRegisterService(cfg, log, strg, svcs))
+	auth_service.RegisterSyncUserServiceServer(grpcServer, service.NewSyncUserService(cfg, log, strg, svcs))
 	auth_service.RegisterSmsOtpSettingsServiceServer(grpcServer, service.NewSmsOtpSettingsService(cfg, log, strg, svcs))
 	reflection.Register(grpcServer)
 	return

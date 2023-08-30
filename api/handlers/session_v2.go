@@ -66,6 +66,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 		&obs.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
+			ProjectId:     login.GetProjectId(),
 		},
 	)
 	if err != nil {
@@ -320,11 +321,12 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 // @Router /v2/login/with-option [POST]
 // @Summary V2LoginWithOption
 // @Description V2LoginWithOption
+// @Description inside the data you must be passed client_type_id field
 // @Description you must be give environment_id and project_id in body or
 // @Description Environment-Id hearder and project-id in query parameters or
 // @Description X-API-KEY in hearder
 // @Description login strategy must be one of the following values
-// @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH]
+// @Description ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH", "PHONE_PWD", "EMAIL_PWD"]
 // @Tags V2_Session
 // @Accept json
 // @Produce json
@@ -340,6 +342,15 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	clientType := login.Data["client_type_id"]
+	if clientType == "" {
+		h.handleResponse(c, http.InvalidArgument, "inside data client_type_id is required")
+		return
+	}
+	if ok := util.IsValidUUID(clientType); !ok {
+		h.handleResponse(c, http.InvalidArgument, "lient_type_id is an invalid uuid")
 		return
 	}
 	projectId, ok := c.Get("project_id")

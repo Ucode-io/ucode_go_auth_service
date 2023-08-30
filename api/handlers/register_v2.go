@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -100,6 +101,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
+		fmt.Println("test 10")
 		smsOtpSettings, err := h.services.SmsOtpSettingsService().GetList(context.Background(), &auth_service.GetListSmsOtpSettingsRequest{
 			ProjectId:     resourceEnvironment.ProjectId,
 			EnvironmentId: environmentId.(string),
@@ -108,6 +110,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		fmt.Println("test 11")
 		if len(smsOtpSettings.GetItems()) > 0 {
 			if smsOtpSettings.GetItems()[0].GetNumberOfOtp() != 0 {
 				code, err := util.GenerateCode(int(smsOtpSettings.GetItems()[0].GetNumberOfOtp()))
@@ -178,7 +181,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Description V2Register
 // @Description in data must be have type, type must be one of the following values
 // @Description ["google", "apple", "email", "phone"]
-// @Description
+// @Description client_type_id and role_id must be in body parameters
 // @Description you must be give environment_id and project_id in body or
 // @Description Environment-Id hearder and project-id in query parameters or
 // @Description X-API-KEY in hearder
@@ -213,7 +216,23 @@ func (h *Handler) V2Register(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "invalid register type")
 		return
 	}
-
+	if _, ok := body.Data["client_type_id"].(string); !ok {
+		if !util.IsValidUUID(body.Data["client_type_id"].(string)) {
+			h.handleResponse(c, http.BadRequest, "client_type_id is an invalid uuid")
+			return
+		}
+		h.handleResponse(c, http.BadRequest, "client_type_id is required")
+		return
+	}
+	if _, ok := body.Data["role_id"].(string); !ok {
+		if !util.IsValidUUID(body.Data["role_id"].(string)) {
+			h.handleResponse(c, http.BadRequest, "role_id is an invalid uuid")
+			return
+		}
+		h.handleResponse(c, http.BadRequest, "role_id is required")
+		return
+	}
+	fmt.Println("::::::::::TESTTEST:::::::::::::4")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 

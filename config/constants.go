@@ -32,6 +32,8 @@ const (
 	UcodeTestAdminDomain string = "test.admin.u-code.io"
 	// UcodeDefaultProjectID string = "ucode_default_project_id"
 	UcodeDefaultProjectID string = "39f1b0cc-8dc3-42df-b2bf-813310c007a4"
+
+	ObjectBuilderService = "BUILDER_SERVICE"
 )
 
 var (

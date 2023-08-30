@@ -58,6 +58,7 @@ message ResourceEnvironmentV2MultiCompany {
     string name = 8;
     string display_color = 9;
     string description = 10;
+    google.protobuf.Struct client_types = 11;
 }
 
 message Project2 {
@@ -85,6 +86,7 @@ message Company2 {
 message V2MultiCompanyOneLoginRes {
     
     repeated Company2 companies = 1;
+    string user_id = 2;
 }
 
 message V2HasAccessUserReq {
@@ -279,6 +281,10 @@ message GlobalPermission {
     bool api_keys_button = 9;
     bool environments_button = 10;
     bool projects_button = 11;
+    bool environment_button = 12;
+    bool version_button = 13;
+    bool project_button = 14;
+    bool sms_button = 15;
 }
 
 message V2LoginResponse {

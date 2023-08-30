@@ -130,13 +130,17 @@ type UserRepoI interface {
 	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
 	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
 	GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error)
+	GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (*models.UserProjectClientTypeResponse, error)
 	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
+	UpdateUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)
 	GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error)
 	GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error)
 	GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error)
 	GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error)
 	V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error)
+	GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error)
+	DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*emptypb.Empty, error)
 }
 
 type IntegrationRepoI interface {

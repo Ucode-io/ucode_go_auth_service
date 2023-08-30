@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func (s *clientService) V2CreateClientPlatform(ctx context.Context, req *pb.CreateClientPlatformRequest) (*pb.CommonMessage, error) {
@@ -144,46 +145,46 @@ func (s *clientService) V2GetClientPlatformByIDDetailed(ctx context.Context, req
 func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.GetClientPlatformListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
 
-	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		// "offset": req.Offset,
-		// "limit":  req.Limit,
-		// "search": req.Search,
-	})
-	if err != nil {
-		s.log.Error("!!!ClientPlatform--->", logger.Error(err))
-	}
-	var result *pbObject.CommonMessage
-	switch req.ResourceType {
-	case 1:
-		result, err = s.services.ObjectBuilderService().GetList(ctx,
-			&pbObject.CommonMessage{
-				TableSlug: "client_platform",
-				Data:      structData,
-				ProjectId: req.ProjectId,
-			})
+	// structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+	// 	// "offset": req.Offset,
+	// 	// "limit":  req.Limit,
+	// 	// "search": req.Search,
+	// })
+	// if err != nil {
+	// 	s.log.Error("!!!ClientPlatform--->", logger.Error(err))
+	// }
+	// var result *pbObject.CommonMessage
+	// switch req.ResourceType {
+	// case 1:
+	// 	result, err = s.services.ObjectBuilderService().GetList(ctx,
+	// 		&pbObject.CommonMessage{
+	// 			TableSlug: "client_platform",
+	// 			Data:      structData,
+	// 			ProjectId: req.ProjectId,
+	// 		})
 
-		if err != nil {
-			s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-	case 3:
-		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
-			&pbObject.CommonMessage{
-				TableSlug: "client_platform",
-				Data:      structData,
-				ProjectId: req.ProjectId,
-			})
+	// 	if err != nil {
+	// 		s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+	// case 3:
+	// 	result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
+	// 		&pbObject.CommonMessage{
+	// 			TableSlug: "client_platform",
+	// 			Data:      structData,
+	// 			ProjectId: req.ProjectId,
+	// 		})
 
-		if err != nil {
-			s.log.Error("!!!GetClientPlatformList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	// 	if err != nil {
+	// 		s.log.Error("!!!GetClientPlatformList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
 
-	}
+	// }
 
 	return &pb.CommonMessage{
-		TableSlug: result.TableSlug,
-		Data:      result.Data,
+		TableSlug: "client_platform",
+		Data:      &structpb.Struct{},
 	}, nil
 }
 
@@ -320,6 +321,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		SelfRegister: req.SelfRegister,
 		SelfRecover:  req.SelfRecover,
 		ProjectId:    req.DbProjectId,
+		TableSlug:    req.GetTableSlug(),
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
@@ -405,11 +407,16 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 	}, nil
 }
 
+//
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 	var (
 		result *pbObject.CommonMessage
 	)
+
+	if req.Limit == 0 {
+		req.Limit = 1000
+	}
 
 	// @TODO limit offset error should fix
 	structReq := map[string]interface{}{
@@ -417,14 +424,18 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		"offset": req.GetOffset(),
 		//"search": req.GetSearch(),
 	}
+	if req.Guids != nil {
+		structReq["guid"] = req.Guids
+	}
 	structData, err := helper.ConvertRequestToSturct(structReq)
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("\n\n >>> structData >>", structReq)
 	switch req.ResourceType {
 	case 1:
-		
+
 		result, err = s.services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -436,7 +447,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		
+
 		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -449,7 +460,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	
 
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
@@ -463,18 +473,18 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 	var (
 		result *pbObject.CommonMessage
 	)
-	requestToObjBuilderService := &pb.UpdateClientTypeRequestToObjService{
-		Name:              req.Name,
-		ConfirmBy:         req.ConfirmBy.String(),
-		SelfRegister:      req.SelfRegister,
-		SelfRecover:       req.SelfRecover,
-		ProjectId:         req.DbProjectId,
-		Guid:              req.Guid,
-		ClientPlatformIds: req.ClientPlatformIds,
+	requestToObjBuilderService := map[string]interface{}{
+		"mame":            req.Name,
+		"confirm_by":      req.ConfirmBy.String(),
+		"self_register":   req.SelfRegister,
+		"self_recorder":   req.SelfRecover,
+		"project_id":      req.DbProjectId,
+		"guid":            req.Guid,
+		"client_type_ids": req.ClientPlatformIds,
+		"table_slug":      req.TableSlug,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
-	
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
