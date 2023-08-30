@@ -407,6 +407,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 	}, nil
 }
 
+//
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 	var (
@@ -434,7 +435,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 	fmt.Println("\n\n >>> structData >>", structReq)
 	switch req.ResourceType {
 	case 1:
-		
+
 		result, err = s.services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -446,7 +447,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		
+
 		result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
@@ -459,7 +460,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	
 
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
