@@ -1494,6 +1494,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	fmt.Println("has access user begin::", time.Now())
 	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	arr_path := strings.Split(req.Path, "/")
@@ -1576,17 +1577,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			tableSlug = arr_path[len(arr_path)-1]
 		}
 
-		filter := map[string]interface{}{
-			"role_id":    session.RoleId,
-			"table_slug": tableSlug,
-		}
-		filter[methodField] = "Yes"
-
-		structData, err := helper.ConvertMapToStruct(filter)
-		if err != nil {
-			return nil, err
-		}
-
 		resource, err := s.services.ServiceResource().GetSingle(
 			ctx,
 			&company_service.GetSingleServiceResourceReq{
@@ -1599,34 +1589,19 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			return nil, err
 		}
 
-		resp, err := s.services.ObjectBuilderService().GetList(
+		resp, err := s.services.BuilderPermissionService().GetTablePermission(
 			context.Background(),
-			&pbObject.CommonMessage{
-				TableSlug: "record_permission",
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
+			&pbObject.GetTablePermissionRequest{
+				TableSlug:             tableSlug,
+				RoleId:                session.RoleId,
+				ResourceEnvironmentId: resource.ResourceEnvironmentId,
+				Method:                methodField,
 			},
 		)
 		if err != nil {
 			return nil, err
 		}
-		var isHavePermission = false
-
-		if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
-			err := status.Error(codes.PermissionDenied, "Permission denied")
-			return nil, err //fmt.Errorf("Permission denied")
-		} else {
-			if response, ok := resp.Data.AsMap()["response"].([]interface{}); ok {
-				for _, v := range response {
-					if res, ok := v.(map[string]interface{}); ok {
-						if res["table_slug"] == tableSlug {
-							isHavePermission = true
-						}
-					}
-				}
-			}
-		}
-		if !isHavePermission {
+		if !resp.IsHavePermission {
 			err := status.Error(codes.PermissionDenied, "Permission denied")
 			return nil, err //fmt.Errorf("Permission denied")
 		}
@@ -1640,6 +1615,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 		authTables = append(authTables, authTable)
 	}
+	fmt.Println("has access user end::", time.Now())
 
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
