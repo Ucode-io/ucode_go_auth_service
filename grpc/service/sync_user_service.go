@@ -148,3 +148,24 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	response.UserId = user.GetId()
 	return &empty.Empty{}, nil
 }
+
+func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
+	var (
+		response = pb.SyncUserResponse{}
+		user     *pb.User
+	)
+	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+		ProjectId: req.GetProjectId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	req.CompanyId = project.CompanyId
+
+	_, err = sus.strg.User().DeleteUsersFromProject(context.Background(), req)
+	if err != nil {
+		return nil, err
+	}
+	response.UserId = user.GetId()
+	return &empty.Empty{}, nil
+}

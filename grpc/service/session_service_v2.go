@@ -1826,6 +1826,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
 						},
 					)
+					fmt.Println("project id to get list of client types:: ", resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId)
 					if err != nil {
 						errGetProjects := errors.New("cant get client types")
 						s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
