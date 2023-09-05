@@ -141,6 +141,7 @@ type UserRepoI interface {
 	V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error)
 	GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error)
 	DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*emptypb.Empty, error)
+	DeleteUsersFromProject(ctx context.Context, req *pb.DeleteManyUserRequest) (*emptypb.Empty, error)
 }
 
 type IntegrationRepoI interface {
