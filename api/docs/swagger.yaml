@@ -2228,11 +2228,17 @@ definitions:
     properties:
       client_type:
         type: string
+      email:
+        type: string
       environment_id:
         type: string
       login_strategy:
         type: string
+      otp:
+        type: string
       password:
+        type: string
+      phone:
         type: string
       project_id:
         type: string
@@ -2240,10 +2246,14 @@ definitions:
         type: string
       resource_type:
         type: integer
+      sms_id:
+        type: string
       tables:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
         type: array
+      type:
+        type: string
       username:
         type: string
     type: object
