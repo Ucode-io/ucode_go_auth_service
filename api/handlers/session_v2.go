@@ -50,6 +50,10 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
+	if login.Type == "" {
+		login.Type = config.Default
+	}
+
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))

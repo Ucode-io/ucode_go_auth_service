@@ -41,39 +41,85 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!V2Login--->", logger.Error(err))
-		if err == sql.ErrNoRows {
-			errNoRows := errors.New("no user found")
-			return nil, status.Error(codes.Internal, errNoRows.Error())
+	user := &pb.User{}
+	var err error
+
+	switch req.Type {
+	case config.Default:
+		{
+			if len(req.Username) < 6 {
+				err := errors.New("invalid username")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			if len(req.Password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			match, err := security.ComparePassword(user.Password, req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 		}
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	case config.WithPhone:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+			user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	case config.WithEmail:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+			user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
 	}
-
-	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
-	// if err != nil {
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-	//
-	// if expiresAt.Unix() < time.Now().Unix() {
-	// 	err := errors.New("User has been expired")
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
 
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                user.GetId(),
@@ -81,7 +127,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
-	log.Println("reqLoginData--->", reqLoginData)
+
 	var data *pbObject.LoginDataRes
 
 	switch req.ResourceType {
