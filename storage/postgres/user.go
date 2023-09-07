@@ -492,7 +492,7 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	res := pb.GetUserProjectsRes{}
 
 	query := `SELECT company_id,
-      			array_agg(project_id)
+      			array_agg( DISTINCT project_id)
 				FROM user_project
 				WHERE user_id = $1
 				GROUP BY company_id`
