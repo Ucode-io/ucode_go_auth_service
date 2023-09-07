@@ -8476,6 +8476,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "project-id",
                         "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "user-id",
+                        "name": "user-id",
                         "in": "query",
                         "required": true
                     },
@@ -10176,7 +10182,7 @@ const docTemplate = `{
         },
         "/v2/login/with-option": {
             "post": {
-                "description": "V2LoginWithOption\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH\", \"PHONE_PWD\", \"EMAIL_PWD\"]",
+                "description": "V2LoginWithOption\ninside the data you must be passed client_type_id field\nyou must be give environment_id and project_id in body or\nEnvironment-Id hearder and project-id in query parameters or\nX-API-KEY in hearder\nlogin strategy must be one of the following values\n[\"EMAIL\", \"PHONE\", \"EMAIL_OTP\", \"PHONE_OTP\", \"LOGIN\", \"LOGIN_PWD\", \"GOOGLE_AUTH\", \"APPLE_AUTH\", \"PHONE_PWD\", \"EMAIL_PWD\"]",
                 "consumes": [
                     "application/json"
                 ],
@@ -13808,7 +13814,7 @@ const docTemplate = `{
                     "V2_SMS_OTP_SETTINGS"
                 ],
                 "summary": "Update sms otp settings",
-                "operationId": "update_api_keys",
+                "operationId": "update_sms_otp_settings",
                 "parameters": [
                     {
                         "type": "string",
@@ -13907,7 +13913,7 @@ const docTemplate = `{
                     "V2_SMS_OTP_SETTINGS"
                 ],
                 "summary": "Create sms otp settings",
-                "operationId": "create_api_keys",
+                "operationId": "create_sms_otp_settings",
                 "parameters": [
                     {
                         "type": "string",
@@ -18516,6 +18522,9 @@ const docTemplate = `{
                 "project_id": {
                     "type": "string"
                 },
+                "resource_environment_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "type": "integer"
                 },
@@ -18942,6 +18951,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Company2"
                     }
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },

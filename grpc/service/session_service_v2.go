@@ -929,7 +929,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	if req.EnvId != "" {
 		session.EnvId = req.EnvId
 	}
-	fmt.Println("\n\n session >>>>>>>>>>>> #2", session)
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -947,16 +946,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!V2RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	// userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
-	// 	ClientTypeId: session.ClientTypeId,
-	// 	UserId:       session.UserId,
-	// 	ProjectId:    session.GetProjectId(),
-	// })
-	// if err != nil {
-	// 	s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-	// convertedData := helper.ConvertPbToAnotherPb(userData)
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
@@ -1407,6 +1396,171 @@ func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCom
 	return resp, nil
 }
 
+func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
+
+	arr_path := strings.Split(req.Path, "/")
+
+	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
+	if err != nil {
+		s.log.Error("!!!V2HasAccessUser->TimeParse--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if expiresAt.Unix() < time.Now().Unix() {
+		err := errors.New("user has been expired")
+		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	var methodField string
+	switch req.Method {
+	case "GET":
+		methodField = "read"
+	case "POST":
+		methodField = "write"
+	case "PUT":
+		methodField = "update"
+	case "DELETE":
+		methodField = "delete"
+	}
+	// this condition need our object/get-list api because this api's method is post we change it to get
+	// this condition need our object/get-list-group-by api because this api's method is post we change it to get
+	if ((strings.Contains(req.GetPath(), "object/get-list")) || (strings.Contains(req.GetPath(), "object/get-list-group-by"))) && req.GetMethod() != "GET" {
+		methodField = "read"
+	}
+
+	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
+		UserId: session.GetUserId(),
+	})
+	if err != nil {
+		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
+		return nil, err
+	}
+
+	exist := false
+	for _, item := range projects.GetProjectIds() {
+		if item == session.GetProjectId() {
+
+			exist = true
+			break
+		}
+	}
+	if !exist {
+		err = errors.New("---V2HasAccessUser->Access denied")
+		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	var checkPermission bool
+	// guess role check
+	for _, path := range arr_path {
+		if path == "object" || path == "object-slim" {
+			checkPermission = true
+			break
+		}
+	}
+	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" && checkPermission {
+		var tableSlug string
+		if strings.Contains(arr_path[len(arr_path)-1], ":") {
+			tableSlug = arr_path[len(arr_path)-2]
+		} else {
+			tableSlug = arr_path[len(arr_path)-1]
+		}
+
+		filter := map[string]interface{}{
+			"role_id":    session.RoleId,
+			"table_slug": tableSlug,
+		}
+		filter[methodField] = "Yes"
+
+		structData, err := helper.ConvertMapToStruct(filter)
+		if err != nil {
+			return nil, err
+		}
+
+		resource, err := s.services.ServiceResource().GetSingle(
+			ctx,
+			&company_service.GetSingleServiceResourceReq{
+				ProjectId:     session.ProjectId,
+				EnvironmentId: session.EnvId,
+				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err := s.services.ObjectBuilderService().GetList(
+			context.Background(),
+			&pbObject.CommonMessage{
+				TableSlug: "record_permission",
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		var isHavePermission = false
+
+		if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
+			err := status.Error(codes.PermissionDenied, "Permission denied")
+			return nil, err //fmt.Errorf("Permission denied")
+		} else {
+			if response, ok := resp.Data.AsMap()["response"].([]interface{}); ok {
+				for _, v := range response {
+					if res, ok := v.(map[string]interface{}); ok {
+						if res["table_slug"] == tableSlug {
+							isHavePermission = true
+						}
+					}
+				}
+			}
+		}
+		if !isHavePermission {
+			err := status.Error(codes.PermissionDenied, "Permission denied")
+			return nil, err //fmt.Errorf("Permission denied")
+		}
+	}
+
+	var authTables []*pb.TableBody
+	for _, table := range tokenInfo.Tables {
+		authTable := &pb.TableBody{
+			TableSlug: table.TableSlug,
+			ObjectId:  table.ObjectID,
+		}
+		authTables = append(authTables, authTable)
+	}
+
+	return &pb.V2HasAccessUserRes{
+		Id:               session.Id,
+		ProjectId:        session.ProjectId,
+		UserId:           session.UserId,
+		Ip:               session.Ip,
+		Data:             session.Data,
+		ExpiresAt:        session.ExpiresAt,
+		CreatedAt:        session.CreatedAt,
+		UpdatedAt:        session.UpdatedAt,
+		Tables:           authTables,
+		ClientPlatformId: session.ClientPlatformId,
+		ClientTypeId:     session.ClientTypeId,
+		RoleId:           session.RoleId,
+		EnvId:            session.EnvId,
+	}, nil
+}
+
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
 	resp := pb.V2MultiCompanyOneLoginRes{
 		Companies: []*pb.Company2{},
@@ -1531,6 +1685,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					Description:   en.Description,
 				}
 
+				fmt.Println("\n\n >>> ", resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "")
 				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
 					continue
 				}
@@ -1551,6 +1706,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					}
 					respResourceEnvironment.ClientTypes = clientTypes.Data
 				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
+					fmt.Println("\n >> have client type id in user", clientType.ClientTypeIds)
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{
@@ -1582,172 +1738,9 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			Projects:    projects,
 		})
 	}
+	resp.UserId = user.Id
 
 	return &resp, nil
-}
-
-func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
-	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
-
-	arr_path := strings.Split(req.Path, "/")
-
-	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
-	if err != nil {
-		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
-	if err != nil {
-		s.log.Error("!!!V2HasAccessUser->TimeParse--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("user has been expired")
-		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	var methodField string
-	switch req.Method {
-	case "GET":
-		methodField = "read"
-	case "POST":
-		methodField = "write"
-	case "PUT":
-		methodField = "update"
-	case "DELETE":
-		methodField = "delete"
-	}
-	// this condition need our object/get-list api because this api's method is post we change it to get
-	if (strings.Contains(req.GetPath(), "object/get-list")) && req.GetMethod() != "GET" {
-		methodField = "read"
-	}
-
-	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
-		UserId: session.GetUserId(),
-	})
-	if err != nil {
-		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
-		return nil, err
-	}
-
-	exist := false
-	for _, item := range projects.GetProjectIds() {
-		if item == session.GetProjectId() {
-
-			exist = true
-			break
-		}
-	}
-	if !exist {
-		err = errors.New("---V2HasAccessUser->Access denied")
-		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-	var checkPermission bool
-	// guess role check
-	for _, path := range arr_path {
-		if path == "object" || path == "object-slim" {
-			checkPermission = true
-			break
-		}
-	}
-	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" && checkPermission {
-		var tableSlug string
-		if arr_path[len(arr_path)-1] == ":object_id" {
-			tableSlug = arr_path[len(arr_path)-2]
-		} else {
-			tableSlug = arr_path[len(arr_path)-1]
-		}
-
-		filter := map[string]interface{}{
-			"role_id":    session.RoleId,
-			"table_slug": tableSlug,
-		}
-		filter[methodField] = "Yes"
-
-		structData, err := helper.ConvertMapToStruct(filter)
-		if err != nil {
-			return nil, err
-		}
-
-		resource, err := s.services.ServiceResource().GetSingle(
-			ctx,
-			&company_service.GetSingleServiceResourceReq{
-				ProjectId:     session.ProjectId,
-				EnvironmentId: session.EnvId,
-				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		resp, err := s.services.ObjectBuilderService().GetList(
-			context.Background(),
-			&pbObject.CommonMessage{
-				TableSlug: "record_permission",
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
-		var isHavePermission = false
-
-		if resp.Data.AsMap()["response"] == nil || len(resp.Data.AsMap()["response"].([]interface{})) == 0 {
-			err := status.Error(codes.PermissionDenied, "Permission denied")
-			return nil, err //fmt.Errorf("Permission denied")
-		} else {
-			if response, ok := resp.Data.AsMap()["response"].([]interface{}); ok {
-				for _, v := range response {
-					if res, ok := v.(map[string]interface{}); ok {
-						if res["table_slug"] == tableSlug {
-							isHavePermission = true
-						}
-					}
-				}
-			}
-		}
-		if !isHavePermission {
-			err := status.Error(codes.PermissionDenied, "Permission denied")
-			return nil, err //fmt.Errorf("Permission denied")
-		}
-	}
-
-	var authTables []*pb.TableBody
-	for _, table := range tokenInfo.Tables {
-		authTable := &pb.TableBody{
-			TableSlug: table.TableSlug,
-			ObjectId:  table.ObjectID,
-		}
-		authTables = append(authTables, authTable)
-	}
-
-	return &pb.V2HasAccessUserRes{
-		Id:               session.Id,
-		ProjectId:        session.ProjectId,
-		UserId:           session.UserId,
-		Ip:               session.Ip,
-		Data:             session.Data,
-		ExpiresAt:        session.ExpiresAt,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		Tables:           authTables,
-		ClientPlatformId: session.ClientPlatformId,
-		ClientTypeId:     session.ClientTypeId,
-		RoleId:           session.RoleId,
-		EnvId:            session.EnvId,
-	}, nil
 }
 
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
