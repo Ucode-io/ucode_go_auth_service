@@ -147,6 +147,7 @@ message CreateUserRequest {
     string base_url = 15;
     string year_of_birth = 16;
     int32 resource_type = 17;
+    bool invite = 18;
 }
 
 message UserPrimaryKey {

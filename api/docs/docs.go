@@ -17167,6 +17167,9 @@ const docTemplate = `{
                 "expires_at": {
                     "type": "string"
                 },
+                "invite": {
+                    "type": "boolean"
+                },
                 "login": {
                     "type": "string"
                 },
@@ -18795,13 +18798,22 @@ const docTemplate = `{
                 "client_type": {
                     "type": "string"
                 },
+                "email": {
+                    "type": "string"
+                },
                 "environment_id": {
                     "type": "string"
                 },
                 "login_strategy": {
                     "type": "string"
                 },
+                "otp": {
+                    "type": "string"
+                },
                 "password": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 },
                 "project_id": {
@@ -18813,11 +18825,17 @@ const docTemplate = `{
                 "resource_type": {
                     "type": "integer"
                 },
+                "sms_id": {
+                    "type": "string"
+                },
                 "tables": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object"
                     }
+                },
+                "type": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string"
