@@ -79,6 +79,8 @@ type Config struct {
 
 	PostgresObjectBuidlerServiceHost string
 	PostgresObjectBuidlerServicePort string
+
+	UcodeAppBaseUrl string
 }
 
 // Load ...
@@ -134,6 +136,7 @@ func Load() Config {
 
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", "localhost"))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":9202"))
+	config.UcodeAppBaseUrl = cast.ToString(getOrReturnDefaultValue("UCODE_APP_BASE_URL", "https://dev-app.ucode.run"))
 
 	return config
 }

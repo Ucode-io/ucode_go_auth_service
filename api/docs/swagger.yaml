@@ -58,6 +58,8 @@ definitions:
         type: string
       smsServiceHost:
         type: string
+      ucodeAppBaseUrl:
+        type: string
       version:
         type: string
       webPageServiceHost:

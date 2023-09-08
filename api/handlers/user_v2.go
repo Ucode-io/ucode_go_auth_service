@@ -98,7 +98,6 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 			return
 		}
 	}
-
 	user.ResourceEnvironmentId = resourceEnvironment.GetId()
 	user.ResourceType = resourceEnvironment.GetResourceType()
 	resp, err := h.services.UserService().V2CreateUser(

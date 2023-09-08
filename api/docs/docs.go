@@ -15858,6 +15858,9 @@ const docTemplate = `{
                 "smsServiceHost": {
                     "type": "string"
                 },
+                "ucodeAppBaseUrl": {
+                    "type": "string"
+                },
                 "version": {
                     "type": "string"
                 },
