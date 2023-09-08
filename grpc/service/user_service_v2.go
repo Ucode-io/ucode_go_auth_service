@@ -461,6 +461,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
 	// 	return nil, err
 	// }
+	unHashedPassword := req.Password
 
 	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
@@ -592,6 +593,33 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if req.GetInvite() {
+		emailSettings, err := s.strg.Email().GetListEmailSettings(ctx, &pb.GetListEmailSettingsRequest{
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		var devEmail string
+		var devEmailPassword string
+		if len(emailSettings.GetItems()) > 0 {
+			devEmail = emailSettings.GetItems()[0].GetEmail()
+			devEmailPassword = emailSettings.GetItems()[0].GetPassword()
+		}
+		err = helper.SendInviteMessageToEmail(
+			"Invite message",
+			req.GetEmail(),
+			pKey.GetId(),
+			devEmail,
+			devEmailPassword,
+			req.GetLogin(),
+			unHashedPassword,
+		)
+		if err != nil {
+			s.log.Error("Error while sending message to invite")
+			s.log.Error(err.Error())
+		}
 	}
 
 	return s.strg.User().GetByPK(ctx, pKey)
@@ -1128,6 +1156,17 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser.ObjectBuilderService.Update--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+			UserId:       req.GetId(),
+			ProjectId:    req.GetProjectId(),
+			CompanyId:    req.GetCompanyId(),
+			ClientTypeId: req.GetClientTypeId(),
+			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+		})
 	case 3:
 		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",

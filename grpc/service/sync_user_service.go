@@ -8,6 +8,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -116,6 +117,34 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			if err != nil {
 				return nil, err
 			}
+		}
+	}
+
+	if req.GetInvite() {
+		emailSettings, err := sus.strg.Email().GetListEmailSettings(ctx, &pb.GetListEmailSettingsRequest{
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		var devEmail string
+		var devEmailPassword string
+		if len(emailSettings.GetItems()) > 0 {
+			devEmail = emailSettings.GetItems()[0].GetEmail()
+			devEmailPassword = emailSettings.GetItems()[0].GetPassword()
+		}
+		err = helper.SendInviteMessageToEmail(
+			"Invite message",
+			req.GetEmail(),
+			userId,
+			devEmail,
+			devEmailPassword,
+			req.GetLogin(),
+			req.GetPassword(),
+		)
+		if err != nil {
+			sus.log.Error("Error while sending message to invite")
+			sus.log.Error(err.Error())
 		}
 	}
 	response.UserId = userId

@@ -61,6 +61,8 @@ type Config struct {
 
 	PostgresObjectBuidlerServiceHost string
 	PostgresObjectBuidlerServicePort string
+
+	UcodeAppBaseUrl string
 }
 
 // Load ...
@@ -83,10 +85,10 @@ func Load() Config {
 	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", "ucode.udevs.io@gmail.com"))
 	config.Password = cast.ToString(getOrReturnDefaultValue("PASSWORD", "xkiaqodjfuielsug"))
 
-	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "95.217.155.57"))
-	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 30034))
+	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "65.109.239.69"))
+	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 5432))
 	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", "auth_service"))
-	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "IeX7ieso"))
+	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "Iegfrte45eatr7ieso"))
 	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "auth_service"))
 
 	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 30))
@@ -116,6 +118,7 @@ func Load() Config {
 
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", "localhost"))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":9202"))
+	config.UcodeAppBaseUrl = cast.ToString(getOrReturnDefaultValue("UCODE_APP_BASE_URL", "https://dev-app.ucode.run"))
 
 	return config
 }
