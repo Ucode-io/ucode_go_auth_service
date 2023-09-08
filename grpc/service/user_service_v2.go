@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -461,6 +462,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
 	// 	return nil, err
 	// }
+	unHashedPassword := req.Password
 
 	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
@@ -592,6 +594,36 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if req.GetInvite() {
+		emailSettings, err := s.strg.Email().GetListEmailSettings(ctx, &pb.GetListEmailSettingsRequest{
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		var devEmail string
+		var devEmailPassword string
+		if len(emailSettings.GetItems()) > 0 {
+			devEmail = emailSettings.GetItems()[0].GetEmail()
+			devEmailPassword = emailSettings.GetItems()[0].GetPassword()
+		}
+		err = helper.SendInviteMessageToEmail(helper.SendMessageToEmailRequest{
+			Subject:       "Invite message",
+			To:            req.GetEmail(),
+			UserId:        pKey.Id,
+			Email:         devEmail,
+			Password:      devEmailPassword,
+			Username:      req.GetLogin(),
+			TempPassword:  unHashedPassword,
+			EnvironmentId: req.GetEnvironmentId(),
+			ClientTypeId:  req.GetClientTypeId(),
+			ProjectId:     req.GetProjectId(),
+		})
+		if err != nil {
+			s.log.Error("Error while sending message to invite")
+			s.log.Error(err.Error())
+		}
 	}
 
 	return s.strg.User().GetByPK(ctx, pKey)
@@ -1128,6 +1160,17 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser.ObjectBuilderService.Update--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+			UserId:       req.GetId(),
+			ProjectId:    req.GetProjectId(),
+			CompanyId:    req.GetCompanyId(),
+			ClientTypeId: req.GetClientTypeId(),
+			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+		})
 	case 3:
 		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
@@ -1235,8 +1278,9 @@ func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.G
 func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
 
 	var (
-		user = &pb.User{}
-		err  error
+		user             = &pb.User{}
+		err              error
+		unHashedPassword = req.GetPassword()
 	)
 	if len(req.GetPassword()) > 6 {
 		user, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
@@ -1272,6 +1316,44 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 			return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 		}
 		user.Password = hashedPassword
+		if req.GetClientTypeId() != "" && req.GetEnvironmentId() != "" && req.GetProjectId() != "" {
+			resource, err := s.services.ServiceResource().GetSingle(ctx, &company_service.GetSingleServiceResourceReq{
+				ProjectId:     req.GetProjectId(),
+				EnvironmentId: req.GetEnvironmentId(),
+				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+			})
+			if err != nil {
+				err = errors.New("Password updated in auth but not found resource in this project")
+				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+				return nil, err
+			}
+			switch resource.ResourceType {
+			case 1:
+				_, err = s.services.LoginService().UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
+					Guid:                  req.UserId,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Password:              unHashedPassword,
+					ClientTypeId:          req.ClientTypeId,
+				})
+				if err != nil {
+					err = errors.New("Password updated in auth but failed to update in object builder")
+					s.log.Error("!!!V2UserResetPassword.LoginService().UpdateUserPassword--->", logger.Error(err))
+					return nil, err
+				}
+			case 3:
+				_, err = s.services.PostgresLoginService().UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
+					Guid:                  req.UserId,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Password:              unHashedPassword,
+					ClientTypeId:          req.ClientTypeId,
+				})
+				if err != nil {
+					err = errors.New("Password updated in auth but failed to update in object builder")
+					s.log.Error("!!!V2UserResetPassword.PostgresLoginService().UpdateUserPassword--->", logger.Error(err))
+					return nil, err
+				}
+			}
+		}
 	} else {
 		err := fmt.Errorf("password must not be less than 6 characters")
 		s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))

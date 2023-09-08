@@ -2,11 +2,12 @@ package helper
 
 import (
 	"encoding/json"
-	_ "fmt"
+	"fmt"
 	"io/ioutil"
 	"log"
 	net_http "net/http"
 	"net/smtp"
+	"ucode/ucode_go_auth_service/config"
 
 	"github.com/pkg/errors"
 )
@@ -20,6 +21,19 @@ const (
 	from            string = "ucode.udevs.io@gmail.com"
 	defaultPassword string = "xkiaqodjfuielsug"
 )
+
+type SendMessageToEmailRequest struct {
+	Subject       string
+	To            string
+	UserId        string
+	Email         string
+	Password      string
+	Username      string
+	TempPassword  string
+	EnvironmentId string
+	ProjectId     string
+	ClientTypeId  string
+}
 
 func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
 	resp, err := net_http.Get("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken)
@@ -86,6 +100,47 @@ func SendCodeToEmail(subject, to, code string, email string, password string) er
 		message + "\n"
 
 	if err := smtp.SendMail(host+hostPort, auth, from, []string{to}, []byte(msg)); err != nil {
+		return errors.Wrap(err, "error while sending message to email")
+	}
+
+	return nil
+}
+
+func SendInviteMessageToEmail(input SendMessageToEmailRequest) error {
+
+	cfg := config.Load()
+	log.Printf("---SendInviteMessageToEmail---> email: %s", input.To)
+	url := fmt.Sprintf(
+		cfg.UcodeAppBaseUrl+"/invite-user?user_id=%s&environment_id=%s&project_id=%s&client_type_id=%s",
+		input.UserId,
+		input.EnvironmentId,
+		input.ProjectId,
+		input.ClientTypeId,
+	)
+	message := fmt.Sprintf(`
+			Dear %s,
+
+			I hope this message finds you well. I am pleased to invite you to access our admin panel, where you will have the ability to manage and oversee various aspects of our system.
+			
+			Below, you will find the details needed to access the admin panel:
+			
+			Admin Panel Link: %s
+			Login: %s
+			Temporary Password: %s`, input.To, url, input.Username, input.TempPassword)
+
+	if input.Email == "" || input.Password == "" {
+		input.Email = from
+		input.Password = defaultPassword
+	}
+
+	auth := smtp.PlainAuth("", input.Email, input.Password, host)
+
+	msg := "To: \"" + input.To + "\" <" + input.To + ">\n" +
+		"From: \"" + input.Email + "\" <" + input.Email + ">\n" +
+		"Subject: " + input.Subject + "\n" +
+		message + "\n"
+
+	if err := smtp.SendMail(host+hostPort, auth, from, []string{input.To}, []byte(msg)); err != nil {
 		return errors.Wrap(err, "error while sending message to email")
 	}
 

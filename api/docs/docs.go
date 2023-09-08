@@ -15775,6 +15775,9 @@ const docTemplate = `{
                 "smsServiceHost": {
                     "type": "string"
                 },
+                "ucodeAppBaseUrl": {
+                    "type": "string"
+                },
                 "version": {
                     "type": "string"
                 },
@@ -17098,8 +17101,14 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "expires_at": {
                     "type": "string"
+                },
+                "invite": {
+                    "type": "boolean"
                 },
                 "login": {
                     "type": "string"
@@ -19049,10 +19058,19 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.V2UserResetPasswordRequest": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
                 "old_password": {
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "project_id": {
                     "type": "string"
                 },
                 "user_id": {
