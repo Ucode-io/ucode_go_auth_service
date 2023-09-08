@@ -1324,7 +1324,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 	var (
 		user             = &pb.User{}
 		err              error
-		unHashedPassword = user.GetPassword()
+		unHashedPassword = req.GetPassword()
 	)
 	if len(req.GetPassword()) > 6 {
 		user, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
