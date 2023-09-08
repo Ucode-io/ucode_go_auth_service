@@ -133,14 +133,18 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			devEmail = emailSettings.GetItems()[0].GetEmail()
 			devEmailPassword = emailSettings.GetItems()[0].GetPassword()
 		}
-		err = helper.SendInviteMessageToEmail(
-			"Invite message",
-			req.GetEmail(),
-			userId,
-			devEmail,
-			devEmailPassword,
-			req.GetLogin(),
-			req.GetPassword(),
+		err = helper.SendInviteMessageToEmail(helper.SendMessageToEmailRequest{
+			Subject:       "Invite message",
+			To:            req.GetEmail(),
+			UserId:        userId,
+			Email:         devEmail,
+			Password:      devEmailPassword,
+			Username:      req.GetLogin(),
+			TempPassword:  req.GetPassword(),
+			EnvironmentId: req.GetEnvironmentId(),
+			ClientTypeId:  req.GetClientTypeId(),
+			ProjectId:     req.GetProjectId(),
+		},
 		)
 		if err != nil {
 			sus.log.Error("Error while sending message to invite")
