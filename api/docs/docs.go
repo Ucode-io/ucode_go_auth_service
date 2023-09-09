@@ -18807,6 +18807,9 @@ const docTemplate = `{
                 "user": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                 },
+                "user_data": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                },
                 "user_found": {
                     "type": "boolean"
                 },
@@ -18843,6 +18846,9 @@ const docTemplate = `{
                 },
                 "token": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
+                },
+                "user_data": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -20011,6 +20017,9 @@ const docTemplate = `{
                 },
                 "role": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.Role"
+                },
+                "user_data": {
+                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
                 },
                 "user_found": {
                     "type": "boolean"

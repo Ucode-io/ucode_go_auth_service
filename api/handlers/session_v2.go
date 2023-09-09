@@ -411,6 +411,7 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		Companies: resp.GetCompanies(),
 		UserId:    resp.GetUserId(),
 		Sessions:  resp.GetSessions(),
+		UserData:  resp.GetUserData(),
 	}
 
 	h.handleResponse(c, http.Created, res)
