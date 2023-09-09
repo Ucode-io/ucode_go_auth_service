@@ -591,6 +591,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			Role:           data.GetRole(),
 			Permissions:    data.GetPermissions(),
 			LoginTableSlug: data.GetLoginTableSlug(),
+			UserData:       data.GetUserData(),
 		})
 
 	}
@@ -672,6 +673,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		ResourceId:      resp.GetResourceId(),
 		EnvironmentId:   resp.GetEnvironmentId(),
 		User:            resp.GetUser(),
+		UserData:        res.GetUserData(),
 	}, nil
 }
 
