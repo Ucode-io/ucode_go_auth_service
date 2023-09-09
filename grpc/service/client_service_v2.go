@@ -407,6 +407,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 	}, nil
 }
 
+//
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 	result := &pbObject.CommonMessage{}
@@ -461,7 +462,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	fmt.Println("\n\n >>>>>>>>>>>>>>> client types", result.Data)
 
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
