@@ -32,9 +32,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		if bearerToken != "" {
 			strArr := strings.Split(bearerToken, " ")
 
-			if projectId == "9edbd20e-83bb-4739-afb6-073a266a2294" {
-				fmt.Println("\n\n Authorization ", bearerToken)
-			}
+			fmt.Println("\n\n Authorization >>>> ", bearerToken)
 
 			if strArr[0] == "API-KEY" {
 				app_id := c.GetHeader("X-API-KEY")
