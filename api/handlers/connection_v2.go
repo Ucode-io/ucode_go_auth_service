@@ -348,6 +348,9 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 				Data:      structData,
 			},
 		)
+		fmt.Println("\n\n ----------- > params ", structData)
+		fmt.Println("\n\n >>>>>>>>>>>>> response ", resp)
+		fmt.Println("\n\n")
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
