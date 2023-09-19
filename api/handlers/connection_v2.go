@@ -349,8 +349,6 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			},
 		)
 		fmt.Println("\n\n ----------- > params ", structData)
-		fmt.Println("\n\n >>>>>>>>>>>>> response ", resp)
-		fmt.Println("\n\n")
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
@@ -373,6 +371,9 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	}
 	response, ok := resp.Data.AsMap()["response"].([]interface{})
 	responseWithOptions := make([]interface{}, 0, len(response))
+	fmt.Println("\n\n >>>>>>>>>>>>> response ", len(response), response)
+	fmt.Println("\n\n >>>>>>>>>>>>> responseWithOption ", len(responseWithOptions))
+	fmt.Println("\n\n")
 	if ok && c.Query("user-id") != "" {
 		for _, v := range response {
 			if res, ok := v.(map[string]interface{}); ok {
