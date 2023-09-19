@@ -397,7 +397,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			responseWithOptions = append(responseWithOptions, v)
 		}
 	}
-	if len(responseWithOptions) < 0 {
+	if len(responseWithOptions) <= 0 {
 		if res, ok := resp.Data.AsMap()["response"].([]interface{}); ok {
 			responseWithOptions = res
 		} else {
