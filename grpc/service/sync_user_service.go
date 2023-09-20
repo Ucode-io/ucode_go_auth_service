@@ -201,3 +201,127 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 	response.UserId = user.GetId()
 	return &empty.Empty{}, nil
 }
+
+func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUsersRequest) (*pb.SyncUsersResponse, error) {
+	var (
+		response = pb.SyncUsersResponse{}
+		user_ids = make([]string, 0, len(in.Users))
+	)
+	for _, req := range in.Users {
+		var user *pb.User
+		var username string
+		username = req.GetLogin()
+		if username == "" {
+			username = req.GetEmail()
+		}
+		if username == "" {
+			username = req.GetPhone()
+		}
+
+		user, err := sus.strg.User().GetByUsername(context.Background(), username)
+		if err != nil {
+			return nil, err
+		}
+		userId := user.GetId()
+		project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+			ProjectId: req.GetProjectId(),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if userId == "" {
+			// if user not found in auth service db we have to create it
+			if req.GetPassword() != "" {
+				hashedPassword, err := security.HashPassword(req.GetPassword())
+				if err != nil {
+					sus.log.Error("!!!CreateUser--->", logger.Error(err))
+					return nil, status.Error(codes.InvalidArgument, err.Error())
+				}
+				req.Password = hashedPassword
+			}
+
+			user, err := sus.strg.User().Create(ctx, &pb.CreateUserRequest{
+				Login:     req.GetLogin(),
+				Password:  req.GetPassword(),
+				Email:     req.GetEmail(),
+				Phone:     req.GetPhone(),
+				CompanyId: project.GetCompanyId(),
+			})
+			if err != nil {
+				sus.log.Error("!!!CreateUser--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			userId = user.GetId()
+			_, err = sus.strg.User().AddUserToProject(context.Background(), &pb.AddUserToProjectReq{
+				UserId:       userId,
+				CompanyId:    project.GetCompanyId(),
+				RoleId:       req.GetRoleId(),
+				ProjectId:    req.GetProjectId(),
+				ClientTypeId: req.GetClientTypeId(),
+			})
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			exists, err := sus.strg.User().GetUserProjectByAllFields(context.Background(), models.GetUserProjectByAllFieldsReq{
+				ClientTypeId: req.GetClientTypeId(),
+				RoleId:       req.GetRoleId(),
+				UserId:       userId,
+				CompanyId:    project.GetCompanyId(),
+				ProjectId:    req.GetProjectId(),
+			})
+			if err != nil {
+				return nil, err
+			}
+			if !exists {
+				_, err = sus.strg.User().AddUserToProject(context.Background(), &pb.AddUserToProjectReq{
+					UserId:       userId,
+					CompanyId:    project.GetCompanyId(),
+					RoleId:       req.GetRoleId(),
+					ProjectId:    req.GetProjectId(),
+					ClientTypeId: req.GetClientTypeId(),
+				})
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		if req.GetInvite() {
+			emailSettings, err := sus.strg.Email().GetListEmailSettings(ctx, &pb.GetListEmailSettingsRequest{
+				ProjectId: req.GetProjectId(),
+			})
+			if err != nil {
+				return nil, err
+			}
+			var devEmail string
+			var devEmailPassword string
+			if len(emailSettings.GetItems()) > 0 {
+				devEmail = emailSettings.GetItems()[0].GetEmail()
+				devEmailPassword = emailSettings.GetItems()[0].GetPassword()
+			}
+			err = helper.SendInviteMessageToEmail(helper.SendMessageToEmailRequest{
+				Subject:       "Invite message",
+				To:            req.GetEmail(),
+				UserId:        userId,
+				Email:         devEmail,
+				Password:      devEmailPassword,
+				Username:      req.GetLogin(),
+				TempPassword:  req.GetPassword(),
+				EnvironmentId: req.GetEnvironmentId(),
+				ClientTypeId:  req.GetClientTypeId(),
+				ProjectId:     req.GetProjectId(),
+			},
+			)
+			if err != nil {
+				sus.log.Error("Error while sending message to invite")
+				sus.log.Error(err.Error())
+			}
+		}
+		user_ids = append(user_ids, userId)
+	}
+	response.UserIds = user_ids
+
+	return &response, nil
+}

@@ -51,7 +51,7 @@ message SyncUserResponse {
     string user_id = 2;
 }
 message SyncUsersResponse {
-    repeated string user_id = 2;
+    repeated string user_ids = 1;
 }
 
 message DeleteSyncUserRequest {
