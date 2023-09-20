@@ -169,8 +169,7 @@ message FieldResponse {
     string relation_type = 12;
     bool show_label = 13;
     bool enable_multilanguage = 14;
-    string label_uz = 15;
-    string label_en = 16;
+    bool is_editable = 15;
 } 
 
 message FieldForSection {
