@@ -953,3 +953,39 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 
 	return &empty.Empty{}, nil
 }
+func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
+
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// call function to commit or rollback transaction at the end
+	defer func() {
+		if err != nil {
+			err = tx.Rollback(ctx)
+		} else {
+			err = tx.Commit(ctx)
+		}
+	}()
+	query := `DELETE FROM "user_project" 
+				WHERE 
+				project_id = $1 AND 
+				user_id = $2 AND 
+				role_id = $3 AND 
+				client_type_id = $4 AND company_id = $5`
+	for _, user := range req.GetUsers() {
+		_, err = r.db.Exec(ctx,
+			query,
+			req.GetProjectId(),
+			user.GetUserId(),
+			user.GetRoleId(),
+			user.GetClientTypeId(),
+			req.GetCompanyId(),
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &empty.Empty{}, nil
+}
