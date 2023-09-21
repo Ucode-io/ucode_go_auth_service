@@ -2,4 +2,11 @@
   stage: purge
   image: gitlab.udevs.io:5050/docker/docker:dind
   script:
-  
+    - test_output=$(cat test_output.txt)
+    - |
+      if [[ "$test_output" == *"exit code 1"* || "$test_output" == *"FAILED"* ]]; then
+          exit 1
+      else
+        echo "Unit tests were successful."
+
+      fi

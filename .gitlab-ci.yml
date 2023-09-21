@@ -6,7 +6,7 @@ stages:
   - migrate
   - deploy-test
   - test
-  # - purge
+  - purge
   # - build
   # - deploy
   # - rollback
@@ -57,12 +57,12 @@ test-dev:
   only:
     - dev
 
-# purge-dev:
-#   stage: purge
-#   extends: .purge_template
-#   dependencies:
-#     - migrate-dev
-#     - test-dev
+purge-dev:
+  stage: purge
+  extends: .purge_template
+  dependencies:
+    - migrate-dev
+    - test-dev
 
 # check-dev:
 #   stage: check-output
