@@ -2,21 +2,24 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
-  - build
+  - build-test
   - migrate
-  - deploy
-  - rollback
-
-# test-dev:
-#   stage: test
-#   image: golang:1.18
-#   script:
-#     - go mod tidy
-#     - go mod vendor
-#     - go test -v ./...
-#   only:
-#     - dev
+  - deploy-test
+  - test
+  # - purge
+  # - build
+  # - deploy
+  # - rollback
   
+build-test-image:
+  stage: build-test
+  extends: .build_template
+  variables:
+    ENV_TAG: integration-test
+    DOCKERFILE: Dockerfile-test
+  only:
+    - dev
+
 build-dev:
   stage: build
   extends: .build_template
@@ -26,11 +29,64 @@ build-dev:
   only:
     - dev
 
+migrate-dev:
+  stage: migrate
+  extends: .migrate_template
+  variables:
+    PATH_MIGRATION: migrations/postgres
+    POSTGRES_LINK: $UCODE_AUTH_SERVICE_DEVDB
+  only:
+    - dev
+
+deploy-integration-test:
+  stage: deploy-test
+  extends: .deploy_template
+  variables:
+    NAMESPACE: ucode-integration-test
+    VALUES_FILE: .helm/values-integrationTest-dev.yml
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+  only:
+    - dev
+
+test-dev:
+  stage: test
+  extends: .test_template
+  variables:
+    NAMESPACE: ucode-integration-test
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+  only:
+    - dev
+
+purge-dev:
+  stage: purge
+  extends: .purge_template
+  dependencies:
+    - migrate-dev
+    - test-dev
+
+check-dev:
+  stage: check-output
+  extends: .check_template
+  dependencies:
+    - test-dev
+  only:
+    - dev
+
+deploy-dev:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    NAMESPACE: ucode-dev
+    VALUES_FILE: .helm/values-dev.yml
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+  only:
+    - dev
+
 build-staging:
   stage: build
   extends: .build_template
   variables:
-    ENV_TAG: ucode-test
+    ENV_TAG: test
     DOCKERFILE: Dockerfile
   only:
     - staging
@@ -44,14 +100,6 @@ build-prod:
   only:
     - master
 
-migrate-dev:
-  stage: migrate
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_AUTH_SERVICE_DEVDB
-  only:
-    - dev
 
 migrate-staging:
   stage: migrate
@@ -70,16 +118,6 @@ migrate-prod:
     POSTGRES_LINK: $UCODE_AUTH_SERVICE_PRODDB
   only:
     - master
-
-deploy-dev:
-  stage: deploy
-  extends: .deploy_template
-  variables:
-    NAMESPACE: ucode-dev
-    VALUES_FILE: .helm/values-dev.yml
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  only:
-    - dev
 
 deploy-staging:
   stage: deploy

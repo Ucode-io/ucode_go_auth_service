@@ -1,0 +1,5 @@
+.purge_template:
+  stage: purge
+  image: gitlab.udevs.io:5050/docker/docker:dind
+  script:
+  

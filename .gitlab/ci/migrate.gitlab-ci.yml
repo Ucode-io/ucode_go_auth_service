@@ -1,5 +1,16 @@
 .migrate_template:
   stage: migrate
   image: gitlab.udevs.io:5050/docker/docker:dind
+  before_script:
+  - psql $UCODE_AUTH_SERVICE_DEVDB -c "SELECT version FROM migrations_ucode_go_auth_service" | sed -n '3s/[%[:space:]]//gp' > before_up.txt
+  - cat before_up.txt 
   script:
     - migrate -path=$PWD/$PATH_MIGRATION -database="${POSTGRES_LINK}?sslmode=disable&x-migrations-table=migrations_$CI_PROJECT_NAME" up
+  after_script:
+  - psql $UCODE_AUTH_SERVICE_DEVDB -c "SELECT version FROM migrations_ucode_go_auth_service" | sed -n '3s/[%[:space:]]//gp' > after_script:_up.txt
+  - cat after_up.txt
+  artifacts:
+    untracked: false
+    paths:
+      - before_up.txt
+      - after_up.txt
