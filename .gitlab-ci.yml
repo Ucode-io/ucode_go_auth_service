@@ -13,7 +13,7 @@ stages:
   
 build-test-image:
   stage: build-test
-  extends: .build_template
+  extends: .build_test_template
   variables:
     ENV_TAG: integration-test
     DOCKERFILE: Dockerfile-test
