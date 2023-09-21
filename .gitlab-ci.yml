@@ -20,14 +20,14 @@ build-test-image:
   only:
     - dev
 
-build-dev:
-  stage: build
-  extends: .build_template
-  variables:
-    ENV_TAG: dev
-    DOCKERFILE: Dockerfile
-  only:
-    - dev
+# build-dev:
+#   stage: build
+#   extends: .build_template
+#   variables:
+#     ENV_TAG: dev
+#     DOCKERFILE: Dockerfile
+#   only:
+#     - dev
 
 migrate-dev:
   stage: migrate
