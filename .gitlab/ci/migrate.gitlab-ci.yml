@@ -2,6 +2,7 @@
   stage: migrate
   image: gitlab.udevs.io:5050/docker/docker:dind
   before_script:
+  - apk --update add postgresql-client
   - psql $UCODE_AUTH_SERVICE_DEVDB -c "SELECT version FROM migrations_ucode_go_auth_service" | sed -n '3s/[%[:space:]]//gp' > before_up.txt
   - cat before_up.txt 
   script:
