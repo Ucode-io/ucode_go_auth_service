@@ -103,7 +103,7 @@ service:
       name: grpc
 
 ingress:
-  enabled: true
+  enabled: false
   rules:
     - annotations:
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
