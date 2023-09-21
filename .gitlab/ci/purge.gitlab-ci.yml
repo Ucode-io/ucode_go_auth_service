@@ -6,11 +6,20 @@
     - echo "Test Output"
     - cat test_output.txt
     - echo "Before Migration"
-    - cat 
+    - echo $K8SCONFIGJSON > tmp
+    - yq -P tmp > /root/.kube/config
+    - chmod 600 /root/.kube/config
+    - DEPLOYMENT=$(echo $CI_PROJECT_NAME | sed s/_/-/g | sed s/$CI_PROJECT_NAMESPACE-//g)
+    - DEPLOYMENTNAME=$(kubectl get deployment -n $NAMESPACE | grep $DEPLOYMENT | awk '{print $1}')
     - |
-      if [[ "$test_output" == *"exit code 1"* || "$test_output" == *"FAILED"* ]]; then
+      if [[ "$test_output" == *"exit code 1"* || "$test_output" == *"FAILED"* || "$test_output" == *"FAIL"* ]]; then
+
+          if [ "$(cat before_up.txt)" != $(cat after_up.txt)]; then
+              migrate -path=$PWD/$PATH_MIGRATION -database="${POSTGRES_LINK}?sslmode=disable&x-migrations-table=migrations_$CI_PROJECT_NAME" down
+          fi
+            kubectl delete deployment $DEPLOYMENTNAME -n $NAMESPACE
           exit 1
       else
-        echo "Unit tests were successful."
-
+        echo "Integration tests were successful."
+        kubectl delete deployment $DEPLOYMENTNAME -n $NAMESPACE
       fi
