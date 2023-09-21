@@ -9,9 +9,9 @@
     - echo ----- Deployment ---- $DEPLOYMENT
     - PODNAME=$(kubectl get pods -n $NAMESPACE | grep $DEPLOYMENT | awk '{print $1}')
     - echo ----- PodName ----- $PODNAME
-    - TESTCOMMAND=${go test ./...} 
+    # - TESTCOMMAND=${go test ./...} 
     - echo ----- TestCommand ----- $TESTCOMMAND
-    - kubectl exec -it $PODNAME $TESTCOMMAND -n $NAMESPACE > test_output.txt
+    - kubectl exec -it $PODNAME -n $NAMESPACE -- go test ./... > test_output.txt
     - cat test_output.txt
   artifacts:
     untracked: false
