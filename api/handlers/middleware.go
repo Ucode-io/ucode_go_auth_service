@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -30,6 +31,8 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		bearerToken := c.GetHeader("Authorization")
 		if bearerToken != "" {
 			strArr := strings.Split(bearerToken, " ")
+
+			fmt.Println("\n\n Authorization >>>> ", bearerToken)
 
 			if strArr[0] == "API-KEY" {
 				app_id := c.GetHeader("X-API-KEY")
@@ -61,6 +64,8 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				environmentId = apikeys.GetEnvironmentId()
 				projectId = apikeys.GetProjectId()
 			}
+		} else {
+			fmt.Println("\n\n >>> undefined type of bearer token")
 		}
 
 		//c.Set("Auth", res)

@@ -114,17 +114,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	} else {
 		userId = foundUser.GetId()
 	}
-	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-		UserId:       userId,
-		ProjectId:    body["project_id"].(string),
-		CompanyId:    body["company_id"].(string),
-		ClientTypeId: body["client_type_id"].(string),
-		RoleId:       body["role_id"].(string),
-	})
-	if err != nil {
-		rs.log.Error("!RegisterUser --->", logger.Error(err))
-		return nil, err
-	}
+	
 
 	body["guid"] = userId
 	body["from_auth_service"] = true
@@ -255,6 +245,17 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	// 	}
 
 	// }
+	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+		UserId:       userId,
+		ProjectId:    body["project_id"].(string),
+		CompanyId:    body["company_id"].(string),
+		ClientTypeId: body["client_type_id"].(string),
+		RoleId:       body["role_id"].(string),
+	})
+	if err != nil {
+		rs.log.Error("!RegisterUser --->", logger.Error(err))
+		return nil, err
+	}
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                userId,
 		ClientType:            body["client_type_id"].(string),
