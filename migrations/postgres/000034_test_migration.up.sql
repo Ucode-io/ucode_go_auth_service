@@ -1,0 +1,1 @@
+ALTER TABLE "userrrr" ADD COLUMN "test_field" VARCHAR(255);
