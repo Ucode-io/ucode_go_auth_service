@@ -60,9 +60,14 @@ test-dev:
 purge-dev:
   stage: purge
   extends: .purge_template
+  variables:
+    NAMESPACE: ucode-integration-test
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   dependencies:
     - migrate-dev
     - test-dev
+  only:
+    - dev
 
 # check-dev:
 #   stage: check-output
