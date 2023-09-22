@@ -53,7 +53,8 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			return nil, err
 		}
 	}
-	if username == "" {
+	if username == "" || user == nil {
+		username = req.GetPhone()
 		user, err = sus.strg.User().GetByUsername(context.Background(), username)
 		if err != nil {
 			return nil, err
