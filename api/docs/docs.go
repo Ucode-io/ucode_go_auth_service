@@ -19898,6 +19898,9 @@ const docTemplate = `{
                 "guid": {
                     "type": "string"
                 },
+                "not_use_in_tab": {
+                    "type": "boolean"
+                },
                 "object_field": {
                     "type": "string"
                 },
