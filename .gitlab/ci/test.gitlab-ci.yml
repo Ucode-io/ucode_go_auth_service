@@ -11,6 +11,7 @@
     - echo ----- PodName ----- $PODNAME
     # - TESTCOMMAND=${go test ./...} 
     - echo ----- TestCommand ----- $TESTCOMMAND
+    - sleep 120
     - kubectl exec -i  -n $NAMESPACE  $PODNAME -- go test ./grpc/service/test/... > test_output.txt
     - cat test_output.txt
   artifacts:
