@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"testing"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -20,6 +21,7 @@ func TestAddRole(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	role := &auth_service.V2AddRoleRequest{
@@ -37,6 +39,7 @@ func TestAddRole(t *testing.T) {
 
 	if bytes, err := json.Marshal(userData); err == nil {
 		t.Log("userData", string(bytes))
+		os.Exit(1)
 	}
 
 	t.Log("userData[response.guid].(string) ==========", userData["guid"].(string))
@@ -48,6 +51,7 @@ func TestV2GetRoleById(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if roleId != "" {
@@ -66,6 +70,7 @@ func TestV2GetRolesList(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	res, err := svcs.PermissionService().V2GetRolesList(context.Background(), &auth_service.V2GetRolesListRequest{
@@ -84,6 +89,7 @@ func TestV2UpdateRole(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	role := &auth_service.V2UpdateRoleRequest{
@@ -106,6 +112,7 @@ func TestV2RemoveRole(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	res, err := svcs.PermissionService().V2RemoveRole(context.Background(),

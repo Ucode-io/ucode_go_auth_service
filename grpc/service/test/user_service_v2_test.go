@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"os"
 	"testing"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -17,6 +18,7 @@ func TestV2CreateUser(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	user := &auth_service.CreateUserRequest{
@@ -47,6 +49,7 @@ func TestV2GetUserByID(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if userId != "" {
@@ -69,6 +72,7 @@ func TestV2GetUserList(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	res, err := svcs.UserService().V2GetUserList(context.Background(), &auth_service.GetUserListRequest{
@@ -87,6 +91,7 @@ func TestV2UpdateUser(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	user := &auth_service.UpdateUserRequest{
@@ -110,6 +115,7 @@ func TestGetProjectsByUserId(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if userId != "" {
@@ -126,6 +132,7 @@ func TestV2GetUserByLoginTypes(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if userId != "" {
@@ -153,6 +160,7 @@ func TestGetUserProjects(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if userId != "" {
@@ -169,6 +177,7 @@ func TestGetUserByUsername(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if userId != "" {
@@ -194,6 +203,7 @@ func TestV2DeleteUser(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if userId != "" {

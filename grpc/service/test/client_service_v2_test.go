@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"testing"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -18,6 +19,7 @@ func TestV2CreateClientType(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	clientType := &auth_service.V2CreateClientTypeRequest{
@@ -39,6 +41,7 @@ func TestV2CreateClientType(t *testing.T) {
 
 	if bytes, err := json.Marshal(data); err == nil {
 		t.Log("data ======>", string(bytes))
+		os.Exit(1)
 	}
 
 	clientTypeId = data["guid"].(string)
@@ -49,6 +52,7 @@ func TestV2GetClientTypeByID(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if clientTypeId != "" {
@@ -67,6 +71,7 @@ func TestV2GetClientTypeList(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	res, err := svcs.ClientService().V2GetClientTypeList(context.Background(), &auth_service.V2GetClientTypeListRequest{
@@ -84,6 +89,7 @@ func TestV2UpdateClientType(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	clientType := &auth_service.V2UpdateClientTypeRequest{
@@ -107,6 +113,7 @@ func TestV2DeleteClientType(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
+		os.Exit(1)
 	}
 
 	if clientTypeId != "" {
