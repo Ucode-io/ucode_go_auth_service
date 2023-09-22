@@ -46,14 +46,14 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	if err != nil {
 		return nil, err
 	}
-	if username == "" || user == nil {
+	if user.GetId() == "" {
 		username = req.GetEmail()
 		user, err = sus.strg.User().GetByUsername(context.Background(), username)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if username == "" || user == nil {
+	if user.GetId() == "" {
 		username = req.GetPhone()
 		user, err = sus.strg.User().GetByUsername(context.Background(), username)
 		if err != nil {
