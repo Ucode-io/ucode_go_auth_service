@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 	"time"
-	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -65,8 +65,7 @@ func ExtractToken(bearer string) (token string, err error) {
 }
 
 type TokenInfo struct {
-	ID    string
-	Table []*pb.Object
+	ID string
 	// ProjectID        string
 	// ClientPlatformID string
 	// ClientTypeID     string
