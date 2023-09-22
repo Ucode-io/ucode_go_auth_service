@@ -449,7 +449,8 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
-	s.log.Info("---CreateUser--->", logger.Any("req", req))
+	s.log.Info("---V2CreateUser--->", logger.Any("req", req))
+
 	// if len(req.Login) < 6 {
 	// 	err := fmt.Errorf("login must not be less than 6 characters")
 	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))

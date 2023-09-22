@@ -28,12 +28,14 @@ func TestMain(m *testing.M) {
 	pgStore, err := postgres.NewPostgres(context.Background(), conf)
 	if err != nil {
 		log.Fatal(err)
+		os.Exit(1)
 	}
 	defer pgStore.CloseDB()
 
 	svcs, err := client.NewGrpcClients(conf)
 	if err != nil {
 		log.Fatal(err)
+		os.Exit(1)
 	}
 
 	grpcServer := grpc.SetUpServer(conf, newLogger, pgStore, svcs)
@@ -42,14 +44,16 @@ func TestMain(m *testing.M) {
 		lis, err := net.Listen("tcp", conf.AuthGRPCPort)
 		if err != nil {
 			log.Fatal(err)
+			os.Exit(1)
 		}
 
 		newLogger.Info("GRPC: Server being started...", logger.String("port", conf.AuthGRPCPort))
 
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatal(err)
+			os.Exit(1)
 		}
 	}()
 
-	os.Exit(m.Run())
+	os.Exit(0)
 }
