@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -39,21 +38,25 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	var (
 		response = pb.SyncUserResponse{}
 		user     *pb.User
+		err      error
 	)
 	var username string
-	username = req.GetLogin()
-	user, err := sus.strg.User().GetByUsername(context.Background(), username)
-	if err != nil {
-		return nil, err
+	if user.GetId() == "" && req.GetLogin() != "" {
+		username = req.GetLogin()
+		user, err = sus.strg.User().GetByUsername(context.Background(), username)
+		if err != nil {
+			return nil, err
+		}
 	}
-	if user.GetId() == "" {
+
+	if user.GetId() == "" && req.GetEmail() != "" {
 		username = req.GetEmail()
 		user, err = sus.strg.User().GetByUsername(context.Background(), username)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if user.GetId() == "" {
+	if user.GetId() == "" && req.GetPhone() != "" {
 		username = req.GetPhone()
 		user, err = sus.strg.User().GetByUsername(context.Background(), username)
 		if err != nil {
@@ -62,7 +65,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	}
 
 	userId := user.GetId()
-	fmt.Println("before:: get project", req.GetProjectId())
 	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
