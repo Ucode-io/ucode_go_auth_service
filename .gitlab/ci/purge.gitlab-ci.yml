@@ -6,9 +6,9 @@
     - test_output=$(cat test_output.txt)
     - echo "Test Output"
     - cat test_output.txt
-    - VBeforeMigrationUp=$(grep -oE '[0-9]+' before_up.txt | head -n 1 | awk '{print int($0)})
+    - VBeforeMigrationUp=$(grep -oE '[0-9]+' before_up.txt | head -n 1 | awk '{print int($0)}')
     - echo 'Version Before Migration Up -----------' $VBeforeMigrationUp
-    - VAfterMigrationUp=$(grep -oE '[0-9]+' after_up.txt | head -n 1 | awk '{print int($0)})
+    - VAfterMigrationUp=$(grep -oE '[0-9]+' after_up.txt | head -n 1 | awk '{print int($0)}')
     - echo 'Version After Migration Up --------' $VAfterMigrationUp
     - echo $K8SCONFIGJSON > tmp
     - yq -P tmp > /root/.kube/config
