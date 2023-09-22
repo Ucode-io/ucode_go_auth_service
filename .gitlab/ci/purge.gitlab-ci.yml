@@ -2,14 +2,9 @@
   stage: purge
   image: gitlab.udevs.io:5050/docker/docker:dind
   script:
-    - apk --update add postgresql-client
     - test_output=$(cat test_output.txt)
     - echo "Test Output"
     - cat test_output.txt
-    - VBeforeMigrationUp=$(grep -oE '[0-9]+' before_up.txt | head -n 1 | awk '{print int($0)}')
-    - echo 'Version Before Migration Up -----------' $VBeforeMigrationUp
-    - VAfterMigrationUp=$(grep -oE '[0-9]+' after_up.txt | head -n 1 | awk '{print int($0)}')
-    - echo 'Version After Migration Up --------' $VAfterMigrationUp
     - echo $K8SCONFIGJSON > tmp
     - yq -P tmp > /root/.kube/config
     - chmod 600 /root/.kube/config
@@ -18,12 +13,7 @@
     - |
       if [[ "$test_output" == *"exit code 1"* || "$test_output" == *"FAILED"* || "$test_output" == *"FAIL"* ]]; then
           echo "Integration test was failed"
-          if [ $VBeforeMigrationUp != $VAfterMigrationUp]; then
-              echo "Migrations aren't same"
-              migrate -path=$PWD/$PATH_MIGRATION -database="${POSTGRES_LINK}?sslmode=disable&x-migrations-table=migrations_$CI_PROJECT_NAME" down $VAfterMigrationUp
-              psql $UCODE_AUTH_SERVICE_DEVDB -c "UPDATE migrations_ucode_go_auth_service SET version='$VBeforeMigrationU', dirty=false"
-          fi
-            kubectl delete deployment $DEPLOYMENTNAME -n $NAMESPACE
+          kubectl delete deployment $DEPLOYMENTNAME -n $NAMESPACE
           exit 1
       else
         echo "Integration tests were successful."

@@ -6,12 +6,9 @@
     - yq -P tmp > /root/.kube/config
     - chmod 600 /root/.kube/config
     - DEPLOYMENT=$(echo $CI_PROJECT_NAME | sed s/_/-/g | sed s/$CI_PROJECT_NAMESPACE-//g)
-    - echo ----- Deployment ---- $DEPLOYMENT
-    - sleep 60
+    - sleep 30
     - PODNAME=$(kubectl get pods -n $NAMESPACE | grep $DEPLOYMENT | awk '{print $1}')
     - echo ----- PodName ----- $PODNAME
-    # - TESTCOMMAND=${go test ./...} 
-    - echo ----- TestCommand ----- $TESTCOMMAND
     - kubectl exec -i  -n $NAMESPACE  $PODNAME -- go test ./grpc/service/test/... > test_output.txt
     - cat test_output.txt
   artifacts:
