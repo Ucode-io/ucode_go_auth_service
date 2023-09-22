@@ -16,7 +16,7 @@ type header struct {
 }
 
 var (
-	host = "http://localhost:8081"
+	host = "http://localhost:8080"
 )
 
 func PerformRequest(method, path string, req, res interface{}, headers ...header) (*http.Response, error) {
