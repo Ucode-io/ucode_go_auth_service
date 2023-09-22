@@ -42,17 +42,24 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	)
 	var username string
 	username = req.GetLogin()
-	if username == "" {
-		username = req.GetEmail()
-	}
-	if username == "" {
-		username = req.GetPhone()
-	}
-
 	user, err := sus.strg.User().GetByUsername(context.Background(), username)
 	if err != nil {
 		return nil, err
 	}
+	if username == "" || user == nil {
+		username = req.GetEmail()
+		user, err = sus.strg.User().GetByUsername(context.Background(), username)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if username == "" {
+		user, err = sus.strg.User().GetByUsername(context.Background(), username)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	userId := user.GetId()
 	fmt.Println("before:: get project", req.GetProjectId())
 	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
