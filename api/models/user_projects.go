@@ -15,4 +15,10 @@ type GetUserProjectByAllFieldsReq struct {
 	UserId       string `json:"user_id"`
 	CompanyId    string `json:"company_id"`
 	ProjectId    string `json:"project_id"`
+	EnvId        string `json:"env_id"`
+}
+
+// key of map will be project_id and value of map will be envIds
+type GetUserEnvProjectRes struct {
+	EnvProjects map[string][]string `json:"env_projects"`
 }

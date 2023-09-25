@@ -142,6 +142,9 @@ type UserRepoI interface {
 	GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error)
 	DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*emptypb.Empty, error)
 	DeleteUsersFromProject(ctx context.Context, req *pb.DeleteManyUserRequest) (*emptypb.Empty, error)
+	GetAllUserProjects(ctx context.Context) ([]string, error)
+	UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error)
+	GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error)
 }
 
 type IntegrationRepoI interface {

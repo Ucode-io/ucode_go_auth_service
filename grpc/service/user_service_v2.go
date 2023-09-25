@@ -12,7 +12,6 @@ import (
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
-	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/saidamir98/udevs_pkg/security"
@@ -589,6 +588,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		CompanyId:    req.GetCompanyId(),
 		ClientTypeId: req.GetClientTypeId(),
 		RoleId:       req.GetRoleId(),
+		EnvId:        req.GetEnvironmentId(),
 	})
 
 	if err != nil {
@@ -770,177 +770,200 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 
 	resp := &pb.GetUserListResponse{}
 	var (
-		usersResp *pbObject.CommonMessage
+	// usersResp *pbObject.CommonMessage
 	)
 
-	userIds, err := s.strg.User().GetUserIds(ctx, req)
+	// userIds, err := s.strg.User().GetUserIds(ctx, req)
+	// if err != nil {
+	// 	s.log.Error("!!!V2GetUserList--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+	projectIds, err := s.strg.User().GetAllUserProjects(ctx)
 	if err != nil {
-		s.log.Error("!!!V2GetUserList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, err
 	}
-
-	users, err := s.strg.User().GetListByPKs(ctx, &pb.UserPrimaryKeyList{
-		Ids: *userIds,
-	})
-	if err != nil {
-		s.log.Error("!!!V2GetUserList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	usersMap := make(map[string]*pb.User, users.Count)
-
-	for _, user := range users.Users {
-		usersMap[user.Id] = user
-	}
-
-	structReq := map[string]interface{}{
-		"guid": map[string]interface{}{
-			"$in": userIds,
-		},
-	}
-
-	if util.IsValidUUID(req.ClientTypeId) {
-		structReq["client_type_id"] = req.ClientTypeId
-	}
-
-	if util.IsValidUUID(req.ClientPlatformId) {
-		structReq["client_platform_id"] = req.ClientPlatformId
-	}
-
-	structData, err := helper.ConvertRequestToSturct(structReq)
-	if err != nil {
-		s.log.Error("!!!V2GetUserList--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	var tableSlug = "user"
-	switch req.ResourceType {
-	case 1:
-		fmt.Println("aaaa:", userIds)
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
-			ProjectId: req.GetResourceEnvironmentId(),
+	for _, projectId := range projectIds {
+		envs, err := s.services.EnvironmentService().GetList(ctx, &company_service.GetEnvironmentListRequest{
+			Search:    "production",
+			ProjectId: projectId,
 		})
 		if err != nil {
-			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, err
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
-		if ok {
-			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok && clientTypeTableSlug != "" {
-				tableSlug = clientTypeTableSlug
+		if len(envs.GetEnvironments()) > 0 {
+			if envs.GetEnvironments()[0].GetId() != "" {
+				_, err = s.strg.User().UpdateUserProjects(ctx, envs.GetEnvironments()[0].GetId(), projectId)
+				if err != nil {
+					fmt.Println("error while updating user project")
+					fmt.Println(err)
+				}
 			}
-		}
-		usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-			TableSlug: tableSlug,
-			Data:      structData,
-			ProjectId: req.GetResourceEnvironmentId(),
-		})
-		if err != nil {
-			s.log.Error("!!!V2GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-	case 3:
-		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
-			ProjectId: req.GetResourceEnvironmentId(),
-		})
-		if err != nil {
-			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
-		if ok {
-			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok && clientTypeTableSlug != "" {
-				tableSlug = clientTypeTableSlug
-			}
-		}
-		usersResp, err = s.services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
-			TableSlug: tableSlug,
-			Data:      structData,
-			ProjectId: req.GetResourceEnvironmentId(),
-		})
-		if err != nil {
-			s.log.Error("!!!GetUserList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 
+		}
 	}
 
-	userCount, ok := usersResp.Data.AsMap()["count"].(float64)
-	if !ok {
-		err := errors.New("usersData is nil")
-		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// users, err := s.strg.User().GetListByPKs(ctx, &pb.UserPrimaryKeyList{
+	// 	Ids: *userIds,
+	// })
+	// if err != nil {
+	// 	s.log.Error("!!!V2GetUserList--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
-	usersData, ok := usersResp.Data.AsMap()["response"].([]interface{})
-	if !ok {
-		err := errors.New("usersData is nil")
-		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// usersMap := make(map[string]*pb.User, users.Count)
 
-	resp.Users = make([]*pb.User, 0, int(userCount))
-	resp.Count = int32(userCount)
+	// for _, user := range users.Users {
+	// 	usersMap[user.Id] = user
+	// }
 
-	for _, userData := range usersData {
-		userItem, ok := userData.(map[string]interface{})
-		if !ok {
-			err := errors.New("userItem is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	// structReq := map[string]interface{}{
+	// 	"guid": map[string]interface{}{
+	// 		"$in": userIds,
+	// 	},
+	// }
 
-		userId, ok := userItem["guid"].(string)
-		if !ok {
-			err := errors.New("userId is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	// if util.IsValidUUID(req.ClientTypeId) {
+	// 	structReq["client_type_id"] = req.ClientTypeId
+	// }
 
-		roleId, ok := userItem["role_id"].(string)
-		if !ok {
-			err := errors.New("roleId is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	// if util.IsValidUUID(req.ClientPlatformId) {
+	// 	structReq["client_platform_id"] = req.ClientPlatformId
+	// }
 
-		clientTypeId, ok := userItem["client_type_id"].(string)
-		if !ok {
-			err := errors.New("clientTypeId is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	// structData, err := helper.ConvertRequestToSturct(structReq)
+	// if err != nil {
+	// 	s.log.Error("!!!V2GetUserList--->", logger.Error(err))
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// }
 
-		user, ok := usersMap[userId]
-		if !ok {
-			err := errors.New("user is nil")
-			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		name, ok := userItem["name"].(string)
-		if ok {
-			user.Name = name
-		}
+	// var tableSlug = "user"
+	// switch req.ResourceType {
+	// case 1:
+	// 	fmt.Println("aaaa:", userIds)
+	// 	clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+	// 		TableSlug: "client_type",
+	// 		Data: &structpb.Struct{
+	// 			Fields: map[string]*structpb.Value{
+	// 				"id": structpb.NewStringValue(req.GetClientTypeId()),
+	// 			},
+	// 		},
+	// 		ProjectId: req.GetResourceEnvironmentId(),
+	// 	})
+	// 	if err != nil {
+	// 		s.log.Error("!!!V2GetUserList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.InvalidArgument, err.Error())
+	// 	}
+	// 	response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+	// 	if ok {
+	// 		clientTypeTableSlug, ok := response["table_slug"].(string)
+	// 		if ok && clientTypeTableSlug != "" {
+	// 			tableSlug = clientTypeTableSlug
+	// 		}
+	// 	}
+	// 	usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+	// 		TableSlug: tableSlug,
+	// 		Data:      structData,
+	// 		ProjectId: req.GetResourceEnvironmentId(),
+	// 	})
+	// 	if err != nil {
+	// 		s.log.Error("!!!V2GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+	// case 3:
+	// 	clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+	// 		TableSlug: "client_type",
+	// 		Data: &structpb.Struct{
+	// 			Fields: map[string]*structpb.Value{
+	// 				"id": structpb.NewStringValue(req.GetClientTypeId()),
+	// 			},
+	// 		},
+	// 		ProjectId: req.GetResourceEnvironmentId(),
+	// 	})
+	// 	if err != nil {
+	// 		s.log.Error("!!!V2GetUserList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.InvalidArgument, err.Error())
+	// 	}
+	// 	response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+	// 	if ok {
+	// 		clientTypeTableSlug, ok := response["table_slug"].(string)
+	// 		if ok && clientTypeTableSlug != "" {
+	// 			tableSlug = clientTypeTableSlug
+	// 		}
+	// 	}
+	// 	usersResp, err = s.services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+	// 		TableSlug: tableSlug,
+	// 		Data:      structData,
+	// 		ProjectId: req.GetResourceEnvironmentId(),
+	// 	})
+	// 	if err != nil {
+	// 		s.log.Error("!!!GetUserList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
 
-		user.RoleId = roleId
-		user.ClientTypeId = clientTypeId
+	// }
 
-		resp.Users = append(resp.Users, user)
-	}
+	// userCount, ok := usersResp.Data.AsMap()["count"].(float64)
+	// if !ok {
+	// 	err := errors.New("usersData is nil")
+	// 	s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+
+	// usersData, ok := usersResp.Data.AsMap()["response"].([]interface{})
+	// if !ok {
+	// 	err := errors.New("usersData is nil")
+	// 	s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+
+	// resp.Users = make([]*pb.User, 0, int(userCount))
+	// resp.Count = int32(userCount)
+
+	// for _, userData := range usersData {
+	// 	userItem, ok := userData.(map[string]interface{})
+	// 	if !ok {
+	// 		err := errors.New("userItem is nil")
+	// 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+
+	// 	userId, ok := userItem["guid"].(string)
+	// 	if !ok {
+	// 		err := errors.New("userId is nil")
+	// 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+
+	// 	roleId, ok := userItem["role_id"].(string)
+	// 	if !ok {
+	// 		err := errors.New("roleId is nil")
+	// 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+
+	// 	clientTypeId, ok := userItem["client_type_id"].(string)
+	// 	if !ok {
+	// 		err := errors.New("clientTypeId is nil")
+	// 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+
+	// 	user, ok := usersMap[userId]
+	// 	if !ok {
+	// 		err := errors.New("user is nil")
+	// 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
+	// 	name, ok := userItem["name"].(string)
+	// 	if ok {
+	// 		user.Name = name
+	// 	}
+
+	// 	user.RoleId = roleId
+	// 	user.ClientTypeId = clientTypeId
+
+	// 	resp.Users = append(resp.Users, user)
+	// }
 
 	return resp, nil
 
@@ -1004,6 +1027,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			ProjectId:    req.ProjectId,
 			ClientTypeId: req.ClientTypeId,
 			RoleId:       req.RoleId,
+			EnvId: "",
 		},
 	)
 	if err != nil {
