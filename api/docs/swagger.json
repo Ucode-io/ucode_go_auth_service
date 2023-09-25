@@ -16740,6 +16740,9 @@
                 "company_id": {
                     "type": "string"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -16764,6 +16767,9 @@
                     "type": "string"
                 },
                 "company_id": {
+                    "type": "string"
+                },
+                "env_id": {
                     "type": "string"
                 },
                 "project_id": {

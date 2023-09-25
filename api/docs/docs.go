@@ -16751,6 +16751,9 @@ const docTemplate = `{
                 "company_id": {
                     "type": "string"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -16775,6 +16778,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "company_id": {
+                    "type": "string"
+                },
+                "env_id": {
                     "type": "string"
                 },
                 "project_id": {
