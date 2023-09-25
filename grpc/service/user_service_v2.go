@@ -589,6 +589,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		CompanyId:    req.GetCompanyId(),
 		ClientTypeId: req.GetClientTypeId(),
 		RoleId:       req.GetRoleId(),
+		EnvId:        req.GetEnvironmentId(),
 	})
 
 	if err != nil {
@@ -1034,6 +1035,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			ProjectId:    req.ProjectId,
 			ClientTypeId: req.ClientTypeId,
 			RoleId:       req.RoleId,
+			EnvId:        "",
 		},
 	)
 	if err != nil {

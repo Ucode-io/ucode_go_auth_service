@@ -412,6 +412,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	body.Data["project_id"] = serviceResource.GetProjectId()
+	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["resource_environment_id"] = serviceResource.GetResourceEnvironmentId()
 	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["company_id"] = project.GetCompanyId()

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -39,22 +38,33 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	var (
 		response = pb.SyncUserResponse{}
 		user     *pb.User
+		err      error
 	)
 	var username string
-	username = req.GetLogin()
-	if username == "" {
-		username = req.GetEmail()
-	}
-	if username == "" {
-		username = req.GetPhone()
+	if user.GetId() == "" && req.GetLogin() != "" {
+		username = req.GetLogin()
+		user, err = sus.strg.User().GetByUsername(context.Background(), username)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	user, err := sus.strg.User().GetByUsername(context.Background(), username)
-	if err != nil {
-		return nil, err
+	if user.GetId() == "" && req.GetEmail() != "" {
+		username = req.GetEmail()
+		user, err = sus.strg.User().GetByUsername(context.Background(), username)
+		if err != nil {
+			return nil, err
+		}
 	}
+	if user.GetId() == "" && req.GetPhone() != "" {
+		username = req.GetPhone()
+		user, err = sus.strg.User().GetByUsername(context.Background(), username)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	userId := user.GetId()
-	fmt.Println("before:: get project", req.GetProjectId())
 	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
@@ -91,6 +101,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			RoleId:       req.GetRoleId(),
 			ProjectId:    req.GetProjectId(),
 			ClientTypeId: req.GetClientTypeId(),
+			EnvId:        req.GetEnvironmentId(),
 		})
 		if err != nil {
 			return nil, err
@@ -102,6 +113,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			UserId:       userId,
 			CompanyId:    project.GetCompanyId(),
 			ProjectId:    req.GetProjectId(),
+			EnvId:        req.GetEnvironmentId(),
 		})
 		if err != nil {
 			return nil, err
@@ -113,6 +125,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 				RoleId:       req.GetRoleId(),
 				ProjectId:    req.GetProjectId(),
 				ClientTypeId: req.GetClientTypeId(),
+				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
 				return nil, err
@@ -173,6 +186,7 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		RoleId:       req.GetRoleId(),
 		ProjectId:    req.GetProjectId(),
 		ClientTypeId: req.GetClientTypeId(),
+		EnvironmentId: req.GetEnvironmentId(),
 	})
 	if err != nil {
 		return nil, err
@@ -259,6 +273,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				RoleId:       req.GetRoleId(),
 				ProjectId:    req.GetProjectId(),
 				ClientTypeId: req.GetClientTypeId(),
+				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
 				return nil, err
@@ -270,6 +285,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				UserId:       userId,
 				CompanyId:    project.GetCompanyId(),
 				ProjectId:    req.GetProjectId(),
+				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
 				return nil, err
@@ -281,6 +297,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 					RoleId:       req.GetRoleId(),
 					ProjectId:    req.GetProjectId(),
 					ClientTypeId: req.GetClientTypeId(),
+					EnvId:        req.GetEnvironmentId(),
 				})
 				if err != nil {
 					return nil, err

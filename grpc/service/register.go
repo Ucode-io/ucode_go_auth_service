@@ -114,7 +114,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	} else {
 		userId = foundUser.GetId()
 	}
-	
 
 	body["guid"] = userId
 	body["from_auth_service"] = true
@@ -251,6 +250,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		CompanyId:    body["company_id"].(string),
 		ClientTypeId: body["client_type_id"].(string),
 		RoleId:       body["role_id"].(string),
+		EnvId:        body["envronment_id"].(string),
 	})
 	if err != nil {
 		rs.log.Error("!RegisterUser --->", logger.Error(err))
