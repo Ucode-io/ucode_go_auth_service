@@ -547,14 +547,13 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 		roleId.Status = pgtype.Null
 	}
 	if req.GetEnvId() != "" {
-		err := envId.Set(req.GetRoleId())
+		err := envId.Set(req.GetEnvId())
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		envId.Status = pgtype.Null
 	}
-
 
 	query := `INSERT INTO
 			user_project(user_id, company_id, project_id, client_type_id, role_id, env_id)
@@ -958,21 +957,34 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 
 func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
 
+	params := make(map[string]interface{})
+
 	query := `DELETE FROM "user_project" 
 				WHERE 
-				project_id = $1 AND 
-				user_id = $2 AND 
-				role_id = $3 AND 
-				client_type_id = $4 AND company_id = $5 AND env_id = $6`
+				project_id = :project_id AND 
+				user_id = :user_id AND 
+				company_id = :company_id`
 
+	params["project_id"] = req.ProjectId
+	params["user_id"] = req.UserId
+	params["company_id"] = req.CompanyId
+	if req.GetRoleId() != "" {
+		query += " AND role_id = :role_id"
+		params["role_id"] = req.GetRoleId()
+	}
+	if req.GetClientTypeId() != "" {
+		query += " AND client_type_id = :client_type_id"
+		params["client_type_id"] = req.GetClientTypeId()
+	}
+	if req.GetEnvironmentId() != "" {
+		query += " AND env_id = :env_id"
+		params["env_id"] = req.GetEnvironmentId()
+	}
+
+	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx,
-		query,
-		req.GetProjectId(),
-		req.GetUserId(),
-		req.GetRoleId(),
-		req.GetClientTypeId(),
-		req.GetCompanyId(),
-		req.GetEnvironmentId(),
+		q,
+		args...,
 	)
 	if err != nil {
 		return nil, err
@@ -994,21 +1006,35 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 			err = tx.Commit(ctx)
 		}
 	}()
+
 	query := `DELETE FROM "user_project" 
 				WHERE 
-				project_id = $1 AND 
-				user_id = $2 AND 
-				role_id = $3 AND 
-				client_type_id = $4 AND company_id = $5 AND env_id = $6`
+				project_id = :project_id AND  
+				company_id = :company_id`
 	for _, user := range req.GetUsers() {
+		params := map[string]interface{}{}
+		params["project_id"] = req.GetProjectId()
+		params["company_id"] = req.GetCompanyId()
+		params["env_id"] = req.GetEnvironmentId()
+
+		if user.UserId != "" {
+			query = query + " AND user_id = :user_id"
+			params["user_id"] = user.GetRoleId()
+		} else {
+			return nil, errors.New("user id is required")
+		}
+		if user.GetClientTypeId() != "" {
+			query = query + " AND client_type_id = :client_type_id"
+			params["client_type_id"] = user.GetClientTypeId()
+		}
+		if user.GetRoleId() != "" {
+			query = query + " AND role_id = :role_id"
+			params["role_id"] = user.GetRoleId()
+		}
+		q, args := helper.ReplaceQueryParams(query, params)
 		_, err = r.db.Exec(ctx,
-			query,
-			req.GetProjectId(),
-			user.GetUserId(),
-			user.GetRoleId(),
-			user.GetClientTypeId(),
-			req.GetCompanyId(),
-			req.GetEnvironmentId(),
+			q,
+			args...,
 		)
 		if err != nil {
 			return nil, err
