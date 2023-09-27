@@ -101,6 +101,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			RoleId:       req.GetRoleId(),
 			ProjectId:    req.GetProjectId(),
 			ClientTypeId: req.GetClientTypeId(),
+			EnvId:        req.GetEnvironmentId(),
 		})
 		if err != nil {
 			return nil, err
@@ -112,6 +113,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			UserId:       userId,
 			CompanyId:    project.GetCompanyId(),
 			ProjectId:    req.GetProjectId(),
+			EnvId:        req.GetEnvironmentId(),
 		})
 		if err != nil {
 			return nil, err
@@ -123,6 +125,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 				RoleId:       req.GetRoleId(),
 				ProjectId:    req.GetProjectId(),
 				ClientTypeId: req.GetClientTypeId(),
+				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
 				return nil, err
@@ -183,6 +186,7 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		RoleId:       req.GetRoleId(),
 		ProjectId:    req.GetProjectId(),
 		ClientTypeId: req.GetClientTypeId(),
+		EnvironmentId: req.GetEnvironmentId(),
 	})
 	if err != nil {
 		return nil, err
@@ -269,6 +273,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				RoleId:       req.GetRoleId(),
 				ProjectId:    req.GetProjectId(),
 				ClientTypeId: req.GetClientTypeId(),
+				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
 				return nil, err
@@ -280,6 +285,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				UserId:       userId,
 				CompanyId:    project.GetCompanyId(),
 				ProjectId:    req.GetProjectId(),
+				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
 				return nil, err
@@ -291,6 +297,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 					RoleId:       req.GetRoleId(),
 					ProjectId:    req.GetProjectId(),
 					ClientTypeId: req.GetClientTypeId(),
+					EnvId:        req.GetEnvironmentId(),
 				})
 				if err != nil {
 					return nil, err

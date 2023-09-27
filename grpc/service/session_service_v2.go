@@ -1677,7 +1677,13 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
-
+	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
+	if err != nil {
+		errGetEnvProjects := errors.New("cant get user env projects")
+		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
+	}
+	fmt.Println("user env project::", userEnvProject)
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
@@ -1725,6 +1731,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				&company_service.GetEnvironmentListRequest{
 					ProjectId: projectId,
 					Limit:     1000,
+					Ids:       userEnvProject.EnvProjects[projectId],
 				},
 			)
 			if err != nil {

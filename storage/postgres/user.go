@@ -14,6 +14,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
@@ -526,7 +527,7 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	res := pb.AddUserToProjectRes{}
 
 	var (
-		clientTypeId, roleId pgtype.UUID
+		clientTypeId, roleId, envId pgtype.UUID
 	)
 	if req.GetClientTypeId() != "" {
 		err := clientTypeId.Set(req.GetClientTypeId())
@@ -544,11 +545,19 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	} else {
 		roleId.Status = pgtype.Null
 	}
+	if req.GetEnvId() != "" {
+		err := envId.Set(req.GetEnvId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		envId.Status = pgtype.Null
+	}
 
 	query := `INSERT INTO
-			user_project(user_id, company_id, project_id, client_type_id, role_id)
-			VALUES ($1, $2, $3, $4, $5)
-			RETURNING user_id, company_id, project_id, client_type_id, role_id`
+			user_project(user_id, company_id, project_id, client_type_id, role_id, env_id)
+			VALUES ($1, $2, $3, $4, $5, $6)
+			RETURNING user_id, company_id, project_id, client_type_id, role_id, env_id`
 
 	err := r.db.QueryRow(ctx,
 		query,
@@ -557,12 +566,14 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 		req.GetProjectId(),
 		clientTypeId,
 		roleId,
+		envId,
 	).Scan(
 		&res.UserId,
 		&res.CompanyId,
 		&res.ProjectId,
 		&clientTypeId,
 		&roleId,
+		&envId,
 	)
 	if err != nil {
 		return nil, err
@@ -573,6 +584,9 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	if clientTypeId.Status != pgtype.Null {
 		req.ClientTypeId = fmt.Sprintf("%v", clientTypeId.Status)
 	}
+	if envId.Status != pgtype.Null {
+		req.EnvId = fmt.Sprintf("%v", envId.Status)
+	}
 
 	return &res, nil
 }
@@ -581,7 +595,7 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 	res := pb.AddUserToProjectRes{}
 
 	var (
-		clientTypeId, roleId pgtype.UUID
+		clientTypeId, roleId, envId pgtype.UUID
 	)
 	if req.GetClientTypeId() != "" {
 		err := clientTypeId.Set(req.GetClientTypeId())
@@ -599,17 +613,26 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 	} else {
 		roleId.Status = pgtype.Null
 	}
+	if req.GetEnvId() != "" {
+		err := envId.Set(req.GetRoleId())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		envId.Status = pgtype.Null
+	}
 	fmt.Println(">\n\n req", req.ProjectId)
 	query := `UPDATE user_project 
-			  SET client_type_id = $3,
-			  role_id = $4
-			  WHERE user_id = $1 AND project_id = $2
-			  RETURNING user_id, company_id, project_id, client_type_id, role_id`
+			  SET client_type_id = $4,
+			  role_id = $5
+			  WHERE user_id = $1 AND project_id = $2 AND env_id = $3
+			  RETURNING user_id, company_id, project_id, client_type_id, role_id, env_id`
 
 	err := r.db.QueryRow(ctx,
 		query,
 		req.UserId,
 		req.ProjectId,
+		envId,
 		clientTypeId,
 		roleId,
 	).Scan(
@@ -618,6 +641,7 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		&res.ProjectId,
 		&clientTypeId,
 		&roleId,
+		&envId,
 	)
 	if err != nil {
 		return nil, err
@@ -932,20 +956,34 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 
 func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
 
+	params := make(map[string]interface{})
+
 	query := `DELETE FROM "user_project" 
 				WHERE 
-				project_id = $1 AND 
-				user_id = $2 AND 
-				role_id = $3 AND 
-				client_type_id = $4 AND company_id = $5`
+				project_id = :project_id AND 
+				user_id = :user_id AND 
+				company_id = :company_id`
 
+	params["project_id"] = req.ProjectId
+	params["user_id"] = req.UserId
+	params["company_id"] = req.CompanyId
+	if req.GetRoleId() != "" {
+		query += " AND role_id = :role_id"
+		params["role_id"] = req.GetRoleId()
+	}
+	if req.GetClientTypeId() != "" {
+		query += " AND client_type_id = :client_type_id"
+		params["client_type_id"] = req.GetClientTypeId()
+	}
+	if req.GetEnvironmentId() != "" {
+		query += " AND env_id = :env_id"
+		params["env_id"] = req.GetEnvironmentId()
+	}
+
+	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx,
-		query,
-		req.GetProjectId(),
-		req.GetUserId(),
-		req.GetRoleId(),
-		req.GetClientTypeId(),
-		req.GetCompanyId(),
+		q,
+		args...,
 	)
 	if err != nil {
 		return nil, err
@@ -967,20 +1005,35 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 			err = tx.Commit(ctx)
 		}
 	}()
+
 	query := `DELETE FROM "user_project" 
 				WHERE 
-				project_id = $1 AND 
-				user_id = $2 AND 
-				role_id = $3 AND 
-				client_type_id = $4 AND company_id = $5`
+				project_id = :project_id AND  
+				company_id = :company_id`
 	for _, user := range req.GetUsers() {
+		params := map[string]interface{}{}
+		params["project_id"] = req.GetProjectId()
+		params["company_id"] = req.GetCompanyId()
+		params["env_id"] = req.GetEnvironmentId()
+
+		if user.UserId != "" {
+			query = query + " AND user_id = :user_id"
+			params["user_id"] = user.GetRoleId()
+		} else {
+			return nil, errors.New("user id is required")
+		}
+		if user.GetClientTypeId() != "" {
+			query = query + " AND client_type_id = :client_type_id"
+			params["client_type_id"] = user.GetClientTypeId()
+		}
+		if user.GetRoleId() != "" {
+			query = query + " AND role_id = :role_id"
+			params["role_id"] = user.GetRoleId()
+		}
+		q, args := helper.ReplaceQueryParams(query, params)
 		_, err = r.db.Exec(ctx,
-			query,
-			req.GetProjectId(),
-			user.GetUserId(),
-			user.GetRoleId(),
-			user.GetClientTypeId(),
-			req.GetCompanyId(),
+			q,
+			args...,
 		)
 		if err != nil {
 			return nil, err
@@ -988,4 +1041,84 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
+	count := 0
+	query := `SELECT count(distinct project_id)
+	FROM user_project`
+
+	err := r.db.QueryRow(ctx, query).Scan(&count)
+	res := make([]string, 0, count)
+
+	query = `SELECT distinct project_id
+				FROM user_project`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			project string
+		)
+
+		err = rows.Scan(&project)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, project)
+	}
+
+	return res, nil
+}
+
+func (r *userRepo) UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error) {
+
+	query := `UPDATE user_project SET env_id = $1
+	  WHERE project_id = $2`
+
+	_, err := r.db.Exec(ctx, query, envId, projectId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error) {
+	res := models.GetUserEnvProjectRes{
+		EnvProjects: map[string][]string{},
+	}
+
+	query := `SELECT project_id,
+      			array_agg( DISTINCT env_id)
+				FROM user_project
+				WHERE user_id = $1
+				GROUP BY project_id`
+
+	rows, err := r.db.Query(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			envIds    []string
+			projectId string
+		)
+
+		err = rows.Scan(&projectId, pq.Array(&envIds))
+		if err != nil {
+			return nil, err
+		}
+
+		res.EnvProjects[projectId] = envIds
+	}
+
+	return &res, nil
 }
