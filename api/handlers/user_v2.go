@@ -100,6 +100,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	}
 	user.ResourceEnvironmentId = resourceEnvironment.GetId()
 	user.ResourceType = resourceEnvironment.GetResourceType()
+	user.EnvironmentId = resourceEnvironment.EnvironmentId
 	resp, err := h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&user,
@@ -139,7 +140,6 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
-	log.Println("ofset :::::", offset)
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
@@ -147,7 +147,6 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
-	log.Println("limit :::: ", limit)
 
 	projectId := c.DefaultQuery("project-id", "")
 	if !util.IsValidUUID(projectId) {
@@ -162,14 +161,11 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
-	log.Println("evironment_id::::::", environmentId)
-
 	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &company_service.GetSingleServiceResourceReq{
 		ProjectId:     projectId,
 		EnvironmentId: environmentId.(string),
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
-	log.Println("rosource:::::", resource)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -189,7 +185,6 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 			ResourceType:          int32(resource.GetResourceType()),
 		},
 	)
-	log.Println("resp :::", resp)
 
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -475,8 +470,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
 	var (
-		req                 = auth_service.AddUserToProjectReq{}
-		resourceEnvironment *company_service.ResourceEnvironment
+		req = auth_service.AddUserToProjectReq{}
 	)
 
 	err := c.ShouldBindJSON(&req)
@@ -496,43 +490,21 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	if util.IsValidUUID(resourceId.(string)) {
-		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-			c.Request.Context(),
-			&company_service.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
-	} else {
-		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-			c.Request.Context(),
-			&company_service.GetDefaultResourceEnvironmentReq{
-				ResourceId: resourceId.(string),
-				ProjectId:  req.GetProjectId(),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project-id in query param"))
+		return
 	}
+	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &company_service.GetSingleServiceResourceReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     projectId.(string),
+	})
+	req.EnvId = environmentId.(string)
 
 	res, err := h.services.UserService().AddUserToProject(
 		c.Request.Context(),
@@ -547,11 +519,10 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
 			Id:                    req.UserId,
-			ResourceEnvironmentId: resourceEnvironment.Id,
-			ProjectId:             resourceEnvironment.GetProjectId(),
+			ResourceEnvironmentId: resource.ResourceEnvironmentId,
+			ProjectId:             resource.GetProjectId(),
 			ClientTypeId:          req.ClientTypeId,
-			ResourceType:          resourceEnvironment.ResourceType,
-			// CompanyId:             req.CompanyId,
+			ResourceType:          int32(resource.ResourceType.Number()),
 		},
 	)
 	if err != nil {
@@ -579,7 +550,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 	var tableSlug = "user"
-	switch resourceEnvironment.ResourceType {
+	switch int32(resource.ResourceType.Number()) {
 	case 1:
 		clientType, err := h.services.ObjectBuilderService().GetSingle(
 			context.Background(),
@@ -590,7 +561,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 						"id": structpb.NewStringValue(req.ClientTypeId),
 					},
 				},
-				ProjectId: resourceEnvironment.GetId(),
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
@@ -601,7 +572,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			&obs.CommonMessage{
 				TableSlug: tableSlug,
 				Data:      structData,
-				ProjectId: resourceEnvironment.GetId(),
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
@@ -618,7 +589,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 						"id": structpb.NewStringValue(req.ClientTypeId),
 					},
 				},
-				ProjectId: resourceEnvironment.GetId(),
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
@@ -629,7 +600,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			&obs.CommonMessage{
 				TableSlug: tableSlug,
 				Data:      structData,
-				ProjectId: resourceEnvironment.GetId(),
+				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
 		if err != nil {
