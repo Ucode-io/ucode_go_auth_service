@@ -1035,7 +1035,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			ProjectId:    req.ProjectId,
 			ClientTypeId: req.ClientTypeId,
 			RoleId:       req.RoleId,
-			EnvId:        "",
+			EnvId:        req.EnvironmentId,
 		},
 	)
 	if err != nil {
