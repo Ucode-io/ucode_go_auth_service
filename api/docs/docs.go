@@ -18596,6 +18596,9 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "environment_id": {
+                    "type": "string"
+                },
                 "expires_at": {
                     "type": "string"
                 },
