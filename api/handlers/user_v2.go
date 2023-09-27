@@ -140,13 +140,11 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
-
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-
 
 	projectId := c.DefaultQuery("project-id", "")
 	if !util.IsValidUUID(projectId) {
@@ -332,6 +330,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 
 	user.ResourceType = int32(resource.GetResourceType())
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
+	user.EnvironmentId = environmentId.(string)
 
 	resp, err := h.services.UserService().V2UpdateUser(
 		c.Request.Context(),
