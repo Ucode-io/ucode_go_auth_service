@@ -250,7 +250,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		CompanyId:    body["company_id"].(string),
 		ClientTypeId: body["client_type_id"].(string),
 		RoleId:       body["role_id"].(string),
-		EnvId:        body["envronment_id"].(string),
+		EnvId:        body["environment_id"].(string),
 	})
 	if err != nil {
 		rs.log.Error("!RegisterUser --->", logger.Error(err))
