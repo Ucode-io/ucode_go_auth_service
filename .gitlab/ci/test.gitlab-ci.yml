@@ -8,9 +8,7 @@
     - DEPLOYMENT=$(echo $CI_PROJECT_NAME | sed s/_/-/g | sed s/$CI_PROJECT_NAMESPACE-//g)
     - sleep 30
     - PODNAME=$(kubectl get pods -n $NAMESPACE | grep $DEPLOYMENT | awk '{print $1}')
-    - echo ----- PodName ----- $PODNAME
     - kubectl exec -i  -n $NAMESPACE  $PODNAME -- go test ./grpc/service/test/... > test_output.txt
-    - cat test_output.txt
   artifacts:
     untracked: false
     paths:

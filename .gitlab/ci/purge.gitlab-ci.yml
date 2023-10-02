@@ -3,8 +3,6 @@
   image: gitlab.udevs.io:5050/docker/docker:dind
   script:
     - test_output=$(cat test_output.txt)
-    - echo "Test Output"
-    - cat test_output.txt
     - echo $K8SCONFIGJSON > tmp
     - yq -P tmp > /root/.kube/config
     - chmod 600 /root/.kube/config
