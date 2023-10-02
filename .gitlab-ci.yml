@@ -44,7 +44,7 @@ deploy-dev-integration-test:
   extends: .deploy_template
   variables:
     NAMESPACE: ucode-integration-test
-    VALUES_FILE: .helm/values-integrationTest.yml
+    VALUES_FILE: .helm/values-integrationTest-dev.yml
     K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only:
     - dev
@@ -120,7 +120,7 @@ deploy-staging-integration-test:
   extends: .deploy_template
   variables:
     NAMESPACE: ucode-integration-test
-    VALUES_FILE: .helm/values-integrationTest.yml
+    VALUES_FILE: .helm/values-integrationTest-staging.yml
     K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only:
     - staging
@@ -197,7 +197,7 @@ deploy-prod-integration-test:
   extends: .deploy_template
   variables:
     NAMESPACE: ucode-integration-test
-    VALUES_FILE: .helm/values-integrationTest.yml
+    VALUES_FILE: .helm/values-integrationTest-prod.yml
     K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only:
     - master
