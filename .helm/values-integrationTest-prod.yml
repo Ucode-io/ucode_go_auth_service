@@ -15,7 +15,7 @@ image:
   repository: /ucode/ucode_go_auth_service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "integration-test"
+  tag: "integration-test-prod"
 
 imagePullSecrets: "gitlab-registry"
 nameOverride: ""
