@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
@@ -112,11 +113,11 @@ func (h *Handler) V2Login(c *gin.Context) {
 		}
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
+	// resourceId, ok := c.Get("resource_id")
+	// if !ok {
+	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+	// 	return
+	// }
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
@@ -124,21 +125,22 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+	resourceEnvironment, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
+		&obs.GetSingleServiceResourceReq{
 			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
 			ProjectId:     login.GetProjectId(),
+			ServiceType:   obs.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
+		fmt.Println("rest:", err)
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
-	login.ResourceEnvironmentId = resourceEnvironment.GetId()
-	login.ResourceType = resourceEnvironment.GetResourceType()
+	login.ResourceEnvironmentId = resourceEnvironment.GetResourceEnvironmentId()
+	login.ResourceType = int32(resourceEnvironment.GetResourceType())
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 
 	resp, err := h.services.SessionService().V2Login(
