@@ -36,8 +36,8 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateUser(c *gin.Context) {
 	var (
-		resourceEnvironment *company_service.ResourceEnvironment
-		user                auth_service.CreateUserRequest
+		// resourceEnvironment *company_service.ResourceEnvironment
+		user auth_service.CreateUserRequest
 	)
 
 	err := c.ShouldBindJSON(&user)
@@ -46,61 +46,63 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	if util.IsValidUUID(resourceId.(string)) {
-		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-			c.Request.Context(),
-			&company_service.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
-		if user.CompanyId == "" {
-			project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
-				ProjectId: resourceEnvironment.GetProjectId(),
-			})
-			if err != nil {
-				h.handleResponse(c, http.GRPCError, err.Error())
-				return
-			}
-			user.CompanyId = project.GetCompanyId()
-			user.ProjectId = resourceEnvironment.GetProjectId()
-		}
-	} else {
-		if !util.IsValidUUID(user.GetProjectId()) {
-			h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
-			return
-		}
-		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-			c.Request.Context(),
-			&company_service.GetDefaultResourceEnvironmentReq{
-				ResourceId: resourceId.(string),
-				ProjectId:  user.GetProjectId(),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
+	if !util.IsValidUUID(user.ProjectId) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id"))
+		return
 	}
-	user.ResourceEnvironmentId = resourceEnvironment.GetId()
-	user.ResourceType = resourceEnvironment.GetResourceType()
-	user.EnvironmentId = resourceEnvironment.EnvironmentId
+	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &company_service.GetSingleServiceResourceReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     user.ProjectId,
+	})
+
+	// if util.IsValidUUID(resourceId.(string)) {
+	// 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+	// 		c.Request.Context(),
+	// 		&company_service.GetResourceEnvironmentReq{
+	// 			EnvironmentId: environmentId.(string),
+	// 			ResourceId:    resourceId.(string),
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, http.GRPCError, err.Error())
+	// 		return
+	// 	}
+	// 	if user.CompanyId == "" {
+	// 		project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	// 			ProjectId: resourceEnvironment.GetProjectId(),
+	// 		})
+	// 		if err != nil {
+	// 			h.handleResponse(c, http.GRPCError, err.Error())
+	// 			return
+	// 		}
+	// 		user.CompanyId = project.GetCompanyId()
+	// 		user.ProjectId = resourceEnvironment.GetProjectId()
+	// 	}
+	// } else {
+	// 	if !util.IsValidUUID(user.GetProjectId()) {
+	// 		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+	// 		return
+	// 	}
+	// 	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+	// 		c.Request.Context(),
+	// 		&company_service.GetDefaultResourceEnvironmentReq{
+	// 			ResourceId: resourceId.(string),
+	// 			ProjectId:  user.GetProjectId(),
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, http.GRPCError, err.Error())
+	// 		return
+	// 	}
+	// }
+	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
+	user.ResourceType = int32(resource.GetResourceType())
+	user.EnvironmentId = resource.EnvironmentId
 	resp, err := h.services.UserService().V2CreateUser(
 		c.Request.Context(),
 		&user,
