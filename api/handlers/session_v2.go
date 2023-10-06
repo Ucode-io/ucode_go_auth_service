@@ -649,7 +649,7 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	err = helper.SendCodeToEmail("Код для подтверждения", user.GetEmail(), code, h.cfg.Email, h.cfg.Password)
+	err = helper.SendCodeToEmail("Your verification code", user.GetEmail(), code, h.cfg.Email, h.cfg.Password)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
@@ -725,7 +725,7 @@ func (h *Handler) EmailEnter(c *gin.Context) {
 		return
 	}
 
-	err = helper.SendCodeToEmail("Код для подтверждения", res.GetEmail(), code, h.cfg.Email, h.cfg.Password)
+	err = helper.SendCodeToEmail("Your verification code", res.GetEmail(), code, h.cfg.Email, h.cfg.Password)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
