@@ -58,7 +58,12 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &company_service.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     user.ProjectId,
+		ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	// if util.IsValidUUID(resourceId.(string)) {
 	// 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
