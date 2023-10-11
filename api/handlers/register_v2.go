@@ -122,6 +122,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			}
 			body.DevEmail = smsOtpSettings.GetItems()[0].Login
 			body.DevEmailPassword = smsOtpSettings.GetItems()[0].Password
+			body.Originator = smsOtpSettings.GetItems()[0].Originator
 		}
 	case "EMAIL":
 

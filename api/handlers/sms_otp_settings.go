@@ -63,6 +63,7 @@ func (h *Handler) CreateSmsOtpSettings(c *gin.Context) {
 			NumberOfOtp:   smsOtpSettings.NumberOfOtp,
 			EnvironmentId: envId.(string),
 			ProjectId:     projectId.(string),
+			Originator:    smsOtpSettings.Originator,
 		},
 	)
 
@@ -128,6 +129,7 @@ func (h *Handler) UpdateSmsOtpSettings(c *gin.Context) {
 			NumberOfOtp:   smsOtpSettings.NumberOfOtp,
 			EnvironmentId: envId.(string),
 			ProjectId:     projectId.(string),
+			Originator:    smsOtpSettings.Originator,
 		},
 	)
 
