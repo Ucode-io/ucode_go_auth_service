@@ -41,28 +41,46 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		err      error
 	)
 	var username string
-	if user.GetId() == "" && req.GetLogin() != "" {
-		username = req.GetLogin()
-		user, err = sus.strg.User().GetByUsername(context.Background(), username)
-		if err != nil {
-			return nil, err
+	for _, loginStrategy := range req.GetLoginStrategy() {
+		if loginStrategy == "login" {
+			username = req.GetLogin()
+		} else if loginStrategy == "email" {
+			username = req.GetEmail()
+		} else if loginStrategy == "phone" {
+			username = req.GetPhone()
+		}
+		if username != "" {
+			user, err = sus.strg.User().GetByUsername(context.Background(), username)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if user.GetId() != "" {
+			break
 		}
 	}
+	// if user.GetId() == "" && req.GetLogin() != "" {
+	// 	username = req.GetLogin()
+	// 	user, err = sus.strg.User().GetByUsername(context.Background(), username)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
-	if user.GetId() == "" && req.GetEmail() != "" {
-		username = req.GetEmail()
-		user, err = sus.strg.User().GetByUsername(context.Background(), username)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if user.GetId() == "" && req.GetPhone() != "" {
-		username = req.GetPhone()
-		user, err = sus.strg.User().GetByUsername(context.Background(), username)
-		if err != nil {
-			return nil, err
-		}
-	}
+	// if user.GetId() == "" && req.GetEmail() != "" {
+	// 	username = req.GetEmail()
+	// 	user, err = sus.strg.User().GetByUsername(context.Background(), username)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
+	// if user.GetId() == "" && req.GetPhone() != "" {
+	// 	username = req.GetPhone()
+	// 	user, err = sus.strg.User().GetByUsername(context.Background(), username)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	userId := user.GetId()
 	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
@@ -181,11 +199,11 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	}
 
 	_, err = sus.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
-		UserId:       req.GetUserId(),
-		CompanyId:    project.GetCompanyId(),
-		RoleId:       req.GetRoleId(),
-		ProjectId:    req.GetProjectId(),
-		ClientTypeId: req.GetClientTypeId(),
+		UserId:        req.GetUserId(),
+		CompanyId:     project.GetCompanyId(),
+		RoleId:        req.GetRoleId(),
+		ProjectId:     req.GetProjectId(),
+		ClientTypeId:  req.GetClientTypeId(),
 		EnvironmentId: req.GetEnvironmentId(),
 	})
 	if err != nil {
@@ -220,22 +238,41 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 	var (
 		response = pb.SyncUsersResponse{}
 		user_ids = make([]string, 0, len(in.Users))
+		err error
 	)
 	for _, req := range in.Users {
 		var user *pb.User
 		var username string
-		username = req.GetLogin()
-		if username == "" {
-			username = req.GetEmail()
+		for _, loginStrategy := range req.GetLoginStrategy() {
+			if loginStrategy == "login" {
+				username = req.GetLogin()
+			} else if loginStrategy == "email" {
+				username = req.GetEmail()
+			} else if loginStrategy == "phone" {
+				username = req.GetPhone()
+			}
+			if username != "" {
+				user, err = sus.strg.User().GetByUsername(context.Background(), username)
+				if err != nil {
+					return nil, err
+				}
+			}
+			if user.GetId() != "" {
+				break
+			}
 		}
-		if username == "" {
-			username = req.GetPhone()
-		}
+		// username = req.GetLogin()
+		// if username == "" {
+		// 	username = req.GetEmail()
+		// }
+		// if username == "" {
+		// 	username = req.GetPhone()
+		// }
 
-		user, err := sus.strg.User().GetByUsername(context.Background(), username)
-		if err != nil {
-			return nil, err
-		}
+		// user, err := sus.strg.User().GetByUsername(context.Background(), username)
+		// if err != nil {
+		// 	return nil, err
+		// }
 		userId := user.GetId()
 		project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
 			ProjectId: req.GetProjectId(),
@@ -249,7 +286,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			if req.GetPassword() != "" {
 				hashedPassword, err := security.HashPassword(req.GetPassword())
 				if err != nil {
-					sus.log.Error("!!!CreateUser--->", logger.Error(err))
+					sus.log.Error("!!!CreateUsers--->", logger.Error(err))
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 				req.Password = hashedPassword
@@ -263,7 +300,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				CompanyId: project.GetCompanyId(),
 			})
 			if err != nil {
-				sus.log.Error("!!!CreateUser--->", logger.Error(err))
+				sus.log.Error("!!!CreateUsers--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			userId = user.GetId()
