@@ -560,6 +560,8 @@ definitions:
           On the client side, it can't be empty. On the server side, it can be
           empty if Config.ClientAuth is not RequireAnyClientCert or
           RequireAndVerifyClientCert.
+
+          PeerCertificates and its contents should not be modified.
         items:
           $ref: '#/definitions/x509.Certificate'
         type: array
@@ -580,12 +582,8 @@ definitions:
       tlsunique:
         description: |-
           TLSUnique contains the "tls-unique" channel binding value (see RFC 5929,
-          Section 3). This value will be nil for TLS 1.3 connections and for all
-          resumed connections.
-
-          Deprecated: there are conditions in which this value might not be unique
-          to a connection. See the Security Considerations sections of RFC 5705 and
-          RFC 7627, and https://mitls.org/pages/attacks/3SHAKE#channelbindings.
+          Section 3). This value will be nil for TLS 1.3 connections and for
+          resumed connections that don't support Extended Master Secret (RFC 7627).
         items:
           type: integer
         type: array
@@ -598,6 +596,8 @@ definitions:
           On the client side, it's set if Config.InsecureSkipVerify is false. On
           the server side, it's set if Config.ClientAuth is VerifyClientCertIfGiven
           (and the peer provided a certificate) or RequireAndVerifyClientCert.
+
+          VerifiedChains and its contents should not be modified.
         items:
           items:
             $ref: '#/definitions/x509.Certificate'
@@ -657,6 +657,8 @@ definitions:
         type: string
       number_of_otp:
         type: integer
+      originator:
+        type: string
       password:
         type: string
     type: object
@@ -738,6 +740,8 @@ definitions:
         type: string
       number_of_otp:
         type: integer
+      originator:
+        type: string
       password:
         type: string
     type: object
@@ -1859,6 +1863,8 @@ definitions:
         type: string
       number_of_otp:
         type: integer
+      originator:
+        type: string
       password:
         type: string
       project_id:
@@ -3180,6 +3186,9 @@ definitions:
       host:
         description: host or host:port
         type: string
+      omitHost:
+        description: do not emit empty host (authority)
+        type: boolean
       opaque:
         description: encoded opaque data
         type: string
@@ -3483,7 +3492,7 @@ definitions:
     - 4
     type: integer
     x-enum-comments:
-      DSA: Unsupported.
+      DSA: Only supported for parsing.
     x-enum-varnames:
     - UnknownPublicKeyAlgorithm
     - RSA

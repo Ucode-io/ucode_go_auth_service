@@ -162,7 +162,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				return
 			}
 
-			err = helper.SendCodeToEmail("Код для подтверждения", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
+			err = helper.SendCodeToEmail("Your verification code", request.Email, code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 			if err != nil {
 				h.handleResponse(c, http.InvalidArgument, err.Error())
 				return

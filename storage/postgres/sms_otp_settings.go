@@ -34,9 +34,10 @@ func (s *smsOtpSettingsRepo) Create(ctx context.Context, req *pb.CreateSmsOtpSet
 				"project_id",
 				"environment_id",
 				"number_of_otp",
-				"default_otp"
+				"default_otp",
+				"originator"
 			) VALUES (
-				$1, $2, $3, $4, $5, $6, $7
+				$1, $2, $3, $4, $5, $6, $7, $8
 			)`,
 		id,
 		req.Login,
@@ -45,6 +46,7 @@ func (s *smsOtpSettingsRepo) Create(ctx context.Context, req *pb.CreateSmsOtpSet
 		req.EnvironmentId,
 		req.NumberOfOtp,
 		req.GetDefaultOtp(),
+		req.Originator,
 	)
 	if err != nil {
 		return nil, err
@@ -57,6 +59,7 @@ func (s *smsOtpSettingsRepo) Create(ctx context.Context, req *pb.CreateSmsOtpSet
 		NumberOfOtp:   req.NumberOfOtp,
 		ProjectId:     req.ProjectId,
 		EnvironmentId: req.EnvironmentId,
+		Originator:    req.Originator,
 	}
 	return response, nil
 }
@@ -67,7 +70,8 @@ func (s *smsOtpSettingsRepo) Update(ctx context.Context, req *pb.SmsOtpSettings)
 		login = :login,
 		password = :password,
 		number_of_otp = :number_of_otp,
-		default_otp = :default_otp
+		default_otp = :default_otp,
+		originator = :originator
 	WHERE
 		id = :id`
 	params := map[string]interface{}{
@@ -76,6 +80,7 @@ func (s *smsOtpSettingsRepo) Update(ctx context.Context, req *pb.SmsOtpSettings)
 		"login":         req.GetLogin(),
 		"password":      req.GetPassword(),
 		"id":            req.Id,
+		"originator":    req.Originator,
 	}
 	q, arr := helper.ReplaceQueryParams(query, params)
 	result, err := s.db.Exec(ctx, q, arr...)
@@ -94,7 +99,8 @@ func (s *smsOtpSettingsRepo) GetById(ctx context.Context, req *pb.SmsOtpSettings
 			project_id, 
 			environment_id, 
 			number_of_otp,
-			default_otp
+			default_otp,
+			originator
 		FROM "sms_otp_settings"
 		WHERE id = $1
 		`,
@@ -106,6 +112,7 @@ func (s *smsOtpSettingsRepo) GetById(ctx context.Context, req *pb.SmsOtpSettings
 		&response.EnvironmentId,
 		&response.NumberOfOtp,
 		&response.DefaultOtp,
+		&response.Originator,
 	)
 	if err != nil {
 		return nil, err
@@ -123,7 +130,8 @@ func (s *smsOtpSettingsRepo) GetList(ctx context.Context, req *pb.GetListSmsOtpS
 			project_id, 
 			environment_id, 
 			number_of_otp,
-			default_otp
+			default_otp,
+			originator
 		FROM "sms_otp_settings"
 		WHERE project_id = $1 AND environment_id = $2
 		`,
@@ -142,6 +150,7 @@ func (s *smsOtpSettingsRepo) GetList(ctx context.Context, req *pb.GetListSmsOtpS
 			&response.EnvironmentId,
 			&response.NumberOfOtp,
 			&response.DefaultOtp,
+			&response.Originator,
 		)
 		if err != nil {
 			return nil, err
