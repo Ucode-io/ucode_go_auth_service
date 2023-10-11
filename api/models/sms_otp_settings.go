@@ -5,6 +5,7 @@ type CreateSmsOtpSettingsRequest struct {
 	Password    string `json:"password"`
 	NumberOfOtp int32  `json:"number_of_otp"`
 	DefaultOtp  string `json:"default_otp"`
+	Originator  string `json:"originator"`
 }
 
 type UpdateSmsOtpSettingsRequest struct {
@@ -13,4 +14,5 @@ type UpdateSmsOtpSettingsRequest struct {
 	Password    string `json:"password"`
 	NumberOfOtp int32  `json:"number_of_otp"`
 	DefaultOtp  string `json:"default_otp"`
+	Originator  string `json:"originator"`
 }
