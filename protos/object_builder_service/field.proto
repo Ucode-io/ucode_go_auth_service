@@ -36,8 +36,7 @@ message CreateFieldRequest {
     bool show_label = 18;
     bool enable_multilanguage = 19;
     bool hide_multilanguage = 20;
-    string label_uz = 21;
-    string label_en = 22;
+    string minio_folder = 21;
 }
 
 message CreateFieldsRequest {
@@ -54,6 +53,7 @@ message CreateFieldsRequest {
     bool automatic = 11;
     string project_id = 12;
     string commit_id = 13;
+    string minio_folder = 14;
 }
 
 message Field {
@@ -80,8 +80,7 @@ message Field {
     bool show_label = 21;
     bool enable_multilanguage = 22;
     bool hide_multilanguage = 23;
-    string label_uz = 24;
-    string label_en = 25;
+    string minio_folder = 24;
 }
 
 message GetAllFieldsResponse {
