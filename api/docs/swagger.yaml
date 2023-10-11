@@ -3234,7 +3234,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          type: integer
+          $ref: '#/definitions/x509.ExtKeyUsage'
         type: array
       extensions:
         description: |-
@@ -3269,7 +3269,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        type: integer
+        $ref: '#/definitions/x509.KeyUsage'
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -3327,7 +3327,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.PublicKeyAlgorithm'
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -3361,7 +3361,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        type: integer
+        $ref: '#/definitions/x509.SignatureAlgorithm'
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -3397,8 +3397,6 @@ definitions:
       version:
         type: integer
     type: object
-<<<<<<< HEAD
-=======
   x509.ExtKeyUsage:
     enum:
     - 0
@@ -3516,7 +3514,6 @@ definitions:
     - SHA384WithRSAPSS
     - SHA512WithRSAPSS
     - PureEd25519
->>>>>>> 936c2dfa7ec61d08bdfcc4b6891d142ef279ad84
 info:
   contact: {}
   description: This is a api gateway

@@ -20231,7 +20231,7 @@ const docTemplate = `{
                     "description": "Sequence of extended key usages.",
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/x509.ExtKeyUsage"
                     }
                 },
                 "extensions": {
@@ -20270,7 +20270,7 @@ const docTemplate = `{
                     }
                 },
                 "keyUsage": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.KeyUsage"
                 },
                 "maxPathLen": {
                     "description": "MaxPathLen and MaxPathLenZero indicate the presence and\nvalue of the BasicConstraints' \"pathLenConstraint\".\n\nWhen parsing a certificate, a positive non-zero MaxPathLen\nmeans that the field was specified, -1 means it was unset,\nand MaxPathLenZero being true mean that the field was\nexplicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false\nshould be treated equivalent to -1 (unset).\n\nWhen generating a certificate, an unset pathLenConstraint\ncan be requested with either MaxPathLen == -1 or using the\nzero value for both MaxPathLen and MaxPathLenZero.",
@@ -20330,7 +20330,7 @@ const docTemplate = `{
                 },
                 "publicKey": {},
                 "publicKeyAlgorithm": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.PublicKeyAlgorithm"
                 },
                 "raw": {
                     "description": "Complete ASN.1 DER content (certificate, signature algorithm and signature).",
@@ -20377,7 +20377,7 @@ const docTemplate = `{
                     }
                 },
                 "signatureAlgorithm": {
-                    "type": "integer"
+                    "$ref": "#/definitions/x509.SignatureAlgorithm"
                 },
                 "subject": {
                     "$ref": "#/definitions/pkix.Name"
@@ -20418,8 +20418,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-<<<<<<< HEAD
-=======
         },
         "x509.ExtKeyUsage": {
             "type": "integer",
@@ -20549,7 +20547,6 @@ const docTemplate = `{
                 "SHA512WithRSAPSS",
                 "PureEd25519"
             ]
->>>>>>> 936c2dfa7ec61d08bdfcc4b6891d142ef279ad84
         }
     }
 }`
