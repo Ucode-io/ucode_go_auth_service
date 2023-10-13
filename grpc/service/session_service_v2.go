@@ -1537,8 +1537,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField = "delete"
 	}
 	// this condition need our object/get-list api because this api's method is post we change it to get
-	// this condition need our object/get-list-group-by api because this api's method is post we change it to get
-	if ((strings.Contains(req.GetPath(), "object/get-list")) || (strings.Contains(req.GetPath(), "object/get-list-group-by"))) && req.GetMethod() != "GET" {
+	// this condition need our object/get-list-group-by and object/get-group-by-field api because this api's method is post we change it to get
+	if ((strings.Contains(req.GetPath(), "object/get-list")) || (strings.Contains(req.GetPath(), "object/get-list-group-by")) || (strings.Contains(req.GetPath(), "object/get-group-by-field"))) && req.GetMethod() != "GET" {
 		methodField = "read"
 	}
 
