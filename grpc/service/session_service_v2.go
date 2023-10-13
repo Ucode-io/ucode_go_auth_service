@@ -1603,6 +1603,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Printf("MethodField: %+v\n", methodField)
+		fmt.Printf("TableSlug: %+v\n", tableSlug)
+		fmt.Printf("BuilderPermissionService: %+v\n", resp)
 		if !resp.IsHavePermission {
 			err := status.Error(codes.PermissionDenied, "Permission denied")
 			return nil, err //fmt.Errorf("Permission denied")
