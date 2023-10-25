@@ -820,21 +820,9 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
+	projectId, ok := c.Get("project_id")
 	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
-		return
-	}
-
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id").Error())
 		return
 	}
 
@@ -884,7 +872,7 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 	emailSettings, err := h.services.EmailService().GetListEmailSettings(
 		c.Request.Context(),
 		&pb.GetListEmailSettingsRequest{
-			ProjectId: resourceEnvironment.GetProjectId(),
+			ProjectId: projectId.(string),
 		},
 	)
 
