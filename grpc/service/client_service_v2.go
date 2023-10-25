@@ -400,7 +400,6 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
 		Data:      result.Data,
@@ -425,9 +424,11 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		"offset": req.GetOffset(),
 		//"search": req.GetSearch(),
 	}
+
 	if req.Guids != nil {
 		structReq["guid"] = req.Guids
 	}
+
 	structData, err := helper.ConvertRequestToSturct(structReq)
 
 	if err != nil {

@@ -34,6 +34,8 @@ const (
 	UcodeDefaultProjectID string = "39f1b0cc-8dc3-42df-b2bf-813310c007a4"
 
 	ObjectBuilderService = "BUILDER_SERVICE"
+
+	DefaultOtp = "718020"
 )
 
 var (

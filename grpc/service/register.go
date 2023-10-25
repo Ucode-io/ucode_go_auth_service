@@ -175,7 +175,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
 		})
-		fmt.Println("::::::::::TEST:::::::::::8", tableSlug)
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())

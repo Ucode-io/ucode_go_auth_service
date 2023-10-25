@@ -371,26 +371,27 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, error) {
 
 	// return 0, nil
+	if pKey.GetIsTest() {
+		queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
 
-	// queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
+		result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
+		if err != nil {
+			return 0, err
+		}
+		rowsAffected := result.RowsAffected()
+		if rowsAffected == 0 {
+			return 0, errors.New("user not found")
+		}
 
-	// result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// rowsAffected = result.RowsAffected()
-	// if rowsAffected == 0 {
-	// 	return 0, errors.New("user not found")
-	// }
-
-	// result, err = r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
-	// if err != nil {
-	// 	return 0, errors.Wrap(err, "delete user error")
-	// }
-	// rowsAffected = result.RowsAffected()
-	// if rowsAffected == 0 {
-	// 	return 0, errors.New("user not found")
-	// }
+		result, err = r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
+		if err != nil {
+			return 0, errors.Wrap(err, "delete user error")
+		}
+		rowsAffected = result.RowsAffected()
+		if rowsAffected == 0 {
+			return 0, errors.New("user not found")
+		}
+	}
 
 	return 0, nil
 }

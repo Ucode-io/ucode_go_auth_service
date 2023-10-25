@@ -546,7 +546,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param verifyBody body models.VerifyEmail true "verify_body"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) VerifyOnlyEmailOtp(c *gin.Context) {

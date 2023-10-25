@@ -17,6 +17,24 @@ const (
 	ReleaseMode = "release"
 )
 
+var CreadentialsForTest = map[string]map[string]string{
+	DebugMode: {
+		"projectId":             "62d6f9d4-dd9c-425b-84f6-cb90860967a8",
+		"companyId":             "61bd72ca-f847-40f2-85b3-a337873862c3",
+		"resourceEnvironmentId": "ecb08c73-3b52-42e9-970b-56be9b7c4e81",
+		"clientTypeId":          "921743b1-9315-4eb9-b180-244bcbeb67cb",
+		"roleId":                "3306fd21-ee1a-4c68-8843-6d0699b6f9ce",
+	},
+	TestMode: {
+		"projectId": "",
+		"companyId": "",
+	},
+	ReleaseMode: {
+		"projectId": "",
+		"companyId": "",
+	},
+}
+
 type Config struct {
 	ServiceName string
 	Environment string // debug, test, release
@@ -75,7 +93,7 @@ func Load() Config {
 	}
 
 	config := Config{}
-	// postgres://auth_service:IeX7ieso@95.217.155.57:30034/auth_service?sslmode=disable
+	// sudo psql -h 95.217.155.57 -p 30034 -U auth_service -d auth_service
 	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "ucode_go_auth_service"))
 	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0"))

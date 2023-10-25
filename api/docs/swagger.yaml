@@ -582,8 +582,12 @@ definitions:
       tlsunique:
         description: |-
           TLSUnique contains the "tls-unique" channel binding value (see RFC 5929,
-          Section 3). This value will be nil for TLS 1.3 connections and for
-          resumed connections that don't support Extended Master Secret (RFC 7627).
+          Section 3). This value will be nil for TLS 1.3 connections and for all
+          resumed connections.
+
+          Deprecated: there are conditions in which this value might not be unique
+          to a connection. See the Security Considerations sections of RFC 5705 and
+          RFC 7627, and https://mitls.org/pages/attacks/3SHAKE#channelbindings.
         items:
           type: integer
         type: array
@@ -684,17 +688,6 @@ definitions:
       password:
         type: string
       project_id:
-        type: string
-    type: object
-  ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse:
-    properties:
-      email:
-        type: string
-      email_found:
-        type: boolean
-      sms_id:
-        type: string
-      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_api_models.RegisterOtp:
@@ -1231,6 +1224,17 @@ definitions:
   ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest:
     properties:
       login:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse:
+    properties:
+      email:
+        type: string
+      login_found:
+        type: boolean
+      sms_id:
+        type: string
+      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq:
@@ -2246,11 +2250,17 @@ definitions:
     properties:
       client_type:
         type: string
+      email:
+        type: string
       environment_id:
         type: string
       login_strategy:
         type: string
+      otp:
+        type: string
       password:
+        type: string
+      phone:
         type: string
       project_id:
         type: string
@@ -2258,10 +2268,14 @@ definitions:
         type: string
       resource_type:
         type: integer
+      sms_id:
+        type: string
       tables:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Object'
         type: array
+      type:
+        type: string
       username:
         type: string
     type: object
@@ -2351,7 +2365,17 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.V2MultiCompanyLoginReq:
     properties:
+      email:
+        type: string
+      otp:
+        type: string
       password:
+        type: string
+      phone:
+        type: string
+      sms_id:
+        type: string
+      type:
         type: string
       username:
         type: string
@@ -2790,6 +2814,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission:
     properties:
+      attributes:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       id:
         type: string
       label:
@@ -2881,6 +2907,8 @@ definitions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ActionPermission'
         type: array
+      attributes:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       automatic_filters:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod'
       custom_permission:
@@ -2922,6 +2950,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ActionPermission:
     properties:
+      attributes:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       custom_event_id:
         type: string
       guid:
@@ -2980,6 +3010,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_FieldPermission:
     properties:
+      attributes:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       edit_permission:
         type: boolean
       field_id:
@@ -3012,6 +3044,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_TableViewPermission:
     properties:
+      attributes:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       delete:
         type: boolean
       edit:
@@ -3027,6 +3061,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_ViewPermission:
     properties:
+      attributes:
+        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
       create_permission:
         type: boolean
       delete_permission:
@@ -8803,7 +8839,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse'
               type: object
         "400":
           description: Bad Request
@@ -8824,6 +8860,52 @@ paths:
                   type: string
               type: object
       summary: ForgotPassword
+      tags:
+      - V2_Session
+  /v2/forgot-password-with-environment-email:
+    post:
+      consumes:
+      - application/json
+      description: Forgot Password With Environment Email
+      operationId: forgot_password_with_environment_email
+      parameters:
+      - description: ForgotPasswordRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: ForgotPasswordWithEnvironmentEmail
       tags:
       - V2_Session
   /v2/get-connection-options/{connection_id}/{user_id}:
@@ -11271,6 +11353,52 @@ paths:
       summary: SendCode
       tags:
       - v2_register
+  /v2/send-code-app:
+    post:
+      consumes:
+      - application/json
+      description: SendCode type must be one of the following values ["EMAIL", "PHONE"]
+      operationId: V2SendCodeApp
+      parameters:
+      - description: SendCode
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: SendCodeApp
+      tags:
+      - v2_register
   /v2/send-message:
     post:
       consumes:
@@ -11354,7 +11482,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse'
               type: object
         "400":
           description: Bad Request
@@ -12250,7 +12378,7 @@ paths:
               type: object
       summary: Reset User password
       tags:
-      - User
+      - V2_User
   /v2/v2multi-company/login:
     post:
       consumes:
@@ -12390,7 +12518,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request

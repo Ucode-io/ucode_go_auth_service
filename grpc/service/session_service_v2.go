@@ -29,51 +29,85 @@ import (
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
 
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	user := &pb.User{}
+	var err error
 
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	switch req.Type {
+	case config.Default:
+		{
+			if len(req.Username) < 6 {
+				err := errors.New("invalid username")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!V2Login--->", logger.Error(err))
-		if err == sql.ErrNoRows {
-			errNoRows := errors.New("no user found")
-			return nil, status.Error(codes.Internal, errNoRows.Error())
+			if len(req.Password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			match, err := security.ComparePassword(user.Password, req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 		}
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	case config.WithPhone:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+			user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	case config.WithEmail:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+			user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
 	}
-
-	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
-	// if err != nil {
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-	//
-	// if expiresAt.Unix() < time.Now().Unix() {
-	// 	err := errors.New("User has been expired")
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
 
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                user.GetId(),
@@ -81,7 +115,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
-	log.Println("reqLoginData--->", reqLoginData)
+
 	var data *pbObject.LoginDataRes
 
 	switch req.ResourceType {
@@ -948,6 +982,10 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!V2RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	if err != nil {
+		s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
@@ -995,7 +1033,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
 	res := &pb.V2RefreshTokenResponse{
-		Token:       token,
+		Token: token,
 		// Permissions: convertedData.Permissions,
 	}
 
@@ -1440,8 +1478,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField = "delete"
 	}
 	// this condition need our object/get-list api because this api's method is post we change it to get
-	// this condition need our object/get-list-group-by api because this api's method is post we change it to get
-	if ((strings.Contains(req.GetPath(), "object/get-list")) || (strings.Contains(req.GetPath(), "object/get-list-group-by"))) && req.GetMethod() != "GET" {
+	// this condition need our object/get-list-group-by and object/get-group-by-field api because this api's method is post we change it to get
+	if ((strings.Contains(req.GetPath(), "object/get-list")) || (strings.Contains(req.GetPath(), "object/get-list-group-by")) || (strings.Contains(req.GetPath(), "object/get-group-by-field"))) && req.GetMethod() != "GET" {
 		methodField = "read"
 	}
 
@@ -1506,6 +1544,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Printf("MethodField: %+v\n", methodField)
+		fmt.Printf("TableSlug: %+v\n", tableSlug)
+		fmt.Printf("BuilderPermissionService: %+v\n", resp)
 		if !resp.IsHavePermission {
 			err := status.Error(codes.PermissionDenied, "Permission denied")
 			return nil, err //fmt.Errorf("Permission denied")
@@ -1544,36 +1586,86 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		Companies: []*pb.Company2{},
 	}
 
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	user := &pb.User{}
+	var err error
 
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	switch req.Type {
+	case config.Default:
+		{
+			if len(req.Username) < 6 {
+				err := errors.New("invalid username")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+			if len(req.Password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+			match, err := security.ComparePassword(user.Password, req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	case config.WithPhone:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	case config.WithEmail:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	}
+	fmt.Println(">>>> user #1", user)
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
@@ -1692,7 +1784,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					}
 					respResourceEnvironment.ClientTypes = clientTypes.Data
 				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
-					fmt.Println("\n >> have client type id in user", clientType.ClientTypeIds)
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{

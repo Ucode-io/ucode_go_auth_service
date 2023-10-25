@@ -650,8 +650,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("project id::", req.ProjectId)
-	fmt.Println("resource type::", req.ResourceType)
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
@@ -754,14 +752,22 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	user.Active = int32(active)
 
-	// projectId, ok := userData["project_id"].(string)
-	// if !ok {
-	// err := errors.New("projectId is nil")
-	// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-	// return nil, status.Error(codes.Internal, err.Error())
-	// }
+	projectId, ok := userData["project_id"].(string)
+	if !ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		projectId = ""
+	}
+	name, ok := userData["name"].(string)
+	if ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		user.Name = name
+	}
 
-	user.ProjectId = req.GetProjectId()
+	user.ProjectId = projectId
 
 	return user, nil
 }
@@ -926,6 +932,29 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		// clientPlatformId, ok := userItem["client_platform_id"].(string)
+		// if !ok {
+		// 	err := errors.New("clientPlatformId is nil")
+		// 	s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+		// 	return nil, status.Error(codes.Internal, err.Error())
+		// }
+
+		projectId, ok := userItem["project_id"].(string)
+		if !ok {
+			// err := errors.New("projectId is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			projectId = ""
+		}
+
+		active, ok := userItem["active"].(float64)
+		if !ok {
+			// err := errors.New("active is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			active = 0
+		}
+
 		user, ok := usersMap[userId]
 		if !ok {
 			err := errors.New("user is nil")
@@ -936,7 +965,8 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		if ok {
 			user.Name = name
 		}
-
+		user.Active = int32(active)
+		user.ProjectId = projectId
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
 
@@ -1119,12 +1149,22 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	res := &emptypb.Empty{}
 	responseFromDeleteUser := &pbObject.CommonMessage{}
 
-	_, err := s.strg.User().Delete(ctx, req)
+	// structData, err = helper.ConvertRequestToSturct(req)
+	//if err != nil {
+	//	s.log.Error("!!!DeleteUser--->", logger.Error(err))
+	//	return nil, status.Error(codes.InvalidArgument, err.Error())
+	//}
+	//
+	//_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+	//	TableSlug: "user",
+	//	Data:      structData,
+	//	ProjectId: req.GetResourceEnvironmentId(),
+	//})
+	//if err != nil {
+	//	s.log.Error("!!!DeleteUser.ObjectBuilderService.Delete--->", logger.Error(err))
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
 
-	if err != nil {
-		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
 	var tableSlug = "user"
 	switch req.GetResourceType() {
 	case 1:
@@ -1217,6 +1257,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		})
 	}
 
+	_, err := s.strg.User().Delete(ctx, req)
+	if err != nil {
+		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return res, nil
 }
 
@@ -1255,6 +1301,15 @@ func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUser
 	return res, nil
 }
 
+func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
+	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
+	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		return nil, err
+	}
+	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
+	return res, nil
+}
 func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKey) (*pb.GetUserProjectsRes, error) {
 
 	userProjects, err := s.strg.User().GetUserProjects(ctx, req.Id)
@@ -1265,16 +1320,6 @@ func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKe
 	}
 
 	return userProjects, nil
-}
-
-func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
-	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
-	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		return nil, err
-	}
-	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
-	return res, nil
 }
 
 func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
