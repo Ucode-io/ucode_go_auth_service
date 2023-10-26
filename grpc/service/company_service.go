@@ -65,7 +65,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	_, err = s.services.EnvironmentService().Create(
+	environment, err := s.services.EnvironmentService().Create(
 		ctx,
 		&company_service.CreateEnvironmentRequest{
 			ProjectId:    project.ProjectId,
@@ -377,6 +377,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		CompanyId: companyPKey.GetId(),
 		ProjectId: project.GetProjectId(),
 		UserId:    createUserRes.GetId(),
+		EnvId: environment.GetId(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))

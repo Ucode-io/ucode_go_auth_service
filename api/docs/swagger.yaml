@@ -8833,6 +8833,52 @@ paths:
       summary: ForgotPassword
       tags:
       - V2_Session
+  /v2/forgot-password-with-environment-email:
+    post:
+      consumes:
+      - application/json
+      description: Forgot Password With Environment Email
+      operationId: forgot_password_with_environment_email
+      parameters:
+      - description: ForgotPasswordRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: ForgotPasswordWithEnvironmentEmail
+      tags:
+      - V2_Session
   /v2/get-connection-options/{connection_id}/{user_id}:
     get:
       consumes:
