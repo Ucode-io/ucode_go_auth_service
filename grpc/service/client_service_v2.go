@@ -474,7 +474,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		result *pbObject.CommonMessage
 	)
 	requestToObjBuilderService := map[string]interface{}{
-		"mame":            req.Name,
+		"name":            req.Name,
 		"confirm_by":      req.ConfirmBy.String(),
 		"self_register":   req.SelfRegister,
 		"self_recorder":   req.SelfRecover,
@@ -482,6 +482,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		"guid":            req.Guid,
 		"client_type_ids": req.ClientPlatformIds,
 		"table_slug":      req.TableSlug,
+		"default_page":    req.DefaultPage,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
