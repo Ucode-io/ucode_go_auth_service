@@ -486,6 +486,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		"client_type_ids": req.ClientPlatformIds,
 		"table_slug":      req.TableSlug,
 		"id":              req.Guid,
+		"default_page":    req.DefaultPage,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
