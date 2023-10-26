@@ -33,6 +33,7 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		SelfRecover:  data.GetClientType().GetSelfRecover(),
 		ProjectId:    data.GetClientType().GetProjectId(),
 		Tables:       tables,
+		DefaultPage:  data.GetClientType().GetDefaultPage(),
 	}
 
 	res.ClientPlatform = &pb.ClientPlatform{
