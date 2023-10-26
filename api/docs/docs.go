@@ -9335,6 +9335,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/forgot-password-with-environment-email": {
+            "post": {
+                "description": "Forgot Password With Environment Email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "ForgotPasswordWithEnvironmentEmail",
+                "operationId": "forgot_password_with_environment_email",
+                "parameters": [
+                    {
+                        "description": "ForgotPasswordRequest",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/get-connection-options/{connection_id}/{user_id}": {
             "get": {
                 "description": "Get Connection Options",
@@ -16430,6 +16513,23 @@ const docTemplate = `{
                 }
             }
         },
+        "ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "email_found": {
+                    "type": "boolean"
+                },
+                "sms_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_api_models.RegisterOtp": {
             "type": "object",
             "properties": {
@@ -16875,6 +16975,9 @@ const docTemplate = `{
             "properties": {
                 "confirm_by": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies"
+                },
+                "default_page": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -18795,6 +18898,9 @@ const docTemplate = `{
                 "db_project_id": {
                     "type": "string"
                 },
+                "default_page": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -19139,6 +19245,9 @@ const docTemplate = `{
                 "db_project_id": {
                     "type": "string"
                 },
+                "default_page": {
+                    "type": "string"
+                },
                 "guid": {
                     "type": "string"
                 },
@@ -19410,13 +19519,15 @@ const docTemplate = `{
                 0,
                 1,
                 2,
-                3
+                3,
+                4
             ],
             "x-enum-varnames": [
                 "ResourceType_NOT_DECIDED",
                 "ResourceType_MONGODB",
                 "ResourceType_CLICKHOUSE",
-                "ResourceType_POSTGRESQL"
+                "ResourceType_POSTGRESQL",
+                "ResourceType_REST"
             ]
         },
         "ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword": {
@@ -19567,6 +19678,9 @@ const docTemplate = `{
             "properties": {
                 "confirm_by": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ConfirmStrategies"
+                },
+                "default_page": {
+                    "type": "string"
                 },
                 "guid": {
                     "type": "string"

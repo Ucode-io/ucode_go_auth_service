@@ -686,6 +686,17 @@ definitions:
       project_id:
         type: string
     type: object
+  ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse:
+    properties:
+      email:
+        type: string
+      email_found:
+        type: boolean
+      sms_id:
+        type: string
+      user_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_api_models.RegisterOtp:
     properties:
       data:
@@ -975,6 +986,8 @@ definitions:
     properties:
       confirm_by:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
+      default_page:
+        type: string
       id:
         type: string
       name:
@@ -2229,6 +2242,8 @@ definitions:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
       db_project_id:
         type: string
+      default_page:
+        type: string
       name:
         type: string
       project_id:
@@ -2454,6 +2469,8 @@ definitions:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ConfirmStrategies'
       db_project_id:
         type: string
+      default_page:
+        type: string
       guid:
         type: string
       name:
@@ -2646,12 +2663,14 @@ definitions:
     - 1
     - 2
     - 3
+    - 4
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
     - ResourceType_MONGODB
     - ResourceType_CLICKHOUSE
     - ResourceType_POSTGRESQL
+    - ResourceType_REST
   ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -2736,6 +2755,8 @@ definitions:
     properties:
       confirm_by:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.ConfirmStrategies'
+      default_page:
+        type: string
       guid:
         type: string
       name:
@@ -8856,6 +8877,52 @@ paths:
                   type: string
               type: object
       summary: ForgotPassword
+      tags:
+      - V2_Session
+  /v2/forgot-password-with-environment-email:
+    post:
+      consumes:
+      - application/json
+      description: Forgot Password With Environment Email
+      operationId: forgot_password_with_environment_email
+      parameters:
+      - description: ForgotPasswordRequest
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Response
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: ForgotPasswordWithEnvironmentEmail
       tags:
       - V2_Session
   /v2/get-connection-options/{connection_id}/{user_id}:
