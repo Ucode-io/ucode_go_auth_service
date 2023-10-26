@@ -70,6 +70,7 @@ message UpdateMenuSettingsRequest {
     string icon_size = 3;
     string menu_template_id = 4;
     string project_id = 5;
+    string user_id = 6;
 }
 
 message GetAllMenuSettingsResponse {
@@ -81,6 +82,7 @@ message MenuSettingPrimaryKey {
     string id = 1;
     string project_id = 2;
     string template_id = 3;
+    string user_id = 4;
 }
 
 message  GetAllMenuSettingsRequest {
@@ -94,6 +96,7 @@ message CreateMenuSettingsRequest {
     string icon_size = 2;
     string project_id = 3;
     string menu_template_id = 4;
+    string user_id = 5;
 }
 
 message MenuSettings {
@@ -101,7 +104,8 @@ message MenuSettings {
     string icon_style = 2;
     string icon_size = 3;
     string menu_template_id = 4;
-    MenuTemplate menu_template = 5;
+    string user_id = 5;
+    MenuTemplate menu_template = 6;
 }
 
 // Menu
@@ -158,6 +162,7 @@ message GetAllMenusResponse {
 message MenuPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string user_id = 3;
 }
 
 message GetAllMenusRequest {
