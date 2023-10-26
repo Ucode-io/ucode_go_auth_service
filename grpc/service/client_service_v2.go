@@ -477,7 +477,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		result *pbObject.CommonMessage
 	)
 	requestToObjBuilderService := map[string]interface{}{
-		"mame":            req.Name,
+		"name":            req.Name,
 		"confirm_by":      req.ConfirmBy.String(),
 		"self_register":   req.SelfRegister,
 		"self_recorder":   req.SelfRecover,
