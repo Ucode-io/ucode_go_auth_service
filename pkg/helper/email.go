@@ -140,7 +140,7 @@ func SendCodeToEnvironmentEmail(subject, to, code string, email string, password
 	smtpPort := 587
 
 	message := `
-		Your verification code is: ` + code
+		Your verification code is ` + code
 
 	msg := "To: \"" + to + "\" <" + to + ">\n" +
 		"From: \"" + email + "\" <" + email + ">\n" +
