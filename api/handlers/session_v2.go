@@ -213,7 +213,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 	//	return
 	//}
 	//
-	//userResp, err := h.services.ObjectBuilderService().GetList(
+	//userResp, err := h.services.GetObjectBuilderServiceByType(req.NodeType).GetList(
 	//	context.Background(),
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "user",

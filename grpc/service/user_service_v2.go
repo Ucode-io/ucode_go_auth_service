@@ -77,7 +77,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 
 		switch req.ResourceType {
 		case 1:
-			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 				TableSlug: "user",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvironmentId(),
@@ -123,7 +123,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 		if req.Email != "" {
 			switch req.ResourceType {
 			case 1:
-				objUser, err = s.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				objUser, err = s.services.GetLoginServiceByType(req.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 					Email:      req.Email,
 					ClientType: "WEB_USER",
@@ -173,7 +173,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 
 			switch req.ResourceType {
 			case 1:
-				_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 					TableSlug: "user",
 					Data:      structData,
 					ProjectId: req.GetResourceEnvironmentId(),
@@ -279,7 +279,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 
 		switch req.ResourceType {
 		case 1:
-			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 				TableSlug: "user",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvironmentId(),
@@ -325,7 +325,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		if req.Email != "" {
 			switch req.ResourceType {
 			case 1:
-				objUser, err = s.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				objUser, err = s.services.GetLoginServiceByType(req.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 					Email:      req.Email,
 					ClientType: "WEB_USER",
@@ -354,7 +354,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		if objUser != nil && req.Phone != "" && !objUser.UserFound {
 			switch req.ResourceType {
 			case 1:
-				objUser, err = s.services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
+				objUser, err = s.services.GetLoginServiceByType(req.NodeType).LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
 
 					PhoneNumber: req.Phone,
 					ClientType:  "WEB_USER",
@@ -402,7 +402,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 
 			switch req.ResourceType {
 			case 1:
-				_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 					TableSlug: "user",
 					Data:      structData,
 					ProjectId: req.GetResourceEnvironmentId(),
@@ -520,7 +520,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 	switch req.ResourceType {
 	case 1:
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -540,7 +540,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -656,7 +656,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	switch req.ResourceType {
 	case 1:
 		fmt.Println("enter to object builder")
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -676,7 +676,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -818,7 +818,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	switch req.ResourceType {
 	case 1:
 		fmt.Println("aaaa:", userIds)
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -838,7 +838,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+		usersResp, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -971,7 +971,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	//	return nil, status.Error(codes.InvalidArgument, err.Error())
 	//}
 	//
-	//result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+	//result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 	//	TableSlug: "user",
 	//	Data:      structData,
 	//	ProjectId: config.UcodeDefaultProjectID,
@@ -1027,7 +1027,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	var tableSlug = "user"
 	switch req.GetResourceType() {
 	case 1:
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1047,7 +1047,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+		_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -1128,7 +1128,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	var tableSlug = "user"
 	switch req.GetResourceType() {
 	case 1:
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1148,7 +1148,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		responseFromDeleteUser, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+		responseFromDeleteUser, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1331,7 +1331,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 			}
 			switch resource.ResourceType {
 			case 1:
-				_, err = s.services.LoginService().UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
+				_, err = s.services.GetLoginServiceByType(resource.NodeType).UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
 					Guid:                  req.UserId,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					Password:              unHashedPassword,
@@ -1339,7 +1339,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 				})
 				if err != nil {
 					err = errors.New("Password updated in auth but failed to update in object builder")
-					s.log.Error("!!!V2UserResetPassword.LoginService().UpdateUserPassword--->", logger.Error(err))
+					s.log.Error("!!!V2UserResetPassword.GetLoginServiceByType(resource.NodeType).UpdateUserPassword--->", logger.Error(err))
 					return nil, err
 				}
 			case 3:

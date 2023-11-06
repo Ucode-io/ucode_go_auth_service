@@ -113,7 +113,7 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 	// This is create connection by client type id
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().Create(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).Create(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -241,7 +241,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 	// This is create connection by client type id
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().Update(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).Update(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -250,7 +250,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 			},
 		)
 	case 3:
-		resp, err = h.services.ObjectBuilderService().Update(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).Update(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -340,7 +340,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().GetList(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -378,7 +378,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		for _, v := range response {
 			if res, ok := v.(map[string]interface{}); ok {
 				if guid, ok := res["guid"].(string); ok {
-					options, err := h.services.LoginService().GetConnetionOptions(
+					options, err := h.services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(
 						c.Request.Context(),
 						&obs.GetConnetionOptionsRequest{
 							ConnectionId:          guid,
@@ -508,7 +508,7 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().GetSingle(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).GetSingle(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -637,7 +637,7 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().Delete(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).Delete(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -651,7 +651,7 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 			return
 		}
 	case 3:
-		resp, err = h.services.ObjectBuilderService().Delete(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).Delete(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -731,12 +731,13 @@ func (h *Handler) GetConnectionOptions(c *gin.Context) {
 	var resp *obs.GetConnectionOptionsResponse
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.LoginService().GetConnetionOptions(
+		resp, err = h.services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(
 			c.Request.Context(),
 			&obs.GetConnetionOptionsRequest{
 				ConnectionId:          connectionId,
 				ResourceEnvironmentId: resource.ResourceEnvironmentId,
 				UserId:                userId,
+				NodeType:              resource.NodeType,
 			},
 		)
 

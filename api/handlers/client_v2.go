@@ -99,6 +99,7 @@ func (h *Handler) V2CreateClientPlatform(c *gin.Context) {
 
 	clientPlatform.ProjectId = resource.ResourceEnvironmentId
 	clientPlatform.ResourceType = int32(resource.ResourceType)
+	clientPlatform.NodeType = resource.NodeType
 
 	resp, err := h.services.ClientService().V2CreateClientPlatform(
 		c.Request.Context(),
@@ -318,6 +319,7 @@ func (h *Handler) V2GetClientPlatformByID(c *gin.Context) {
 			Id:           clientPlatformid,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ResourceType: int32(resource.ResourceType),
+			NodeType:     resource.NodeType,
 		},
 	)
 
@@ -528,6 +530,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 
 	clientType.ProjectId = resource.ResourceEnvironmentId
 	clientType.ResourceType = int32(resource.ResourceType)
+	clientType.NodeType = resource.NodeType
 
 	resp, err := h.services.ClientService().V2CreateClientType(
 		c.Request.Context(),
@@ -606,6 +609,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 			Search:       c.Query("search"),
 			ProjectId:    resource.ResourceEnvironmentId,
 			ResourceType: int32(resource.ResourceType),
+			NodeType:     resource.NodeType,
 		},
 	)
 	if err != nil {
@@ -707,6 +711,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 			Id:           clientTypeid,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ResourceType: int32(resource.ResourceType),
+			NodeType:     resource.NodeType,
 		},
 	)
 
@@ -804,6 +809,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 
 	clientType.ProjectId = resource.ResourceEnvironmentId
 	clientType.ResourceType = int32(resource.ResourceType)
+	clientType.NodeType = resource.NodeType
 
 	resp, err := h.services.ClientService().V2UpdateClientType(
 		c.Request.Context(),
@@ -909,6 +915,7 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 			Id:           clientTypeid,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ResourceType: int32(resource.ResourceType),
+			NodeType:     resource.NodeType,
 		},
 	)
 
@@ -1005,6 +1012,7 @@ func (h *Handler) V2AddClient(c *gin.Context) {
 	}
 
 	client.ProjectId = resource.ResourceEnvironmentId
+	client.NodeType = resource.ResourceEnvironmentId
 
 	resp, err := h.services.ClientService().V2AddClient(
 		c.Request.Context(),
@@ -1136,6 +1144,7 @@ func (h *Handler) V2UpdateClient(c *gin.Context) {
 	}
 
 	client.ProjectId = resource.ResourceEnvironmentId
+	client.NodeType = resource.NodeType
 
 	resp, err := h.services.ClientService().V2UpdateClient(
 		c.Request.Context(),

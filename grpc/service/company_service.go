@@ -91,7 +91,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//	return nil, err
 	//}
 	//
-	//_, err = s.services.ObjectBuilderService().Create(
+	//_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 	//	ctx,
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "project",
@@ -120,7 +120,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//	return nil, err
 	//}
 
-	//createClientTypeResp, err := s.services.ObjectBuilderService().Create(
+	//createClientTypeResp, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 	//	ctx,
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "client_type",
@@ -158,7 +158,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//	return nil, err
 	//}
 	//
-	//createClientPlatformResp, err := s.services.ObjectBuilderService().Create(
+	//createClientPlatformResp, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 	//	ctx,
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "client_platform",
@@ -200,7 +200,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//	return nil, err
 	//}
 	//
-	//createTestLoginResp, err := s.services.ObjectBuilderService().Create(
+	//createTestLoginResp, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 	//	ctx,
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "test_login",
@@ -232,7 +232,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//	return nil, err
 	//}
 	//
-	//createRoleResp, err := s.services.ObjectBuilderService().Create(
+	//createRoleResp, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 	//	ctx,
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "role",
@@ -281,7 +281,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//		return nil, err
 	//	}
 	//
-	//	_, err = s.services.ObjectBuilderService().Create(
+	//	_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 	//		ctx,
 	//		&object_builder_service.CommonMessage{
 	//			TableSlug: "record_permission",
@@ -336,7 +336,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//	return nil, err
 	//}
 	//
-	//createUserResp, err := s.services.ObjectBuilderService().Create(
+	//createUserResp, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 	//	ctx,
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "user",
@@ -377,7 +377,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		CompanyId: companyPKey.GetId(),
 		ProjectId: project.GetProjectId(),
 		UserId:    createUserRes.GetId(),
-		EnvId: environment.GetId(),
+		EnvId:     environment.GetId(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))

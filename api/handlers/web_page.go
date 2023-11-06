@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/web_page_service"
 	"ucode/ucode_go_auth_service/pkg/util"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetListWebPageApp godoc
@@ -103,8 +104,7 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 		&web_page_service.GetListAppReq{
 			ProjectId:     resource.GetProjectId(),
 			EnvironmentId: envId,
-			ResourceId: resource.GetResourceEnvironmentId(),
-
+			ResourceId:    resource.GetResourceEnvironmentId(),
 		},
 	)
 
