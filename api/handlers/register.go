@@ -25,7 +25,7 @@ import (
 // @Tags register
 // @Accept json
 // @Produce json
-// @Enum 
+// @Enum
 // @Param login body models.Sms true "SendCode"
 // @Success 201 {object} http.Response{data=models.SendCodeResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
@@ -60,7 +60,7 @@ func (h *Handler) SendCode(c *gin.Context) {
 
 	phone := helper.ConverPhoneNumberToMongoPhoneFormat(request.Recipient)
 
-	respObject, err := h.services.LoginService().LoginWithOtp(c.Request.Context(), &pbObject.PhoneOtpRequst{
+	respObject, err := h.services.GetLoginServiceByType("").LoginWithOtp(c.Request.Context(), &pbObject.PhoneOtpRequst{
 		PhoneNumber: phone,
 		ClientType:  request.ClientType,
 	})
@@ -181,7 +181,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	_, err = h.services.ObjectBuilderService().Create(
+	_, err = h.services.GetObjectBuilderServiceByType("").Create(
 		context.Background(),
 		&pbObject.CommonMessage{
 			TableSlug: c.Param("table_slug"),
@@ -193,7 +193,7 @@ func (h *Handler) RegisterOtp(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
+	resp, err := h.services.GetLoginServiceByType("").LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
 		PhoneNumber: body.Data["phone"].(string),
 		ClientType:  "PATIENT",
 	})

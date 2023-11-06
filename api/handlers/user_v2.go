@@ -188,6 +188,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 			ProjectId:             projectId,
 			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
 			ResourceType:          int32(resource.GetResourceType()),
+			NodeType:              resource.NodeType,
 		},
 	)
 
@@ -273,6 +274,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 			ResourceType:          int32(resource.GetResourceType()),
 			ClientTypeId:          clientTypeID,
 			ProjectId:             resource.GetProjectId(),
+			NodeType:              resource.NodeType,
 		},
 	)
 	if err != nil {
@@ -338,6 +340,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	user.ResourceType = int32(resource.GetResourceType())
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
 	user.EnvironmentId = environmentId.(string)
+	user.NodeType = resource.NodeType
 
 	resp, err := h.services.UserService().V2UpdateUser(
 		c.Request.Context(),
@@ -549,6 +552,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			ProjectId:             resource.GetProjectId(),
 			ClientTypeId:          req.ClientTypeId,
 			ResourceType:          int32(resource.ResourceType.Number()),
+			NodeType:              resource.NodeType,
 		},
 	)
 	if err != nil {
@@ -578,7 +582,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	var tableSlug = "user"
 	switch int32(resource.ResourceType.Number()) {
 	case 1:
-		clientType, err := h.services.ObjectBuilderService().GetSingle(
+		clientType, err := h.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: "client_type",
@@ -593,7 +597,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
 			tableSlug = clientTypeTableSlug
 		}
-		_, err = h.services.ObjectBuilderService().Create(
+		_, err = h.services.GetObjectBuilderServiceByType(req.NodeType).Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: tableSlug,

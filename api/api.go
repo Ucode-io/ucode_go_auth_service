@@ -147,17 +147,17 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		v2.PUT("/role", h.V2UpdateRole)
 		v2.DELETE("/role/:role-id", h.V2RemoveRole)
 
-		v2.POST("/permission", h.V2CreatePermission)
-		v2.GET("/permission", h.V2GetPermissionList)
+		// v2.POST("/permission", h.V2CreatePermission)
+		// v2.GET("/permission", h.V2GetPermissionList)
 		v2.GET("/permission/:permission-id", h.V2GetPermissionByID)
-		v2.PUT("/permission", h.V2UpdatePermission)
-		v2.DELETE("/permission/:permission-id", h.V2DeletePermission)
+		// v2.PUT("/permission", h.V2UpdatePermission)
+		// v2.DELETE("/permission/:permission-id", h.V2DeletePermission)
 
-		v2.POST("/permission-scope", h.V2AddPermissionScope)
-		v2.DELETE("/permission-scope", h.V2RemovePermissionScope)
+		// v2.POST("/permission-scope", h.V2AddPermissionScope)
+		// v2.DELETE("/permission-scope", h.V2RemovePermissionScope)
 
-		v2.POST("/role-permission", h.V2AddRolePermission)
-		v2.DELETE("/role-permission", h.V2RemoveRolePermission)
+		// v2.POST("/role-permission", h.V2AddRolePermission)
+		// v2.DELETE("/role-permission", h.V2RemoveRolePermission)
 
 		v2.GET("/role-permission/detailed/:project-id/:role-id", h.GetListWithRoleAppTablePermissions)
 		v2.PUT("/role-permission/detailed", h.UpdateRoleAppTablePermissions)

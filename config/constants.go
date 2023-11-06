@@ -37,6 +37,8 @@ const (
 	ObjectBuilderService = "BUILDER_SERVICE"
 
 	DefaultOtp = "718020"
+	LOW_NODE_TYPE  string = "LOW"
+	HIGH_NODE_TYPE string = "HIGH"
 )
 
 var (

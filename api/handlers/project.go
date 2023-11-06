@@ -3,13 +3,14 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/saidamir98/udevs_pkg/util"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+
+	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -271,7 +272,7 @@ func (h *Handler) UpdateProjectUserData(c *gin.Context) {
 
 	ctx, finish := context.WithTimeout(context.Background(), 20*time.Second)
 	defer finish()
-	resp, err := h.services.ObjectBuilderService().Update(
+	resp, err := h.services.GetObjectBuilderServiceByType("").Update(
 		ctx,
 		&object_builder_service.CommonMessage{
 			TableSlug: "user",

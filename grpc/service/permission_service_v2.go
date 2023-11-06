@@ -27,7 +27,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 	}
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetProjectId(),
@@ -68,7 +68,7 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 	}
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetProjectId(),
@@ -111,7 +111,7 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 	}
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetProjectId(),
@@ -156,7 +156,7 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 	}
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: projectId,
@@ -197,7 +197,7 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 	)
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetProjectId(),
@@ -206,7 +206,7 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 			s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+		_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetProjectId(),
@@ -251,7 +251,7 @@ func (s *permissionService) V2CreatePermission(ctx context.Context, req *pb.Crea
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -276,7 +276,7 @@ func (s *permissionService) V2GetPermissionByID(ctx context.Context, req *pb.Per
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -301,7 +301,7 @@ func (s *permissionService) V2GetPermissionList(ctx context.Context, req *pb.Get
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -326,7 +326,7 @@ func (s *permissionService) V2UpdatePermission(ctx context.Context, req *pb.Upda
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -353,7 +353,7 @@ func (s *permissionService) V2DeletePermission(ctx context.Context, req *pb.Perm
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+	_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -374,7 +374,7 @@ func (s *permissionService) V2GetScopesList(ctx context.Context, req *pb.GetScop
 		s.log.Error("!!!GetScopesList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx, &pbObject.CommonMessage{
 		TableSlug: "scope",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -399,7 +399,7 @@ func (s *permissionService) V2AddPermissionScope(ctx context.Context, req *pb.Ad
 		s.log.Error("!!!AddPermissionScope--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission_scope",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -423,7 +423,7 @@ func (s *permissionService) V2RemovePermissionScope(ctx context.Context, req *pb
 		s.log.Error("!!!RemovePermissionScope--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission_scope",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -433,7 +433,7 @@ func (s *permissionService) V2RemovePermissionScope(ctx context.Context, req *pb
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+	_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx, &pbObject.CommonMessage{
 		TableSlug: "permission_scope",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -457,7 +457,7 @@ func (s *permissionService) V2AddRolePermission(ctx context.Context, req *pb.Add
 		s.log.Error("!!!AddRolePermission--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 		TableSlug: "role_permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -479,7 +479,7 @@ func (s *permissionService) V2RemoveRolePermission(ctx context.Context, req *pb.
 		s.log.Error("!!!RemoveRolePermission--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 		TableSlug: "role_permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,
@@ -489,7 +489,7 @@ func (s *permissionService) V2RemoveRolePermission(ctx context.Context, req *pb.
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+	_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx, &pbObject.CommonMessage{
 		TableSlug: "roe_permission",
 		Data:      structData,
 		ProjectId: config.UcodeDefaultProjectID,

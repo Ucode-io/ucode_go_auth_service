@@ -118,7 +118,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	switch request.RegisterType {
 	case cfg.Default:
 		{
-			respObject, err = h.services.LoginService().LoginWithEmailOtp(
+			respObject, err = h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -196,7 +196,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, "Phone required when register type is phone")
 				return
 			}
-			respObject, err = h.services.LoginService().LoginWithOtp(
+			respObject, err = h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithOtp(
 				c.Request.Context(),
 				&pbObject.PhoneOtpRequst{
 					PhoneNumber: phone,
@@ -269,7 +269,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 			request.Email = userInfo["email"].(string)
 
-			respObject, err = h.services.LoginService().LoginWithEmailOtp(
+			respObject, err = h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -425,7 +425,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				return
 			}
 
-			respObject, err := h.services.LoginService().LoginWithEmailOtp(
+			respObject, err := h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -480,7 +480,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				return
 			}
 
-			respObject, err := h.services.LoginService().LoginWithEmailOtp(
+			respObject, err := h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -807,7 +807,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+	resp, err := h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 		Email:      body.Data["email"].(string),
 		ClientType: "WEB_USER",
@@ -844,7 +844,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			respObj, err := h.services.ObjectBuilderService().Create(
+			respObj, err := h.services.GetObjectBuilderServiceByType(resourceEnvironment.NodeType).Create(
 				context.Background(),
 				&pbObject.CommonMessage{
 					TableSlug: mapedInterface["table_slug"].(string),

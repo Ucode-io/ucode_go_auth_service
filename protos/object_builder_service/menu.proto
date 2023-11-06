@@ -26,6 +26,8 @@ service MenuService {
     rpc GetByIDMenuTemplate(MenuSettingPrimaryKey) returns (MenuTemplate) {}
     rpc UpdateMenuTemplate(UpdateMenuTemplateRequest) returns (google.protobuf.Empty) {}
     rpc DeleteMenuTemplate(MenuSettingPrimaryKey) returns (google.protobuf.Empty) {}
+
+    rpc GetWikiFolder(GetWikiFolderRequest) returns (GetAllMenusResponse) {}
 }
 
 // Menu templates
@@ -120,6 +122,8 @@ message CreateMenuRequest {
     string microfrontend_id = 8;
     string webpage_id = 9;
     google.protobuf.Struct attributes = 10;
+    string wiki_id = 11;
+    bool is_visible = 12;
 }
 
 message Menu {
@@ -135,6 +139,8 @@ message Menu {
     int32 order = 10;
     string webpage_id = 11;
     google.protobuf.Struct attributes = 12;
+    string wiki_id = 13;
+    bool is_visible = 14;
 }
 
 message MenuForGetAll {
@@ -150,8 +156,9 @@ message MenuForGetAll {
     string microfrontend_id = 10;
     string webpage_id = 11;
     google.protobuf.Struct attributes = 12;
-    string pivot_template_id = 13;
-    string report_setting_id = 14;
+    string report_setting_id = 13;
+    string pivot_template_id = 15;
+    string wiki_id = 16;
 }
 
 message GetAllMenusResponse {
@@ -179,4 +186,17 @@ message GetAllMenusRequest {
 message UpdateMenuOrderRequest {
     repeated Menu menus = 1;
     string project_id = 2;
+}
+
+message GetWikiFolderRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+    string search = 3;
+    string project_id = 4;
+    string role_id = 5;
+    string parent_id = 6;
+    string type = 7;
+    bool for_template = 8;
+    bool is_visible = 9;
+    string environment_id = 10;
 }
