@@ -1861,6 +1861,8 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					continue
 				}
 
+				fmt.Println("\n\n\n ~~~~~~~~~> ENV-->  ", resourceEnv.ServiceResources[config.ObjectBuilderService])
+
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
 
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
