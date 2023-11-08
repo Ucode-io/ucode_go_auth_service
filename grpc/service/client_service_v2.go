@@ -435,9 +435,11 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	fmt.Println("\n\n test #1", req.NodeType, config.LOW_NODE_TYPE, config.HIGH_NODE_TYPE)
 	switch req.ResourceType {
 	case 1:
-
+		fmt.Println("\n\n test #2 ")
 		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",

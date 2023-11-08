@@ -190,6 +190,7 @@ func (g *grpcClients) GetObjectBuilderServiceByType(nodeType string) object_buil
 	case config.LOW_NODE_TYPE:
 		return g.objectBuilderService
 	case config.HIGH_NODE_TYPE:
+		fmt.Println("\n\n~~~~~~~~~ > case HIGH")
 		return g.highObjectBuilderService
 	}
 
