@@ -838,6 +838,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 				tableSlug = clientTypeTableSlug
 			}
 		}
+		fmt.Println("\n\n >>>> table slug ", tableSlug)
 		usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
