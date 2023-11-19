@@ -209,7 +209,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	_, err = h.services.ObjectBuilderService().Delete(
+	_, err = h.services.GetObjectBuilderServiceByType("").Delete(
 		context.Background(),
 		&obs.CommonMessage{
 			TableSlug: "user",

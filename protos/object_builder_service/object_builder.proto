@@ -13,6 +13,7 @@ service ObjectBuilderService {
     rpc GetList2(CommonMessage) returns (CommonMessage) {}
     rpc GetSingleSlim(CommonMessage) returns (CommonMessage) {}
     rpc GetListSlim(CommonMessage) returns (CommonMessage) {}
+    rpc GetListSlimV2(CommonMessage) returns (CommonMessage) {}
     rpc GetRecursiveList(CommonMessage) returns (CommonMessage) {}
     rpc Update(CommonMessage) returns (CommonMessage) {}
     rpc Delete(CommonMessage) returns (CommonMessage) {}
@@ -29,6 +30,7 @@ service ObjectBuilderService {
     rpc DeleteMany(CommonMessage) returns (CommonMessage) {}
     rpc GroupByColumns(CommonMessage) returns (CommonMessage) {}
     rpc CopyFromProject(CopyFromProjectRequestMessage) returns (CommonMessage) {}
+    rpc GetListWithOutRelations(CommonMessage) returns (CommonMessage) {}
 }
 
 message CommonMessage {

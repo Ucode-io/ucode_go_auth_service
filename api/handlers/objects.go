@@ -111,7 +111,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 	// this is get list objects list from object builder
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().GetList(
+		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),

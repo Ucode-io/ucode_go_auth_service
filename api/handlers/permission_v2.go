@@ -68,7 +68,7 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-		// resp, err = h.services.BuilderPermissionService().GetGlobalPermissionByRoleId(
+		// resp, err = h.services.GetBuilderPermissionServiceByType(resource.NodeType).GetGlobalPermissionByRoleId(
 		// 	c.Request.Context(),
 		// 	&object_builder_service.GetGlobalPermissionsByRoleIdRequest{
 		// 		RoleId:    roleId,
@@ -143,32 +143,6 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 		return
 	}
 
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  role.GetProjectId(),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
-
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
@@ -184,6 +158,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 
 	role.ProjectId = resource.ResourceEnvironmentId
 	role.ResourceType = int32(resource.ResourceType)
+	role.NodeType = resource.NodeType
 
 	resp, err := h.services.PermissionService().V2AddRole(
 		c.Request.Context(),
@@ -285,6 +260,7 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 		Id:           roleId,
 		ProjectId:    resource.ResourceEnvironmentId,
 		ResourceType: int32(resource.ResourceType),
+		NodeType:     resource.NodeType,
 	})
 
 	if err != nil {
@@ -396,6 +372,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 			ClientTypeId:     c.Query("client-type-id"),
 			ProjectId:        resource.ResourceEnvironmentId,
 			ResourceType:     int32(resource.ResourceType),
+			NodeType:         resource.NodeType,
 		},
 	)
 
@@ -493,6 +470,7 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 
 	role.ProjectId = resource.ResourceEnvironmentId
 	role.ResourceType = int32(resource.ResourceType)
+	role.NodeType = resource.NodeType
 
 	resp, err := h.services.PermissionService().V2UpdateRole(
 		c.Request.Context(),
@@ -597,6 +575,7 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 			Id:           roleID,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ResourceType: int32(resource.ResourceType),
+			NodeType:     resource.NodeType,
 		},
 	)
 
@@ -1030,21 +1009,7 @@ func (h *Handler) V2RemoveRolePermission(c *gin.Context) {
 func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	var (
 		resp *object_builder_service.GetListWithRoleAppTablePermissionsResponse
-	)
-	// offset, err := h.getOffsetParam(c)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
-
-	// limit, err := h.getLimitParam(c)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
-	var (
-		// resourceEnvironment *obs.ResourceEnvironment
-		err error
+		err  error
 	)
 
 	projectId := c.Param("project-id")
@@ -1053,43 +1018,11 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1107,7 +1040,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
 
-		resp, err = h.services.BuilderPermissionService().GetListWithRoleAppTablePermissions(
+		resp, err = h.services.GetBuilderPermissionServiceByType(resource.NodeType).GetListWithRoleAppTablePermissions(
 			c.Request.Context(),
 			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
 				RoleId:    c.Param("role-id"),
@@ -1174,43 +1107,11 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  permission.GetProjectId(),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -1229,7 +1130,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
 
-		resp, err = h.services.BuilderPermissionService().UpdateRoleAppTablePermissions(
+		resp, err = h.services.GetBuilderPermissionServiceByType(resource.NodeType).UpdateRoleAppTablePermissions(
 			context.Background(),
 			&permission,
 		)
@@ -1303,7 +1204,7 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
 
-		resp, err = h.services.BuilderPermissionService().GetAllMenuPermissions(
+		resp, err = h.services.GetBuilderPermissionServiceByType(resource.NodeType).GetAllMenuPermissions(
 			c.Request.Context(),
 			&object_builder_service.GetAllMenuPermissionsRequest{
 				RoleId:    c.Param("role-id"),
@@ -1391,7 +1292,7 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
 
-		resp, err = h.services.BuilderPermissionService().UpdateMenuPermissions(
+		resp, err = h.services.GetBuilderPermissionServiceByType(resource.NodeType).UpdateMenuPermissions(
 			context.Background(),
 			&permission,
 		)

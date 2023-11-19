@@ -331,7 +331,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 	}
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().Create(ctx,
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
@@ -376,7 +376,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
@@ -432,11 +432,11 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("\n\n >>> structData >>", structReq)
+
 	switch req.ResourceType {
 	case 1:
 
-		result, err = s.services.ObjectBuilderService().GetListSlim(ctx,
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
@@ -492,7 +492,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 	}
 	switch req.ResourceType {
 	case 1:
-		result, err = s.services.ObjectBuilderService().Update(ctx,
+		result, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
@@ -533,7 +533,7 @@ func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.V2Client
 	}
 	switch req.ResourceType {
 	case 1:
-		_, err = s.services.ObjectBuilderService().Delete(ctx,
+		_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
@@ -603,7 +603,7 @@ func (s *clientService) V2AddClient(ctx context.Context, req *pb.AddClientReques
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	_, err = s.services.ObjectBuilderService().Create(ctx,
+	_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx,
 		&pbObject.CommonMessage{
 			TableSlug: "login_table",
 			Data:      structLoginCreate,
@@ -628,7 +628,7 @@ func (s *clientService) V2GetClientList(ctx context.Context, req *pb.GetClientLi
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.services.ObjectBuilderService().GetList(ctx,
+	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx,
 		&pbObject.CommonMessage{
 			TableSlug: "client",
 			Data:      structData,
