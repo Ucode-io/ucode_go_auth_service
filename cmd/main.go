@@ -67,15 +67,15 @@ func main() {
 	}
 	log.Info(" --- U-code company services --- added to serviceNodes")
 
-	projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
-	if err != nil {
-		log.Error("Error maping company enter price projects to serviceNode. ServiceNode", logger.Error(err))
-		return
-	}
-	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
-	projectServiceNodes.SetConfigs(mapProjectConfs)
+	// projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
+	// if err != nil {
+	// 	log.Error("Error maping company enter price projects to serviceNode. ServiceNode", logger.Error(err))
+	// 	return
+	// }
+	// mapProjectConfs[baseCfg.UcodeNamespace] = uConf
+	// projectServiceNodes.SetConfigs(mapProjectConfs)
 
-	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
+	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, serviceNodes)
 	// log.Info(" --- U-code auth service and company service grpc client done --- ")
 
 	go func() {
@@ -90,7 +90,7 @@ func main() {
 			log.Panic("grpcServer.Serve", logger.Error(err))
 		}
 	}()
-	h := handlers.NewHandler(baseCfg, log, baseSvcs, projectServiceNodes)
+	h := handlers.NewHandler(baseCfg, log, baseSvcs, serviceNodes)
 
 	r := api.SetUpRouter(h, baseCfg)
 
