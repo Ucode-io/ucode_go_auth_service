@@ -133,6 +133,8 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, serviceNodes ServiceNodesI,
 		log.Error("Error getting enter prise project. GetList", logger.Error(err))
 	}
 
+	fmt.Println("~~> epProjects", epProjects)
+
 	mapProjectConf := map[string]config.Config{}
 
 	for _, v := range epProjects.Configs {
