@@ -551,10 +551,17 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		resource.ProjectId,
+		resource.NodeType,
+	)
+
 	var tableSlug = "user"
 	switch int32(resource.ResourceType.Number()) {
 	case 1:
-		clientType, err := h.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: "client_type",
@@ -569,7 +576,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
 			tableSlug = clientTypeTableSlug
 		}
-		_, err = h.services.GetObjectBuilderServiceByType(req.NodeType).Create(
+		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: tableSlug,
@@ -582,7 +589,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			return
 		}
 	case 3:
-		clientType, err := h.services.PostgresObjectBuilderService().GetSingle(
+		clientType, err := services.PostgresObjectBuilderService().GetSingle(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: "client_type",
@@ -597,7 +604,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
 			tableSlug = clientTypeTableSlug
 		}
-		_, err = h.services.PostgresObjectBuilderService().Create(
+		_, err = services.PostgresObjectBuilderService().Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: tableSlug,

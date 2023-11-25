@@ -36,7 +36,7 @@ type Store struct {
 	smsOtpSettings    storage.SmsOtpSettingsRepoI
 }
 
-func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
+func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, error) {
 	config, err := pgxpool.ParseConfig(fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		cfg.PostgresUser,

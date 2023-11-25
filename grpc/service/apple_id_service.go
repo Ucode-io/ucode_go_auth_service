@@ -14,22 +14,23 @@ import (
 )
 
 type appleIdService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedAppleIdLoginServiceServer
 }
 
-func NewAppleSettingsService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *appleIdService {
+func NewAppleSettingsService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *appleIdService {
 	return &appleIdService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
-
 
 func (e *appleIdService) CreateAppleIdSettings(ctx context.Context, req *pb.AppleIdSettings) (*pb.AppleIdSettings, error) {
 	e.log.Info("---AppleIdSettings.CreateAppleIdSettings--->", logger.Any("req", req))
@@ -46,7 +47,6 @@ func (e *appleIdService) CreateAppleIdSettings(ctx context.Context, req *pb.Appl
 	return res, nil
 }
 
-
 func (e *appleIdService) UpdateAppleIdSettings(ctx context.Context, req *pb.AppleIdSettings) (*pb.AppleIdSettings, error) {
 	e.log.Info("---AppleIdSettings.UpdateAppleIdSettings--->", logger.Any("req", req))
 
@@ -62,7 +62,7 @@ func (e *appleIdService) UpdateAppleIdSettings(ctx context.Context, req *pb.Appl
 	res, err := e.strg.AppleSettings().GetByPK(
 		ctx,
 		&pb.AppleIdSettingsPrimaryKey{
-			Id:id,
+			Id: id,
 		},
 	)
 
@@ -70,7 +70,7 @@ func (e *appleIdService) UpdateAppleIdSettings(ctx context.Context, req *pb.Appl
 		e.log.Error("!!!---AppleIdSettings.UpdateAppleIdSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	
+
 	return res, nil
 }
 
@@ -96,7 +96,7 @@ func (e *appleIdService) DeleteAppleIdSettings(ctx context.Context, req *pb.Appl
 		ctx,
 		req,
 	)
-	
+
 	if err != nil {
 		e.log.Error("!!!AppleIdSettingsService.DeleteAppleId--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

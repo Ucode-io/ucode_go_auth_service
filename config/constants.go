@@ -35,8 +35,9 @@ const (
 
 	ObjectBuilderService = "BUILDER_SERVICE"
 
-	LOW_NODE_TYPE  string = "LOW"
-	HIGH_NODE_TYPE string = "HIGH"
+	LOW_NODE_TYPE    string = "LOW"
+	HIGH_NODE_TYPE   string = "HIGH"
+	ENTER_PRICE_TYPE string = "ENTER_PRICE"
 )
 
 var (

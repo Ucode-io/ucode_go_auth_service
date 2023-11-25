@@ -18,19 +18,21 @@ import (
 )
 
 type clientService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedClientServiceServer
 }
 
-func NewClientService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *clientService {
+func NewClientService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *clientService {
 	return &clientService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -164,6 +166,14 @@ func (s *clientService) GetClientTypeList(ctx context.Context, req *pb.GetClient
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		"LOW",
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	for i, el := range res.ClientTypes {
 
 		for e, table := range el.Tables {
@@ -175,7 +185,7 @@ func (s *clientService) GetClientTypeList(ctx context.Context, req *pb.GetClient
 				s.log.Error("!!!GetClientTypeList.ConvertMapToStruct--->", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-			resp, err := s.services.ObjectBuilderService().GetList(context.Background(), &object_builder_service.CommonMessage{
+			resp, err := services.ObjectBuilderService().GetList(context.Background(), &object_builder_service.CommonMessage{
 				TableSlug: table.Slug,
 				Data:      structData,
 				ProjectId: config.ProjectID,

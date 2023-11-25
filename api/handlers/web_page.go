@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"context"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/company_service"
-	"ucode/ucode_go_auth_service/genproto/web_page_service"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -99,19 +97,19 @@ func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	//	}
 	//}
 
-	res, err := h.services.WebPageAppService().GetListApp(
-		context.Background(),
-		&web_page_service.GetListAppReq{
-			ProjectId:     resource.GetProjectId(),
-			EnvironmentId: envId,
-			ResourceId:    resource.GetResourceEnvironmentId(),
-		},
-	)
+	// res, err := h.services.WebPageAppService().GetListApp(
+	// 	context.Background(),
+	// 	&web_page_service.GetListAppReq{
+	// 		ProjectId:     resource.GetProjectId(),
+	// 		EnvironmentId: envId,
+	// 		ResourceId:    resource.GetResourceEnvironmentId(),
+	// 	},
+	// )
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, http.OK, resource)
 }

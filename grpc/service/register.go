@@ -22,19 +22,21 @@ import (
 )
 
 type registerService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedRegisterServiceServer
 }
 
-func NewRegisterService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *registerService {
+func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *registerService {
 	return &registerService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -123,10 +125,19 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		rs.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	services, err := rs.serviceNode.GetByNodeType(
+		body["project_id"].(string),
+		data.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	var tableSlug = "user"
 	switch body["resource_type"].(float64) {
 	case 1:
-		response, err := rs.services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
+		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -146,7 +157,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 	case 3:
-		response, err := rs.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		response, err := services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -170,7 +181,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	// create user in object builder service
 	switch body["resource_type"].(float64) {
 	case 1:
-		_, err = rs.services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
+		_, err = services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
@@ -181,7 +192,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		_, err = rs.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
@@ -213,7 +224,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	switch body["resource_type"].(float64) {
 	case 1:
-		userData, err = rs.services.GetLoginServiceByType(data.NodeType).LoginData(
+		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(
 			ctx,
 			reqLoginData,
 		)
@@ -224,7 +235,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-		userData, err = rs.services.PostgresLoginService().LoginData(
+		userData, err = services.PostgresLoginService().LoginData(
 			ctx,
 			reqLoginData,
 		)
