@@ -12,24 +12,24 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func SetUpServer(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) (grpcServer *grpc.Server) {
+func SetUpServer(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes service.ServiceNodesI) (grpcServer *grpc.Server) {
 	grpcServer = grpc.NewServer()
 
-	auth_service.RegisterClientServiceServer(grpcServer, service.NewClientService(cfg, log, strg, svcs))
-	auth_service.RegisterPermissionServiceServer(grpcServer, service.NewPermissionService(cfg, log, strg, svcs))
-	auth_service.RegisterUserServiceServer(grpcServer, service.NewUserService(cfg, log, strg, svcs))
-	auth_service.RegisterSessionServiceServer(grpcServer, service.NewSessionService(cfg, log, strg, svcs))
-	auth_service.RegisterIntegrationServiceServer(grpcServer, service.NewIntegrationService(cfg, log, strg, svcs))
-	auth_service.RegisterEmailOtpServiceServer(grpcServer, service.NewEmailService(cfg, log, strg, svcs))
-	auth_service.RegisterCompanyServiceServer(grpcServer, service.NewCompanyService(cfg, log, strg, svcs))
-	auth_service.RegisterProjectServiceServer(grpcServer, service.NewProjectService(cfg, log, strg, svcs))
-	auth_service.RegisterApiKeysServer(grpcServer, service.NewApiKeysService(cfg, log, strg, svcs))
-	auth_service.RegisterAppleIdLoginServiceServer(grpcServer, service.NewAppleSettingsService(cfg, log, strg, svcs))
-	auth_service.RegisterLoginStrategyServiceServer(grpcServer, service.NewLoginStrategyService(cfg, log, strg, svcs))
-	auth_service.RegisterLoginPlatformTypeLoginServiceServer(grpcServer, service.NewLoginPlatformTypeService(cfg, log, strg, svcs))
-	auth_service.RegisterRegisterServiceServer(grpcServer, service.NewRegisterService(cfg, log, strg, svcs))
-	auth_service.RegisterSyncUserServiceServer(grpcServer, service.NewSyncUserService(cfg, log, strg, svcs))
-	auth_service.RegisterSmsOtpSettingsServiceServer(grpcServer, service.NewSmsOtpSettingsService(cfg, log, strg, svcs))
+	auth_service.RegisterClientServiceServer(grpcServer, service.NewClientService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterPermissionServiceServer(grpcServer, service.NewPermissionService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterUserServiceServer(grpcServer, service.NewUserService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterSessionServiceServer(grpcServer, service.NewSessionService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterIntegrationServiceServer(grpcServer, service.NewIntegrationService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterEmailOtpServiceServer(grpcServer, service.NewEmailService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterCompanyServiceServer(grpcServer, service.NewCompanyService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterProjectServiceServer(grpcServer, service.NewProjectService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterApiKeysServer(grpcServer, service.NewApiKeysService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterAppleIdLoginServiceServer(grpcServer, service.NewAppleSettingsService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterLoginStrategyServiceServer(grpcServer, service.NewLoginStrategyService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterLoginPlatformTypeLoginServiceServer(grpcServer, service.NewLoginPlatformTypeService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterRegisterServiceServer(grpcServer, service.NewRegisterService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterSyncUserServiceServer(grpcServer, service.NewSyncUserService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterSmsOtpSettingsServiceServer(grpcServer, service.NewSmsOtpSettingsService(cfg, log, strg, svcs, projectServiceNodes))
 	reflection.Register(grpcServer)
 	return
 }

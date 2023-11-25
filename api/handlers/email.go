@@ -115,10 +115,21 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	switch request.RegisterType {
 	case cfg.Default:
 		{
-			respObject, err = h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
+			respObject, err = services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -196,7 +207,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, "Phone required when register type is phone")
 				return
 			}
-			respObject, err = h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithOtp(
+			respObject, err = services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithOtp(
 				c.Request.Context(),
 				&pbObject.PhoneOtpRequst{
 					PhoneNumber: phone,
@@ -212,7 +223,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 			} else {
 				text = request.Text
 			}
-			resp, err := h.services.SmsService().Send(
+			resp, err := services.SmsService().Send(
 				c.Request.Context(),
 				&pbSms.Sms{
 					Id:        id.String(),
@@ -269,7 +280,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 			request.Email = userInfo["email"].(string)
 
-			respObject, err = h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
+			respObject, err = services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -372,6 +383,12 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+
 	switch body.RegisterType {
 	case cfg.Default:
 		{
@@ -395,7 +412,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	case cfg.WithPhone:
 		{
 			if c.Param("otp") != "121212" {
-				_, err := h.services.SmsService().ConfirmOtp(
+				_, err := services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
 						SmsId: c.Param("sms_id"),
@@ -425,7 +442,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				return
 			}
 
-			respObject, err := h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
+			respObject, err := services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -480,7 +497,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				return
 			}
 
-			respObject, err := h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
+			respObject, err := services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -661,6 +678,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
 
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+
 	if body.Data["register_type"] != cfg.WithGoogle && body.Data["register_type"] != cfg.WithApple {
 		body.Data["register_type"] = cfg.Default
 	}
@@ -807,7 +830,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+	resp, err := services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 		Email:      body.Data["email"].(string),
 		ClientType: "WEB_USER",
@@ -844,7 +867,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			respObj, err := h.services.GetObjectBuilderServiceByType(resourceEnvironment.NodeType).Create(
+			respObj, err := services.GetObjectBuilderServiceByType(resourceEnvironment.NodeType).Create(
 				context.Background(),
 				&pbObject.CommonMessage{
 					TableSlug: mapedInterface["table_slug"].(string),

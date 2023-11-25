@@ -245,7 +245,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		Phone: request.Recipient,
 	})
 
-	resp, err := h.services.SmsService().Send(
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+
+	resp, err := services.SmsService().Send(
 		c.Request.Context(),
 		body,
 	)

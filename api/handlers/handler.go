@@ -5,6 +5,7 @@ import (
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/grpc/service"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 
@@ -12,16 +13,36 @@ import (
 )
 
 type Handler struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	services    client.ServiceManagerI
+	serviceNode service.ServiceNodesI
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI, svcs client.ServiceManagerI) Handler {
+func NewHandler(cfg config.BaseConfig, log logger.LoggerI, svcs client.ServiceManagerI, serviceNode service.ServiceNodesI) Handler {
 	return Handler{
-		cfg:      cfg,
-		log:      log,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		services:    svcs,
+		serviceNode: serviceNode,
+	}
+}
+
+func (h *Handler) GetProjectSrvc(c *gin.Context, projectId string, nodeType string) (client.SharedServiceManagerI, error) {
+	if nodeType == config.ENTER_PRICE_TYPE {
+		srvc, err := h.serviceNode.Get(projectId)
+		if err != nil {
+			return nil, err
+		}
+
+		return srvc, nil
+	} else {
+		srvc, err := h.serviceNode.Get(h.cfg.UcodeNamespace)
+		if err != nil {
+			return nil, err
+		}
+
+		return srvc, nil
 	}
 }
 

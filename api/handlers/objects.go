@@ -47,47 +47,11 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		if errors.Is(err, pgx.ErrNoRows) {
-	//			h.handleResponse(c, http.GRPCError, "У вас нет ресурса по умолчанию, установите один ресурс по умолчанию")
-	//			return
-	//		}
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -108,10 +72,16 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 		return
 	}
 
+	services, err := h.GetProjectSrvc(
+		c,
+		resource.ProjectId,
+		resource.NodeType,
+	)
+
 	// this is get list objects list from object builder
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -120,7 +90,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 			},
 		)
 	case 3:
-		resp, err = h.services.PostgresObjectBuilderService().GetList(
+		resp, err = services.PostgresObjectBuilderService().GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
