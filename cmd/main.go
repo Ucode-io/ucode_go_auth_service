@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
@@ -39,6 +40,8 @@ func main() {
 	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
 	defer logger.Cleanup(log)
 
+	fmt.Println("\n\n configs ---- >", baseCfg)
+
 	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg)
 	if err != nil {
 		log.Panic("postgres.NewPostgres", logger.Error(err))
@@ -67,15 +70,15 @@ func main() {
 	}
 	log.Info(" --- U-code company services --- added to serviceNodes")
 
-	// projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
-	// if err != nil {
-	// 	log.Error("Error maping company enter price projects to serviceNode. ServiceNode", logger.Error(err))
-	// 	return
-	// }
-	// mapProjectConfs[baseCfg.UcodeNamespace] = uConf
-	// projectServiceNodes.SetConfigs(mapProjectConfs)
+	projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
+	if err != nil {
+		log.Error("Error maping company enter price projects to serviceNode. ServiceNode", logger.Error(err))
+		return
+	}
+	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
+	projectServiceNodes.SetConfigs(mapProjectConfs)
 
-	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, serviceNodes)
+	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
 	// log.Info(" --- U-code auth service and company service grpc client done --- ")
 
 	go func() {
@@ -90,7 +93,7 @@ func main() {
 			log.Panic("grpcServer.Serve", logger.Error(err))
 		}
 	}()
-	h := handlers.NewHandler(baseCfg, log, baseSvcs, serviceNodes)
+	h := handlers.NewHandler(baseCfg, log, baseSvcs, projectServiceNodes)
 
 	r := api.SetUpRouter(h, baseCfg)
 
