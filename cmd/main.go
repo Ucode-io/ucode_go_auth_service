@@ -73,8 +73,17 @@ func main() {
 	projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
 	if err != nil {
 		log.Error("Error maping company enter price projects to serviceNode. ServiceNode", logger.Error(err))
-		return
+		// return
 	}
+
+	if projectServiceNodes == nil {
+		projectServiceNodes = serviceNodes
+	}
+
+	if mapProjectConfs == nil {
+		mapProjectConfs = make(map[string]config.Config)
+	}
+
 	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
 	projectServiceNodes.SetConfigs(mapProjectConfs)
 
