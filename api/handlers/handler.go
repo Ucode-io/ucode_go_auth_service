@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"strconv"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -61,11 +60,13 @@ func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interf
 }
 
 func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("offset", h.cfg.DefaultOffset)
-	return strconv.Atoi(offsetStr)
+	// offsetStr := c.DefaultQuery("offset", h.cfg.DefaultOffset)
+	// return strconv.Atoi(offsetStr)
+	return 0, nil
 }
 
 func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
-	return strconv.Atoi(offsetStr)
+	// offsetStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
+	// return strconv.Atoi(offsetStr)
+	return 100, nil
 }
