@@ -82,11 +82,11 @@ func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interf
 }
 
 func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("offset", h.cfg.DefaultOffset)
-	return strconv.Atoi(offsetStr)
+	// offsetStr := c.DefaultQuery("offset", h.cfg.DefaultOffset)
+	// return strconv.Atoi(offsetStr)
+	return 0, nil
 }
 
 func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
-	return strconv.Atoi(offsetStr)
+	return 100, nil
 }
