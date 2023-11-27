@@ -355,11 +355,11 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 	resp, err := h.services.ClientService().V2DeleteClientType(
 		c.Request.Context(),
 		&auth_service.V2ClientTypePrimaryKey{
-			Id:           clientTypeid,
-			ProjectId:    resource.ProjectId,
-			ResourceEnvrironmentId:    resource.ResourceEnvironmentId,
-			ResourceType: int32(resource.ResourceType),
-			NodeType:     resource.NodeType,
+			Id:                     clientTypeid,
+			ProjectId:              resource.ProjectId,
+			ResourceEnvrironmentId: resource.ResourceEnvironmentId,
+			ResourceType:           int32(resource.ResourceType),
+			NodeType:               resource.NodeType,
 		},
 	)
 
@@ -370,4 +370,3 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 
 	h.handleResponse(c, http.NoContent, resp)
 }
-

@@ -276,13 +276,18 @@ func (h *Handler) CreateClientType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetClientTypeList(c *gin.Context) {
-	offset := 0
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
+	
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
 
-	limit := 100
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
 
 	resp, err := h.services.ClientService().GetClientTypeList(
 		c.Request.Context(),
