@@ -79,6 +79,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.ResourceEnvironmentId = resourceEnvironment.GetId()
 	login.ResourceType = resourceEnvironment.GetResourceType()
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
+	login.NodeType = resourceEnvironment.GetNodeType()
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
@@ -213,7 +214,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 	//	return
 	//}
 	//
-	//userResp, err := h.services.ObjectBuilderService().GetList(
+	//userResp, err := h.services.GetObjectBuilderServiceByType(req.NodeType).GetList(
 	//	context.Background(),
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "user",

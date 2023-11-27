@@ -63,30 +63,26 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
-	// if err != nil {
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-	//
-	// if expiresAt.Unix() < time.Now().Unix() {
-	// 	err := errors.New("User has been expired")
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                user.GetId(),
 		ClientType:            req.GetClientType(),
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
-	log.Println("reqLoginData--->", reqLoginData)
+	// log.Println("reqLoginData--->", reqLoginData)
 	var data *pbObject.LoginDataRes
+
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	switch req.ResourceType {
 	case 1:
-		data, err = s.services.LoginService().LoginData(
+		data, err = services.GetLoginServiceByType(req.NodeType).LoginData(
 			ctx,
 			reqLoginData,
 		)
@@ -97,7 +93,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-		data, err = s.services.PostgresLoginService().LoginData(
+		data, err = services.PostgresLoginService().LoginData(
 			ctx,
 			reqLoginData,
 		)
@@ -127,9 +123,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		AppPermissions:   data.GetAppPermissions(),
 		GlobalPermission: data.GetGlobalPermission(),
 	})
-	//if bytes, err := json.MarshalIndent(res, "", "  "); err == nil {
-	//
-	//}
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
@@ -161,6 +154,7 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 		userId   string
 		verified bool
 	)
+
 pwd:
 	switch strings.ToUpper(req.GetLoginStrategy()) {
 	case "LOGIN_PWD":
@@ -513,13 +507,22 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			ProjectId:             req.Data["project_id"],
 			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
 			ClientType:            req.Data["client_type_id"],
+			NodeType:              serviceResource.GetNodeType(),
 		}
-		log.Println("reqLoginData--->", reqLoginData)
+		// log.Println("reqLoginData--->", reqLoginData)
 		var data *pbObject.LoginDataRes
+
+		services, err := s.serviceNode.GetByNodeType(
+			req.Data["project_id"],
+			req.NodeType,
+		)
+		if err != nil {
+			return nil, err
+		}
 
 		switch serviceResource.ResourceType {
 		case 1:
-			data, err = s.services.LoginService().LoginData(
+			data, err = services.GetLoginServiceByType(req.NodeType).LoginData(
 				ctx,
 				reqLoginData,
 			)
@@ -530,7 +533,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
 		case 3:
-			data, err = s.services.PostgresLoginService().LoginData(
+			data, err = services.PostgresLoginService().LoginData(
 				ctx,
 				reqLoginData,
 			)
@@ -814,6 +817,14 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	services, err := s.serviceNode.GetByNodeType(
+		session.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	clientName, ok := convertedClientType["response"].(map[string]interface{})["name"]
 	if !ok {
 		res := make(map[string]interface{})
@@ -832,7 +843,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		}
 
 		if session.ClientTypeId != config.AdminClientPlatformID || clientName.(string) != config.AdminClientName {
-			resp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+			resp, err = services.GetObjectBuilderServiceByType("").GetList(ctx, &pbObject.CommonMessage{
 				TableSlug: "record_permission",
 				Data:      structPb,
 				ProjectId: session.ProjectId,
@@ -855,20 +866,6 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 			}
 		}
 	}
-
-	// DONT FORGET TO UNCOMMENT THIS!!!
-
-	// hasAccess, err := s.strg.PermissionScope().HasAccess(ctx, user.RoleId, req.ClientPlatformId, req.Path, req.Method)
-	// if err != nil {
-	// 	s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// if !hasAccess {
-	// 	err = errors.New("access denied")
-	// 	s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
 
 	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
@@ -904,15 +901,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	// This code must be comment
-	// _, err = s.strg.Session().UpdateByRoleId(ctx, &pb.UpdateSessionByRoleIdRequest{
-	// 	RoleId:    tokenInfo.RoleID,
-	// 	IsChanged: false,
-	// })
-	// if err != nil {
-	// 	s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -1014,10 +1002,7 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	//_, err = s.strg.Session().UpdateBySessionId(ctx, &pb.UpdateSessionBySessionIdRequest{
-	//	Id:        tokenInfo.ID,
-	//	IsChanged: false,
-	//})
+
 	if err != nil {
 		s.log.Error("!!!RefreshToken.UpdateByRoleId--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -1028,16 +1013,6 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	//userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
-	//	ClientTypeId: session.ClientTypeId,
-	//	UserId:       session.UserId,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//convertedData := helper.ConvertPbToAnotherPb(userData)
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
@@ -1203,204 +1178,6 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 	s.log.Info("UpdateByRoleId--->UpdateByRoleId", logger.Any("rowsAffected", rowsAffected))
 
 	return &emptypb.Empty{}, nil
-}
-
-func (s *sessionService) MultiCompanyLogin(ctx context.Context, req *pb.MultiCompanyLoginRequest) (*pb.MultiCompanyLoginResponse, error) {
-
-	resp := &pb.MultiCompanyLoginResponse{}
-
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"password": req.Password,
-		"login":    req.Username,
-	})
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	userResp, err := s.services.ObjectBuilderService().GetList(
-		ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "user",
-			Data:      userReq,
-			ProjectId: config.UcodeDefaultProjectID,
-		},
-	)
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	userDatas, ok := userResp.Data.AsMap()["response"].([]interface{})
-	if !ok {
-		err := errors.New("invalid assertion")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if len(userDatas) < 1 {
-		err := errors.New("user not found")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.PermissionDenied, err.Error())
-	} else if len(userDatas) > 1 {
-		err := errors.New("many users found")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.PermissionDenied, err.Error())
-	}
-
-	userData, ok := userDatas[0].(map[string]interface{})
-	if !ok {
-		err := errors.New("invalid assertion")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	clientTypeId, ok := userData["client_type_id"].(string)
-	if !ok {
-		err := errors.New("invalid assertion")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	clientTypeReq, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"id": clientTypeId,
-	})
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	clientTypeResp, err := s.services.ObjectBuilderService().GetSingle(
-		ctx,
-		&pbObject.CommonMessage{
-			TableSlug: "client_type",
-			Data:      clientTypeReq,
-			ProjectId: config.UcodeDefaultProjectID,
-		},
-	)
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	clientTypeData, ok := clientTypeResp.Data.AsMap()["response"].(map[string]interface{})
-	if !ok {
-		err := errors.New("invalid assertion")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	err = errors.New("invalid assertion")
-	id, ok := clientTypeData["guid"].(string)
-	if !ok {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	name, ok := clientTypeData["name"].(string)
-	if !ok {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	selfRegister, ok := clientTypeData["self_register"].(bool)
-	if !ok {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	selfRecover, ok := clientTypeData["self_recover"].(bool)
-	if !ok {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	projectId, ok := clientTypeData["project_id"].(string)
-	if !ok {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// confirmBy, ok := clientTypeData["confirm_by"].(string)
-	// if !ok {
-	// 	err := errors.New("invalid assertion")
-	// 	s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// pb.ConfirmStrategies(pb.ConfirmStrategies_value[confirmBy])
-
-	clientType := &pb.ClientType{
-		Id:           id,
-		Name:         name,
-		SelfRegister: selfRegister,
-		SelfRecover:  selfRecover,
-		ProjectId:    projectId,
-		// ConfirmBy:    confirmBy,
-	}
-
-	resp.ClientTypes = append(resp.ClientTypes, clientType)
-
-	userId, ok := userData["guid"].(string)
-	if !ok {
-		err := errors.New("invalid assertion")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	userCompanyProjects, err := s.services.CompanyServiceClient().GetListWithProjects(ctx,
-		&company_service.GetListWithProjectsRequest{
-			OwnerId: userId,
-		})
-
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	bytes, err := json.Marshal(userCompanyProjects.GetCompanies())
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	err = json.Unmarshal(bytes, &resp.Companies)
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return resp, nil
 }
 
 func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyLoginRes, error) {
@@ -1591,7 +1368,15 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			return nil, err
 		}
 
-		resp, err := s.services.BuilderPermissionService().GetTablePermission(
+		services, err := s.serviceNode.GetByNodeType(
+			resource.ProjectId,
+			resource.NodeType,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err := services.GetBuilderPermissionServiceByType(resource.NodeType).GetTablePermission(
 			context.Background(),
 			&pbObject.GetTablePermissionRequest{
 				TableSlug:             tableSlug,
@@ -1604,9 +1389,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			return nil, err
 		}
 
-		fmt.Printf("MethodField: %+v\n", methodField)
-		fmt.Printf("TableSlug: %+v\n", tableSlug)
-		fmt.Printf("BuilderPermissionService: %+v\n", resp)
 		if !resp.IsHavePermission {
 			err := status.Error(codes.PermissionDenied, "Permission denied")
 			return nil, err //fmt.Errorf("Permission denied")
@@ -1687,7 +1469,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
 	}
-	fmt.Println("user env project::", userEnvProject)
+	
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
@@ -1771,35 +1553,37 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					Description:   en.Description,
 				}
 
-				fmt.Println("\n\n >>> ", resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "")
 				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
 					continue
 				}
 
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
-					fmt.Println(">>>>>>>>>>>>>>>> test")
+
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{
-							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
+							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
 							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
+							NodeType:     resourceEnv.ServiceResources[config.ObjectBuilderService].NodeType,
+							ResourceEnvrironmentId: resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
 						},
 					)
-					fmt.Println("project id to get list of client types:: ", resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId)
 					if err != nil {
 						errGetProjects := errors.New("cant get client types")
 						s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 						return nil, status.Error(codes.NotFound, errGetProjects.Error())
 					}
 					respResourceEnvironment.ClientTypes = clientTypes.Data
+
 				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
-					fmt.Println("\n >> have client type id in user", clientType.ClientTypeIds)
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{
-							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
+							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
 							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
 							Guids:        clientType.ClientTypeIds,
+							NodeType:     resourceEnv.ServiceResources[config.ObjectBuilderService].NodeType,
+							ResourceEnvrironmentId: resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
 						},
 					)
 					if err != nil {

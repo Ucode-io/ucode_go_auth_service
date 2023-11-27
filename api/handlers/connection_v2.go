@@ -48,43 +48,11 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  connection.ProjectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -110,10 +78,20 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 
 	connection.ProjectId = resource.ResourceEnvironmentId
 
+	services, err := h.GetProjectSrvc(
+		c,
+		projectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	// This is create connection by client type id
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().Create(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Create(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -127,7 +105,7 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 			return
 		}
 	case 3:
-		resp, err = h.services.PostgresObjectBuilderService().Create(
+		resp, err = services.PostgresObjectBuilderService().Create(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -179,43 +157,11 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  connection.ProjectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -238,10 +184,20 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 
 	connection.ProjectId = resource.ResourceEnvironmentId
 
+	services, err := h.GetProjectSrvc(
+		c,
+		projectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	// This is create connection by client type id
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().Update(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Update(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -250,7 +206,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 			},
 		)
 	case 3:
-		resp, err = h.services.ObjectBuilderService().Update(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Update(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -337,10 +293,20 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		return
 	}
 	// this is get list connection list from object builder
+	services, err := h.GetProjectSrvc(
+		c,
+		projectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().GetList(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -355,7 +321,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			return
 		}
 	case 3:
-		resp, err = h.services.PostgresObjectBuilderService().GetList(
+		resp, err = services.PostgresObjectBuilderService().GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -369,16 +335,14 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			return
 		}
 	}
+
 	response, ok := resp.Data.AsMap()["response"].([]interface{})
 	responseWithOptions := make([]interface{}, 0, len(response))
-	fmt.Println("\n\n >>>>>>>>>>>>> response ", len(response), response)
-	fmt.Println("\n\n >>>>>>>>>>>>> responseWithOption ", len(responseWithOptions))
-	fmt.Println("\n\n")
 	if ok && c.Query("user-id") != "" {
 		for _, v := range response {
 			if res, ok := v.(map[string]interface{}); ok {
 				if guid, ok := res["guid"].(string); ok {
-					options, err := h.services.LoginService().GetConnetionOptions(
+					options, err := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(
 						c.Request.Context(),
 						&obs.GetConnetionOptionsRequest{
 							ConnectionId:          guid,
@@ -446,44 +410,11 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err := errors.New("error getting resource id")
-	//	h.handleResponse(c, http.BadRequest, err.Error())
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -505,10 +436,21 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		projectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().GetSingle(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).GetSingle(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -522,7 +464,7 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 			return
 		}
 	case 3:
-		resp, err = h.services.PostgresObjectBuilderService().GetSingle(
+		resp, err = services.PostgresObjectBuilderService().GetSingle(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -575,44 +517,11 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	err := errors.New("error getting resource id")
-	//	h.handleResponse(c, http.BadRequest, err.Error())
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&cps.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -634,10 +543,21 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		projectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	var resp *obs.CommonMessage
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.ObjectBuilderService().Delete(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Delete(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -651,7 +571,7 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 			return
 		}
 	case 3:
-		resp, err = h.services.ObjectBuilderService().Delete(
+		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Delete(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "connections",
@@ -728,15 +648,27 @@ func (h *Handler) GetConnectionOptions(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		projectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	var resp *obs.GetConnectionOptionsResponse
 	switch resource.ResourceType {
 	case 1:
-		resp, err = h.services.LoginService().GetConnetionOptions(
+		resp, err = services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(
 			c.Request.Context(),
 			&obs.GetConnetionOptionsRequest{
 				ConnectionId:          connectionId,
 				ResourceEnvironmentId: resource.ResourceEnvironmentId,
 				UserId:                userId,
+				NodeType:              resource.NodeType,
 			},
 		)
 
@@ -745,7 +677,7 @@ func (h *Handler) GetConnectionOptions(c *gin.Context) {
 			return
 		}
 	case 3:
-		resp, err = h.services.PostgresLoginService().GetConnetionOptions(
+		resp, err = services.PostgresLoginService().GetConnetionOptions(
 			c.Request.Context(),
 			&obs.GetConnetionOptionsRequest{
 				ConnectionId:          connectionId,

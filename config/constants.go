@@ -34,6 +34,10 @@ const (
 	UcodeDefaultProjectID string = "39f1b0cc-8dc3-42df-b2bf-813310c007a4"
 
 	ObjectBuilderService = "BUILDER_SERVICE"
+
+	LOW_NODE_TYPE    string = "LOW"
+	HIGH_NODE_TYPE   string = "HIGH"
+	ENTER_PRICE_TYPE string = "ENTER_PRICE"
 )
 
 var (

@@ -18,8 +18,35 @@ const (
 )
 
 type Config struct {
+	DefaultOffset string
+	DefaultLimit  string
+
+	SecretKey string
+
+	PasscodePool   string
+	PasscodeLength int
+
+	ObjectBuilderServiceHost string
+	ObjectBuilderGRPCPort    string
+
+	HighObjectBuilderServiceHost string
+	HighObjectBuilderGRPCPort    string
+
+	SmsServiceHost string
+	SmsGRPCPort    string
+
+	WebPageServiceHost string
+	WebPageServicePort string
+
+	PostgresObjectBuidlerServiceHost string
+	PostgresObjectBuidlerServicePort string
+
+	UcodeAppBaseUrl string
+}
+
+type BaseConfig struct {
 	ServiceName string
-	Environment string // debug, test, release
+	Environment string
 	Version     string
 
 	HTTPPort   string
@@ -35,38 +62,25 @@ type Config struct {
 	PostgresDatabase string
 
 	PostgresMaxConnections int32
-
-	DefaultOffset string
-	DefaultLimit  string
-
-	SecretKey string
-
-	PasscodePool   string
-	PasscodeLength int
-
-	AuthServiceHost string
-	AuthGRPCPort    string
-
-	ObjectBuilderServiceHost string
-	ObjectBuilderGRPCPort    string
+	DefaultOffset          string
+	DefaultLimit           string
 
 	SmsServiceHost string
 	SmsGRPCPort    string
 
+	SecretKey string
+
+	AuthServiceHost string
+	AuthGRPCPort    string
+
+	UcodeNamespace string
+
 	CompanyServiceHost string
 	CompanyGRPCPort    string
-
-	WebPageServiceHost string
-	WebPageServicePort string
-
-	PostgresObjectBuidlerServiceHost string
-	PostgresObjectBuidlerServicePort string
-
-	UcodeAppBaseUrl string
 }
 
-// Load ...
-func Load() Config {
+func BaseLoad() BaseConfig {
+
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
 			fmt.Println("No .env file found")
@@ -74,8 +88,8 @@ func Load() Config {
 		fmt.Println("No .env file found")
 	}
 
-	config := Config{}
-	// postgres://auth_service:IeX7ieso@95.217.155.57:30034/auth_service?sslmode=disable
+	config := BaseConfig{}
+
 	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "ucode_go_auth_service"))
 	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0"))
@@ -90,8 +104,34 @@ func Load() Config {
 	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", "auth_service"))
 	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "Iegfrte45eatr7ieso"))
 	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "auth_service"))
-
 	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 30))
+
+	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", "localhost"))
+	config.AuthGRPCPort = cast.ToString(getOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
+
+	config.UcodeNamespace = "u-code"
+
+	config.CompanyServiceHost = cast.ToString(getOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
+	config.CompanyGRPCPort = cast.ToString(getOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
+
+	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", "localhost"))
+	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ":9105"))
+
+	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "Here$houldBe$ome$ecretKey"))
+
+	return config
+}
+
+// Load ...
+func Load() Config {
+	if err := godotenv.Load("/app/.env"); err != nil {
+		if err := godotenv.Load(".env"); err != nil {
+			fmt.Println("No .env file found")
+		}
+		fmt.Println("No .env file found")
+	}
+
+	config := Config{}
 
 	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "100"))
@@ -101,23 +141,20 @@ func Load() Config {
 	config.PasscodePool = cast.ToString(getOrReturnDefaultValue("PASSCODE_POOL", "0123456789"))
 	config.PasscodeLength = cast.ToInt(getOrReturnDefaultValue("PASSCODE_LENGTH", "6"))
 
-	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", "localhost"))
-	config.AuthGRPCPort = cast.ToString(getOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
+	config.ObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_LOW_HOST", "localhost"))
+	config.ObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_LOW_GRPC_PORT", ":9102"))
 
-	config.ObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HOST", "localhost"))
-	config.ObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_GRPC_PORT", ":9102"))
+	config.HighObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", "localhost"))
+	config.HighObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ":9109"))
 
 	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", "localhost"))
 	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ":9105"))
-
-	config.CompanyServiceHost = cast.ToString(getOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
-	config.CompanyGRPCPort = cast.ToString(getOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
 
 	config.WebPageServiceHost = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", "localhost"))
 	config.WebPageServicePort = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ":8098"))
 
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", "localhost"))
-	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":9202"))
+	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":92033"))
 	config.UcodeAppBaseUrl = cast.ToString(getOrReturnDefaultValue("UCODE_APP_BASE_URL", "https://dev-app.ucode.run"))
 
 	return config
