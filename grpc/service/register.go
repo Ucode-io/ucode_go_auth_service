@@ -22,19 +22,21 @@ import (
 )
 
 type registerService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedRegisterServiceServer
 }
 
-func NewRegisterService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *registerService {
+func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *registerService {
 	return &registerService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -123,10 +125,19 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		rs.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	services, err := rs.serviceNode.GetByNodeType(
+		body["project_id"].(string),
+		data.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	var tableSlug = "user"
 	switch body["resource_type"].(float64) {
 	case 1:
-		response, err := rs.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -146,7 +157,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 	case 3:
-		response, err := rs.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		response, err := services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -170,7 +181,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	// create user in object builder service
 	switch body["resource_type"].(float64) {
 	case 1:
-		_, err = rs.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		_, err = services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
@@ -180,7 +191,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		_, err = rs.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
@@ -191,59 +202,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 	}
 	fmt.Println("::::::::::TEST:::::::::::9")
-	// if body["addational_table"] != nil {
-	// 	validRegisterForAddationalTable := map[string]bool{
-	// 		"phone": true,
-	// 		"email": true,
-	// 	}
-	// 	fmt.Println("::::::::::TEST:::::::::::10")
-	// 	if _, ok := validRegisterForAddationalTable[body["type"].(string)]; ok {
-	// 		body["addational_table"].(map[string]interface{})["guid"] = userId
-	// 		body["addational_table"].(map[string]interface{})["project_id"] = body["project_id"]
-
-	// 		mapedInterface := body["addational_table"].(map[string]interface{})
-	// 		structData, errorInAdditionalObject = helper.ConvertRequestToSturct(mapedInterface)
-	// 		if errorInAdditionalObject != nil {
-	// 			rs.log.Error("Additional table struct table --->", logger.Error(err))
-	// 		}
-	// 		fmt.Println("::::::::::TEST:::::::::::11")
-	// 		_, errorInAdditionalObject = rs.services.ObjectBuilderService().Create(
-	// 			context.Background(),
-	// 			&pbObject.CommonMessage{
-	// 				TableSlug: mapedInterface["table_slug"].(string),
-	// 				Data:      structData,
-	// 				ProjectId: body["resource_environment_id"].(string),
-	// 			})
-	// 		if errorInAdditionalObject != nil {
-	// 			fmt.Println("::::::::::TEST:::::::::::12")
-	// 			defer func(userId string) {
-	// 				fmt.Println("\n\n Come to defer >>> ")
-	// 				// delete user from object builder user table if has any error while create additional object
-	// 				if errorInAdditionalObject != nil {
-	// 					structData, errorInAdditionalObject = helper.ConvertRequestToSturct(map[string]interface{}{
-	// 						"id": userId,
-	// 					})
-	// 					_, errorInAdditionalObject = rs.services.ObjectBuilderService().Delete(
-	// 						context.Background(),
-	// 						&pbObject.CommonMessage{
-	// 							TableSlug: "user",
-	// 							Data:      structData,
-	// 							ProjectId: body["resource_environment_id"].(string),
-	// 						})
-	// 					if errorInAdditionalObject != nil {
-	// 						rs.log.Error("!!!RegisterUser--->delete user if have error while create additional user >>", logger.Error(err))
-	// 					}
-	// 				}
-	// 			}(userId)
-	// 			fmt.Println("\n Addational table error ", errorInAdditionalObject)
-	// 			rs.log.Error("!!!RegisterUser--->Additional Object create error >>", logger.Error(errorInAdditionalObject))
-	// 			fmt.Println("\n\n Error after return")
-	// 			return nil, status.Error(codes.Internal, errorInAdditionalObject.Error())
-	// 			fmt.Println("\n\n Error before return")
-	// 		}
-	// 	}
-
-	// }
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
 		ProjectId:    body["project_id"].(string),
@@ -265,7 +223,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	switch body["resource_type"].(float64) {
 	case 1:
-		userData, err = rs.services.LoginService().LoginData(
+		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(
 			ctx,
 			reqLoginData,
 		)
@@ -276,7 +234,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-		userData, err = rs.services.PostgresLoginService().LoginData(
+		userData, err = services.PostgresLoginService().LoginData(
 			ctx,
 			reqLoginData,
 		)

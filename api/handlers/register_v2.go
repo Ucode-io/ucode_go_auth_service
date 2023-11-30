@@ -245,7 +245,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		Phone: request.Recipient,
 	})
 
-	resp, err := h.services.SmsService().Send(
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+
+	resp, err := services.SmsService().Send(
 		c.Request.Context(),
 		body,
 	)
@@ -418,6 +424,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["company_id"] = project.GetCompanyId()
 	body.Data["resource_type"] = serviceResource.GetResourceType()
+	body.Data["node_type"] = serviceResource.GetNodeType()
 
 	structData, err := helper.ConvertMapToStruct(body.Data)
 	if err != nil {
@@ -426,7 +433,8 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &auth_service.RegisterUserRequest{
-		Data: structData,
+		Data:     structData,
+		NodeType: serviceResource.NodeType,
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())

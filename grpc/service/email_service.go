@@ -14,19 +14,21 @@ import (
 )
 
 type emailService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedEmailOtpServiceServer
 }
 
-func NewEmailService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *emailService {
+func NewEmailService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *emailService {
 	return &emailService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -54,7 +56,6 @@ func (e *emailService) GetEmailByID(ctx context.Context, req *pb.EmailOtpPrimary
 	return res, nil
 }
 
-
 func (e *emailService) CreateEmailSettings(ctx context.Context, req *pb.EmailSettings) (*pb.EmailSettings, error) {
 	e.log.Info("---EmailService.CreateEmailSettings--->", logger.Any("req", req))
 
@@ -70,7 +71,6 @@ func (e *emailService) CreateEmailSettings(ctx context.Context, req *pb.EmailSet
 	return res, nil
 }
 
-
 func (e *emailService) UpdateEmailSettings(ctx context.Context, req *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error) {
 	e.log.Info("---EmailService.UpdateEmailSettings--->", logger.Any("req", req))
 
@@ -83,7 +83,7 @@ func (e *emailService) UpdateEmailSettings(ctx context.Context, req *pb.UpdateEm
 		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	
+
 	return res, nil
 }
 
@@ -109,7 +109,7 @@ func (e *emailService) DeleteEmailSettings(ctx context.Context, req *pb.EmailSet
 		ctx,
 		req,
 	)
-	
+
 	if err != nil {
 		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

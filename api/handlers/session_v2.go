@@ -142,6 +142,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.ResourceEnvironmentId = resourceEnvironment.GetResourceEnvironmentId()
 	login.ResourceType = int32(resourceEnvironment.GetResourceType())
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
+	login.NodeType = resourceEnvironment.GetNodeType()
 
 	resp, err := h.services.SessionService().V2Login(
 		c.Request.Context(),
@@ -276,7 +277,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 	//	return
 	//}
 	//
-	//userResp, err := h.services.ObjectBuilderService().GetList(
+	//userResp, err := h.services.GetObjectBuilderServiceByType(req.NodeType).GetList(
 	//	context.Background(),
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "user",
@@ -887,7 +888,7 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 	}
 
 	fmt.Println(emailSettings.Items[0].Email, emailSettings.Items[0].Password)
-	err = helper.SendCodeToEmail("Your verification code", user.GetEmail(), code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
+	err = helper.SendCodeToEnvironmentEmail("Your verification code", user.GetEmail(), code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
