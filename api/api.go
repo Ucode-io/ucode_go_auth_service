@@ -26,7 +26,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	r.Use(customCORSMiddleware())
 
 	r.GET("/ping", h.Ping)
-	r.GET("/config", h.GetConfig)
+	// r.GET("/config", h.GetConfig)
 
 	// CLIENT SERVICE
 	// (admin, bot, mobile ext)
