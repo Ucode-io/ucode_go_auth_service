@@ -99,6 +99,13 @@ type BaseConfig struct {
 
 func BaseLoad() BaseConfig {
 
+	if err := godotenv.Load("/app/.env"); err != nil {
+		if err := godotenv.Load(".env"); err != nil {
+			fmt.Println("No .env file found")
+		}
+		fmt.Println("No .env file found")
+	}
+
 	config := BaseConfig{}
 
 	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "ucode_go_auth_service"))
