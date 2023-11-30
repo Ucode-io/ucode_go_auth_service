@@ -66,7 +66,7 @@ func main() {
 		log.Error("Error adding company grpc client to serviceNode. ServiceNode", logger.Error(err))
 		return
 	}
-	log.Info(" --- U-code company services --- added to serviceNodes")
+	log.Info(" --- U-code company services --- added to serviceNodes!")
 
 	projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
 	if err != nil {
