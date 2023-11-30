@@ -133,39 +133,43 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, serviceNodes ServiceNodesI,
 		log.Error("Error getting enter prise project. GetList", logger.Error(err))
 	}
 
-	mapProjectConf := map[string]config.Config{}
+	if epProjects != nil {
+		mapProjectConf := map[string]config.Config{}
 
-	for _, v := range epProjects.Configs {
-		projectConf := config.Config{
+		for _, v := range epProjects.Configs {
+			projectConf := config.Config{
 
-			ObjectBuilderServiceHost: v.OBJECT_BUILDER_SERVICE_HOST,
-			ObjectBuilderGRPCPort:    v.OBJECT_BUILDER_GRPC_PORT,
+				ObjectBuilderServiceHost: v.OBJECT_BUILDER_SERVICE_HOST,
+				ObjectBuilderGRPCPort:    v.OBJECT_BUILDER_GRPC_PORT,
 
-			HighObjectBuilderServiceHost: v.OBJECT_BUILDER_SERVICE_HIGHT_HOST,
-			HighObjectBuilderGRPCPort:    v.OBJECT_BUILDER_HIGH_GRPC_PORT,
+				HighObjectBuilderServiceHost: v.OBJECT_BUILDER_SERVICE_HIGHT_HOST,
+				HighObjectBuilderGRPCPort:    v.OBJECT_BUILDER_HIGH_GRPC_PORT,
 
-			SmsServiceHost: v.SMS_SERVICE_HOST,
-			SmsGRPCPort:    v.SMS_GRPC_PORT,
+				SmsServiceHost: v.SMS_SERVICE_HOST,
+				SmsGRPCPort:    v.SMS_GRPC_PORT,
+			}
+
+			grpcSvcs, err := client.NewSharedGrpcClients(projectConf)
+			if err != nil {
+				log.Error("Error connecting grpc client "+v.ProjectId, logger.Error(err))
+			}
+
+			if grpcSvcs == nil {
+				continue
+			}
+
+			err = serviceNodes.Add(grpcSvcs, v.ProjectId)
+			if err != nil {
+				log.Error("Error adding to grpc pooling enter prise project. ServiceNode "+v.ProjectId, logger.Error(err))
+			}
+
+			log.Info(" --- " + v.ProjectId + " --- added to serviceNodes")
+
+			mapProjectConf[v.ProjectId] = projectConf
 		}
 
-		grpcSvcs, err := client.NewSharedGrpcClients(projectConf)
-		if err != nil {
-			log.Error("Error connecting grpc client "+v.ProjectId, logger.Error(err))
-		}
-
-		if grpcSvcs == nil {
-			continue
-		}
-
-		err = serviceNodes.Add(grpcSvcs, v.ProjectId)
-		if err != nil {
-			log.Error("Error adding to grpc pooling enter prise project. ServiceNode "+v.ProjectId, logger.Error(err))
-		}
-
-		log.Info(" --- " + v.ProjectId + " --- added to serviceNodes")
-
-		mapProjectConf[v.ProjectId] = projectConf
+		return serviceNodes, mapProjectConf, nil
+	} else {
+		return nil, nil, nil
 	}
-
-	return serviceNodes, mapProjectConf, nil
 }
