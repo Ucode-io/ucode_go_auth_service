@@ -940,7 +940,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	}, nil
 }
 
-func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenResponse, error) {
+func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
 
 	tokenInfo, err := secure.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
@@ -965,6 +965,73 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	if req.EnvId != "" {
 		session.EnvId = req.EnvId
 	}
+
+	user, err := s.strg.User().GetByUsername(ctx, session.GetUserId())
+	if err != nil {
+		s.log.Error("!!!V2Login--->", logger.Error(err))
+		if err == sql.ErrNoRows {
+			errNoRows := errors.New("no user found")
+			return nil, status.Error(codes.Internal, errNoRows.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resource, err := s.services.ServiceResource().GetSingle(
+		ctx,
+		&company_service.GetSingleServiceResourceReq{
+			ProjectId:     session.ProjectId,
+			EnvironmentId: session.EnvId,
+			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!V2Refresh.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	services, err := s.serviceNode.GetByNodeType(
+		resource.ProjectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	reqLoginData := &pbObject.LoginDataReq{
+		UserId:                user.GetId(),
+		ClientType:            session.GetClientTypeId(),
+		ProjectId:             session.GetProjectId(),
+		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+	}
+
+	var data *pbObject.LoginDataRes
+
+	switch resource.ResourceType {
+	case 1:
+		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(
+			ctx,
+			reqLoginData,
+		)
+
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+	case 3:
+		data, err = services.PostgresLoginService().LoginData(
+			ctx,
+			reqLoginData,
+		)
+
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+
+	}
+
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -979,19 +1046,21 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		EnvId:            session.EnvId,
 	})
 	if err != nil {
-		s.log.Error("!!!V2RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!V2RefreshToken.SessionUpdate--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	// userData, err := s.services.LoginService().GetUserUpdatedPermission(ctx, &pbObject.GetUserUpdatedPermissionRequest{
-	// 	ClientTypeId: session.ClientTypeId,
-	// 	UserId:       session.UserId,
-	// 	ProjectId:    session.GetProjectId(),
-	// })
-	// if err != nil {
-	// 	s.log.Error("!!!V2HasAccess.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-	// convertedData := helper.ConvertPbToAnotherPb(userData)
+
+	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+		ClientPlatform:   data.GetClientPlatform(),
+		ClientType:       data.GetClientType(),
+		UserFound:        data.GetUserFound(),
+		UserId:           data.GetUserId(),
+		Role:             data.GetRole(),
+		Permissions:      data.GetPermissions(),
+		LoginTableSlug:   data.GetLoginTableSlug(),
+		AppPermissions:   data.GetAppPermissions(),
+		GlobalPermission: data.GetGlobalPermission(),
+	})
 
 	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
@@ -1038,9 +1107,8 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		ExpiresAt:        session.ExpiresAt,
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
-	res := &pb.V2RefreshTokenResponse{
-		Token: token,
-	}
+
+	res.Token = token
 
 	return res, nil
 }
@@ -1569,7 +1637,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
 	}
-	
+
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
@@ -1664,9 +1732,9 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{
-							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
-							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
-							NodeType:     resourceEnv.ServiceResources[config.ObjectBuilderService].NodeType,
+							ProjectId:              resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
+							ResourceType:           int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
+							NodeType:               resourceEnv.ServiceResources[config.ObjectBuilderService].NodeType,
 							ResourceEnvrironmentId: resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
 						},
 					)
@@ -1681,10 +1749,10 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{
-							ProjectId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
-							ResourceType: int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
-							Guids:        clientType.ClientTypeIds,
-							NodeType:     resourceEnv.ServiceResources[config.ObjectBuilderService].NodeType,
+							ProjectId:              resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
+							ResourceType:           int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
+							Guids:                  clientType.ClientTypeIds,
+							NodeType:               resourceEnv.ServiceResources[config.ObjectBuilderService].NodeType,
 							ResourceEnvrironmentId: resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
 						},
 					)

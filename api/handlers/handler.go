@@ -87,6 +87,6 @@ func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
 }
 
 func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
-	return strconv.Atoi(offsetStr)
+	limitStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
+	return strconv.Atoi(limitStr)
 }

@@ -275,43 +275,11 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 		return
 	}
 
-	//resourceId, ok := c.Get("resource_id")
-	//if !ok {
-	//	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	//	return
-	//}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
-	//if util.IsValidUUID(resourceId.(string)) {
-	//	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetResourceEnvironmentReq{
-	//			EnvironmentId: environmentId.(string),
-	//			ResourceId:    resourceId.(string),
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//} else {
-	//	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	//		c.Request.Context(),
-	//		&obs.GetDefaultResourceEnvironmentReq{
-	//			ResourceId: resourceId.(string),
-	//			ProjectId:  projectId,
-	//		},
-	//	)
-	//	if err != nil {
-	//		h.handleResponse(c, http.GRPCError, err.Error())
-	//		return
-	//	}
-	//}
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -329,13 +297,14 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 	resp, err := h.services.PermissionService().V2GetRolesList(
 		c.Request.Context(),
 		&auth_service.V2GetRolesListRequest{
-			Offset:           uint32(offset),
-			Limit:            uint32(limit),
-			ClientPlatformId: c.Query("client-platform-id"),
-			ClientTypeId:     c.Query("client-type-id"),
-			ProjectId:        resource.ResourceEnvironmentId,
-			ResourceType:     int32(resource.ResourceType),
-			NodeType:         resource.NodeType,
+			Offset:                uint32(offset),
+			Limit:                 uint32(limit),
+			ClientPlatformId:      c.Query("client-platform-id"),
+			ClientTypeId:          c.Query("client-type-id"),
+			ProjectId:             resource.ProjectId,
+			ResourceEnvironmentId: resource.ResourceEnvironmentId,
+			ResourceType:          int32(resource.ResourceType),
+			NodeType:              resource.NodeType,
 		},
 	)
 
