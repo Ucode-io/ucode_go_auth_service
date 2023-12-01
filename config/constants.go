@@ -10,7 +10,7 @@ const (
 	// DatabaseTimeLayout
 	DatabaseTimeLayout string = time.RFC3339
 	// AccessTokenExpiresInTime ... 1 * 24 *
-	AccessTokenExpiresInTime time.Duration = 1 * 1 * 2 * time.Minute
+	AccessTokenExpiresInTime time.Duration = 1 * 1 * 24 * time.Minute
 	// RefreshTokenExpiresInTime ... 30 * 24 * 60
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
