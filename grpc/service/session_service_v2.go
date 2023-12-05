@@ -110,10 +110,18 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 	}
 
+	if req.GetProjectId() == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		fmt.Println("\n\n here user data ", data)
+	}
+
 	if !data.UserFound {
 		customError := errors.New("User not found")
 		s.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
+	}
+
+	if req.GetProjectId() == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		fmt.Println("\n\n here after ")
 	}
 
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
