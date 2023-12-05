@@ -72,6 +72,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	// log.Println("reqLoginData--->", reqLoginData)
 	var data *pbObject.LoginDataRes
 
+	if req.GetProjectId() == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
+		fmt.Println("\n\n here reqLoginData ", reqLoginData)
+	}
+
 	services, err := s.serviceNode.GetByNodeType(
 		req.ProjectId,
 		req.NodeType,
