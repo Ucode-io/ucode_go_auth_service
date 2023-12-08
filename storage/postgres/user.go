@@ -1008,8 +1008,9 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 
 	query := `DELETE FROM "user_project" 
 				WHERE 
-				project_id = :project_id AND  
-				company_id = :company_id`
+					project_id = :project_id AND  
+					company_id = :company_id AND
+					env_id = :env_id`
 	for _, user := range req.GetUsers() {
 		params := map[string]interface{}{}
 		params["project_id"] = req.GetProjectId()
@@ -1018,18 +1019,21 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 
 		if user.UserId != "" {
 			query = query + " AND user_id = :user_id"
-			params["user_id"] = user.GetRoleId()
+			params["user_id"] = user.GetUserId()
 		} else {
 			return nil, errors.New("user id is required")
 		}
+
 		if user.GetClientTypeId() != "" {
 			query = query + " AND client_type_id = :client_type_id"
 			params["client_type_id"] = user.GetClientTypeId()
 		}
+
 		if user.GetRoleId() != "" {
 			query = query + " AND role_id = :role_id"
 			params["role_id"] = user.GetRoleId()
 		}
+
 		q, args := helper.ReplaceQueryParams(query, params)
 		_, err = r.db.Exec(ctx,
 			q,

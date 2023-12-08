@@ -464,7 +464,12 @@ func (h *Handler) AddUserProject(c *gin.Context) {
 	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &company_service.GetSingleServiceResourceReq{
 		EnvironmentId: req.EnvId,
 		ProjectId:     req.ProjectId,
+		ServiceType:   1,
 	})
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
 
 	resp, err := h.services.UserService().AddUserToProject(
 		c.Request.Context(),
@@ -535,6 +540,7 @@ func (h *Handler) AddUserProject(c *gin.Context) {
 		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
 			tableSlug = clientTypeTableSlug
 		}
+
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
 			context.Background(),
 			&obs.CommonMessage{
