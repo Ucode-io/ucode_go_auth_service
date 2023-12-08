@@ -932,7 +932,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
-	user, err := s.strg.User().GetByUsername(ctx, session.GetUserId())
+	_, err = s.strg.User().GetByUsername(ctx, session.GetUserId())
 	if err != nil {
 		s.log.Error("!!!V2Login--->", logger.Error(err))
 		if err == sql.ErrNoRows {
@@ -942,61 +942,61 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	resource, err := s.services.ServiceResource().GetSingle(
-		ctx,
-		&company_service.GetSingleServiceResourceReq{
-			ProjectId:     session.ProjectId,
-			EnvironmentId: session.EnvId,
-			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		s.log.Error("!!!V2Refresh.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// resource, err := s.services.ServiceResource().GetSingle(
+	// 	ctx,
+	// 	&company_service.GetSingleServiceResourceReq{
+	// 		ProjectId:     session.ProjectId,
+	// 		EnvironmentId: session.EnvId,
+	// 		ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+	// 	},
+	// )
+	// if err != nil {
+	// 	s.log.Error("!!!V2Refresh.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
-	services, err := s.serviceNode.GetByNodeType(
-		resource.ProjectId,
-		resource.NodeType,
-	)
-	if err != nil {
-		return nil, err
-	}
+	// services, err := s.serviceNode.GetByNodeType(
+	// 	resource.ProjectId,
+	// 	resource.NodeType,
+	// )
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	reqLoginData := &pbObject.LoginDataReq{
-		UserId:                user.GetId(),
-		ClientType:            session.GetClientTypeId(),
-		ProjectId:             session.GetProjectId(),
-		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
-	}
+	// reqLoginData := &pbObject.LoginDataReq{
+	// 	UserId:                user.GetId(),
+	// 	ClientType:            session.GetClientTypeId(),
+	// 	ProjectId:             session.GetProjectId(),
+	// 	ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+	// }
 
-	var data *pbObject.LoginDataRes
+	// var data *pbObject.LoginDataRes
 
-	switch resource.ResourceType {
-	case 1:
-		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(
-			ctx,
-			reqLoginData,
-		)
+	// switch resource.ResourceType {
+	// case 1:
+	// 	data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(
+	// 		ctx,
+	// 		reqLoginData,
+	// 	)
 
-		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
-			s.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-		}
-	case 3:
-		data, err = services.PostgresLoginService().LoginData(
-			ctx,
-			reqLoginData,
-		)
+	// 	if err != nil {
+	// 		errGetUserProjectData := errors.New("invalid user project data")
+	// 		s.log.Error("!!!Login--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+	// 	}
+	// case 3:
+	// 	data, err = services.PostgresLoginService().LoginData(
+	// 		ctx,
+	// 		reqLoginData,
+	// 	)
 
-		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
-			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-		}
+	// 	if err != nil {
+	// 		errGetUserProjectData := errors.New("invalid user project data")
+	// 		s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+	// 	}
 
-	}
+	// }
 
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
@@ -1027,17 +1027,17 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		}
 	}
 
-	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-		ClientPlatform:   data.GetClientPlatform(),
-		ClientType:       data.GetClientType(),
-		UserFound:        data.GetUserFound(),
-		UserId:           data.GetUserId(),
-		Role:             data.GetRole(),
-		Permissions:      data.GetPermissions(),
-		LoginTableSlug:   data.GetLoginTableSlug(),
-		AppPermissions:   data.GetAppPermissions(),
-		GlobalPermission: data.GetGlobalPermission(),
-	})
+	// res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+	// 	ClientPlatform:   data.GetClientPlatform(),
+	// 	ClientType:       data.GetClientType(),
+	// 	UserFound:        data.GetUserFound(),
+	// 	UserId:           data.GetUserId(),
+	// 	Role:             data.GetRole(),
+	// 	Permissions:      data.GetPermissions(),
+	// 	LoginTableSlug:   data.GetLoginTableSlug(),
+	// 	AppPermissions:   data.GetAppPermissions(),
+	// 	GlobalPermission: data.GetGlobalPermission(),
+	// })
 
 	// TODO - wrap in a function
 	m := map[string]interface{}{
@@ -1073,6 +1073,8 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		ExpiresAt:        session.ExpiresAt,
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
+
+	res := &pb.V2LoginResponse{}
 
 	res.Token = token
 
