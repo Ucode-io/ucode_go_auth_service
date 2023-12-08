@@ -579,3 +579,55 @@ func (h *Handler) AddUserProject(c *gin.Context) {
 
 	h.handleResponse(c, http.NoContent, resp)
 }
+
+// DeleteManyUserProject godoc
+// @ID delete many user project
+// @Router /delete-many-user-project [POST]
+// @Summary Delete Many User Project
+// @Description Delete Many User Project
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param user body auth_service.DeleteManyUserRequest true "DeleteManyUserRequest"
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) DeleteManyUserProject(c *gin.Context) {
+	var (
+		req = auth_service.DeleteManyUserRequest{}
+	)
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		errCantParseReq := errors.New("cant parse json")
+		h.log.Error("!!!DeleteManyUserToProject -> cant parse json")
+		h.handleResponse(c, http.BadRequest, errCantParseReq.Error())
+		return
+	}
+
+	if !util.IsValidUUID(req.GetProjectId()) {
+		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(req.GetCompanyId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get company_id"))
+		return
+	}
+
+	if !util.IsValidUUID(req.GetEnvironmentId()) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resp, err := h.services.SyncUserService().DeleteManyUser(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.NoContent, resp)
+}
