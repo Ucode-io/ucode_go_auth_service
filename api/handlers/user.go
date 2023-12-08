@@ -1,18 +1,13 @@
 package handlers
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
-	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
-	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
-	"google.golang.org/protobuf/types/known/structpb"
 
 	"ucode/ucode_go_auth_service/api/models"
 
@@ -434,10 +429,7 @@ func (h *Handler) SendMessageToUserEmail(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserProject(c *gin.Context) {
-	var (
-		req = auth_service.AddUserToProjectReq{}
-	)
-
+	var req = auth_service.AddUserToProjectReq{}
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		errCantParseReq := errors.New("cant parse json")
@@ -461,16 +453,6 @@ func (h *Handler) AddUserProject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &company_service.GetSingleServiceResourceReq{
-		EnvironmentId: req.EnvId,
-		ProjectId:     req.ProjectId,
-		ServiceType:   1,
-	})
-	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
-		return
-	}
-
 	resp, err := h.services.UserService().AddUserToProject(
 		c.Request.Context(),
 		&req,
@@ -478,109 +460,6 @@ func (h *Handler) AddUserProject(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
-	}
-
-	user, err := h.services.UserService().V2GetUserByID(
-		c.Request.Context(),
-		&auth_service.UserPrimaryKey{
-			Id:                    req.UserId,
-			ResourceEnvironmentId: resource.ResourceEnvironmentId,
-			ProjectId:             resource.GetProjectId(),
-			ClientTypeId:          req.ClientTypeId,
-			ResourceType:          int32(resource.ResourceType.Number()),
-			NodeType:              resource.NodeType,
-		},
-	)
-	if err != nil {
-		if errors.Is(err, config.ErrUserAlradyMember) {
-			h.handleResponse(c, http.BadEnvironment, "already member!")
-			return
-		}
-
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
-
-	var userDataToMap = make(map[string]interface{})
-	userDataToMap["guid"] = req.UserId
-	userDataToMap["active"] = req.Active
-	userDataToMap["project_id"] = req.ProjectId
-	userDataToMap["role_id"] = req.RoleId
-	userDataToMap["client_type_id"] = user.ClientTypeId
-	userDataToMap["client_platform_id"] = user.ClientPlatformId
-	userDataToMap["from_auth_service"] = true
-
-	structData, err := helper.ConvertMapToStruct(userDataToMap)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(
-		c,
-		resource.ProjectId,
-		resource.NodeType,
-	)
-
-	var tableSlug = "user"
-	switch int32(resource.ResourceType.Number()) {
-	case 1:
-		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: "client_type",
-				Data: &structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"id": structpb.NewStringValue(req.ClientTypeId),
-					},
-				},
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
-			tableSlug = clientTypeTableSlug
-		}
-
-		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: tableSlug,
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.InternalServerError, err.Error())
-			return
-		}
-	case 3:
-		clientType, err := services.PostgresObjectBuilderService().GetSingle(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: "client_type",
-				Data: &structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"id": structpb.NewStringValue(req.ClientTypeId),
-					},
-				},
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
-			tableSlug = clientTypeTableSlug
-		}
-		_, err = services.PostgresObjectBuilderService().Create(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: tableSlug,
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.InternalServerError, err.Error())
-			return
-		}
 	}
 
 	h.handleResponse(c, http.NoContent, resp)
