@@ -1414,9 +1414,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	exist := false
-	for _, item := range projects.GetProjectIds() {
-		if item == session.GetProjectId() {
-
+	for _, item := range projects.GetUserProjects() {
+		if item.ProjectId == session.GetProjectId() {
 			exist = true
 			break
 		}
@@ -1426,6 +1425,23 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	if req.EnvironmentId != "" {
+		exist = false
+		for _, item := range projects.GetUserProjects() {
+			if item.EnvId == req.EnvironmentId {
+				exist = true
+				break
+			}
+		}
+
+		if !exist {
+			err = errors.New("User not access environment")
+			s.log.Error("---V2HasAccessUser--->AccessNotEnvironment--->", logger.Error(err))
+			return nil, status.Error(codes.Unavailable, err.Error())
+		}
+	}
+
 	var checkPermission bool
 	// guess role check
 	for _, path := range arr_path {

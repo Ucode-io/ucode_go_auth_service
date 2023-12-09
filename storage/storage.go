@@ -243,7 +243,7 @@ type LoginPlatformType interface {
 	DeleteLoginSettings(ctx context.Context, input *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error)
 }
 
-//sms otp settings repo is used to save otp creds for each project and environment
+// sms otp settings repo is used to save otp creds for each project and environment
 type SmsOtpSettingsRepoI interface {
 	Create(context.Context, *pb.CreateSmsOtpSettingsRequest) (*pb.SmsOtpSettings, error)
 	Update(context.Context, *pb.SmsOtpSettings) (int64, error)

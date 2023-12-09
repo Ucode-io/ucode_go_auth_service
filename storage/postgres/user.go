@@ -660,16 +660,33 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 	res := pb.GetProjectsByUserIdRes{}
 
 	query := `SELECT
-				array_agg(project_id)
+				project_id,
+				env_id
 			from user_project
 			where user_id = $1`
 
-	tmp := make([]string, 0, 20)
-	err := r.db.QueryRow(ctx, query, req.GetUserId()).Scan(pq.Array(&tmp))
+	rows, err := r.db.Query(ctx, query, req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
-	res.ProjectIds = tmp
+
+	for rows.Next() {
+		var (
+			projectID sql.NullString
+			envID     sql.NullString
+		)
+
+		err = rows.Scan(&projectID, &envID)
+		if err != nil {
+			return nil, err
+		}
+
+		res.UserProjects = append(res.UserProjects, &pb.UserProject{
+			ProjectId: projectID.String,
+			EnvId:     envID.String,
+		})
+	}
+
 	return &res, nil
 }
 
