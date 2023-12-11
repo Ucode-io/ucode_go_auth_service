@@ -32,6 +32,7 @@ type ServiceManagerI interface {
 	RegisterService() auth_service.RegisterServiceClient
 	LoginPlatformType() auth_service.LoginPlatformTypeLoginServiceClient
 	SmsOtpSettingsService() auth_service.SmsOtpSettingsServiceClient
+	SyncUserService() auth_service.SyncUserServiceClient
 
 	SmsService() sms_service.SmsServiceClient
 }
@@ -58,6 +59,7 @@ type grpcClients struct {
 	registerService       auth_service.RegisterServiceClient
 	loginPlatformType     auth_service.LoginPlatformTypeLoginServiceClient
 	smsOtpSettingsService auth_service.SmsOtpSettingsServiceClient
+	syncUserService       auth_service.SyncUserServiceClient
 
 	smsService sms_service.SmsServiceClient
 }
@@ -110,6 +112,7 @@ func NewGrpcClients(cfg config.BaseConfig) (ServiceManagerI, error) {
 		registerService:       auth_service.NewRegisterServiceClient(connAuthService),
 		loginPlatformType:     auth_service.NewLoginPlatformTypeLoginServiceClient(connAuthService),
 		smsOtpSettingsService: auth_service.NewSmsOtpSettingsServiceClient(connAuthService),
+		syncUserService:       auth_service.NewSyncUserServiceClient(connAuthService),
 
 		smsService: sms_service.NewSmsServiceClient(connSmsService),
 	}, nil
@@ -196,4 +199,8 @@ func (g *grpcClients) EmailService() auth_service.EmailOtpServiceClient {
 
 func (g *grpcClients) SmsService() sms_service.SmsServiceClient {
 	return g.smsService
+}
+
+func (g *grpcClients) SyncUserService() auth_service.SyncUserServiceClient {
+	return g.syncUserService
 }

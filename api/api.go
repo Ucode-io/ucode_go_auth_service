@@ -86,6 +86,8 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	r.DELETE("/user/:user-id", h.DeleteUser)
 	r.PUT("/user/reset-password", h.ResetPassword)
 	r.POST("/user/send-message", h.SendMessageToUserEmail)
+	r.POST("/add-user-project", h.AddUserProject)
+	r.DELETE("/delete-many-user-project", h.DeleteManyUserProject)
 
 	r.POST("/integration", h.CreateIntegration)
 	r.GET("/integration", h.GetIntegrationList)
