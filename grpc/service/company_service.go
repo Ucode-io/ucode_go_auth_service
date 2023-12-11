@@ -68,6 +68,22 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
+	_, err = s.services.ProjectServiceClient().Update(
+		ctx,
+		&company_service.Project{
+			CompanyId:    companyPKey.GetId(),
+			K8SNamespace: "cp-region-type-id",
+			ProjectId:    project.GetProjectId(),
+			Title:        req.Name,
+			Language: []*company_service.Language{{
+				Id:         "e2d68f08-8587-4136-8cd4-c26bf1b9cda1",
+				Name:       "English",
+				NativeName: "English",
+				ShortName:  "en",
+			}},
+		},
+	)
+
 	environment, err := s.services.EnvironmentService().Create(
 		ctx,
 		&company_service.CreateEnvironmentRequest{
