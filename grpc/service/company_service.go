@@ -4,6 +4,7 @@ import (
 	"context"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
@@ -124,6 +125,39 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, err
+	}
+
+	// resource and settings service resource
+
+	resource, err := s.services.ResourceService().CreateResource(
+		ctx,
+		&company_service.CreateResourceReq{
+			CompanyId:     companyPKey.GetId(),
+			EnvironmentId: environment.GetId(),
+			ProjectId:     project.GetProjectId(),
+			Resource: &company_service.Resource{
+				ResourceType: 1,
+				NodeType:     config.LOW_NODE_TYPE,
+			},
+			UserId: createUserRes.GetId(),
+		},
+	)
+	if err != nil {
+		s.log.Error("---RegisterCompany-AutoCreateResource--->", logger.Error(err))
+		return nil, err
+	}
+
+	_, err = s.services.ServiceResource().Update(
+		ctx,
+		&company_service.UpdateServiceResourceReq{
+			EnvironmentId:    environment.GetId(),
+			ProjectId:        project.GetProjectId(),
+			ServiceResources: helper.MakeBodyServiceResource(resource.GetId()),
+		},
+	)
+	if err != nil {
+		s.log.Error("---RegisterCompany-AutoSettingMicroServices--->", logger.Error(err))
 		return nil, err
 	}
 
