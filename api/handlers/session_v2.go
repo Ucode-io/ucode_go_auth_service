@@ -560,7 +560,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 		httpErrorStr = strings.ToLower(httpErrorStr)
 
 		if httpErrorStr == "user not found" {
-			err := errors.New("Пользователь не найдено")
+			err := errors.New("Пользователь не найден")
 			h.handleResponse(c, http.NotFound, err.Error())
 			return
 		} else if httpErrorStr == "user has been expired" {
@@ -572,7 +572,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		} else if httpErrorStr == "invalid password" {
-			err := errors.New("Неверное пароль")
+			err := errors.New("Неверный пароль")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		} else if err != nil {
