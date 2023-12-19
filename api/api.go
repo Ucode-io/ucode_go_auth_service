@@ -281,8 +281,3 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-<<<<<<< Updated upstream
-=======
-
-//
->>>>>>> Stashed changes
