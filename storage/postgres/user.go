@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -414,15 +415,17 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		"user"
 	WHERE`
 
+	lowercasedUsername := strings.ToLower(username)
+
 	if util.IsValidEmail(username) {
-		query = query + ` email = $1`
+		query = query + ` LOWER(email) = $1`
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
 	} else {
-		query = query + ` login = $1`
+		query = query + ` LOWER(login) = $1`
 	}
 
-	err = r.db.QueryRow(ctx, query, username).Scan(
+	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
 		&res.Id,
 		// &res.Name,
 		// &res.PhotoUrl,

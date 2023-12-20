@@ -445,7 +445,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
-	s.log.Info("---V2CreateUser--->", logger.Any("req", req))
+	s.log.Info("\n\n\n\n---V2CreateUser--->", logger.Any("req", req))
 
 	unHashedPassword := req.Password
 
