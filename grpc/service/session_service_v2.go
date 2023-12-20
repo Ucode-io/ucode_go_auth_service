@@ -230,7 +230,6 @@ pwd:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = user.GetId()
-
 	case "EMAIL":
 		email, ok := req.GetData()["email"]
 		if !ok {

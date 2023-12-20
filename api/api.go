@@ -104,7 +104,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 
 	r.POST("/upsert-user-info/:user-id", h.UpsertUserInfo)
 
-	r.POST("/login", h.Login)
+	// r.POST("/login", h.Login)
 	r.DELETE("/logout", h.Logout)
 	r.PUT("/refresh", h.RefreshToken)
 	r.POST("/has-acess", h.HasAccess)
@@ -259,6 +259,16 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	v2.GET("/login-platform-type", h.GetLoginPlatformType)
 	v2.GET("/login-platform-type/:id", h.LoginPlatformTypePrimaryKey)
 	v2.DELETE("/login-platform-type/:id", h.DeleteLoginPlatformType)
+
+	auth := v2.Group("/auth")
+	{
+		auth.POST("/register/:provider", h.V2RegisterProvider)
+		auth.POST("/verify/:verify_id", h.V2VerifyOtp)
+		auth.POST("/login/:provider", h.V2LoginProvider)
+		auth.POST("/refresh", h.V2RefreshToken)
+		// auth.POST("/password/request", h.V2RefreshToken)
+		auth.POST("/password/reset", h.V2UserResetPassword)
+	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return
