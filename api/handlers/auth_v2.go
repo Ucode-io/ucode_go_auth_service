@@ -481,8 +481,8 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-	fmt.Println("Login test #4")
 	environmentId, ok := c.Get("environment_id")
+	fmt.Println("Login test #4", environmentId, projectId)
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, http.BadRequest, err)
@@ -494,7 +494,7 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "provider is required(param)")
 		return
 	}
-	fmt.Println("Login test #6", environmentId, projectId)
+	fmt.Println("Login test #6")
 	login.LoginStrategy = provider
 	login.Data["environment_id"] = environmentId.(string)
 	login.Data["project_id"] = projectId.(string)
