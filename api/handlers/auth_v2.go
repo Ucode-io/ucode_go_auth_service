@@ -273,10 +273,12 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		resourceEnvironment.NodeType,
 	)
 
-	switch body.Provider {
-	case cfg.Default:
+	switch strings.ToLower(body.Provider) {
+	case "email", cfg.Default:
 		{
+			fmt.Println("\n\n Verify test #1")
 			if c.Param("otp") != "121212" {
+				fmt.Println("\n\n Verify test #2", c.Param("verify_id"))
 				resp, err := h.services.EmailService().GetEmailByID(
 					c.Request.Context(),
 					&pb.EmailOtpPrimaryKey{
@@ -287,6 +289,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 					h.handleResponse(c, http.GRPCError, err.Error())
 					return
 				}
+				fmt.Println("\n\n Verify test #3", body.Otp, resp.Otp)
 				if resp.Otp != body.Otp {
 					h.handleResponse(c, http.InvalidArgument, "Неверный код подверждения")
 					return
@@ -414,6 +417,11 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 			}
 
 			h.handleResponse(c, http.Created, res)
+			return
+		}
+	default:
+		{
+			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
 	}
