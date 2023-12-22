@@ -235,9 +235,11 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	}
 
 	if body.Provider == "" {
-		h.handleResponse(c, http.BadRequest, "Register type is required")
+		h.handleResponse(c, http.BadRequest, "Provider type is required")
 		return
 	}
+
+	body.RegisterType = body.Provider
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
