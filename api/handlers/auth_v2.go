@@ -464,34 +464,37 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("Login test #1")
 	clientType := login.Data["client_type_id"]
 	if clientType == "" {
 		h.handleResponse(c, http.InvalidArgument, "inside data client_type_id is required")
 		return
 	}
+	fmt.Println("Login test #2")
 	if ok := util.IsValidUUID(clientType); !ok {
 		h.handleResponse(c, http.InvalidArgument, "lient_type_id is an invalid uuid")
 		return
 	}
+	fmt.Println("Login test #3")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-
+	fmt.Println("Login test #4")
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, http.BadRequest, err)
 		return
 	}
-
+	fmt.Println("Login test #5")
 	provider := c.Param("provider")
 	if provider == "" {
 		h.handleResponse(c, http.InvalidArgument, "provider is required(param)")
 		return
 	}
-
+	fmt.Println("Login test #6", environmentId, projectId)
 	login.LoginStrategy = provider
 	login.Data["environment_id"] = environmentId.(string)
 	login.Data["project_id"] = projectId.(string)
@@ -503,7 +506,7 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 			LoginStrategy: login.GetLoginStrategy(),
 			Tables:        login.GetTables(),
 		})
-
+	fmt.Println("Login test #7")
 	httpErrorStr := ""
 	if err != nil {
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
