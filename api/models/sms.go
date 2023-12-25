@@ -20,7 +20,7 @@ type SendCodeResponse struct {
 type Verify struct {
 	Data         *pbObject.V2LoginResponse `json:"data"`
 	Tables       []*pb.Object              `json:"tables"`
-	Provider     string                    `json:"provider"`
+	Provider     string                    `json:"register_type"`
 	GoogleToken  string                    `json:"google_token"`
 	AppleCode    string                    `json:"apple_code"`
 	Otp          string                    `json:"otp"`
