@@ -110,7 +110,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("test 11")
+		fmt.Println("test 11", smsOtpSettings.GetItems())
 		if len(smsOtpSettings.GetItems()) > 0 {
 			if smsOtpSettings.GetItems()[0].GetNumberOfOtp() != 0 {
 				code, err := util.GenerateCode(int(smsOtpSettings.GetItems()[0].GetNumberOfOtp()))
@@ -158,6 +158,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		Phone: request.Recipient,
 	})
 
+	fmt.Println("\n\n SEND-CODE #1")
 	services, err := h.GetProjectSrvc(
 		c,
 		resourceEnvironment.ProjectId,
@@ -168,12 +169,12 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		c.Request.Context(),
 		body,
 	)
-
+	fmt.Println("\n\n SEND-CODE #2")
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	fmt.Println("\n\n SEND-CODE #3")
 	res := models.V2SendCodeResponse{
 		SmsId: resp.SmsId,
 	}
