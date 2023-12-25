@@ -150,9 +150,9 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		fmt.Println("\n\n\n\n\n\n ~~~~~~~~~~~~> ##########", response.Data.AsMap())
+
 		clientType, ok := response.Data.AsMap()["response"]
-		if ok {
+		if ok && clientType != nil {
 			if clientTypeTableSlug, ok := clientType.(map[string]interface{})["table_slug"]; ok {
 				tableSlug = clientTypeTableSlug.(string)
 			}
