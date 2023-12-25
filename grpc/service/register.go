@@ -223,6 +223,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ResourceEnvironmentId: body["resource_environment_id"].(string),
 	}
 
+	fmt.Println("\n\n\n\n :::::: TESTCREAYEUSER ", reqLoginData)
+
 	switch body["resource_type"].(float64) {
 	case 1:
 		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(
