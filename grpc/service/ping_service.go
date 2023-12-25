@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/ping_service"
+	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -17,7 +17,7 @@ type pingService struct {
 	log      logger.LoggerI
 	strg     storage.StorageI
 	services client.ServiceManagerI
-	ping_service.UnimplementedPingServiceServer
+	pb.UnimplementedPingServiceServer
 }
 
 func NewPingService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *pingService {
@@ -29,8 +29,8 @@ func NewPingService(cfg config.Config, log logger.LoggerI, strg storage.StorageI
 	}
 }
 
-func (s *pingService) Ping(ctx context.Context, req *empty.Empty) (res *ping_service.PongResponse, err error) {
-	return &ping_service.PongResponse{
+func (s *pingService) Ping(ctx context.Context, req *empty.Empty) (res *pb.PingResponse, err error) {
+	return &pb.PingResponse{
 		Message: "Pong",
 	}, nil
 }
