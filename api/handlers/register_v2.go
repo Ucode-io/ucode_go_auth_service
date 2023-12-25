@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -95,7 +94,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		Type:      request.Type,
 	}
 
-	switch strings.ToUpper(request.Type) {
+	switch request.Type {
 	case "PHONE":
 		valid = util.IsValidPhone(request.Recipient)
 		if !valid {
