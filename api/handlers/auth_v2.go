@@ -21,6 +21,40 @@ import (
 	"github.com/saidamir98/udevs_pkg/util"
 )
 
+// V2Logout godoc
+// @ID logout
+// @Router /v2/auth/logout [POST]
+// @Summary V2Logout User
+// @Description V2Logout User
+// @Tags v2_auth
+// @Accept json
+// @Produce json
+// @Param data body auth_service.LogoutRequest true "LogoutRequest"
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2Logout(c *gin.Context) {
+	var logout auth_service.LogoutRequest
+
+	err := c.ShouldBindJSON(&logout)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	resp, err := h.services.SessionService().Logout(
+		c.Request.Context(),
+		&logout,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.NoContent, resp)
+}
+
 // V2Register godoc
 // @ID V2RegisterProvider
 // @Router /v2/register/{provider} [POST]
