@@ -22,6 +22,9 @@ func NewPingService(log l.LoggerI, services ServiceNodesI) *PingService {
 }
 
 func (s *PingService) Ping(ctx context.Context, req *empty.Empty) (res *pb.PingResponse, err error) {
+
+	s.logger.Info("--AuthServicePing-- requested")
+	
 	return &pb.PingResponse{
 		Message: "Pong",
 	}, nil
