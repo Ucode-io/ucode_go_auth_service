@@ -5,8 +5,6 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
 	l "ucode/ucode_go_auth_service/pkg/logger"
-
-	"github.com/golang/protobuf/ptypes/empty"
 )
 
 // AdminService ...
@@ -21,10 +19,10 @@ func NewPingService(log l.LoggerI, services ServiceNodesI) *PingService {
 	}
 }
 
-func (s *PingService) Ping(ctx context.Context, req *empty.Empty) (res *pb.PingResponse, err error) {
+func (s *PingService) Ping(ctx context.Context, req *pb.PingRequest) (res *pb.PingResponse, err error) {
 
 	s.logger.Info("--AuthServicePing-- requested")
-	
+
 	return &pb.PingResponse{
 		Message: "Pong",
 	}, nil
