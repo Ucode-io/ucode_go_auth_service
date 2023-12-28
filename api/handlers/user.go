@@ -181,25 +181,25 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteUser(c *gin.Context) {
 	var userDataToMap = make(map[string]interface{})
-	// userID := c.Param("user-id")
-	// projectID := c.Param("project-id")
+	userID := c.Param("user-id")
+	//projectID := c.Param("project-id")
 
-	// if !util.IsValidUUID(userID) {
-	// 	h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
-	// 	return
-	// }
+	if !util.IsValidUUID(userID) {
+		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+		return
+	}
 
-	// // resp, err := h.services.UserService().DeleteUser(
-	// // 	c.Request.Context(),
-	// // 	&auth_service.UserPrimaryKey{
-	// // 		Id: userID,
-	// // 	},
-	// // )
+	_, err := h.services.UserService().DeleteUser(
+		c.Request.Context(),
+		&auth_service.UserPrimaryKey{
+			Id: userID,
+		},
+	)
 
-	// // if err != nil {
-	// // 	h.handleResponse(c, http.GRPCError, err.Error())
-	// // 	return
-	// // }
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 	// userDataToMap["id"] = userID
 	// structData, err := helper.ConvertMapToStruct(userDataToMap)
 	// if err != nil {
@@ -207,7 +207,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	// 	return
 	// }
 
-	// _, err = h.services.GetObjectBuilderServiceByType("").Delete(
+	// _, err = h.services.obje("").Delete(
 	// 	context.Background(),
 	// 	&obs.CommonMessage{
 	// 		TableSlug: "user",
