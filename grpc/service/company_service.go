@@ -4,6 +4,7 @@ import (
 	"context"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
@@ -67,6 +68,22 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
+	_, err = s.services.ProjectServiceClient().Update(
+		ctx,
+		&company_service.Project{
+			CompanyId:    companyPKey.GetId(),
+			K8SNamespace: "cp-region-type-id",
+			ProjectId:    project.GetProjectId(),
+			Title:        req.Name,
+			Language: []*company_service.Language{{
+				Id:         "e2d68f08-8587-4136-8cd4-c26bf1b9cda1",
+				Name:       "English",
+				NativeName: "English",
+				ShortName:  "en",
+			}},
+		},
+	)
+
 	environment, err := s.services.EnvironmentService().Create(
 		ctx,
 		&company_service.CreateEnvironmentRequest{
@@ -124,6 +141,39 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		return nil, err
+	}
+
+	// resource and settings service resource
+
+	resource, err := s.services.ResourceService().CreateResource(
+		ctx,
+		&company_service.CreateResourceReq{
+			CompanyId:     companyPKey.GetId(),
+			EnvironmentId: environment.GetId(),
+			ProjectId:     project.GetProjectId(),
+			Resource: &company_service.Resource{
+				ResourceType: 1,
+				NodeType:     config.LOW_NODE_TYPE,
+			},
+			UserId: createUserRes.GetId(),
+		},
+	)
+	if err != nil {
+		s.log.Error("---RegisterCompany-AutoCreateResource--->", logger.Error(err))
+		return nil, err
+	}
+
+	_, err = s.services.ServiceResource().Update(
+		ctx,
+		&company_service.UpdateServiceResourceReq{
+			EnvironmentId:    environment.GetId(),
+			ProjectId:        project.GetProjectId(),
+			ServiceResources: helper.MakeBodyServiceResource(resource.GetId()),
+		},
+	)
+	if err != nil {
+		s.log.Error("---RegisterCompany-AutoSettingMicroServices--->", logger.Error(err))
 		return nil, err
 	}
 

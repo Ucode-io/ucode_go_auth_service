@@ -19,7 +19,7 @@ func TestCompany(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	cfg := config.Load()
+	cfg := config.BaseLoad()
 	t.Log(cfg.PostgresHost, cfg.PostgresPort, cfg.PostgresUser, cfg.PostgresPassword, cfg.PostgresDatabase)
 	strg, err := postgres.NewPostgres(ctx, cfg)
 	if err != nil {

@@ -31,11 +31,12 @@ message CreateFunctionRequest {
     string password = 11;
     string ssh_url = 12;
     string type = 13;
+    string framework_type = 16;
     string gitlab_id = 14;
     string gitlab_group_id = 15;
+    string source_url = 17;
 }
 
-// if you change this message you must be change Microfrontend message in object_builder_service's menu.proto
 message Function {
     string id = 1;
     string path = 2;
@@ -50,6 +51,8 @@ message Function {
     string type = 12;
     string gitlab_id = 13;
     string gitlab_group_id = 14;
+    string framework_type = 15;
+    string source_url = 16;
 }
 
 message GetAllFunctionsRequest {
@@ -70,6 +73,7 @@ message FunctionPrimaryKey {
     string id = 1;
     string project_id = 2;
     string path = 3;
+    string source_url = 4;
 }
 
 message UpdateManyUrlAndPassword {

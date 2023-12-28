@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -413,15 +414,17 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		"user"
 	WHERE`
 
+	lowercasedUsername := strings.ToLower(username)
+
 	if util.IsValidEmail(username) {
-		query = query + ` email = $1`
+		query = query + ` LOWER(email) = $1`
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
 	} else {
-		query = query + ` login = $1`
+		query = query + ` LOWER(login) = $1`
 	}
 
-	err = r.db.QueryRow(ctx, query, username).Scan(
+	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
 		&res.Id,
 		// &res.Name,
 		// &res.PhotoUrl,
@@ -660,16 +663,33 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 	res := pb.GetProjectsByUserIdRes{}
 
 	query := `SELECT
-				array_agg(project_id)
+				project_id,
+				env_id
 			from user_project
 			where user_id = $1`
 
-	tmp := make([]string, 0, 20)
-	err := r.db.QueryRow(ctx, query, req.GetUserId()).Scan(pq.Array(&tmp))
+	rows, err := r.db.Query(ctx, query, req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
-	res.ProjectIds = tmp
+
+	for rows.Next() {
+		var (
+			projectID sql.NullString
+			envID     sql.NullString
+		)
+
+		err = rows.Scan(&projectID, &envID)
+		if err != nil {
+			return nil, err
+		}
+
+		res.UserProjects = append(res.UserProjects, &pb.UserProject{
+			ProjectId: projectID.String,
+			EnvId:     envID.String,
+		})
+	}
+
 	return &res, nil
 }
 
@@ -1008,8 +1028,9 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 
 	query := `DELETE FROM "user_project" 
 				WHERE 
-				project_id = :project_id AND  
-				company_id = :company_id`
+					project_id = :project_id AND  
+					company_id = :company_id AND
+					env_id = :env_id`
 	for _, user := range req.GetUsers() {
 		params := map[string]interface{}{}
 		params["project_id"] = req.GetProjectId()
@@ -1018,18 +1039,21 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 
 		if user.UserId != "" {
 			query = query + " AND user_id = :user_id"
-			params["user_id"] = user.GetRoleId()
+			params["user_id"] = user.GetUserId()
 		} else {
 			return nil, errors.New("user id is required")
 		}
+
 		if user.GetClientTypeId() != "" {
 			query = query + " AND client_type_id = :client_type_id"
 			params["client_type_id"] = user.GetClientTypeId()
 		}
+
 		if user.GetRoleId() != "" {
 			query = query + " AND role_id = :role_id"
 			params["role_id"] = user.GetRoleId()
 		}
+
 		q, args := helper.ReplaceQueryParams(query, params)
 		_, err = r.db.Exec(ctx,
 			q,

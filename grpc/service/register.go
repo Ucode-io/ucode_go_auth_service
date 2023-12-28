@@ -150,8 +150,9 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
 		clientType, ok := response.Data.AsMap()["response"]
-		if ok {
+		if ok && clientType != nil {
 			if clientTypeTableSlug, ok := clientType.(map[string]interface{})["table_slug"]; ok {
 				tableSlug = clientTypeTableSlug.(string)
 			}
@@ -221,6 +222,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ProjectId:             body["project_id"].(string),
 		ResourceEnvironmentId: body["resource_environment_id"].(string),
 	}
+
+	fmt.Println("\n\n\n\n :::::: TESTCREAYEUSER ", reqLoginData)
 
 	switch body["resource_type"].(float64) {
 	case 1:
