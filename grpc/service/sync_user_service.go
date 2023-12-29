@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -186,6 +187,37 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	}
 	response.UserId = userId
 	return &response, nil
+}
+
+func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.ResetPasswordRequest) error {
+	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+
+	if len(req.Password) < 6 {
+		err := fmt.Errorf("password must not be less than 6 characters")
+		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+		return err
+	}
+
+	hashedPassword, err := security.HashPassword(req.Password)
+	if err != nil {
+		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
+		UserId:   req.GetUserId(),
+		Password: hashedPassword,
+	})
+	if err != nil {
+		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if rowsAffected <= 0 {
+		return status.Error(codes.InvalidArgument, "no rows were affected")
+	}
+
+	return nil
 }
 
 func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
