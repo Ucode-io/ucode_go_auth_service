@@ -384,14 +384,14 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 	// 	return 0, errors.New("user not found")
 	// }
 
-	// result, err = r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
-	// if err != nil {
-	// 	return 0, errors.Wrap(err, "delete user error")
-	// }
-	// rowsAffected = result.RowsAffected()
-	// if rowsAffected == 0 {
-	// 	return 0, errors.New("user not found")
-	// }
+	result, err := r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
+	if err != nil {
+		return 0, errors.Wrap(err, "delete user error")
+	}
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return 0, errors.New("user not found")
+	}
 
 	return 0, nil
 }
