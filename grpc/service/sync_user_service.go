@@ -248,9 +248,6 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	_, err = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
 		Id: req.GetUserId(),
 	})
-	if err != nil {
-		return nil, err
-	}
 
 	return &empty.Empty{}, nil
 }
