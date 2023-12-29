@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -182,42 +181,42 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteUser(c *gin.Context) {
-	var userDataToMap = make(map[string]interface{})
-	userID := c.Param("user-id")
-	projectID := c.Param("project-id")
+	// var userDataToMap = make(map[string]interface{})
+	// userID := c.Param("user-id")
+	// projectID := c.Param("project-id")
 
-	if !util.IsValidUUID(userID) {
-		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
-		return
-	}
+	// if !util.IsValidUUID(userID) {
+	// 	h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+	// 	return
+	// }
 
-	_, err := h.services.UserService().DeleteUser(
-		c.Request.Context(),
-		&auth_service.UserPrimaryKey{
-			Id: userID,
-		},
-	)
+	// _, err := h.services.UserService().DeleteUser(
+	// 	c.Request.Context(),
+	// 	&auth_service.UserPrimaryKey{
+	// 		Id: userID,
+	// 	},
+	// )
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
-	userDataToMap["id"] = userID
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
+	// userDataToMap["id"] = userID
 	// structData, err := helper.ConvertMapToStruct(userDataToMap)
 	// if err != nil {
 	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
 	// 	return
 	// }
 
-	_, err = h.services.SyncUserService().DeleteUser(
-		context.Background(),
-		&auth_service.DeleteSyncUserRequest{
-			ProjectId: projectID,
-			UserId:    userID,
-		},
-	)
+	// _, err = h.services.SyncUserService().DeleteUser(
+	// 	context.Background(),
+	// 	&auth_service.DeleteSyncUserRequest{
+	// 		ProjectId: projectID,
+	// 		UserId:    userID,
+	// 	},
+	// )
 
-	h.handleResponse(c, http.NoContent, userDataToMap)
+	// h.handleResponse(c, http.NoContent, userDataToMap)
 }
 
 // AddUserRelation godoc
