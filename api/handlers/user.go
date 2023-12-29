@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -183,7 +184,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 func (h *Handler) DeleteUser(c *gin.Context) {
 	var userDataToMap = make(map[string]interface{})
 	userID := c.Param("user-id")
-	//projectID := c.Param("project-id")
+	projectID := c.Param("project-id")
 
 	if !util.IsValidUUID(userID) {
 		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
@@ -201,21 +202,20 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	// userDataToMap["id"] = userID
+	userDataToMap["id"] = userID
 	// structData, err := helper.ConvertMapToStruct(userDataToMap)
 	// if err != nil {
 	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
 	// 	return
 	// }
 
-	// _, err = h.services.obje("").Delete(
-	// 	context.Background(),
-	// 	&obs.CommonMessage{
-	// 		TableSlug: "user",
-	// 		Data:      structData,
-	// 		ProjectId: projectID,
-	// 	},
-	// )
+	_, err = h.services.SyncUserService().DeleteUser(
+		context.Background(),
+		&auth_service.DeleteSyncUserRequest{
+			ProjectId: projectID,
+			UserId:    userID,
+		},
+	)
 
 	h.handleResponse(c, http.NoContent, userDataToMap)
 }
