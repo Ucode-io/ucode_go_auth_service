@@ -40,7 +40,7 @@ func main() {
 	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
 	defer logger.Cleanup(log)
 
-	fmt.Println("\n\n configs ---- >", baseCfg)
+	fmt.Println("\n\n configs --- >", baseCfg)
 
 	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg)
 	if err != nil {
