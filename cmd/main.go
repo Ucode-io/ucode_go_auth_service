@@ -84,7 +84,7 @@ func main() {
 		mapProjectConfs = make(map[string]config.Config)
 	}
 
-	fmt.Println("\n\n ~~~~> project configs ", mapProjectConfs)
+	fmt.Println("\n\n ~> project configs ", mapProjectConfs)
 
 	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
 	projectServiceNodes.SetConfigs(mapProjectConfs)
