@@ -1118,7 +1118,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	return res, err
+	return res, nil
 }
 
 func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*emptypb.Empty, error) {

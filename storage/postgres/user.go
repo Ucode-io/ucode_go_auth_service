@@ -364,6 +364,7 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		return 0, err
 	}
 
+	fmt.Println("result", result)
 	rowsAffected = result.RowsAffected()
 
 	return rowsAffected, nil
@@ -647,7 +648,9 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		&envId,
 	)
 	if err != nil {
-		return nil, err
+		if err.Error() != "no rows in result set" {
+			return nil, err
+		}
 	}
 	if roleId.Status != pgtype.Null {
 		req.RoleId = fmt.Sprintf("%v", roleId.Status)
