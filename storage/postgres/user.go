@@ -366,7 +366,7 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 
 	rowsAffected = result.RowsAffected()
 
-	return rowsAffected, err
+	return rowsAffected, nil
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, error) {
