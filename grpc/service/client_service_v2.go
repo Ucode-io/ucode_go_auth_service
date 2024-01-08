@@ -181,7 +181,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			// return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		fmt.Println("\n\n\n\n RESPONSE -----> ", result)
+		fmt.Println("\n\n\n\n RESPONSE 222 -----> ", result)
 
 		result, err = services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
