@@ -180,6 +180,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		LoginTableSlug:   data.GetLoginTableSlug(),
 		AppPermissions:   data.GetAppPermissions(),
 		GlobalPermission: data.GetGlobalPermission(),
+		UserData:         data.GetUserData(),
 	})
 
 	fmt.Println("\n\n\n LOGIN USER DATA ", res.UserData)
