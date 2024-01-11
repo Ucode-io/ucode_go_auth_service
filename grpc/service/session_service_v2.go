@@ -1772,6 +1772,8 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		session.EnvId = req.EnvId
 	}
 
+	fmt.Println("\n\n\n\n\n\n\n\n\n ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~? session ", session)
+
 	user, err := s.strg.User().GetByUsername(ctx, session.GetUserId())
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
