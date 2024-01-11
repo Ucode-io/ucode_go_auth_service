@@ -1786,7 +1786,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		ctx,
 		&company_service.GetSingleServiceResourceReq{
 			ProjectId:     session.ProjectId,
-			EnvironmentId: session.EnvId,
+			EnvironmentId: req.EnvId,
 			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 		},
 	)
@@ -1874,7 +1874,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		Data:             session.Data,
 		ExpiresAt:        session.ExpiresAt,
 		IsChanged:        session.IsChanged,
-		EnvId:            session.EnvId,
+		EnvId:            req.EnvId,
 	})
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
