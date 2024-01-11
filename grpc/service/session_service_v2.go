@@ -1774,7 +1774,9 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	fmt.Println("\n\n\n\n\n\n\n\n\n ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~? session ", session)
 
-	user, err := s.strg.User().GetByUsername(ctx, session.GetUserId())
+	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+		Id: session.GetUserId(),
+	})
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
 		if err == sql.ErrNoRows {
