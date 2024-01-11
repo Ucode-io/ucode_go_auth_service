@@ -267,6 +267,8 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		auth.POST("/verify/:verify_id", h.V2VerifyOtp)
 		auth.POST("/login/:provider", h.V2LoginProvider)
 		auth.POST("/refresh", h.V2RefreshToken)
+		auth.POST("/send-code", h.V2SendCode)
+		auth.POST("/logout", h.V2Logout)
 		// auth.POST("/password/request", h.V2RefreshToken)
 		auth.POST("/password/reset", h.V2UserResetPassword)
 	}

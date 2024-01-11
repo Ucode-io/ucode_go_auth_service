@@ -58,6 +58,8 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		permission.Settings = v.GetSettings()
 		permission.ShareModal = v.GetShareModal()
 		permission.ViewCreate = v.GetViewCreate()
+		permission.AddField = v.GetAddField()
+		permission.PdfAction = v.GetPdfAction()
 		permissions = append(permissions, permission)
 	}
 

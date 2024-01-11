@@ -181,7 +181,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteUser(c *gin.Context) {
-	var userDataToMap = make(map[string]interface{})
+	// var userDataToMap = make(map[string]interface{})
 	// userID := c.Param("user-id")
 	// projectID := c.Param("project-id")
 
@@ -190,17 +190,17 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	// 	return
 	// }
 
-	// // resp, err := h.services.UserService().DeleteUser(
-	// // 	c.Request.Context(),
-	// // 	&auth_service.UserPrimaryKey{
-	// // 		Id: userID,
-	// // 	},
-	// // )
+	// _, err := h.services.UserService().DeleteUser(
+	// 	c.Request.Context(),
+	// 	&auth_service.UserPrimaryKey{
+	// 		Id: userID,
+	// 	},
+	// )
 
-	// // if err != nil {
-	// // 	h.handleResponse(c, http.GRPCError, err.Error())
-	// // 	return
-	// // }
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 	// userDataToMap["id"] = userID
 	// structData, err := helper.ConvertMapToStruct(userDataToMap)
 	// if err != nil {
@@ -208,16 +208,15 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	// 	return
 	// }
 
-	// _, err = h.services.GetObjectBuilderServiceByType("").Delete(
+	// _, err = h.services.SyncUserService().DeleteUser(
 	// 	context.Background(),
-	// 	&obs.CommonMessage{
-	// 		TableSlug: "user",
-	// 		Data:      structData,
+	// 	&auth_service.DeleteSyncUserRequest{
 	// 		ProjectId: projectID,
+	// 		UserId:    userID,
 	// 	},
 	// )
 
-	h.handleResponse(c, http.NoContent, userDataToMap)
+	// h.handleResponse(c, http.NoContent, userDataToMap)
 }
 
 // AddUserRelation godoc

@@ -1860,3 +1860,191 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 	s.log.Info("V2ResetPassword <- ", logger.Any("res: ", rowsAffected))
 	return s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{Id: req.GetUserId()})
 }
+
+func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
+
+	tokenInfo, err := secure.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if req.ClientTypeId != "" {
+		session.ClientTypeId = req.ClientTypeId
+	}
+	if req.ProjectId != "" {
+		session.ProjectId = req.ProjectId
+	}
+	if req.RoleId != "" {
+		session.RoleId = req.RoleId
+	}
+	if req.EnvId != "" {
+		session.EnvId = req.EnvId
+	}
+
+	user, err := s.strg.User().GetByUsername(ctx, session.GetUserId())
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+		if err == sql.ErrNoRows {
+			errNoRows := errors.New("no user found")
+			return nil, status.Error(codes.Internal, errNoRows.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resource, err := s.services.ServiceResource().GetSingle(
+		ctx,
+		&company_service.GetSingleServiceResourceReq{
+			ProjectId:     session.ProjectId,
+			EnvironmentId: session.EnvId,
+			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!V2Refresh.SessionService().GetServiceResource--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	services, err := s.serviceNode.GetByNodeType(
+		resource.ProjectId,
+		resource.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	reqLoginData := &pbObject.LoginDataReq{
+		UserId:                user.GetId(),
+		ClientType:            session.GetClientTypeId(),
+		ProjectId:             session.GetProjectId(),
+		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+	}
+
+	var data *pbObject.LoginDataRes
+
+	switch resource.ResourceType {
+	case 1:
+		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(
+			ctx,
+			reqLoginData,
+		)
+
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+	case 3:
+		data, err = services.PostgresLoginService().LoginData(
+			ctx,
+			reqLoginData,
+		)
+
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+
+	}
+
+	if !data.UserFound {
+		customError := errors.New(fmt.Sprintf("User not found with env_id %s", req.GetEnvId()))
+		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(customError))
+		return nil, status.Error(codes.NotFound, customError.Error())
+	}
+
+	userResp := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+		ClientPlatform:   data.GetClientPlatform(),
+		ClientType:       data.GetClientType(),
+		UserFound:        data.GetUserFound(),
+		UserId:           data.GetUserId(),
+		Role:             data.GetRole(),
+		Permissions:      data.GetPermissions(),
+		LoginTableSlug:   data.GetLoginTableSlug(),
+		AppPermissions:   data.GetAppPermissions(),
+		GlobalPermission: data.GetGlobalPermission(),
+		UserData:         data.GetUserData(),
+	})
+
+	roleId := ""
+	if userRole, ok := userResp.UserData.Fields["role_id"].GetKind().(*structpb.Value_StringValue); ok {
+
+		roleId = userRole.StringValue
+	}
+
+	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
+		Id:               session.Id,
+		ProjectId:        session.ProjectId,
+		ClientPlatformId: session.ClientPlatformId,
+		ClientTypeId:     session.ClientTypeId,
+		UserId:           session.UserId,
+		RoleId:           roleId,
+		Ip:               session.Ip,
+		Data:             session.Data,
+		ExpiresAt:        session.ExpiresAt,
+		IsChanged:        session.IsChanged,
+		EnvId:            session.EnvId,
+	})
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	authTables := []*pb.TableBody{}
+	if tokenInfo.Tables != nil {
+		for _, table := range tokenInfo.Tables {
+			authTable := &pb.TableBody{
+				TableSlug: table.TableSlug,
+				ObjectId:  table.ObjectID,
+			}
+			authTables = append(authTables, authTable)
+		}
+	}
+
+	// TODO - wrap in a function
+	m := map[string]interface{}{
+		"id":                 session.Id,
+		"project_id":         session.ProjectId,
+		"client_platform_id": session.ClientPlatformId,
+		"client_type_id":     session.ClientTypeId,
+		"user_id":            session.UserId,
+		"role_id":            session.RoleId,
+		"ip":                 session.Data,
+		"data":               session.Data,
+		"tables":             authTables,
+		"login_table_slug":   tokenInfo.LoginTableSlug,
+	}
+
+	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	token := &pb.Token{
+		AccessToken:      accessToken,
+		RefreshToken:     refreshToken,
+		CreatedAt:        session.CreatedAt,
+		UpdatedAt:        session.UpdatedAt,
+		ExpiresAt:        session.ExpiresAt,
+		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+	}
+
+	res := &pb.V2LoginResponse{}
+
+	res.Token = token
+
+	return res, nil
+}

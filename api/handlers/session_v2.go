@@ -188,12 +188,16 @@ func (h *Handler) V2Login(c *gin.Context) {
 // @Tags V2_Session
 // @Accept json
 // @Produce json
+// @Param for_env query string false "for_env"
 // @Param user body auth_service.RefreshTokenRequest true "RefreshTokenRequestBody"
 // @Success 200 {object} http.Response{data=auth_service.V2RefreshTokenResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RefreshToken(c *gin.Context) {
-	var user auth_service.RefreshTokenRequest
+	var (
+		user auth_service.RefreshTokenRequest
+		resp *pb.V2LoginResponse
+	)
 
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
@@ -201,14 +205,26 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.SessionService().V2RefreshToken(
-		c.Request.Context(),
-		&user,
-	)
+	for_env := c.DefaultQuery("for_env", "")
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+	if for_env == "true" {
+		resp, err = h.services.SessionService().V2RefreshTokenForEnv(
+			c.Request.Context(),
+			&user,
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resp, err = h.services.SessionService().V2RefreshToken(
+			c.Request.Context(),
+			&user,
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, http.OK, resp)
