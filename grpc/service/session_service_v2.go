@@ -25,6 +25,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
@@ -183,7 +184,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		UserData:         data.GetUserData(),
 	})
 
-	fmt.Println("\n\n\n LOGIN USER DATA ", res.UserData)
+	if roleId, ok := res.UserData.Fields["RoleId"].GetKind().(*structpb.Value_StringValue); ok {
+
+		fmt.Println("\n\n\n LOGIN USER DATA 111", roleId.StringValue)
+	}
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
