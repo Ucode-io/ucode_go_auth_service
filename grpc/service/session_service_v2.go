@@ -1839,7 +1839,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	}
 
 	if !data.UserFound {
-		customError := errors.New(fmt.Sprintf("User not found with env_id %s", req.GetEnvId()))
+		customError := errors.New(fmt.Sprintf("User not found with env_id %s, user_id %s, client_type_id %s", req.GetEnvId(), user.Id, session.ClientTypeId))
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
