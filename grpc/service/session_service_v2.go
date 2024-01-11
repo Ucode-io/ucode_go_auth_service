@@ -184,7 +184,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		UserData:         data.GetUserData(),
 	})
 
-	if roleId, ok := res.UserData.Fields["RoleId"].GetKind().(*structpb.Value_StringValue); ok {
+	if roleId, ok := res.UserData.Fields["role_id"].GetKind().(*structpb.Value_StringValue); ok {
 
 		fmt.Println("\n\n\n LOGIN USER DATA 111", roleId.StringValue)
 	}
