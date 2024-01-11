@@ -22,7 +22,7 @@ import (
 )
 
 // V2Logout godoc
-// @ID logout
+// @ID v2_logout
 // @Router /v2/auth/logout [POST]
 // @Summary V2Logout User
 // @Description V2Logout User
