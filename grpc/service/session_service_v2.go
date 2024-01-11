@@ -182,6 +182,8 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		GlobalPermission: data.GetGlobalPermission(),
 	})
 
+	fmt.Println("\n\n\n LOGIN USER DATA ", res.UserData)
+
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
 		Tables:        req.Tables,
