@@ -37,7 +37,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		result, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
-			ProjectId: req.GetResourceEnvironmentId(),
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!AddRole.ObjectBuilderService.Create--->", logger.Error(err))
@@ -47,7 +47,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		result, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
-			ProjectId: req.GetResourceEnvironmentId(),
+			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
 			s.log.Error("!!!AddRole.PostgresObjectBuilderService.Create--->", logger.Error(err))
