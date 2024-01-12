@@ -3,26 +3,13 @@ definitions:
     type: object
   config.Config:
     properties:
-      authGRPCPort:
-        type: string
-      authServiceHost:
-        type: string
-      companyGRPCPort:
-        type: string
-      companyServiceHost:
-        type: string
       defaultLimit:
         type: string
       defaultOffset:
         type: string
-      email:
+      highObjectBuilderGRPCPort:
         type: string
-      environment:
-        description: debug, test, release
-        type: string
-      httpport:
-        type: string
-      httpscheme:
+      highObjectBuilderServiceHost:
         type: string
       objectBuilderGRPCPort:
         type: string
@@ -32,35 +19,17 @@ definitions:
         type: integer
       passcodePool:
         type: string
-      password:
-        type: string
-      postgresDatabase:
-        type: string
-      postgresHost:
-        type: string
-      postgresMaxConnections:
-        type: integer
       postgresObjectBuidlerServiceHost:
         type: string
       postgresObjectBuidlerServicePort:
         type: string
-      postgresPassword:
-        type: string
-      postgresPort:
-        type: integer
-      postgresUser:
-        type: string
       secretKey:
-        type: string
-      serviceName:
         type: string
       smsGRPCPort:
         type: string
       smsServiceHost:
         type: string
       ucodeAppBaseUrl:
-        type: string
-      version:
         type: string
       webPageServiceHost:
         type: string
@@ -726,15 +695,6 @@ definitions:
       user_id:
         type: string
     type: object
-  ucode_ucode_go_auth_service_api_models.Sms:
-    properties:
-      client_type:
-        type: string
-      recipient:
-        type: string
-      text:
-        type: string
-    type: object
   ucode_ucode_go_auth_service_api_models.StructBody:
     properties:
       body:
@@ -782,6 +742,10 @@ definitions:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.V2LoginResponse'
       google_token:
         type: string
+      otp:
+        type: string
+      provider:
+        type: string
       register_type:
         type: string
       tables:
@@ -810,6 +774,8 @@ definitions:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginTable'
       login_value:
         type: string
+      node_type:
+        type: string
       password:
         type: string
       project_id:
@@ -820,6 +786,8 @@ definitions:
       client_platform_id:
         type: string
       method:
+        type: string
+      node_type:
         type: string
       path:
         type: string
@@ -839,6 +807,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest:
     properties:
+      node_type:
+        type: string
       permission_id:
         type: string
       resource_type:
@@ -848,6 +818,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionsRequest:
     properties:
+      node_type:
+        type: string
       permissions:
         items:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest'
@@ -895,6 +867,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.AddUserRelationRequest:
     properties:
+      node_type:
+        type: string
       relation_id:
         type: string
       user_id:
@@ -909,6 +883,8 @@ definitions:
       company_id:
         type: string
       env_id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -980,6 +956,8 @@ definitions:
       client_platform_id:
         type: string
       client_type_id:
+        type: string
+      node_type:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.ClientType:
@@ -1079,6 +1057,8 @@ definitions:
     properties:
       name:
         type: string
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -1129,6 +1109,8 @@ definitions:
       client_platform_id:
         type: string
       name:
+        type: string
+      node_type:
         type: string
       parent_id:
         type: string
@@ -1197,6 +1179,8 @@ definitions:
         type: string
       name:
         type: string
+      node_type:
+        type: string
       password:
         type: string
       phone:
@@ -1212,6 +1196,28 @@ definitions:
       role_id:
         type: string
       year_of_birth:
+        type: string
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.DeleteManyUserRequest:
+    properties:
+      company_id:
+        type: string
+      environment_id:
+        type: string
+      project_id:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.DeleteManyUserRequest_User'
+        type: array
+    type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.DeleteManyUserRequest_User:
+    properties:
+      client_type_id:
+        type: string
+      role_id:
+        type: string
+      user_id:
         type: string
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.DeleteRes:
@@ -1368,6 +1374,8 @@ definitions:
         type: string
       login:
         type: string
+      node_type:
+        type: string
       phone:
         type: string
       resource_type:
@@ -1427,6 +1435,8 @@ definitions:
       client_platform_id:
         type: string
       method:
+        type: string
+      node_type:
         type: string
       path:
         type: string
@@ -1654,6 +1664,8 @@ definitions:
         type: string
       method:
         type: string
+      node_type:
+        type: string
       path:
         type: string
       permission_id:
@@ -1682,6 +1694,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.RecordPermission:
     properties:
+      add_field:
+        type: string
       automation:
         type: string
       client_type_id:
@@ -1691,6 +1705,8 @@ definitions:
       id:
         type: string
       language_btn:
+        type: string
+      pdf_action:
         type: string
       read:
         type: string
@@ -1772,6 +1788,8 @@ definitions:
     - RelationTypes_REGION
   ucode_ucode_go_auth_service_genproto_auth_service.ResetPasswordRequest:
     properties:
+      node_type:
+        type: string
       password:
         type: string
       token:
@@ -1794,6 +1812,8 @@ definitions:
       is_configured:
         type: boolean
       name:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -1819,6 +1839,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey:
     properties:
+      node_type:
+        type: string
       permission_id:
         type: string
       role_id:
@@ -1829,6 +1851,8 @@ definitions:
       base_url:
         type: string
       email:
+        type: string
+      node_type:
         type: string
       token:
         type: string
@@ -1946,6 +1970,8 @@ definitions:
         type: string
       name:
         type: string
+      node_type:
+        type: string
       resource_type:
         type: integer
       subdomain:
@@ -1962,6 +1988,8 @@ definitions:
       login_table:
         $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LoginTable'
       login_value:
+        type: string
+      node_type:
         type: string
       password:
         type: string
@@ -2028,6 +2056,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      node_type:
         type: string
       parent_id:
         type: string
@@ -2129,6 +2159,8 @@ definitions:
         type: string
       name:
         type: string
+      node_type:
+        type: string
       phone:
         type: string
       photo_url:
@@ -2149,6 +2181,8 @@ definitions:
       client_platform_id:
         type: string
       method:
+        type: string
+      node_type:
         type: string
       path:
         type: string
@@ -2227,7 +2261,11 @@ definitions:
         type: boolean
       name:
         type: string
+      node_type:
+        type: string
       project_id:
+        type: string
+      resource_environment_id:
         type: string
       resource_type:
         type: integer
@@ -2246,7 +2284,11 @@ definitions:
         type: string
       name:
         type: string
+      node_type:
+        type: string
       project_id:
+        type: string
+      resource_envrironment_id:
         type: string
       resource_type:
         type: integer
@@ -2266,6 +2308,8 @@ definitions:
       environment_id:
         type: string
       login_strategy:
+        type: string
+      node_type:
         type: string
       otp:
         type: string
@@ -2475,7 +2519,11 @@ definitions:
         type: string
       name:
         type: string
+      node_type:
+        type: string
       project_id:
+        type: string
+      resource_envrironment_id:
         type: string
       resource_type:
         type: integer
@@ -2500,7 +2548,11 @@ definitions:
         type: string
       name:
         type: string
+      node_type:
+        type: string
       project_id:
+        type: string
+      resource_environment_id:
         type: string
       resource_type:
         type: integer
@@ -2510,6 +2562,8 @@ definitions:
       client_type_id:
         type: string
       environment_id:
+        type: string
+      node_type:
         type: string
       old_password:
         type: string
@@ -2635,6 +2689,8 @@ definitions:
         type: string
       is_configured:
         type: boolean
+      node_type:
+        type: string
       project_id:
         type: string
       resource_type:
@@ -2664,6 +2720,7 @@ definitions:
     - 2
     - 3
     - 4
+    - 5
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
@@ -2671,6 +2728,7 @@ definitions:
     - ResourceType_CLICKHOUSE
     - ResourceType_POSTGRESQL
     - ResourceType_REST
+    - ResourceType_GITHUB
   ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -2680,6 +2738,8 @@ definitions:
           $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_company_service.ResourceWithoutPassword_Environment'
         type: array
       id:
+        type: string
+      node_type:
         type: string
       project_id:
         type: string
@@ -2712,6 +2772,8 @@ definitions:
       is_configured:
         type: boolean
       name:
+        type: string
+      node_type:
         type: string
       resource_environment_id:
         type: string
@@ -2857,6 +2919,8 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RecordPermission:
     properties:
+      add_field:
+        type: string
       automation:
         type: string
       client_type_id:
@@ -2866,6 +2930,8 @@ definitions:
       guid:
         type: string
       language_btn:
+        type: string
+      pdf_action:
         type: string
       read:
         type: string
@@ -3014,9 +3080,13 @@ definitions:
     type: object
   ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission:
     properties:
+      add_field:
+        type: string
       automation:
         type: string
       language_btn:
+        type: string
+      pdf_action:
         type: string
       settings:
         type: string
@@ -3157,43 +3227,6 @@ definitions:
       user_found:
         type: boolean
       user_id:
-        type: string
-    type: object
-  ucode_ucode_go_auth_service_genproto_web_page_service.App:
-    properties:
-      Routes:
-        $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Struct'
-      environment_id:
-        type: string
-      id:
-        type: string
-      logo:
-        type: string
-      name:
-        type: string
-      pages:
-        $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.Pages'
-      project_id:
-        type: string
-      resource_id:
-        type: string
-      sub_domain:
-        type: string
-    type: object
-  ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes:
-    properties:
-      Apps:
-        items:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.App'
-        type: array
-      count:
-        type: integer
-    type: object
-  ucode_ucode_go_auth_service_genproto_web_page_service.Pages:
-    properties:
-      default_page:
-        type: string
-      login_page:
         type: string
     type: object
   url.URL:
@@ -3569,6 +3602,52 @@ info:
   description: This is a api gateway
   termsOfService: https://udevs.io
 paths:
+  /add-user-project:
+    post:
+      consumes:
+      - application/json
+      description: Add User Project
+      operationId: add user project
+      parameters:
+      - description: AddUserToProjectReq
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserToProjectRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Add User Project
+      tags:
+      - User
   /client:
     delete:
       consumes:
@@ -4389,6 +4468,45 @@ paths:
           schema:
             $ref: '#/definitions/http.Response'
       summary: get config data on the debug mode
+  /delete-many-user-project:
+    post:
+      consumes:
+      - application/json
+      description: Delete Many User Project
+      operationId: delete many user project
+      parameters:
+      - description: DeleteManyUserRequest
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.DeleteManyUserRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete Many User Project
+      tags:
+      - User
   /has-access:
     post:
       consumes:
@@ -5595,57 +5713,6 @@ paths:
       summary: Refresh Token
       tags:
       - Session
-  /register-otp/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: RegisterOtp
-      operationId: registerOtp
-      parameters:
-      - description: register_body
-        in: body
-        name: registerBody
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: RegisterOtp
-      tags:
-      - register
   /relation:
     post:
       consumes:
@@ -6198,52 +6265,6 @@ paths:
       summary: Get Scopes List
       tags:
       - Scope
-  /send-code:
-    post:
-      consumes:
-      - application/json
-      description: SendCode
-      operationId: sendCode
-      parameters:
-      - description: SendCode
-        in: body
-        name: login
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Sms'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: SendCode
-      tags:
-      - register
   /upsert-scope:
     post:
       consumes:
@@ -7477,34 +7498,84 @@ paths:
       summary: DeleteAppleIdSettings
       tags:
       - AppleId
-  /v2/client:
-    delete:
+  /v2/auth/login/{provider}:
+    post:
       consumes:
       - application/json
-      description: Get Client
-      operationId: remove_client_v2
+      description: |-
+        V2LoginProvider
+        inside the data you must be passed client_type_id field
+        you must be give environment_id and project_id in body or
+        Environment-Id hearder and project-id in query parameters or
+        X-API-KEY in hearder
+        login strategy must be one of the following values
+        ["EMAIL", "PHONE", "EMAIL_OTP", "PHONE_OTP", "LOGIN", "LOGIN_PWD", "GOOGLE_AUTH", "APPLE_AUTH", "PHONE_PWD", "EMAIL_PWD"]
+      operationId: V2LoginProvider
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
         type: string
       - description: project-id
         in: query
         name: project-id
-        required: true
         type: string
-      - description: RemoveClientBody
+      - description: V2LoginRequest
         in: body
-        name: remove-client
+        name: login
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ClientPrimaryKey'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginWithOptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginSuperAdminRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: V2LoginProvider
+      tags:
+      - v2_auth
+  /v2/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: V2Logout User
+      operationId: v2_logout
+      parameters:
+      - description: LogoutRequest
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.LogoutRequest'
       produces:
       - application/json
       responses:
@@ -7528,15 +7599,25 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Delete Client
+      summary: V2Logout User
       tags:
-      - V2_Client
+      - v2_auth
+  /v2/auth/verify/{verify_id}:
     post:
       consumes:
       - application/json
-      description: Create Client
-      operationId: create_client_v2
+      description: V2VerifyProvider
+      operationId: V2VerifyProvider
       parameters:
+      - description: verify_id
+        in: path
+        name: verify_id
+        required: true
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
       - description: Resource-Id
         in: header
         name: Resource-Id
@@ -7547,28 +7628,23 @@ paths:
         name: Environment-Id
         required: true
         type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: AddClientRequestBody
+      - description: verify_body
         in: body
-        name: client
+        name: verifyBody
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddClientRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Verify'
       produces:
       - application/json
       responses:
         "201":
-          description: Client data
+          description: User data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -7588,426 +7664,9 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Create Client
+      summary: Verify Otp
       tags:
-      - V2_Client
-    put:
-      consumes:
-      - application/json
-      description: Update Client
-      operationId: update_client_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: UpdateClientRequestBody
-        in: body
-        name: client
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Client data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update Client
-      tags:
-      - V2_Client
-  /v2/client-platform:
-    get:
-      consumes:
-      - application/json
-      description: Get ClientPlatform List
-      operationId: get_client_platform_list_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: offset
-        in: query
-        name: offset
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        type: integer
-      - description: search
-        in: query
-        name: search
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: GetClientPlatformListResponseBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get ClientPlatform List
-      tags:
-      - V2_ClientPlatform
-    post:
-      consumes:
-      - application/json
-      description: Create ClientPlatform
-      operationId: create_client_platform_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: CreateClientPlatformRequestBody
-        in: body
-        name: client-platform
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreateClientPlatformRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: ClientPlatform data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Create ClientPlatform
-      tags:
-      - V2_ClientPlatform
-    put:
-      consumes:
-      - application/json
-      description: Update ClientPlatform
-      operationId: update_client_platform_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: UpdateClientPlatformRequestBody
-        in: body
-        name: client-platform
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateClientPlatformRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ClientPlatform data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update ClientPlatform
-      tags:
-      - V2_ClientPlatform
-  /v2/client-platform-detailed/{client-platform-id}:
-    get:
-      consumes:
-      - application/json
-      description: Get ClientPlatform By ID Detailed
-      operationId: get_client_platform_detailed_by_id_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: client-platform-id
-        in: path
-        name: client-platform-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ClientPlatformDetailedBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get ClientPlatform By ID Detailed
-      tags:
-      - V2_ClientPlatform
-  /v2/client-platform/{client-platform-id}:
-    delete:
-      consumes:
-      - application/json
-      description: Get ClientPlatform
-      operationId: delete_client_platform_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: client-platform-id
-        in: path
-        name: client-platform-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete ClientPlatform
-      tags:
-      - V2_ClientPlatform
-    get:
-      consumes:
-      - application/json
-      description: Get ClientPlatform By ID
-      operationId: get_client_platform_by_id_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: client-platform-id
-        in: path
-        name: client-platform-id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ClientPlatformBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get ClientPlatform By ID
-      tags:
-      - V2_ClientPlatform
+      - v2_auth
   /v2/client-type:
     get:
       consumes:
@@ -8299,61 +7958,6 @@ paths:
       summary: Get ClientType By ID
       tags:
       - V2_ClientType
-  /v2/client/{project-id}:
-    get:
-      consumes:
-      - application/json
-      description: Get Client Matrix
-      operationId: get_client_matrix_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: GetClientMatrixBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get Client Matrix
-      tags:
-      - V2_Client
   /v2/connection:
     get:
       consumes:
@@ -9744,419 +9348,6 @@ paths:
       summary: Get object list
       tags:
       - V2_Object
-  /v2/permission:
-    get:
-      consumes:
-      - application/json
-      description: Get Permission List
-      operationId: get_permission_list_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: offset
-        in: query
-        name: offset
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        type: integer
-      - description: search
-        in: query
-        name: search
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: GetPermissionListResponseBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get Permission List
-      tags:
-      - V2_Permission
-    post:
-      consumes:
-      - application/json
-      description: Create Permission
-      operationId: create_permission_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: CreatePermissionRequestBody
-        in: body
-        name: permission
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CreatePermissionRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Permission data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Create Permission
-      tags:
-      - V2_Permission
-    put:
-      consumes:
-      - application/json
-      description: Update Permission
-      operationId: update_permission_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: UpdatePermissionRequestBody
-        in: body
-        name: permission
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdatePermissionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Permission data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update Permission
-      tags:
-      - V2_Permission
-  /v2/permission-scope:
-    delete:
-      consumes:
-      - application/json
-      description: Get PermissionScope
-      operationId: delete_permission_scope_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: PermissionScopePrimaryKeyBody
-        in: body
-        name: permission-scope
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.PermissionScopePrimaryKey'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete PermissionScope
-      tags:
-      - V2_PermissionScope
-    post:
-      consumes:
-      - application/json
-      description: Create PermissionScope
-      operationId: add_permission_scope_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: AddPermissionScopeRequestBody
-        in: body
-        name: permission-scope
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddPermissionScopeRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: PermissionScope data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Create PermissionScope
-      tags:
-      - V2_PermissionScope
-  /v2/permission/{permission-id}:
-    delete:
-      consumes:
-      - application/json
-      description: Get Permission
-      operationId: delete_permission_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: permission-id
-        in: path
-        name: permission-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete Permission
-      tags:
-      - V2_Permission
-    get:
-      consumes:
-      - application/json
-      description: Get Permission By ID
-      operationId: get_permission_by_id_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: permission-id
-        in: path
-        name: permission-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: PermissionBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get Permission By ID
-      tags:
-      - V2_Permission
   /v2/refresh:
     put:
       consumes:
@@ -10164,6 +9355,10 @@ paths:
       description: V2Refresh Token
       operationId: v2refresh
       parameters:
+      - description: for_env
+        in: query
+        name: for_env
+        type: string
       - description: RefreshTokenRequestBody
         in: body
         name: user
@@ -10379,45 +9574,54 @@ paths:
       summary: RegisterEmailOtp
       tags:
       - Email
-  /v2/relation:
+  /v2/register/{provider}:
     post:
       consumes:
       - application/json
-      description: Create Relation
-      operationId: create_relation_v2
+      description: |-
+        V2RegisterProvider
+        in data must be have type, type must be one of the following values
+        ["google", "apple", "email", "phone"]
+        client_type_id and role_id must be in body parameters
+        you must be give environment_id and project_id in body or
+        Environment-Id hearder and project-id in query parameters or
+        X-API-KEY in hearder
+      operationId: V2RegisterProvider
       parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
+      - description: provider
+        in: path
+        name: provider
         required: true
+        type: string
+      - description: X-API-KEY
+        in: header
+        name: X-API-KEY
         type: string
       - description: Environment-Id
         in: header
         name: Environment-Id
-        required: true
         type: string
       - description: project-id
         in: query
         name: project-id
-        required: true
         type: string
-      - description: AddRelationRequestBody
+      - description: register_body
         in: body
-        name: relation
+        name: registerBody
         required: true
         schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRelationRequest'
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.RegisterOtp'
       produces:
       - application/json
       responses:
         "201":
-          description: Relation data
+          description: User data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -10437,122 +9641,9 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Create Relation
+      summary: V2RegisterProvider
       tags:
-      - V2_Relation
-    put:
-      consumes:
-      - application/json
-      description: Update Relation
-      operationId: update_relation_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: UpdateRelationRequestBody
-        in: body
-        name: relation
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateRelationRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Relation data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update Relation
-      tags:
-      - V2_Relation
-  /v2/relation/{relation-id}:
-    delete:
-      consumes:
-      - application/json
-      description: Get Relation
-      operationId: delete_relation_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: relation-id
-        in: path
-        name: relation-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete Relation
-      tags:
-      - V2_Relation
+      - v2_auth
   /v2/reset-password:
     put:
       consumes:
@@ -10889,120 +9980,6 @@ paths:
       summary: Get Global Role By ID
       tags:
       - V2_Permission
-  /v2/role-permission:
-    delete:
-      consumes:
-      - application/json
-      description: Get RolePermission
-      operationId: delete_role_permission_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: RolePermissionPrimaryKeyBody
-        in: body
-        name: role-permission
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.RolePermissionPrimaryKey'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete RolePermission
-      tags:
-      - V2_RolePermission
-    post:
-      consumes:
-      - application/json
-      description: Create RolePermission
-      operationId: add_role_permission_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: AddRolePermissionRequestBody
-        in: body
-        name: role-permission
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddRolePermissionRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: RolePermission data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Create RolePermission
-      tags:
-      - V2_RolePermission
   /v2/role-permission/detailed:
     put:
       consumes:
@@ -11229,86 +10206,6 @@ paths:
       summary: Get Role By ID
       tags:
       - V2_Role
-  /v2/scope:
-    get:
-      consumes:
-      - application/json
-      description: Get Scopes List
-      operationId: get_scopes_list_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: offset
-        in: query
-        name: offset
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        type: integer
-      - description: client-platform-id
-        in: query
-        name: client-platform-id
-        required: true
-        type: string
-      - description: search
-        in: query
-        name: search
-        type: string
-      - description: order_by
-        in: query
-        name: order_by
-        type: string
-      - description: order_type
-        in: query
-        name: order_type
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: GetScopesListResponseBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get Scopes List
-      tags:
-      - V2_Scope
   /v2/send-code:
     post:
       consumes:
@@ -12008,180 +10905,6 @@ paths:
       summary: Update User
       tags:
       - V2_User
-  /v2/user-info-field:
-    post:
-      consumes:
-      - application/json
-      description: Create UserInfoField
-      operationId: create_user_info_field_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: AddUserInfoFieldRequestBody
-        in: body
-        name: user-info-field
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.AddUserInfoFieldRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: UserInfoField data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Create UserInfoField
-      tags:
-      - V2_UserInfoField
-    put:
-      consumes:
-      - application/json
-      description: Update UserInfoField
-      operationId: update_user_info_field_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: UpdateUserInfoFieldRequestBody
-        in: body
-        name: user-info-field
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.UpdateUserInfoFieldRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: UserInfoField data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage'
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update UserInfoField
-      tags:
-      - V2_UserInfoField
-  /v2/user-info-field/{user-info-field-id}:
-    delete:
-      consumes:
-      - application/json
-      description: Get UserInfoField
-      operationId: delete_user_info_field_v2
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        required: true
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: user-info-field-id
-        in: path
-        name: user-info-field-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete UserInfoField
-      tags:
-      - V2_UserInfoField
   /v2/user/{user-id}:
     delete:
       consumes:
@@ -12555,110 +11278,4 @@ paths:
       summary: Verify
       tags:
       - Email
-  /v2/webpage-app:
-    get:
-      consumes:
-      - application/json
-      description: Get List webpage app
-      operationId: get_list_web_page_app
-      parameters:
-      - description: project-id
-        in: query
-        name: project-id
-        required: true
-        type: string
-      - description: environment-id
-        in: query
-        name: environment-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: AppBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_web_page_service.GetListAppRes'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get List webpage app
-      tags:
-      - WebPage
-  /verify/{sms_id}/{otp}:
-    post:
-      consumes:
-      - application/json
-      description: Verify
-      operationId: verify
-      parameters:
-      - description: sms_id
-        in: path
-        name: sms_id
-        required: true
-        type: string
-      - description: otp
-        in: path
-        name: otp
-        required: true
-        type: string
-      - description: verify_body
-        in: body
-        name: verifyBody
-        required: true
-        schema:
-          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.Verify'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Verify
-      tags:
-      - register
 swagger: "2.0"

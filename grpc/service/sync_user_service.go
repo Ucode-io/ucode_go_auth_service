@@ -189,6 +189,37 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	return &response, nil
 }
 
+// func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
+// 	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+
+// 	if len(req.Password) < 6 {
+// 		err := fmt.Errorf("password must not be less than 6 characters")
+// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 		return nil, err
+// 	}
+
+// 	hashedPassword, err := security.HashPassword(req.Password)
+// 	if err != nil {
+// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 		return nil, status.Error(codes.InvalidArgument, err.Error())
+// 	}
+
+// 	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
+// 		UserId:   req.GetGuid(),
+// 		Password: hashedPassword,
+// 	})
+// 	if err != nil {
+// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 		return nil, status.Error(codes.InvalidArgument, err.Error())
+// 	}
+
+// 	if rowsAffected <= 0 {
+// 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+// 	}
+
+// 	return nil, nil
+// }
+
 func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
 	var (
 		response = pb.SyncUserResponse{}
@@ -213,6 +244,11 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		return nil, err
 	}
 	response.UserId = user.GetId()
+
+	_, err = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+		Id: req.GetUserId(),
+	})
+
 	return &empty.Empty{}, nil
 }
 

@@ -364,9 +364,10 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		return 0, err
 	}
 
+	fmt.Println("result", result)
 	rowsAffected = result.RowsAffected()
 
-	return rowsAffected, err
+	return rowsAffected, nil
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, error) {
@@ -384,14 +385,23 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 			return 0, errors.New("user not found")
 		}
 
-		result, err = r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
-		if err != nil {
-			return 0, errors.Wrap(err, "delete user error")
-		}
-		rowsAffected = result.RowsAffected()
-		if rowsAffected == 0 {
-			return 0, errors.New("user not found")
-		}
+	}
+	// result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
+	// if err != nil {
+	// 	return 0, err
+	// }
+	// rowsAffected = result.RowsAffected()
+	// if rowsAffected == 0 {
+	// 	return 0, errors.New("user not found")
+	// }
+
+	result, err := r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
+	if err != nil {
+		return 0, errors.Wrap(err, "delete user error")
+	}
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return 0, errors.New("user not found")
 	}
 
 	return 0, nil
@@ -648,7 +658,9 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		&envId,
 	)
 	if err != nil {
-		return nil, err
+		if err.Error() != "no rows in result set" {
+			return nil, err
+		}
 	}
 	if roleId.Status != pgtype.Null {
 		req.RoleId = fmt.Sprintf("%v", roleId.Status)

@@ -144,6 +144,7 @@ message Menu {
     bool is_visible = 14;
     bool is_static = 15;
     string env_id = 16;
+    google.protobuf.Struct data = 17;
 }
 
 message MenuForGetAll {

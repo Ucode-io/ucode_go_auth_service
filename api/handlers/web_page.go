@@ -8,19 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetListWebPageApp godoc
-// @ID get_list_web_page_app
-// @Router /v2/webpage-app [GET]
-// @Summary Get List webpage app
-// @Description Get List webpage app
-// @Tags WebPage
-// @Accept json
-// @Produce json
-// @Param project-id query string true "project-id"
-// @Param environment-id query string true "environment-id"
-// @Success 200 {object} http.Response{data=web_page_service.GetListAppRes} "AppBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListWebPageApp(c *gin.Context) {
 	var (
 	//resourceEnvironment *obs.ResourceEnvironment
