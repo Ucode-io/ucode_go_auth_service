@@ -166,22 +166,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 
 	switch req.ResourceType {
 	case 1:
-		// c3c74e92-044c-4c30-ad51-b50eec3f49fa - staging
-		// dc3b8f74-aa46-4101-b255-d6b82ac0db2d - production
-
-		result, err = services.ObjectBuilderService().GetListSlim(ctx,
-			&pbObject.CommonMessage{
-				TableSlug: "client_type",
-				Data:      structData,
-				ProjectId: req.ResourceEnvrironmentId,
-			})
-		if err != nil {
-			s.log.Error("!!!----2-----GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return &pb.CommonMessage{}, nil
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-
-		fmt.Println("\n\n\n\n RESPONSE 222 -----> ", result)
+		fmt.Println("\n\n\n\n RESPONSE 222 -----> ")
 
 		result, err = services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
