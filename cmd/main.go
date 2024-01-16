@@ -98,7 +98,7 @@ func main() {
 			log.Panic("net.Listen", logger.Error(err))
 		}
 
-		log.Info("GRPC: Server being started...", logger.String("port", baseCfg.AuthGRPCPort))
+		log.Info("GRPC: Server being started....", logger.String("port", baseCfg.AuthGRPCPort))
 
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Panic("grpcServer.Serve", logger.Error(err))
