@@ -173,12 +173,12 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
-				ProjectId: "dc3b8f74-aa46-4101-b255-d6b82ac0db2d",
+				ProjectId: req.ResourceEnvrironmentId,
 			})
 		if err != nil {
 			s.log.Error("!!!----2-----GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
-			// return &pb.CommonMessage{}, nil
-			// return nil, status.Error(codes.InvalidArgument, err.Error())
+			return &pb.CommonMessage{}, nil
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
 		fmt.Println("\n\n\n\n RESPONSE 222 -----> ", result)
