@@ -147,6 +147,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.GET("/role/:role-id", h.V2GetRoleByID)
 		v2.GET("/role", h.V2GetRolesList)
 		v2.POST("/role", h.V2AddRole)
+		v2.DELETE("/role/:role-id", h.V2RemoveRole)
 		// v2.PUT("/role", h.V2UpdateRole)
 		// v2.DELETE("/role/:role-id", h.V2RemoveRole)
 
@@ -293,4 +294,3 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-
