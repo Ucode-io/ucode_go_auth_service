@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -46,7 +45,7 @@ func (p *serviceNodes) GetByNodeType(namespace string, nodeType string) (client.
 
 		p.Mu.Lock()
 		defer p.Mu.Unlock()
-		fmt.Println("\n\n ~~~~~~~~> Namespace ", config.BaseLoad().UcodeNamespace)
+
 		storage, ok := p.ServicePool[config.BaseLoad().UcodeNamespace]
 		if !ok {
 			return nil, config.ErrNodeNotExists
@@ -57,7 +56,7 @@ func (p *serviceNodes) GetByNodeType(namespace string, nodeType string) (client.
 		if p.ServicePool == nil {
 			return nil, config.ErrNilServicePool
 		}
-		fmt.Println("\n\n ~~~~~~~~> Namespace ", namespace)
+
 		p.Mu.Lock()
 		defer p.Mu.Unlock()
 
