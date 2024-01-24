@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -418,9 +419,9 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	lowercasedUsername := strings.ToLower(username)
 
 	fmt.Println("emailusername", username)
-	fmt.Println("util.IsValidEmail(username):", util.IsValidEmailNew(username))
+	fmt.Println("util.IsValidEmail(username):", IsValidEmailNew(username))
 
-	if util.IsValidEmailNew(username) {
+	if IsValidEmailNew(username) {
 		query = query + ` LOWER(email) = $1`
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
@@ -1151,4 +1152,16 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	}
 
 	return &res, nil
+}
+
+func IsValidEmailNew(email string) bool {
+	// Define the regular expression pattern for a valid email address
+	// This is a basic pattern and may not cover all edge cases
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(emailRegex)
+
+	// Use the MatchString method to check if the email matches the pattern
+	return re.MatchString(email)
 }
