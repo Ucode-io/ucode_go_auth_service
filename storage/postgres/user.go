@@ -418,9 +418,9 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	lowercasedUsername := strings.ToLower(username)
 
 	fmt.Println("emailusername", username)
-	fmt.Println("util.IsValidEmail(username):", util.IsValidEmail(username))
+	fmt.Println("util.IsValidEmail(username):", util.IsValidEmailNew(username))
 
-	if util.IsValidEmail(username) {
+	if util.IsValidEmailNew(username) {
 		query = query + ` LOWER(email) = $1`
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
