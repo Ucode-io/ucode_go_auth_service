@@ -367,8 +367,8 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteUser(c *gin.Context) {
 	var (
-		resourceEnvironment *company_service.ResourceEnvironment
-		err                 error
+		// resourceEnvironment *company_service.ResourceEnvironment
+		err error
 	)
 	userID := c.Param("user-id")
 
@@ -394,11 +394,11 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
+	// resourceId, ok := c.Get("resource_id")
+	// if !ok {
+	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
+	// 	return
+	// }
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -409,39 +409,45 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		ProjectId: projectID,
 	})
 
-	if util.IsValidUUID(resourceId.(string)) {
-		resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-			c.Request.Context(),
-			&company_service.GetResourceEnvironmentReq{
-				EnvironmentId: environmentId.(string),
-				ResourceId:    resourceId.(string),
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
-	} else {
-		resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-			c.Request.Context(),
-			&company_service.GetDefaultResourceEnvironmentReq{
-				ResourceId: resourceId.(string),
-				ProjectId:  projectID,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
-	}
+	// if util.IsValidUUID(resourceId.(string)) {
+	// 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+	// 		c.Request.Context(),
+	// 		&company_service.GetResourceEnvironmentReq{
+	// 			EnvironmentId: environmentId.(string),
+	// 			ResourceId:    resourceId.(string),
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, http.GRPCError, err.Error())
+	// 		return
+	// 	}
+	// } else {
+	// 	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
+	// 		c.Request.Context(),
+	// 		&company_service.GetDefaultResourceEnvironmentReq{
+	// 			ResourceId: resourceId.(string),
+	// 			ProjectId:  projectID,
+	// 		},
+	// 	)
+	// 	if err != nil {
+	// 		h.handleResponse(c, http.GRPCError, err.Error())
+	// 		return
+	// 	}
+	// }
+
+	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
+		EnvironmentId: environmentId.(string),
+		ProjectId:     projectID,
+		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+	})
 
 	resp, err := h.services.UserService().V2DeleteUser(
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
 			Id:                    userID,
 			ProjectId:             projectID,
-			ResourceType:          resourceEnvironment.ResourceType,
-			ResourceEnvironmentId: resourceEnvironment.Id,
+			ResourceType:          1,
+			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ClientTypeId:          clientTypeID,
 			CompanyId:             project.CompanyId,
 		},
