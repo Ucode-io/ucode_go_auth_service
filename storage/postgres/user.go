@@ -986,26 +986,32 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	params := make(map[string]interface{})
 
 	query := `DELETE FROM "user_project" 
-				WHERE 
-				project_id = :project_id AND 
-				user_id = :user_id AND 
-				company_id = :company_id`
+	WHERE  
+	user_id = :user_id`
 
-	params["project_id"] = req.ProjectId
+	// `DELETE FROM "user_project"
+	// 			WHERE
+	// 			project_id = :project_id
+	// 			AND
+	// 			user_id = :user_id
+	// 			AND
+	// 			company_id = :company_id`
+
+	// params["project_id"] = req.ProjectId
 	params["user_id"] = req.UserId
-	params["company_id"] = req.CompanyId
-	if req.GetRoleId() != "" {
-		query += " AND role_id = :role_id"
-		params["role_id"] = req.GetRoleId()
-	}
-	if req.GetClientTypeId() != "" {
-		query += " AND client_type_id = :client_type_id"
-		params["client_type_id"] = req.GetClientTypeId()
-	}
-	if req.GetEnvironmentId() != "" {
-		query += " AND env_id = :env_id"
-		params["env_id"] = req.GetEnvironmentId()
-	}
+	// params["company_id"] = req.CompanyId
+	// if req.GetRoleId() != "" {
+	// 	query += " AND role_id = :role_id"
+	// 	params["role_id"] = req.GetRoleId()
+	// }
+	// if req.GetClientTypeId() != "" {
+	// 	query += " AND client_type_id = :client_type_id"
+	// 	params["client_type_id"] = req.GetClientTypeId()
+	// }
+	// if req.GetEnvironmentId() != "" {
+	// 	query += " AND env_id = :env_id"
+	// 	params["env_id"] = req.GetEnvironmentId()
+	// }
 
 	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx,
