@@ -30,8 +30,35 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		updatedAt sql.NullString
 	)
 
-	query := `INSERT INTO api_keys(id, name, app_id, app_secret, role_id, environment_id, project_id, client_type_id, created_at, updated_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now()) RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id`
+	query := `
+		INSERT INTO api_keys(
+			id, 
+			name, 
+			app_id, 
+			app_secret, 
+			role_id, 
+			environment_id, 
+			project_id, 
+			client_type_id,
+			rps_limit,
+			monthly_request_limit,
+			created_at, 
+			updated_at
+		)
+		VALUES (
+			$1, 
+			$2, 
+			$3, 
+			$4, 
+			$5, 
+			$6, 
+			$7, 
+			$8,
+			$9,
+			$10,
+			now(), 
+			now()) 
+		RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id, rps_limit, monthly_request_limit`
 
 	err := r.db.QueryRow(
 		ctx,
@@ -44,7 +71,9 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetEnvironmentId(),
 		req.GetProjectId(),
 		req.GetClientTypeId(),
-	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId)
+		req.GetRpsLimit(),
+		req.GetMonthlyRequestLimit(),
+	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId, &res.RpsLimit, &res.MonthlyRequestLimit)
 
 	if err != nil {
 		return nil, err
@@ -76,7 +105,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
   				updated_at,
   				environment_id,
 				project_id,
-				client_type_id
+				client_type_id,
+				rps_limit,
+				monthly_request_limit
 			FROM
 			    api_keys`
 
@@ -156,6 +187,8 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&row.EnvironmentId,
 			&row.ProjectId,
 			&clientTypeId,
+			&row.RpsLimit,
+			&row.MonthlyRequestLimit,
 		)
 
 		if err != nil {
@@ -197,6 +230,8 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
   				environment_id,
 				project_id,
 				client_type_id,
+				rps_limit,
+				monthly_request_limit,
   				created_at,
   				updated_at
 			FROM
@@ -214,6 +249,8 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.EnvironmentId,
 		&res.ProjectId,
 		&res.ClientTypeId,
+		&res.RpsLimit,
+		&res.MonthlyRequestLimit,
 		&createdAt,
 		&updatedAt,
 	)
@@ -236,9 +273,11 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 				name = $2,
 				role_id = $3,
 				client_type_id = $4,
+				rps_limit = $5,
+				monthly_request_limit = $6,
 				updated_at = now()
 			WHERE
-			    id = $5`
+			    id = $7`
 
 	res, err := r.db.Exec(
 		ctx,
@@ -247,6 +286,8 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 		req.GetName(),
 		req.GetRoleId(),
 		req.GetClientTypeId(),
+		req.GetRpsLimit(),
+		req.GetMonthlyRequestLimit(),
 		req.GetId(),
 	)
 
@@ -287,6 +328,8 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
   				environment_id,
 				project_id,
 				client_type_id,
+				rps_limit,
+				monthly_request_limit,
   				created_at,
   				updated_at
 			FROM
@@ -304,6 +347,8 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
 		&res.EnvironmentId,
 		&res.ProjectId,
 		&res.ClientTypeId,
+		&res.RpsLimit,
+		&res.MonthlyRequestLimit,
 		&createdAt,
 		&updatedAt,
 	)
@@ -335,7 +380,9 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 			status,
 			name,
 			app_id,
-			app_secret
+			app_secret,
+			rps_limit,
+			monthly_request_limit
 		FROM
 			api_keys
 		WHERE
@@ -351,6 +398,8 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 		&res.Name,
 		&res.AppId,
 		&res.AppSecret,
+		&res.RpsLimit,
+		&res.MonthlyRequestLimit,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while scanning")

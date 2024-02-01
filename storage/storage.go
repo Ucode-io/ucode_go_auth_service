@@ -38,6 +38,7 @@ type StorageI interface {
 	LoginStrategy() LoginStrategyI
 	LoginPlatformType() LoginPlatformType
 	SmsOtpSettings() SmsOtpSettingsRepoI
+	ApiKeyUsage() ApiKeyUsageRepoI
 }
 
 type ClientPlatformRepoI interface {
@@ -250,4 +251,9 @@ type SmsOtpSettingsRepoI interface {
 	GetById(context.Context, *pb.SmsOtpSettingsPrimaryKey) (*pb.SmsOtpSettings, error)
 	GetList(context.Context, *pb.GetListSmsOtpSettingsRequest) (*pb.SmsOtpSettingsResponse, error)
 	Delete(context.Context, *pb.SmsOtpSettingsPrimaryKey) (int64, error)
+}
+
+type ApiKeyUsageRepoI interface {
+	Get(ctx context.Context, req *pb.GetApiKeyUsageReq) (res *pb.ApiKeyUsage, err error)
+	CheckAndUpsertLimit(ctx context.Context, req *pb.CheckLimitRequest) (res *pb.CheckLimitResponse, err error)
 }
