@@ -15168,6 +15168,9 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                },
+                "used_count": {
+                    "type": "integer"
                 }
             }
         },

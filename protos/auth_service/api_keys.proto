@@ -92,6 +92,7 @@ message GetRes {
   string client_type_id = 11;
   int32 rps_limit = 12;
   int32 monthly_request_limit = 13;
+  int32 used_count = 14;
 }
 
 message GetListReq {
