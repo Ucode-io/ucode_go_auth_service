@@ -41,7 +41,6 @@ func (s *apiKeyUsageService) CheckLimit(ctx context.Context, req *pb.CheckLimitR
 		s.log.Error("!!!CheckLimitApiKeyUsage--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on creating new api key")
 	}
-	s.log.Info("---CheckLimitApiKeyUsage--->", logger.Any("res", res))
 
 	if res.RpsCount <= 0 {
 		res.IsLimitReached = true
