@@ -27,7 +27,7 @@ message CheckLimitRequest {
 
 message CheckLimitResponse {
   bool is_limit_reached = 1;
-  int32 request_count = 2;
-  int32 limit = 3;
+  int32 rps_count = 2;
+  int32 monthly_count = 3;
 }
 
