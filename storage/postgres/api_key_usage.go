@@ -58,12 +58,11 @@ func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error
 			request_count
 		) VALUES(
 			$1,
-			$2,
-			$3
+			$2
 		)
 	`
 
-	_, err := r.db.Exec(ctx, query,
+	_, err := r.db.Exec(context.Background(), query,
 		req.GetApiKey(),
 		req.GetRequestCount(),
 	)

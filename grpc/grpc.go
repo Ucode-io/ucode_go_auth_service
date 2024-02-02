@@ -32,5 +32,6 @@ func SetUpServer(cfg config.BaseConfig, log logger.LoggerI, strg storage.Storage
 	auth_service.RegisterSmsOtpSettingsServiceServer(grpcServer, service.NewSmsOtpSettingsService(cfg, log, strg, svcs, projectServiceNodes))
 	reflection.Register(grpcServer)
 	auth_service.RegisterAuthPingServiceServer(grpcServer, service.NewPingService(log, projectServiceNodes))
+	auth_service.RegisterApiKeyUsageServiceServer(grpcServer, service.NewApiKeyUsageService(cfg, log, strg, svcs, projectServiceNodes))
 	return
 }
