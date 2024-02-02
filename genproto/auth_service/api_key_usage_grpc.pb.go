@@ -25,7 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ApiKeyUsageServiceClient interface {
 	Get(ctx context.Context, in *GetApiKeyUsageReq, opts ...grpc.CallOption) (*ApiKeyUsage, error)
 	CheckLimit(ctx context.Context, in *CheckLimitRequest, opts ...grpc.CallOption) (*CheckLimitResponse, error)
-	Upsert(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Create(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type apiKeyUsageServiceClient struct {
@@ -54,9 +54,9 @@ func (c *apiKeyUsageServiceClient) CheckLimit(ctx context.Context, in *CheckLimi
 	return out, nil
 }
 
-func (c *apiKeyUsageServiceClient) Upsert(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *apiKeyUsageServiceClient) Create(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/auth_service.ApiKeyUsageService/Upsert", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth_service.ApiKeyUsageService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (c *apiKeyUsageServiceClient) Upsert(ctx context.Context, in *ApiKeyUsage, 
 type ApiKeyUsageServiceServer interface {
 	Get(context.Context, *GetApiKeyUsageReq) (*ApiKeyUsage, error)
 	CheckLimit(context.Context, *CheckLimitRequest) (*CheckLimitResponse, error)
-	Upsert(context.Context, *ApiKeyUsage) (*emptypb.Empty, error)
+	Create(context.Context, *ApiKeyUsage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedApiKeyUsageServiceServer()
 }
 
@@ -83,8 +83,8 @@ func (UnimplementedApiKeyUsageServiceServer) Get(context.Context, *GetApiKeyUsag
 func (UnimplementedApiKeyUsageServiceServer) CheckLimit(context.Context, *CheckLimitRequest) (*CheckLimitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckLimit not implemented")
 }
-func (UnimplementedApiKeyUsageServiceServer) Upsert(context.Context, *ApiKeyUsage) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Upsert not implemented")
+func (UnimplementedApiKeyUsageServiceServer) Create(context.Context, *ApiKeyUsage) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedApiKeyUsageServiceServer) mustEmbedUnimplementedApiKeyUsageServiceServer() {}
 
@@ -135,20 +135,20 @@ func _ApiKeyUsageService_CheckLimit_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiKeyUsageService_Upsert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiKeyUsageService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ApiKeyUsage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiKeyUsageServiceServer).Upsert(ctx, in)
+		return srv.(ApiKeyUsageServiceServer).Create(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/auth_service.ApiKeyUsageService/Upsert",
+		FullMethod: "/auth_service.ApiKeyUsageService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiKeyUsageServiceServer).Upsert(ctx, req.(*ApiKeyUsage))
+		return srv.(ApiKeyUsageServiceServer).Create(ctx, req.(*ApiKeyUsage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -169,8 +169,8 @@ var ApiKeyUsageService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ApiKeyUsageService_CheckLimit_Handler,
 		},
 		{
-			MethodName: "Upsert",
-			Handler:    _ApiKeyUsageService_Upsert_Handler,
+			MethodName: "Create",
+			Handler:    _ApiKeyUsageService_Create_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

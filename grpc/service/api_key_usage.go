@@ -61,12 +61,12 @@ func (s *apiKeyUsageService) Get(ctx context.Context, req *pb.GetApiKeyUsageReq)
 	return res, nil
 }
 
-func (s *apiKeyUsageService) Upsert(ctx context.Context, req *pb.ApiKeyUsage) (*emptypb.Empty, error) {
+func (s *apiKeyUsageService) Create(ctx context.Context, req *pb.ApiKeyUsage) (*emptypb.Empty, error) {
 	s.log.Info("---UpsertApiKeyUsage--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
 
-	err := s.strg.ApiKeyUsage().Upsert(ctx, req)
+	err := s.strg.ApiKeyUsage().Create(ctx, req)
 	if err == pgx.ErrNoRows {
 		s.log.Error("!!!UpsertApiKeyUsage--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, "api-key not found")

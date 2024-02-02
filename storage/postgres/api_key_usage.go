@@ -34,7 +34,16 @@ func (r *apiKeyUsageRepo) Get(ctx context.Context, req *pb.GetApiKeyUsageReq) (*
 	return &res, nil
 }
 
-func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error {
+func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error {
 
-	return nil
+	query := `
+		INSERT INTO api_key_usage (api_key, request_count)
+	`
+
+	_, err := r.db.Exec(ctx, query,
+		req.ApiKey,
+		req.RequestCount,
+	)
+
+	return err
 }

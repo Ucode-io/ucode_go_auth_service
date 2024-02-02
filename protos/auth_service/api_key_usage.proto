@@ -8,7 +8,7 @@ import "google/protobuf/empty.proto";
 service ApiKeyUsageService {
   rpc Get (GetApiKeyUsageReq) returns (ApiKeyUsage) {}
   rpc CheckLimit (CheckLimitRequest) returns (CheckLimitResponse) {}
-  rpc Upsert (ApiKeyUsage) returns (google.protobuf.Empty) {}
+  rpc Create (ApiKeyUsage) returns (google.protobuf.Empty) {}
 }
 
 message ApiKeyUsage {
