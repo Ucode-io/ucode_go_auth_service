@@ -11,7 +11,8 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+
+	// "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -422,7 +423,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: userIdRes.GetId(),
 		})
 		if err != nil {
@@ -465,7 +466,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: userIdRes.GetId(),
 		})
 		if err != nil {
@@ -658,11 +659,11 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		return nil, err
 	}
 
-	companiesResp := []*auth_service.Company{}
+	companiesResp := []*pb.Company{}
 
 	if len(companies.Companies) < 1 {
 		companiesById := make([]*company_service.Company, 0)
-		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: resp.GetUserId(),
 		})
 		if err != nil {
@@ -1858,7 +1859,7 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 	s.log.Info("V2ResetPassword <- ", logger.Any("res: ", rowsAffected))
-	return s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{Id: req.GetUserId()})
+	return s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: req.GetUserId()})
 }
 
 func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
@@ -1887,7 +1888,11 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		session.EnvId = req.EnvId
 	}
 
-	user, err := s.strg.User().GetByUsername(ctx, session.GetUserId())
+	fmt.Println("\n\n\n\n\n\n\n\n\n ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~? session ", session)
+
+	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+		Id: session.GetUserId(),
+	})
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
 		if err == sql.ErrNoRows {
@@ -1901,7 +1906,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		ctx,
 		&company_service.GetSingleServiceResourceReq{
 			ProjectId:     session.ProjectId,
-			EnvironmentId: session.EnvId,
+			EnvironmentId: req.EnvId,
 			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 		},
 	)
@@ -1953,8 +1958,9 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	}
 
+	fmt.Println("\n\n\n\n\n\n\n\n\n ~~~~~~~~~~~~~~~~~~~~~~~~? user ", user)
 	if !data.UserFound {
-		customError := errors.New(fmt.Sprintf("User not found with env_id %s", req.GetEnvId()))
+		customError := errors.New(fmt.Sprintf("User not found with env_id %s, user_id %s, client_type_id %s", req.GetEnvId(), user.Id, session.ClientTypeId))
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
@@ -1989,7 +1995,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		Data:             session.Data,
 		ExpiresAt:        session.ExpiresAt,
 		IsChanged:        session.IsChanged,
-		EnvId:            session.EnvId,
+		EnvId:            req.EnvId,
 	})
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))

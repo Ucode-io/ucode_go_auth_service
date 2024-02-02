@@ -16,6 +16,7 @@ import (
 
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/saidamir98/udevs_pkg/security"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -1143,6 +1144,13 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 	res := &emptypb.Empty{}
 	responseFromDeleteUser := &pbObject.CommonMessage{}
 
+	// _, err := s.strg.User().Delete(ctx, req)
+	// if err != nil {
+	// 	s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+	// return res, nil
+
 	services, err := s.serviceNode.GetByNodeType(
 		req.ProjectId,
 		req.NodeType,
@@ -1169,8 +1177,8 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		}
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok && clientTypeTableSlug != "" {
+			clientTypeTableSlug := cast.ToString(response["table_slug"])
+			if clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
@@ -1197,8 +1205,17 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			ProjectId:    req.GetProjectId(),
 			CompanyId:    req.GetCompanyId(),
 			ClientTypeId: req.GetClientTypeId(),
-			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+			//RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
 		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		_, err = s.strg.User().Delete(ctx, req)
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	case 3:
 		clientType, err := services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",

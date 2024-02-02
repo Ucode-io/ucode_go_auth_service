@@ -72,7 +72,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c,
 		resource.ProjectId,
 		resource.NodeType,
@@ -81,7 +81,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 	// this is get list objects list from object builder
 	switch resource.ResourceType {
 	case 1:
-		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
+		resp, _ = services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),
@@ -90,7 +90,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 			},
 		)
 	case 3:
-		resp, err = services.PostgresObjectBuilderService().GetList(
+		resp, _ = services.PostgresObjectBuilderService().GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: c.Param("table_slug"),

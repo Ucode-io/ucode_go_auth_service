@@ -34,6 +34,7 @@ type Store struct {
 	loginStrategy     storage.LoginStrategyI
 	loginPlatformType storage.LoginPlatformType
 	smsOtpSettings    storage.SmsOtpSettingsRepoI
+	apiKeyUsage       storage.ApiKeyUsageRepoI
 }
 
 func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, error) {
@@ -243,4 +244,11 @@ func (s *Store) SmsOtpSettings() storage.SmsOtpSettingsRepoI {
 		s.smsOtpSettings = NewSmsOtpSettingsRepo(s.db)
 	}
 	return s.smsOtpSettings
+}
+
+func (s *Store) ApiKeyUsage() storage.ApiKeyUsageRepoI {
+	if s.apiKeyUsage == nil {
+		s.apiKeyUsage = NewApiKeyUsageRepo(s.db)
+	}
+	return s.apiKeyUsage
 }

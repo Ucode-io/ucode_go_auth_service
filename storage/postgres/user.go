@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -427,7 +428,10 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	lowercasedUsername := strings.ToLower(username)
 
-	if util.IsValidEmail(username) {
+	fmt.Println("emailusername", username)
+	fmt.Println("util.IsValidEmail(username):", IsValidEmailNew(username))
+
+	if IsValidEmailNew(username) {
 		query = query + ` LOWER(email) = $1`
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
@@ -992,26 +996,32 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	params := make(map[string]interface{})
 
 	query := `DELETE FROM "user_project" 
-				WHERE 
-				project_id = :project_id AND 
-				user_id = :user_id AND 
-				company_id = :company_id`
+	WHERE  
+	user_id = :user_id`
 
-	params["project_id"] = req.ProjectId
+	// `DELETE FROM "user_project"
+	// 			WHERE
+	// 			project_id = :project_id
+	// 			AND
+	// 			user_id = :user_id
+	// 			AND
+	// 			company_id = :company_id`
+
+	// params["project_id"] = req.ProjectId
 	params["user_id"] = req.UserId
-	params["company_id"] = req.CompanyId
-	if req.GetRoleId() != "" {
-		query += " AND role_id = :role_id"
-		params["role_id"] = req.GetRoleId()
-	}
-	if req.GetClientTypeId() != "" {
-		query += " AND client_type_id = :client_type_id"
-		params["client_type_id"] = req.GetClientTypeId()
-	}
-	if req.GetEnvironmentId() != "" {
-		query += " AND env_id = :env_id"
-		params["env_id"] = req.GetEnvironmentId()
-	}
+	// params["company_id"] = req.CompanyId
+	// if req.GetRoleId() != "" {
+	// 	query += " AND role_id = :role_id"
+	// 	params["role_id"] = req.GetRoleId()
+	// }
+	// if req.GetClientTypeId() != "" {
+	// 	query += " AND client_type_id = :client_type_id"
+	// 	params["client_type_id"] = req.GetClientTypeId()
+	// }
+	// if req.GetEnvironmentId() != "" {
+	// 	query += " AND env_id = :env_id"
+	// 	params["env_id"] = req.GetEnvironmentId()
+	// }
 
 	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx,
@@ -1158,4 +1168,16 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	}
 
 	return &res, nil
+}
+
+func IsValidEmailNew(email string) bool {
+	// Define the regular expression pattern for a valid email address
+	// This is a basic pattern and may not cover all edge cases
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(emailRegex)
+
+	// Use the MatchString method to check if the email matches the pattern
+	return re.MatchString(email)
 }
