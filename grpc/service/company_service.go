@@ -68,7 +68,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	_, err = s.services.ProjectServiceClient().Update(
+	_, _ = s.services.ProjectServiceClient().Update(
 		ctx,
 		&company_service.Project{
 			CompanyId:    companyPKey.GetId(),

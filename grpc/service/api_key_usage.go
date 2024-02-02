@@ -11,6 +11,7 @@ import (
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type apiKeyUsageService struct {
@@ -32,12 +33,12 @@ func NewApiKeyUsageService(cfg config.BaseConfig, log logger.LoggerI, strg stora
 	}
 }
 
-func (s *apiKeyUsageService) CheckAndUpsertLimit(ctx context.Context, req *pb.CheckLimitRequest) (*pb.CheckLimitResponse, error) {
-	s.log.Info("---CheckAndUpsertLimit--->", logger.Any("req", req))
+func (s *apiKeyUsageService) CheckLimit(ctx context.Context, req *pb.CheckLimitRequest) (*pb.CheckLimitResponse, error) {
+	s.log.Info("---CheckLimitApiKeyUsage--->", logger.Any("req", req))
 
-	res, err := s.strg.ApiKeyUsage().CheckAndUpsertLimit(ctx, req)
+	res, err := s.strg.ApiKeyUsage().CheckLimit(ctx, req)
 	if err != nil {
-		s.log.Error("!!!CheckAndUpsertLimit--->", logger.Error(err))
+		s.log.Error("!!!CheckLimitApiKeyUsage--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on creating new api key")
 	}
 
@@ -45,16 +46,34 @@ func (s *apiKeyUsageService) CheckAndUpsertLimit(ctx context.Context, req *pb.Ch
 }
 
 func (s *apiKeyUsageService) Get(ctx context.Context, req *pb.GetApiKeyUsageReq) (*pb.ApiKeyUsage, error) {
-	s.log.Info("---Get--->", logger.Any("req", req))
+	s.log.Info("---GetApiKeyUsage--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeyUsage().Get(ctx, req)
 	if err == pgx.ErrNoRows {
-		s.log.Error("!!!Get--->", logger.Error(err))
+		s.log.Error("!!!GetApiKeyUsage--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, "api-key not found")
 	}
 	if err != nil {
-		s.log.Error("!!!Get--->", logger.Error(err))
+		s.log.Error("!!!GetApiKeyUsage--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on getting api key")
+	}
+
+	return res, nil
+}
+
+func (s *apiKeyUsageService) Upsert(ctx context.Context, req *pb.ApiKeyUsage) (*emptypb.Empty, error) {
+	s.log.Info("---UpsertApiKeyUsage--->", logger.Any("req", req))
+
+	res := &emptypb.Empty{}
+
+	err := s.strg.ApiKeyUsage().Upsert(ctx, req)
+	if err == pgx.ErrNoRows {
+		s.log.Error("!!!UpsertApiKeyUsage--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, "api-key not found")
+	}
+	if err != nil {
+		s.log.Error("!!!UpsertApiKeyUsage--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, "error on upserting api key usage")
 	}
 
 	return res, nil

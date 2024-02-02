@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -23,7 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ApiKeyUsageServiceClient interface {
 	Get(ctx context.Context, in *GetApiKeyUsageReq, opts ...grpc.CallOption) (*ApiKeyUsage, error)
-	CheckAndUpsertLimit(ctx context.Context, in *CheckLimitRequest, opts ...grpc.CallOption) (*CheckLimitResponse, error)
+	CheckLimit(ctx context.Context, in *CheckLimitRequest, opts ...grpc.CallOption) (*CheckLimitResponse, error)
+	Upsert(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type apiKeyUsageServiceClient struct {
@@ -43,9 +45,18 @@ func (c *apiKeyUsageServiceClient) Get(ctx context.Context, in *GetApiKeyUsageRe
 	return out, nil
 }
 
-func (c *apiKeyUsageServiceClient) CheckAndUpsertLimit(ctx context.Context, in *CheckLimitRequest, opts ...grpc.CallOption) (*CheckLimitResponse, error) {
+func (c *apiKeyUsageServiceClient) CheckLimit(ctx context.Context, in *CheckLimitRequest, opts ...grpc.CallOption) (*CheckLimitResponse, error) {
 	out := new(CheckLimitResponse)
-	err := c.cc.Invoke(ctx, "/auth_service.ApiKeyUsageService/CheckAndUpsertLimit", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth_service.ApiKeyUsageService/CheckLimit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiKeyUsageServiceClient) Upsert(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/auth_service.ApiKeyUsageService/Upsert", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +68,8 @@ func (c *apiKeyUsageServiceClient) CheckAndUpsertLimit(ctx context.Context, in *
 // for forward compatibility
 type ApiKeyUsageServiceServer interface {
 	Get(context.Context, *GetApiKeyUsageReq) (*ApiKeyUsage, error)
-	CheckAndUpsertLimit(context.Context, *CheckLimitRequest) (*CheckLimitResponse, error)
+	CheckLimit(context.Context, *CheckLimitRequest) (*CheckLimitResponse, error)
+	Upsert(context.Context, *ApiKeyUsage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedApiKeyUsageServiceServer()
 }
 
@@ -68,8 +80,11 @@ type UnimplementedApiKeyUsageServiceServer struct {
 func (UnimplementedApiKeyUsageServiceServer) Get(context.Context, *GetApiKeyUsageReq) (*ApiKeyUsage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedApiKeyUsageServiceServer) CheckAndUpsertLimit(context.Context, *CheckLimitRequest) (*CheckLimitResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckAndUpsertLimit not implemented")
+func (UnimplementedApiKeyUsageServiceServer) CheckLimit(context.Context, *CheckLimitRequest) (*CheckLimitResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckLimit not implemented")
+}
+func (UnimplementedApiKeyUsageServiceServer) Upsert(context.Context, *ApiKeyUsage) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Upsert not implemented")
 }
 func (UnimplementedApiKeyUsageServiceServer) mustEmbedUnimplementedApiKeyUsageServiceServer() {}
 
@@ -102,20 +117,38 @@ func _ApiKeyUsageService_Get_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiKeyUsageService_CheckAndUpsertLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiKeyUsageService_CheckLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CheckLimitRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiKeyUsageServiceServer).CheckAndUpsertLimit(ctx, in)
+		return srv.(ApiKeyUsageServiceServer).CheckLimit(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/auth_service.ApiKeyUsageService/CheckAndUpsertLimit",
+		FullMethod: "/auth_service.ApiKeyUsageService/CheckLimit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiKeyUsageServiceServer).CheckAndUpsertLimit(ctx, req.(*CheckLimitRequest))
+		return srv.(ApiKeyUsageServiceServer).CheckLimit(ctx, req.(*CheckLimitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ApiKeyUsageService_Upsert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApiKeyUsage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiKeyUsageServiceServer).Upsert(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.ApiKeyUsageService/Upsert",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiKeyUsageServiceServer).Upsert(ctx, req.(*ApiKeyUsage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -132,8 +165,12 @@ var ApiKeyUsageService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ApiKeyUsageService_Get_Handler,
 		},
 		{
-			MethodName: "CheckAndUpsertLimit",
-			Handler:    _ApiKeyUsageService_CheckAndUpsertLimit_Handler,
+			MethodName: "CheckLimit",
+			Handler:    _ApiKeyUsageService_CheckLimit_Handler,
+		},
+		{
+			MethodName: "Upsert",
+			Handler:    _ApiKeyUsageService_Upsert_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

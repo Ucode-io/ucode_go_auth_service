@@ -49,7 +49,7 @@ func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb
 func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.UpdateLoginPlatformType--->", logger.Any("req", req))
 
-	types, err := e.strg.LoginPlatformType().GetLoginPlatformType(
+	types, _ := e.strg.LoginPlatformType().GetLoginPlatformType(
 		ctx,
 		&pb.LoginPlatformTypePrimaryKey{
 			Id: req.Id,

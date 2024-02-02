@@ -18,7 +18,7 @@ func NewApiKeyUsageRepo(db *pgxpool.Pool) storage.ApiKeyUsageRepoI {
 	}
 }
 
-func (r *apiKeyUsageRepo) CheckAndUpsertLimit(ctx context.Context, req *pb.CheckLimitRequest) (*pb.CheckLimitResponse, error) {
+func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequest) (*pb.CheckLimitResponse, error) {
 	var (
 		res pb.CheckLimitResponse
 	)
@@ -32,4 +32,9 @@ func (r *apiKeyUsageRepo) Get(ctx context.Context, req *pb.GetApiKeyUsageReq) (*
 	)
 
 	return &res, nil
+}
+
+func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error {
+
+	return nil
 }
