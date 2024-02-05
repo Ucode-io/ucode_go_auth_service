@@ -107,7 +107,8 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 				project_id,
 				client_type_id,
 				rps_limit,
-				monthly_request_limit
+				monthly_request_limit,
+				(SELECT count(1) FROM api_key_usage where api_key=app_id)
 			FROM
 			    api_keys`
 
@@ -189,6 +190,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&clientTypeId,
 			&row.RpsLimit,
 			&row.MonthlyRequestLimit,
+			&row.UsedCount,
 		)
 
 		if err != nil {
@@ -232,6 +234,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 				client_type_id,
 				rps_limit,
 				monthly_request_limit,
+				(SELECT count(1) FROM api_key_usage where api_key=app_id),
   				created_at,
   				updated_at
 			FROM
@@ -251,6 +254,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.ClientTypeId,
 		&res.RpsLimit,
 		&res.MonthlyRequestLimit,
+		&res.UsedCount,
 		&createdAt,
 		&updatedAt,
 	)
@@ -273,11 +277,9 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 				name = $2,
 				role_id = $3,
 				client_type_id = $4,
-				rps_limit = $5,
-				monthly_request_limit = $6,
 				updated_at = now()
 			WHERE
-			    id = $7`
+			    id = $5`
 
 	res, err := r.db.Exec(
 		ctx,
@@ -286,8 +288,6 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 		req.GetName(),
 		req.GetRoleId(),
 		req.GetClientTypeId(),
-		req.GetRpsLimit(),
-		req.GetMonthlyRequestLimit(),
 		req.GetId(),
 	)
 
