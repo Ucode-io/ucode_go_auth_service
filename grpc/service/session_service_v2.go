@@ -11,7 +11,8 @@ import (
 	"time"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+
+	// "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -370,7 +371,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: userIdRes.GetId(),
 		})
 		if err != nil {
@@ -413,7 +414,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: userIdRes.GetId(),
 		})
 		if err != nil {
@@ -606,11 +607,11 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		return nil, err
 	}
 
-	companiesResp := []*auth_service.Company{}
+	companiesResp := []*pb.Company{}
 
 	if len(companies.Companies) < 1 {
 		companiesById := make([]*company_service.Company, 0)
-		user, err := s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{
+		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: resp.GetUserId(),
 		})
 		if err != nil {
@@ -1743,7 +1744,7 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 	s.log.Info("V2ResetPassword <- ", logger.Any("res: ", rowsAffected))
-	return s.strg.User().GetByPK(ctx, &auth_service.UserPrimaryKey{Id: req.GetUserId()})
+	return s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: req.GetUserId()})
 }
 
 func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {

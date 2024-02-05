@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"strings"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
@@ -354,14 +354,14 @@ func (r *permissionRepo) Delete(ctx context.Context, pKey *pb.PermissionPrimaryK
 	return rowsAffected, err
 }
 
-func (r *permissionRepo) GeneratePermission(ctx context.Context, req *auth_service.PermissionGenerated) (res *auth_service.Permission, err error) {
+func (r *permissionRepo) GeneratePermission(ctx context.Context, req *pb.PermissionGenerated) (res *pb.Permission, err error) {
 
 	return nil, nil
 }
 
-func MakePermissions(permissions *auth_service.PermissionGenerated_Permission) []*auth_service.Permission {
+func MakePermissions(permissions *pb.PermissionGenerated_Permission) []*pb.Permission {
 	var (
-		res []*auth_service.Permission
+		res []*pb.Permission
 	)
 	if permissions.Children == nil {
 		return res
@@ -370,7 +370,7 @@ func MakePermissions(permissions *auth_service.PermissionGenerated_Permission) [
 	return res
 }
 
-func InsertScopes(scopes []*auth_service.PermissionGenerated_Permission_Scope, permissionID, clientPlatformID string, tx *sql.Tx) error {
+func InsertScopes(scopes []*pb.PermissionGenerated_Permission_Scope, permissionID, clientPlatformID string, tx *sql.Tx) error {
 	values := []interface{}{}
 	query := `
 		INSERT INTO "permission_scope" (

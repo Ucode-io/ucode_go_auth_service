@@ -51,7 +51,7 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 	secretKey := "S-" + helper.GenerateSecretKey(32)
 	secretId := "P-" + helper.GenerateSecretKey(32)
 
-	hashedSecretKey, err := security.HashPassword(secretKey)
+	hashedSecretKey, _ := security.HashPassword(secretKey)
 
 	// req.AppSecret = hashedSecretKey
 	// req.AppId = secretId

@@ -109,6 +109,9 @@ func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSett
 			&resp.Email,
 			&resp.Password,
 		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
@@ -142,6 +145,9 @@ func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEma
 			&resp.Email,
 			&resp.Password,
 		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
