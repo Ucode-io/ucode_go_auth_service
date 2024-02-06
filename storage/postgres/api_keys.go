@@ -67,8 +67,6 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetEnvironmentId(),
 		req.GetProjectId(),
 		req.GetClientTypeId(),
-		req.GetRpsLimit(),
-		req.GetMonthlyRequestLimit(),
 	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId, &res.RpsLimit, &res.MonthlyRequestLimit)
 
 	if err != nil {
