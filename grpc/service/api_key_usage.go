@@ -44,11 +44,11 @@ func (s *apiKeyUsageService) CheckLimit(ctx context.Context, req *pb.CheckLimitR
 
 	if res.RpsCount <= 0 {
 		res.IsLimitReached = true
-		return nil, status.Error(codes.ResourceExhausted, "rps limit exceeded")
+		return res, status.Error(codes.ResourceExhausted, "rps limit exceeded")
 	}
 	if res.MonthlyCount <= 0 {
 		res.IsLimitReached = true
-		return nil, status.Error(codes.ResourceExhausted, "monthly limit exceeded")
+		return res, status.Error(codes.ResourceExhausted, "monthly limit exceeded")
 	}
 
 	return res, nil

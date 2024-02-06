@@ -5,13 +5,12 @@ option go_package="genproto/object_builder_service";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
-import "permission.proto";
 
 service MenuService {
     rpc Create(CreateMenuRequest) returns (Menu) {}
     rpc GetByID(MenuPrimaryKey) returns (Menu) {}
     rpc GetAll(GetAllMenusRequest) returns (GetAllMenusResponse) {}
-    rpc Update(Menu) returns (google.protobuf.Empty) {}
+    rpc Update(Menu) returns (Menu) {}
     rpc Delete(MenuPrimaryKey) returns (google.protobuf.Empty) {}
     rpc UpdateMenuOrder(UpdateMenuOrderRequest) returns (google.protobuf.Empty) {}
 
@@ -125,6 +124,7 @@ message CreateMenuRequest {
     string wiki_id = 11;
     bool is_visible = 12;
     string env_id = 13;
+    string id = 14;
 }
 
 message Menu {
@@ -143,8 +143,8 @@ message Menu {
     string wiki_id = 13;
     bool is_visible = 14;
     bool is_static = 15;
-    string env_id = 16;
-    google.protobuf.Struct data = 17;
+    google.protobuf.Struct data = 16;
+    string env_id = 17;
 }
 
 message MenuForGetAll {
