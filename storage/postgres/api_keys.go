@@ -40,8 +40,6 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			environment_id, 
 			project_id, 
 			client_type_id,
-			rps_limit,
-			monthly_request_limit,
 			created_at, 
 			updated_at
 		)
@@ -54,8 +52,6 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			$6, 
 			$7, 
 			$8,
-			$9,
-			$10,
 			now(), 
 			now()) 
 		RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id, rps_limit, monthly_request_limit`
