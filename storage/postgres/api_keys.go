@@ -40,8 +40,6 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			environment_id, 
 			project_id, 
 			client_type_id,
-			rps_limit,
-			monthly_request_limit,
 			created_at, 
 			updated_at
 		)
@@ -54,8 +52,6 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			$6, 
 			$7, 
 			$8,
-			$9,
-			$10,
 			now(), 
 			now()) 
 		RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id, rps_limit, monthly_request_limit`
@@ -71,8 +67,6 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetEnvironmentId(),
 		req.GetProjectId(),
 		req.GetClientTypeId(),
-		req.GetRpsLimit(),
-		req.GetMonthlyRequestLimit(),
 	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId, &res.RpsLimit, &res.MonthlyRequestLimit)
 
 	if err != nil {
