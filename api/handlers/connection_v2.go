@@ -257,19 +257,16 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
