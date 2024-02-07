@@ -25,7 +25,10 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateProject(c *gin.Context) {
 	//var project auth_service.CreateProjectRequest
-	var project company_service.CreateProjectRequest
+	var (
+		project company_service.CreateProjectRequest
+		resp    *company_service.CreateProjectResponse
+	)
 
 	err := c.ShouldBindJSON(&project)
 	if err != nil {
@@ -33,7 +36,7 @@ func (h *Handler) CreateProject(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.ProjectServiceClient().Create(
+	resp, err = h.services.ProjectServiceClient().Create(
 		c.Request.Context(),
 		&project,
 	)

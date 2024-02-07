@@ -7811,6 +7811,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create ClientType
       tags:
       - V2_ClientType
@@ -7870,6 +7872,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update ClientType
       tags:
       - V2_ClientType
@@ -7921,6 +7925,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete ClientType
       tags:
       - V2_ClientType
@@ -8666,6 +8672,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: V2Login
       tags:
       - V2_Session
@@ -9148,6 +9156,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update Permission
       tags:
       - V2_Permission
@@ -9212,6 +9222,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get Permission List
       tags:
       - V2_Permission
@@ -9883,6 +9895,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create Role
       tags:
       - V2_Role
@@ -10060,6 +10074,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update Permission
       tags:
       - V2_Permission
@@ -10118,6 +10134,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get Permission List
       tags:
       - V2_Permission
@@ -10169,6 +10187,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete Role
       tags:
       - V2_Role
@@ -10871,6 +10891,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create User
       tags:
       - V2_User
@@ -10925,6 +10947,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update User
       tags:
       - V2_User
@@ -10982,6 +11006,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete User
       tags:
       - V2_User
@@ -11301,4 +11327,9 @@ paths:
       summary: Verify
       tags:
       - Email
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

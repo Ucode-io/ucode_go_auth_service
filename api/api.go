@@ -23,7 +23,9 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	docs.SwaggerInfo.Version = cfg.Version
 	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
-
+	// @securityDefinitions.apikey ApiKeyAuth
+	// @in header
+	// @name Authorization
 	r.Use(customCORSMiddleware())
 
 	r.GET("/ping", h.Ping)

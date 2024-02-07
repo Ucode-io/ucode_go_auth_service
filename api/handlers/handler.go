@@ -1,12 +1,21 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
 	"strconv"
+	"time"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/grpc/service"
 
+	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
 
 	"github.com/gin-gonic/gin"
@@ -89,4 +98,75 @@ func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
 func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
 	limitStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
 	return strconv.Atoi(limitStr)
+}
+
+func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+	var (
+		current  = map[string]interface{}{"data": req.Current}
+		previous = map[string]interface{}{"data": req.Previous}
+		request  = map[string]interface{}{"data": req.Request}
+		response = map[string]interface{}{"data": req.Response}
+		user     = ""
+	)
+
+	sharedServiceManager, _ := h.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
+
+	if req.Current == nil {
+		current["data"] = make(map[string]interface{})
+	}
+	if req.Previous == nil {
+		previous["data"] = make(map[string]interface{})
+	}
+	if req.Request == nil {
+		request["data"] = make(map[string]interface{})
+	}
+	if req.Response == nil {
+		response["data"] = make(map[string]interface{})
+	}
+
+	info, err := h.services.UserService().GetUserByID(context.Background(), &auth_service.UserPrimaryKey{
+		Id: req.UserInfo,
+	})
+	if err == nil {
+		if info.Login != "" {
+			user = info.Login
+		} else {
+			user = info.Phone
+		}
+	}
+
+	_, err = sharedServiceManager.VersionHistoryService().Create(
+		context.Background(),
+		&object_builder_service.CreateVersionHistoryRequest{
+			Id:                uuid.NewString(),
+			ProjectId:         req.ProjectId,
+			ActionSource:      req.ActionSource,
+			ActionType:        req.ActionType,
+			Previus:           fromMapToString(previous),
+			Current:           fromMapToString(current),
+			UsedEnvrironments: req.UsedEnvironments,
+			Date:              time.Now().Format("2006-01-02 15:04:05"),
+			UserInfo:          user,
+			Request:           fromMapToString(request),
+			Response:          fromMapToString(response),
+			ApiKey:            req.ApiKey,
+			Type:              req.Type,
+			TableSlug:         req.TableSlug,
+		},
+	)
+	if err != nil {
+		fmt.Println("=======================================================")
+		log.Println(err)
+		fmt.Println("=======================================================")
+		return err
+	}
+	return nil
+}
+
+func fromMapToString(req map[string]interface{}) string {
+	reqString, err := json.Marshal(req)
+	if err != nil {
+		return ""
+	}
+	return string(reqString)
 }

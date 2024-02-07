@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/gin-gonic/gin"
@@ -99,6 +101,7 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// @Security ApiKeyAuth
 // V2AddRole godoc
 // @ID create_role_v2
 // @Param Resource-Id header string false "Resource-Id"
@@ -118,6 +121,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 	var (
 		// resourceEnvironment *obs.ResourceEnvironment
 		role auth_service.V2AddRoleRequest
+		resp *auth_service.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&role)
@@ -155,7 +159,34 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 	role.ResourceType = int32(resource.ResourceType)
 	role.NodeType = resource.NodeType
 
-	resp, err := h.services.PermissionService().V2AddRole(
+	userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &role,
+			TableSlug: "ROLE",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!V2AddRole -> error")
+		} else {
+			logReq.Response = resp
+			h.log.Info("V2AddRole -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = h.services.PermissionService().V2AddRole(
 		c.Request.Context(),
 		&role,
 	)
@@ -417,6 +448,7 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// @Security ApiKeyAuth
 // V2RemoveRole godoc
 // @ID delete_role_v2
 // @Param Resource-Id header string false "Resource-Id"
@@ -435,7 +467,8 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 func (h *Handler) V2RemoveRole(c *gin.Context) {
 	var (
 		// resourceEnvironment *obs.ResourceEnvironment
-		err error
+		err  error
+		resp *auth_service.CommonMessage
 	)
 	roleID := c.Param("role-id")
 
@@ -501,7 +534,34 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PermissionService().V2RemoveRole(
+	userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   roleID,
+			TableSlug: "ROLE",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!V2RemoveRole -> error")
+		} else {
+			logReq.Response = resp
+			h.log.Info("V2RemoveRole -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = h.services.PermissionService().V2RemoveRole(
 		c.Request.Context(),
 		&auth_service.V2RolePrimaryKey{
 			Id:           roleID,
@@ -519,6 +579,7 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
+// @Security ApiKeyAuth
 // GetListWithRoleAppTablePermissions godoc
 // @ID get_list_with_role_app_table_permissions
 // @Param Resource-Id header string true "Resource-Id"
@@ -565,7 +626,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c,
 		resource.ProjectId,
 		resource.NodeType,
@@ -607,6 +668,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// @Security ApiKeyAuth
 // UpdateRoleAppTablePermissions godoc
 // @ID update_role_app_table_permissions
 // @Param Resource-Id header string false "Resource-Id"
@@ -660,7 +722,35 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	userId, _ := c.Get("user_id")
+
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &permission,
+			TableSlug: "ROLE_PERMISSION",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!UpdateRoleAppTablePermissions -> error")
+		} else {
+			logReq.Response = resp
+			h.log.Info("UpdateRoleAppTablePermissions -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	services, _ := h.GetProjectSrvc(
 		c,
 		resource.ProjectId,
 		resource.NodeType,
@@ -696,6 +786,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// @Security ApiKeyAuth
 // GetListMenuPermissions godoc
 // @ID get_list_menu_permissions
 // @Param Resource-Id header string false "Resource-Id"
@@ -742,7 +833,7 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c,
 		resource.ProjectId,
 		resource.NodeType,
@@ -782,6 +873,7 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// @Security ApiKeyAuth
 // UpdateMenuPermissions godoc
 // @ID update_menu_permissions
 // @Param Resource-Id header string false "Resource-Id"
@@ -835,7 +927,34 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &permission,
+			TableSlug: "MENU_PERMISSION",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!UpdateMenuPermissions -> error")
+		} else {
+			logReq.Response = resp
+			h.log.Info("UpdateMenuPermissions -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	services, _ := h.GetProjectSrvc(
 		c,
 		resource.ProjectId,
 		resource.NodeType,

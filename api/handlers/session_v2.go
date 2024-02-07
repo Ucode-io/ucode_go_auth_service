@@ -18,8 +18,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 )
 
+// @Security ApiKeyAuth
 // V2Login godoc
 // @ID V2login
 // @Param Resource-Id header string true "Resource-Id"
@@ -37,6 +39,7 @@ import (
 func (h *Handler) V2Login(c *gin.Context) {
 	var (
 		login auth_service.V2LoginRequest
+		resp  *pb.V2LoginResponse
 	)
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
@@ -144,7 +147,34 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 	login.NodeType = resourceEnvironment.GetNodeType()
 
-	resp, err := h.services.SessionService().V2Login(
+	userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resourceEnvironment.NodeType,
+			ProjectId:    resourceEnvironment.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(resourceEnvironment.EnvironmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &login,
+			TableSlug: "USER",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!V2Login -> error")
+		} else {
+			logReq.Response = resp
+			h.log.Info("V2Login -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = h.services.SessionService().V2Login(
 		c.Request.Context(),
 		&login,
 	)

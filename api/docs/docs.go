@@ -7312,6 +7312,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update ClientType",
                 "consumes": [
                     "application/json"
@@ -7413,6 +7418,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create ClientType",
                 "consumes": [
                     "application/json"
@@ -7614,6 +7624,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get ClientType",
                 "consumes": [
                     "application/json"
@@ -8794,6 +8809,11 @@ const docTemplate = `{
         },
         "/v2/login": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "V2Login",
                 "consumes": [
                     "application/json"
@@ -9631,6 +9651,11 @@ const docTemplate = `{
         },
         "/v2/menu-permission/detailed": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update Permission",
                 "consumes": [
                     "application/json"
@@ -9734,6 +9759,11 @@ const docTemplate = `{
         },
         "/v2/menu-permission/detailed/{project-id}/{role-id}/{parent-id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get Permission List",
                 "consumes": [
                     "application/json"
@@ -10988,6 +11018,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create Role",
                 "consumes": [
                     "application/json"
@@ -11191,6 +11226,11 @@ const docTemplate = `{
         },
         "/v2/role-permission/detailed": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update Permission",
                 "consumes": [
                     "application/json"
@@ -11294,6 +11334,11 @@ const docTemplate = `{
         },
         "/v2/role-permission/detailed/{project-id}/{role-id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get Permission List",
                 "consumes": [
                     "application/json"
@@ -11492,6 +11537,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get Role",
                 "consumes": [
                     "application/json"
@@ -12606,6 +12656,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update User",
                 "consumes": [
                     "application/json"
@@ -12700,6 +12755,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create User",
                 "consumes": [
                     "application/json"
@@ -13067,6 +13127,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get User",
                 "consumes": [
                     "application/json"
@@ -18461,6 +18526,13 @@ const docTemplate = `{
                 "SHA512WithRSAPSS",
                 "PureEd25519"
             ]
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
