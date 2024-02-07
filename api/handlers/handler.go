@@ -148,7 +148,7 @@ func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistor
 			Previus:           fromMapToString(previous),
 			Current:           fromMapToString(current),
 			UsedEnvrironments: req.UsedEnvironments,
-			Date:              time.Now().String(),
+			Date:              time.Now().Format("2006-01-02T15:04:05.000Z"),
 			UserInfo:          user,
 			Request:           fromMapToString(request),
 			Response:          fromMapToString(response),
