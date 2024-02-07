@@ -137,7 +137,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
 	v2.GET("/get-connection-options/:connection_id/:user_id", h.GetConnectionOptions)
 
-	v2.Use(h.AuthMiddleware())
+	// v2.Use(h.AuthMiddleware())
 	{
 		// sms-otp-settings
 		v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
