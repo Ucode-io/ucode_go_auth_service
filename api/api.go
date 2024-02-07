@@ -125,6 +125,10 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	v2.POST("/register", h.V2Register)
 	v2.POST("/login/with-option", h.V2LoginWithOption)
 	v2.POST("/send-code-app", h.V2SendCodeApp)
+	v2.POST("/forgot-password", h.ForgotPassword)
+	v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
+	v2.PUT("/reset-password", h.V2ResetPassword)
+	v2.PUT("set-email/send-code", h.EmailEnter)
 
 	v2.Use(h.AuthMiddleware())
 	{
@@ -220,10 +224,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.GET("/login-strategy", h.GetLoginStrategy)
 		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
 		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
-		v2.POST("/forgot-password", h.ForgotPassword)
-		v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
-		v2.PUT("/reset-password", h.V2ResetPassword)
-		v2.PUT("set-email/send-code", h.EmailEnter)
 	}
 
 	//COMPANY
