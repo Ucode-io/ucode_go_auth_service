@@ -83,6 +83,10 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			}},
 		},
 	)
+	if err != nil {
+		s.log.Error("---RegisterCompany-UpdateProjectLanguage-->", logger.Error(err))
+		return nil, err
+	}
 
 	environment, err := s.services.EnvironmentService().Create(
 		ctx,

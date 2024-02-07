@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -120,7 +121,6 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
 		Data:      result.Data,
@@ -129,24 +129,28 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
-	var (
-		result *pbObject.CommonMessage
-	)
+	result := &pbObject.CommonMessage{}
 
 	if req.Limit == 0 {
 		req.Limit = 1000
 	}
 
 	// @TODO limit offset error should fix
+	if req.Limit == 0 {
+		req.Limit = 1000
+	}
 	structReq := map[string]interface{}{
 		"limit":  req.GetLimit(),
 		"offset": req.GetOffset(),
 		//"search": req.GetSearch(),
 	}
+
 	if req.Guids != nil {
 		structReq["guid"] = req.Guids
 	}
+
 	structData, err := helper.ConvertRequestToSturct(structReq)
+
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -162,8 +166,9 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 
 	switch req.ResourceType {
 	case 1:
+		fmt.Println("\n\n\n\n RESPONSE 222 -----> ")
 
-		result, err = services.GetObjectBuilderServiceByType(req.NodeType).GetListSlim(ctx,
+		result, err = services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
@@ -171,7 +176,8 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			})
 		if err != nil {
 			s.log.Error("!!!GetClientTypeList.ObjectBuilderService.GetList--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return &pb.CommonMessage{}, nil
+			// return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
 
@@ -209,6 +215,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		"guid":            req.Guid,
 		"client_type_ids": req.ClientPlatformIds,
 		"table_slug":      req.TableSlug,
+		"id":              req.Guid,
 		"default_page":    req.DefaultPage,
 	}
 

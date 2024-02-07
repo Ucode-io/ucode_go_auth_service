@@ -9,10 +9,9 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
-	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
-	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+
+	// pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -74,7 +73,7 @@ func (h *Handler) V2Logout(c *gin.Context) {
 // @Param Environment-Id header string false "Environment-Id"
 // @Param project-id query string false "project-id"
 // @Param registerBody body models.RegisterOtp true "register_body"
-// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
+// @Success 201 {object} http.Response{data=auth_service.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RegisterProvider(c *gin.Context) {
@@ -139,7 +138,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		&obs.GetSingleServiceResourceReq{
 			EnvironmentId: environmentId.(string),
 			ProjectId:     projectId.(string),
-			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+			ServiceType:   obs.ServiceType_BUILDER_SERVICE,
 		},
 	)
 
@@ -148,7 +147,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		return
 	}
 
-	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &obs.GetProjectByIdRequest{
 		ProjectId: serviceResource.GetProjectId(),
 	})
 	if err != nil {
@@ -252,7 +251,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Param verifyBody body models.Verify true "verify_body"
-// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
+// @Success 201 {object} http.Response{data=auth_service.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2VerifyOtp(c *gin.Context) {
@@ -269,9 +268,11 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	}
 
 	if body.Provider == "" {
-		h.handleResponse(c, http.BadRequest, "Register type is required")
+		h.handleResponse(c, http.BadRequest, "Provider type is required")
 		return
 	}
+
+	body.RegisterType = body.Provider
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
@@ -305,13 +306,15 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		resourceEnvironment.NodeType,
 	)
 
-	switch body.Provider {
-	case cfg.Default:
+	switch strings.ToLower(body.Provider) {
+	case "email", cfg.Default:
 		{
+			fmt.Println("\n\n Verify test #1")
 			if c.Param("otp") != "121212" {
+				fmt.Println("\n\n Verify test #2", c.Param("verify_id"))
 				resp, err := h.services.EmailService().GetEmailByID(
 					c.Request.Context(),
-					&pb.EmailOtpPrimaryKey{
+					&auth_service.EmailOtpPrimaryKey{
 						Id: c.Param("verify_id"),
 					},
 				)
@@ -319,6 +322,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 					h.handleResponse(c, http.GRPCError, err.Error())
 					return
 				}
+				fmt.Println("\n\n Verify test #3", body.Otp, resp.Otp)
 				if resp.Otp != body.Otp {
 					h.handleResponse(c, http.InvalidArgument, "Неверный код подверждения")
 					return
@@ -380,7 +384,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
 			res, err := h.services.SessionService().SessionAndTokenGenerator(
 				context.Background(),
-				&pb.SessionAndTokenRequest{
+				&auth_service.SessionAndTokenRequest{
 					LoginData: convertedToAuthPb,
 					Tables:    body.Tables,
 					ProjectId: resourceEnvironment.GetProjectId(), //@TODO:: temp added hardcoded project id
@@ -435,7 +439,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
 			res, err := h.services.SessionService().SessionAndTokenGenerator(
 				context.Background(),
-				&pb.SessionAndTokenRequest{
+				&auth_service.SessionAndTokenRequest{
 					LoginData: convertedToAuthPb,
 					Tables:    body.Tables,
 					ProjectId: resourceEnvironment.GetProjectId(),
@@ -448,6 +452,11 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 			h.handleResponse(c, http.Created, res)
 			return
 		}
+	default:
+		{
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 	if !body.Data.UserFound {
 		h.handleResponse(c, http.OK, "User verified but not found")
@@ -457,7 +466,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 	res, err := h.services.SessionService().SessionAndTokenGenerator(
 		context.Background(),
-		&pb.SessionAndTokenRequest{
+		&auth_service.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
 			ProjectId: resourceEnvironment.GetProjectId(), //@TODO:: temp added hardcoded project id
@@ -498,34 +507,37 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("Login test #1")
 	clientType := login.Data["client_type_id"]
 	if clientType == "" {
 		h.handleResponse(c, http.InvalidArgument, "inside data client_type_id is required")
 		return
 	}
+	fmt.Println("Login test #2")
 	if ok := util.IsValidUUID(clientType); !ok {
 		h.handleResponse(c, http.InvalidArgument, "lient_type_id is an invalid uuid")
 		return
 	}
+	fmt.Println("Login test #3")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-
 	environmentId, ok := c.Get("environment_id")
+	fmt.Println("Login test #4", environmentId, projectId)
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, http.BadRequest, err)
 		return
 	}
-
+	fmt.Println("Login test #5")
 	provider := c.Param("provider")
 	if provider == "" {
 		h.handleResponse(c, http.InvalidArgument, "provider is required(param)")
 		return
 	}
-
+	fmt.Println("Login test #6")
 	login.LoginStrategy = provider
 	login.Data["environment_id"] = environmentId.(string)
 	login.Data["project_id"] = projectId.(string)
@@ -537,7 +549,7 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 			LoginStrategy: login.GetLoginStrategy(),
 			Tables:        login.GetTables(),
 		})
-
+	fmt.Println("Login test #7")
 	httpErrorStr := ""
 	if err != nil {
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]

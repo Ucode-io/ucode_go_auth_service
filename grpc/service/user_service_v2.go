@@ -749,14 +749,22 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	user.Active = int32(active)
 
-	// projectId, ok := userData["project_id"].(string)
-	// if !ok {
-	// err := errors.New("projectId is nil")
-	// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-	// return nil, status.Error(codes.Internal, err.Error())
-	// }
+	projectId, ok := userData["project_id"].(string)
+	if !ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		projectId = ""
+	}
+	name, ok := userData["name"].(string)
+	if ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		user.Name = name
+	}
 
-	user.ProjectId = req.GetProjectId()
+	user.ProjectId = projectId
 
 	return user, nil
 }
@@ -929,6 +937,29 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		// clientPlatformId, ok := userItem["client_platform_id"].(string)
+		// if !ok {
+		// 	err := errors.New("clientPlatformId is nil")
+		// 	s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+		// 	return nil, status.Error(codes.Internal, err.Error())
+		// }
+
+		projectId, ok := userItem["project_id"].(string)
+		if !ok {
+			// err := errors.New("projectId is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			projectId = ""
+		}
+
+		active, ok := userItem["active"].(float64)
+		if !ok {
+			// err := errors.New("active is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			active = 0
+		}
+
 		user, ok := usersMap[userId]
 		if !ok {
 			err := errors.New("user is nil")
@@ -939,7 +970,8 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		if ok {
 			user.Name = name
 		}
-
+		user.Active = int32(active)
+		user.ProjectId = projectId
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
 
@@ -1097,22 +1129,6 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		}
 	}
 
-	//emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	//email := emailRegex.MatchString(req.Email)
-	//if !email {
-	//	err = fmt.Errorf("email is not valid")
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, err
-	//}
-	//
-	//phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
-	//phone := phoneRegex.MatchString(req.Phone)
-	//if !phone {
-	//	err = fmt.Errorf("phone number is not valid")
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, err
-	//}
-
 	res, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: req.Id})
 	if err != nil {
 		s.log.Error("!!!V2UpdateUser.GetByPK--->", logger.Error(err))
@@ -1244,6 +1260,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		})
 	}
 
+	_, err = s.strg.User().Delete(ctx, req)
+	if err != nil {
+		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return res, nil
 }
 
@@ -1282,6 +1304,15 @@ func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUser
 	return res, nil
 }
 
+func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
+	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
+	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		return nil, err
+	}
+	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
+	return res, nil
+}
 func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKey) (*pb.GetUserProjectsRes, error) {
 
 	userProjects, err := s.strg.User().GetUserProjects(ctx, req.Id)
@@ -1292,16 +1323,6 @@ func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKe
 	}
 
 	return userProjects, nil
-}
-
-func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
-	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
-	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		return nil, err
-	}
-	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
-	return res, nil
 }
 
 func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {

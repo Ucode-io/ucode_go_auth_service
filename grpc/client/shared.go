@@ -18,6 +18,7 @@ type SharedServiceManagerI interface {
 	PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	PostgresLoginService() object_builder_service.LoginServiceClient
 	PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient
+	VersionHistoryService() object_builder_service.VersionHistoryServiceClient
 
 	HighObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	HighLoginService() object_builder_service.LoginServiceClient
@@ -37,6 +38,7 @@ type sharedGrpcClients struct {
 	postgresObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	postgresLoginService             object_builder_service.LoginServiceClient
 	postgresBuilderPermissionService object_builder_service.PermissionServiceClient
+	versionHisotryService            object_builder_service.VersionHistoryServiceClient
 
 	highObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	highLoginService             object_builder_service.LoginServiceClient
@@ -93,6 +95,7 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		postgresLoginService:             object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
 		postgresObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connPostgresObjectBuilderService),
 		postgresBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connPostgresObjectBuilderService),
+		versionHisotryService:            object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 
 		highObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connHighObjectBuilderService),
 		highLoginService:             object_builder_service.NewLoginServiceClient(connHighObjectBuilderService),
@@ -181,4 +184,8 @@ func (g *sharedGrpcClients) WebPageAppService() web_page_service.AppServiceClien
 
 func (g *sharedGrpcClients) LoginService() object_builder_service.LoginServiceClient {
 	return g.loginService
+}
+
+func (g *sharedGrpcClients) VersionHistoryService() object_builder_service.VersionHistoryServiceClient {
+	return g.versionHisotryService
 }

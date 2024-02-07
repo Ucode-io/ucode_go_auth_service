@@ -23,7 +23,9 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	docs.SwaggerInfo.Version = cfg.Version
 	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
-
+	// @securityDefinitions.apikey ApiKeyAuth
+	// @in header
+	// @name Authorization
 	r.Use(customCORSMiddleware())
 
 	r.GET("/ping", h.Ping)
@@ -111,6 +113,23 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	r.POST("/has-access-super-admin", h.HasAccessSuperAdmin)
 
 	v2 := r.Group("/v2")
+	v2.PUT("/refresh", h.V2RefreshToken)
+	v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
+	v2.POST("/login/superadmin", h.V2LoginSuperAdmin)      // @TODO
+	v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
+	v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
+	v2.POST("/user/invite", h.AddUserToProject)
+	v2.POST("/user/check", h.V2GetUserByLoginType)
+
+	v2.POST("/send-code", h.V2SendCode)
+	v2.POST("/register", h.V2Register)
+	v2.POST("/login/with-option", h.V2LoginWithOption)
+	v2.POST("/send-code-app", h.V2SendCodeApp)
+	v2.POST("/forgot-password", h.ForgotPassword)
+	v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
+	v2.PUT("/reset-password", h.V2ResetPassword)
+	v2.PUT("set-email/send-code", h.EmailEnter)
+
 	v2.Use(h.AuthMiddleware())
 	{
 		// sms-otp-settings
@@ -119,6 +138,14 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
 		v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
 		v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
+
+		//connection
+		v2.POST("/connection", h.V2CreateConnection)
+		v2.GET("/connection", h.V2GetConnectionList)
+		v2.GET("/connection/:connection_id", h.V2GetConnectionByID)
+		v2.PUT("/connection", h.V2UpdateConnection)
+		v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
+		v2.GET("/get-connection-options/:connection_id/:user_id", h.GetConnectionOptions)
 
 		// v2.POST("/client-platform", h.V2CreateClientPlatform)
 		// v2.GET("/client-platform", h.V2GetClientPlatformList) //project_id
@@ -176,17 +203,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
 		v2.PUT("/user/reset-password", h.V2UserResetPassword)
 		v2.POST("/login", h.V2Login) // @TODO
-		v2.PUT("/refresh", h.V2RefreshToken)
-		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
-		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)      // @TODO
-		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
-		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
-		v2.POST("/user/invite", h.AddUserToProject)
-		v2.POST("/user/check", h.V2GetUserByLoginType)
-
-		v2.POST("/send-code", h.V2SendCode)
-		v2.POST("/register", h.V2Register)
-		v2.POST("/login/with-option", h.V2LoginWithOption)
 
 		// api keys
 		v2.POST("/api-key/:project-id", h.CreateApiKey)
@@ -201,14 +217,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
 		v2.GET("/webpage-app", h.GetListWebPageApp)
 
-		// connection
-		v2.POST("/connection", h.V2CreateConnection)
-		v2.GET("/connection", h.V2GetConnectionList)
-		v2.GET("/connection/:connection_id", h.V2GetConnectionByID)
-		v2.PUT("/connection", h.V2UpdateConnection)
-		v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
-		v2.GET("/get-connection-options/:connection_id/:user_id", h.GetConnectionOptions)
-
 		// objects
 		v2.POST("/object/get-list/:table_slug", h.V2GetListObjects)
 
@@ -216,10 +224,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.GET("/login-strategy", h.GetLoginStrategy)
 		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
 		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
-		v2.POST("/forgot-password", h.ForgotPassword)
-		v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
-		v2.PUT("/reset-password", h.V2ResetPassword)
-		v2.PUT("set-email/send-code", h.EmailEnter)
 	}
 
 	//COMPANY
@@ -294,3 +298,5 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+//

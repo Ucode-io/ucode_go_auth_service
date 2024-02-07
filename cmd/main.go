@@ -40,7 +40,7 @@ func main() {
 	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
 	defer logger.Cleanup(log)
 
-	fmt.Println("\n\n configs ---- >", baseCfg)
+	fmt.Println("\n\n configs --- >", baseCfg)
 
 	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg)
 	if err != nil {
@@ -68,7 +68,7 @@ func main() {
 		log.Error("Error adding company grpc client to serviceNode. ServiceNode", logger.Error(err))
 		return
 	}
-	log.Info(" --- U-code company services --- added to serviceNodes")
+	log.Info(" --- U-code company services --- added to serviceNodes!")
 
 	projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
 	if err != nil {
@@ -84,7 +84,7 @@ func main() {
 		mapProjectConfs = make(map[string]config.Config)
 	}
 
-	fmt.Println("\n\n ~~~~> project configs ", mapProjectConfs)
+	fmt.Println("\n\n ~> project configs ", mapProjectConfs)
 
 	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
 	projectServiceNodes.SetConfigs(mapProjectConfs)
@@ -98,7 +98,7 @@ func main() {
 			log.Panic("net.Listen", logger.Error(err))
 		}
 
-		log.Info("GRPC: Server being started...", logger.String("port", baseCfg.AuthGRPCPort))
+		log.Info("GRPC: Server being started....", logger.String("port", baseCfg.AuthGRPCPort))
 
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Panic("grpcServer.Serve", logger.Error(err))

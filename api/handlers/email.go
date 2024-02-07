@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
@@ -319,7 +318,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.GRPCError, "Register type must be default or phone type")
-	return
 }
 
 // Verify godoc
@@ -383,7 +381,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c,
 		resourceEnvironment.ProjectId,
 		resourceEnvironment.NodeType,
@@ -563,7 +561,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param verifyBody body models.VerifyEmail true "verify_body"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) VerifyOnlyEmailOtp(c *gin.Context) {
@@ -666,7 +664,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &obs.GetProjectByIdRequest{
 		ProjectId: resourceEnvironment.GetProjectId(),
 	})
 	if err != nil {
@@ -678,7 +676,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
 
-	services, err := h.GetProjectSrvc(
+	services, _ := h.GetProjectSrvc(
 		c,
 		resourceEnvironment.ProjectId,
 		resourceEnvironment.NodeType,

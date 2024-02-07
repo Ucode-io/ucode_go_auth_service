@@ -1249,6 +1249,17 @@ definitions:
       login:
         type: string
     type: object
+  ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse:
+    properties:
+      email:
+        type: string
+      login_found:
+        type: boolean
+      sms_id:
+        type: string
+      user_id:
+        type: string
+    type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq:
     properties:
       app_id:
@@ -1368,6 +1379,8 @@ definitions:
         type: string
       updated_at:
         type: string
+      used_count:
+        type: integer
     type: object
   ucode_ucode_go_auth_service_genproto_auth_service.GetUserByLoginTypesRequest:
     properties:
@@ -3327,7 +3340,7 @@ definitions:
       extKeyUsage:
         description: Sequence of extended key usages.
         items:
-          $ref: '#/definitions/x509.ExtKeyUsage'
+          type: integer
         type: array
       extensions:
         description: |-
@@ -3362,7 +3375,7 @@ definitions:
           type: string
         type: array
       keyUsage:
-        $ref: '#/definitions/x509.KeyUsage'
+        type: integer
       maxPathLen:
         description: |-
           MaxPathLen and MaxPathLenZero indicate the presence and
@@ -3420,7 +3433,7 @@ definitions:
         type: array
       publicKey: {}
       publicKeyAlgorithm:
-        $ref: '#/definitions/x509.PublicKeyAlgorithm'
+        type: integer
       raw:
         description: Complete ASN.1 DER content (certificate, signature algorithm
           and signature).
@@ -3454,7 +3467,7 @@ definitions:
           type: integer
         type: array
       signatureAlgorithm:
-        $ref: '#/definitions/x509.SignatureAlgorithm'
+        type: integer
       subject:
         $ref: '#/definitions/pkix.Name'
       subjectKeyId:
@@ -3490,123 +3503,6 @@ definitions:
       version:
         type: integer
     type: object
-  x509.ExtKeyUsage:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    type: integer
-    x-enum-varnames:
-    - ExtKeyUsageAny
-    - ExtKeyUsageServerAuth
-    - ExtKeyUsageClientAuth
-    - ExtKeyUsageCodeSigning
-    - ExtKeyUsageEmailProtection
-    - ExtKeyUsageIPSECEndSystem
-    - ExtKeyUsageIPSECTunnel
-    - ExtKeyUsageIPSECUser
-    - ExtKeyUsageTimeStamping
-    - ExtKeyUsageOCSPSigning
-    - ExtKeyUsageMicrosoftServerGatedCrypto
-    - ExtKeyUsageNetscapeServerGatedCrypto
-    - ExtKeyUsageMicrosoftCommercialCodeSigning
-    - ExtKeyUsageMicrosoftKernelCodeSigning
-  x509.KeyUsage:
-    enum:
-    - 1
-    - 2
-    - 4
-    - 8
-    - 16
-    - 32
-    - 64
-    - 128
-    - 256
-    type: integer
-    x-enum-varnames:
-    - KeyUsageDigitalSignature
-    - KeyUsageContentCommitment
-    - KeyUsageKeyEncipherment
-    - KeyUsageDataEncipherment
-    - KeyUsageKeyAgreement
-    - KeyUsageCertSign
-    - KeyUsageCRLSign
-    - KeyUsageEncipherOnly
-    - KeyUsageDecipherOnly
-  x509.PublicKeyAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-comments:
-      DSA: Only supported for parsing.
-    x-enum-varnames:
-    - UnknownPublicKeyAlgorithm
-    - RSA
-    - DSA
-    - ECDSA
-    - Ed25519
-  x509.SignatureAlgorithm:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    - 14
-    - 15
-    - 16
-    type: integer
-    x-enum-comments:
-      DSAWithSHA1: Unsupported.
-      DSAWithSHA256: Unsupported.
-      ECDSAWithSHA1: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-      MD2WithRSA: Unsupported.
-      MD5WithRSA: Only supported for signing, not verification.
-      SHA1WithRSA: Only supported for signing, and verification of CRLs, CSRs, and
-        OCSP responses.
-    x-enum-varnames:
-    - UnknownSignatureAlgorithm
-    - MD2WithRSA
-    - MD5WithRSA
-    - SHA1WithRSA
-    - SHA256WithRSA
-    - SHA384WithRSA
-    - SHA512WithRSA
-    - DSAWithSHA1
-    - DSAWithSHA256
-    - ECDSAWithSHA1
-    - ECDSAWithSHA256
-    - ECDSAWithSHA384
-    - ECDSAWithSHA512
-    - SHA256WithRSAPSS
-    - SHA384WithRSAPSS
-    - SHA512WithRSAPSS
-    - PureEd25519
 info:
   contact: {}
   description: This is a api gateway
@@ -7798,6 +7694,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create ClientType
       tags:
       - V2_ClientType
@@ -7857,6 +7755,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update ClientType
       tags:
       - V2_ClientType
@@ -7908,6 +7808,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete ClientType
       tags:
       - V2_ClientType
@@ -8467,7 +8369,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse'
               type: object
         "400":
           description: Bad Request
@@ -8653,6 +8555,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: V2Login
       tags:
       - V2_Session
@@ -9135,6 +9039,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update Permission
       tags:
       - V2_Permission
@@ -9199,6 +9105,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get Permission List
       tags:
       - V2_Permission
@@ -9870,6 +9778,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create Role
       tags:
       - V2_Role
@@ -10047,6 +9957,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update Permission
       tags:
       - V2_Permission
@@ -10105,6 +10017,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get Permission List
       tags:
       - V2_Permission
@@ -10156,6 +10070,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete Role
       tags:
       - V2_Role
@@ -10274,6 +10190,52 @@ paths:
       summary: SendCode
       tags:
       - v2_register
+  /v2/send-code-app:
+    post:
+      consumes:
+      - application/json
+      description: SendCode type must be one of the following values ["EMAIL", "PHONE"]
+      operationId: V2SendCodeApp
+      parameters:
+      - description: SendCode
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: SendCodeApp
+      tags:
+      - v2_register
   /v2/send-message:
     post:
       consumes:
@@ -10357,7 +10319,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse'
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse'
               type: object
         "400":
           description: Bad Request
@@ -10812,6 +10774,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create User
       tags:
       - V2_User
@@ -10866,6 +10830,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update User
       tags:
       - V2_User
@@ -10923,6 +10889,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete User
       tags:
       - V2_User
@@ -11079,7 +11047,7 @@ paths:
               type: object
       summary: Reset User password
       tags:
-      - User
+      - V2_User
   /v2/v2multi-company/login:
     post:
       consumes:
@@ -11219,7 +11187,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -11242,4 +11210,9 @@ paths:
       summary: Verify
       tags:
       - Email
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

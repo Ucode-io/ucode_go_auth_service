@@ -31,38 +31,84 @@ import (
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
 
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	user := &pb.User{}
+	var err error
 
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	switch req.Type {
+	case config.Default:
+		{
+			if len(req.Username) < 6 {
+				err := errors.New("invalid username")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!V2Login--->", logger.Error(err))
-		if err == sql.ErrNoRows {
-			errNoRows := errors.New("no user found")
-			return nil, status.Error(codes.Internal, errNoRows.Error())
+			if len(req.Password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			match, err := security.ComparePassword(user.Password, req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 		}
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	case config.WithPhone:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+			user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	case config.WithEmail:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+			user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
 	}
 
 	reqLoginData := &pbObject.LoginDataReq{
@@ -136,7 +182,13 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		LoginTableSlug:   data.GetLoginTableSlug(),
 		AppPermissions:   data.GetAppPermissions(),
 		GlobalPermission: data.GetGlobalPermission(),
+		UserData:         data.GetUserData(),
 	})
+
+	if roleId, ok := res.UserData.Fields["role_id"].GetKind().(*structpb.Value_StringValue); ok {
+
+		fmt.Println("\n\n\n LOGIN USER DATA 111", roleId.StringValue)
+	}
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
@@ -1013,7 +1065,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		EnvId:            session.EnvId,
 	})
 	if err != nil {
-		s.log.Error("!!!V2RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!V2RefreshToken.SessionUpdate--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -1039,6 +1091,17 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	// 	AppPermissions:   data.GetAppPermissions(),
 	// 	GlobalPermission: data.GetGlobalPermission(),
 	// })
+
+	// authTables := []*pb.TableBody{}
+	// if tokenInfo.Tables != nil {
+	// 	for _, table := range tokenInfo.Tables {
+	// 		authTable := &pb.TableBody{
+	// 			TableSlug: table.TableSlug,
+	// 			ObjectId:  table.ObjectID,
+	// 		}
+	// 		authTables = append(authTables, authTable)
+	// 	}
+	// }
 
 	// TODO - wrap in a function
 	m := map[string]interface{}{
@@ -1530,36 +1593,86 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		Companies: []*pb.Company2{},
 	}
 
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	user := &pb.User{}
+	var err error
 
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	switch req.Type {
+	case config.Default:
+		{
+			if len(req.Username) < 6 {
+				err := errors.New("invalid username")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+			if len(req.Password) < 6 {
+				err := errors.New("invalid password")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+			match, err := security.ComparePassword(user.Password, req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	case config.WithPhone:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	case config.WithEmail:
+		{
+			if config.DefaultOtp != req.Otp {
+				_, err := s.services.SmsService().ConfirmOtp(
+					ctx,
+					&sms_service.ConfirmOtpRequest{
+						SmsId: req.GetSmsId(),
+						Otp:   req.GetOtp(),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	}
+	fmt.Println(">>>> user #1", user)
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
@@ -1659,6 +1772,8 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
 					continue
 				}
+
+				fmt.Println("\n\n\n ~~~~~~~~~> ENV-->  ", resourceEnv.ServiceResources[config.ObjectBuilderService])
 
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
 

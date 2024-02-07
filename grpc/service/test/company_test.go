@@ -11,12 +11,13 @@ import (
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/grpc/service"
 	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/storage/postgres"
 )
 
 func TestRegisterCompany(t *testing.T) {
-	conf := config.Load()
+	conf := config.BaseLoad()
 	log := logger.NewLogger(conf.ServiceName, logger.LevelDebug)
 
 	pgStore, err := postgres.NewPostgres(context.Background(), conf)
@@ -32,7 +33,10 @@ func TestRegisterCompany(t *testing.T) {
 		t.FailNow()
 	}
 
-	grpcServer := grpc.SetUpServer(conf, log, pgStore, svcs)
+	serviceNodes := service.NewServiceNodes()
+
+	grpcServer := grpc.SetUpServer(conf, log, pgStore, svcs, serviceNodes)
+
 	go func() {
 		lis, err := net.Listen("tcp", conf.AuthGRPCPort)
 		if err != nil {

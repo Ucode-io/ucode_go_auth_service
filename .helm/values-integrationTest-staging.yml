@@ -15,7 +15,7 @@ image:
   repository: /ucode/ucode_go_auth_service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "dev"
+  tag: "integration-test-staging"
 
 imagePullSecrets: "gitlab-registry"
 nameOverride: ""
@@ -103,7 +103,7 @@ service:
       name: grpc
 
 ingress:
-  enabled: true
+  enabled: false
   rules:
     - annotations:
         nginx.ingress.kubernetes.io/proxy-body-size: "0"

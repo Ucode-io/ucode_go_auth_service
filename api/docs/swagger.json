@@ -7301,6 +7301,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update ClientType",
                 "consumes": [
                     "application/json"
@@ -7402,6 +7407,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create ClientType",
                 "consumes": [
                     "application/json"
@@ -7603,6 +7613,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get ClientType",
                 "consumes": [
                     "application/json"
@@ -8544,7 +8559,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse"
                                         }
                                     }
                                 }
@@ -8783,6 +8798,11 @@
         },
         "/v2/login": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "V2Login",
                 "consumes": [
                     "application/json"
@@ -9620,6 +9640,11 @@
         },
         "/v2/menu-permission/detailed": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update Permission",
                 "consumes": [
                     "application/json"
@@ -9723,6 +9748,11 @@
         },
         "/v2/menu-permission/detailed/{project-id}/{role-id}/{parent-id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get Permission List",
                 "consumes": [
                     "application/json"
@@ -10977,6 +11007,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create Role",
                 "consumes": [
                     "application/json"
@@ -11180,6 +11215,11 @@
         },
         "/v2/role-permission/detailed": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update Permission",
                 "consumes": [
                     "application/json"
@@ -11283,6 +11323,11 @@
         },
         "/v2/role-permission/detailed/{project-id}/{role-id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get Permission List",
                 "consumes": [
                     "application/json"
@@ -11481,6 +11526,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get Role",
                 "consumes": [
                     "application/json"
@@ -11597,6 +11647,89 @@
                         "name": "Environment-Id",
                         "in": "header"
                     },
+                    {
+                        "description": "SendCode",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/send-code-app": {
+            "post": {
+                "description": "SendCode type must be one of the following values [\"EMAIL\", \"PHONE\"]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2_register"
+                ],
+                "summary": "SendCodeApp",
+                "operationId": "V2SendCodeApp",
+                "parameters": [
                     {
                         "description": "SendCode",
                         "name": "login",
@@ -11805,7 +11938,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.ForgotPasswordResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse"
                                         }
                                     }
                                 }
@@ -12512,6 +12645,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update User",
                 "consumes": [
                     "application/json"
@@ -12606,6 +12744,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create User",
                 "consumes": [
                     "application/json"
@@ -12793,7 +12936,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "V2_User"
                 ],
                 "summary": "Reset User password",
                 "operationId": "v2_user_reset_password",
@@ -12973,6 +13116,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get User",
                 "consumes": [
                     "application/json"
@@ -13301,7 +13449,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -14874,6 +15022,23 @@
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_auth_service.ForgotPasswordResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "login_found": {
+                    "type": "boolean"
+                },
+                "sms_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_auth_service.GenerateApiTokenReq": {
             "type": "object",
             "properties": {
@@ -15057,6 +15222,9 @@
                 },
                 "updated_at": {
                     "type": "string"
+                },
+                "used_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -18031,7 +18199,7 @@
                     "description": "Sequence of extended key usages.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/x509.ExtKeyUsage"
+                        "type": "integer"
                     }
                 },
                 "extensions": {
@@ -18070,7 +18238,7 @@
                     }
                 },
                 "keyUsage": {
-                    "$ref": "#/definitions/x509.KeyUsage"
+                    "type": "integer"
                 },
                 "maxPathLen": {
                     "description": "MaxPathLen and MaxPathLenZero indicate the presence and\nvalue of the BasicConstraints' \"pathLenConstraint\".\n\nWhen parsing a certificate, a positive non-zero MaxPathLen\nmeans that the field was specified, -1 means it was unset,\nand MaxPathLenZero being true mean that the field was\nexplicitly set to zero. The case of MaxPathLen==0 with MaxPathLenZero==false\nshould be treated equivalent to -1 (unset).\n\nWhen generating a certificate, an unset pathLenConstraint\ncan be requested with either MaxPathLen == -1 or using the\nzero value for both MaxPathLen and MaxPathLenZero.",
@@ -18130,7 +18298,7 @@
                 },
                 "publicKey": {},
                 "publicKeyAlgorithm": {
-                    "$ref": "#/definitions/x509.PublicKeyAlgorithm"
+                    "type": "integer"
                 },
                 "raw": {
                     "description": "Complete ASN.1 DER content (certificate, signature algorithm and signature).",
@@ -18177,7 +18345,7 @@
                     }
                 },
                 "signatureAlgorithm": {
-                    "$ref": "#/definitions/x509.SignatureAlgorithm"
+                    "type": "integer"
                 },
                 "subject": {
                     "$ref": "#/definitions/pkix.Name"
@@ -18218,135 +18386,13 @@
                     "type": "integer"
                 }
             }
-        },
-        "x509.ExtKeyUsage": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13
-            ],
-            "x-enum-varnames": [
-                "ExtKeyUsageAny",
-                "ExtKeyUsageServerAuth",
-                "ExtKeyUsageClientAuth",
-                "ExtKeyUsageCodeSigning",
-                "ExtKeyUsageEmailProtection",
-                "ExtKeyUsageIPSECEndSystem",
-                "ExtKeyUsageIPSECTunnel",
-                "ExtKeyUsageIPSECUser",
-                "ExtKeyUsageTimeStamping",
-                "ExtKeyUsageOCSPSigning",
-                "ExtKeyUsageMicrosoftServerGatedCrypto",
-                "ExtKeyUsageNetscapeServerGatedCrypto",
-                "ExtKeyUsageMicrosoftCommercialCodeSigning",
-                "ExtKeyUsageMicrosoftKernelCodeSigning"
-            ]
-        },
-        "x509.KeyUsage": {
-            "type": "integer",
-            "enum": [
-                1,
-                2,
-                4,
-                8,
-                16,
-                32,
-                64,
-                128,
-                256
-            ],
-            "x-enum-varnames": [
-                "KeyUsageDigitalSignature",
-                "KeyUsageContentCommitment",
-                "KeyUsageKeyEncipherment",
-                "KeyUsageDataEncipherment",
-                "KeyUsageKeyAgreement",
-                "KeyUsageCertSign",
-                "KeyUsageCRLSign",
-                "KeyUsageEncipherOnly",
-                "KeyUsageDecipherOnly"
-            ]
-        },
-        "x509.PublicKeyAlgorithm": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-comments": {
-                "DSA": "Only supported for parsing."
-            },
-            "x-enum-varnames": [
-                "UnknownPublicKeyAlgorithm",
-                "RSA",
-                "DSA",
-                "ECDSA",
-                "Ed25519"
-            ]
-        },
-        "x509.SignatureAlgorithm": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16
-            ],
-            "x-enum-comments": {
-                "DSAWithSHA1": "Unsupported.",
-                "DSAWithSHA256": "Unsupported.",
-                "ECDSAWithSHA1": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses.",
-                "MD2WithRSA": "Unsupported.",
-                "MD5WithRSA": "Only supported for signing, not verification.",
-                "SHA1WithRSA": "Only supported for signing, and verification of CRLs, CSRs, and OCSP responses."
-            },
-            "x-enum-varnames": [
-                "UnknownSignatureAlgorithm",
-                "MD2WithRSA",
-                "MD5WithRSA",
-                "SHA1WithRSA",
-                "SHA256WithRSA",
-                "SHA384WithRSA",
-                "SHA512WithRSA",
-                "DSAWithSHA1",
-                "DSAWithSHA256",
-                "ECDSAWithSHA1",
-                "ECDSAWithSHA256",
-                "ECDSAWithSHA384",
-                "ECDSAWithSHA512",
-                "SHA256WithRSAPSS",
-                "SHA384WithRSAPSS",
-                "SHA512WithRSAPSS",
-                "PureEd25519"
-            ]
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

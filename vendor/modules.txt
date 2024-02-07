@@ -7,10 +7,6 @@ github.com/Timothylock/go-signin-with-apple/apple
 # github.com/blendle/zapdriver v1.3.1
 ## explicit; go 1.12
 github.com/blendle/zapdriver
-# github.com/bxcodec/faker/v3 v3.8.0
-## explicit; go 1.12
-github.com/bxcodec/faker/v3
-github.com/bxcodec/faker/v3/support/slice
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
@@ -132,6 +128,11 @@ github.com/logrusorgru/aurora
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
+# github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d
+## explicit
+github.com/manveru/faker
+# github.com/manveru/gobdd v0.0.0-20131210092515-f1a17fdd710b
+## explicit
 # github.com/mattn/go-isatty v0.0.14
 ## explicit; go 1.12
 github.com/mattn/go-isatty
@@ -171,8 +172,8 @@ github.com/spf13/cast
 # github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
 ## explicit; go 1.16
 github.com/streamingfast/logging
-# github.com/stretchr/testify v1.8.1
-## explicit; go 1.13
+# github.com/stretchr/testify v1.8.4
+## explicit; go 1.20
 github.com/stretchr/testify/assert
 # github.com/swaggo/gin-swagger v1.2.0
 ## explicit

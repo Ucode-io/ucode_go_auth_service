@@ -102,7 +102,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 				client_type_id,
 				rps_limit,
 				monthly_request_limit,
-				(SELECT count(1) FROM api_key_usage where api_key=app_id)
+				(SELECT count(1) FROM api_key_usage where api_key=app_id AND created_at >= date_trunc('month', current_date))
 			FROM
 			    api_keys`
 
@@ -228,7 +228,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 				client_type_id,
 				rps_limit,
 				monthly_request_limit,
-				(SELECT count(1) FROM api_key_usage where api_key=app_id),
+				(SELECT count(1) FROM api_key_usage where api_key=app_id AND created_at >= date_trunc('month', current_date)),
   				created_at,
   				updated_at
 			FROM

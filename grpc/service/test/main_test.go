@@ -1,14 +1,67 @@
-package service
+package service_test
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"net"
+	"os"
 	"sync"
+	"testing"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/grpc"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/logger"
+	"ucode/ucode_go_auth_service/storage/postgres"
 
+	"github.com/manveru/faker"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+var (
+	conf     config.BaseConfig
+	fakeData *faker.Faker
+)
+
+func TestMain(m *testing.M) {
+	conf = config.BaseLoad()
+	newLogger := logger.NewLogger(conf.ServiceName, logger.LevelDebug)
+	fakeData, _ = faker.New("en")
+
+	serviceNodes := NewServiceNodes()
+
+	pgStore, err := postgres.NewPostgres(context.Background(), conf)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	defer pgStore.CloseDB()
+
+	svcs, err := client.NewGrpcClients(conf)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	grpcServer := grpc.SetUpServer(conf, newLogger, pgStore, svcs, serviceNodes)
+
+	go func() {
+		lis, err := net.Listen("tcp", conf.AuthGRPCPort)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		newLogger.Info("GRPC: Server being started...", logger.String("port", conf.AuthGRPCPort))
+
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+	}()
+
+	os.Exit(0)
+}
 
 type ServiceNodesI interface {
 	Get(namespace string) (client.SharedServiceManagerI, error)
@@ -45,7 +98,7 @@ func (p *serviceNodes) GetByNodeType(namespace string, nodeType string) (client.
 
 		p.Mu.Lock()
 		defer p.Mu.Unlock()
-
+		fmt.Println("\n\n ~~~~~~~~> Namespace ", config.BaseLoad().UcodeNamespace)
 		storage, ok := p.ServicePool[config.BaseLoad().UcodeNamespace]
 		if !ok {
 			return nil, config.ErrNodeNotExists
@@ -56,7 +109,7 @@ func (p *serviceNodes) GetByNodeType(namespace string, nodeType string) (client.
 		if p.ServicePool == nil {
 			return nil, config.ErrNilServicePool
 		}
-
+		fmt.Println("\n\n ~~~~~~~~> Namespace ", namespace)
 		p.Mu.Lock()
 		defer p.Mu.Unlock()
 

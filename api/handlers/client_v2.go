@@ -2,16 +2,20 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/api/models"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
+	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
 )
 
+// @Security ApiKeyAuth
 // V2CreateClientType godoc
 // @ID create_client_type_v2
 // @Param Resource-Id header string false "Resource-Id"
@@ -30,6 +34,7 @@ import (
 func (h *Handler) V2CreateClientType(c *gin.Context) {
 	var (
 		clientType auth_service.V2CreateClientTypeRequest
+		resp       *auth_service.CommonMessage
 		// resourceEnvironment *obs.ResourceEnvironment
 	)
 
@@ -60,6 +65,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		fmt.Println("HERE AGAIN")
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
@@ -69,7 +75,34 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 	clientType.ResourceType = int32(resource.ResourceType)
 	clientType.NodeType = resource.NodeType
 
-	resp, err := h.services.ClientService().V2CreateClientType(
+	userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "CREATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &clientType,
+			TableSlug: "CLIENT_TYPE",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!V2CreateClientType -> error")
+		} else {
+			logReq.Response = resp
+			h.log.Info("V2CreateClientType -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = h.services.ClientService().V2CreateClientType(
 		c.Request.Context(),
 		&clientType,
 	)
@@ -230,6 +263,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// @Security ApiKeyAuth
 // V2UpdateClientType godoc
 // @ID update_client_type_v2
 // @Param Resource-Id header string false "Resource-Id"
@@ -249,6 +283,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	var (
 		clientType auth_service.V2UpdateClientTypeRequest
 		// resourceEnvironment *obs.ResourceEnvironment
+		resp *auth_service.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&clientType)
@@ -287,7 +322,34 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	clientType.ResourceType = int32(resource.ResourceType)
 	clientType.NodeType = resource.NodeType
 
-	resp, err := h.services.ClientService().V2UpdateClientType(
+	userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "UPDATE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   &clientType,
+			TableSlug: "CLIENT_TYPE",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!V2UpdateClientType -> error")
+		} else {
+			logReq.Response = resp
+			h.log.Info("V2UpdateClientType -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = h.services.ClientService().V2UpdateClientType(
 		c.Request.Context(),
 		&clientType,
 	)
@@ -300,6 +362,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// @Security ApiKeyAuth
 // V2DeleteClientType godoc
 // @ID delete_client_type_v2
 // @Param Resource-Id header string false "Resource-Id"
@@ -351,6 +414,33 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resource.NodeType,
+			ProjectId:    resource.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "DELETE",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(environmentId): true,
+			},
+			UserInfo:  cast.ToString(userId),
+			Request:   clientTypeid,
+			TableSlug: "CLIENT_TYPE",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+			h.log.Info("!!!V2DeleteClientType -> error")
+		} else {
+			logReq.Response = "success"
+			h.log.Info("V2DeleteClientType -> success")
+		}
+		go h.versionHistory(c, logReq)
+	}()
 
 	resp, err := h.services.ClientService().V2DeleteClientType(
 		c.Request.Context(),
