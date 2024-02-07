@@ -22,6 +22,14 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		environmentId := c.GetHeader("Environment-Id")
 		projectId := c.DefaultQuery("project-id", "")
 		bearerToken := c.GetHeader("Authorization")
+		if len(bearerToken) == 0 {
+			c.Set("resource_id", resourceId)
+			c.Set("environment_id", environmentId)
+			c.Set("project_id", projectId)
+			//c.Set("namespace", h.cfg.UcodeNamespace)
+			c.Next()
+			return
+		}
 
 		strArr := strings.Split(bearerToken, " ")
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {

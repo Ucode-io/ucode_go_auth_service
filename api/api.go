@@ -130,13 +130,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	v2.PUT("/reset-password", h.V2ResetPassword)
 	v2.PUT("set-email/send-code", h.EmailEnter)
 
-	v2.POST("/connection", h.V2CreateConnection)
-	v2.GET("/connection", h.V2GetConnectionList)
-	v2.GET("/connection/:connection_id", h.V2GetConnectionByID)
-	v2.PUT("/connection", h.V2UpdateConnection)
-	v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
-	v2.GET("/get-connection-options/:connection_id/:user_id", h.GetConnectionOptions)
-
 	v2.Use(h.AuthMiddleware())
 	{
 		// sms-otp-settings
@@ -145,6 +138,14 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
 		v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
 		v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
+
+		//connection
+		v2.POST("/connection", h.V2CreateConnection)
+		v2.GET("/connection", h.V2GetConnectionList)
+		v2.GET("/connection/:connection_id", h.V2GetConnectionByID)
+		v2.PUT("/connection", h.V2UpdateConnection)
+		v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
+		v2.GET("/get-connection-options/:connection_id/:user_id", h.GetConnectionOptions)
 
 		// v2.POST("/client-platform", h.V2CreateClientPlatform)
 		// v2.GET("/client-platform", h.V2GetClientPlatformList) //project_id
