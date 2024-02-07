@@ -153,13 +153,13 @@ func (h *Handler) V2Login(c *gin.Context) {
 			NodeType:     resourceEnvironment.NodeType,
 			ProjectId:    resourceEnvironment.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE",
+			ActionType:   "LOGIN",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(resourceEnvironment.EnvironmentId): true,
 			},
 			UserInfo:  cast.ToString(userId),
 			Request:   &login,
-			TableSlug: "USER",
+			TableSlug: "User",
 		}
 	)
 
