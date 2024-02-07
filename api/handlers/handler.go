@@ -14,6 +14,7 @@ import (
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/grpc/service"
+	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
@@ -106,7 +107,7 @@ func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistor
 		previous = map[string]interface{}{"data": req.Previous}
 		request  = map[string]interface{}{"data": req.Request}
 		response = map[string]interface{}{"data": req.Response}
-		user     = ""
+		user     = req.UserInfo
 	)
 
 	sharedServiceManager, _ := h.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
@@ -124,18 +125,20 @@ func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistor
 		response["data"] = make(map[string]interface{})
 	}
 
-	info, err := h.services.UserService().GetUserByID(context.Background(), &auth_service.UserPrimaryKey{
-		Id: req.UserInfo,
-	})
-	if err == nil {
-		if info.Login != "" {
-			user = info.Login
-		} else {
-			user = info.Phone
+	if util.IsValidUUID(req.UserInfo) {
+		info, err := h.services.UserService().GetUserByID(context.Background(), &auth_service.UserPrimaryKey{
+			Id: req.UserInfo,
+		})
+		if err == nil {
+			if info.Login != "" {
+				user = info.Login
+			} else {
+				user = info.Phone
+			}
 		}
 	}
 
-	_, err = sharedServiceManager.VersionHistoryService().Create(
+	_, err := sharedServiceManager.VersionHistoryService().Create(
 		context.Background(),
 		&object_builder_service.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),

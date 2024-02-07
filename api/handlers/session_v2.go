@@ -147,7 +147,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 	login.NodeType = resourceEnvironment.GetNodeType()
 
-	userId, _ := c.Get("user_id")
+	//userId, _ := c.Get("user_id")
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			NodeType:     resourceEnvironment.NodeType,
@@ -157,7 +157,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 			UsedEnvironments: map[string]bool{
 				cast.ToString(resourceEnvironment.EnvironmentId): true,
 			},
-			UserInfo:  cast.ToString(userId),
+			UserInfo:  cast.ToString(login.Username),
 			Request:   &login,
 			TableSlug: "User",
 		}
