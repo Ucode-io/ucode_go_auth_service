@@ -81,7 +81,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE",
+			ActionType:   "CREATE CLIENT TYPE",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -328,7 +328,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE CLIENT TYPE",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -421,7 +421,7 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "DELETE",
+			ActionType:   "DELETE CLIENT TYPE",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
