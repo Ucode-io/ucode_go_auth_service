@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"ucode/ucode_go_auth_service/api/http"
-	"ucode/ucode_go_auth_service/api/models"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
-	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
 )
@@ -556,33 +554,7 @@ func (h *Handler) AddRolePermission(c *gin.Context) {
 		return
 	}
 
-	userId, _ := c.Get("user_id")
-
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType: rolePermission.NodeType,
-			// ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &rolePermission,
-			TableSlug: "ROLE_PERMISSION",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.log.Info("!!!AddRolePermission -> error")
-		} else {
-			logReq.Response = resp
-			h.log.Info("AddRolePermission -> success")
-		}
-		go h.versionHistory(c, logReq)
-	}()
+	//
 
 	resp, err = h.services.PermissionService().AddRolePermission(
 		c.Request.Context(),
@@ -620,34 +592,6 @@ func (h *Handler) AddRolePermissions(c *gin.Context) {
 		return
 	}
 
-	userId, _ := c.Get("user_id")
-
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType: rolePermissions.NodeType,
-			// ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &rolePermissions,
-			TableSlug: "ROLE_PERMISSION",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.log.Info("!!!AddRolePermission -> error")
-		} else {
-			logReq.Response = resp
-			h.log.Info("AddRolePermission -> success")
-		}
-		go h.versionHistory(c, logReq)
-	}()
-
 	resp, err = h.services.PermissionService().AddRolePermissions(
 		c.Request.Context(),
 		&rolePermissions,
@@ -684,34 +628,6 @@ func (h *Handler) RemoveRolePermission(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
-	userId, _ := c.Get("user_id")
-
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType: rolePermission.NodeType,
-			// ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
-			// UsedEnvironments: map[string]bool{
-			// 	cast.ToString(environmentId): true,
-			// },
-			UserInfo:  cast.ToString(userId),
-			Request:   &rolePermission,
-			TableSlug: "ROLE_PERMISSION",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.log.Info("!!!RemoveRolePermission -> error")
-		} else {
-			logReq.Response = resp
-			h.log.Info("RemoveRolePermission -> success")
-		}
-		go h.versionHistory(c, logReq)
-	}()
 
 	resp, err = h.services.PermissionService().RemoveRolePermission(
 		c.Request.Context(),

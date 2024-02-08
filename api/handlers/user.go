@@ -8,7 +8,6 @@ import (
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
-	"github.com/spf13/cast"
 
 	"ucode/ucode_go_auth_service/api/models"
 
@@ -38,34 +37,6 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
-	userId, _ := c.Get("user_id")
-
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType:     user.NodeType,
-			ProjectId:    user.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(user.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &user,
-			TableSlug: "USER",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.log.Info("!!!CreateUser -> error")
-		} else {
-			logReq.Response = resp
-			h.log.Info("CreateUser -> success")
-		}
-		go h.versionHistory(c, logReq)
-	}()
 
 	resp, err = h.services.UserService().CreateUser(
 		c.Request.Context(),
@@ -188,34 +159,6 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
-	userId, _ := c.Get("user_id")
-
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType:     user.NodeType,
-			ProjectId:    user.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(user.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &user,
-			TableSlug: "USER",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.log.Info("!!!UpdateUser -> error")
-		} else {
-			logReq.Response = resp
-			h.log.Info("UpdateUser -> success")
-		}
-		go h.versionHistory(c, logReq)
-	}()
 
 	resp, err = h.services.UserService().UpdateUser(
 		c.Request.Context(),
