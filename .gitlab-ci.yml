@@ -2,24 +2,10 @@ include:
   - .gitlab/ci/*.gitlab-ci.yml
 
 stages:
-  - build-test
-  - migrate
-  - deploy-test
-  - test
-  - purge
   - build
+  - migrate
   - deploy
   - rollback
-  
-# dev env
-build-test-image:
-  stage: build-test
-  extends: .build_test_template
-  variables:
-    ENV_TAG: integration-test-dev
-    DOCKERFILE: Dockerfile-test
-  only:
-    - dev
 
 build-dev:
   stage: build
@@ -30,6 +16,24 @@ build-dev:
   only:
     - dev
 
+build-staging:
+  stage: build
+  extends: .build_template
+  variables:
+    ENV_TAG: ucode-test
+    DOCKERFILE: Dockerfile
+  only:
+    - staging
+
+build-prod:
+  stage: build
+  extends: .build_template
+  variables:
+    ENV_TAG: latest
+    DOCKERFILE: Dockerfile
+  only:
+    - master
+
 migrate-dev:
   stage: migrate
   extends: .migrate_template
@@ -39,35 +43,23 @@ migrate-dev:
   only:
     - dev
 
-deploy-dev-integration-test:
-  stage: deploy-test
-  extends: .deploy_template
+migrate-staging:
+  stage: migrate
+  extends: .migrate_template
   variables:
-    NAMESPACE: ucode-integration-test
-    VALUES_FILE: .helm/values-integrationTest-dev.yml
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+    PATH_MIGRATION: migrations/postgres
+    POSTGRES_LINK: $UCODE_AUTH_SERVICE_TESTDB
   only:
-    - dev
+    - staging
 
-test-dev:
-  stage: test
-  extends: .test_template
+migrate-prod:
+  stage: migrate
+  extends: .migrate_template
   variables:
-    NAMESPACE: ucode-integration-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+    PATH_MIGRATION: migrations/postgres
+    POSTGRES_LINK: $UCODE_AUTH_SERVICE_PRODDB
   only:
-    - dev
-
-purge-dev:
-  stage: purge
-  extends: .purge_template
-  variables:
-    NAMESPACE: ucode-integration-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  dependencies:
-    - test-dev
-  only:
-    - dev
+    - master
 
 deploy-dev:
   stage: deploy
@@ -79,72 +71,6 @@ deploy-dev:
   only:
     - dev
 
-rollback-dev:
-  stage: rollback
-  extends: .rollback_template
-  variables:
-    NAMESPACE: ucode-dev
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  when: manual
-
-# staging env
-build-staging-image:
-  stage: build-test
-  extends: .build_test_template
-  variables:
-    ENV_TAG: integration-test-staging
-    DOCKERFILE: Dockerfile-test
-  only:
-    - staging
-
-build-staging:
-  stage: build
-  extends: .build_template
-  variables:
-    ENV_TAG: test
-    DOCKERFILE: Dockerfile
-  only:
-    - staging
-
-migrate-staging:
-  stage: migrate
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_AUTH_SERVICE_TESTDB
-  only:
-    - staging
-
-deploy-staging-integration-test:
-  stage: deploy-test
-  extends: .deploy_template
-  variables:
-    NAMESPACE: ucode-integration-test
-    VALUES_FILE: .helm/values-integrationTest-staging.yml
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  only:
-    - staging
-
-test-staging:
-  stage: test
-  extends: .test_template
-  variables:
-    NAMESPACE: ucode-integration-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  only:
-    - staging
-
-purge-staging:
-  stage: purge
-  extends: .purge_template
-  variables:
-    NAMESPACE: ucode-integration-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  dependencies:
-    - test-staging
-  only:
-    - staging
-
 deploy-staging:
   stage: deploy
   extends: .deploy_template
@@ -154,73 +80,6 @@ deploy-staging:
     K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
   only:
     - staging
-
-rollback-staging:
-  stage: rollback
-  extends: .rollback_template
-  variables:
-    NAMESPACE: ucode-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  when: manual
-
-
-# prod env
-build-prod-image:
-  stage: build-test
-  extends: .build_test_template
-  variables:
-    ENV_TAG: integration-test-prod
-    DOCKERFILE: Dockerfile-test
-  only:
-    - master
-
-build-prod:
-  stage: build
-  extends: .build_template
-  variables:
-    ENV_TAG: latest
-    DOCKERFILE: Dockerfile
-  only:
-    - master
-
-migrate-prod:
-  stage: migrate
-  extends: .migrate_template
-  variables:
-    PATH_MIGRATION: migrations/postgres
-    POSTGRES_LINK: $UCODE_AUTH_SERVICE_PRODDB
-  only:
-    - master
-
-deploy-prod-integration-test:
-  stage: deploy-test
-  extends: .deploy_template
-  variables:
-    NAMESPACE: ucode-integration-test
-    VALUES_FILE: .helm/values-integrationTest-prod.yml
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  only:
-    - master
-
-test-prod:
-  stage: test
-  extends: .test_template
-  variables:
-    NAMESPACE: ucode-integration-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  only:
-    - master
-
-purge-master:
-  stage: purge
-  extends: .purge_template
-  variables:
-    NAMESPACE: ucode-integration-test
-    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
-  dependencies:
-    - test-prod
-  only:
-    - master
 
 deploy-prod:
   stage: deploy
@@ -232,6 +91,23 @@ deploy-prod:
   only:
     - master
 
+
+rollback-staging:
+  stage: rollback
+  extends: .rollback_template
+  variables:
+    NAMESPACE: ucode-test
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+  when: manual
+
+rollback-dev:
+  stage: rollback
+  extends: .rollback_template
+  variables:
+    NAMESPACE: ucode-dev
+    K8SCONFIGJSON: $UCODE_HZN_KUBECONFIG
+  when: manual
+
 rollback-prod:
   stage: rollback
   extends: .rollback_template
@@ -239,3 +115,4 @@ rollback-prod:
     NAMESPACE: ucode-prod
     K8SCONFIGJSON: $UCODE_KUBECONFIG
   when: manual
+

@@ -6,7 +6,6 @@ APP_CMD_DIR=${CURRENT_DIR}/cmd
 TAG=latest
 ENV_TAG=latest
 DOCKERFILE=Dockerfile
-DOCKERFILETEST=Dockerfile-test
 
 pull-proto-module:
 	git submodule update --init --recursive
@@ -31,10 +30,6 @@ build-image:
 	docker build --rm -t ${REGISTRY}/${PROJECT_NAME}/${APP}:${TAG} . -f ${DOCKERFILE}
 	docker tag ${REGISTRY}/${PROJECT_NAME}/${APP}:${TAG} ${REGISTRY}/${PROJECT_NAME}/${APP}:${ENV_TAG}
 
-build-test-image:
-	docker build --rm -t ${REGISTRY}/${PROJECT_NAME}/${APP}:${TAG} . -f ${DOCKERFILETEST}
-	docker tag ${REGISTRY}/${PROJECT_NAME}/${APP}:${TAG} ${REGISTRY}/${PROJECT_NAME}/${APP}:${ENV_TAG}
-	
 push-image:
 	docker push ${REGISTRY}/${PROJECT_NAME}/${APP}:${TAG}
 	docker push ${REGISTRY}/${PROJECT_NAME}/${APP}:${ENV_TAG}
@@ -48,9 +43,6 @@ swag-init:
 run:
 	go run cmd/main.go
 
-test:
-	go test -v ./...
-
 linter:
 	golangci-lint run
 
@@ -60,3 +52,4 @@ migration-up:
 
 migration-down:
 	migrate -path ./migrations/postgres -database 'postgres://postgres:qwerty123@0.0.0.0:5432/ucode_auth_service?sslmode=disable' down 
+
