@@ -113,23 +113,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	r.POST("/has-access-super-admin", h.HasAccessSuperAdmin)
 
 	v2 := r.Group("/v2")
-	v2.PUT("/refresh", h.V2RefreshToken)
-	v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
-	v2.POST("/login/superadmin", h.V2LoginSuperAdmin)      // @TODO
-	v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
-	v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
-	v2.POST("/user/invite", h.AddUserToProject)
-	v2.POST("/user/check", h.V2GetUserByLoginType)
-
-	v2.POST("/send-code", h.V2SendCode)
-	v2.POST("/register", h.V2Register)
-	v2.POST("/login/with-option", h.V2LoginWithOption)
-	v2.POST("/send-code-app", h.V2SendCodeApp)
-	v2.POST("/forgot-password", h.ForgotPassword)
-	v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
-	v2.PUT("/reset-password", h.V2ResetPassword)
-	v2.PUT("set-email/send-code", h.EmailEnter)
-
 	v2.Use(h.AuthMiddleware())
 	{
 		// sms-otp-settings
@@ -138,6 +121,23 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
 		v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
 		v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
+
+		v2.POST("/send-code", h.V2SendCode)
+		v2.POST("/register", h.V2Register)
+		v2.POST("/login/with-option", h.V2LoginWithOption)
+		v2.POST("/send-code-app", h.V2SendCodeApp)
+		v2.POST("/forgot-password", h.ForgotPassword)
+		v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
+		v2.PUT("/reset-password", h.V2ResetPassword)
+		v2.PUT("set-email/send-code", h.EmailEnter)
+
+		v2.PUT("/refresh", h.V2RefreshToken)
+		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
+		v2.POST("/login/superadmin", h.V2LoginSuperAdmin)      // @TODO
+		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
+		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
+		v2.POST("/user/invite", h.AddUserToProject)
+		v2.POST("/user/check", h.V2GetUserByLoginType)
 
 		//connection
 		v2.POST("/connection", h.V2CreateConnection)
