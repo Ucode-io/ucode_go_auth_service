@@ -18,7 +18,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/spf13/cast"
 )
 
 // @Security ApiKeyAuth
@@ -148,31 +147,31 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.NodeType = resourceEnvironment.GetNodeType()
 
 	//userId, _ := c.Get("user_id")
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType:     resourceEnvironment.NodeType,
-			ProjectId:    resourceEnvironment.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "LOGIN",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(resourceEnvironment.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(login.Username),
-			Request:   &login,
-			TableSlug: "User",
-		}
-	)
+	// var (
+	// 	logReq = &models.CreateVersionHistoryRequest{
+	// 		NodeType:     resourceEnvironment.NodeType,
+	// 		ProjectId:    resourceEnvironment.ResourceEnvironmentId,
+	// 		ActionSource: c.Request.URL.String(),
+	// 		ActionType:   "LOGIN",
+	// 		UsedEnvironments: map[string]bool{
+	// 			cast.ToString(resourceEnvironment.EnvironmentId): true,
+	// 		},
+	// 		UserInfo:  cast.ToString(login.Username),
+	// 		Request:   &login,
+	// 		TableSlug: "User",
+	// 	}
+	// )
 
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-			h.log.Info("!!!V2Login -> error")
-		} else {
-			logReq.Response = resp
-			h.log.Info("V2Login -> success")
-		}
-		go h.versionHistory(c, logReq)
-	}()
+	// defer func() {
+	// 	if err != nil {
+	// 		logReq.Response = err.Error()
+	// 		h.log.Info("!!!V2Login -> error")
+	// 	} else {
+	// 		logReq.Response = resp
+	// 		h.log.Info("V2Login -> success")
+	// 	}
+	// 	go h.versionHistory(c, logReq)
+	// }()
 
 	resp, err = h.services.SessionService().V2Login(
 		c.Request.Context(),
