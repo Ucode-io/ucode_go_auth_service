@@ -110,7 +110,11 @@ func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistor
 		user     = req.UserInfo
 	)
 
-	sharedServiceManager, _ := h.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
+	sharedServiceManager, err := h.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
+	if err != nil {
+		h.log.Info("Error getting shared service manager", logger.Error(err))
+		return err
+	}
 
 	if req.Current == nil {
 		current["data"] = make(map[string]interface{})
@@ -138,7 +142,7 @@ func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistor
 		}
 	}
 
-	_, err := sharedServiceManager.VersionHistoryService().Create(
+	_, err = sharedServiceManager.VersionHistoryService().Create(
 		context.Background(),
 		&object_builder_service.CreateVersionHistoryRequest{
 			Id:                uuid.NewString(),

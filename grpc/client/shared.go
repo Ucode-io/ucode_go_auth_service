@@ -38,7 +38,7 @@ type sharedGrpcClients struct {
 	postgresObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	postgresLoginService             object_builder_service.LoginServiceClient
 	postgresBuilderPermissionService object_builder_service.PermissionServiceClient
-	versionHisotryService            object_builder_service.VersionHistoryServiceClient
+	versionHistoryService            object_builder_service.VersionHistoryServiceClient
 
 	highObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	highLoginService             object_builder_service.LoginServiceClient
@@ -95,7 +95,7 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		postgresLoginService:             object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
 		postgresObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connPostgresObjectBuilderService),
 		postgresBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connPostgresObjectBuilderService),
-		versionHisotryService:            object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		versionHistoryService:            object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 
 		highObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connHighObjectBuilderService),
 		highLoginService:             object_builder_service.NewLoginServiceClient(connHighObjectBuilderService),
@@ -187,5 +187,5 @@ func (g *sharedGrpcClients) LoginService() object_builder_service.LoginServiceCl
 }
 
 func (g *sharedGrpcClients) VersionHistoryService() object_builder_service.VersionHistoryServiceClient {
-	return g.versionHisotryService
+	return g.versionHistoryService
 }
