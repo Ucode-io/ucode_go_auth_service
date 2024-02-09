@@ -401,3 +401,17 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 
 	return res, nil
 }
+
+func (r *apiKeysRepo) UpdateIsMonthlyLimitReached(ctx context.Context) error {
+	query := `
+		UPDATE api_keys SET 
+			is_monthly_request_limit_reached = false
+	`
+
+	_, err := r.db.Exec(ctx, query)
+	if err != nil {
+		return errors.Wrap(err, "error while executing UpdateIsMonthlyLimitReached query")
+	}
+
+	return nil
+}
