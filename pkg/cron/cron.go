@@ -33,7 +33,7 @@ func New(cfg config.Config, log logger.LoggerI, storage storage.StorageI) TaskSc
 
 func (t *TaskScheduler) RunJobs(ctx context.Context) error {
 	t.log.Info("Jobs Started:")
-	t.cron.AddFunc("* * * * *", func() {
+	t.cron.AddFunc("0 0 1 * *", func() {
 		t.ApiKeyLimit(context.Background())
 	})
 
