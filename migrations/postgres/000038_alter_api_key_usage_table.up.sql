@@ -47,7 +47,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Attach the trigger to the api_key_usage table
-CREATE TRIGGER IF NOT EXISTS check_monthly_limit_reached
+CREATE TRIGGER check_monthly_limit_reached
 BEFORE INSERT ON api_key_usage
 FOR EACH ROW
 EXECUTE FUNCTION update_monthly_limit_reached();
