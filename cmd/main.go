@@ -10,11 +10,11 @@ import (
 	"ucode/ucode_go_auth_service/grpc"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/grpc/service"
+	cronjob "ucode/ucode_go_auth_service/pkg/cron"
 	"ucode/ucode_go_auth_service/storage/postgres"
 
-	"github.com/saidamir98/udevs_pkg/logger"
-
 	"github.com/gin-gonic/gin"
+	"github.com/saidamir98/udevs_pkg/logger"
 )
 
 func main() {
@@ -91,6 +91,7 @@ func main() {
 
 	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
 	// log.Info(" --- U-code auth service and company service grpc client done --- ")
+	go cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
 
 	go func() {
 		lis, err := net.Listen("tcp", baseCfg.AuthGRPCPort)

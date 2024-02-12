@@ -165,7 +165,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE",
+			ActionType:   "CREATE ROLE",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -540,7 +540,7 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "DELETE",
+			ActionType:   "DELETE ROLE",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -558,7 +558,7 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 			logReq.Response = resp
 			h.log.Info("V2RemoveRole -> success")
 		}
-		go h.versionHistory(c, logReq)
+
 	}()
 
 	resp, err = h.services.PermissionService().V2RemoveRole(
@@ -729,7 +729,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE PERMISSION",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},
@@ -933,7 +933,7 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE PERMISSION",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(environmentId): true,
 			},

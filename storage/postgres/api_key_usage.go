@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"time"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -24,16 +25,21 @@ func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequ
 	)
 
 	query := `
-		SELECT 
-			rps_limit-(SELECT COUNT(*) FROM api_key_usage WHERE api_key = $1 AND created_at >= now() - interval '1 second') as rps_count,
-			monthly_request_limit-(SELECT COUNT(*) FROM api_key_usage WHERE api_key = $1 AND created_at >= date_trunc('month', current_date)) as monthly_request_count
+		SELECT
+			is_monthly_request_limit_reached,
+			rps_limit-(SELECT COUNT(1) FROM api_key_usage WHERE api_key = $1 AND creation_time = $2) as rps_count
 		FROM api_keys 
 		WHERE app_id = $1;
 	`
 
-	err := r.db.QueryRow(ctx, query, req.GetApiKey()).Scan(
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		req.GetApiKey(),
+		time.Now().Format(time.DateTime),
+	).Scan(
+		&res.IsLimitReached,
 		&res.RpsCount,
-		&res.MonthlyCount,
 	)
 	if err != nil {
 		return nil, err
@@ -54,17 +60,14 @@ func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error
 
 	query := `
 		INSERT INTO api_key_usage (
-			api_key, 
-			request_count
+			api_key
 		) VALUES(
-			$1,
-			$2
+			$1
 		)
 	`
 
 	_, err := r.db.Exec(context.Background(), query,
 		req.GetApiKey(),
-		req.GetRequestCount(),
 	)
 
 	return err

@@ -75,7 +75,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 			NodeType:     user.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE",
+			ActionType:   "CREATE USER",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(user.EnvironmentId): true,
 			},
@@ -382,7 +382,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 			NodeType:     user.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE",
+			ActionType:   "UPDATE USER",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(user.EnvironmentId): true,
 			},
@@ -515,7 +515,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 			NodeType:     resource.NodeType,
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
-			ActionType:   "DELETE",
+			ActionType:   "DELETE USER",
 			UsedEnvironments: map[string]bool{
 				cast.ToString(resource.EnvironmentId): true,
 			},

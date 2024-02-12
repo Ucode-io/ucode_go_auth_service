@@ -12,6 +12,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d
 	github.com/pkg/errors v0.9.1
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
 	github.com/spf13/cast v1.5.0
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
