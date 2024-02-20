@@ -1242,7 +1242,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	_, err = uuid.Parse(input.GetProjectId())
 	if err != nil {
-		input.ProjectId = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
+		input.ProjectId = "8104fded-dfdf-4ee3-87a4-4fa1edca1f68"
 	}
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
