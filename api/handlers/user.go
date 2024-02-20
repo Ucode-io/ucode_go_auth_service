@@ -187,7 +187,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteUser(c *gin.Context) {
-	// var userDataToMap = make(map[string]interface{})
+	// var userDataToMap = make(map[string]interface{}) 
 	// userID := c.Param("user-id")
 	// projectID := c.Param("project-id")
 
