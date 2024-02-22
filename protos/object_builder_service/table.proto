@@ -86,6 +86,7 @@ message CreateTableRequest {
     string env_id = 24;
     string id = 25;
     string view_id = 26;
+    string layout_id = 27;
 }
 
 message IncrementID {

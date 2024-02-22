@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"log"
 	"time"
@@ -334,7 +336,8 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"session"
-	WHERE user_id = $1`
+	WHERE user_id = $1
+	ORDER BY created_at DESC`
 
 	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
@@ -436,4 +439,34 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 	rowsAffected = result.RowsAffected()
 
 	return rowsAffected, err
+}
+
+func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error) {
+	params := make(map[string]interface{})
+	var placeholders []string
+	queryInitial := `UPDATE "session" SET
+        expires_at = now(),
+        is_changed = TRUE,
+        updated_at = now()`
+
+	for idx, id := range entity.SessionIds {
+		placeholder := fmt.Sprintf(":id%d", idx+1)
+		placeholders = append(placeholders, placeholder)
+		params[fmt.Sprintf("id%d", idx+1)] = id
+	}
+
+	filter := " WHERE id IN (" + strings.Join(placeholders, ", ") + ")"
+
+	query := queryInitial + filter
+
+	cQuery, arr := helper.ReplaceQueryParams(query, params)
+
+	result, err := r.db.Exec(ctx, cQuery, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected = result.RowsAffected()
+
+	return rowsAffected, nil
 }

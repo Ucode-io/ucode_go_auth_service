@@ -1060,3 +1060,38 @@ func (h *Handler) V2ResetPassword(c *gin.Context) {
 	}
 	h.handleResponse(c, http.OK, res)
 }
+
+// ExpireSessions godoc
+// @ID expire_sesssions
+// @Router /expire-sessions [PUT]
+// @Summary Expire Sessions
+// @Description Expire Sessions
+// @Tags Expire Sessions
+// @Accept json
+// @Produce json
+// @Param sessions body auth_service.ExpireSessionsRequest true "ExpireSessionsRequestBody"
+// @Success 200 {object} http.Response{data=string} "Response data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) ExpireSessions(c *gin.Context) {
+	var (
+		req auth_service.ExpireSessionsRequest
+	)
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	_, err = h.services.SessionService().ExpireSessions(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, map[string]interface{}{"message": "success"})
+}

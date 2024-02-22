@@ -29,6 +29,7 @@ service SessionService {
     rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {}
     rpc V2ResetPassword(V2ResetPasswordRequest) returns (User) {}
     rpc V2RefreshTokenForEnv(RefreshTokenRequest) returns (V2LoginResponse) {}
+    rpc ExpireSessions (ExpireSessionsRequest) returns (google.protobuf.Empty) {}
 }
 
 message V2ResetPasswordRequest {
@@ -461,4 +462,8 @@ message MultiCompanyLoginResponse {
 
     repeated Company companies = 1;
     repeated ClientType client_types = 2;
+}
+
+message ExpireSessionsRequest {
+    repeated string session_ids = 1;
 }

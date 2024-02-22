@@ -133,6 +133,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
 		v2.PUT("/reset-password", h.V2ResetPassword)
 		v2.PUT("set-email/send-code", h.EmailEnter)
+		v2.PUT("/expire-sessions", h.ExpireSessions)
 
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
