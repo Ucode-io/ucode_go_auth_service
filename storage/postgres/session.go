@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"log"
@@ -442,26 +441,19 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 }
 
 func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error) {
-	params := make(map[string]interface{})
-	var placeholders []string
+	quotedSessionIDs := make([]string, len(entity.SessionIds))
+	for i, id := range entity.SessionIds {
+		quotedSessionIDs[i] = "'" + id + "'"
+	}
+
 	queryInitial := `UPDATE "session" SET
         expires_at = now(),
         is_changed = TRUE,
-        updated_at = now()`
+        updated_at = now()
+		WHERE id IN (` + strings.Join(quotedSessionIDs, ",") + `)
+	`
 
-	for idx, id := range entity.SessionIds {
-		placeholder := fmt.Sprintf(":id%d", idx+1)
-		placeholders = append(placeholders, placeholder)
-		params[fmt.Sprintf("id%d", idx+1)] = id
-	}
-
-	filter := " WHERE id IN (" + strings.Join(placeholders, ", ") + ")"
-
-	query := queryInitial + filter
-
-	cQuery, arr := helper.ReplaceQueryParams(query, params)
-
-	result, err := r.db.Exec(ctx, cQuery, arr...)
+	result, err := r.db.Exec(ctx, queryInitial)
 	if err != nil {
 		return 0, err
 	}
