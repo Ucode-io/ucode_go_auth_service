@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	_ "encoding/json"
 	"errors"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
