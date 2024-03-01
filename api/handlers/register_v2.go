@@ -221,25 +221,26 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			return
 		}
 
-		emailSettings, err := h.services.EmailService().GetListEmailSettings(
-			c.Request.Context(),
-			&pb.GetListEmailSettingsRequest{
-				ProjectId: resourceEnvironment.GetProjectId(),
-			},
-		)
+		emailSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_SMTP,
+			})
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
 
-		if len(emailSettings.Items) < 1 {
+		if len(emailSettings.GetResources()) < 1 {
 			h.handleResponse(c, http.InvalidArgument, errors.New("email settings not found"))
 			return
 		}
 
-		body.DevEmail = emailSettings.Items[0].Email
-		body.DevEmailPassword = emailSettings.Items[0].Password
+		body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetEmail()
+		body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetPassword()
 	}
 
 	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &pb.GetUserByLoginTypesRequest{

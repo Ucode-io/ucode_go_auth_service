@@ -14,7 +14,7 @@ import (
 
 	// "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -329,18 +329,20 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		smsOtpSettings, err := s.services.SmsOtpSettingsService().GetList(ctx, &pb.GetListSmsOtpSettingsRequest{
+		smsOtpSettings, err := s.services.ResourceService().GetProjectResourceList(ctx, &pbc.GetProjectResourceListRequest{
 			EnvironmentId: req.Data["environment_id"],
 			ProjectId:     req.Data["project_id"],
+			Type:          pbc.ResourceType_SMS,
 		})
+
 		if err != nil {
 			s.log.Error("!!!V2LoginWithOption.SmsOtpSettingsService().GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 		var defaultOtp string
-		if len(smsOtpSettings.GetItems()) > 0 {
-			if smsOtpSettings.GetItems()[0].GetDefaultOtp() != "" {
-				defaultOtp = smsOtpSettings.GetItems()[0].GetDefaultOtp()
+		if len(smsOtpSettings.GetResources()) > 0 {
+			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetDefaultOtp() != "" {
+				defaultOtp = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetDefaultOtp()
 			}
 		}
 		if defaultOtp != otp {
@@ -556,10 +558,10 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	var res *pb.V2LoginResponse
 
 	if req.Data["project_id"] != "" && req.Data["environment_id"] != "" {
-		serviceResource, err := s.services.ServiceResource().GetSingle(ctx, &company_service.GetSingleServiceResourceReq{
+		serviceResource, err := s.services.ServiceResource().GetSingle(ctx, &pbc.GetSingleServiceResourceReq{
 			EnvironmentId: req.Data["environment_id"],
 			ProjectId:     req.Data["project_id"],
-			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
 		})
 		if err != nil {
 			errGetUserProjectData := errors.New("unable to get resource")
@@ -650,7 +652,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	companies, err := s.services.CompanyServiceClient().GetList(ctx, &company_service.GetCompanyListRequest{
+	companies, err := s.services.CompanyServiceClient().GetList(ctx, &pbc.GetCompanyListRequest{
 		Offset:  0,
 		Limit:   128,
 		OwnerId: req.Data["user_id"],
@@ -662,14 +664,14 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	companiesResp := []*pb.Company{}
 
 	if len(companies.Companies) < 1 {
-		companiesById := make([]*company_service.Company, 0)
+		companiesById := make([]*pbc.Company, 0)
 		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: resp.GetUserId(),
 		})
 		if err != nil {
 			return nil, err
 		}
-		company, err := s.services.CompanyServiceClient().GetById(ctx, &company_service.GetCompanyByIdRequest{
+		company, err := s.services.CompanyServiceClient().GetById(ctx, &pbc.GetCompanyByIdRequest{
 			Id: user.GetCompanyId(),
 		})
 		if err != nil {
@@ -997,10 +999,10 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 
 	// resource, err := s.services.ServiceResource().GetSingle(
 	// 	ctx,
-	// 	&company_service.GetSingleServiceResourceReq{
+	// 	&pbc.GetSingleServiceResourceReq{
 	// 		ProjectId:     session.ProjectId,
 	// 		EnvironmentId: session.EnvId,
-	// 		ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+	// 		ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
 	// 	},
 	// )
 	// if err != nil {
@@ -1375,7 +1377,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.V2MultiCompanyLoginRes_Company_Project, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
-			&company_service.GetCompanyByIdRequest{
+			&pbc.GetCompanyByIdRequest{
 				Id: item.Id,
 			})
 
@@ -1389,7 +1391,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
-				&company_service.GetProjectByIdRequest{
+				&pbc.GetProjectByIdRequest{
 					ProjectId: projectId,
 					CompanyId: item.Id,
 				})
@@ -1524,10 +1526,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 		resource, err := s.services.ServiceResource().GetSingle(
 			ctx,
-			&company_service.GetSingleServiceResourceReq{
+			&pbc.GetSingleServiceResourceReq{
 				ProjectId:     session.ProjectId,
 				EnvironmentId: session.EnvId,
-				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+				ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
 			},
 		)
 		if err != nil {
@@ -1689,7 +1691,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
 		company, err := s.services.CompanyServiceClient().GetById(ctx,
-			&company_service.GetCompanyByIdRequest{
+			&pbc.GetCompanyByIdRequest{
 				Id: item.Id,
 			})
 
@@ -1711,7 +1713,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
-				&company_service.GetProjectByIdRequest{
+				&pbc.GetProjectByIdRequest{
 					ProjectId: projectId,
 					CompanyId: item.Id,
 				})
@@ -1730,7 +1732,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 			environments, err := s.services.EnvironmentService().GetList(
 				ctx,
-				&company_service.GetEnvironmentListRequest{
+				&pbc.GetEnvironmentListRequest{
 					ProjectId: projectId,
 					Limit:     1000,
 					Ids:       userEnvProject.EnvProjects[projectId],
@@ -1745,7 +1747,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			for _, en := range environments.Environments {
 				resourceEnv, err := s.services.ServiceResource().GetList(
 					ctx,
-					&company_service.GetListServiceResourceReq{
+					&pbc.GetListServiceResourceReq{
 						ProjectId:     projectId,
 						EnvironmentId: en.Id,
 					},
@@ -1905,10 +1907,10 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	resource, err := s.services.ServiceResource().GetSingle(
 		ctx,
-		&company_service.GetSingleServiceResourceReq{
+		&pbc.GetSingleServiceResourceReq{
 			ProjectId:     session.ProjectId,
 			EnvironmentId: req.EnvId,
-			ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
