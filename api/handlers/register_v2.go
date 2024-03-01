@@ -248,15 +248,15 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		body.DevEmailPassword = emailSettings.Items[0].Password
 	}
 
-	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
+	_, _ = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
-	if err != nil {
-		h.log.Error("V2SendCode#V2GetUserByLoginTypes", logger.Error(err))
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.log.Error("V2SendCode#V2GetUserByLoginTypes", logger.Error(err))
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	fmt.Println("\n\n SEND-CODE #1")
 	services, err := h.GetProjectSrvc(
