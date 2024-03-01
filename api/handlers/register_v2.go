@@ -15,6 +15,7 @@ import (
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -164,11 +165,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		h.log.Error("V2SendCode#GetResourceEnvironment", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 	code, err := util.GenerateCode(4)
 	if err != nil {
+		h.log.Error("V2SendCode#GenerateCode4", logger.Error(err))
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
@@ -189,27 +192,32 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			return
 		}
 		fmt.Println("test 10")
-		smsOtpSettings, err := h.services.SmsOtpSettingsService().GetList(context.Background(), &auth_service.GetListSmsOtpSettingsRequest{
-			ProjectId:     resourceEnvironment.ProjectId,
-			EnvironmentId: environmentId.(string),
-		})
+		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbCompany.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbCompany.ResourceType_SMS,
+			})
 		if err != nil {
+			h.log.Error("V2SendCode#GetResources", logger.Error(err))
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("test 11", smsOtpSettings.GetItems())
-		if len(smsOtpSettings.GetItems()) > 0 {
-			if smsOtpSettings.GetItems()[0].GetNumberOfOtp() != 0 {
-				code, err := util.GenerateCode(int(smsOtpSettings.GetItems()[0].GetNumberOfOtp()))
+		fmt.Println("test 11", smsOtpSettings.GetResources())
+		if len(smsOtpSettings.GetResources()) > 0 {
+			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
+				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
 				if err != nil {
+					h.log.Error("V2SendCode#GenerateCode", logger.Error(err))
 					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
 					return
 				}
 				body.Otp = code
 			}
-			body.DevEmail = smsOtpSettings.GetItems()[0].Login
-			body.DevEmailPassword = smsOtpSettings.GetItems()[0].Password
-			body.Originator = smsOtpSettings.GetItems()[0].Originator
+			body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
+			body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
+			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
 		}
 	case "EMAIL":
 
@@ -244,6 +252,11 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
+	if err != nil {
+		h.log.Error("V2SendCode#V2GetUserByLoginTypes", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	fmt.Println("\n\n SEND-CODE #1")
 	services, err := h.GetProjectSrvc(
@@ -251,6 +264,11 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		resourceEnvironment.ProjectId,
 		resourceEnvironment.NodeType,
 	)
+	if err != nil {
+		h.log.Error("V2SendCode#GetProjectSrvc", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := services.SmsService().Send(
 		c.Request.Context(),
@@ -258,6 +276,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	)
 	fmt.Println("\n\n SEND-CODE #2")
 	if err != nil {
+		h.log.Error("V2SendCode#Send", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
