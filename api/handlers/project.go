@@ -219,7 +219,7 @@ func (h *Handler) DeleteProject(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateProjectUserData(c *gin.Context) {
-	var UpdateProjectUserDataReq company_service.UpdateProjectUserDataReq
+	var updateProjectUserDataReq company_service.UpdateProjectUserDataReq
 
 	// err := c.ShouldBindJSON(&UpdateProjectUserDataReq)
 	// if err != nil {
@@ -255,5 +255,5 @@ func (h *Handler) UpdateProjectUserData(c *gin.Context) {
 	// 	return
 	// }
 
-	h.handleResponse(c, http.OK, UpdateProjectUserDataReq)
+	h.handleResponse(c, http.OK, &updateProjectUserDataReq)
 }
