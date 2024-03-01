@@ -62,6 +62,7 @@ message ResourceEnvironmentV2MultiCompany {
     string description = 10;
     google.protobuf.Struct client_types = 11;
     string node_type = 12;
+    string access_type = 13;
 }
 
 message Project2 {
