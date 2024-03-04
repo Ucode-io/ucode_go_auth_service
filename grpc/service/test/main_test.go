@@ -109,7 +109,6 @@ func (p *serviceNodes) GetByNodeType(namespace string, nodeType string) (client.
 		if p.ServicePool == nil {
 			return nil, config.ErrNilServicePool
 		}
-		fmt.Println("\n\n ~~~~~~~~> Namespace ", namespace)
 		p.Mu.Lock()
 		defer p.Mu.Unlock()
 

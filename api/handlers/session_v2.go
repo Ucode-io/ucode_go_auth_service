@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
@@ -137,7 +136,6 @@ func (h *Handler) V2Login(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		fmt.Println("rest:", err)
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
@@ -166,10 +164,8 @@ func (h *Handler) V2Login(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.log.Info("!!!V2Login -> error")
 		} else {
 			logReq.Response = resp
-			h.log.Info("V2Login -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()
@@ -933,7 +929,6 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 	err = helper.SendCodeToEnvironmentEmail("Your verification code", user.GetEmail(), code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())

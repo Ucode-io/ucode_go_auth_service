@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/models"
@@ -117,12 +116,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
-	// log.Println("reqLoginData--->", reqLoginData)
 	var data *pbObject.LoginDataRes
-
-	if req.GetProjectId() == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		fmt.Println("\n\n here reqLoginData ", reqLoginData)
-	}
 
 	services, err := s.serviceNode.GetByNodeType(
 		req.ProjectId,
@@ -158,18 +152,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 	}
 
-	if req.GetProjectId() == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		fmt.Println("\n\n here user data ", data)
-	}
-
 	if !data.UserFound {
 		customError := errors.New("User not found")
 		s.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
-	}
-
-	if req.GetProjectId() == "1acd7a8f-a038-4e07-91cb-b689c368d855" {
-		fmt.Println("\n\n here after ")
 	}
 
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
@@ -184,11 +170,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		GlobalPermission: data.GetGlobalPermission(),
 		UserData:         data.GetUserData(),
 	})
-
-	if roleId, ok := res.UserData.Fields["role_id"].GetKind().(*structpb.Value_StringValue); ok {
-
-		fmt.Println("\n\n\n LOGIN USER DATA 111", roleId.StringValue)
-	}
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
@@ -551,7 +532,6 @@ pwd:
 }
 
 func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMiddlewareReq) (*pb.V2LoginWithOptionsResponse, error) {
-	log.Println("reqLoginData--->", req)
 
 	var res *pb.V2LoginResponse
 
@@ -574,7 +554,6 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			ClientType:            req.Data["client_type_id"],
 			NodeType:              serviceResource.GetNodeType(),
 		}
-		// log.Println("reqLoginData--->", reqLoginData)
 		var data *pbObject.LoginDataRes
 
 		services, err := s.serviceNode.GetByNodeType(
@@ -1217,7 +1196,6 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
 	s.log.Info("--->SessionAndTokenGenerator--->", logger.Any("req", input))
-	fmt.Print("user id:::", input.GetLoginData().GetUserId())
 
 	if _, err := uuid.Parse(input.GetLoginData().GetUserId()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
@@ -1423,7 +1401,6 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
-	fmt.Println("has access user begin::", time.Now())
 	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	arr_path := strings.Split(req.Path, "/")
@@ -1569,7 +1546,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 		authTables = append(authTables, authTable)
 	}
-	fmt.Println("has access user end::", time.Now())
 
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
@@ -1672,7 +1648,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			}
 		}
 	}
-	fmt.Println(">>>> user #1", user)
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
@@ -1773,8 +1748,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
 					continue
 				}
-
-				fmt.Println("\n\n\n ~~~~~~~~~> ENV-->  ", resourceEnv.ServiceResources[config.ObjectBuilderService])
 
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
 
@@ -1889,8 +1862,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		session.EnvId = req.EnvId
 	}
 
-	fmt.Println("\n\n\n\n\n\n\n\n\n ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~? session ", session)
-
 	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 		Id: session.GetUserId(),
 	})
@@ -1959,9 +1930,8 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	}
 
-	fmt.Println("\n\n\n\n\n\n\n\n\n ~~~~~~~~~~~~~~~~~~~~~~~~? user ", user)
 	if !data.UserFound {
-		customError := errors.New(fmt.Sprintf("User not found with env_id %s, user_id %s, client_type_id %s", req.GetEnvId(), user.Id, session.ClientTypeId))
+		customError := fmt.Errorf("User not found with env_id %s, user_id %s, client_type_id %s", req.GetEnvId(), user.Id, session.ClientTypeId)
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}

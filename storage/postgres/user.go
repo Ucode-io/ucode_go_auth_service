@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/api/models"
@@ -357,15 +356,12 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		// "language_id": entity.GetLanguageId(),
 		// "timezone_id": entity.GetTimezoneId(),
 	}
-	log.Println("language_id", entity.LanguageId, "timezone_id", entity.TimezoneId)
 	q, arr := helper.ReplaceQueryParams(query, params)
-	log.Println("query", q, "arr", arr)
 	result, err := r.db.Exec(ctx, q, arr...)
 	if err != nil {
 		return 0, err
 	}
 
-	fmt.Println("result", result)
 	rowsAffected = result.RowsAffected()
 
 	return rowsAffected, nil
@@ -427,9 +423,6 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	WHERE`
 
 	lowercasedUsername := strings.ToLower(username)
-
-	fmt.Println("emailusername", username)
-	fmt.Println("util.IsValidEmail(username):", IsValidEmailNew(username))
 
 	if IsValidEmailNew(username) {
 		query = query + ` LOWER(email) = $1`
@@ -639,7 +632,6 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 	} else {
 		envId.Status = pgtype.Null
 	}
-	fmt.Println(">\n\n req", req.ProjectId)
 	query := `UPDATE user_project 
 			  SET client_type_id = $4,
 			  role_id = $5
@@ -946,8 +938,6 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 	WHERE
 		id = :id`
 	params["id"] = req.GetUserId()
-
-	fmt.Print("\n\nParams: ", params)
 
 	q, arr := helper.ReplaceQueryParams(query, params)
 

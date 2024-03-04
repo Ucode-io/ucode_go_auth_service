@@ -3,8 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
 	"strconv"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
@@ -112,7 +110,6 @@ func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistor
 
 	sharedServiceManager, err := h.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
-		h.log.Info("Error getting shared service manager", logger.Error(err))
 		return err
 	}
 
@@ -161,9 +158,6 @@ func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistor
 		},
 	)
 	if err != nil {
-		fmt.Println("=======================================================")
-		log.Println(err)
-		fmt.Println("=======================================================")
 		return err
 	}
 	return nil

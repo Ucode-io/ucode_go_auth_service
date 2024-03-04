@@ -8,8 +8,6 @@ import (
 	"github.com/Timothylock/go-signin-with-apple/apple"
 )
 
-
-
 func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayload, error) {
 
 	// Generate the client secret used to authenticate with Apple's validation servers
@@ -18,7 +16,7 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 -----END PRIVATE KEY-----`, c.SecretKey)
 	secret, err := apple.GenerateClientSecret(secretKey, c.TeamId, c.ClientId, c.KeyId)
 	if err != nil {
-		
+
 		return nil, err
 	}
 
@@ -36,26 +34,25 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	// Do the verification
 	err = client.VerifyAppToken(context.Background(), vReq, &resp)
 	if err != nil {
-		
+
 		return nil, err
 	}
 
 	if resp.Error != "" {
-		fmt.Printf("apple returned an error: %s - %s\n", resp.Error, resp.ErrorDescription)
 		return nil, fmt.Errorf("apple returned an error: %s - %s\n", resp.Error, resp.ErrorDescription)
 	}
 
 	// Get the unique user ID
 	// unique, err := apple.GetUniqueID(resp.IDToken)
 	// if err != nil {
-	
+
 	// 	return nil, err
 	// }
 
 	// Get the email
 	claim, err := apple.GetClaims(resp.IDToken)
 	if err != nil {
-		
+
 		return nil, err
 	}
 
@@ -64,7 +61,6 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	// isPrivateEmail := (*claim)["is_private_email"]
 	// name := (*claim)["name"]
 
-	
 	return &models.AppleUserPayload{
 		Email: email,
 	}, nil

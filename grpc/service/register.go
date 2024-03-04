@@ -111,7 +111,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		fmt.Println("::::::::::TEST:::::::::::3")
 		userId = pKey.GetId()
 	} else {
 		userId = foundUser.GetId()
@@ -202,7 +201,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	fmt.Println("::::::::::TEST:::::::::::9")
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
 		ProjectId:    body["project_id"].(string),
@@ -221,8 +219,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ProjectId:             body["project_id"].(string),
 		ResourceEnvironmentId: body["resource_environment_id"].(string),
 	}
-
-	fmt.Println("\n\n\n\n :::::: TESTCREAYEUSER ", reqLoginData)
 
 	switch body["resource_type"].(float64) {
 	case 1:
