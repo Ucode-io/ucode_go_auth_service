@@ -245,9 +245,11 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	}
 	response.UserId = user.GetId()
 
-	_, err = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
-		Id: req.GetUserId(),
-	})
+	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+		sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+			Id: req.GetUserId(),
+		})
+	}
 
 	return &empty.Empty{}, nil
 }
