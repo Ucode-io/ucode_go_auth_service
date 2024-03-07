@@ -1029,6 +1029,8 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 		return nil, err
 	}
 
+	fmt.Println("query====", q)
+
 	return &empty.Empty{}, nil
 }
 func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
