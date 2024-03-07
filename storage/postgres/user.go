@@ -987,8 +987,8 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 
 	query := `DELETE FROM "user_project" 
 	WHERE  
-	user_id = :user_id
-	role_id = :role_id
+	user_id = :user_id and 
+	role_id = :role_id and 
 	client_type_id = :client_type_id
 	`
 
