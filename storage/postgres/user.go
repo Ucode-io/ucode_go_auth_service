@@ -987,7 +987,10 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 
 	query := `DELETE FROM "user_project" 
 	WHERE  
-	user_id = :user_id`
+	user_id = :user_id
+	role_id = :role_id
+	client_type_id = :client_type_id
+	`
 
 	// `DELETE FROM "user_project"
 	// 			WHERE
@@ -999,13 +1002,9 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 
 	// params["project_id"] = req.ProjectId
 	params["user_id"] = req.UserId
+	params["role_id"] = req.RoleId
+	params["client_type_id"] = req.ClientTypeId
 
-	if req.ClientTypeId != "" {
-		params["client_type_id"] = req.ClientTypeId
-	}
-	if req.RoleId != "" {
-		params["role_id"] = req.RoleId
-	}
 	// params["company_id"] = req.CompanyId
 	// if req.GetRoleId() != "" {
 	// 	query += " AND role_id = :role_id"
@@ -1028,8 +1027,6 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("query====", q)
 
 	return &empty.Empty{}, nil
 }
