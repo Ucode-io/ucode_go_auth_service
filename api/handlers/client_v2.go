@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -65,7 +64,6 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		fmt.Println("HERE AGAIN")
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
@@ -94,10 +92,8 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.log.Info("!!!V2CreateClientType -> error")
 		} else {
 			logReq.Response = resp
-			h.log.Info("V2CreateClientType -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()
@@ -341,10 +337,8 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.log.Info("!!!V2UpdateClientType -> error")
 		} else {
 			logReq.Response = resp
-			h.log.Info("V2UpdateClientType -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()
@@ -434,10 +428,8 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.log.Info("!!!V2DeleteClientType -> error")
 		} else {
 			logReq.Response = "success"
-			h.log.Info("V2DeleteClientType -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()

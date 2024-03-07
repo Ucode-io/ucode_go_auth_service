@@ -101,7 +101,6 @@ func (e *loginPlatformTypeRepo) GetLoginPlatformType(ctx context.Context, pKey *
 
 	err = json.Unmarshal(resp, &data)
 	if err != nil {
-		log.Println(err)
 		return res, err
 	}
 

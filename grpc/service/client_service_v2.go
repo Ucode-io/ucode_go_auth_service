@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -166,8 +165,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 
 	switch req.ResourceType {
 	case 1:
-		fmt.Println("\n\n\n\n RESPONSE 222 -----> ")
-
 		result, err = services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",

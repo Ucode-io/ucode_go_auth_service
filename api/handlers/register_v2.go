@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -191,7 +190,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
-		fmt.Println("test 10")
 		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
 			context.Background(),
 			&pbCompany.GetProjectResourceListRequest{
@@ -204,7 +202,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("test 11", smsOtpSettings.GetResources())
 		if len(smsOtpSettings.GetResources()) > 0 {
 			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
 				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
@@ -258,7 +255,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	// 	return
 	// }
 
-	fmt.Println("\n\n SEND-CODE #1")
 	services, err := h.GetProjectSrvc(
 		c,
 		resourceEnvironment.ProjectId,
@@ -274,13 +270,11 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		c.Request.Context(),
 		body,
 	)
-	fmt.Println("\n\n SEND-CODE #2")
 	if err != nil {
 		h.log.Error("V2SendCode#Send", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("\n\n SEND-CODE #3")
 	res := models.V2SendCodeResponse{
 		SmsId: resp.SmsId,
 	}

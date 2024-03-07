@@ -1,14 +1,11 @@
 package helper
 
 import (
-	"log"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
-
-	log.Printf("ConvertPbToAnotherPb: %v", data)
 
 	res := &pb.V2LoginResponse{}
 	res.UserId = data.GetUserId()

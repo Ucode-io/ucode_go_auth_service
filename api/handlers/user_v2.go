@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"log"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -88,10 +87,8 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.log.Info("!!!CreateUserV2 -> error")
 		} else {
 			logReq.Response = resp
-			h.log.Info("CreateUserV2 -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()
@@ -189,7 +186,6 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		h.handleResponse(c, http.BadEnvironment, "project-id is required")
 		return
 	}
-	log.Println("project_id:::::", projectId)
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -395,10 +391,8 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.log.Info("!!!UpdateUserV2 -> error")
 		} else {
 			logReq.Response = resp
-			h.log.Info("UpdateUserV2 -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()
@@ -528,10 +522,8 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
-			h.log.Info("!!!V2DeleteUser -> error")
 		} else {
 			logReq.Response = nil
-			h.log.Info("V2DeleteUser -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()

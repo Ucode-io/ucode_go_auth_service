@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -281,9 +280,9 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	}
 
 	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"limit":          limit,
-		"offset":         offset,
-		"client_type_id": c.DefaultQuery("client_type_id", ""),
+		"limit":                     limit,
+		"offset":                    offset,
+		"client_type_id_from_token": c.DefaultQuery("client_type_id", ""),
 	})
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -311,7 +310,6 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 				Data:      structData,
 			},
 		)
-		fmt.Println("\n\n ----------- > params ", structData)
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
@@ -350,7 +348,6 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 					if err != nil {
 						continue
 					}
-					fmt.Println("options response::", options.Data.AsMap()["response"])
 					res["options"] = options.Data.AsMap()["response"]
 				}
 				v = res

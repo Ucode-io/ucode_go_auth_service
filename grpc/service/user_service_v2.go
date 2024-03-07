@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -636,8 +635,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("project id::", req.ProjectId)
-	fmt.Println("resource type::", req.ResourceType)
 
 	services, err := s.serviceNode.GetByNodeType(
 		req.ProjectId,
@@ -650,7 +647,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
-		fmt.Println("enter to object builder")
 		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
@@ -720,9 +716,9 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if bytes, err := json.Marshal(userData); err == nil {
-		fmt.Println("userdata", string(bytes))
-	}
+	// if bytes, err := json.Marshal(userData); err == nil {
+	// 	fmt.Println("userdata", string(bytes))
+	// }
 
 	roleId, ok := userData["role_id"].(string)
 	if !ok {

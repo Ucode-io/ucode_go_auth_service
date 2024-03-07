@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"ucode/ucode_go_auth_service/api/docs"
 	"ucode/ucode_go_auth_service/api/handlers"
 	"ucode/ucode_go_auth_service/config"
@@ -284,7 +283,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 }
 
 func customCORSMiddleware() gin.HandlerFunc {
-	fmt.Println("\n\n test log for check changes")
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")

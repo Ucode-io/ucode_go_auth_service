@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"log"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -28,7 +27,6 @@ func NewSessionRepo(db *pgxpool.Pool) storage.SessionRepoI {
 }
 
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
-	log.Printf("--->STRG: CreateSessionRequest: %+v", entity)
 
 	params := make(map[string]interface{})
 	queryInitial := `INSERT INTO "session" (
@@ -290,7 +288,6 @@ func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (r
 }
 
 func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error) {
-	log.Printf("---STRG->DeleteExpiredUserSessions---> %s", userID)
 
 	query := `DELETE FROM "session" WHERE user_id = $1 AND expires_at < $2`
 

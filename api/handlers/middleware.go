@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	nethttp "net/http"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
@@ -51,7 +50,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			environmentId := c.GetHeader("Environment-Id")
 			projectId := c.Query("Project-Id")
 
-			fmt.Println("\n\n\n AUTH RES ", res)
 			if res.ProjectId != "" {
 				projectId = res.ProjectId
 			}
@@ -144,9 +142,6 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 	)
 	if err != nil {
 		errr := status.Error(codes.PermissionDenied, "Permission denied")
-		fmt.Println("\n\n Admin errr 3th", errr)
-		fmt.Println("\n\n Admin errr 3th invoked ", errr.Error())
-		fmt.Println("\n\n Auth err 2th ", err.Error())
 		if errr.Error() == err.Error() {
 			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))
 			h.handleResponse(c, http.BadRequest, err.Error())

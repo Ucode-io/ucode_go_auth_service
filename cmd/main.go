@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
@@ -39,8 +38,6 @@ func main() {
 
 	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
 	defer logger.Cleanup(log)
-
-	fmt.Println("\n\n configs --- >", baseCfg)
 
 	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg)
 	if err != nil {
@@ -83,8 +80,6 @@ func main() {
 	if mapProjectConfs == nil {
 		mapProjectConfs = make(map[string]config.Config)
 	}
-
-	fmt.Println("\n\n ~> project configs ", mapProjectConfs)
 
 	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
 	projectServiceNodes.SetConfigs(mapProjectConfs)

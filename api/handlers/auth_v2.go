@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -119,7 +118,6 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "role_id is required")
 		return
 	}
-	fmt.Println("::::::::::TESTTEST:::::::::::::4")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 
@@ -309,9 +307,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	switch strings.ToLower(body.Provider) {
 	case "email", cfg.Default:
 		{
-			fmt.Println("\n\n Verify test #1")
 			if c.Param("otp") != "121212" {
-				fmt.Println("\n\n Verify test #2", c.Param("verify_id"))
 				resp, err := h.services.EmailService().GetEmailByID(
 					c.Request.Context(),
 					&auth_service.EmailOtpPrimaryKey{
@@ -322,7 +318,6 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 					h.handleResponse(c, http.GRPCError, err.Error())
 					return
 				}
-				fmt.Println("\n\n Verify test #3", body.Otp, resp.Otp)
 				if resp.Otp != body.Otp {
 					h.handleResponse(c, http.InvalidArgument, "Неверный код подверждения")
 					return
@@ -507,37 +502,31 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println("Login test #1")
 	clientType := login.Data["client_type_id"]
 	if clientType == "" {
 		h.handleResponse(c, http.InvalidArgument, "inside data client_type_id is required")
 		return
 	}
-	fmt.Println("Login test #2")
 	if ok := util.IsValidUUID(clientType); !ok {
 		h.handleResponse(c, http.InvalidArgument, "lient_type_id is an invalid uuid")
 		return
 	}
-	fmt.Println("Login test #3")
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 	environmentId, ok := c.Get("environment_id")
-	fmt.Println("Login test #4", environmentId, projectId)
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		err = errors.New("error getting environment id | not valid")
 		h.handleResponse(c, http.BadRequest, err)
 		return
 	}
-	fmt.Println("Login test #5")
 	provider := c.Param("provider")
 	if provider == "" {
 		h.handleResponse(c, http.InvalidArgument, "provider is required(param)")
 		return
 	}
-	fmt.Println("Login test #6")
 	login.LoginStrategy = provider
 	login.Data["environment_id"] = environmentId.(string)
 	login.Data["project_id"] = projectId.(string)
@@ -549,7 +538,6 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 			LoginStrategy: login.GetLoginStrategy(),
 			Tables:        login.GetTables(),
 		})
-	fmt.Println("Login test #7")
 	httpErrorStr := ""
 	if err != nil {
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
