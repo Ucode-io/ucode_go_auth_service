@@ -111,34 +111,34 @@ func BaseLoad() BaseConfig {
 	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "100"))
 
-	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "ucode_go_auth_service"))
+	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", ""))
 	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0"))
 
-	config.HTTPPort = cast.ToString(getOrReturnDefaultValue("HTTP_PORT", ":9107"))
-	config.HTTPScheme = cast.ToString(getOrReturnDefaultValue("HTTP_SCHEME", "http"))
-	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", "ucode.udevs.io@gmail.com"))
-	config.Password = cast.ToString(getOrReturnDefaultValue("PASSWORD", "xkiaqodjfuielsug"))
+	config.HTTPPort = cast.ToString(getOrReturnDefaultValue("HTTP_PORT", ""))
+	config.HTTPScheme = cast.ToString(getOrReturnDefaultValue("HTTP_SCHEME", ""))
+	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", ""))
+	config.Password = cast.ToString(getOrReturnDefaultValue("PASSWORD", ""))
 
-	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "65.109.239.69"))
-	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 5432))
-	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", "auth_service"))
-	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "Iegfrte45eatr7ieso"))
-	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "auth_service"))
-	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 30))
+	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", ""))
+	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 0))
+	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", ""))
+	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", ""))
+	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", ""))
+	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 0))
 
-	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", "localhost"))
-	config.AuthGRPCPort = cast.ToString(getOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))
+	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
+	config.AuthGRPCPort = cast.ToString(getOrReturnDefaultValue("AUTH_GRPC_PORT", ""))
 
 	config.UcodeNamespace = "u-code"
 
-	config.CompanyServiceHost = cast.ToString(getOrReturnDefaultValue("COMPANY_SERVICE_HOST", "localhost"))
-	config.CompanyGRPCPort = cast.ToString(getOrReturnDefaultValue("COMPANY_GRPC_PORT", ":8092"))
+	config.CompanyServiceHost = cast.ToString(getOrReturnDefaultValue("COMPANY_SERVICE_HOST", ""))
+	config.CompanyGRPCPort = cast.ToString(getOrReturnDefaultValue("COMPANY_GRPC_PORT", ""))
 
-	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", "localhost"))
-	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ":9105"))
+	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", ""))
+	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ""))
 
-	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "Here$houldBe$ome$ecretKey"))
+	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", ""))
 
 	return config
 }
@@ -157,26 +157,26 @@ func Load() Config {
 	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "100"))
 
-	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "Here$houldBe$ome$ecretKey"))
+	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", ""))
 
-	config.PasscodePool = cast.ToString(getOrReturnDefaultValue("PASSCODE_POOL", "0123456789"))
-	config.PasscodeLength = cast.ToInt(getOrReturnDefaultValue("PASSCODE_LENGTH", "6"))
+	config.PasscodePool = cast.ToString(getOrReturnDefaultValue("PASSCODE_POOL", ""))
+	config.PasscodeLength = cast.ToInt(getOrReturnDefaultValue("PASSCODE_LENGTH", ""))
 
-	config.ObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_LOW_HOST", "localhost"))
-	config.ObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_LOW_GRPC_PORT", ":9102"))
+	config.ObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_LOW_HOST", ""))
+	config.ObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_LOW_GRPC_PORT", ""))
 
-	config.HighObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", "localhost"))
-	config.HighObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ":9109"))
+	config.HighObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_SERVICE_HIGHT_HOST", ""))
+	config.HighObjectBuilderGRPCPort = cast.ToString(getOrReturnDefaultValue("OBJECT_BUILDER_HIGH_GRPC_PORT", ""))
 
-	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", "localhost"))
-	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ":9105"))
+	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", ""))
+	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ""))
 
-	config.WebPageServiceHost = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", "localhost"))
-	config.WebPageServicePort = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ":8098"))
+	config.WebPageServiceHost = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", ""))
+	config.WebPageServicePort = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ""))
 
-	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", "localhost"))
-	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ":92033"))
-	config.UcodeAppBaseUrl = cast.ToString(getOrReturnDefaultValue("UCODE_APP_BASE_URL", "https://dev-app.ucode.run"))
+	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
+	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
+	config.UcodeAppBaseUrl = cast.ToString(getOrReturnDefaultValue("UCODE_APP_BASE_URL", ""))
 
 	return config
 }
