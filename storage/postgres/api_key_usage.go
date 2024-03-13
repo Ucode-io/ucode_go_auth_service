@@ -48,14 +48,6 @@ func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequ
 	return &res, nil
 }
 
-func (r *apiKeyUsageRepo) Get(ctx context.Context, req *pb.GetApiKeyUsageReq) (*pb.ApiKeyUsage, error) {
-	var (
-		res pb.ApiKeyUsage
-	)
-
-	return &res, nil
-}
-
 func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error {
 
 	query := `
@@ -71,4 +63,27 @@ func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error
 	)
 
 	return err
+}
+
+func (r *apiKeyUsageRepo) BulkUpsert(ctx context.Context, req *pb.ApiKeyUsage) error {
+	query := `
+		INSERT INTO api_key_usage (
+			api_key,
+			request_count)
+		VALUES (
+			$1,
+			$2
+		) ON CONFLICT (api_key, creation_month) DO 
+		UPDATE SET request_count = api_key_usage.request_count + $2
+	`
+
+	_, err := r.db.Exec(context.Background(), query,
+		req.GetApiKey(),
+		req.GetRequestCount(),
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

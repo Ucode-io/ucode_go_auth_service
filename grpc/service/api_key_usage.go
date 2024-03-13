@@ -54,22 +54,6 @@ func (s *apiKeyUsageService) CheckLimit(ctx context.Context, req *pb.CheckLimitR
 	return res, nil
 }
 
-func (s *apiKeyUsageService) Get(ctx context.Context, req *pb.GetApiKeyUsageReq) (*pb.ApiKeyUsage, error) {
-	s.log.Info("---GetApiKeyUsage--->", logger.Any("req", req))
-
-	res, err := s.strg.ApiKeyUsage().Get(ctx, req)
-	if err == pgx.ErrNoRows {
-		s.log.Error("!!!GetApiKeyUsage--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, "api-key not found")
-	}
-	if err != nil {
-		s.log.Error("!!!GetApiKeyUsage--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, "error on getting api key")
-	}
-
-	return res, nil
-}
-
 func (s *apiKeyUsageService) Create(ctx context.Context, req *pb.ApiKeyUsage) (*emptypb.Empty, error) {
 	s.log.Info("---UpsertApiKeyUsage--->", logger.Any("req", req))
 

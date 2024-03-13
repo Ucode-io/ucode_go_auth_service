@@ -9,6 +9,7 @@ service ApiKeyUsageService {
   rpc Get (GetApiKeyUsageReq) returns (ApiKeyUsage) {}
   rpc CheckLimit (CheckLimitRequest) returns (CheckLimitResponse) {}
   rpc Create (ApiKeyUsage) returns (google.protobuf.Empty) {}
+  rpc BulkUpsert(BulkUpsertRequest) returns (google.protobuf.Empty) {}
 }
 
 message ApiKeyUsage {
@@ -33,3 +34,6 @@ message CheckLimitResponse {
   int32 monthly_count = 3;
 }
 
+message BulkUpsertRequest {
+  repeated ApiKeyUsage api_key_usages = 1;
+}
