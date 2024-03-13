@@ -310,6 +310,14 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
+	if !strings.HasSuffix(login.GetUsername(), "_superadmin") {
+		err := errors.New("Пользователь не найдено")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
+	} else {
+		login.Username = strings.TrimSuffix(login.GetUsername(), "_superadmin")
+	}
+
 	//userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
 	//	"login":    login.Username,
 	//	"password": login.Password,
