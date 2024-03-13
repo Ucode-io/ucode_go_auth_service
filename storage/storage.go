@@ -258,5 +258,5 @@ type SmsOtpSettingsRepoI interface {
 type ApiKeyUsageRepoI interface {
 	CheckLimit(ctx context.Context, req *pb.CheckLimitRequest) (res *pb.CheckLimitResponse, err error)
 	Create(ctx context.Context, req *pb.ApiKeyUsage) error
-	BulkUpsert(ctx context.Context, req *pb.ApiKeyUsage) error
+	Upsert(ctx context.Context, req *pb.ApiKeyUsage) error
 }

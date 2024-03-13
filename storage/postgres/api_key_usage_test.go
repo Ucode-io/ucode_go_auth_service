@@ -9,9 +9,12 @@ import (
 )
 
 func apiKeyUsageBulkUpsert(t *testing.T) {
-	usage := &pb.ApiKeyUsage{}
+	usage := &pb.ApiKeyUsage{
+		ApiKey:       "Malta",
+		RequestCount: 12,
+	}
 
-	err := strg.ApiKeyUsage().BulkUpsert(context.Background(), usage)
+	err := strg.ApiKeyUsage().Upsert(context.Background(), usage)
 	assert.NoError(t, err)
 
 }

@@ -65,7 +65,7 @@ func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error
 	return err
 }
 
-func (r *apiKeyUsageRepo) BulkUpsert(ctx context.Context, req *pb.ApiKeyUsage) error {
+func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error {
 	query := `
 		INSERT INTO api_key_usage (
 			api_key,
