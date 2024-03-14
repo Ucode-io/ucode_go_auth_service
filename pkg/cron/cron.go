@@ -36,17 +36,31 @@ func (t *TaskScheduler) RunJobs(ctx context.Context) error {
 	t.cron.AddFunc("0 0 1 * *", func() {
 		t.ApiKeyLimit(context.Background())
 	})
+	t.cron.AddFunc("*/2 * * * *", func() {
+		t.UpdateMonthlyLimit(context.Background())
+	})
 
 	return nil
 }
 
 func (t *TaskScheduler) ApiKeyLimit(ctx context.Context) {
 	t.log.Info("Started api key monthly request limit job.....")
-	err := t.strg.ApiKeys().UpdateIsMonthlyLimitReached(context.Background())
+	err := t.strg.ApiKeys().UpdateIsMonthlyLimitReached(ctx)
 	if err != nil {
 		t.log.Error("Error in updating monthly limit reached", logger.Error(err))
 		return
 	}
 
-	t.log.Info("Finsished api key monthly request limit job.....")
+	t.log.Info("Finished api key monthly request limit job.....")
+}
+
+func (t *TaskScheduler) UpdateMonthlyLimit(ctx context.Context) {
+	t.log.Info("Started api key usage monthly request limit job.....")
+	err := t.strg.ApiKeyUsage().UpdateMonthlyLimit(ctx)
+	if err != nil {
+		t.log.Error("Error in updating monthly limit reached", logger.Error(err))
+		return
+	}
+
+	t.log.Info("Finished api key monthly request limit job.....")
 }

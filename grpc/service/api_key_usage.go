@@ -39,27 +39,42 @@ func (s *apiKeyUsageService) CheckLimit(ctx context.Context, req *pb.CheckLimitR
 	res, err := s.strg.ApiKeyUsage().CheckLimit(ctx, req)
 	if err != nil {
 		s.log.Error("!!!CheckLimitApiKeyUsage--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, "error on creating new api key")
-	}
-
-	if res.RpsCount <= 0 {
-		res.IsLimitReached = true
-		return res, status.Error(codes.ResourceExhausted, "rps limit exceeded")
+		return nil, status.Error(codes.Internal, "error on check limit api key")
 	}
 
 	if res.IsLimitReached {
-		return res, status.Error(codes.ResourceExhausted, "monthly limit exceeded")
+		return res, nil
 	}
+
+	s.log.Info("---CheckLimitApiKeyUsage--->", logger.Any("res", res))
 
 	return res, nil
 }
 
 func (s *apiKeyUsageService) Create(ctx context.Context, req *pb.ApiKeyUsage) (*emptypb.Empty, error) {
-	s.log.Info("---UpsertApiKeyUsage--->", logger.Any("req", req))
+	s.log.Info("---CreateApiKeyUsage--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
 
 	err := s.strg.ApiKeyUsage().Create(ctx, req)
+	if err == pgx.ErrNoRows {
+		s.log.Error("!!!CreateApiKeyUsage--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, "api-key not found")
+	}
+	if err != nil {
+		s.log.Error("!!!CreateApiKeyUsage--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, "error on upserting api key usage")
+	}
+
+	return res, nil
+}
+
+func (s *apiKeyUsageService) Upsert(ctx context.Context, req *pb.ApiKeyUsage) (*emptypb.Empty, error) {
+	s.log.Info("---UpsertApiKeyUsage--->", logger.Any("req", req))
+
+	res := &emptypb.Empty{}
+
+	err := s.strg.ApiKeyUsage().Upsert(ctx, req)
 	if err == pgx.ErrNoRows {
 		s.log.Error("!!!UpsertApiKeyUsage--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, "api-key not found")

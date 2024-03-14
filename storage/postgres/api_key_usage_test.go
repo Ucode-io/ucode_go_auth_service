@@ -10,8 +10,8 @@ import (
 
 func apiKeyUsageBulkUpsert(t *testing.T) {
 	usage := &pb.ApiKeyUsage{
-		ApiKey:       "Malta",
-		RequestCount: 12,
+		ApiKey:       "P-iTSqj09ucK9IySQIoL6cr6T8lk23MYAB",
+		RequestCount: 21,
 	}
 
 	err := strg.ApiKeyUsage().Upsert(context.Background(), usage)

@@ -26,7 +26,7 @@ type ApiKeyUsageServiceClient interface {
 	Get(ctx context.Context, in *GetApiKeyUsageReq, opts ...grpc.CallOption) (*ApiKeyUsage, error)
 	CheckLimit(ctx context.Context, in *CheckLimitRequest, opts ...grpc.CallOption) (*CheckLimitResponse, error)
 	Create(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	BulkUpsert(ctx context.Context, in *BulkUpsertRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Upsert(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type apiKeyUsageServiceClient struct {
@@ -64,9 +64,9 @@ func (c *apiKeyUsageServiceClient) Create(ctx context.Context, in *ApiKeyUsage, 
 	return out, nil
 }
 
-func (c *apiKeyUsageServiceClient) BulkUpsert(ctx context.Context, in *BulkUpsertRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *apiKeyUsageServiceClient) Upsert(ctx context.Context, in *ApiKeyUsage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/auth_service.ApiKeyUsageService/BulkUpsert", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth_service.ApiKeyUsageService/Upsert", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ type ApiKeyUsageServiceServer interface {
 	Get(context.Context, *GetApiKeyUsageReq) (*ApiKeyUsage, error)
 	CheckLimit(context.Context, *CheckLimitRequest) (*CheckLimitResponse, error)
 	Create(context.Context, *ApiKeyUsage) (*emptypb.Empty, error)
-	BulkUpsert(context.Context, *BulkUpsertRequest) (*emptypb.Empty, error)
+	Upsert(context.Context, *ApiKeyUsage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedApiKeyUsageServiceServer()
 }
 
@@ -97,8 +97,8 @@ func (UnimplementedApiKeyUsageServiceServer) CheckLimit(context.Context, *CheckL
 func (UnimplementedApiKeyUsageServiceServer) Create(context.Context, *ApiKeyUsage) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedApiKeyUsageServiceServer) BulkUpsert(context.Context, *BulkUpsertRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BulkUpsert not implemented")
+func (UnimplementedApiKeyUsageServiceServer) Upsert(context.Context, *ApiKeyUsage) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Upsert not implemented")
 }
 func (UnimplementedApiKeyUsageServiceServer) mustEmbedUnimplementedApiKeyUsageServiceServer() {}
 
@@ -167,20 +167,20 @@ func _ApiKeyUsageService_Create_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiKeyUsageService_BulkUpsert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BulkUpsertRequest)
+func _ApiKeyUsageService_Upsert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApiKeyUsage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiKeyUsageServiceServer).BulkUpsert(ctx, in)
+		return srv.(ApiKeyUsageServiceServer).Upsert(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/auth_service.ApiKeyUsageService/BulkUpsert",
+		FullMethod: "/auth_service.ApiKeyUsageService/Upsert",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiKeyUsageServiceServer).BulkUpsert(ctx, req.(*BulkUpsertRequest))
+		return srv.(ApiKeyUsageServiceServer).Upsert(ctx, req.(*ApiKeyUsage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -205,8 +205,8 @@ var ApiKeyUsageService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ApiKeyUsageService_Create_Handler,
 		},
 		{
-			MethodName: "BulkUpsert",
-			Handler:    _ApiKeyUsageService_BulkUpsert_Handler,
+			MethodName: "Upsert",
+			Handler:    _ApiKeyUsageService_Upsert_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
