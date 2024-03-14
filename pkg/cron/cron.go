@@ -55,12 +55,12 @@ func (t *TaskScheduler) ApiKeyLimit(ctx context.Context) {
 }
 
 func (t *TaskScheduler) UpdateMonthlyLimit(ctx context.Context) {
-	t.log.Info("Started api key usage monthly request limit job.....")
+	t.log.Info("Started update monthly limit job.....")
 	err := t.strg.ApiKeyUsage().UpdateMonthlyLimit(ctx)
 	if err != nil {
 		t.log.Error("Error in updating monthly limit reached", logger.Error(err))
 		return
 	}
 
-	t.log.Info("Finished api key monthly request limit job.....")
+	t.log.Info("Finished update monthly limit job.....")
 }

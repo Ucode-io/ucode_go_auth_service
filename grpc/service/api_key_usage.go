@@ -43,10 +43,8 @@ func (s *apiKeyUsageService) CheckLimit(ctx context.Context, req *pb.CheckLimitR
 	}
 
 	if res.IsLimitReached {
-		return res, nil
+		return res, status.Error(codes.FailedPrecondition, "monthly limit reached")
 	}
-
-	s.log.Info("---CheckLimitApiKeyUsage--->", logger.Any("res", res))
 
 	return res, nil
 }
