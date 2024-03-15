@@ -1,2 +1,2 @@
-DELETE FROM "company";
+-- DELETE FROM "company";
 DROP TABLE IF EXISTS "company";

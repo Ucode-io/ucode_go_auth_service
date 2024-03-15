@@ -21,11 +21,9 @@ ALTER TABLE IF EXISTS api_key_usage
     DROP COLUMN IF EXISTS request_count;
 
 
--- Create the trigger function
 CREATE OR REPLACE FUNCTION update_monthly_limit_reached()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Check if the count of rows for the api_key in the current month exceeds the monthly_request_limit
     IF (
         SELECT COUNT(*)
         FROM api_key_usage
@@ -34,19 +32,17 @@ BEGIN
     ) >= (
         SELECT monthly_request_limit
         FROM api_keys
-        WHERE app_id = NEW.api_key -- Assuming api_key is app_id
+        WHERE app_id = NEW.api_key
     ) THEN
-        -- Update is_monthly_request_limit_reached to TRUE
         UPDATE api_keys
         SET is_monthly_request_limit_reached = TRUE
-        WHERE app_id = NEW.api_key; -- Assuming api_key is app_id
+        WHERE app_id = NEW.api_key;
     END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- Attach the trigger to the api_key_usage table
 CREATE TRIGGER check_monthly_limit_reached
 BEFORE INSERT ON api_key_usage
 FOR EACH ROW

@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"time"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -26,8 +25,7 @@ func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequ
 
 	query := `
 		SELECT
-			is_monthly_request_limit_reached,
-			rps_limit-(SELECT COUNT(1) FROM api_key_usage WHERE api_key = $1 AND creation_time = $2) as rps_count
+			is_monthly_request_limit_reached
 		FROM api_keys 
 		WHERE app_id = $1;
 	`
@@ -36,22 +34,12 @@ func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequ
 		ctx,
 		query,
 		req.GetApiKey(),
-		time.Now().Format(time.DateTime),
 	).Scan(
 		&res.IsLimitReached,
-		&res.RpsCount,
 	)
 	if err != nil {
 		return nil, err
 	}
-
-	return &res, nil
-}
-
-func (r *apiKeyUsageRepo) Get(ctx context.Context, req *pb.GetApiKeyUsageReq) (*pb.ApiKeyUsage, error) {
-	var (
-		res pb.ApiKeyUsage
-	)
 
 	return &res, nil
 }
@@ -71,4 +59,49 @@ func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error
 	)
 
 	return err
+}
+
+func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error {
+	query := `
+		INSERT INTO api_key_usage (
+			api_key,
+			request_count)
+		VALUES (
+			$1,
+			$2
+		) ON CONFLICT (api_key, creation_month) DO 
+		UPDATE SET request_count = api_key_usage.request_count + $2
+	`
+
+	_, err := r.db.Exec(context.Background(), query,
+		req.GetApiKey(),
+		req.GetRequestCount(),
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *apiKeyUsageRepo) UpdateMonthlyLimit(ctx context.Context) error {
+	query := `	
+		UPDATE api_keys SET
+			is_monthly_request_limit_reached = true
+  		WHERE app_id IN(
+			SELECT
+	  			aku.api_key
+			FROM api_key_usage aku
+			INNER JOIN api_keys ak ON aku.api_key = ak.app_id
+			WHERE aku.creation_month = TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE
+			AND aku.request_count >= ak.monthly_request_limit
+  			);
+	`
+
+	_, err := r.db.Exec(context.Background(), query)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
