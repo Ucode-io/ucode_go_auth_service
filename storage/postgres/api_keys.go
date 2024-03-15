@@ -168,6 +168,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			createdAt    sql.NullString
 			updatedAt    sql.NullString
 			clientTypeId sql.NullString
+			usedCount    sql.NullInt32
 		)
 
 		err = rows.Scan(
@@ -184,7 +185,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&clientTypeId,
 			&row.RpsLimit,
 			&row.MonthlyRequestLimit,
-			&row.UsedCount,
+			&usedCount,
 		)
 
 		if err != nil {
@@ -203,6 +204,10 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			row.UpdatedAt = updatedAt.String
 		}
 
+		if usedCount.Valid {
+			row.UsedCount = usedCount.Int32
+		}
+
 		res.Data = append(res.Data, &row)
 	}
 
@@ -214,6 +219,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 
 		createdAt sql.NullString
 		updatedAt sql.NullString
+		usedCount sql.NullInt32
 	)
 
 	query := `SELECT
@@ -248,7 +254,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.ClientTypeId,
 		&res.RpsLimit,
 		&res.MonthlyRequestLimit,
-		&res.UsedCount,
+		&usedCount,
 		&createdAt,
 		&updatedAt,
 	)
@@ -262,6 +268,10 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 
 	if updatedAt.Valid {
 		res.UpdatedAt = updatedAt.String
+	}
+
+	if usedCount.Valid {
+		res.UsedCount = usedCount.Int32
 	}
 	return &res, nil
 }
