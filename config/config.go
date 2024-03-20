@@ -138,7 +138,7 @@ func BaseLoad() BaseConfig {
 	config.SmsServiceHost = cast.ToString(getOrReturnDefaultValue("SMS_SERVICE_HOST", ""))
 	config.SmsGRPCPort = cast.ToString(getOrReturnDefaultValue("SMS_GRPC_PORT", ""))
 
-	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", ""))
+	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "snZV9XNmvf"))
 
 	return config
 }
@@ -157,7 +157,7 @@ func Load() Config {
 	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "100"))
 
-	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", ""))
+	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "snZV9XNmvf"))
 
 	config.PasscodePool = cast.ToString(getOrReturnDefaultValue("PASSCODE_POOL", ""))
 	config.PasscodeLength = cast.ToInt(getOrReturnDefaultValue("PASSCODE_LENGTH", ""))
@@ -190,4 +190,3 @@ func getOrReturnDefaultValue(key string, defaultValue interface{}) interface{} {
 
 	return defaultValue
 }
-
