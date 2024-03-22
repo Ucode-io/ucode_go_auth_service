@@ -616,7 +616,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 }
 
 func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey) (*pb.User, error) {
-	s.log.Info("---GetUserByID--->", logger.Any("req", req))
+	s.log.Info("---V2GetUserByID--->", logger.Any("req", req))
 
 	var (
 		result *pbObject.CommonMessage

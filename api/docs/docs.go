@@ -15468,6 +15468,9 @@ const docTemplate = `{
         "ucode_ucode_go_auth_service_genproto_auth_service.HasAccessSuperAdminRes": {
             "type": "object",
             "properties": {
+                "client_type_id": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -15487,6 +15490,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
                     "type": "string"
                 },
                 "tables": {

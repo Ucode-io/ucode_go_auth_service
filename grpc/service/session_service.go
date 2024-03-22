@@ -558,15 +558,17 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		authTables = append(authTables, authTable)
 	}
 	return &pb.HasAccessSuperAdminRes{
-		Id:        session.Id,
-		ProjectId: session.ProjectId,
-		UserId:    session.UserId,
-		Ip:        session.Ip,
-		Data:      session.Data,
-		ExpiresAt: session.ExpiresAt,
-		CreatedAt: session.CreatedAt,
-		UpdatedAt: session.UpdatedAt,
-		Tables:    authTables,
-		EnvId:     session.EnvId,
+		Id:           session.Id,
+		ProjectId:    session.ProjectId,
+		UserId:       session.UserId,
+		Ip:           session.Ip,
+		Data:         session.Data,
+		ExpiresAt:    session.ExpiresAt,
+		CreatedAt:    session.CreatedAt,
+		UpdatedAt:    session.UpdatedAt,
+		Tables:       authTables,
+		EnvId:        session.EnvId,
+		ClientTypeId: session.ClientTypeId,
+		RoleId:       session.RoleId,
 	}, nil
 }
