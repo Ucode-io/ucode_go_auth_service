@@ -1204,12 +1204,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			//RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
 		})
 		if err != nil {
-			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			s.log.Error("!!!V2DeleteUser--->DeleteUserFromProject", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 		_, err = s.strg.User().Delete(ctx, req)
 		if err != nil {
-			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			s.log.Error("!!!V2DeleteUser--->User Delete", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
@@ -1258,7 +1258,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 
 	_, err = s.strg.User().Delete(ctx, req)
 	if err != nil {
-		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+		s.log.Error("!!!V2DeleteUser--->User Delete Last", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

@@ -554,10 +554,11 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 	resp, err = h.services.PermissionService().V2RemoveRole(
 		c.Request.Context(),
 		&auth_service.V2RolePrimaryKey{
-			Id:           roleID,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ResourceType: int32(resource.ResourceType),
-			NodeType:     resource.NodeType,
+			Id:                    roleID,
+			ProjectId:             resource.ResourceEnvironmentId,
+			ResourceType:          int32(resource.ResourceType),
+			NodeType:              resource.NodeType,
+			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 		},
 	)
 
@@ -752,7 +753,6 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			context.Background(),
 			&permission,
 		)
-
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -763,7 +763,6 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			c.Request.Context(),
 			&permission,
 		)
-
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return

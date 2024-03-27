@@ -271,6 +271,9 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	}
 
 	body.RegisterType = body.Provider
+	if body.Data == nil {
+		body.Data = &pbObject.V2LoginResponse{}
+	}
 
 	resourceId, ok := c.Get("resource_id")
 	if !ok {
