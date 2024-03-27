@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
+	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/saidamir98/udevs_pkg/util"
 	"github.com/spf13/cast"
@@ -124,67 +125,86 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
-		return
-	}
+	// projectId := c.Query("project-id")
+	// if !util.IsValidUUID(projectId) {
+	// 	h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+	// 	return
+	// }
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
-	}
+	// environmentId, ok := c.Get("environment_id")
+	// if !ok || !util.IsValidUUID(environmentId.(string)) {
+	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+	// 	return
+	// }
 
-	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
-			EnvironmentId: environmentId.(string),
-			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// resource, err := h.services.ServiceResource().GetSingle(
+	// 	c.Request.Context(),
+	// 	&pbCompany.GetSingleServiceResourceReq{
+	// 		ProjectId:     projectId,
+	// 		EnvironmentId: environmentId.(string),
+	// 		ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+	// 	},
+	// )
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	role.ProjectId = resource.ResourceEnvironmentId
-	role.ResourceType = int32(resource.ResourceType)
-	role.NodeType = resource.NodeType
-
-	userId, _ := c.Get("user_id")
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType:     resource.NodeType,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE ROLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &role,
-			TableSlug: "ROLE",
-		}
+	services, _ := h.GetProjectSrvc(
+		c,
+		"7214baf7-74da-4fd2-a116-6477a9528c83",
+		"LOW",
 	)
 
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-		} else {
-			logReq.Response = resp
-		}
-		go h.versionHistory(c, logReq)
-	}()
+	role.ProjectId = "ae7e025f-3d3c-4edc-af41-a71e5951f9bd"
+	role.ResourceType = 1
+	role.NodeType = "LOW"
+
+	// userId, _ := c.Get("user_id")
+	// var (
+	// 	logReq = &models.CreateVersionHistoryRequest{
+	// 		NodeType:     resource.NodeType,
+	// 		ProjectId:    resource.ResourceEnvironmentId,
+	// 		ActionSource: c.Request.URL.String(),
+	// 		ActionType:   "CREATE ROLE",
+	// 		UsedEnvironments: map[string]bool{
+	// 			cast.ToString(environmentId): true,
+	// 		},
+	// 		UserInfo:  cast.ToString(userId),
+	// 		Request:   &role,
+	// 		TableSlug: "ROLE",
+	// 	}
+	// )
+
+	// defer func() {
+	// 	if err != nil {
+	// 		logReq.Response = err.Error()
+	// 	} else {
+	// 		logReq.Response = resp
+	// 	}
+	// 	go h.versionHistory(c, logReq)
+	// }()
 
 	resp, err = h.services.PermissionService().V2AddRole(
 		c.Request.Context(),
 		&role,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	roleData, _ := helper.ConvertStructToResponse(resp.Data)
+	roleDataData := cast.ToStringMap(roleData["data"])
+	_, err = services.GetBuilderPermissionServiceByType("LOW").CreateDefaultPermission(
+		c.Request.Context(),
+		&object_builder_service.CreateDefaultPermissionRequest{
+			ProjectId: "ae7e025f-3d3c-4edc-af41-a71e5951f9bd",
+			RoleId:    cast.ToString(roleDataData["guid"]),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
 
