@@ -1039,7 +1039,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		RoleId:           session.RoleId,
 		Ip:               session.Ip,
 		Data:             session.Data,
-		ExpiresAt:        session.ExpiresAt,
+		ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
 		IsChanged:        session.IsChanged,
 		EnvId:            session.EnvId,
 	})
@@ -1113,7 +1113,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		RefreshToken:     refreshToken,
 		CreatedAt:        session.CreatedAt,
 		UpdatedAt:        session.UpdatedAt,
-		ExpiresAt:        session.ExpiresAt,
+		ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
 
@@ -1423,6 +1423,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	fmt.Println("Expire time=", expiresAt.Unix())
+	fmt.Println("Now=", time.Now().Add(5*time.Hour))
 	if expiresAt.Unix() < time.Now().Add(5*time.Hour).Unix() {
 		err := errors.New("user has been expired")
 		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
