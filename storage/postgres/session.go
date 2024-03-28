@@ -443,7 +443,12 @@ func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessi
 		quotedSessionIDs[i] = "'" + id + "'"
 	}
 
-	queryInitial := `DELETE FROM "session" WHERE id IN (` + strings.Join(quotedSessionIDs, ",") + `)`
+	queryInitial := `UPDATE "session" SET
+        expires_at = now(),
+        is_changed = TRUE,
+        updated_at = now()
+		WHERE id IN (` + strings.Join(quotedSessionIDs, ",") + `)
+	`
 
 	result, err := r.db.Exec(ctx, queryInitial)
 	if err != nil {
