@@ -1694,7 +1694,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				})
 			if err != nil {
 				errGetProjects := errors.New("cant get user projects")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin---->", logger.Error(err))
 				return nil, status.Error(codes.NotFound, errGetProjects.Error())
 			}
 
