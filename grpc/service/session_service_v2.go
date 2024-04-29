@@ -14,6 +14,7 @@ import (
 	// "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
+	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -310,18 +311,29 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		smsOtpSettings, err := s.services.SmsOtpSettingsService().GetList(ctx, &pb.GetListSmsOtpSettingsRequest{
-			EnvironmentId: req.Data["environment_id"],
-			ProjectId:     req.Data["project_id"],
-		})
+		// smsOtpSettings, err := s.services.SmsOtpSettingsService().GetList(ctx, &pb.GetListSmsOtpSettingsRequest{
+		// 	EnvironmentId: req.Data["environment_id"],
+		// 	ProjectId:     req.Data["project_id"],
+		// })
+		// if err != nil {
+		// 	s.log.Error("!!!V2LoginWithOption.SmsOtpSettingsService().GetList--->", logger.Error(err))
+		// 	return nil, status.Error(codes.Internal, err.Error())
+		// }
+		smsOtpSettings, err := s.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbCompany.GetProjectResourceListRequest{
+				EnvironmentId: req.Data["environment_id"],
+				ProjectId:     req.Data["project_id"],
+				Type:          pbCompany.ResourceType_SMS,
+			})
 		if err != nil {
 			s.log.Error("!!!V2LoginWithOption.SmsOtpSettingsService().GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 		var defaultOtp string
-		if len(smsOtpSettings.GetItems()) > 0 {
-			if smsOtpSettings.GetItems()[0].GetDefaultOtp() != "" {
-				defaultOtp = smsOtpSettings.GetItems()[0].GetDefaultOtp()
+		if len(smsOtpSettings.GetResources()) > 0 {
+			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetDefaultOtp() != "" {
+				defaultOtp = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetDefaultOtp()
 			}
 		}
 		if defaultOtp != otp {
