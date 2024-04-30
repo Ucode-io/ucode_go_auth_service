@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -22,19 +21,21 @@ import (
 )
 
 type apiKeysService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedApiKeysServer
 }
 
-func NewApiKeysService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *apiKeysService {
+func NewApiKeysService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *apiKeysService {
 	return &apiKeysService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -49,7 +50,7 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 	secretKey := "S-" + helper.GenerateSecretKey(32)
 	secretId := "P-" + helper.GenerateSecretKey(32)
 
-	hashedSecretKey, err := security.HashPassword(secretKey)
+	hashedSecretKey, _ := security.HashPassword(secretKey)
 
 	// req.AppSecret = hashedSecretKey
 	// req.AppId = secretId
@@ -244,7 +245,6 @@ func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApi
 func (s *apiKeysService) GetEnvID(ctx context.Context, req *pb.GetReq) (resp *pb.GetRes, err error) {
 	s.log.Info("---GetEnvID--->>>>", logger.Any("req", req))
 
-	fmt.Println("req::", req)
 	resp, err = s.strg.ApiKeys().GetEnvID(context.Background(), req)
 	if err != nil {
 		s.log.Error("---GetEnvID->Error--->>>", logger.Error(err))

@@ -8,19 +8,20 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/grpc/service"
+	cronjob "ucode/ucode_go_auth_service/pkg/cron"
 	"ucode/ucode_go_auth_service/storage/postgres"
 
-	"github.com/saidamir98/udevs_pkg/logger"
-
 	"github.com/gin-gonic/gin"
+	"github.com/saidamir98/udevs_pkg/logger"
 )
 
 func main() {
-	cfg := config.Load()
+	baseCfg := config.BaseLoad()
 
 	loggerLevel := logger.LevelDebug
 
-	switch cfg.Environment {
+	switch baseCfg.Environment {
 	case config.DebugMode:
 		loggerLevel = logger.LevelDebug
 		gin.SetMode(gin.DebugMode)
@@ -32,36 +33,76 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	log := logger.NewLogger(cfg.ServiceName, loggerLevel)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
 	defer logger.Cleanup(log)
 
-	pgStore, err := postgres.NewPostgres(context.Background(), cfg)
+	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg)
 	if err != nil {
 		log.Panic("postgres.NewPostgres", logger.Error(err))
 	}
 	defer pgStore.CloseDB()
 
-	svcs, err := client.NewGrpcClients(cfg)
+	// connection with auth and company
+	baseSvcs, err := client.NewGrpcClients(baseCfg)
 	if err != nil {
-		log.Panic("client.NewGrpcClients", logger.Error(err))
+		log.Panic("--- U-code auth service and company service grpc client error: ", logger.Error(err))
 	}
 
-	grpcServer := grpc.SetUpServer(cfg, log, pgStore, svcs)
+	serviceNodes := service.NewServiceNodes()
+
+	// connection with shared services
+	uConf := config.Load()
+	grpcSvcs, err := client.NewSharedGrpcClients(uConf)
+	if err != nil {
+		log.Error("Error adding grpc client with base config. NewGrpcClients", logger.Error(err))
+		return
+	}
+	err = serviceNodes.Add(grpcSvcs, baseCfg.UcodeNamespace)
+	if err != nil {
+		log.Error("Error adding company grpc client to serviceNode. ServiceNode", logger.Error(err))
+		return
+	}
+	log.Info(" --- U-code company services --- added to serviceNodes!")
+
+	projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
+	if err != nil {
+		log.Error("Error maping company enter price projects to serviceNode. ServiceNode", logger.Error(err))
+		// return
+	}
+
+	if projectServiceNodes == nil {
+		projectServiceNodes = serviceNodes
+	}
+
+	if mapProjectConfs == nil {
+		mapProjectConfs = make(map[string]config.Config)
+	}
+
+	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
+	projectServiceNodes.SetConfigs(mapProjectConfs)
+
+	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
+	// log.Info(" --- U-code auth service and company service grpc client done --- ")
+	go cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
+
 	go func() {
-		lis, err := net.Listen("tcp", cfg.AuthGRPCPort)
+		lis, err := net.Listen("tcp", baseCfg.AuthGRPCPort)
 		if err != nil {
 			log.Panic("net.Listen", logger.Error(err))
 		}
 
-		log.Info("GRPC: Server being started...", logger.String("port", cfg.AuthGRPCPort))
+		log.Info("GRPC: Server being started....", logger.String("port", baseCfg.AuthGRPCPort))
 
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Panic("grpcServer.Serve", logger.Error(err))
 		}
 	}()
-	h := handlers.NewHandler(cfg, log, svcs)
+	h := handlers.NewHandler(baseCfg, log, baseSvcs, projectServiceNodes)
 
-	r := api.SetUpRouter(h, cfg)
+	r := api.SetUpRouter(h, baseCfg)
 
-	r.Run(cfg.HTTPPort)
+	r.Run(baseCfg.HTTPPort)
 }

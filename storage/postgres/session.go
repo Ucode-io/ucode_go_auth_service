@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"context"
+	"strings"
 
-	"log"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -27,7 +27,6 @@ func NewSessionRepo(db *pgxpool.Pool) storage.SessionRepoI {
 }
 
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
-	log.Printf("--->STRG: CreateSessionRequest: %+v", entity)
 
 	params := make(map[string]interface{})
 	queryInitial := `INSERT INTO "session" (
@@ -289,7 +288,6 @@ func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (r
 }
 
 func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error) {
-	log.Printf("---STRG->DeleteExpiredUserSessions---> %s", userID)
 
 	query := `DELETE FROM "session" WHERE user_id = $1 AND expires_at < $2`
 
@@ -334,7 +332,8 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"session"
-	WHERE user_id = $1`
+	WHERE user_id = $1
+	ORDER BY created_at DESC`
 
 	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
@@ -436,4 +435,22 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 	rowsAffected = result.RowsAffected()
 
 	return rowsAffected, err
+}
+
+func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error) {
+	quotedSessionIDs := make([]string, len(entity.SessionIds))
+	for i, id := range entity.SessionIds {
+		quotedSessionIDs[i] = "'" + id + "'"
+	}
+
+	queryInitial := `DELETE FROM "session" WHERE id IN (` + strings.Join(quotedSessionIDs, ",") + `)`
+
+	result, err := r.db.Exec(ctx, queryInitial)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected = result.RowsAffected()
+
+	return rowsAffected, nil
 }

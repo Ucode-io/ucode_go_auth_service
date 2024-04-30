@@ -11,7 +11,7 @@ const (
 	DatabaseTimeLayout string = time.RFC3339
 	// AccessTokenExpiresInTime ... 1 * 24 *
 	// AccessTokenExpiresInTime time.Duration = 1 * time.Minute
-	AccessTokenExpiresInTime time.Duration = 1 * 24 * 60 * time.Minute
+	AccessTokenExpiresInTime time.Duration = 1 * 60 * 24 * time.Minute
 	// RefreshTokenExpiresInTime ... 30 * 24 * 60
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
@@ -36,7 +36,10 @@ const (
 
 	ObjectBuilderService = "BUILDER_SERVICE"
 
-	DefaultOtp = "718020"
+	DefaultOtp       string = "208071"
+	LOW_NODE_TYPE    string = "LOW"
+	HIGH_NODE_TYPE   string = "HIGH"
+	ENTER_PRICE_TYPE string = "ENTER_PRICE"
 )
 
 var (

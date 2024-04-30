@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
@@ -18,8 +17,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 )
 
+// @Security ApiKeyAuth
 // V2Login godoc
 // @ID V2login
 // @Param Resource-Id header string true "Resource-Id"
@@ -37,6 +38,7 @@ import (
 func (h *Handler) V2Login(c *gin.Context) {
 	var (
 		login auth_service.V2LoginRequest
+		resp  *pb.V2LoginResponse
 	)
 	err := c.ShouldBindJSON(&login)
 	if err != nil {
@@ -134,7 +136,6 @@ func (h *Handler) V2Login(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		fmt.Println("rest:", err)
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
@@ -142,8 +143,34 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.ResourceEnvironmentId = resourceEnvironment.GetResourceEnvironmentId()
 	login.ResourceType = int32(resourceEnvironment.GetResourceType())
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
+	login.NodeType = resourceEnvironment.GetNodeType()
 
-	resp, err := h.services.SessionService().V2Login(
+	//userId, _ := c.Get("user_id")
+	var (
+		logReq = &models.CreateVersionHistoryRequest{
+			NodeType:     resourceEnvironment.NodeType,
+			ProjectId:    resourceEnvironment.ResourceEnvironmentId,
+			ActionSource: c.Request.URL.String(),
+			ActionType:   "LOGIN",
+			UsedEnvironments: map[string]bool{
+				cast.ToString(resourceEnvironment.EnvironmentId): true,
+			},
+			UserInfo:  cast.ToString(login.Username),
+			Request:   &login,
+			TableSlug: "User",
+		}
+	)
+
+	defer func() {
+		if err != nil {
+			logReq.Response = err.Error()
+		} else {
+			logReq.Response = resp
+		}
+		go h.versionHistory(c, logReq)
+	}()
+
+	resp, err = h.services.SessionService().V2Login(
 		c.Request.Context(),
 		&login,
 	)
@@ -187,12 +214,16 @@ func (h *Handler) V2Login(c *gin.Context) {
 // @Tags V2_Session
 // @Accept json
 // @Produce json
+// @Param for_env query string false "for_env"
 // @Param user body auth_service.RefreshTokenRequest true "RefreshTokenRequestBody"
 // @Success 200 {object} http.Response{data=auth_service.V2RefreshTokenResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RefreshToken(c *gin.Context) {
-	var user auth_service.RefreshTokenRequest
+	var (
+		user auth_service.RefreshTokenRequest
+		resp *pb.V2LoginResponse
+	)
 
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
@@ -200,14 +231,26 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.SessionService().V2RefreshToken(
-		c.Request.Context(),
-		&user,
-	)
+	for_env := c.DefaultQuery("for_env", "")
 
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+	if for_env == "true" {
+		resp, err = h.services.SessionService().V2RefreshTokenForEnv(
+			c.Request.Context(),
+			&user,
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	} else {
+		resp, err = h.services.SessionService().V2RefreshToken(
+			c.Request.Context(),
+			&user,
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
 
 	h.handleResponse(c, http.OK, resp)
@@ -267,6 +310,14 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
+	if !strings.HasSuffix(login.GetUsername(), "_superadmin") {
+		err := errors.New("Пользователь не найдено")
+		h.handleResponse(c, http.NotFound, err.Error())
+		return
+	} else {
+		login.Username = strings.TrimSuffix(login.GetUsername(), "_superadmin")
+	}
+
 	//userReq, err := helper.ConvertMapToStruct(map[string]interface{}{
 	//	"login":    login.Username,
 	//	"password": login.Password,
@@ -276,7 +327,7 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 	//	return
 	//}
 	//
-	//userResp, err := h.services.ObjectBuilderService().GetList(
+	//userResp, err := h.services.GetObjectBuilderServiceByType(req.NodeType).GetList(
 	//	context.Background(),
 	//	&object_builder_service.CommonMessage{
 	//		TableSlug: "user",
@@ -682,7 +733,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 		httpErrorStr = strings.ToLower(httpErrorStr)
 
 		if httpErrorStr == "user not found" {
-			err := errors.New("Пользователь не найдено")
+			err := errors.New("Пользователь не найден")
 			h.handleResponse(c, http.NotFound, err.Error())
 			return
 		} else if httpErrorStr == "user has been expired" {
@@ -694,7 +745,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		} else if httpErrorStr == "invalid password" {
-			err := errors.New("Неверное пароль")
+			err := errors.New("Неверный пароль")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		} else if err != nil {
@@ -886,8 +937,7 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(emailSettings.Items[0].Email, emailSettings.Items[0].Password)
-	err = helper.SendCodeToEmail("Your verification code", user.GetEmail(), code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
+	err = helper.SendCodeToEnvironmentEmail("Your verification code", user.GetEmail(), code, emailSettings.Items[0].Email, emailSettings.Items[0].Password)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
@@ -1012,4 +1062,39 @@ func (h *Handler) V2ResetPassword(c *gin.Context) {
 		return
 	}
 	h.handleResponse(c, http.OK, res)
+}
+
+// ExpireSessions godoc
+// @ID expire_sesssions
+// @Router /expire-sessions [PUT]
+// @Summary Expire Sessions
+// @Description Expire Sessions
+// @Tags Expire Sessions
+// @Accept json
+// @Produce json
+// @Param sessions body auth_service.ExpireSessionsRequest true "ExpireSessionsRequestBody"
+// @Success 200 {object} http.Response{data=string} "Response data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) ExpireSessions(c *gin.Context) {
+	var (
+		req auth_service.ExpireSessionsRequest
+	)
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	_, err = h.services.SessionService().ExpireSessions(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, map[string]interface{}{"message": "success"})
 }

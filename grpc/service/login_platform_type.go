@@ -14,19 +14,21 @@ import (
 )
 
 type loginPlatformType struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedLoginPlatformTypeLoginServiceServer
 }
 
-func NewLoginPlatformTypeService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *loginPlatformType {
+func NewLoginPlatformTypeService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *loginPlatformType {
 	return &loginPlatformType{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -47,7 +49,7 @@ func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb
 func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.UpdateLoginPlatformType--->", logger.Any("req", req))
 
-	types, err := e.strg.LoginPlatformType().GetLoginPlatformType(
+	types, _ := e.strg.LoginPlatformType().GetLoginPlatformType(
 		ctx,
 		&pb.LoginPlatformTypePrimaryKey{
 			Id: req.Id,

@@ -1,6 +1,4 @@
 -- PASSCODE
-DROP TYPE "passcode_type";
-
 ALTER TABLE "passcode" DROP COLUMN "type";
 ALTER TABLE "passcode" ADD COLUMN "phone" VARCHAR NOT NULL DEFAULT '';
 ALTER TABLE "passcode" DROP COLUMN "item";
@@ -8,10 +6,9 @@ ALTER TABLE "passcode" DROP COLUMN "item";
 -- EMAIL SETTINGS
 ALTER TABLE "email_settings" DROP COLUMN "env_id";
 ALTER TABLE "email_settings" ADD CONSTRAINT "email_settings_project_id_key" UNIQUE(project_id);
-ALTER TABLE "email_setting" RENAME TO "email_settings";
 
 -- LOGIN STRATEGY
-DROP TYPE "login_strategy_type";
+-- DROP TYPE "login_strategy_type";
 ALTER TABLE "login_strategy" DROP COLUMN "type";
 ALTER TABLE "login_strategy" DROP COLUMN "project_id";
 ALTER TABLE "login_strategy" DROP COLUMN "env_id";

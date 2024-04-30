@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -47,7 +48,6 @@ func ReplaceSQL(old, searchPattern string) string {
 }
 
 func ConvertMapToStruct(inputMap map[string]interface{}) (*structpb.Struct, error) {
-	log.Printf("---INFO->ConvertMapToStruct---> %+v", inputMap)
 
 	marshledInputMap, err := json.Marshal(inputMap)
 	outputStruct := &structpb.Struct{}
@@ -128,4 +128,17 @@ func ParsePsqlTypeToEnum(arg string) error {
 		return errors.New("incorrect auth type")
 	}
 	return nil
+}
+
+func GetURLWithTableSlug(c *gin.Context) string {
+	url := c.FullPath()
+	if strings.Contains(url, ":table_slug") {
+		tableSlug := c.Param("table_slug")
+		url = strings.Replace(url, ":table_slug", tableSlug, -1)
+	} else if strings.Contains(url, ":collection") && strings.Contains(url, "/items") {
+		tableSlug := c.Param("collection")
+		url = strings.Replace(url, ":collection", tableSlug, -1)
+	}
+
+	return url
 }

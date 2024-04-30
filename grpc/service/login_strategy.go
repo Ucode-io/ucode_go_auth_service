@@ -12,19 +12,21 @@ import (
 )
 
 type loginStrategyService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedLoginStrategyServiceServer
 }
 
-func NewLoginStrategyService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *loginStrategyService {
+func NewLoginStrategyService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *loginStrategyService {
 	return &loginStrategyService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 

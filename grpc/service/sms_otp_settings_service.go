@@ -14,19 +14,21 @@ import (
 )
 
 type smsOtpSettingsService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedSmsOtpSettingsServiceServer
 }
 
-func NewSmsOtpSettingsService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *smsOtpSettingsService {
+func NewSmsOtpSettingsService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *smsOtpSettingsService {
 	return &smsOtpSettingsService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 

@@ -30,8 +30,31 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		updatedAt sql.NullString
 	)
 
-	query := `INSERT INTO api_keys(id, name, app_id, app_secret, role_id, environment_id, project_id, client_type_id, created_at, updated_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now()) RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id`
+	query := `
+		INSERT INTO api_keys(
+			id, 
+			name, 
+			app_id, 
+			app_secret, 
+			role_id, 
+			environment_id, 
+			project_id, 
+			client_type_id,
+			created_at, 
+			updated_at
+		)
+		VALUES (
+			$1, 
+			$2, 
+			$3, 
+			$4, 
+			$5, 
+			$6, 
+			$7, 
+			$8,
+			now(), 
+			now()) 
+		RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id, rps_limit, monthly_request_limit`
 
 	err := r.db.QueryRow(
 		ctx,
@@ -44,7 +67,7 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetEnvironmentId(),
 		req.GetProjectId(),
 		req.GetClientTypeId(),
-	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId)
+	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId, &res.RpsLimit, &res.MonthlyRequestLimit)
 
 	if err != nil {
 		return nil, err
@@ -76,7 +99,10 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
   				updated_at,
   				environment_id,
 				project_id,
-				client_type_id
+				client_type_id,
+				rps_limit,
+				monthly_request_limit,
+				(SELECT request_count FROM api_key_usage WHERE api_key=app_id AND creation_month=TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE)
 			FROM
 			    api_keys`
 
@@ -142,6 +168,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			createdAt    sql.NullString
 			updatedAt    sql.NullString
 			clientTypeId sql.NullString
+			usedCount    sql.NullInt32
 		)
 
 		err = rows.Scan(
@@ -156,6 +183,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&row.EnvironmentId,
 			&row.ProjectId,
 			&clientTypeId,
+			&row.RpsLimit,
+			&row.MonthlyRequestLimit,
+			&usedCount,
 		)
 
 		if err != nil {
@@ -174,6 +204,10 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			row.UpdatedAt = updatedAt.String
 		}
 
+		if usedCount.Valid {
+			row.UsedCount = usedCount.Int32
+		}
+
 		res.Data = append(res.Data, &row)
 	}
 
@@ -185,6 +219,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 
 		createdAt sql.NullString
 		updatedAt sql.NullString
+		usedCount sql.NullInt32
 	)
 
 	query := `SELECT
@@ -197,6 +232,9 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
   				environment_id,
 				project_id,
 				client_type_id,
+				rps_limit,
+				monthly_request_limit,
+				(SELECT request_count FROM api_key_usage WHERE api_key=app_id AND creation_month=TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE),
   				created_at,
   				updated_at
 			FROM
@@ -214,6 +252,9 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.EnvironmentId,
 		&res.ProjectId,
 		&res.ClientTypeId,
+		&res.RpsLimit,
+		&res.MonthlyRequestLimit,
+		&usedCount,
 		&createdAt,
 		&updatedAt,
 	)
@@ -227,6 +268,10 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 
 	if updatedAt.Valid {
 		res.UpdatedAt = updatedAt.String
+	}
+
+	if usedCount.Valid {
+		res.UsedCount = usedCount.Int32
 	}
 	return &res, nil
 }
@@ -287,6 +332,8 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
   				environment_id,
 				project_id,
 				client_type_id,
+				rps_limit,
+				monthly_request_limit,
   				created_at,
   				updated_at
 			FROM
@@ -304,6 +351,8 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
 		&res.EnvironmentId,
 		&res.ProjectId,
 		&res.ClientTypeId,
+		&res.RpsLimit,
+		&res.MonthlyRequestLimit,
 		&createdAt,
 		&updatedAt,
 	)
@@ -335,7 +384,9 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 			status,
 			name,
 			app_id,
-			app_secret
+			app_secret,
+			rps_limit,
+			monthly_request_limit
 		FROM
 			api_keys
 		WHERE
@@ -351,10 +402,26 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 		&res.Name,
 		&res.AppId,
 		&res.AppSecret,
+		&res.RpsLimit,
+		&res.MonthlyRequestLimit,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while scanning")
 	}
 
 	return res, nil
+}
+
+func (r *apiKeysRepo) UpdateIsMonthlyLimitReached(ctx context.Context) error {
+	query := `
+		UPDATE api_keys SET 
+			is_monthly_request_limit_reached = false
+	`
+
+	_, err := r.db.Exec(ctx, query)
+	if err != nil {
+		return errors.Wrap(err, "error while executing UpdateIsMonthlyLimitReached query")
+	}
+
+	return nil
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -18,19 +19,21 @@ import (
 )
 
 type syncUserService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedSyncUserServiceServer
 }
 
-func NewSyncUserService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *syncUserService {
+func NewSyncUserService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *syncUserService {
 	return &syncUserService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -186,6 +189,37 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	return &response, nil
 }
 
+// func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
+// 	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+
+// 	if len(req.Password) < 6 {
+// 		err := fmt.Errorf("password must not be less than 6 characters")
+// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 		return nil, err
+// 	}
+
+// 	hashedPassword, err := security.HashPassword(req.Password)
+// 	if err != nil {
+// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 		return nil, status.Error(codes.InvalidArgument, err.Error())
+// 	}
+
+// 	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
+// 		UserId:   req.GetGuid(),
+// 		Password: hashedPassword,
+// 	})
+// 	if err != nil {
+// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 		return nil, status.Error(codes.InvalidArgument, err.Error())
+// 	}
+
+// 	if rowsAffected <= 0 {
+// 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+// 	}
+
+// 	return nil, nil
+// }
+
 func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
 	var (
 		response = pb.SyncUserResponse{}
@@ -209,8 +243,52 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	if err != nil {
 		return nil, err
 	}
-	response.UserId = user.GetId()
+	response.UserId = user.GetId() 
+
+	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+		sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+			Id: req.GetUserId(),
+		})
+	}
+
 	return &empty.Empty{}, nil
+}
+
+func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
+	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+
+	if len(req.Password) < 6 {
+		err := fmt.Errorf("password must not be less than 6 characters")
+		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+		return nil, err
+	}
+
+	if len(req.Password) == 0 {
+		err := fmt.Errorf("login must not be empty")
+		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+		return nil, err
+	}
+
+	hashedPassword, err := security.HashPassword(req.Password)
+	if err != nil {
+		sus.log.Error("!!!ResetPassword--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
+		UserId:   req.GetGuid(),
+		Password: hashedPassword,
+	})
+	if err != nil {
+		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if rowsAffected <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+	}
+
+	return &pb.SyncUserResponse{}, nil
 }
 
 func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
@@ -238,7 +316,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 	var (
 		response = pb.SyncUsersResponse{}
 		user_ids = make([]string, 0, len(in.Users))
-		err error
+		err      error
 	)
 	for _, req := range in.Users {
 		var user *pb.User

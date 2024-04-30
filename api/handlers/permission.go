@@ -543,7 +543,10 @@ func (h *Handler) RemovePermissionScope(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRolePermission(c *gin.Context) {
-	var rolePermission auth_service.AddRolePermissionRequest
+	var (
+		rolePermission auth_service.AddRolePermissionRequest
+		resp           *auth_service.RolePermission
+	)
 
 	err := c.ShouldBindJSON(&rolePermission)
 	if err != nil {
@@ -551,11 +554,12 @@ func (h *Handler) AddRolePermission(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PermissionService().AddRolePermission(
+	//
+
+	resp, err = h.services.PermissionService().AddRolePermission(
 		c.Request.Context(),
 		&rolePermission,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -577,7 +581,10 @@ func (h *Handler) AddRolePermission(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRolePermissions(c *gin.Context) {
-	var rolePermissions auth_service.AddRolePermissionsRequest
+	var (
+		rolePermissions auth_service.AddRolePermissionsRequest
+		resp            *auth_service.AddRolePermissionsResponse
+	)
 
 	err := c.ShouldBindJSON(&rolePermissions)
 	if err != nil {
@@ -585,7 +592,7 @@ func (h *Handler) AddRolePermissions(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PermissionService().AddRolePermissions(
+	resp, err = h.services.PermissionService().AddRolePermissions(
 		c.Request.Context(),
 		&rolePermissions,
 	)
@@ -611,7 +618,10 @@ func (h *Handler) AddRolePermissions(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RemoveRolePermission(c *gin.Context) {
-	var rolePermission auth_service.RolePermissionPrimaryKey
+	var (
+		rolePermission auth_service.RolePermissionPrimaryKey
+		resp           *auth_service.RolePermission
+	)
 
 	err := c.ShouldBindJSON(&rolePermission)
 	if err != nil {
@@ -619,7 +629,7 @@ func (h *Handler) RemoveRolePermission(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PermissionService().RemoveRolePermission(
+	resp, err = h.services.PermissionService().RemoveRolePermission(
 		c.Request.Context(),
 		&rolePermission,
 	)

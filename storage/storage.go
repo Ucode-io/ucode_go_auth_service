@@ -38,6 +38,7 @@ type StorageI interface {
 	LoginStrategy() LoginStrategyI
 	LoginPlatformType() LoginPlatformType
 	SmsOtpSettings() SmsOtpSettingsRepoI
+	ApiKeyUsage() ApiKeyUsageRepoI
 }
 
 type ClientPlatformRepoI interface {
@@ -182,6 +183,7 @@ type SessionRepoI interface {
 	GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	GetSessionListByIntegrationID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error)
+	ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error)
 }
 
 type EmailRepoI interface {
@@ -218,6 +220,7 @@ type ApiKeysRepoI interface {
 	Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffected int64, err error)
 	GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error)
 	GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error)
+	UpdateIsMonthlyLimitReached(ctx context.Context) error
 }
 
 type AppleSettingsI interface {
@@ -243,11 +246,18 @@ type LoginPlatformType interface {
 	DeleteLoginSettings(ctx context.Context, input *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error)
 }
 
-//sms otp settings repo is used to save otp creds for each project and environment
+// sms otp settings repo is used to save otp creds for each project and environment
 type SmsOtpSettingsRepoI interface {
 	Create(context.Context, *pb.CreateSmsOtpSettingsRequest) (*pb.SmsOtpSettings, error)
 	Update(context.Context, *pb.SmsOtpSettings) (int64, error)
 	GetById(context.Context, *pb.SmsOtpSettingsPrimaryKey) (*pb.SmsOtpSettings, error)
 	GetList(context.Context, *pb.GetListSmsOtpSettingsRequest) (*pb.SmsOtpSettingsResponse, error)
 	Delete(context.Context, *pb.SmsOtpSettingsPrimaryKey) (int64, error)
+}
+
+type ApiKeyUsageRepoI interface {
+	CheckLimit(ctx context.Context, req *pb.CheckLimitRequest) (res *pb.CheckLimitResponse, err error)
+	Create(ctx context.Context, req *pb.ApiKeyUsage) error
+	Upsert(ctx context.Context, req *pb.ApiKeyUsage) error
+	UpdateMonthlyLimit(ctx context.Context) error
 }

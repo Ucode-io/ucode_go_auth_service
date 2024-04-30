@@ -22,7 +22,7 @@ package service
 // 		return nil, status.Error(codes.InvalidArgument, err.Error())
 // 	}
 
-// 	result, err := s.services.ObjectBuilderService().Create(ctx,
+// 	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx,
 // 		&pbObject.CommonMessage{
 // 			TableSlug: "connection",
 // 			Data:      structData,
@@ -49,7 +49,7 @@ package service
 // 		return nil, status.Error(codes.InvalidArgument, err.Error())
 // 	}
 
-// 	result, err := s.services.ObjectBuilderService().GetSingle(ctx,
+// 	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx,
 // 		&pbObject.CommonMessage{
 // 			TableSlug: "connection",
 // 			Data:      structData,
@@ -79,7 +79,7 @@ package service
 // 		s.log.Error("!!!V2GetConnnectionList--->", logger.Error(err))
 // 	}
 
-// 	result, err := s.services.ObjectBuilderService().GetList(ctx,
+// 	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx,
 // 		&pbObject.CommonMessage{
 // 			TableSlug: "connection",
 // 			Data:      structData,
@@ -106,7 +106,7 @@ package service
 // 		return nil, status.Error(codes.InvalidArgument, err.Error())
 // 	}
 
-// 	result, err := s.services.ObjectBuilderService().Update(ctx,
+// 	result, err := s.services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx,
 // 		&pbObject.CommonMessage{
 // 			TableSlug: "connection",
 // 			Data:      structData,
@@ -134,7 +134,7 @@ package service
 // 		return nil, status.Error(codes.InvalidArgument, err.Error())
 // 	}
 
-// 	_, err = s.services.ObjectBuilderService().Delete(ctx,
+// 	_, err = s.services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx,
 // 		&pbObject.CommonMessage{
 // 			TableSlug: "connection",
 // 			Data:      structData,

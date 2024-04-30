@@ -1,14 +1,11 @@
 package helper
 
 import (
-	"log"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
-
-	log.Printf("ConvertPbToAnotherPb: %v", data)
 
 	res := &pb.V2LoginResponse{}
 	res.UserId = data.GetUserId()
@@ -33,6 +30,7 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		SelfRecover:  data.GetClientType().GetSelfRecover(),
 		ProjectId:    data.GetClientType().GetProjectId(),
 		Tables:       tables,
+		DefaultPage:  data.GetClientType().GetDefaultPage(),
 	}
 
 	res.ClientPlatform = &pb.ClientPlatform{
@@ -57,6 +55,8 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		permission.Settings = v.GetSettings()
 		permission.ShareModal = v.GetShareModal()
 		permission.ViewCreate = v.GetViewCreate()
+		permission.AddField = v.GetAddField()
+		permission.PdfAction = v.GetPdfAction()
 		permissions = append(permissions, permission)
 	}
 

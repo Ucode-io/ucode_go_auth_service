@@ -23,19 +23,21 @@ import (
 )
 
 type sessionService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedSessionServiceServer
 }
 
-func NewSessionService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *sessionService {
+func NewSessionService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *sessionService {
 	return &sessionService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -556,15 +558,17 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		authTables = append(authTables, authTable)
 	}
 	return &pb.HasAccessSuperAdminRes{
-		Id:        session.Id,
-		ProjectId: session.ProjectId,
-		UserId:    session.UserId,
-		Ip:        session.Ip,
-		Data:      session.Data,
-		ExpiresAt: session.ExpiresAt,
-		CreatedAt: session.CreatedAt,
-		UpdatedAt: session.UpdatedAt,
-		Tables:    authTables,
-		EnvId:     session.EnvId,
+		Id:           session.Id,
+		ProjectId:    session.ProjectId,
+		UserId:       session.UserId,
+		Ip:           session.Ip,
+		Data:         session.Data,
+		ExpiresAt:    session.ExpiresAt,
+		CreatedAt:    session.CreatedAt,
+		UpdatedAt:    session.UpdatedAt,
+		Tables:       authTables,
+		EnvId:        session.EnvId,
+		ClientTypeId: session.ClientTypeId,
+		RoleId:       session.RoleId,
 	}, nil
 }

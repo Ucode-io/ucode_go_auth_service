@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"regexp"
+	"strings"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -355,9 +356,7 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 		// "language_id": entity.GetLanguageId(),
 		// "timezone_id": entity.GetTimezoneId(),
 	}
-	log.Println("language_id", entity.LanguageId, "timezone_id", entity.TimezoneId)
 	q, arr := helper.ReplaceQueryParams(query, params)
-	log.Println("query", q, "arr", arr)
 	result, err := r.db.Exec(ctx, q, arr...)
 	if err != nil {
 		return 0, err
@@ -365,7 +364,7 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 
 	rowsAffected = result.RowsAffected()
 
-	return rowsAffected, err
+	return rowsAffected, nil
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, error) {
@@ -383,14 +382,23 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 			return 0, errors.New("user not found")
 		}
 
-		result, err = r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
-		if err != nil {
-			return 0, errors.Wrap(err, "delete user error")
-		}
-		rowsAffected = result.RowsAffected()
-		if rowsAffected == 0 {
-			return 0, errors.New("user not found")
-		}
+	}
+	// result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
+	// if err != nil {
+	// 	return 0, err
+	// }
+	// rowsAffected = result.RowsAffected()
+	// if rowsAffected == 0 {
+	// 	return 0, errors.New("user not found")
+	// }
+
+	result, err := r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
+	if err != nil {
+		return 0, errors.Wrap(err, "delete user error")
+	}
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return 0, errors.New("user not found")
 	}
 
 	return 0, nil
@@ -414,15 +422,17 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		"user"
 	WHERE`
 
-	if util.IsValidEmail(username) {
-		query = query + ` email = $1`
+	lowercasedUsername := strings.ToLower(username)
+
+	if IsValidEmailNew(username) {
+		query = query + ` LOWER(email) = $1`
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
 	} else {
-		query = query + ` login = $1`
+		query = query + ` LOWER(login) = $1`
 	}
 
-	err = r.db.QueryRow(ctx, query, username).Scan(
+	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
 		&res.Id,
 		// &res.Name,
 		// &res.PhotoUrl,
@@ -622,7 +632,6 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 	} else {
 		envId.Status = pgtype.Null
 	}
-	fmt.Println(">\n\n req", req.ProjectId)
 	query := `UPDATE user_project 
 			  SET client_type_id = $4,
 			  role_id = $5
@@ -645,7 +654,9 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		&envId,
 	)
 	if err != nil {
-		return nil, err
+		if err.Error() != "no rows in result set" {
+			return nil, err
+		}
 	}
 	if roleId.Status != pgtype.Null {
 		req.RoleId = fmt.Sprintf("%v", roleId.Status)
@@ -661,16 +672,33 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 	res := pb.GetProjectsByUserIdRes{}
 
 	query := `SELECT
-				array_agg(project_id)
+				project_id,
+				env_id
 			from user_project
 			where user_id = $1`
 
-	tmp := make([]string, 0, 20)
-	err := r.db.QueryRow(ctx, query, req.GetUserId()).Scan(pq.Array(&tmp))
+	rows, err := r.db.Query(ctx, query, req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
-	res.ProjectIds = tmp
+
+	for rows.Next() {
+		var (
+			projectID sql.NullString
+			envID     sql.NullString
+		)
+
+		err = rows.Scan(&projectID, &envID)
+		if err != nil {
+			return nil, err
+		}
+
+		res.UserProjects = append(res.UserProjects, &pb.UserProject{
+			ProjectId: projectID.String,
+			EnvId:     envID.String,
+		})
+	}
+
 	return &res, nil
 }
 
@@ -911,8 +939,6 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 		id = :id`
 	params["id"] = req.GetUserId()
 
-	fmt.Print("\n\nParams: ", params)
-
 	q, arr := helper.ReplaceQueryParams(query, params)
 
 	result, err := r.db.Exec(ctx, q, arr...)
@@ -960,26 +986,36 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	params := make(map[string]interface{})
 
 	query := `DELETE FROM "user_project" 
-				WHERE 
-				project_id = :project_id AND 
-				user_id = :user_id AND 
-				company_id = :company_id`
+	WHERE  
+	user_id = :user_id and 
+	client_type_id = :client_type_id
+	`
 
-	params["project_id"] = req.ProjectId
+	// `DELETE FROM "user_project"
+	// 			WHERE
+	// 			project_id = :project_id
+	// 			AND
+	// 			user_id = :user_id
+	// 			AND
+	// 			company_id = :company_id`
+
+	// params["project_id"] = req.ProjectId
 	params["user_id"] = req.UserId
-	params["company_id"] = req.CompanyId
-	if req.GetRoleId() != "" {
-		query += " AND role_id = :role_id"
-		params["role_id"] = req.GetRoleId()
-	}
-	if req.GetClientTypeId() != "" {
-		query += " AND client_type_id = :client_type_id"
-		params["client_type_id"] = req.GetClientTypeId()
-	}
-	if req.GetEnvironmentId() != "" {
-		query += " AND env_id = :env_id"
-		params["env_id"] = req.GetEnvironmentId()
-	}
+	params["client_type_id"] = req.ClientTypeId
+
+	// params["company_id"] = req.CompanyId
+	// if req.GetRoleId() != "" {
+	// 	query += " AND role_id = :role_id"
+	// 	params["role_id"] = req.GetRoleId()
+	// }
+	// if req.GetClientTypeId() != "" {
+	// 	query += " AND client_type_id = :client_type_id"
+	// 	params["client_type_id"] = req.GetClientTypeId()
+	// }
+	// if req.GetEnvironmentId() != "" {
+	// 	query += " AND env_id = :env_id"
+	// 	params["env_id"] = req.GetEnvironmentId()
+	// }
 
 	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx,
@@ -1009,8 +1045,9 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 
 	query := `DELETE FROM "user_project" 
 				WHERE 
-				project_id = :project_id AND  
-				company_id = :company_id`
+					project_id = :project_id AND  
+					company_id = :company_id AND
+					env_id = :env_id`
 	for _, user := range req.GetUsers() {
 		params := map[string]interface{}{}
 		params["project_id"] = req.GetProjectId()
@@ -1019,18 +1056,21 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 
 		if user.UserId != "" {
 			query = query + " AND user_id = :user_id"
-			params["user_id"] = user.GetRoleId()
+			params["user_id"] = user.GetUserId()
 		} else {
 			return nil, errors.New("user id is required")
 		}
+
 		if user.GetClientTypeId() != "" {
 			query = query + " AND client_type_id = :client_type_id"
 			params["client_type_id"] = user.GetClientTypeId()
 		}
+
 		if user.GetRoleId() != "" {
 			query = query + " AND role_id = :role_id"
 			params["role_id"] = user.GetRoleId()
 		}
+
 		q, args := helper.ReplaceQueryParams(query, params)
 		_, err = r.db.Exec(ctx,
 			q,
@@ -1122,4 +1162,16 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	}
 
 	return &res, nil
+}
+
+func IsValidEmailNew(email string) bool {
+	// Define the regular expression pattern for a valid email address
+	// This is a basic pattern and may not cover all edge cases
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(emailRegex)
+
+	// Use the MatchString method to check if the email matches the pattern
+	return re.MatchString(email)
 }

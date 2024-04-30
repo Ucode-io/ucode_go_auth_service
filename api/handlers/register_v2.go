@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -15,6 +14,7 @@ import (
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -164,11 +164,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		h.log.Error("V2SendCode#GetResourceEnvironment", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 	code, err := util.GenerateCode(4)
 	if err != nil {
+		h.log.Error("V2SendCode#GenerateCode4", logger.Error(err))
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
@@ -188,28 +190,31 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
-		fmt.Println("test 10")
-		smsOtpSettings, err := h.services.SmsOtpSettingsService().GetList(context.Background(), &auth_service.GetListSmsOtpSettingsRequest{
-			ProjectId:     resourceEnvironment.ProjectId,
-			EnvironmentId: environmentId.(string),
-		})
+		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbCompany.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbCompany.ResourceType_SMS,
+			})
 		if err != nil {
+			h.log.Error("V2SendCode#GetResources", logger.Error(err))
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("test 11")
-		if len(smsOtpSettings.GetItems()) > 0 {
-			if smsOtpSettings.GetItems()[0].GetNumberOfOtp() != 0 {
-				code, err := util.GenerateCode(int(smsOtpSettings.GetItems()[0].GetNumberOfOtp()))
+		if len(smsOtpSettings.GetResources()) > 0 {
+			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
+				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
 				if err != nil {
+					h.log.Error("V2SendCode#GenerateCode", logger.Error(err))
 					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
 					return
 				}
 				body.Otp = code
 			}
-			body.DevEmail = smsOtpSettings.GetItems()[0].Login
-			body.DevEmailPassword = smsOtpSettings.GetItems()[0].Password
-			body.Originator = smsOtpSettings.GetItems()[0].Originator
+			body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
+			body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
+			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
 		}
 	case "EMAIL":
 
@@ -240,21 +245,36 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		body.DevEmailPassword = emailSettings.Items[0].Password
 	}
 
-	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
+	_, _ = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
+	// if err != nil {
+	// 	h.log.Error("V2SendCode#V2GetUserByLoginTypes", logger.Error(err))
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	resp, err := h.services.SmsService().Send(
-		c.Request.Context(),
-		body,
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
 	)
-
 	if err != nil {
+		h.log.Error("V2SendCode#GetProjectSrvc", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
+	resp, err := services.SmsService().Send(
+		c.Request.Context(),
+		body,
+	)
+	if err != nil {
+		h.log.Error("V2SendCode#Send", logger.Error(err))
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 	res := models.V2SendCodeResponse{
 		SmsId: resp.SmsId,
 	}
@@ -418,6 +438,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["company_id"] = project.GetCompanyId()
 	body.Data["resource_type"] = serviceResource.GetResourceType()
+	body.Data["node_type"] = serviceResource.GetNodeType()
 
 	structData, err := helper.ConvertMapToStruct(body.Data)
 	if err != nil {
@@ -426,7 +447,8 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &auth_service.RegisterUserRequest{
-		Data: structData,
+		Data:     structData,
+		NodeType: serviceResource.NodeType,
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
