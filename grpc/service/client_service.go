@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -166,6 +167,7 @@ func (s *clientService) GetClientTypeList(ctx context.Context, req *pb.GetClient
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	fmt.Println("I AM FROM HEREEEEEEEEE")
 	services, err := s.serviceNode.GetByNodeType(
 		req.ProjectId,
 		"LOW",
