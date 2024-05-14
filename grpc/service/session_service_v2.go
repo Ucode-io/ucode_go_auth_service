@@ -1422,12 +1422,14 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("Token info->", tokenInfo)
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+	fmt.Println("Session->", session)
 
 	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
 	if err != nil {
@@ -1460,6 +1462,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField = "read"
 	}
 
+	fmt.Println("Before user")
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
 		UserId: session.GetUserId(),
 	})
@@ -1467,7 +1470,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
 		return nil, err
 	}
-
+	fmt.Println("Projects->", projects)
 	exist := false
 	for _, item := range projects.GetUserProjects() {
 		if item.ProjectId == session.GetProjectId() {
@@ -1524,7 +1527,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		if err != nil {
 			return nil, err
 		}
-
+		fmt.Println("Hello World->", resource)
 		services, err := s.serviceNode.GetByNodeType(
 			resource.ProjectId,
 			resource.NodeType,
@@ -1543,8 +1546,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			},
 		)
 		if err != nil {
+			fmt.Println("Error is here")
 			return nil, err
 		}
+		fmt.Println("After builder service")
 
 		if !resp.IsHavePermission {
 			err := status.Error(codes.PermissionDenied, "Permission denied")
@@ -1561,6 +1566,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		authTables = append(authTables, authTable)
 	}
 
+	fmt.Println("Before return")
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,

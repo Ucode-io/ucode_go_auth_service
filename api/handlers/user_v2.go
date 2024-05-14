@@ -344,6 +344,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	// 	return
 	// }
 	projectId, ok := c.Get("project_id")
+
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get project-id in query param"))
 		return
@@ -368,6 +369,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 
 	user.ResourceType = int32(resource.GetResourceType())
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
+	user.ProjectId = projectId.(string)
 	user.EnvironmentId = environmentId.(string)
 	user.NodeType = resource.NodeType
 
