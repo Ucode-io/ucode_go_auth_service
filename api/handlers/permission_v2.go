@@ -3,12 +3,13 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
-	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/saidamir98/udevs_pkg/util"
 	"github.com/spf13/cast"
@@ -52,6 +53,7 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 	// 	return
 	// }
+	// fmt.Println(">>>>>>>>>>>>>>>   test #0.3")
 	// resource, err := h.services.ServiceResource().GetSingle(
 	// 	c.Request.Context(),
 	// 	&pbCompany.GetSingleServiceResourceReq{
@@ -60,10 +62,12 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 	// 		ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 	// 	},
 	// )
+	// fmt.Println(">>>>>>>>>>>>>>>   test #1")
 	// if err != nil {
 	// 	h.handleResponse(c, http.GRPCError, err.Error())
 	// 	return
 	// }
+	// fmt.Println(">>>>>>>>>>>>>>>   test #2")
 	// switch resource.ResourceType {
 	// case pbCompany.ResourceType_MONGODB:
 	// resp, err = h.services.BuilderPermissionService().GetGlobalPermissionByRoleId(
@@ -150,12 +154,6 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 		return
 	}
 
-	services, _ := h.GetProjectSrvc(
-		c,
-		resource.ProjectId,
-		resource.NodeType,
-	)
-
 	role.ProjectId = resource.ResourceEnvironmentId
 	role.ResourceType = int32(resource.ResourceType)
 	role.NodeType = resource.NodeType
@@ -184,7 +182,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 			logReq.Response = resp
 			h.log.Info("V2AddRole -> success")
 		}
-		go h.versionHistory(c, logReq)
+		// go h.versionHistory(c, logReq)
 	}()
 
 	resp, err = h.services.PermissionService().V2AddRole(
@@ -193,20 +191,6 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
-
-	roleData, _ := helper.ConvertStructToResponse(resp.Data)
-	roleDataData := cast.ToStringMap(roleData["data"])
-	_, err = services.GetBuilderPermissionServiceByType(resource.NodeType).CreateDefaultPermission(
-		c.Request.Context(),
-		&object_builder_service.CreateDefaultPermissionRequest{
-			ProjectId: resource.ResourceEnvironmentId,
-			RoleId:    cast.ToString(roleDataData["guid"]),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
 
@@ -567,11 +551,15 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
+			h.log.Info("!!!V2RemoveRole -> error")
 		} else {
 			logReq.Response = resp
+			h.log.Info("V2RemoveRole -> success")
 		}
 
 	}()
+
+	fmt.Printf("roleID: %+v\n", resource)
 
 	resp, err = h.services.PermissionService().V2RemoveRole(
 		c.Request.Context(),
@@ -755,8 +743,10 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	defer func() {
 		if err != nil {
 			logReq.Response = err.Error()
+			h.log.Info("!!!UpdateRoleAppTablePermissions -> error")
 		} else {
 			logReq.Response = resp
+			h.log.Info("UpdateRoleAppTablePermissions -> success")
 		}
 		go h.versionHistory(c, logReq)
 	}()
@@ -775,7 +765,9 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			context.Background(),
 			&permission,
 		)
+
 		if err != nil {
+			fmt.Println("test permission before error update builder error >>>>>>> ", err)
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
@@ -785,6 +777,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			c.Request.Context(),
 			&permission,
 		)
+
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -863,20 +856,20 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 			return
 		}
 	case pbCompany.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderPermissionService().GetAllMenuPermissions(
+		resp, err := services.GoObjectBuilderPermissionService().GetAllMenuPermissions(
 			c.Request.Context(),
-			&object_builder_service.GetAllMenuPermissionsRequest{
+			&new_object_builder_service.GetAllMenuPermissionsRequest{
 				RoleId:    c.Param("role-id"),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.Param("parent-id"),
 			},
 		)
-
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-
+		h.handleResponse(c, http.OK, resp)
+		return
 	}
 	h.handleResponse(c, http.OK, resp)
 }

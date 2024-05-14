@@ -48,6 +48,7 @@ func ReplaceSQL(old, searchPattern string) string {
 }
 
 func ConvertMapToStruct(inputMap map[string]interface{}) (*structpb.Struct, error) {
+	log.Printf("---INFO->ConvertMapToStruct---> %+v", inputMap)
 
 	marshledInputMap, err := json.Marshal(inputMap)
 	outputStruct := &structpb.Struct{}
@@ -141,4 +142,18 @@ func GetURLWithTableSlug(c *gin.Context) string {
 	}
 
 	return url
+}
+
+func MarshalToStruct(data interface{}, resp interface{}) error {
+	js, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(js, resp)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

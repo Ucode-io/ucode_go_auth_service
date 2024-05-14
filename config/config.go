@@ -59,6 +59,9 @@ type Config struct {
 	PostgresObjectBuidlerServiceHost string
 	PostgresObjectBuidlerServicePort string
 
+	GoObjectBuilderServiceHost string
+	GoObjectBuilderServicePort string
+
 	UcodeAppBaseUrl string
 }
 
@@ -157,7 +160,7 @@ func Load() Config {
 	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "100"))
 
-	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "snZV9XNmvf"))
+	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", ""))
 
 	config.PasscodePool = cast.ToString(getOrReturnDefaultValue("PASSCODE_POOL", ""))
 	config.PasscodeLength = cast.ToInt(getOrReturnDefaultValue("PASSCODE_LENGTH", ""))
@@ -173,6 +176,12 @@ func Load() Config {
 
 	config.WebPageServiceHost = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", ""))
 	config.WebPageServicePort = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ""))
+
+	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
+	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
+
+	config.GoObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", ""))
+	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ""))
 
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))

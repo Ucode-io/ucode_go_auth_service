@@ -7,14 +7,10 @@ import (
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
-	obs "ucode/ucode_go_auth_service/genproto/company_service"
-	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
-	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -86,10 +82,14 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 		}
 	}
 
-	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
+	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &pb.GetUserByLoginTypesRequest{
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	resp, err := h.services.SmsService().Send(
 		c.Request.Context(),
@@ -158,19 +158,17 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 
 	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
+		&pbc.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
 	)
 	if err != nil {
-		h.log.Error("V2SendCode#GetResourceEnvironment", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 	code, err := util.GenerateCode(4)
 	if err != nil {
-		h.log.Error("V2SendCode#GenerateCode4", logger.Error(err))
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
@@ -192,13 +190,12 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
 			context.Background(),
-			&pbCompany.GetProjectResourceListRequest{
+			&pbc.GetProjectResourceListRequest{
 				ProjectId:     resourceEnvironment.ProjectId,
 				EnvironmentId: environmentId.(string),
-				Type:          pbCompany.ResourceType_SMS,
+				Type:          pbc.ResourceType_SMS,
 			})
 		if err != nil {
-			h.log.Error("V2SendCode#GetResources", logger.Error(err))
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
@@ -206,7 +203,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
 				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
 				if err != nil {
-					h.log.Error("V2SendCode#GenerateCode", logger.Error(err))
 					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
 					return
 				}
@@ -245,15 +241,14 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		body.DevEmailPassword = emailSettings.Items[0].Password
 	}
 
-	_, _ = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
+	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &pb.GetUserByLoginTypesRequest{
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
-	// if err != nil {
-	// 	h.log.Error("V2SendCode#V2GetUserByLoginTypes", logger.Error(err))
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	services, err := h.GetProjectSrvc(
 		c,
@@ -261,17 +256,14 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		resourceEnvironment.NodeType,
 	)
 	if err != nil {
-		h.log.Error("V2SendCode#GetProjectSrvc", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
 	resp, err := services.SmsService().Send(
 		c.Request.Context(),
 		body,
 	)
 	if err != nil {
-		h.log.Error("V2SendCode#Send", logger.Error(err))
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
@@ -355,10 +347,10 @@ func (h *Handler) V2Register(c *gin.Context) {
 
 	serviceResource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
+		&pbc.GetSingleServiceResourceReq{
 			EnvironmentId: environmentId.(string),
 			ProjectId:     projectId.(string),
-			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
 		},
 	)
 
@@ -367,7 +359,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &pbc.GetProjectByIdRequest{
 		ProjectId: serviceResource.GetProjectId(),
 	})
 	if err != nil {
@@ -446,7 +438,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &auth_service.RegisterUserRequest{
+	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
 		Data:     structData,
 		NodeType: serviceResource.NodeType,
 	})

@@ -13,6 +13,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -139,6 +140,10 @@ func (h *Handler) V2Login(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	h.log.Info("---SessionV2---", logger.Any("body", resourceEnvironment))
+	h.log.Info("---SessionV2---", logger.Any("resource-type", resourceEnvironment.ResourceType.Number()))
+	h.log.Info("---SessionV2---", logger.Any("login-req", int32(resourceEnvironment.ResourceType)))
 
 	login.ResourceEnvironmentId = resourceEnvironment.GetResourceEnvironmentId()
 	login.ResourceType = int32(resourceEnvironment.GetResourceType())
@@ -310,12 +315,12 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 		return
 	}
 
-	if !strings.HasSuffix(login.GetUsername(), "_superadmin") {
+	if !strings.HasSuffix(login.GetUsername(), "_kibr") {
 		err := errors.New("Пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	} else {
-		login.Username = strings.TrimSuffix(login.GetUsername(), "_superadmin")
+		login.Username = strings.TrimSuffix(login.GetUsername(), "_kibr")
 	}
 
 	//userReq, err := helper.ConvertMapToStruct(map[string]interface{}{

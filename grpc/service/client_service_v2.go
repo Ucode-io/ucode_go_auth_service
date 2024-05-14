@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
+
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/saidamir98/udevs_pkg/logger"
@@ -55,17 +57,21 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		result, err = services.PostgresObjectBuilderService().Create(ctx,
-			&pbObject.CommonMessage{
+		result, err := services.GoItemService().Create(ctx,
+			&nobs.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
-				ProjectId: req.GetProjectId(),
+				ProjectId: req.GetResourceEnvrironmentId(),
 			})
-
 		if err != nil {
 			s.log.Error("!!!CreateClientType.PostgresObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		return &pb.CommonMessage{
+			TableSlug: result.TableSlug,
+			Data:      result.Data,
+		}, nil
 	}
 
 	return &pb.CommonMessage{
@@ -108,8 +114,8 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		result, err = services.PostgresObjectBuilderService().GetSingle(ctx,
-			&pbObject.CommonMessage{
+		result, err := services.GoItemService().GetSingle(ctx,
+			&nobs.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvrironmentId(),
@@ -119,6 +125,11 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 			s.log.Error("!!!GetClientTypeByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		return &pb.CommonMessage{
+			TableSlug: result.TableSlug,
+			Data:      result.Data,
+		}, nil
 	}
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
@@ -165,7 +176,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 
 	switch req.ResourceType {
 	case 1:
-		result, err = services.GetObjectBuilderServiceByType(req.NodeType).GetListSlim(ctx,
+		result, err = services.ObjectBuilderService().GetListSlim(ctx,
 			&pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
@@ -177,9 +188,8 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			// return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-
-		result, err = services.PostgresObjectBuilderService().GetList(ctx,
-			&pbObject.CommonMessage{
+		result2, err := services.GoObjectBuilderService().GetList2(ctx,
+			&nobs.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvrironmentId(),
@@ -189,6 +199,8 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 			s.log.Error("!!!GetClientTypeList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		result.Data = result2.Data
 	}
 
 	return &pb.CommonMessage{
@@ -243,8 +255,8 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
 	case 3:
-		result, err = services.PostgresObjectBuilderService().Update(ctx,
-			&pbObject.CommonMessage{
+		result, err := services.GoItemService().Update(ctx,
+			&nobs.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvrironmentId(),
@@ -253,6 +265,11 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 			s.log.Error("!!!UpdateClientType.PostgresObjectBuilderService.Update--->", logger.Error(err))
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
+
+		return &pb.CommonMessage{
+			TableSlug: result.TableSlug,
+			Data:      result.Data,
+		}, nil
 	}
 
 	return &pb.CommonMessage{
@@ -294,8 +311,8 @@ func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.V2Client
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		_, err = services.PostgresObjectBuilderService().Delete(ctx,
-			&pbObject.CommonMessage{
+		_, err = services.GoItemService().Delete(ctx,
+			&nobs.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvrironmentId(),

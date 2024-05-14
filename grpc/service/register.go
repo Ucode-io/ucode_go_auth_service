@@ -55,7 +55,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		{
 			foundUser, err = rs.strg.User().GetByUsername(ctx, body["email"].(string))
 			if err != nil {
-				rs.log.Error("!RegisterUser --->", logger.Error(err))
+				rs.log.Error("!RegisterUserError--->EmailGetByUsername", logger.Error(err))
 				return nil, err
 			}
 		}
@@ -63,7 +63,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		{
 			foundUser, err = rs.strg.User().GetByUsername(ctx, body["phone"].(string))
 			if err != nil {
-				rs.log.Error("!RegisterUser --->", logger.Error(err))
+				rs.log.Error("!RegisterUserError--->PhoneGetByUsernames", logger.Error(err))
 				return nil, err
 			}
 		}
@@ -210,7 +210,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		EnvId:        body["environment_id"].(string),
 	})
 	if err != nil {
-		rs.log.Error("!RegisterUser --->", logger.Error(err))
+		rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
 		return nil, err
 	}
 	reqLoginData := &pbObject.LoginDataReq{

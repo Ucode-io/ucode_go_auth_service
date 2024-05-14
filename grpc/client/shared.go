@@ -3,7 +3,9 @@ package client
 import (
 	"fmt"
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
+
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/genproto/web_page_service"
 
@@ -14,11 +16,16 @@ import (
 type SharedServiceManagerI interface {
 	ObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	LoginService() object_builder_service.LoginServiceClient
+	GoLoginService() new_object_builder_service.LoginServiceClient
 	BuilderPermissionService() object_builder_service.PermissionServiceClient
 	PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	PostgresLoginService() object_builder_service.LoginServiceClient
 	PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient
 	VersionHistoryService() object_builder_service.VersionHistoryServiceClient
+
+	GoObjectBuilderService() new_object_builder_service.ObjectBuilderServiceClient
+	GoItemService() new_object_builder_service.ItemsServiceClient
+	GoObjectBuilderPermissionService() new_object_builder_service.PermissionServiceClient
 
 	HighObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	HighLoginService() object_builder_service.LoginServiceClient
@@ -34,11 +41,16 @@ type SharedServiceManagerI interface {
 type sharedGrpcClients struct {
 	objectBuilderService             object_builder_service.ObjectBuilderServiceClient
 	loginService                     object_builder_service.LoginServiceClient
+	goLoginService                   new_object_builder_service.LoginServiceClient
 	builderPermissionService         object_builder_service.PermissionServiceClient
 	postgresObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	postgresLoginService             object_builder_service.LoginServiceClient
 	postgresBuilderPermissionService object_builder_service.PermissionServiceClient
-	versionHistoryService            object_builder_service.VersionHistoryServiceClient
+	versionHisotryService            object_builder_service.VersionHistoryServiceClient
+
+	goObjectBuilderService           new_object_builder_service.ObjectBuilderServiceClient
+	goObjectBuilderPermissionService new_object_builder_service.PermissionServiceClient
+	goItemService                    new_object_builder_service.ItemsServiceClient
 
 	highObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	highLoginService             object_builder_service.LoginServiceClient
@@ -88,14 +100,20 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		// return nil, err
 	}
 
+	connGoObjectBuilderService, err := grpc.Dial(
+		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderServicePort,
+		grpc.WithInsecure(),
+	)
+
 	return &sharedGrpcClients{
 		objectBuilderService:             object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
 		loginService:                     object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		goLoginService:                   new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
 		builderPermissionService:         object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
 		postgresLoginService:             object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
 		postgresObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connPostgresObjectBuilderService),
 		postgresBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connPostgresObjectBuilderService),
-		versionHistoryService:            object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		versionHisotryService:            object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 
 		highObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connHighObjectBuilderService),
 		highLoginService:             object_builder_service.NewLoginServiceClient(connHighObjectBuilderService),
@@ -103,6 +121,10 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 
 		webPageAppService: web_page_service.NewAppServiceClient(connWebPageService),
 		smsService:        sms_service.NewSmsServiceClient(connSmsService),
+
+		goObjectBuilderService:           new_object_builder_service.NewObjectBuilderServiceClient(connGoObjectBuilderService),
+		goObjectBuilderPermissionService: new_object_builder_service.NewPermissionServiceClient(connGoObjectBuilderService),
+		goItemService:                    new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 	}, nil
 }
 
@@ -187,5 +209,21 @@ func (g *sharedGrpcClients) LoginService() object_builder_service.LoginServiceCl
 }
 
 func (g *sharedGrpcClients) VersionHistoryService() object_builder_service.VersionHistoryServiceClient {
-	return g.versionHistoryService
+	return g.versionHisotryService
+}
+
+func (g *sharedGrpcClients) GoObjectBuilderService() new_object_builder_service.ObjectBuilderServiceClient {
+	return g.goObjectBuilderService
+}
+
+func (g *sharedGrpcClients) GoLoginService() new_object_builder_service.LoginServiceClient {
+	return g.goLoginService
+}
+
+func (g *sharedGrpcClients) GoObjectBuilderPermissionService() new_object_builder_service.PermissionServiceClient {
+	return g.goObjectBuilderPermissionService
+}
+
+func (g *sharedGrpcClients) GoItemService() new_object_builder_service.ItemsServiceClient {
+	return g.goItemService
 }

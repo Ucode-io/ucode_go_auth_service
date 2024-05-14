@@ -716,10 +716,6 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// if bytes, err := json.Marshal(userData); err == nil {
-	// 	fmt.Println("userdata", string(bytes))
-	// }
-
 	roleId, ok := userData["role_id"].(string)
 	if !ok {
 		err := errors.New("role_id is nil")
@@ -1204,12 +1200,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			//RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
 		})
 		if err != nil {
-			s.log.Error("!!!V2DeleteUser--->DeleteUserFromProject", logger.Error(err))
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 		_, err = s.strg.User().Delete(ctx, req)
 		if err != nil {
-			s.log.Error("!!!V2DeleteUser--->User Delete", logger.Error(err))
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
@@ -1258,7 +1254,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 
 	_, err = s.strg.User().Delete(ctx, req)
 	if err != nil {
-		s.log.Error("!!!V2DeleteUser--->User Delete Last", logger.Error(err))
+		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

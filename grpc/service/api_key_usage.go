@@ -39,11 +39,11 @@ func (s *apiKeyUsageService) CheckLimit(ctx context.Context, req *pb.CheckLimitR
 	res, err := s.strg.ApiKeyUsage().CheckLimit(ctx, req)
 	if err != nil {
 		s.log.Error("!!!CheckLimitApiKeyUsage--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, "error on check limit api key")
+		return nil, status.Error(codes.Internal, "error on creating new api key")
 	}
 
 	if res.IsLimitReached {
-		return res, status.Error(codes.FailedPrecondition, "monthly limit reached")
+		return res, status.Error(codes.ResourceExhausted, "monthly limit exceeded")
 	}
 
 	return res, nil
@@ -61,7 +61,7 @@ func (s *apiKeyUsageService) Create(ctx context.Context, req *pb.ApiKeyUsage) (*
 	}
 	if err != nil {
 		s.log.Error("!!!CreateApiKeyUsage--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, "error on upserting api key usage")
+		return nil, status.Error(codes.Internal, "error on creating api key usage")
 	}
 
 	return res, nil

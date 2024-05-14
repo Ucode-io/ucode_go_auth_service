@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
@@ -299,7 +300,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		return
 	}
 
-	var resp *obs.CommonMessage
+	resp := &obs.CommonMessage{}
 	switch resource.ResourceType {
 	case 1:
 		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
@@ -316,9 +317,9 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			return
 		}
 	case 3:
-		resp, err = services.PostgresObjectBuilderService().GetList(
+		result2, err := services.GoObjectBuilderService().GetList(
 			c.Request.Context(),
-			&obs.CommonMessage{
+			&nobs.CommonMessage{
 				TableSlug: "connections",
 				ProjectId: resource.ResourceEnvironmentId,
 				Data:      structData,
@@ -329,6 +330,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		resp.Data = result2.Data
 	}
 
 	response, ok := resp.Data.AsMap()["response"].([]interface{})

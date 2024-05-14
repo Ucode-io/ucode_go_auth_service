@@ -750,7 +750,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	}
 	if req.Phone != "" {
 		if filter != "" {
-			filter += " OR phone = :login"
+			filter += " OR phone = :phone"
 		} else {
 			filter = "phone = :phone"
 		}
@@ -758,7 +758,6 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	}
 
 	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
-
 	var userId string
 	err := r.db.QueryRow(ctx, lastQuery, args...).Scan(&userId)
 	if err == pgx.ErrNoRows {

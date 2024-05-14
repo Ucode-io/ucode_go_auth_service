@@ -3,10 +3,13 @@ package service
 import (
 	"context"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
+	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/saidamir98/udevs_pkg/logger"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -43,8 +46,23 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			s.log.Error("!!!AddRole.ObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
+		roleData, _ := helper.ConvertStructToResponse(result.Data)
+		roleDataData := cast.ToStringMap(roleData["data"])
+		_, err = services.BuilderPermissionService().CreateDefaultPermission(
+			ctx,
+			&object_builder_service.CreateDefaultPermissionRequest{
+				ProjectId: req.GetProjectId(),
+				RoleId:    cast.ToString(roleDataData["guid"]),
+			},
+		)
+		if err != nil {
+			s.log.Error("!!!AddRole.ObjectBuilderService.CreateDefaultPermission--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
 	case 3:
-		result, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		result, err := services.GoItemService().Create(ctx, &nobs.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetProjectId(),
@@ -53,6 +71,25 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			s.log.Error("!!!AddRole.PostgresObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
+		roleData, _ := helper.ConvertStructToResponse(result.Data)
+		roleDataData := cast.ToStringMap(roleData["data"])
+		_, err = services.GoObjectBuilderPermissionService().CreateDefaultPermission(
+			ctx,
+			&nobs.CreateDefaultPermissionRequest{
+				ProjectId: req.GetProjectId(),
+				RoleId:    cast.ToString(roleDataData["guid"]),
+			},
+		)
+		if err != nil {
+			s.log.Error("!!!AddRole.ObjectBuilderService.CreateDefaultPermission--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		return &pb.CommonMessage{
+			TableSlug: result.TableSlug,
+			Data:      result.Data,
+		}, nil
 	}
 
 	return &pb.CommonMessage{
@@ -146,16 +183,20 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		result, err = services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+		result, err := services.GoObjectBuilderService().GetList2(ctx, &nobs.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.log.Error("!!!GetRolesList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
+			s.log.Error("!!!GetRolesList.GoObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		return &pb.CommonMessage{
+			TableSlug: result.TableSlug,
+			Data:      result.Data,
+		}, nil
 	}
 
 	return &pb.CommonMessage{
@@ -246,6 +287,7 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 			s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
@@ -256,7 +298,7 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		result, err = services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		result, err := services.GoItemService().GetSingle(ctx, &nobs.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -265,7 +307,7 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 			s.log.Error("!!!GetRoleById.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		_, err = services.PostgresObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+		_, err = services.GoItemService().Delete(ctx, &nobs.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -274,6 +316,11 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 			s.log.Error("!!!GetRoleById.PostgresObjectBuilderService.Delete--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
+		return &pb.CommonMessage{
+			TableSlug: result.TableSlug,
+			Data:      result.Data,
+		}, nil
 	}
 
 	return &pb.CommonMessage{
