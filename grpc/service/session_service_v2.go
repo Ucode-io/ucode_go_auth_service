@@ -15,6 +15,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -140,15 +141,32 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-		data, err = services.PostgresLoginService().LoginData(
+
+		newReq := nb.LoginDataReq{}
+
+		err = helper.MarshalToStruct(&reqLoginData, &newReq)
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(400, err.Error())
+		}
+
+		newReq.ProjectId = newReq.ResourceEnvironmentId
+
+		newData, err := services.GoLoginService().LoginData(
 			ctx,
-			reqLoginData,
+			&newReq,
 		)
 
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+
+		err = helper.MarshalToStruct(&newData, &data)
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(400, err.Error())
 		}
 
 	}

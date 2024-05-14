@@ -39,7 +39,7 @@ import (
 //
 // Neither of the above are covered by the compatibility promise and
 // may be removed in a future release of this module.
-var conflictPolicy = "panic" // "panic" | "warn" | "ignore"
+var conflictPolicy = "warn" // "panic" | "warn" | "ignore"
 
 // ignoreConflict reports whether to ignore a registration conflict
 // given the descriptor being registered and the error.
