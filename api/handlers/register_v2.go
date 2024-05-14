@@ -245,10 +245,10 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		Email: request.Recipient,
 		Phone: request.Recipient,
 	})
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
 	services, err := h.GetProjectSrvc(
 		c,

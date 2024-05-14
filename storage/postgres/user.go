@@ -765,7 +765,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	} else if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("here returning >>>> ", userId)
 	return &pb.GetUserByLoginTypesResponse{
 		UserId: userId,
 	}, nil

@@ -1287,7 +1287,7 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 
 func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
-
+	fmt.Println("coming here to V2GetUserByLoginTypes >>> ", req)
 	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
 		return nil, err
