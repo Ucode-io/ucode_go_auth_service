@@ -73,12 +73,11 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		}
 
 		roleData, _ := helper.ConvertStructToResponse(result.Data)
-		roleDataData := cast.ToStringMap(roleData["data"])
 		_, err = services.GoObjectBuilderPermissionService().CreateDefaultPermission(
 			ctx,
 			&nobs.CreateDefaultPermissionRequest{
 				ProjectId: req.GetProjectId(),
-				RoleId:    cast.ToString(roleDataData["guid"]),
+				RoleId:    cast.ToString(roleData["guid"]),
 			},
 		)
 		if err != nil {
