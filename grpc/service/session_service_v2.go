@@ -1546,32 +1546,36 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			return nil, err
 		}
 		fmt.Println("Hello World->", resource)
-		services, err := s.serviceNode.GetByNodeType(
-			resource.ProjectId,
-			resource.NodeType,
-		)
-		if err != nil {
-			return nil, err
-		}
 
-		resp, err := services.GetBuilderPermissionServiceByType(resource.NodeType).GetTablePermission(
-			context.Background(),
-			&pbObject.GetTablePermissionRequest{
-				TableSlug:             tableSlug,
-				RoleId:                session.RoleId,
-				ResourceEnvironmentId: resource.ResourceEnvironmentId,
-				Method:                methodField,
-			},
-		)
-		if err != nil {
-			fmt.Println("Error is here")
-			return nil, err
-		}
-		fmt.Println("After builder service")
+		switch resource.ResourceType {
+		case pbCompany.ResourceType_MONGODB:
+			services, err := s.serviceNode.GetByNodeType(
+				resource.ProjectId,
+				resource.NodeType,
+			)
+			if err != nil {
+				return nil, err
+			}
 
-		if !resp.IsHavePermission {
-			err := status.Error(codes.PermissionDenied, "Permission denied")
-			return nil, err //fmt.Errorf("Permission denied")
+			resp, err := services.GetBuilderPermissionServiceByType(resource.NodeType).GetTablePermission(
+				context.Background(),
+				&pbObject.GetTablePermissionRequest{
+					TableSlug:             tableSlug,
+					RoleId:                session.RoleId,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Method:                methodField,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			if !resp.IsHavePermission {
+				err := status.Error(codes.PermissionDenied, "Permission denied")
+				return nil, err //fmt.Errorf("Permission denied")
+			}
+		case pbCompany.ResourceType_POSTGRESQL:
+
 		}
 	}
 
