@@ -329,7 +329,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 			Offset:                uint32(offset),
 			Limit:                 uint32(limit),
 			ClientPlatformId:      c.Query("client-platform-id"),
-			ClientTypeId:          c.Query("client-type-id"),
+			ClientTypeId:          c.Query("clienty_type_id"),
 			ProjectId:             resource.ProjectId,
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ResourceType:          int32(resource.ResourceType),
