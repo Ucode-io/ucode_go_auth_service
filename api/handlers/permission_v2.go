@@ -10,6 +10,7 @@ import (
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
+	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/saidamir98/udevs_pkg/util"
 	"github.com/spf13/cast"
@@ -980,11 +981,17 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 		}
 
 	case pbCompany.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderPermissionService().UpdateMenuPermissions(
-			c.Request.Context(),
-			&permission,
-		)
+		newReq := new_object_builder_service.UpdateMenuPermissionsRequest{}
+		err = helper.MarshalToStruct(&permission, &newReq)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 
+		resp, err = services.GoObjectBuilderPermissionService().UpdateMenuPermissions(
+			c.Request.Context(),
+			&newReq,
+		)
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
