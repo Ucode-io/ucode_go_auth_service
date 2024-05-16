@@ -323,13 +323,19 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 		return
 	}
 
+	var clientTypeId string
+	if c.Query("clienty_type_id") != "" {
+		clientTypeId = c.Query("clienty_type_id")
+	} else {
+		clientTypeId = c.Query("client-type-id")
+	}
 	resp, err := h.services.PermissionService().V2GetRolesList(
 		c.Request.Context(),
 		&auth_service.V2GetRolesListRequest{
 			Offset:                uint32(offset),
 			Limit:                 uint32(limit),
 			ClientPlatformId:      c.Query("client-platform-id"),
-			ClientTypeId:          c.Query("clienty_type_id"),
+			ClientTypeId:          clientTypeId,
 			ProjectId:             resource.ProjectId,
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ResourceType:          int32(resource.ResourceType),
