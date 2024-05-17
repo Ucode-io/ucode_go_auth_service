@@ -655,25 +655,26 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		resp.ProjectId = projectId
+
+		h.handleResponse(c, http.OK, resp)
 	case pbCompany.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderPermissionService().GetListWithRoleAppTablePermissions(
-			c.Request.Context(),
-			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
-				RoleId:    c.Param("role-id"),
+		resp, err := services.GoObjectBuilderPermissionService().GetListWithRoleAppTablePermissions(context.Background(),
+			&new_object_builder_service.GetListWithRoleAppTablePermissionsRequest{
 				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
+				RoleId:    c.Param("role-id"),
+			})
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
 
+		resp.ProjectId = projectId
+
+		h.handleResponse(c, http.OK, resp)
+
 	}
-
-	resp.ProjectId = projectId
-
-	h.handleResponse(c, http.OK, resp)
 }
 
 // @Security ApiKeyAuth
