@@ -780,19 +780,30 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			return
 		}
 
+		h.handleResponse(c, http.OK, resp)
 	case pbCompany.ResourceType_POSTGRESQL:
-		resp, err = services.PostgresBuilderPermissionService().UpdateRoleAppTablePermissions(
+
+		newPermission := &new_object_builder_service.UpdateRoleAppTablePermissionsRequest{}
+
+		err := helper.MarshalToStruct(&permission, &newPermission)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+
+		resp, err := services.GoObjectBuilderPermissionService().UpdateRoleAppTablePermissions(
 			c.Request.Context(),
-			&permission,
+			newPermission,
 		)
 
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+
+		h.handleResponse(c, http.OK, resp)
 	}
 
-	h.handleResponse(c, http.OK, resp)
 }
 
 // @Security ApiKeyAuth
