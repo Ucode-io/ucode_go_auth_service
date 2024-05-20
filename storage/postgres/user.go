@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"regexp"
-	"strings"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -60,6 +59,9 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	if err != nil {
 		return pKey, err
 	}
+
+	fmt.Println("I THINK ITS EMPTY")
+	fmt.Println(entity.GetCompanyId())
 
 	_, err = r.db.Exec(ctx, query,
 		id.String(),
@@ -422,7 +424,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		"user"
 	WHERE`
 
-	lowercasedUsername := strings.ToLower(username)
+	// lowercasedUsername := strings.ToLower(username)
 
 	if IsValidEmailNew(username) {
 		query = query + ` LOWER(email) = $1`
@@ -432,7 +434,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		query = query + ` LOWER(login) = $1`
 	}
 
-	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
+	err = r.db.QueryRow(ctx, query, "jinni_admin").Scan(
 		&res.Id,
 		// &res.Name,
 		// &res.PhotoUrl,

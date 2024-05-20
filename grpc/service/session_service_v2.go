@@ -1617,6 +1617,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 	switch req.Type {
 	case config.Default:
 		{
+			fmt.Println("i am here bro")
 			if len(req.Username) < 6 {
 				err := errors.New("invalid username")
 				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
@@ -1635,11 +1636,17 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
+			fmt.Println(user)
+
 			match, err := security.ComparePassword(user.Password, req.Password)
 			if err != nil {
 				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
+
+			fmt.Print("\n\n\n\n\n")
+
+			fmt.Println(match)
 
 			if !match {
 				err := errors.New("username or password is wrong")
@@ -1696,12 +1703,19 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
+
+	fmt.Print("\n\n\n\n")
+	fmt.Println(userProjects)
+
 	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
 	if err != nil {
 		errGetEnvProjects := errors.New("cant get user env projects")
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
 	}
+
+	fmt.Print("\n\n\n\n")
+	fmt.Println(userEnvProject)
 
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)

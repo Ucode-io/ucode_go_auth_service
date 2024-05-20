@@ -114,7 +114,7 @@ func BaseLoad() BaseConfig {
 	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
 	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "100"))
 
-	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", ""))
+	config.ServiceName = cast.ToString(getOrReturnDefaultValue("SERVICE_NAME", "auth_service"))
 	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", DebugMode))
 	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0"))
 
@@ -123,11 +123,11 @@ func BaseLoad() BaseConfig {
 	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", ""))
 	config.Password = cast.ToString(getOrReturnDefaultValue("PASSWORD", ""))
 
-	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", ""))
-	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 0))
-	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", ""))
-	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", ""))
-	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", ""))
+	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "95.217.155.57"))
+	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 30034))
+	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", "auth_service"))
+	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "IeX7ieso"))
+	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "auth_service"))
 	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 30))
 
 	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
