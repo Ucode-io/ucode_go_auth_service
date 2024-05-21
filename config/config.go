@@ -181,8 +181,7 @@ func Load() Config {
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
 
 	config.GoObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", "localhost"))
-	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ":7107"))
-	config.GoObjectBuilderServicePort = "80"
+	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_PORT", ":7107"))
 
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
