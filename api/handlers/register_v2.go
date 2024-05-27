@@ -529,14 +529,6 @@ func (h *Handler) SendMessage(c *gin.Context) {
 			return
 		}
 		if len(smsOtpSettings.GetResources()) > 0 {
-			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
-				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
-				if err != nil {
-					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
-					return
-				}
-				body.Otp = code
-			}
 			body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
 			body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
 			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
