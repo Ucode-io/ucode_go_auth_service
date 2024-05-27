@@ -241,15 +241,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		body.DevEmailPassword = emailSettings.Items[0].Password
 	}
 
-	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &pb.GetUserByLoginTypesRequest{
-		Email: request.Recipient,
-		Phone: request.Recipient,
-	})
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-
 	services, err := h.GetProjectSrvc(
 		c,
 		resourceEnvironment.ProjectId,
@@ -448,4 +439,122 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, response)
+}
+
+// SendMessage godoc
+// @ID SendMessage
+// @Router /v2/send-message [POST]
+// @Summary SendMessage
+// @Description SendMessage type must be one of the following values ["EMAIL", "PHONE"]
+// @Tags v2_register
+// @Accept json
+// @Produce json
+// @Param X-API-KEY header string false "X-API-KEY"
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string false "Environment-Id"
+// @Param login body models.V2SendCodeRequest true "SendCode"
+// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) SendMessage(c *gin.Context) {
+
+	var (
+		request models.V2SendCodeRequest
+	)
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	id, err := uuid.NewRandom()
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+	_, valid := util.ValidRecipients[request.Type]
+	if !valid {
+		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
+		return
+	}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
+		return
+	}
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
+		return
+	}
+	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
+
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&pbc.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	body := &pbSms.Sms{
+		Id:        id.String(),
+		Text:      request.Text,
+		Otp:       "",
+		Recipient: request.Recipient,
+		ExpiresAt: expire.String()[:19],
+		Type:      request.Type,
+	}
+
+	switch request.Type {
+	case "PHONE":
+		valid = util.IsValidPhone(request.Recipient)
+		if !valid {
+			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
+			return
+		}
+		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_SMS,
+			})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		if len(smsOtpSettings.GetResources()) > 0 {
+			body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
+			body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
+			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
+		}
+	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	resp, err := services.SmsService().Send(
+		c.Request.Context(),
+		body,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	res := models.V2SendCodeResponse{
+		SmsId: resp.SmsId,
+	}
+
+	h.handleResponse(c, http.Created, res)
 }
