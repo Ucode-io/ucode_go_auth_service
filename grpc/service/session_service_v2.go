@@ -1636,7 +1636,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
-			fmt.Println(user)
+			fmt.Println("USER HERE >>> ", user)
 
 			match, err := security.ComparePassword(user.Password, req.Password)
 			if err != nil {

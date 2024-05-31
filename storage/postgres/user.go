@@ -448,9 +448,38 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		// &res.CreatedAt,
 		// &res.UpdatedAt,
 	)
+	if err == pgx.ErrNoRows && IsValidEmailNew(username) {
+		queryIf := `
+					SELECT
+						id,
+						phone,
+						email,
+						login,
+						password
+					FROM
+						"user"
+					WHERE
+				`
+
+		queryIf = queryIf + ` LOWER(login) = $1`
+
+		err = r.db.QueryRow(ctx, queryIf, lowercasedUsername).Scan(
+			&res.Id,
+			&res.Phone,
+			&res.Email,
+			&res.Login,
+			&res.Password,
+		)
+		if err == pgx.ErrNoRows {
+			return res, nil
+		}
+		return res, nil
+	}
+
 	if err == pgx.ErrNoRows {
 		return res, nil
 	}
+
 	if err != nil {
 		return res, err
 	}
