@@ -1636,17 +1636,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
-			fmt.Println(user)
-
 			match, err := security.ComparePassword(user.Password, req.Password)
 			if err != nil {
 				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-
-			fmt.Print("\n\n\n\n\n")
-
-			fmt.Println(match)
 
 			if !match {
 				err := errors.New("username or password is wrong")
@@ -1704,18 +1698,12 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
 
-	fmt.Print("\n\n\n\n")
-	fmt.Println(userProjects)
-
 	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
 	if err != nil {
 		errGetEnvProjects := errors.New("cant get user env projects")
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
 	}
-
-	fmt.Print("\n\n\n\n")
-	fmt.Println(userEnvProject)
 
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
@@ -1732,13 +1720,20 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 		for _, projectId := range item.ProjectIds {
 
-			clientType, _ := s.strg.User().GetUserProjectClientTypes(
+			fmt.Println("HERHEHREH OOOO")
+
+			fmt.Println(user.Id)
+			fmt.Println(projectId)
+
+			clientType, err := s.strg.User().GetUserProjectClientTypes(
 				ctx,
 				&models.UserProjectClientTypeRequest{
 					UserId:    user.GetId(),
 					ProjectId: projectId,
 				},
 			)
+
+			fmt.Println(err)
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
@@ -1824,6 +1819,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					respResourceEnvironment.ClientTypes = clientTypes.Data
 
 				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
+					fmt.Println("here iam here")
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{

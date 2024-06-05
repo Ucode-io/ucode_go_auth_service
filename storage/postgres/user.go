@@ -61,9 +61,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		return pKey, err
 	}
 
-	fmt.Println("I THINK ITS EMPTY")
-	fmt.Println(entity.GetCompanyId())
-
 	_, err = r.db.Exec(ctx, query,
 		id.String(),
 		// entity.GetName(),
@@ -498,6 +495,9 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 	if err != nil {
 		return res, err
 	}
+
+	fmt.Println("HEREHEHREHEHH")
+	fmt.Println(res.ClientTypeIds)
 
 	return res, nil
 }
