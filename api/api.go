@@ -125,6 +125,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
 
 		v2.POST("/send-code", h.V2SendCode)
+		v2.POST("/send/message", h.SendMessage)
 		v2.POST("/register", h.V2Register)
 		v2.POST("/login/with-option", h.V2LoginWithOption)
 		v2.POST("/send-code-app", h.V2SendCodeApp)
