@@ -489,13 +489,17 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		password = :password,
+		login = :login,
+		email = :email,
+		password = :password
 		updated_at = now()
 	WHERE
 		id = :id`
 
 	params := map[string]interface{}{
 		"id":       user.UserId,
+		"login":    user.Login,
+		"email":    user.Email,
 		"password": user.Password,
 	}
 
