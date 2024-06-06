@@ -491,7 +491,7 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	query := `UPDATE "user" SET
 		login = :login,
 		email = :email,
-		password = :password
+		password = :password,
 		updated_at = now()
 	WHERE
 		id = :id`

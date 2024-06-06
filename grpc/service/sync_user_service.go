@@ -270,36 +270,40 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 
 func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
 	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+	var hashedPassword string
+	var err error
 
-	if len(req.Password) < 6 {
-		err := fmt.Errorf("password must not be less than 6 characters")
-		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-		return nil, err
-	}
-
-	if len(req.Password) == 0 {
-		err := fmt.Errorf("password must not be empty")
-		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-		return nil, err
-	}
-
-	hashedPassword, err := security.HashPassword(req.Password)
-	if err != nil {
-		sus.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if req.Login != "" {
-		if len(req.Login) < 6 {
-			err := fmt.Errorf("login must not be less than 6 characters")
+	if req.Password != "" {
+		if len(req.Password) < 6 {
+			err = fmt.Errorf("password must not be less than 6 characters")
 			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
 			return nil, err
+		}
+
+		if len(req.Password) == 0 {
+			err = fmt.Errorf("password must not be empty")
+			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+			return nil, err
+		}
+
+		hashedPassword, err = security.HashPassword(req.Password)
+		if err != nil {
+			sus.log.Error("!!!ResetPassword--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		if req.Login != "" {
+			if len(req.Login) < 6 {
+				err = fmt.Errorf("login must not be less than 6 characters")
+				sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+				return nil, err
+			}
 		}
 	}
 
 	if req.Email != "" {
 		if !IsValidEmailNew(req.Email) {
-			err := fmt.Errorf("email is not valid")
+			err = fmt.Errorf("email is not valid")
 			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
 			return nil, err
 		}
