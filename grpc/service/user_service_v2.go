@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
+	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -851,7 +852,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -871,7 +872,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		usersResp, err = services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+		goUsersResp, err := services.GoObjectBuilderService().GetList(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -881,6 +882,9 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		if err := helper.MarshalToStruct(goUsersResp, &usersResp); err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	userCount, ok := usersResp.Data.AsMap()["count"].(float64)
