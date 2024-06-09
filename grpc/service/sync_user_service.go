@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -191,22 +192,35 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 
 // func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
 // 	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+// 	fmt.Println("axaxaxaxaxaax >>> > > > > ")
+// 	// if len(req.Password) < 6 {
+// 	// 	err := fmt.Errorf("password must not be less than 6 characters")
+// 	// 	sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 	// 	return nil, err
+// 	// }
 
-// 	if len(req.Password) < 6 {
-// 		err := fmt.Errorf("password must not be less than 6 characters")
+// 	if len(req.Login) < 6 {
+// 		err := fmt.Errorf("login must not be less than 6 characters")
 // 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
 // 		return nil, err
 // 	}
 
-// 	hashedPassword, err := security.HashPassword(req.Password)
-// 	if err != nil {
+// 	if !IsValidEmailNew(req.Email) {
+// 		err := fmt.Errorf("email is not valid")
 // 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
+// 		return nil, err
 // 	}
 
+// 	// hashedPassword, err := security.HashPassword(req.Password)
+// 	// if err != nil {
+// 	// 	sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+// 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+// 	// }
+
 // 	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
-// 		UserId:   req.GetGuid(),
-// 		Password: hashedPassword,
+// 		UserId: req.GetGuid(),
+// 		Login:  req.Login,
+// 		Email:  req.Email,
 // 	})
 // 	if err != nil {
 // 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
@@ -217,7 +231,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 // 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 // 	}
 
-// 	return nil, nil
+// 	return &pb.SyncUserResponse{}, nil
 // }
 
 func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
@@ -256,27 +270,49 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 
 func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
 	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+	var hashedPassword string
+	var err error
 
-	if len(req.Password) < 6 {
-		err := fmt.Errorf("password must not be less than 6 characters")
-		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-		return nil, err
+	if req.Password != "" {
+		if len(req.Password) < 6 {
+			err = fmt.Errorf("password must not be less than 6 characters")
+			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+			return nil, err
+		}
+
+		if len(req.Password) == 0 {
+			err = fmt.Errorf("password must not be empty")
+			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+			return nil, err
+		}
+
+		hashedPassword, err = security.HashPassword(req.Password)
+		if err != nil {
+			sus.log.Error("!!!ResetPassword--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		if req.Login != "" {
+			if len(req.Login) < 6 {
+				err = fmt.Errorf("login must not be less than 6 characters")
+				sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+				return nil, err
+			}
+		}
 	}
 
-	if len(req.Password) == 0 {
-		err := fmt.Errorf("login must not be empty")
-		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-		return nil, err
-	}
-
-	hashedPassword, err := security.HashPassword(req.Password)
-	if err != nil {
-		sus.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if req.Email != "" {
+		if !IsValidEmailNew(req.Email) {
+			err = fmt.Errorf("email is not valid")
+			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+			return nil, err
+		}
 	}
 
 	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
 		UserId:   req.GetGuid(),
+		Login:    req.Login,
+		Email:    req.Email,
 		Password: hashedPassword,
 	})
 	if err != nil {
@@ -465,4 +501,16 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 	response.UserIds = user_ids
 
 	return &response, nil
+}
+
+func IsValidEmailNew(email string) bool {
+	// Define the regular expression pattern for a valid email address
+	// This is a basic pattern and may not cover all edge cases
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(emailRegex)
+
+	// Use the MatchString method to check if the email matches the pattern
+	return re.MatchString(email)
 }

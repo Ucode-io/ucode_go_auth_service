@@ -445,9 +445,38 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		// &res.CreatedAt,
 		// &res.UpdatedAt,
 	)
+	if err == pgx.ErrNoRows && IsValidEmailNew(username) {
+		queryIf := `
+					SELECT
+						id,
+						phone,
+						email,
+						login,
+						password
+					FROM
+						"user"
+					WHERE
+				`
+
+		queryIf = queryIf + ` LOWER(login) = $1`
+
+		err = r.db.QueryRow(ctx, queryIf, lowercasedUsername).Scan(
+			&res.Id,
+			&res.Phone,
+			&res.Email,
+			&res.Login,
+			&res.Password,
+		)
+		if err == pgx.ErrNoRows {
+			return res, nil
+		}
+		return res, nil
+	}
+
 	if err == pgx.ErrNoRows {
 		return res, nil
 	}
+
 	if err != nil {
 		return res, err
 	}
@@ -457,6 +486,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
+		login = :login,
+		email = :email,
 		password = :password,
 		updated_at = now()
 	WHERE
@@ -464,6 +495,8 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 
 	params := map[string]interface{}{
 		"id":       user.UserId,
+		"login":    user.Login,
+		"email":    user.Email,
 		"password": user.Password,
 	}
 
