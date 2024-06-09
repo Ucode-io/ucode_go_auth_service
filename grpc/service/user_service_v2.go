@@ -872,7 +872,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		goUsersResp, err := services.GoObjectBuilderService().GetList(ctx, &nb.CommonMessage{
+		goUsersResp, err := services.GoObjectBuilderService().GetList2(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
