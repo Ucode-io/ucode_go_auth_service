@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
@@ -48,7 +48,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 	}
 
 	if foundUser.Id == "" {
-		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+		pKey, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:                 "",
 			Password:              "",
 			Email:                 req.Email,
@@ -234,9 +234,9 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		return nil, err
 	}
 
-	foundUser, err := s.strg.User().GetByUsername(ctx, req.Email)
+	foundUser, _ := s.strg.User().GetByUsername(ctx, req.Email)
 	if foundUser.Id == "" {
-		foundUser, err = s.strg.User().GetByUsername(ctx, req.Phone)
+		foundUser, _ = s.strg.User().GetByUsername(ctx, req.Phone)
 	}
 
 	services, err := s.serviceNode.GetByNodeType(
@@ -248,7 +248,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	}
 
 	if foundUser.Id == "" {
-		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+		pKey, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:    req.GetLogin(),
 			Password: req.GetPassword(),
 			//	Email:                 req.GetEmail(),
@@ -1192,16 +1192,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser.ObjectBuilderService.Update--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if err != nil {
-			s.log.Error("!!!V2DeleteUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
 			UserId:       req.GetId(),
 			ProjectId:    req.GetProjectId(),
 			CompanyId:    req.GetCompanyId(),
 			ClientTypeId: req.GetClientTypeId(),
-			//RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
@@ -1254,6 +1250,10 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			ClientTypeId: req.GetClientTypeId(),
 			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
 		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser.PostgresObjectBuilderService.DeleteUserProject--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	_, err = s.strg.User().Delete(ctx, req)
@@ -1300,7 +1300,7 @@ func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUser
 	return res, nil
 }
 
-func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
+func (s *userService) GetUserByUsername(ctx context.Context, req *pb.GetUserByUsernameRequest) (*pb.User, error) {
 	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
 	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
 	if err != nil {
@@ -1378,7 +1378,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 			})
 			if err != nil {
-				err = errors.New("Password updated in auth but not found resource in this project")
+				err = errors.New("password updated in auth but not found resource in this project")
 				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
 				return nil, err
 			}
@@ -1391,7 +1391,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 					ClientTypeId:          req.ClientTypeId,
 				})
 				if err != nil {
-					err = errors.New("Password updated in auth but failed to update in object builder")
+					err = errors.New("password updated in auth but failed to update in object builder")
 					s.log.Error("!!!V2UserResetPassword.GetLoginServiceByType(resource.NodeType).UpdateUserPassword--->", logger.Error(err))
 					return nil, err
 				}
@@ -1403,7 +1403,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 					ClientTypeId:          req.ClientTypeId,
 				})
 				if err != nil {
-					err = errors.New("Password updated in auth but failed to update in object builder")
+					err = errors.New("password updated in auth but failed to update in object builder")
 					s.log.Error("!!!V2UserResetPassword.PostgresLoginService().UpdateUserPassword--->", logger.Error(err))
 					return nil, err
 				}
