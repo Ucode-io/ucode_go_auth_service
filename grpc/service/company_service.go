@@ -153,7 +153,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			EnvironmentId: environment.GetId(),
 			ProjectId:     project.GetProjectId(),
 			Resource: &company_service.Resource{
-				ResourceType: 3,
+				ResourceType: 1,
 				NodeType:     config.LOW_NODE_TYPE,
 			},
 			UserId: createUserRes.GetId(),
