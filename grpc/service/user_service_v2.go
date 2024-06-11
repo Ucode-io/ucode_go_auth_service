@@ -620,7 +620,10 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	s.log.Info("---V2GetUserByID--->", logger.Any("req", req))
 
 	var (
-		result *pbObject.CommonMessage
+		result   *pbObject.CommonMessage
+		resultGo *nb.CommonMessage
+		userData map[string]interface{}
+		ok       bool
 	)
 	user, err := s.strg.User().GetByPK(ctx, req)
 
@@ -678,7 +681,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -698,7 +701,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		result, err = services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		resultGo, err = services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -707,9 +710,13 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			s.log.Error("!!!GetUserByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-
 	}
-	userData, ok := result.Data.AsMap()["response"].(map[string]interface{})
+
+	if result != nil {
+		userData, ok = result.Data.AsMap()["response"].(map[string]interface{})
+	} else {
+		userData, ok = resultGo.Data.AsMap()["response"].(map[string]interface{})
+	}
 
 	if !ok {
 		err := errors.New("userData is nil")
