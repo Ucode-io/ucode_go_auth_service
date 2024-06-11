@@ -49,6 +49,7 @@ type sharedGrpcClients struct {
 	versionHisotryService            object_builder_service.VersionHistoryServiceClient
 
 	goObjectBuilderService           new_object_builder_service.ObjectBuilderServiceClient
+	goItemsService                   new_object_builder_service.ItemsServiceClient
 	goObjectBuilderPermissionService new_object_builder_service.PermissionServiceClient
 	goItemService                    new_object_builder_service.ItemsServiceClient
 
@@ -123,6 +124,7 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		smsService:        sms_service.NewSmsServiceClient(connSmsService),
 
 		goObjectBuilderService:           new_object_builder_service.NewObjectBuilderServiceClient(connGoObjectBuilderService),
+		goItemsService:                   new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 		goObjectBuilderPermissionService: new_object_builder_service.NewPermissionServiceClient(connGoObjectBuilderService),
 		goItemService:                    new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 	}, nil
