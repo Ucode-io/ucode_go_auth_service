@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -138,7 +137,6 @@ func (g *sharedGrpcClients) GetObjectBuilderServiceByType(nodeType string) objec
 		return g.highObjectBuilderService
 	}
 
-	fmt.Println("!!!Warning get default low type GetObjectBuilderServiceByType service")
 	return g.objectBuilderService
 }
 
@@ -150,7 +148,6 @@ func (g *sharedGrpcClients) GetLoginServiceByType(nodeType string) object_builde
 		return g.highLoginService
 	}
 
-	fmt.Println("!!!Warning get default low type GetLoginServiceByType service")
 	return g.loginService
 }
 
@@ -162,7 +159,6 @@ func (g *sharedGrpcClients) GetBuilderPermissionServiceByType(nodeType string) o
 		return g.highBuilderPermissionService
 	}
 
-	fmt.Println("!!!Warning get default low type GetBuilderPermissionServiceByType service")
 	return g.builderPermissionService
 }
 

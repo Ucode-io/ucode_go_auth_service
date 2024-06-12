@@ -529,9 +529,6 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 		return res, err
 	}
 
-	fmt.Println("HEREHEHREHEHH")
-	fmt.Println(res.ClientTypeIds)
-
 	return res, nil
 }
 
@@ -801,7 +798,6 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	} else if err != nil {
 		return nil, err
 	}
-	fmt.Println("here returning >>>> ", userId)
 	return &pb.GetUserByLoginTypesResponse{
 		UserId: userId,
 	}, nil

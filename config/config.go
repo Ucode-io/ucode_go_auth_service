@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -104,9 +103,7 @@ func BaseLoad() BaseConfig {
 
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
-			fmt.Println("No .env file found")
 		}
-		fmt.Println("No .env file found")
 	}
 
 	config := BaseConfig{}
@@ -150,9 +147,7 @@ func BaseLoad() BaseConfig {
 func Load() Config {
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
-			fmt.Println("No .env file found")
 		}
-		fmt.Println("No .env file found")
 	}
 
 	config := Config{}
@@ -180,9 +175,8 @@ func Load() Config {
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
 
-	config.GoObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_HOST", "localhost"))
-	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ":7107"))
-	fmt.Println("COOOOONNNN", config.GoObjectBuilderServiceHost, config.GoObjectBuilderServicePort)
+	config.GoObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_HOST", ""))
+	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ""))
 
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))

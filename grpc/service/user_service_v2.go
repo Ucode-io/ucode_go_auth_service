@@ -828,7 +828,6 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
-		fmt.Println("aaaa:", userIds)
 		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
@@ -1298,7 +1297,6 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 
 func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
-	fmt.Println("coming here to V2GetUserByLoginTypes >>> ", req)
 	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
 		return nil, err
