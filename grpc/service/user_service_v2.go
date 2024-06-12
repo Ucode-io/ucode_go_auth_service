@@ -1101,7 +1101,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1111,7 +1111,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
+			s.log.Error("!!!V2GetUserSingle--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
@@ -1121,7 +1121,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		_, err = services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+		_, err = services.GoItemService().Update(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
