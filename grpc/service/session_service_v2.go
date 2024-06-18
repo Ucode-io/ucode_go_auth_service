@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 
@@ -982,7 +983,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.Code(http.Unauthorized.Code), err.Error())
 	}
 	if req.ClientTypeId != "" {
 		session.ClientTypeId = req.ClientTypeId
