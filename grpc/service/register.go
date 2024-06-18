@@ -202,10 +202,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 	}
 
-	fmt.Print("\n\n\n")
-	fmt.Println(userId)
-	fmt.Println("HERE WE GO CREATE USER PROJECT")
-	fmt.Print("\n\n\n")
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
 		ProjectId:    body["project_id"].(string),

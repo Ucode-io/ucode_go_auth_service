@@ -980,6 +980,11 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	s.log.Info("PROJECT_ID->" + req.ProjectId)
+	s.log.Info("REFRESH TOKEN->" + req.RefreshToken)
+	s.log.Info(fmt.Sprintf("TOKEN INFO->%+v", tokenInfo))
+	s.log.Info(fmt.Sprintf("SECRET KEY->%v", s.cfg.SecretKey))
+
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
@@ -1444,7 +1449,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("Token info->", tokenInfo)
 
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -1481,7 +1485,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField = "read"
 	}
 
-	fmt.Println("Before user")
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
 		UserId: session.GetUserId(),
 	})
@@ -1489,7 +1492,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
 		return nil, err
 	}
-	fmt.Println("Projects->", projects)
 	exist := false
 	for _, item := range projects.GetUserProjects() {
 		if item.ProjectId == session.GetProjectId() {
@@ -1546,7 +1548,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("Hello World->", resource)
 
 		switch resource.ResourceType {
 		case pbCompany.ResourceType_MONGODB:
@@ -1589,7 +1590,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		authTables = append(authTables, authTable)
 	}
 
-	fmt.Println("Before return")
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -1618,7 +1618,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 	switch req.Type {
 	case config.Default:
 		{
-			fmt.Println("i am here bro")
 			if len(req.Username) < 6 {
 				err := errors.New("invalid username")
 				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
@@ -1721,11 +1720,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 		for _, projectId := range item.ProjectIds {
 
-			fmt.Println("HERHEHREH OOOO")
-
-			fmt.Println(user.Id)
-			fmt.Println(projectId)
-
 			clientType, err := s.strg.User().GetUserProjectClientTypes(
 				ctx,
 				&models.UserProjectClientTypeRequest{
@@ -1733,8 +1727,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					ProjectId: projectId,
 				},
 			)
-
-			fmt.Println(err)
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
@@ -1820,7 +1812,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					respResourceEnvironment.ClientTypes = clientTypes.Data
 
 				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
-					fmt.Println("here iam here")
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{

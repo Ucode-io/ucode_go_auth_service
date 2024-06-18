@@ -144,13 +144,13 @@ ingress:
           hosts:
             - "api.auth.u-code.io"
 
-# resources:
-#    limits:
-#      cpu: 150m
-#      memory: 256Mi
-#    requests:
-#      cpu: 100m
-#      memory: 200Mi
+resources:
+  limits:
+    cpu: 150m
+    memory: 1024Mi
+  requests:
+    cpu: 100m
+    memory: 512Mi
 
 autoscaling:
   enabled: false

@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -98,7 +97,6 @@ func (p *serviceNodes) GetByNodeType(namespace string, nodeType string) (client.
 
 		p.Mu.Lock()
 		defer p.Mu.Unlock()
-		fmt.Println("\n\n ~~~~~~~~> Namespace ", config.BaseLoad().UcodeNamespace)
 		storage, ok := p.ServicePool[config.BaseLoad().UcodeNamespace]
 		if !ok {
 			return nil, config.ErrNodeNotExists

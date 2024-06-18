@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -49,6 +48,7 @@ type sharedGrpcClients struct {
 	versionHisotryService            object_builder_service.VersionHistoryServiceClient
 
 	goObjectBuilderService           new_object_builder_service.ObjectBuilderServiceClient
+	goItemsService                   new_object_builder_service.ItemsServiceClient
 	goObjectBuilderPermissionService new_object_builder_service.PermissionServiceClient
 	goItemService                    new_object_builder_service.ItemsServiceClient
 
@@ -123,6 +123,7 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		smsService:        sms_service.NewSmsServiceClient(connSmsService),
 
 		goObjectBuilderService:           new_object_builder_service.NewObjectBuilderServiceClient(connGoObjectBuilderService),
+		goItemsService:                   new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 		goObjectBuilderPermissionService: new_object_builder_service.NewPermissionServiceClient(connGoObjectBuilderService),
 		goItemService:                    new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 	}, nil
@@ -136,7 +137,6 @@ func (g *sharedGrpcClients) GetObjectBuilderServiceByType(nodeType string) objec
 		return g.highObjectBuilderService
 	}
 
-	fmt.Println("!!!Warning get default low type GetObjectBuilderServiceByType service")
 	return g.objectBuilderService
 }
 
@@ -148,7 +148,6 @@ func (g *sharedGrpcClients) GetLoginServiceByType(nodeType string) object_builde
 		return g.highLoginService
 	}
 
-	fmt.Println("!!!Warning get default low type GetLoginServiceByType service")
 	return g.loginService
 }
 
@@ -160,7 +159,6 @@ func (g *sharedGrpcClients) GetBuilderPermissionServiceByType(nodeType string) o
 		return g.highBuilderPermissionService
 	}
 
-	fmt.Println("!!!Warning get default low type GetBuilderPermissionServiceByType service")
 	return g.builderPermissionService
 }
 
