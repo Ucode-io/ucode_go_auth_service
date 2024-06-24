@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"strings"
 
 	"log"
 	"time"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 )
 
@@ -441,14 +441,10 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 }
 
 func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error) {
-	quotedSessionIDs := make([]string, len(entity.SessionIds))
-	for i, id := range entity.SessionIds {
-		quotedSessionIDs[i] = "'" + id + "'"
-	}
 
-	queryInitial := `DELETE FROM "session" WHERE id IN (` + strings.Join(quotedSessionIDs, ",") + `)`
+	queryInitial := `DELETE FROM "session" WHERE id IN ($1)`
 
-	result, err := r.db.Exec(ctx, queryInitial)
+	result, err := r.db.Exec(ctx, queryInitial, pq.Array(entity.SessionIds))
 	if err != nil {
 		return 0, err
 	}

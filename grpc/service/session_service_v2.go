@@ -2083,6 +2083,8 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessionsRequest) (*emptypb.Empty, error) {
 
+	s.log.Info("---ExpireSessions--->>>", logger.Any("req", req.SessionIds))
+
 	rowsAffected, err := s.strg.Session().ExpireSessions(ctx, req)
 	if err != nil {
 		s.log.Error("!!!ExpireSessiona--->", logger.Error(err))
