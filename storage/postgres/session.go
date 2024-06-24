@@ -442,7 +442,7 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 
 func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error) {
 
-	queryInitial := `DELETE FROM "session" WHERE id IN ($1)`
+	queryInitial := `DELETE FROM "session" WHERE id::varchar IN ($1)`
 
 	result, err := r.db.Exec(ctx, queryInitial, pq.Array(entity.SessionIds))
 	if err != nil {
