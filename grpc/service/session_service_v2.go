@@ -2085,14 +2085,11 @@ func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessi
 
 	s.log.Info("---ExpireSessions--->>>", logger.Any("req", req.SessionIds))
 
-	rowsAffected, err := s.strg.Session().ExpireSessions(ctx, req)
+	err := s.strg.Session().ExpireSessions(ctx, req)
 	if err != nil {
 		s.log.Error("!!!ExpireSessiona--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
 	return &emptypb.Empty{}, nil
 }

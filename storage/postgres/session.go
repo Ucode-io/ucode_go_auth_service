@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -440,16 +441,18 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 	return rowsAffected, err
 }
 
-func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error) {
+func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error) {
 
-	queryInitial := `DELETE FROM "session" WHERE id::varchar IN ($1)`
+	queryInitial := `DELETE FROM "session" WHERE id::varchar = ANY($1)`
 
 	result, err := r.db.Exec(ctx, queryInitial, pq.Array(entity.SessionIds))
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	rowsAffected = result.RowsAffected()
+	if result.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
 
-	return rowsAffected, nil
+	return nil
 }

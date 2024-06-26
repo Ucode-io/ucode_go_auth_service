@@ -183,7 +183,7 @@ type SessionRepoI interface {
 	GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	GetSessionListByIntegrationID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error)
-	ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (rowsAffected int64, err error)
+	ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error)
 }
 
 type EmailRepoI interface {
