@@ -7,7 +7,7 @@ import (
 	l "ucode/ucode_go_auth_service/pkg/logger"
 )
 
-// AdminService ...
+/// AdminService ...
 type PingService struct {
 	logger l.LoggerI
 	pb.UnimplementedAuthPingServiceServer
