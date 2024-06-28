@@ -222,7 +222,7 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 		phone,
 		email,
 		login,
-		password,
+		-- password,
 		created_at,
 		updated_at
 	FROM
@@ -298,7 +298,7 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 			&obj.Phone,
 			&obj.Email,
 			&obj.Login,
-			&obj.Password,
+			// &obj.Password,
 			&active,
 			&expiresAt,
 			&createdAt,
