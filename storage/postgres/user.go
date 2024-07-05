@@ -92,7 +92,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		u.phone,
 		u.email,
 		u.login,
-		u.password,
+		-- u.password,
 		u.company_id
 		-- coalesce(t.id::VARCHAR, ''),
 		-- coalesce(t.name, ''),
@@ -117,7 +117,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.Phone,
 		&res.Email,
 		&res.Login,
-		&res.Password,
+		// &res.Password,
 		&res.CompanyId,
 		// &time.Id,
 		// &time.Name,
