@@ -64,6 +64,7 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		permission.ExcelMenu = v.GetExcelMenu()
 		permission.TabGroup = v.GetTabGroup()
 		permission.SearchButton = v.GetSearchButton()
+		permission.Columns = v.GetColumns()
 		permissions = append(permissions, permission)
 	}
 
