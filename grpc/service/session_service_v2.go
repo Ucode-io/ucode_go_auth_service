@@ -16,6 +16,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
@@ -622,15 +623,26 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
 		case 3:
-			data, err = services.PostgresLoginService().LoginData(
+			pgLoginData := new_object_builder_service.LoginDataReq{}
+			err := helper.MarshalToStruct(reqLoginData, &pgLoginData)
+			if err != nil {
+				return nil, err
+			}
+
+			pgData, err := services.GoLoginService().LoginData(
 				ctx,
-				reqLoginData,
+				&pgLoginData,
 			)
 
 			if err != nil {
 				errGetUserProjectData := errors.New("invalid user project data")
 				s.log.Error("!!!LoginMiddleware--->PostgresLoginService", logger.Error(err))
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			}
+
+			err = helper.MarshalToStruct(pgData, &data)
+			if err != nil {
+				return nil, err
 			}
 
 		}
