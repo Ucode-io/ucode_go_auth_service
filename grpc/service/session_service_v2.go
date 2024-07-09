@@ -685,7 +685,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		s.log.Error("!!!LoginMiddleware--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+ 
 	companies, err := s.services.CompanyServiceClient().GetList(ctx, &company_service.GetCompanyListRequest{
 		Offset:  0,
 		Limit:   128,
