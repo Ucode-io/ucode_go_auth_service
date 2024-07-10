@@ -18,6 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
 
@@ -157,7 +158,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 	case 3:
-		response, err := services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		response, err := services.GoItemService().GetSingle(ctx, &new_object_builder_service.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -191,7 +192,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		_, err = services.GoItemService().Create(ctx, &new_object_builder_service.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: body["resource_environment_id"].(string),
@@ -234,14 +235,27 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-		userData, err = services.PostgresLoginService().LoginData(
-			ctx,
-			reqLoginData,
-		)
+		pgLoginData := &new_object_builder_service.LoginDataReq{}
+		err := helper.MarshalToStruct(reqLoginData, &pgLoginData)
+		if err != nil {
+			rs.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 
+		pgUserData, err := services.GoLoginService().LoginData(
+			ctx,
+			pgLoginData,
+		)
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			rs.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+
+		err = helper.MarshalToStruct(&pgUserData, &userData)
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			rs.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 
