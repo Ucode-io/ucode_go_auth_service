@@ -103,8 +103,7 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 	}
 
 	connGoObjectBuilderService, err := grpc.Dial(
-		// cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderServicePort,
-		"localhost:7107",
+		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderServicePort,
 		grpc.WithInsecure(),
 	)
 
