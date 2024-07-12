@@ -216,7 +216,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.POST("/api-key/refresh-token", h.RefreshApiKeyToken)
 
 		// environment
-		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
+		// v2.GET("/resource-environment", h.GetAllResourceEnvironments)
 		v2.GET("/webpage-app", h.GetListWebPageApp)
 
 		// objects
