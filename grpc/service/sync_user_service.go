@@ -313,6 +313,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		UserId:   req.GetGuid(),
 		Login:    req.Login,
 		Email:    req.Email,
+		Phone:    req.Phone,
 		Password: hashedPassword,
 	})
 	if err != nil {

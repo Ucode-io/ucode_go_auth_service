@@ -489,6 +489,7 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 		login = :login,
 		email = :email,
 		password = :password,
+		phone = :phone,
 		updated_at = now()
 	WHERE
 		id = :id`
@@ -498,6 +499,7 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 		"login":    user.Login,
 		"email":    user.Email,
 		"password": user.Password,
+		"phone":    user.Phone,
 	}
 
 	q, arr := helper.ReplaceQueryParams(query, params)
