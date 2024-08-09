@@ -489,17 +489,21 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 		login = :login,
 		email = :email,
 		password = :password,
-		phone = :phone,
-		updated_at = now()
-	WHERE
-		id = :id`
+		updated_at = now()`
+	if user.Phone != "" {
+		query += `, phone = :phone`
+	}
+	query += ` WHERE id = :id`
 
 	params := map[string]interface{}{
 		"id":       user.UserId,
 		"login":    user.Login,
 		"email":    user.Email,
 		"password": user.Password,
-		"phone":    user.Phone,
+	}
+
+	if user.Phone != "" {
+		params["phone"] = user.Phone
 	}
 
 	q, arr := helper.ReplaceQueryParams(query, params)
