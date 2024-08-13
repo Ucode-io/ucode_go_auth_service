@@ -9,20 +9,23 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 )
 
 type companyRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewCompanyRepo(db *pgxpool.Pool) storage.CompanyRepoI {
+func NewCompanyRepo(db *Pool) storage.CompanyRepoI {
 	return &companyRepo{
 		db: db,
 	}
 }
 
 func (r *companyRepo) Register(ctx context.Context, entity *pb.RegisterCompanyRequest) (pKey *pb.CompanyPrimaryKey, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `INSERT INTO "company" (
 		id,
 		name
@@ -49,6 +52,9 @@ func (r *companyRepo) Register(ctx context.Context, entity *pb.RegisterCompanyRe
 }
 
 func (r *companyRepo) Update(ctx context.Context, entity *pb.UpdateCompanyRequest) (rowsAffected int64, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `UPDATE "company" SET
 		name = :name,
 		updated_at = now()
@@ -72,6 +78,9 @@ func (r *companyRepo) Update(ctx context.Context, entity *pb.UpdateCompanyReques
 }
 
 func (r *companyRepo) Remove(ctx context.Context, pKey *pb.CompanyPrimaryKey) (rowsAffected int64, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `DELETE FROM "company" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)
@@ -85,6 +94,9 @@ func (r *companyRepo) Remove(ctx context.Context, pKey *pb.CompanyPrimaryKey) (r
 }
 
 func (r *companyRepo) GetList(ctx context.Context, queryParam *pb.GetComapnyListRequest) (*pb.GetListCompanyResponse, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	res := &pb.GetListCompanyResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -167,6 +179,9 @@ func (r *companyRepo) GetList(ctx context.Context, queryParam *pb.GetComapnyList
 }
 
 func (r *companyRepo) GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (*pb.Company, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	res := &pb.Company{}
 	query := `SELECT
 		id,
@@ -192,6 +207,9 @@ func (r *companyRepo) GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (
 }
 
 func (r *companyRepo) TransferOwnership(ctx context.Context, companyID, ownerID string) (rowsAffected int64, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `UPDATE "company" SET
 		owner_id = :owner_id,
 		updated_at = now()

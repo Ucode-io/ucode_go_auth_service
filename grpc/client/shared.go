@@ -25,6 +25,7 @@ type SharedServiceManagerI interface {
 	GoObjectBuilderService() new_object_builder_service.ObjectBuilderServiceClient
 	GoItemService() new_object_builder_service.ItemsServiceClient
 	GoObjectBuilderPermissionService() new_object_builder_service.PermissionServiceClient
+	GoObjectBuilderLoginService() new_object_builder_service.LoginServiceClient
 
 	HighObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	HighLoginService() object_builder_service.LoginServiceClient
@@ -51,6 +52,7 @@ type sharedGrpcClients struct {
 	goItemsService                   new_object_builder_service.ItemsServiceClient
 	goObjectBuilderPermissionService new_object_builder_service.PermissionServiceClient
 	goItemService                    new_object_builder_service.ItemsServiceClient
+	goObjectBuilderLoginService      new_object_builder_service.LoginServiceClient
 
 	highObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	highLoginService             object_builder_service.LoginServiceClient
@@ -126,6 +128,7 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		goItemsService:                   new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 		goObjectBuilderPermissionService: new_object_builder_service.NewPermissionServiceClient(connGoObjectBuilderService),
 		goItemService:                    new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
+		goObjectBuilderLoginService:      new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
 	}, nil
 }
 
@@ -224,4 +227,8 @@ func (g *sharedGrpcClients) GoObjectBuilderPermissionService() new_object_builde
 
 func (g *sharedGrpcClients) GoItemService() new_object_builder_service.ItemsServiceClient {
 	return g.goItemService
+}
+
+func (g *sharedGrpcClients) GoObjectBuilderLoginService() new_object_builder_service.LoginServiceClient {
+	return g.goLoginService
 }

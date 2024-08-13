@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	"log"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
+
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
 	"ucode/ucode_go_auth_service/config"
@@ -13,10 +17,14 @@ import (
 	"ucode/ucode_go_auth_service/storage/postgres"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"github.com/uber/jaeger-client-go"
+	jaeger_config "github.com/uber/jaeger-client-go/config"
 )
 
 func main() {
+
 	baseCfg := config.BaseLoad()
 
 	loggerLevel := logger.LevelDebug
@@ -32,6 +40,30 @@ func main() {
 		loggerLevel = logger.LevelInfo
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	jaegerCfg := &jaeger_config.Configuration{
+		ServiceName: baseCfg.ServiceName,
+
+		// "const" sampler is a binary sampling strategy: 0=never sample, 1=always sample.
+		Sampler: &jaeger_config.SamplerConfig{
+			Type:  "const",
+			Param: 1,
+		},
+
+		// Log the emitted spans to stdout.
+		Reporter: &jaeger_config.ReporterConfig{
+			LogSpans:           false,
+			LocalAgentHostPort: "localhost:6831",
+		},
+	}
+
+	tracer, closer, err := jaegerCfg.NewTracer(jaeger_config.Logger(jaeger.StdLogger))
+	if err != nil {
+		log.Panic("ERROR: cannot init Jaeger", logger.Error(err))
+	}
+	log.Println("Jaeger tracer initialized")
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -84,6 +116,17 @@ func main() {
 	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
 	projectServiceNodes.SetConfigs(mapProjectConfs)
 
+	go func() {
+
+		// this is default import api for pprof
+		// http.HandleFunc("/", pprof.Index)
+		// http.HandleFunc("/cmdline", pprof.Cmdline)
+		// http.HandleFunc("/profile", pprof.Profile)
+		// http.HandleFunc("/symbol", pprof.Symbol)
+		// http.HandleFunc("/trace", pprof.Trace)
+		http.ListenAndServe(":6060", nil)
+	}()
+	
 	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
 	// log.Info(" --- U-code auth service and company service grpc client done --- ")
 	go cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
@@ -102,7 +145,8 @@ func main() {
 	}()
 	h := handlers.NewHandler(baseCfg, log, baseSvcs, projectServiceNodes)
 
-	r := api.SetUpRouter(h, baseCfg)
+	r := api.SetUpRouter(h, baseCfg, tracer)
 
 	r.Run(baseCfg.HTTPPort)
+
 }

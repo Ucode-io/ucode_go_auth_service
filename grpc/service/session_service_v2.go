@@ -622,9 +622,17 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
 		case 3:
-			data, err = services.PostgresLoginService().LoginData(
+
+			goReq := &nb.LoginDataReq{}
+
+			err = helper.MarshalToStruct(reqLoginData, &goReq)
+			if err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			goData, err := services.GoLoginService().LoginData(
 				ctx,
-				reqLoginData,
+				goReq,
 			)
 
 			if err != nil {
@@ -633,6 +641,10 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
 
+			err = helper.MarshalToStruct(goData, &data)
+			if err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 		}
 
 		if !data.UserFound {

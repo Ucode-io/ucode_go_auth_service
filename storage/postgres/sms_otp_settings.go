@@ -8,21 +8,23 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
 type smsOtpSettingsRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewSmsOtpSettingsRepo(db *pgxpool.Pool) storage.SmsOtpSettingsRepoI {
+func NewSmsOtpSettingsRepo(db *Pool) storage.SmsOtpSettingsRepoI {
 	return &smsOtpSettingsRepo{
 		db: db,
 	}
 }
 
 func (s *smsOtpSettingsRepo) Create(ctx context.Context, req *pb.CreateSmsOtpSettingsRequest) (*pb.SmsOtpSettings, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	id := uuid.New().String()
 	_, err := s.db.Exec(ctx, `
@@ -64,6 +66,8 @@ func (s *smsOtpSettingsRepo) Create(ctx context.Context, req *pb.CreateSmsOtpSet
 	return response, nil
 }
 func (s *smsOtpSettingsRepo) Update(ctx context.Context, req *pb.SmsOtpSettings) (int64, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	query := `UPDATE "sms_otp_settings" SET
 		updated_at = now(),
@@ -91,6 +95,8 @@ func (s *smsOtpSettingsRepo) Update(ctx context.Context, req *pb.SmsOtpSettings)
 	return result.RowsAffected(), err
 }
 func (s *smsOtpSettingsRepo) GetById(ctx context.Context, req *pb.SmsOtpSettingsPrimaryKey) (*pb.SmsOtpSettings, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 	response := &pb.SmsOtpSettings{}
 	err := s.db.QueryRow(ctx, `
 		SELECT 
@@ -121,6 +127,8 @@ func (s *smsOtpSettingsRepo) GetById(ctx context.Context, req *pb.SmsOtpSettings
 	return response, nil
 }
 func (s *smsOtpSettingsRepo) GetList(ctx context.Context, req *pb.GetListSmsOtpSettingsRequest) (*pb.SmsOtpSettingsResponse, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 	res := make([]*pb.SmsOtpSettings, 0)
 	rows, err := s.db.Query(ctx, `
 		SELECT 
@@ -162,6 +170,8 @@ func (s *smsOtpSettingsRepo) GetList(ctx context.Context, req *pb.GetListSmsOtpS
 	}, nil
 }
 func (s *smsOtpSettingsRepo) Delete(ctx context.Context, req *pb.SmsOtpSettingsPrimaryKey) (int64, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	queryDeleteFromUserProject := `DELETE FROM "sms_otp_settings" WHERE id = $1`
 

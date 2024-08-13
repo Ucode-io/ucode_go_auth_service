@@ -6,6 +6,8 @@ import (
 	"ucode/ucode_go_auth_service/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
+	"github.com/opentracing/opentracing-go"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
@@ -13,10 +15,11 @@ import (
 // SetUpRouter godoc
 // @description This is a api gateway
 // @termsOfService https://udevs.io
-func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
+func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) (r *gin.Engine) {
 	r = gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(ginhttp.Middleware(tracer))
 
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
@@ -29,6 +32,8 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 
 	r.GET("/ping", h.Ping)
 	// r.GET("/config", h.GetConfig)
+	
+	
 
 	// CLIENT SERVICE
 	// (admin, bot, mobile ext)
@@ -117,6 +122,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 
 	v2.Use(h.AuthMiddleware())
 	{
+
 		// sms-otp-settings
 		v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
 		v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)
@@ -216,7 +222,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 		v2.POST("/api-key/refresh-token", h.RefreshApiKeyToken)
 
 		// environment
-		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
+		// v2.GET("/resource-environment", h.GetAllResourceEnvironments)
 		v2.GET("/webpage-app", h.GetListWebPageApp)
 
 		// objects
