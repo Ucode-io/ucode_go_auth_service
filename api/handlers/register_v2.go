@@ -374,52 +374,36 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	switch registerType {
-	case cfg.WithGoogle:
-		{
-			h.handleResponse(c, http.BadRequest, "register with goole not implemented")
-			return
 
-		}
-	case cfg.WithApple:
-		{
-			h.handleResponse(c, http.BadRequest, "registre with apple not implemented")
-			return
-		}
 	case cfg.WithEmail:
-		{
-			if v, ok := body.Data["email"]; ok {
-				if !util.IsValidEmail(v.(string)) {
-					h.handleResponse(c, http.BadRequest, "Неверный формат email")
-					return
-				}
-			} else {
-				h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+		if v, ok := body.Data["email"]; ok {
+			if !util.IsValidEmail(v.(string)) {
+				h.handleResponse(c, http.BadRequest, "Неверный формат email")
 				return
 			}
+		} else {
+			h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+			return
+		}
 
-			if _, ok := body.Data["login"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
-				return
-			}
-
-			if _, ok := body.Data["name"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле name не заполнено")
-				return
-			}
-
-			if _, ok := body.Data["phone"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
+		var fields = []string{"email", "login", "name", "phone"}
+		for _, field := range fields {
+			if _, ok := body.Data[field]; !ok {
+				h.handleResponse(c, http.BadRequest, "Поле "+field+" не заполнено")
 				return
 			}
 		}
+
 	case cfg.WithPhone:
-		{
-			if _, ok := body.Data["phone"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
-				return
+		if _, ok := body.Data["phone"]; !ok {
+			h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
+			return
 
-			}
 		}
+	default:
+		h.handleResponse(c, http.BadRequest, "register with goole and apple not implemented")
+		return
+
 	}
 
 	if body.Data["addational_table"] != nil {
