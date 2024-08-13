@@ -32,6 +32,8 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 	r.GET("/ping", h.Ping)
 	// r.GET("/config", h.GetConfig)
+	
+	
 
 	// CLIENT SERVICE
 	// (admin, bot, mobile ext)
@@ -120,6 +122,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 	v2.Use(h.AuthMiddleware())
 	{
+
 		// sms-otp-settings
 		v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
 		v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)

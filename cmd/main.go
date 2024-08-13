@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"net/http"
 	_ "net/http/pprof"
 
 	"ucode/ucode_go_auth_service/api"
@@ -23,6 +24,7 @@ import (
 )
 
 func main() {
+
 	baseCfg := config.BaseLoad()
 
 	loggerLevel := logger.LevelDebug
@@ -114,6 +116,17 @@ func main() {
 	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
 	projectServiceNodes.SetConfigs(mapProjectConfs)
 
+	go func() {
+
+		// this is default import api for pprof
+		// http.HandleFunc("/", pprof.Index)
+		// http.HandleFunc("/cmdline", pprof.Cmdline)
+		// http.HandleFunc("/profile", pprof.Profile)
+		// http.HandleFunc("/symbol", pprof.Symbol)
+		// http.HandleFunc("/trace", pprof.Trace)
+		http.ListenAndServe(":6060", nil)
+	}()
+	
 	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
 	// log.Info(" --- U-code auth service and company service grpc client done --- ")
 	go cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
@@ -135,4 +148,5 @@ func main() {
 	r := api.SetUpRouter(h, baseCfg, tracer)
 
 	r.Run(baseCfg.HTTPPort)
+
 }
