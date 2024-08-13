@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -43,7 +44,7 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
-	body := data.Data.AsMap()
+	body := make(map[string]interface{})
 	var (
 		foundUser *pb.User
 		err       error
@@ -69,6 +70,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 	}
+
+	userId = foundUser.GetId()
 
 	if foundUser.Id == "" {
 		// create user in auth service
@@ -113,8 +116,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = pKey.GetId()
-	} else {
-		userId = foundUser.GetId()
 	}
 
 	body["guid"] = userId
@@ -222,6 +223,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ResourceEnvironmentId: body["resource_environment_id"].(string),
 	}
 
+	t2 := time.Now()
 	switch body["resource_type"].(float64) {
 	case 1:
 		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(
@@ -261,12 +263,15 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	}
 
+	fmt.Println("SINCE2", time.Since(t2))
+
 	if !userData.UserFound {
-		customError := errors.New("User not found")
+		customError := errors.New("user not found")
 		rs.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
 
+	t := time.Now()
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
 		ClientPlatform: userData.GetClientPlatform(),
 		ClientType:     userData.GetClientType(),
@@ -276,15 +281,18 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		Permissions:    userData.GetPermissions(),
 		LoginTableSlug: userData.GetLoginTableSlug(),
 	})
+	fmt.Println("SINCE", time.Since(t))
 
+	t1 := time.Now()
 	resp, err := rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
 		ProjectId:     body["project_id"].(string),
 		Tables:        []*pb.Object{},
 		EnvironmentId: body["environment_id"].(string),
 	})
+	fmt.Println("SINCE1", time.Since(t1))
 	if resp == nil {
-		err := errors.New("User Not Found")
+		err := errors.New("user Not Found")
 		rs.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}

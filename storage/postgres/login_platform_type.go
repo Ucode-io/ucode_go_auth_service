@@ -7,23 +7,25 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type loginPlatformTypeRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewLoginPlatformTypeRepo(db *pgxpool.Pool) storage.LoginPlatformType {
+func NewLoginPlatformTypeRepo(db *Pool) storage.LoginPlatformType {
 	return &loginPlatformTypeRepo{
 		db: db,
 	}
 }
 
 func (e *loginPlatformTypeRepo) CreateLoginPlatformType(ctx context.Context, input *pb.LoginPlatform) (*pb.LoginPlatform, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	var data map[string]string
 	if input.Type == "APPLE" {
@@ -75,6 +77,8 @@ func (e *loginPlatformTypeRepo) CreateLoginPlatformType(ctx context.Context, inp
 }
 
 func (e *loginPlatformTypeRepo) GetLoginPlatformType(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatform, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	query := `SELECT id, project_id, env_id, type, data
 	FROM "login_platform_setting"
@@ -117,6 +121,8 @@ func (e *loginPlatformTypeRepo) GetLoginPlatformType(ctx context.Context, pKey *
 }
 
 func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest, types string) (string, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	var resp = &pb.LoginPlatform{}
 
@@ -159,6 +165,8 @@ func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, inp
 }
 
 func (e *loginPlatformTypeRepo) GetListLoginPlatformType(ctx context.Context, input *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 	arr := &pb.GetListLoginPlatformTypeResponse{}
 
 	query := `SELECT
@@ -217,6 +225,8 @@ func (e *loginPlatformTypeRepo) GetListLoginPlatformType(ctx context.Context, in
 }
 
 func (e *loginPlatformTypeRepo) DeleteLoginSettings(ctx context.Context, input *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	var resp = &emptypb.Empty{}
 

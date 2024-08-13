@@ -13,6 +13,15 @@ service RegisterService {
 }
 
 message RegisterUserRequest {
-    google.protobuf.Struct data = 1;
+    string login = 1;
     string node_type = 2;
+    string password = 3;
+    string email = 4;
+    string phone = 5;
+    string resource_id = 6;
+    string resource_type = 7;
+    string environment_id = 8;
+    string project_id = 9;
+    string company_id = 10;
+    string resource_environment_id = 11;
 }

@@ -7,23 +7,26 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type clientPlatformRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewClientPlatformRepo(db *pgxpool.Pool) storage.ClientPlatformRepoI {
+func NewClientPlatformRepo(db *Pool) storage.ClientPlatformRepoI {
 	return &clientPlatformRepo{
 		db: db,
 	}
 }
 
 func (r *clientPlatformRepo) Create(ctx context.Context, entity *pb.CreateClientPlatformRequest) (pKey *pb.ClientPlatformPrimaryKey, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `INSERT INTO "client_platform" (
 		id,
 		project_id,
@@ -56,6 +59,9 @@ func (r *clientPlatformRepo) Create(ctx context.Context, entity *pb.CreateClient
 }
 
 func (r *clientPlatformRepo) GetByPK(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (res *pb.ClientPlatform, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	res = &pb.ClientPlatform{}
 	query := `SELECT
 		id,
@@ -82,6 +88,9 @@ func (r *clientPlatformRepo) GetByPK(ctx context.Context, pKey *pb.ClientPlatfor
 }
 
 func (r *clientPlatformRepo) GetByPKDetailed(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (res *pb.ClientPlatformDetailedResponse, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	res = &pb.ClientPlatformDetailedResponse{}
 	query := `SELECT
 	  id,
@@ -173,6 +182,9 @@ func (r *clientPlatformRepo) GetByPKDetailed(ctx context.Context, pKey *pb.Clien
 }
 
 func (r *clientPlatformRepo) GetList(ctx context.Context, queryParam *pb.GetClientPlatformListRequest) (res *pb.GetClientPlatformListResponse, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	res = &pb.GetClientPlatformListResponse{}
 	var arr []interface{}
 	params := make(map[string]interface{})
@@ -246,6 +258,9 @@ func (r *clientPlatformRepo) GetList(ctx context.Context, queryParam *pb.GetClie
 }
 
 func (r *clientPlatformRepo) Update(ctx context.Context, entity *pb.UpdateClientPlatformRequest) (rowsAffected int64, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `UPDATE "client_platform" SET
 		name = :name,
 		subdomain = :subdomain,
@@ -271,6 +286,9 @@ func (r *clientPlatformRepo) Update(ctx context.Context, entity *pb.UpdateClient
 }
 
 func (r *clientPlatformRepo) Delete(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (rowsAffected int64, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `DELETE FROM "client_platform" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)

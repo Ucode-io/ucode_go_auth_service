@@ -218,14 +218,14 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 	body.Data["resource_type"] = serviceResource.GetResourceType()
 	body.Data["node_type"] = serviceResource.GetNodeType()
 
-	structData, err := helper.ConvertMapToStruct(body.Data)
+	_, err = helper.ConvertMapToStruct(body.Data)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &auth_service.RegisterUserRequest{
-		Data:     structData,
+		// Data:     structData,
 		NodeType: serviceResource.NodeType,
 	})
 	if err != nil {

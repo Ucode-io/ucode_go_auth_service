@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -97,12 +98,15 @@ type BaseConfig struct {
 
 	CompanyServiceHost string
 	CompanyGRPCPort    string
+
+	JaegerHostPort string
 }
 
 func BaseLoad() BaseConfig {
 
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
+			log.Println("Error loading .env file")
 		}
 	}
 
@@ -140,6 +144,8 @@ func BaseLoad() BaseConfig {
 
 	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "snZV9XNmvf"))
 
+	config.JaegerHostPort = cast.ToString(getOrReturnDefaultValue("JAEGER_HOST_PORT", ""))
+
 	return config
 }
 
@@ -147,6 +153,7 @@ func BaseLoad() BaseConfig {
 func Load() Config {
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
+			log.Println("Error loading .env file")
 		}
 	}
 

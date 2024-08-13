@@ -6,22 +6,25 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type appleSettingsRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewAppleSettingsRepo(db *pgxpool.Pool) storage.AppleSettingsI {
+func NewAppleSettingsRepo(db *Pool) storage.AppleSettingsI {
 	return &appleSettingsRepo{
 		db: db,
 	}
 }
 
 func (e *appleSettingsRepo) Create(ctx context.Context, input *pb.AppleIdSettings) (*pb.AppleIdSettings, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `INSERT INTO "apple_settings" (
 		id,
 		team_id,
@@ -54,6 +57,8 @@ func (e *appleSettingsRepo) Create(ctx context.Context, input *pb.AppleIdSetting
 }
 
 func (e *appleSettingsRepo) GetByPK(ctx context.Context, pKey *pb.AppleIdSettingsPrimaryKey) (res *pb.AppleIdSettings, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 	res = &pb.AppleIdSettings{}
 	query := `SELECT
 	                id,
@@ -83,8 +88,9 @@ func (e *appleSettingsRepo) GetByPK(ctx context.Context, pKey *pb.AppleIdSetting
 	return res, nil
 }
 
-
 func (e *appleSettingsRepo) UpdateAppleSettings(ctx context.Context, input *pb.AppleIdSettings) (string, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	var resp = &pb.AppleIdSettings{}
 
@@ -104,8 +110,7 @@ func (e *appleSettingsRepo) UpdateAppleSettings(ctx context.Context, input *pb.A
 		input.Secret,
 		input.Id,
 	).Scan(
-		    &resp.Id,
-			
+		&resp.Id,
 	)
 	if err != nil {
 		return "", err
@@ -115,6 +120,8 @@ func (e *appleSettingsRepo) UpdateAppleSettings(ctx context.Context, input *pb.A
 }
 
 func (e *appleSettingsRepo) GetListAppleSettings(ctx context.Context, input *pb.GetListAppleIdSettingsRequest) (*pb.GetListAppleIdSettingsResponse, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 	arr := &pb.GetListAppleIdSettingsResponse{}
 
 	query := `SELECT
@@ -157,6 +164,8 @@ func (e *appleSettingsRepo) GetListAppleSettings(ctx context.Context, input *pb.
 }
 
 func (e *appleSettingsRepo) DeleteAppleSettings(ctx context.Context, input *pb.AppleIdSettingsPrimaryKey) (*emptypb.Empty, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
 
 	var resp = &emptypb.Empty{}
 

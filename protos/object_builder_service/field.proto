@@ -7,6 +7,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 
 
+
 service FieldService {
     rpc Create(CreateFieldRequest) returns (Field) {}
     rpc GetByID(FieldPrimaryKey) returns (Field) {}
@@ -16,6 +17,8 @@ service FieldService {
     rpc UpdateSearch(SearchUpdateRequest) returns (google.protobuf.Empty) {}
     rpc Delete(FieldPrimaryKey) returns (google.protobuf.Empty) {}
     rpc GetAllByLabel(GetAllByLabelReq) returns (GetAllFieldsResponse) {}
+    rpc GetIdsByLabel(GetIdsByLabelReq) returns (GetIdsByLabelResponse) {}
+    
 }
 
 message CreateFieldRequest {
@@ -41,6 +44,7 @@ message CreateFieldRequest {
     bool hide_multilanguage = 20;
     string minio_folder = 21;
     string env_id = 22;
+    bool is_alt = 23;
 }
 
 message CreateFieldsRequest {
@@ -87,6 +91,7 @@ message Field {
     string minio_folder = 24;
     string env_id = 25;
     bool is_search = 26;
+    bool is_alt = 27;
 }
 
 message SearchUpdate {
@@ -142,5 +147,15 @@ message AllFields {
 message GetAllByLabelReq {
     string project_id = 1;
     string field_label = 2;
+    string table_id = 3;
+}
+
+message GetIdsByLabelResponse {
+    repeated string ids = 1;
+}
+
+message GetIdsByLabelReq {
+    string project_id = 1;
+    repeated string field_label = 2;
     string table_id = 3;
 }

@@ -6,6 +6,8 @@ import (
 	"ucode/ucode_go_auth_service/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
+	"github.com/opentracing/opentracing-go"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
@@ -13,10 +15,11 @@ import (
 // SetUpRouter godoc
 // @description This is a api gateway
 // @termsOfService https://udevs.io
-func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
+func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) (r *gin.Engine) {
 	r = gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(ginhttp.Middleware(tracer))
 
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version

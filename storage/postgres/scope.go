@@ -5,20 +5,23 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 )
 
 type scopeRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewScopeRepo(db *pgxpool.Pool) storage.ScopeRepoI {
+func NewScopeRepo(db *Pool) storage.ScopeRepoI {
 	return &scopeRepo{
 		db: db,
 	}
 }
 
 func (r *scopeRepo) Upsert(ctx context.Context, entity *pb.UpsertScopeRequest) (pKey *pb.ScopePrimaryKey, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	query := `INSERT INTO "scope" (
 		client_platform_id,
 		path,
@@ -52,6 +55,9 @@ func (r *scopeRepo) Upsert(ctx context.Context, entity *pb.UpsertScopeRequest) (
 }
 
 func (r *scopeRepo) GetByPK(ctx context.Context, pKey *pb.ScopePrimaryKey) (res *pb.Scope, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	res = &pb.Scope{}
 	query := `SELECT
 		client_platform_id,
@@ -77,6 +83,9 @@ func (r *scopeRepo) GetByPK(ctx context.Context, pKey *pb.ScopePrimaryKey) (res 
 }
 
 func (r *scopeRepo) GetList(ctx context.Context, req *pb.GetScopeListRequest) (res *pb.GetScopesResponse, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	res = &pb.GetScopesResponse{}
 	query := `SELECT
 			client_platform_id,

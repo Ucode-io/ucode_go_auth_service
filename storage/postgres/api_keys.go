@@ -8,21 +8,24 @@ import (
 	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
 type apiKeysRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewApiKeysRepo(db *pgxpool.Pool) storage.ApiKeysRepoI {
+func NewApiKeysRepo(db *Pool) storage.ApiKeysRepoI {
 	return &apiKeysRepo{
 		db: db,
 	}
 }
 
 func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, appId, id string) (*pb.CreateRes, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	defer dbSpan.Finish()
+
 	var (
 		res pb.CreateRes
 
@@ -84,6 +87,9 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 	return &res, nil
 }
 func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetListRes, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.GetList")
+	defer dbSpan.Finish()
+
 	var (
 		res = pb.GetListRes{Count: 0}
 	)
@@ -214,9 +220,11 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	return &res, nil
 }
 func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
-	var (
-		res pb.GetRes
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Get")
+	defer dbSpan.Finish()
 
+	var (
+		res       pb.GetRes
 		createdAt sql.NullString
 		updatedAt sql.NullString
 		usedCount sql.NullInt32
@@ -276,6 +284,9 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 	return &res, nil
 }
 func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffected int64, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Update")
+	defer dbSpan.Finish()
+
 	query := `UPDATE "api_keys" SET
 				status = $1,
 				name = $2,
@@ -303,6 +314,9 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 	return
 }
 func (r *apiKeysRepo) Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffected int64, err error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Delete")
+	defer dbSpan.Finish()
+
 	query := `DELETE FROM "api_keys"
 				WHERE id = $1`
 
@@ -315,9 +329,11 @@ func (r *apiKeysRepo) Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffect
 }
 
 func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error) {
-	var (
-		res pb.GetRes
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.GetByAppId")
+	defer dbSpan.Finish()
 
+	var (
+		res       pb.GetRes
 		createdAt sql.NullString
 		updatedAt sql.NullString
 	)
@@ -371,6 +387,8 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
 }
 
 func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.GetEnvID")
+	defer dbSpan.Finish()
 
 	res := &pb.GetRes{}
 
@@ -413,6 +431,9 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 }
 
 func (r *apiKeysRepo) UpdateIsMonthlyLimitReached(ctx context.Context) error {
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.UpdateIsMonthlyLimitReached")
+	defer dbSpan.Finish()
+
 	query := `
 		UPDATE api_keys SET 
 			is_monthly_request_limit_reached = false
