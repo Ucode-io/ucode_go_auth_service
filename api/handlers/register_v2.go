@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -11,6 +10,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
+	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -297,7 +297,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Register(c *gin.Context) {
-	t := time.Now()
 	var (
 		body models.RegisterOtp
 	)
@@ -308,28 +307,31 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	t2 := time.Now()
-	if _, ok := body.Data["type"]; !ok {
+	registerType, ok := body.Data["type"].(string)
+
+	if !ok {
 		h.handleResponse(c, http.BadRequest, "register type is required")
 		return
 	}
-
-	registerType := body.Data["type"].(string)
 
 	if _, ok := cfg.RegisterTypes[registerType]; !ok {
 		h.handleResponse(c, http.BadRequest, "invalid register type")
 		return
 	}
-	if _, ok := body.Data["client_type_id"].(string); !ok {
-		if !util.IsValidUUID(body.Data["client_type_id"].(string)) {
+
+	clientTypeId, ok := body.Data["client_type_id"].(string)
+	if !ok {
+		if !util.IsValidUUID(clientTypeId) {
 			h.handleResponse(c, http.BadRequest, "client_type_id is an invalid uuid")
 			return
 		}
 		h.handleResponse(c, http.BadRequest, "client_type_id is required")
 		return
 	}
-	if _, ok := body.Data["role_id"].(string); !ok {
-		if !util.IsValidUUID(body.Data["role_id"].(string)) {
+
+	roleId, ok := body.Data["role_id"].(string)
+	if !ok {
+		if !util.IsValidUUID(roleId) {
 			h.handleResponse(c, http.BadRequest, "role_id is an invalid uuid")
 			return
 		}
@@ -348,7 +350,6 @@ func (h *Handler) V2Register(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	fmt.Println("regext time", time.Since(t2))
 
 	serviceResource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
@@ -372,7 +373,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	switch body.Data["type"] {
+	switch registerType {
 	case cfg.WithGoogle:
 		{
 			h.handleResponse(c, http.BadRequest, "register with goole not implemented")
@@ -423,21 +424,35 @@ func (h *Handler) V2Register(c *gin.Context) {
 
 	if body.Data["addational_table"] != nil {
 		if body.Data["addational_table"].(map[string]interface{})["table_slug"] == nil {
-			h.log.Error("Addational user create >>>> ")
 			h.handleResponse(c, http.BadRequest, "If addional table have, table slug is required")
 			return
 		}
 	}
 
-	fmt.Println("structData", time.Since(t))
+	body.Data["project_id"] = serviceResource.GetProjectId()
+	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
+	body.Data["resource_environment_id"] = serviceResource.GetResourceEnvironmentId()
+	body.Data["company_id"] = project.GetCompanyId()
+	body.Data["resource_type"] = serviceResource.GetResourceType()
+	body.Data["node_type"] = serviceResource.GetNodeType()
+
+	structData, err := helper.ConvertMapToStruct(body.Data)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 
 	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
-		ProjectId:             serviceResource.GetProjectId(),
-		EnvironmentId:         serviceResource.GetEnvironmentId(),
-		ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
-		CompanyId:             project.GetCompanyId(),
-		ResourceType:          serviceResource.GetResourceType().String(),
+		Data:                  structData,
 		NodeType:              serviceResource.NodeType,
+		ProjectId:             serviceResource.ProjectId,
+		EnvironmentId:         serviceResource.EnvironmentId,
+		ResourceEnvironmentId: serviceResource.ResourceEnvironmentId,
+		ResourceId:            serviceResource.ResourceId,
+		CompanyId:             project.CompanyId,
+		Type:                  registerType,
+		ClientTypeId:          clientTypeId,
+		RoleId:                roleId,
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())

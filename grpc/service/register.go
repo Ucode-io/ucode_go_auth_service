@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/config"
@@ -44,7 +43,7 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
-	body := make(map[string]interface{})
+	body := data.Data.AsMap()
 	var (
 		foundUser *pb.User
 		err       error
@@ -52,7 +51,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		userData  *pbObject.LoginDataRes
 	)
 
-	switch strings.ToUpper(body["type"].(string)) {
+	switch strings.ToUpper(data.Type) {
 	case "EMAIL":
 		{
 			foundUser, err = rs.strg.User().GetByUsername(ctx, body["email"].(string))
@@ -89,8 +88,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		if _, ok := body["email"].(string); ok {
 			email = body["email"].(string)
 		}
-		emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-		checkEmail := emailRegex.MatchString(email)
+
+		checkEmail := helper.EmailValidation(email)
 		if !checkEmail && email != "" {
 			err = fmt.Errorf("email is not valid")
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -108,7 +107,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			Password:  password,
 			Email:     email,
 			Phone:     phone,
-			CompanyId: body["company_id"].(string),
+			CompanyId: data.GetCompanyId(),
 		})
 
 		if err != nil {
@@ -128,24 +127,26 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 
 	services, err := rs.serviceNode.GetByNodeType(
-		body["project_id"].(string),
+		data.ProjectId,
 		data.NodeType,
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	resourceType := body["resource_type"].(float64)
+
 	var tableSlug = "user"
-	switch body["resource_type"].(float64) {
+	switch resourceType {
 	case 1:
 		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(body["client_type_id"].(string)),
+					"id": structpb.NewStringValue(data.ClientTypeId),
 				},
 			},
-			ProjectId: body["resource_environment_id"].(string),
+			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -163,10 +164,10 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(body["client_type_id"].(string)),
+					"id": structpb.NewStringValue(data.ClientTypeId),
 				},
 			},
-			ProjectId: body["resource_environment_id"].(string),
+			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -181,12 +182,12 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 
 	// create user in object builder service
-	switch body["resource_type"].(float64) {
+	switch resourceType {
 	case 1:
 		_, err = services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: body["resource_environment_id"].(string),
+			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
 			rs.log.Error("!!!CreateUser--->", logger.Error(err))
@@ -196,7 +197,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		_, err = services.GoItemService().Create(ctx, &new_object_builder_service.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: body["resource_environment_id"].(string),
+			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
 			rs.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
@@ -206,11 +207,11 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
-		ProjectId:    body["project_id"].(string),
-		CompanyId:    body["company_id"].(string),
-		ClientTypeId: body["client_type_id"].(string),
-		RoleId:       body["role_id"].(string),
-		EnvId:        body["environment_id"].(string),
+		ProjectId:    data.ProjectId,
+		CompanyId:    data.CompanyId,
+		ClientTypeId: data.ClientTypeId,
+		RoleId:       data.RoleId,
+		EnvId:        data.EnvironmentId,
 	})
 	if err != nil {
 		rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
@@ -218,13 +219,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                userId,
-		ClientType:            body["client_type_id"].(string),
-		ProjectId:             body["project_id"].(string),
-		ResourceEnvironmentId: body["resource_environment_id"].(string),
+		ClientType:            data.ClientTypeId,
+		ProjectId:             data.ProjectId,
+		ResourceEnvironmentId: data.ResourceEnvironmentId,
 	}
 
 	t2 := time.Now()
-	switch body["resource_type"].(float64) {
+	switch resourceType {
 	case 1:
 		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(
 			ctx,
@@ -286,9 +287,9 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	t1 := time.Now()
 	resp, err := rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
-		ProjectId:     body["project_id"].(string),
+		ProjectId:     data.ProjectId,
 		Tables:        []*pb.Object{},
-		EnvironmentId: body["environment_id"].(string),
+		EnvironmentId: data.EnvironmentId,
 	})
 	fmt.Println("SINCE1", time.Since(t1))
 	if resp == nil {
