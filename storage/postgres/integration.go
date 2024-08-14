@@ -10,23 +10,21 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lib/pq"
-	"github.com/opentracing/opentracing-go"
 )
 
 type IntegrationRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewIntegrationRepo(db *Pool) storage.IntegrationRepoI {
+func NewIntegrationRepo(db *pgxpool.Pool) storage.IntegrationRepoI {
 	return &IntegrationRepo{
 		db: db,
 	}
 }
 
 func (r *IntegrationRepo) Create(ctx context.Context, entity *pb.CreateIntegrationRequest) (pKey *pb.IntegrationPrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "integration" (
 		id,
@@ -83,8 +81,6 @@ func (r *IntegrationRepo) Create(ctx context.Context, entity *pb.CreateIntegrati
 }
 
 func (r *IntegrationRepo) GetByPK(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (res *pb.Integration, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.Integration{}
 	query := `SELECT
@@ -133,8 +129,6 @@ func (r *IntegrationRepo) GetByPK(ctx context.Context, pKey *pb.IntegrationPrima
 }
 
 func (r *IntegrationRepo) GetIntegrationSessions(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (res *pb.GetIntegrationSessionsResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetIntegrationSessionsResponse{}
 
@@ -195,8 +189,6 @@ func (r *IntegrationRepo) GetIntegrationSessions(ctx context.Context, pKey *pb.I
 }
 
 func (r *IntegrationRepo) CreateSession(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "session" (
 		id,
@@ -245,8 +237,6 @@ func (r *IntegrationRepo) CreateSession(ctx context.Context, entity *pb.CreateSe
 }
 
 func (r *IntegrationRepo) GetListByPKs(ctx context.Context, pKeys *pb.IntegrationPrimaryKeyList) (res *pb.GetIntegrationListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetIntegrationListResponse{}
 	query := `SELECT
@@ -330,8 +320,6 @@ func (r *IntegrationRepo) GetListByPKs(ctx context.Context, pKeys *pb.Integratio
 }
 
 func (r *IntegrationRepo) GetList(ctx context.Context, queryParam *pb.GetIntegrationListRequest) (res *pb.GetIntegrationListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetIntegrationListResponse{}
 	params := make(map[string]interface{})
@@ -461,8 +449,6 @@ func (r *IntegrationRepo) GetList(ctx context.Context, queryParam *pb.GetIntegra
 }
 
 func (r *IntegrationRepo) Update(ctx context.Context, entity *pb.UpdateIntegrationRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE "integration" SET
 		project_id = :project_id,
@@ -505,8 +491,6 @@ func (r *IntegrationRepo) Update(ctx context.Context, entity *pb.UpdateIntegrati
 }
 
 func (r *IntegrationRepo) Delete(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM "integration" WHERE id = $1`
 
@@ -521,8 +505,6 @@ func (r *IntegrationRepo) Delete(ctx context.Context, pKey *pb.IntegrationPrimar
 }
 
 func (r *IntegrationRepo) DeleteSession(ctx context.Context, pKey *pb.GetIntegrationTokenRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM "session" WHERE id = $1 AND integration_id=$2`
 
@@ -537,8 +519,6 @@ func (r *IntegrationRepo) DeleteSession(ctx context.Context, pKey *pb.GetIntegra
 }
 
 func (r *IntegrationRepo) GetIntegrationSession(ctx context.Context, req *pb.GetIntegrationTokenRequest) (res *pb.Session, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.Session{}
 	query := `SELECT

@@ -10,22 +10,20 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type permissionRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewPermissionRepo(db *Pool) storage.PermissionRepoI {
+func NewPermissionRepo(db *pgxpool.Pool) storage.PermissionRepoI {
 	return &permissionRepo{
 		db: db,
 	}
 }
 
 func (r *permissionRepo) Create(ctx context.Context, entity *pb.CreatePermissionRequest) (pKey *pb.PermissionPrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "permission" (
 		id,
@@ -69,8 +67,6 @@ func (r *permissionRepo) Create(ctx context.Context, entity *pb.CreatePermission
 }
 
 func (r *permissionRepo) GetByPK(ctx context.Context, pKey *pb.PermissionPrimaryKey) (res *pb.GetPermissionByIDResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetPermissionByIDResponse{}
 	var nullableStr *string
@@ -131,8 +127,6 @@ func (r *permissionRepo) GetByPK(ctx context.Context, pKey *pb.PermissionPrimary
 }
 
 func (r *permissionRepo) GetList(ctx context.Context, queryParam *pb.GetPermissionListRequest) (res *pb.GetPermissionListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetPermissionListResponse{}
 	params := make(map[string]interface{})
@@ -206,8 +200,6 @@ func (r *permissionRepo) GetList(ctx context.Context, queryParam *pb.GetPermissi
 }
 
 func (r *permissionRepo) GetListByRoleId(ctx context.Context, roleID string) (res []*pb.Permission, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var (
 		permissionMap = make(map[string]*pb.Permission)
@@ -267,8 +259,6 @@ func (r *permissionRepo) GetListByRoleId(ctx context.Context, roleID string) (re
 }
 
 func (r *permissionRepo) GetListByClientPlatformId(ctx context.Context, clientPlatformID string) (res []*pb.Permission, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var (
 		permissionMap = make(map[string]*pb.Permission)
@@ -320,8 +310,6 @@ func (r *permissionRepo) GetListByClientPlatformId(ctx context.Context, clientPl
 }
 
 func (r *permissionRepo) Update(ctx context.Context, entity *pb.UpdatePermissionRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	if entity.Id == entity.ParentId {
 		err = storage.ErrorTheSameId
@@ -360,8 +348,6 @@ func (r *permissionRepo) Update(ctx context.Context, entity *pb.UpdatePermission
 }
 
 func (r *permissionRepo) Delete(ctx context.Context, pKey *pb.PermissionPrimaryKey) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM "permission" WHERE id = $1`
 
@@ -376,8 +362,6 @@ func (r *permissionRepo) Delete(ctx context.Context, pKey *pb.PermissionPrimaryK
 }
 
 func (r *permissionRepo) GeneratePermission(ctx context.Context, req *pb.PermissionGenerated) (res *pb.Permission, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	return nil, nil
 }

@@ -6,14 +6,11 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/opentracing/opentracing-go"
 )
 
 type Store struct {
-	db                *Pool
+	db                *pgxpool.Pool
 	clientPlatform    storage.ClientPlatformRepoI
 	clientType        storage.ClientTypeRepoI
 	client            storage.ClientRepoI
@@ -66,69 +63,13 @@ func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, 
 		return nil, err
 	}
 
-	dbPool := &Pool{
-		db: pool,
-	}
-
 	return &Store{
-		db: dbPool,
+		db: pool,
 	}, err
 }
 
 func (s *Store) CloseDB() {
-	s.db.db.Close()
-}
-
-type Pool struct {
-	db *pgxpool.Pool
-}
-
-func (b *Pool) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.QueryRow")
-	defer dbSpan.Finish()
-
-	dbSpan.SetTag("sql", sql)
-	dbSpan.SetTag("args", args)
-
-	return b.db.QueryRow(ctx, sql, args...)
-}
-
-func (b *Pool) Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.Query")
-	defer dbSpan.Finish()
-
-	dbSpan.SetTag("sql", sql)
-	dbSpan.SetTag("args", args)
-
-	return b.db.Query(ctx, sql, args...)
-}
-
-func (b *Pool) Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.Exec")
-	defer dbSpan.Finish()
-
-	dbSpan.SetTag("sql", sql)
-	dbSpan.SetTag("args", arguments)
-
-	return b.db.Exec(ctx, sql, arguments...)
-}
-
-func (b *Pool) SendBatch(ctx context.Context, arguments *pgx.Batch) pgx.BatchResults {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.SendBatch")
-	defer dbSpan.Finish()
-
-	dbSpan.SetTag("args", arguments)
-
-	return b.db.SendBatch(ctx, arguments)
-}
-
-func (b *Pool) Begin(ctx context.Context, args ...any) (pgx.Tx, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.BeginTx")
-	defer dbSpan.Finish()
-
-	dbSpan.SetTag("args", args)
-
-	return b.db.Begin(ctx)
+	s.db.Close()
 }
 
 func (s *Store) ClientPlatform() storage.ClientPlatformRepoI {

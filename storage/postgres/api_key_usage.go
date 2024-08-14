@@ -5,22 +5,22 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/opentracing/opentracing-go"
 )
 
 type apiKeyUsageRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewApiKeyUsageRepo(db *Pool) storage.ApiKeyUsageRepoI {
+func NewApiKeyUsageRepo(db *pgxpool.Pool) storage.ApiKeyUsageRepoI {
 	return &apiKeyUsageRepo{
 		db: db,
 	}
 }
 
 func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequest) (*pb.CheckLimitResponse, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
+
 	var (
 		res pb.CheckLimitResponse
 	)
@@ -47,8 +47,7 @@ func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequ
 }
 
 func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
+
 	query := `
 		INSERT INTO api_key_usage (
 			api_key
@@ -65,8 +64,7 @@ func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error
 }
 
 func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
+
 	query := `
 		INSERT INTO api_key_usage (
 			api_key,

@@ -6,23 +6,21 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/saidamir98/udevs_pkg/util"
 )
 
 type clientRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewClientRepo(db *Pool) storage.ClientRepoI {
+func NewClientRepo(db *pgxpool.Pool) storage.ClientRepoI {
 	return &clientRepo{
 		db: db,
 	}
 }
 
 func (r *clientRepo) Add(ctx context.Context, projectID string, entity *pb.AddClientRequest) (err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "client" (
 		project_id,
@@ -47,8 +45,6 @@ func (r *clientRepo) Add(ctx context.Context, projectID string, entity *pb.AddCl
 }
 
 func (r *clientRepo) GetByPK(ctx context.Context, pKey *pb.ClientPrimaryKey) (res *pb.Client, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.Client{}
 	var loginStrategy string
@@ -79,8 +75,6 @@ func (r *clientRepo) GetByPK(ctx context.Context, pKey *pb.ClientPrimaryKey) (re
 }
 
 func (r *clientRepo) Update(ctx context.Context, entity *pb.UpdateClientRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE "client" SET
 		login_strategy = :login_strategy,
@@ -106,8 +100,6 @@ func (r *clientRepo) Update(ctx context.Context, entity *pb.UpdateClientRequest)
 }
 
 func (r *clientRepo) Remove(ctx context.Context, pKey *pb.ClientPrimaryKey) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM "client" WHERE client_platform_id = $1 AND client_type_id = $2`
 
@@ -122,8 +114,6 @@ func (r *clientRepo) Remove(ctx context.Context, pKey *pb.ClientPrimaryKey) (row
 }
 
 func (r *clientRepo) GetList(ctx context.Context, queryParam *pb.GetClientListRequest) (res *pb.GetClientListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetClientListResponse{}
 	params := make(map[string]interface{})
@@ -199,8 +189,6 @@ func (r *clientRepo) GetList(ctx context.Context, queryParam *pb.GetClientListRe
 }
 
 func (r *clientRepo) GetMatrix(ctx context.Context, req *pb.GetClientMatrixRequest) (res *pb.GetClientMatrixResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	if !util.IsValidUUID(req.ProjectId) {
 		return res, storage.ErrorProjectId

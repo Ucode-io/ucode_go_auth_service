@@ -5,22 +5,20 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type permissionScopeRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewPermissionScopeRepo(db *Pool) storage.PermissionScopeRepoI {
+func NewPermissionScopeRepo(db *pgxpool.Pool) storage.PermissionScopeRepoI {
 	return &permissionScopeRepo{
 		db: db,
 	}
 }
 
 func (r *permissionScopeRepo) Add(ctx context.Context, entity *pb.AddPermissionScopeRequest) (pKey *pb.PermissionScopePrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "permission_scope" (
 		permission_id,
@@ -52,8 +50,6 @@ func (r *permissionScopeRepo) Add(ctx context.Context, entity *pb.AddPermissionS
 }
 
 func (r *permissionScopeRepo) GetByPK(ctx context.Context, pKey *pb.PermissionScopePrimaryKey) (res *pb.PermissionScope, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.PermissionScope{}
 	query := `SELECT
@@ -81,8 +77,6 @@ func (r *permissionScopeRepo) GetByPK(ctx context.Context, pKey *pb.PermissionSc
 }
 
 func (r *permissionScopeRepo) Remove(ctx context.Context, pKey *pb.PermissionScopePrimaryKey) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM
 		"permission_scope"
@@ -100,8 +94,6 @@ func (r *permissionScopeRepo) Remove(ctx context.Context, pKey *pb.PermissionSco
 }
 
 func (r *permissionScopeRepo) HasAccess(ctx context.Context, roleID, clientPlatformID, path, method string) (hasAccess bool, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var count int32
 

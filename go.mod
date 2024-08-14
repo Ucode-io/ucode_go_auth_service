@@ -11,7 +11,6 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.7
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d
-	github.com/opentracing-contrib/go-gin v0.0.0-20230313182354-1499e56cc906
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
@@ -20,7 +19,6 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.8.9
-	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.17.0
 	google.golang.org/grpc v1.52.0
@@ -30,7 +28,6 @@ require (
 require (
 	github.com/jackc/pgx/v4 v4.17.2 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/uber/jaeger-lib v2.4.0+incompatible // indirect
 	golang.org/x/sync v0.1.0 // indirect
 )
 

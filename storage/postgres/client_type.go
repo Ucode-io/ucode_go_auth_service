@@ -6,25 +6,23 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
 )
 
 type clientTypeRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewClientTypeRepo(db *Pool) storage.ClientTypeRepoI {
+func NewClientTypeRepo(db *pgxpool.Pool) storage.ClientTypeRepoI {
 	return &clientTypeRepo{
 		db: db,
 	}
 }
 
 func (r *clientTypeRepo) Create(ctx context.Context, entity *pb.CreateClientTypeRequest) (pKey *pb.ClientTypePrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "client_type" (
 		id,
@@ -64,8 +62,6 @@ func (r *clientTypeRepo) Create(ctx context.Context, entity *pb.CreateClientType
 }
 
 func (r *clientTypeRepo) GetByPK(ctx context.Context, pKey *pb.ClientTypePrimaryKey) (res *pb.ClientType, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.ClientType{}
 	var confirmBy string
@@ -100,8 +96,6 @@ func (r *clientTypeRepo) GetByPK(ctx context.Context, pKey *pb.ClientTypePrimary
 }
 
 func (r *clientTypeRepo) GetList(ctx context.Context, queryParam *pb.GetClientTypeListRequest) (res *pb.GetClientTypeListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetClientTypeListResponse{}
 	params := make(map[string]interface{})
@@ -168,8 +162,6 @@ func (r *clientTypeRepo) GetList(ctx context.Context, queryParam *pb.GetClientTy
 }
 
 func (r *clientTypeRepo) Update(ctx context.Context, entity *pb.UpdateClientTypeRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE "client_type" SET
 		name = :name,
@@ -201,8 +193,6 @@ func (r *clientTypeRepo) Update(ctx context.Context, entity *pb.UpdateClientType
 }
 
 func (r *clientTypeRepo) Delete(ctx context.Context, pKey *pb.ClientTypePrimaryKey) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM "client_type" WHERE id = $1`
 
@@ -217,8 +207,6 @@ func (r *clientTypeRepo) Delete(ctx context.Context, pKey *pb.ClientTypePrimaryK
 }
 
 func (r *clientTypeRepo) GetCompleteByPK(ctx context.Context, pKey *pb.ClientTypePrimaryKey) (res *pb.CompleteClientType, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.CompleteClientType{
 		ClientType:     &pb.ClientType{},

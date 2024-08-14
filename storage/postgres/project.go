@@ -9,22 +9,20 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type projectRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewProjectRepo(db *Pool) storage.ProjectRepoI {
+func NewProjectRepo(db *pgxpool.Pool) storage.ProjectRepoI {
 	return &projectRepo{
 		db: db,
 	}
 }
 
 func (r *projectRepo) Create(ctx context.Context, entity *pb.CreateProjectRequest) (pKey *pb.ProjectPrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "project" (
 		id,
@@ -58,8 +56,6 @@ func (r *projectRepo) Create(ctx context.Context, entity *pb.CreateProjectReques
 }
 
 func (r *projectRepo) GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (res *pb.Project, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.Project{}
 	query := `SELECT
@@ -108,8 +104,6 @@ func (r *projectRepo) GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (
 }
 
 func (r *projectRepo) GetList(ctx context.Context, queryParam *pb.GetProjectListRequest) (res *pb.GetProjectListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetProjectListResponse{}
 	params := make(map[string]interface{})
@@ -188,8 +182,6 @@ func (r *projectRepo) GetList(ctx context.Context, queryParam *pb.GetProjectList
 }
 
 func (r *projectRepo) Update(ctx context.Context, entity *pb.UpdateProjectRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE "project" SET
 		name = :name,
@@ -216,8 +208,6 @@ func (r *projectRepo) Update(ctx context.Context, entity *pb.UpdateProjectReques
 }
 
 func (r *projectRepo) Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM "project" WHERE id = $1`
 

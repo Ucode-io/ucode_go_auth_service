@@ -7,23 +7,21 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type emailRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewEmailRepo(db *Pool) storage.EmailRepoI {
+func NewEmailRepo(db *pgxpool.Pool) storage.EmailRepoI {
 	return &emailRepo{
 		db: db,
 	}
 }
 
 func (e *emailRepo) Create(ctx context.Context, input *pb.Email) (*pb.Email, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "email_sms" (
 		id,
@@ -51,8 +49,6 @@ func (e *emailRepo) Create(ctx context.Context, input *pb.Email) (*pb.Email, err
 }
 
 func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (res *pb.Email, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.Email{}
 	query := `SELECT
@@ -80,8 +76,6 @@ func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (r
 }
 
 func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var resp = &pb.EmailSettings{}
 
@@ -126,8 +120,6 @@ func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSett
 }
 
 func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var resp = &pb.EmailSettings{}
 
@@ -164,8 +156,6 @@ func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEma
 }
 
 func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	arr := &pb.UpdateEmailSettingsResponse{}
 	res := &pb.EmailSettings{}
@@ -196,8 +186,6 @@ func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListE
 }
 
 func (e *emailRepo) DeleteEmailSettings(ctx context.Context, input *pb.EmailSettingsPrimaryKey) (*emptypb.Empty, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var resp = &emptypb.Empty{}
 

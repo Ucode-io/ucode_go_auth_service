@@ -6,22 +6,20 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type userInfoRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewUserInfoRepo(db *Pool) storage.UserInfoRepoI {
+func NewUserInfoRepo(db *pgxpool.Pool) storage.UserInfoRepoI {
 	return &userInfoRepo{
 		db: db,
 	}
 }
 
 func (r *userInfoRepo) Upsert(ctx context.Context, entity *pb.UpsertUserInfoRequest) (pKey *pb.UserInfoPrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	data, err := json.Marshal(entity.Data)
 	if err != nil {
@@ -51,8 +49,6 @@ func (r *userInfoRepo) Upsert(ctx context.Context, entity *pb.UpsertUserInfoRequ
 }
 
 func (r *userInfoRepo) GetByPK(ctx context.Context, pKey *pb.UserInfoPrimaryKey) (res *pb.UserInfo, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.UserInfo{}
 	var data []byte

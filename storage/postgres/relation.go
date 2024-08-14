@@ -7,22 +7,20 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type relationRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewRelationRepo(db *Pool) storage.RelationRepoI {
+func NewRelationRepo(db *pgxpool.Pool) storage.RelationRepoI {
 	return &relationRepo{
 		db: db,
 	}
 }
 
 func (r *relationRepo) Add(ctx context.Context, entity *pb.AddRelationRequest) (pKey *pb.RelationPrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "relation" (
 		id,
@@ -59,8 +57,6 @@ func (r *relationRepo) Add(ctx context.Context, entity *pb.AddRelationRequest) (
 }
 
 func (r *relationRepo) GetByPK(ctx context.Context, pKey *pb.RelationPrimaryKey) (res *pb.Relation, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var relationType string
 	res = &pb.Relation{}
@@ -92,8 +88,6 @@ func (r *relationRepo) GetByPK(ctx context.Context, pKey *pb.RelationPrimaryKey)
 }
 
 func (r *relationRepo) Update(ctx context.Context, entity *pb.UpdateRelationRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE "relation" SET
 		client_type_id = :client_type_id,
@@ -124,8 +118,6 @@ func (r *relationRepo) Update(ctx context.Context, entity *pb.UpdateRelationRequ
 }
 
 func (r *relationRepo) Remove(ctx context.Context, pKey *pb.RelationPrimaryKey) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `DELETE FROM "relation" WHERE id = $1`
 

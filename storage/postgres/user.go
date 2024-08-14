@@ -20,22 +20,21 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lib/pq"
 )
 
 type userRepo struct {
-	db *Pool
+	db *pgxpool.Pool
 }
 
-func NewUserRepo(db *Pool) storage.UserRepoI {
+func NewUserRepo(db *pgxpool.Pool) storage.UserRepoI {
 	return &userRepo{
 		db: db,
 	}
 }
 
 func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `INSERT INTO "user" (
 		id,
@@ -75,8 +74,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 }
 
 func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.User{}
 	var (
@@ -110,8 +107,6 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 }
 
 func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyList) (res *pb.GetUserListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetUserListResponse{}
 	query := `SELECT
@@ -183,8 +178,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 }
 
 func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListRequest) (res *pb.GetUserListResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &pb.GetUserListResponse{}
 	params := make(map[string]interface{})
@@ -307,8 +300,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 }
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE "user" SET
 		-- name = :name,
@@ -346,8 +337,6 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	// return 0, nil
 	if pKey.GetIsTest() {
@@ -457,8 +446,6 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 }
 
 func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE "user" SET
 		login = :login,
@@ -493,8 +480,6 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 }
 
 func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res = &models.UserProjectClientTypeResponse{}
 
@@ -559,8 +544,6 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 }
 
 func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res := pb.AddUserToProjectRes{}
 
@@ -630,8 +613,6 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 }
 
 func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res := pb.AddUserToProjectRes{}
 
@@ -699,8 +680,6 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 }
 
 func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res := pb.GetProjectsByUserIdRes{}
 
@@ -736,8 +715,6 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 }
 
 func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `SELECT
 				array_agg(user_id)
@@ -765,8 +742,6 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 }
 
 func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `SELECT
 				id
@@ -955,8 +930,6 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 }
 
 func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	var (
 		params                      = make(map[string]interface{})
@@ -1020,8 +993,6 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 }
 
 func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	params := make(map[string]interface{})
 
@@ -1069,8 +1040,6 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	return &empty.Empty{}, nil
 }
 func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -1127,8 +1096,6 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 }
 
 func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	count := 0
 	query := `SELECT count(distinct project_id)
@@ -1167,8 +1134,6 @@ func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
 }
 
 func (r *userRepo) UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	query := `UPDATE user_project SET env_id = $1
 	  WHERE project_id = $2`
@@ -1182,8 +1147,6 @@ func (r *userRepo) UpdateUserProjects(ctx context.Context, envId, projectId stri
 }
 
 func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
-	defer dbSpan.Finish()
 
 	res := models.GetUserEnvProjectRes{
 		EnvProjects: map[string][]string{},
