@@ -7,10 +7,9 @@ import (
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 
-	res := &pb.V2LoginResponse{}
-	res.UserId = data.GetUserId()
-	res.LoginTableSlug = data.GetLoginTableSlug()
 	tables := make([]*pb.Table, 0, len(data.GetClientType().GetTables()))
+	permissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
+	appPermissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
 
 	for _, v := range data.GetClientType().GetTables() {
 		tables = append(tables, &pb.Table{
@@ -22,26 +21,6 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 			ViewSlug:  v.GetViewSlug(),
 		})
 	}
-
-	res.ClientType = &pb.ClientType{
-		Id:           data.GetClientType().GetGuid(),
-		Name:         data.GetClientType().GetName(),
-		ConfirmBy:    pb.ConfirmStrategies(data.GetClientType().GetConfirmBy()),
-		SelfRegister: data.GetClientType().GetSelfRegister(),
-		SelfRecover:  data.GetClientType().GetSelfRecover(),
-		ProjectId:    data.GetClientType().GetProjectId(),
-		Tables:       tables,
-		DefaultPage:  data.GetClientType().GetDefaultPage(),
-	}
-
-	res.ClientPlatform = &pb.ClientPlatform{
-		Id:        data.GetClientPlatform().GetGuid(),
-		Name:      data.GetClientPlatform().GetName(),
-		ProjectId: data.GetClientPlatform().GetProjectId(),
-		Subdomain: data.GetClientPlatform().GetSubdomain(),
-	}
-	permissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
-	appPermissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
 
 	for _, v := range data.GetPermissions() {
 		permissions = append(permissions, &pb.RecordPermission{
@@ -83,35 +62,53 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 
 	}
 
-	res.Permissions = permissions
-	res.AppPermissions = appPermissions
-	res.Role = &pb.Role{
-		Id:               data.GetRole().GetGuid(),
-		ClientTypeId:     data.GetRole().GetClientTypeId(),
-		Name:             data.GetRole().GetName(),
-		ClientPlatformId: data.GetRole().GetClientPlatformId(),
-		ProjectId:        data.GetRole().GetProjectId(),
+	res := &pb.V2LoginResponse{
+		UserId:         data.GetUserId(),
+		LoginTableSlug: data.GetLoginTableSlug(),
+		ClientType: &pb.ClientType{
+			Id:           data.GetClientType().GetGuid(),
+			Name:         data.GetClientType().GetName(),
+			ConfirmBy:    pb.ConfirmStrategies(data.GetClientType().GetConfirmBy()),
+			SelfRegister: data.GetClientType().GetSelfRegister(),
+			SelfRecover:  data.GetClientType().GetSelfRecover(),
+			ProjectId:    data.GetClientType().GetProjectId(),
+			Tables:       tables,
+			DefaultPage:  data.GetClientType().GetDefaultPage(),
+		},
+		ClientPlatform: &pb.ClientPlatform{
+			Id:        data.GetClientPlatform().GetGuid(),
+			Name:      data.GetClientPlatform().GetName(),
+			ProjectId: data.GetClientPlatform().GetProjectId(),
+			Subdomain: data.GetClientPlatform().GetSubdomain(),
+		},
+		Permissions:    permissions,
+		AppPermissions: appPermissions,
+		Role: &pb.Role{
+			Id:               data.GetRole().GetGuid(),
+			ClientTypeId:     data.GetRole().GetClientTypeId(),
+			Name:             data.GetRole().GetName(),
+			ClientPlatformId: data.GetRole().GetClientPlatformId(),
+			ProjectId:        data.GetRole().GetProjectId(),
+		},
+		UserData: data.GetUserData(),
+		GlobalPermission: &pb.GlobalPermission{
+			Id:                    data.GetGlobalPermission().GetId(),
+			MenuButton:            data.GetGlobalPermission().GetMenuButton(),
+			Chat:                  data.GetGlobalPermission().GetChat(),
+			SettingsButton:        data.GetGlobalPermission().GetSettingsButton(),
+			ProjectSettingsButton: data.GetGlobalPermission().GetProjectSettingsButton(),
+			ProfileSettingsButton: data.GetGlobalPermission().GetProfileSettingsButton(),
+			MenuSettingButton:     data.GetGlobalPermission().GetMenuSettingButton(),
+			RedirectsButton:       data.GetGlobalPermission().GetRedirectsButton(),
+			ApiKeysButton:         data.GetGlobalPermission().GetApiKeysButton(),
+			EnvironmentsButton:    data.GetGlobalPermission().GetEnvironmentsButton(),
+			ProjectsButton:        data.GetGlobalPermission().GetProjectsButton(),
+			VersionButton:         data.GetGlobalPermission().GetVersionButton(),
+			EnvironmentButton:     data.GetGlobalPermission().GetEnvironmentButton(),
+			ProjectButton:         data.GetGlobalPermission().GetProjectButton(),
+			SmsButton:             data.GetGlobalPermission().GetSmsButton(),
+		},
 	}
-
-	res.GlobalPermission = &pb.GlobalPermission{
-		Id:                    data.GetGlobalPermission().GetId(),
-		MenuButton:            data.GetGlobalPermission().GetMenuButton(),
-		Chat:                  data.GetGlobalPermission().GetChat(),
-		SettingsButton:        data.GetGlobalPermission().GetSettingsButton(),
-		ProjectSettingsButton: data.GetGlobalPermission().GetProjectSettingsButton(),
-		ProfileSettingsButton: data.GetGlobalPermission().GetProfileSettingsButton(),
-		MenuSettingButton:     data.GetGlobalPermission().GetMenuSettingButton(),
-		RedirectsButton:       data.GetGlobalPermission().GetRedirectsButton(),
-		ApiKeysButton:         data.GetGlobalPermission().GetApiKeysButton(),
-		EnvironmentsButton:    data.GetGlobalPermission().GetEnvironmentsButton(),
-		ProjectsButton:        data.GetGlobalPermission().GetProjectsButton(),
-		VersionButton:         data.GetGlobalPermission().GetVersionButton(),
-		EnvironmentButton:     data.GetGlobalPermission().GetEnvironmentButton(),
-		ProjectButton:         data.GetGlobalPermission().GetProjectButton(),
-		SmsButton:             data.GetGlobalPermission().GetSmsButton(),
-	}
-
-	res.UserData = data.GetUserData()
 
 	return res
 }
