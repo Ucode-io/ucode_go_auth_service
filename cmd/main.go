@@ -24,7 +24,6 @@ import (
 )
 
 func main() {
-
 	baseCfg := config.BaseLoad()
 
 	loggerLevel := logger.LevelDebug
@@ -126,7 +125,7 @@ func main() {
 		// http.HandleFunc("/trace", pprof.Trace)
 		http.ListenAndServe(":6060", nil)
 	}()
-	
+
 	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
 	// log.Info(" --- U-code auth service and company service grpc client done --- ")
 	go cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
