@@ -125,5 +125,8 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	fmt.Println("memStats.TotalAlloc: ", memStats.TotalAlloc/megabyte)
 	fmt.Println("memStats.Alloc: ", memStats.Alloc/megabyte)
 	fmt.Println("memStats.Mallocs: ", memStats.Mallocs/megabyte)
+	fmt.Println("memStats.HeapAlloc: ", memStats.HeapAlloc/megabyte)
+	fmt.Printf("NumGC: %v\n", memStats.NumGC)
+	fmt.Printf("NextGC: %v MB\n", memStats.NextGC/megabyte)
 	return res
 }

@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof"
+	"runtime/debug"
 
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
@@ -24,7 +25,7 @@ import (
 )
 
 func main() {
-
+	debug.SetGCPercent(60)
 	baseCfg := config.BaseLoad()
 
 	loggerLevel := logger.LevelDebug
@@ -126,7 +127,7 @@ func main() {
 		// http.HandleFunc("/trace", pprof.Trace)
 		http.ListenAndServe(":6060", nil)
 	}()
-	
+
 	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
 	// log.Info(" --- U-code auth service and company service grpc client done --- ")
 	go cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
