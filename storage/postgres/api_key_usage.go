@@ -6,7 +6,6 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/opentracing/opentracing-go"
 )
 
 type apiKeyUsageRepo struct {
@@ -88,8 +87,6 @@ func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error
 }
 
 func (r *apiKeyUsageRepo) UpdateMonthlyLimit(ctx context.Context) error {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.UpdateMonthlyLimit")
-	defer dbSpan.Finish()
 
 	query := `	
 		UPDATE api_keys SET

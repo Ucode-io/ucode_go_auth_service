@@ -12,7 +12,6 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -374,8 +373,6 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 }
 
 func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.User, err error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.GetByUsername")
-	defer dbSpan.Finish()
 
 	res = &pb.User{}
 
@@ -502,8 +499,6 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 }
 
 func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.GetUserProjects")
-	defer dbSpan.Finish()
 
 	res := pb.GetUserProjectsRes{}
 
