@@ -272,7 +272,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
 
-	t := time.Now()
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
 		ClientPlatform: userData.GetClientPlatform(),
 		ClientType:     userData.GetClientType(),
@@ -282,7 +281,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		Permissions:    userData.GetPermissions(),
 		LoginTableSlug: userData.GetLoginTableSlug(),
 	})
-	fmt.Println("SINCE", time.Since(t))
 
 	t1 := time.Now()
 	resp, err := rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{

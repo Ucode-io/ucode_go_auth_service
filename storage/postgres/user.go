@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/api/models"
-	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
@@ -86,48 +85,20 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	)
 	query := `SELECT
 		u.id,
-		-- coalesce(u.name, ''),
-		-- coalesce(u.photo_url, ''),
 		u.phone,
 		u.email,
 		u.login,
-		-- u.password,
 		u.company_id
-		-- coalesce(t.id::VARCHAR, ''),
-		-- coalesce(t.name, ''),
-		-- coalesce(t.text, ''),
-		-- coalesce(l.id::VARCHAR, ''),
-		-- coalesce(l.name, ''),
-		-- coalesce(l.short_name, ''),
-		-- coalesce(l.native_name, '')
-		-- TO_CHAR(u.expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at
-		-- TO_CHAR(u.created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		-- TO_CHAR(u.updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"user" u
-		-- LEFT JOIN "language" l on u.language_id = l.id
-		-- LEFT JOIN "timezone" t on u.timezone_id = t.id
 	WHERE
 		u.id = $1`
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
-		// &res.Name,
-		// &res.PhotoUrl,
 		&res.Phone,
 		&res.Email,
 		&res.Login,
-		// &res.Password,
 		&res.CompanyId,
-		// &time.Id,
-		// &time.Name,
-		// &time.Text,
-		// &lan.Id,
-		// &lan.Name,
-		// &lan.ShortName,
-		// &lan.NativeName,
-		// &res.ExpiresAt,
-		// &res.CreatedAt,
-		// &res.UpdatedAt,
 	)
 	if err != nil {
 		return res, err
@@ -536,7 +507,7 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 			GROUP BY  user_id`
 
 	err = r.db.QueryRow(ctx, query, req.UserId, req.ProjectId).Scan(
-		&res.ClientTypeIds,
+		pq.Array(&res.ClientTypeIds),
 	)
 	if err != nil {
 		return res, err
@@ -546,7 +517,7 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 }
 
 func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error) {
-	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.Create")
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "storage.GetUserProjects")
 	defer dbSpan.Finish()
 
 	res := pb.GetUserProjectsRes{}
@@ -561,18 +532,22 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {
 		var (
-			projects []string
+			// projects []string
 			company  string
+			projects []string
 		)
 
-		err = rows.Scan(&company, pq.Array(&projects))
+		err = rows.Scan(&company, &projects)
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Printf("projects: %v\n", projects)
 
 		res.Companies = append(res.Companies, &pb.UserCompany{
 			Id:         company,
@@ -1232,7 +1207,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 			projectId string
 		)
 
-		err = rows.Scan(&projectId, pq.Array(&envIds))
+		err = rows.Scan(&projectId, &envIds)
 		if err != nil {
 			return nil, err
 		}
