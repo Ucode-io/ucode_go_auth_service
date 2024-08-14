@@ -957,7 +957,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 			}
 
 			if len(res["response"].([]interface{})) == 0 {
-				err := errors.New("Permission denied")
+				err := errors.New("permission denied")
 				s.log.Error("!!!V2HasAccess--->", logger.Error(err))
 				return nil, status.Error(codes.PermissionDenied, err.Error())
 			}
@@ -1736,17 +1736,13 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 		for _, projectId := range item.ProjectIds {
 
-			clientType, err := s.strg.User().GetUserProjectClientTypes(
+			clientType, _ := s.strg.User().GetUserProjectClientTypes(
 				ctx,
 				&models.UserProjectClientTypeRequest{
 					UserId:    user.GetId(),
 					ProjectId: projectId,
 				},
 			)
-			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->GetUserProjectClientTypes", logger.Error(err))
-				return nil, status.Error(codes.NotFound, err.Error())
-			}
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(
 				ctx,
@@ -1831,7 +1827,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					}
 					respResourceEnvironment.ClientTypes = clientTypes.Data
 
-				} else if clientType != nil && len(clientType.ClientTypeIds) > 0 {
+				} else if len(clientType.ClientTypeIds) > 0 {
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{
