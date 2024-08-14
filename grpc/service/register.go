@@ -63,7 +63,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, err
 		}
 	case "PHONE":
-		foundUser, err = rs.strg.User().GetByUsername(ctx, email)
+		foundUser, err = rs.strg.User().GetByUsername(ctx, phone)
 		if err != nil {
 			rs.log.Error("!RegisterUserError--->PhoneGetByUsernames", logger.Error(err))
 			return nil, err
@@ -74,7 +74,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	if foundUser.Id == "" {
 
-		if !helper.EmailValidation(email) {
+		if !helper.EmailValidation(email) && len(email) > 0 {
 			err = fmt.Errorf("email is not valid")
 			rs.log.Error("!!!CreateUser--->EmailValidation", logger.Error(err))
 			return nil, err
