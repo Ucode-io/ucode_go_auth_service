@@ -58,7 +58,7 @@ func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, 
 
 	config.MaxConns = cfg.PostgresMaxConnections
 
-	pool, err := pgxpool.NewWithConfig(ctx, config)
+	pool, err := pgxpool.ConnectConfig(ctx, config)
 	if err != nil {
 		return nil, err
 	}
