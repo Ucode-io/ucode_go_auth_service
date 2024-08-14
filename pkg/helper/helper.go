@@ -164,3 +164,19 @@ func EmailValidation(email string) bool {
 
 	return checkEmail
 }
+
+func GetStringFromMap(body map[string]interface{}, key string) string {
+	if value, ok := body[key]; ok {
+		if str, ok := value.(string); ok {
+			return str
+		}
+	}
+	return ""
+}
+func AnyToString(value any, exist bool) string {
+	if !exist {
+		return ""
+	}
+
+	return value.(string)
+}
