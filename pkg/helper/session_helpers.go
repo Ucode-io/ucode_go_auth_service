@@ -1,14 +1,9 @@
 package helper
 
 import (
-	"fmt"
-
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
-	"unsafe"
 )
-
-const megabyte uint64 = 1024 * 1024
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 
@@ -16,8 +11,6 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	res.UserId = data.GetUserId()
 	res.LoginTableSlug = data.GetLoginTableSlug()
 	tables := make([]*pb.Table, 0, len(data.GetClientType().GetTables()))
-	fmt.Println("LEN: ", len(data.GetClientType().GetTables()))
-	fmt.Println("SizeOf>>>>>>>>>> ", unsafe.Sizeof(data.GetClientType().GetTables()))
 
 	for _, v := range data.GetClientType().GetTables() {
 		table := &pb.Table{}
