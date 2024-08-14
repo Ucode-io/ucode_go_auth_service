@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof"
-	"runtime/debug"
 
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
@@ -25,7 +24,6 @@ import (
 )
 
 func main() {
-	debug.SetGCPercent(60)
 	baseCfg := config.BaseLoad()
 
 	loggerLevel := logger.LevelDebug

@@ -1,8 +1,6 @@
 package helper
 
 import (
-	"fmt"
-	"runtime"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
@@ -10,11 +8,7 @@ import (
 const megabyte uint64 = 1024 * 1024
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
-	var (
-		memStats          runtime.MemStats
-		allocsAfterTables = runtime.NumGoroutine()
-	)
-	runtime.ReadMemStats(&memStats)
+
 
 	res := &pb.V2LoginResponse{}
 	res.UserId = data.GetUserId()
@@ -119,14 +113,6 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	}
 
 	res.UserData = data.GetUserData()
-	fmt.Println("<<<<<<<<<<<<<<<ConvertPbToAnotherPb>>>>>>>>>>>>>>>>>>>")
-	fmt.Println("allocsAfterTables: ", allocsAfterTables)
-	fmt.Println("memStats.Sys: ", memStats.Sys/megabyte)
-	fmt.Println("memStats.TotalAlloc: ", memStats.TotalAlloc/megabyte)
-	fmt.Println("memStats.Alloc: ", memStats.Alloc/megabyte)
-	fmt.Println("memStats.Mallocs: ", memStats.Mallocs/megabyte)
-	fmt.Println("memStats.HeapAlloc: ", memStats.HeapAlloc/megabyte)
-	fmt.Printf("NumGC: %v\n", memStats.NumGC)
-	fmt.Printf("NextGC: %v MB\n", memStats.NextGC/megabyte)
+
 	return res
 }
