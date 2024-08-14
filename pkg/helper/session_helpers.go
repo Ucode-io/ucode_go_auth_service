@@ -13,14 +13,14 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 	tables := make([]*pb.Table, 0, len(data.GetClientType().GetTables()))
 
 	for _, v := range data.GetClientType().GetTables() {
-		table := &pb.Table{}
-		table.Data = v.GetData()
-		table.Icon = v.GetIcon()
-		table.Label = v.GetLabel()
-		table.Slug = v.GetSlug()
-		table.ViewLabel = v.GetViewLabel()
-		table.ViewSlug = v.GetViewSlug()
-		tables = append(tables, table)
+		tables = append(tables, &pb.Table{
+			Data:      v.GetData(),
+			Icon:      v.GetIcon(),
+			Label:     v.GetLabel(),
+			Slug:      v.GetSlug(),
+			ViewLabel: v.GetViewLabel(),
+			ViewSlug:  v.GetViewSlug(),
+		})
 	}
 
 	res.ClientType = &pb.ClientType{
@@ -41,47 +41,48 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 		Subdomain: data.GetClientPlatform().GetSubdomain(),
 	}
 	permissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
+	appPermissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
+
 	for _, v := range data.GetPermissions() {
-		permission := &pb.RecordPermission{}
-		permission.ClientTypeId = v.GetClientTypeId()
-		permission.Id = v.GetGuid()
-		permission.Read = v.GetRead()
-		permission.Write = v.GetWrite()
-		permission.Delete = v.GetDelete()
-		permission.Update = v.GetUpdate()
-		permission.RoleId = v.GetRoleId()
-		permission.TableSlug = v.GetTableSlug()
-		permission.Automation = v.GetAutomation()
-		permission.LanguageBtn = v.GetLanguageBtn()
-		permission.Settings = v.GetSettings()
-		permission.ShareModal = v.GetShareModal()
-		permission.ViewCreate = v.GetViewCreate()
-		permission.AddField = v.GetAddField()
-		permission.PdfAction = v.GetPdfAction()
-		permission.AddFilter = v.GetAddFilter()
-		permission.FieldFilter = v.GetFieldFilter()
-		permission.FixColumn = v.GetFixColumn()
-		permission.Group = v.GetGroup()
-		permission.ExcelMenu = v.GetExcelMenu()
-		permission.TabGroup = v.GetTabGroup()
-		permission.SearchButton = v.GetSearchButton()
-		permission.Columns = v.GetColumns()
-		permissions = append(permissions, permission)
+		permissions = append(permissions, &pb.RecordPermission{
+			ClientTypeId: v.GetClientTypeId(),
+			Id:           v.GetGuid(),
+			Read:         v.GetRead(),
+			Write:        v.GetWrite(),
+			Delete:       v.GetDelete(),
+			Update:       v.GetUpdate(),
+			RoleId:       v.GetRoleId(),
+			TableSlug:    v.GetTableSlug(),
+			Automation:   v.GetAutomation(),
+			LanguageBtn:  v.GetLanguageBtn(),
+			Settings:     v.GetSettings(),
+			ShareModal:   v.GetShareModal(),
+			ViewCreate:   v.GetViewCreate(),
+			AddField:     v.GetAddField(),
+			PdfAction:    v.GetPdfAction(),
+			AddFilter:    v.GetAddFilter(),
+			FieldFilter:  v.GetFieldFilter(),
+			FixColumn:    v.GetFixColumn(),
+			Group:        v.GetGroup(),
+			ExcelMenu:    v.GetExcelMenu(),
+			TabGroup:     v.GetTabGroup(),
+			SearchButton: v.GetSearchButton(),
+			Columns:      v.GetColumns(),
+		})
+
+		appPermissions = append(appPermissions, &pb.RecordPermission{
+			ClientTypeId: v.GetClientTypeId(),
+			Id:           v.GetGuid(),
+			Read:         v.GetRead(),
+			Write:        v.GetWrite(),
+			Delete:       v.GetDelete(),
+			Update:       v.GetUpdate(),
+			RoleId:       v.GetRoleId(),
+			TableSlug:    v.GetTableSlug(),
+		})
+
 	}
 
-	appPermissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
-	for _, v := range data.GetAppPermissions() {
-		appPermission := &pb.RecordPermission{}
-		appPermission.ClientTypeId = v.GetClientTypeId()
-		appPermission.Id = v.GetGuid()
-		appPermission.Read = v.GetRead()
-		appPermission.Write = v.GetWrite()
-		appPermission.Delete = v.GetDelete()
-		appPermission.Update = v.GetUpdate()
-		appPermission.RoleId = v.GetRoleId()
-		appPermission.TableSlug = v.GetTableSlug()
-		appPermissions = append(appPermissions, appPermission)
-	}
 	res.Permissions = permissions
 	res.AppPermissions = appPermissions
 	res.Role = &pb.Role{
