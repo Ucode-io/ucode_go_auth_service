@@ -17,6 +17,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 	r = gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
+	// r.Use(ginhttp.Middleware(tracer))
 
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
@@ -117,6 +118,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
 
 	v2.Use(h.AuthMiddleware())
 	{
+
 		// sms-otp-settings
 		v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
 		v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)

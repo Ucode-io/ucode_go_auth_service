@@ -19,6 +19,7 @@ func NewApiKeyUsageRepo(db *pgxpool.Pool) storage.ApiKeyUsageRepoI {
 }
 
 func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequest) (*pb.CheckLimitResponse, error) {
+
 	var (
 		res pb.CheckLimitResponse
 	)
@@ -62,6 +63,7 @@ func (r *apiKeyUsageRepo) Create(ctx context.Context, req *pb.ApiKeyUsage) error
 }
 
 func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error {
+
 	query := `
 		INSERT INTO api_key_usage (
 			api_key,
@@ -85,6 +87,7 @@ func (r *apiKeyUsageRepo) Upsert(ctx context.Context, req *pb.ApiKeyUsage) error
 }
 
 func (r *apiKeyUsageRepo) UpdateMonthlyLimit(ctx context.Context) error {
+
 	query := `	
 		UPDATE api_keys SET
 			is_monthly_request_limit_reached = true

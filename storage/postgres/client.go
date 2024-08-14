@@ -6,9 +6,8 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/saidamir98/udevs_pkg/util"
-
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/saidamir98/udevs_pkg/util"
 )
 
 type clientRepo struct {
@@ -22,6 +21,7 @@ func NewClientRepo(db *pgxpool.Pool) storage.ClientRepoI {
 }
 
 func (r *clientRepo) Add(ctx context.Context, projectID string, entity *pb.AddClientRequest) (err error) {
+
 	query := `INSERT INTO "client" (
 		project_id,
 		client_platform_id,
@@ -45,6 +45,7 @@ func (r *clientRepo) Add(ctx context.Context, projectID string, entity *pb.AddCl
 }
 
 func (r *clientRepo) GetByPK(ctx context.Context, pKey *pb.ClientPrimaryKey) (res *pb.Client, err error) {
+
 	res = &pb.Client{}
 	var loginStrategy string
 	query := `SELECT
@@ -74,6 +75,7 @@ func (r *clientRepo) GetByPK(ctx context.Context, pKey *pb.ClientPrimaryKey) (re
 }
 
 func (r *clientRepo) Update(ctx context.Context, entity *pb.UpdateClientRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "client" SET
 		login_strategy = :login_strategy,
 		updated_at = now()
@@ -98,6 +100,7 @@ func (r *clientRepo) Update(ctx context.Context, entity *pb.UpdateClientRequest)
 }
 
 func (r *clientRepo) Remove(ctx context.Context, pKey *pb.ClientPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "client" WHERE client_platform_id = $1 AND client_type_id = $2`
 
 	result, err := r.db.Exec(ctx, query, pKey.ClientPlatformId, pKey.ClientTypeId)
@@ -111,6 +114,7 @@ func (r *clientRepo) Remove(ctx context.Context, pKey *pb.ClientPrimaryKey) (row
 }
 
 func (r *clientRepo) GetList(ctx context.Context, queryParam *pb.GetClientListRequest) (res *pb.GetClientListResponse, err error) {
+
 	res = &pb.GetClientListResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -185,6 +189,7 @@ func (r *clientRepo) GetList(ctx context.Context, queryParam *pb.GetClientListRe
 }
 
 func (r *clientRepo) GetMatrix(ctx context.Context, req *pb.GetClientMatrixRequest) (res *pb.GetClientMatrixResponse, err error) {
+
 	if !util.IsValidUUID(req.ProjectId) {
 		return res, storage.ErrorProjectId
 	}

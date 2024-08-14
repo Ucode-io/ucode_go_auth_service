@@ -91,6 +91,7 @@ func (s *smsOtpSettingsRepo) Update(ctx context.Context, req *pb.SmsOtpSettings)
 	return result.RowsAffected(), err
 }
 func (s *smsOtpSettingsRepo) GetById(ctx context.Context, req *pb.SmsOtpSettingsPrimaryKey) (*pb.SmsOtpSettings, error) {
+
 	response := &pb.SmsOtpSettings{}
 	err := s.db.QueryRow(ctx, `
 		SELECT 
@@ -121,6 +122,7 @@ func (s *smsOtpSettingsRepo) GetById(ctx context.Context, req *pb.SmsOtpSettings
 	return response, nil
 }
 func (s *smsOtpSettingsRepo) GetList(ctx context.Context, req *pb.GetListSmsOtpSettingsRequest) (*pb.SmsOtpSettingsResponse, error) {
+
 	res := make([]*pb.SmsOtpSettings, 0)
 	rows, err := s.db.Query(ctx, `
 		SELECT 

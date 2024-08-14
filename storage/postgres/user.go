@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/api/models"
-	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
@@ -38,8 +37,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	query := `INSERT INTO "user" (
 		id,
-		-- name,
-		-- photo_url,
 		phone,
 		email,
 		login,
@@ -52,8 +49,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		$4,
 		$5,
 		$6
-		-- $7,
-		-- $8
 	)`
 
 	id, err := uuid.NewRandom()
@@ -63,8 +58,6 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	_, err = r.db.Exec(ctx, query,
 		id.String(),
-		// entity.GetName(),
-		// entity.GetPhotoUrl(),
 		entity.GetPhone(),
 		entity.GetEmail(),
 		entity.GetLogin(),
@@ -80,6 +73,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 }
 
 func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error) {
+
 	res = &pb.User{}
 	var (
 		lan  pb.Language
@@ -87,48 +81,20 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 	)
 	query := `SELECT
 		u.id,
-		-- coalesce(u.name, ''),
-		-- coalesce(u.photo_url, ''),
 		u.phone,
 		u.email,
 		u.login,
-		-- u.password,
 		u.company_id
-		-- coalesce(t.id::VARCHAR, ''),
-		-- coalesce(t.name, ''),
-		-- coalesce(t.text, ''),
-		-- coalesce(l.id::VARCHAR, ''),
-		-- coalesce(l.name, ''),
-		-- coalesce(l.short_name, ''),
-		-- coalesce(l.native_name, '')
-		-- TO_CHAR(u.expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at
-		-- TO_CHAR(u.created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		-- TO_CHAR(u.updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"user" u
-		-- LEFT JOIN "language" l on u.language_id = l.id
-		-- LEFT JOIN "timezone" t on u.timezone_id = t.id
 	WHERE
 		u.id = $1`
 	err = r.db.QueryRow(ctx, query, pKey.Id).Scan(
 		&res.Id,
-		// &res.Name,
-		// &res.PhotoUrl,
 		&res.Phone,
 		&res.Email,
 		&res.Login,
-		// &res.Password,
 		&res.CompanyId,
-		// &time.Id,
-		// &time.Name,
-		// &time.Text,
-		// &lan.Id,
-		// &lan.Name,
-		// &lan.ShortName,
-		// &lan.NativeName,
-		// &res.ExpiresAt,
-		// &res.CreatedAt,
-		// &res.UpdatedAt,
 	)
 	if err != nil {
 		return res, err
@@ -409,15 +375,10 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	query := `SELECT
 		id,
-		-- name,
-		-- coalesce(photo_url, ''),
 		phone,
 		email,
 		login,
 		password
-		-- TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
-		-- TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		-- TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
 	FROM
 		"user"
 	WHERE`
@@ -434,16 +395,10 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 
 	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
 		&res.Id,
-		// &res.Name,
-		// &res.PhotoUrl,
 		&res.Phone,
 		&res.Email,
 		&res.Login,
 		&res.Password,
-		// &res.Active,
-		// &res.ExpiresAt,
-		// &res.CreatedAt,
-		// &res.UpdatedAt,
 	)
 	if err == pgx.ErrNoRows && IsValidEmailNew(username) {
 		queryIf := `

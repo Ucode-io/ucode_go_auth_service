@@ -6,10 +6,10 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type clientTypeRepo struct {
@@ -23,6 +23,7 @@ func NewClientTypeRepo(db *pgxpool.Pool) storage.ClientTypeRepoI {
 }
 
 func (r *clientTypeRepo) Create(ctx context.Context, entity *pb.CreateClientTypeRequest) (pKey *pb.ClientTypePrimaryKey, err error) {
+
 	query := `INSERT INTO "client_type" (
 		id,
 		project_id,
@@ -61,6 +62,7 @@ func (r *clientTypeRepo) Create(ctx context.Context, entity *pb.CreateClientType
 }
 
 func (r *clientTypeRepo) GetByPK(ctx context.Context, pKey *pb.ClientTypePrimaryKey) (res *pb.ClientType, err error) {
+
 	res = &pb.ClientType{}
 	var confirmBy string
 	query := `SELECT
@@ -94,6 +96,7 @@ func (r *clientTypeRepo) GetByPK(ctx context.Context, pKey *pb.ClientTypePrimary
 }
 
 func (r *clientTypeRepo) GetList(ctx context.Context, queryParam *pb.GetClientTypeListRequest) (res *pb.GetClientTypeListResponse, err error) {
+
 	res = &pb.GetClientTypeListResponse{}
 	params := make(map[string]interface{})
 	query := `SELECT
@@ -159,6 +162,7 @@ func (r *clientTypeRepo) GetList(ctx context.Context, queryParam *pb.GetClientTy
 }
 
 func (r *clientTypeRepo) Update(ctx context.Context, entity *pb.UpdateClientTypeRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "client_type" SET
 		name = :name,
 		confirm_by = :confirm_by,
@@ -189,6 +193,7 @@ func (r *clientTypeRepo) Update(ctx context.Context, entity *pb.UpdateClientType
 }
 
 func (r *clientTypeRepo) Delete(ctx context.Context, pKey *pb.ClientTypePrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "client_type" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)
@@ -202,6 +207,7 @@ func (r *clientTypeRepo) Delete(ctx context.Context, pKey *pb.ClientTypePrimaryK
 }
 
 func (r *clientTypeRepo) GetCompleteByPK(ctx context.Context, pKey *pb.ClientTypePrimaryKey) (res *pb.CompleteClientType, err error) {
+
 	res = &pb.CompleteClientType{
 		ClientType:     &pb.ClientType{},
 		Relations:      make([]*pb.Relation, 0),

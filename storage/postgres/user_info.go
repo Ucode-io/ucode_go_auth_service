@@ -20,6 +20,7 @@ func NewUserInfoRepo(db *pgxpool.Pool) storage.UserInfoRepoI {
 }
 
 func (r *userInfoRepo) Upsert(ctx context.Context, entity *pb.UpsertUserInfoRequest) (pKey *pb.UserInfoPrimaryKey, err error) {
+
 	data, err := json.Marshal(entity.Data)
 	if err != nil {
 		return pKey, err
@@ -48,6 +49,7 @@ func (r *userInfoRepo) Upsert(ctx context.Context, entity *pb.UpsertUserInfoRequ
 }
 
 func (r *userInfoRepo) GetByPK(ctx context.Context, pKey *pb.UserInfoPrimaryKey) (res *pb.UserInfo, err error) {
+
 	res = &pb.UserInfo{}
 	var data []byte
 

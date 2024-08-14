@@ -22,6 +22,7 @@ func NewEmailRepo(db *pgxpool.Pool) storage.EmailRepoI {
 }
 
 func (e *emailRepo) Create(ctx context.Context, input *pb.Email) (*pb.Email, error) {
+
 	query := `INSERT INTO "email_sms" (
 		id,
 		email,
@@ -48,6 +49,7 @@ func (e *emailRepo) Create(ctx context.Context, input *pb.Email) (*pb.Email, err
 }
 
 func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (res *pb.Email, err error) {
+
 	res = &pb.Email{}
 	query := `SELECT
 					id,
@@ -64,7 +66,7 @@ func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (r
 		&res.Otp,
 	)
 	if err == pgx.ErrNoRows {
-		err := errors.New("Otp has been expired")
+		err := errors.New("otp has been expired")
 		return nil, err
 	} else if err != nil {
 		return res, err
@@ -154,6 +156,7 @@ func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEma
 }
 
 func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error) {
+
 	arr := &pb.UpdateEmailSettingsResponse{}
 	res := &pb.EmailSettings{}
 

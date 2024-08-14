@@ -22,6 +22,7 @@ func NewRoleRepo(db *pgxpool.Pool) storage.RoleRepoI {
 }
 
 func (r *roleRepo) Add(ctx context.Context, entity *pb.AddRoleRequest) (pKey *pb.RolePrimaryKey, err error) {
+
 	query := `INSERT INTO "role" (
 		id,
 		client_type_id,
@@ -57,6 +58,7 @@ func (r *roleRepo) Add(ctx context.Context, entity *pb.AddRoleRequest) (pKey *pb
 }
 
 func (r *roleRepo) GetByPK(ctx context.Context, pKey *pb.RolePrimaryKey) (res *pb.Role, err error) {
+
 	res = &pb.Role{}
 	query := `SELECT
 		id,
@@ -84,6 +86,7 @@ func (r *roleRepo) GetByPK(ctx context.Context, pKey *pb.RolePrimaryKey) (res *p
 }
 
 func (r *roleRepo) GetRoleByIdDetailed(ctx context.Context, entity *pb.RolePrimaryKey) (res *pb.GetRoleByIdResponse, err error) {
+
 	res = &pb.GetRoleByIdResponse{}
 	var confirmBy string
 	query := `SELECT 
@@ -172,6 +175,7 @@ func (r *roleRepo) GetRoleByIdDetailed(ctx context.Context, entity *pb.RolePrima
 }
 
 func (r *roleRepo) GetList(ctx context.Context, entity *pb.GetRolesListRequest) (*pb.GetRolesResponse, error) {
+
 	res := new(pb.GetRolesResponse)
 
 	params := map[string]interface{}{
@@ -231,6 +235,7 @@ func (r *roleRepo) GetList(ctx context.Context, entity *pb.GetRolesListRequest) 
 }
 
 func (r *roleRepo) Update(ctx context.Context, entity *pb.UpdateRoleRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "role" SET
 		client_type_id = :client_type_id,
 		name = :name,
@@ -260,6 +265,7 @@ func (r *roleRepo) Update(ctx context.Context, entity *pb.UpdateRoleRequest) (ro
 }
 
 func (r *roleRepo) Remove(ctx context.Context, pKey *pb.RolePrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "role" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)

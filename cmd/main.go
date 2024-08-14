@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net"
+
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
 	"ucode/ucode_go_auth_service/config"
@@ -32,6 +33,30 @@ func main() {
 		loggerLevel = logger.LevelInfo
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	// jaegerCfg := &jaeger_config.Configuration{
+	// 	ServiceName: baseCfg.ServiceName,
+
+	// 	// "const" sampler is a binary sampling strategy: 0=never sample, 1=always sample.
+	// 	Sampler: &jaeger_config.SamplerConfig{
+	// 		Type:  "const",
+	// 		Param: 1,
+	// 	},
+
+	// 	// Log the emitted spans to stdout.
+	// 	Reporter: &jaeger_config.ReporterConfig{
+	// 		LogSpans:           false,
+	// 		LocalAgentHostPort: "localhost:6831",
+	// 	},
+	// }
+
+	// tracer, closer, err := jaegerCfg.NewTracer(jaeger_config.Logger(jaeger.StdLogger))
+	// if err != nil {
+	// 	log.Panic("ERROR: cannot init Jaeger", logger.Error(err))
+	// }
+	// log.Println("Jaeger tracer initialized")
+	// defer closer.Close()
+	// opentracing.SetGlobalTracer(tracer)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -105,4 +130,5 @@ func main() {
 	r := api.SetUpRouter(h, baseCfg)
 
 	r.Run(baseCfg.HTTPPort)
+
 }

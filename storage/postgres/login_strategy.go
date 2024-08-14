@@ -21,6 +21,7 @@ func NewLoginStrategy(db *pgxpool.Pool) storage.LoginStrategyI {
 }
 
 func (ls *loginStrategyRepoI) GetList(ctx context.Context, req *pb.GetListRequest) (*pb.GetListResponse, error) {
+
 	var (
 		res = pb.GetListResponse{}
 	)
@@ -56,6 +57,7 @@ func (ls *loginStrategyRepoI) GetList(ctx context.Context, req *pb.GetListReques
 }
 
 func (ls *loginStrategyRepoI) GetByID(ctx context.Context, req *pb.LoginStrategyPrimaryKey) (*pb.LoginStrategy, error) {
+
 	var (
 		res = pb.LoginStrategy{}
 	)
@@ -79,6 +81,7 @@ func (ls *loginStrategyRepoI) GetByID(ctx context.Context, req *pb.LoginStrategy
 }
 
 func (ls *loginStrategyRepoI) Upsert(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+
 	var (
 		resp = pb.UpdateResponse{}
 	)

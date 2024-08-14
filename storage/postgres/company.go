@@ -23,6 +23,7 @@ func NewCompanyRepo(db *pgxpool.Pool) storage.CompanyRepoI {
 }
 
 func (r *companyRepo) Register(ctx context.Context, entity *pb.RegisterCompanyRequest) (pKey *pb.CompanyPrimaryKey, err error) {
+
 	query := `INSERT INTO "company" (
 		id,
 		name
@@ -49,6 +50,7 @@ func (r *companyRepo) Register(ctx context.Context, entity *pb.RegisterCompanyRe
 }
 
 func (r *companyRepo) Update(ctx context.Context, entity *pb.UpdateCompanyRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "company" SET
 		name = :name,
 		updated_at = now()
@@ -72,6 +74,7 @@ func (r *companyRepo) Update(ctx context.Context, entity *pb.UpdateCompanyReques
 }
 
 func (r *companyRepo) Remove(ctx context.Context, pKey *pb.CompanyPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "company" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)
@@ -85,6 +88,7 @@ func (r *companyRepo) Remove(ctx context.Context, pKey *pb.CompanyPrimaryKey) (r
 }
 
 func (r *companyRepo) GetList(ctx context.Context, queryParam *pb.GetComapnyListRequest) (*pb.GetListCompanyResponse, error) {
+
 	res := &pb.GetListCompanyResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -167,6 +171,7 @@ func (r *companyRepo) GetList(ctx context.Context, queryParam *pb.GetComapnyList
 }
 
 func (r *companyRepo) GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (*pb.Company, error) {
+
 	res := &pb.Company{}
 	query := `SELECT
 		id,
@@ -192,6 +197,7 @@ func (r *companyRepo) GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (
 }
 
 func (r *companyRepo) TransferOwnership(ctx context.Context, companyID, ownerID string) (rowsAffected int64, err error) {
+
 	query := `UPDATE "company" SET
 		owner_id = :owner_id,
 		updated_at = now()

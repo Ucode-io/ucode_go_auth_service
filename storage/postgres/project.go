@@ -23,6 +23,7 @@ func NewProjectRepo(db *pgxpool.Pool) storage.ProjectRepoI {
 }
 
 func (r *projectRepo) Create(ctx context.Context, entity *pb.CreateProjectRequest) (pKey *pb.ProjectPrimaryKey, err error) {
+
 	query := `INSERT INTO "project" (
 		id,
 		company_id,
@@ -55,6 +56,7 @@ func (r *projectRepo) Create(ctx context.Context, entity *pb.CreateProjectReques
 }
 
 func (r *projectRepo) GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (res *pb.Project, err error) {
+
 	res = &pb.Project{}
 	query := `SELECT
 		id,
@@ -102,6 +104,7 @@ func (r *projectRepo) GetByPK(ctx context.Context, pKey *pb.ProjectPrimaryKey) (
 }
 
 func (r *projectRepo) GetList(ctx context.Context, queryParam *pb.GetProjectListRequest) (res *pb.GetProjectListResponse, err error) {
+
 	res = &pb.GetProjectListResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -179,6 +182,7 @@ func (r *projectRepo) GetList(ctx context.Context, queryParam *pb.GetProjectList
 }
 
 func (r *projectRepo) Update(ctx context.Context, entity *pb.UpdateProjectRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "project" SET
 		name = :name,
 		domain = :domain,
@@ -204,6 +208,7 @@ func (r *projectRepo) Update(ctx context.Context, entity *pb.UpdateProjectReques
 }
 
 func (r *projectRepo) Delete(ctx context.Context, pKey *pb.ProjectPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "project" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)

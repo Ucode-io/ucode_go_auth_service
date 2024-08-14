@@ -19,6 +19,7 @@ func NewScopeRepo(db *pgxpool.Pool) storage.ScopeRepoI {
 }
 
 func (r *scopeRepo) Upsert(ctx context.Context, entity *pb.UpsertScopeRequest) (pKey *pb.ScopePrimaryKey, err error) {
+
 	query := `INSERT INTO "scope" (
 		client_platform_id,
 		path,
@@ -52,6 +53,7 @@ func (r *scopeRepo) Upsert(ctx context.Context, entity *pb.UpsertScopeRequest) (
 }
 
 func (r *scopeRepo) GetByPK(ctx context.Context, pKey *pb.ScopePrimaryKey) (res *pb.Scope, err error) {
+
 	res = &pb.Scope{}
 	query := `SELECT
 		client_platform_id,
@@ -77,6 +79,7 @@ func (r *scopeRepo) GetByPK(ctx context.Context, pKey *pb.ScopePrimaryKey) (res 
 }
 
 func (r *scopeRepo) GetList(ctx context.Context, req *pb.GetScopeListRequest) (res *pb.GetScopesResponse, err error) {
+
 	res = &pb.GetScopesResponse{}
 	query := `SELECT
 			client_platform_id,

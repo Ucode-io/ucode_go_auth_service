@@ -23,6 +23,7 @@ func NewApiKeysRepo(db *pgxpool.Pool) storage.ApiKeysRepoI {
 }
 
 func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, appId, id string) (*pb.CreateRes, error) {
+
 	var (
 		res pb.CreateRes
 
@@ -84,6 +85,7 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 	return &res, nil
 }
 func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetListRes, error) {
+
 	var (
 		res = pb.GetListRes{Count: 0}
 	)
@@ -214,9 +216,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	return &res, nil
 }
 func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
-	var (
-		res pb.GetRes
 
+	var (
+		res       pb.GetRes
 		createdAt sql.NullString
 		updatedAt sql.NullString
 		usedCount sql.NullInt32
@@ -276,6 +278,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 	return &res, nil
 }
 func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffected int64, err error) {
+
 	query := `UPDATE "api_keys" SET
 				status = $1,
 				name = $2,
@@ -303,6 +306,7 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 	return
 }
 func (r *apiKeysRepo) Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "api_keys"
 				WHERE id = $1`
 
@@ -315,9 +319,9 @@ func (r *apiKeysRepo) Delete(ctx context.Context, req *pb.DeleteReq) (rowsAffect
 }
 
 func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error) {
-	var (
-		res pb.GetRes
 
+	var (
+		res       pb.GetRes
 		createdAt sql.NullString
 		updatedAt sql.NullString
 	)
@@ -371,7 +375,6 @@ func (r *apiKeysRepo) GetByAppId(ctx context.Context, appId string) (*pb.GetRes,
 }
 
 func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
-
 	res := &pb.GetRes{}
 
 	query := `
@@ -413,6 +416,7 @@ func (r *apiKeysRepo) GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes,
 }
 
 func (r *apiKeysRepo) UpdateIsMonthlyLimitReached(ctx context.Context) error {
+
 	query := `
 		UPDATE api_keys SET 
 			is_monthly_request_limit_reached = false

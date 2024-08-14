@@ -19,6 +19,7 @@ func NewRolePermissionRepo(db *pgxpool.Pool) storage.RolePermissionRepoI {
 }
 
 func (r *rolePermissionRepo) Add(ctx context.Context, entity *pb.AddRolePermissionRequest) (pKey *pb.RolePermissionPrimaryKey, err error) {
+
 	query := `INSERT INTO "role_permission" (
 		role_id,
 		permission_id
@@ -41,6 +42,7 @@ func (r *rolePermissionRepo) Add(ctx context.Context, entity *pb.AddRolePermissi
 }
 
 func (r *rolePermissionRepo) AddMultiple(ctx context.Context, entity *pb.AddRolePermissionsRequest) (rowsAffected int64, err error) {
+
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return rowsAffected, err
@@ -84,6 +86,7 @@ func (r *rolePermissionRepo) AddMultiple(ctx context.Context, entity *pb.AddRole
 }
 
 func (r *rolePermissionRepo) GetByPK(ctx context.Context, pKey *pb.RolePermissionPrimaryKey) (res *pb.RolePermission, err error) {
+
 	res = &pb.RolePermission{}
 	query := `SELECT
 		role_id,
@@ -105,6 +108,7 @@ func (r *rolePermissionRepo) GetByPK(ctx context.Context, pKey *pb.RolePermissio
 }
 
 func (r *rolePermissionRepo) Remove(ctx context.Context, pKey *pb.RolePermissionPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM
 		"role_permission"
 	WHERE

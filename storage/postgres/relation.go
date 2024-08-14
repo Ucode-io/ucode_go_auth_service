@@ -21,6 +21,7 @@ func NewRelationRepo(db *pgxpool.Pool) storage.RelationRepoI {
 }
 
 func (r *relationRepo) Add(ctx context.Context, entity *pb.AddRelationRequest) (pKey *pb.RelationPrimaryKey, err error) {
+
 	query := `INSERT INTO "relation" (
 		id,
 		client_type_id,
@@ -56,6 +57,7 @@ func (r *relationRepo) Add(ctx context.Context, entity *pb.AddRelationRequest) (
 }
 
 func (r *relationRepo) GetByPK(ctx context.Context, pKey *pb.RelationPrimaryKey) (res *pb.Relation, err error) {
+
 	var relationType string
 	res = &pb.Relation{}
 	query := `SELECT
@@ -86,6 +88,7 @@ func (r *relationRepo) GetByPK(ctx context.Context, pKey *pb.RelationPrimaryKey)
 }
 
 func (r *relationRepo) Update(ctx context.Context, entity *pb.UpdateRelationRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "relation" SET
 		client_type_id = :client_type_id,
 		type = :type,
@@ -115,6 +118,7 @@ func (r *relationRepo) Update(ctx context.Context, entity *pb.UpdateRelationRequ
 }
 
 func (r *relationRepo) Remove(ctx context.Context, pKey *pb.RelationPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "relation" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)

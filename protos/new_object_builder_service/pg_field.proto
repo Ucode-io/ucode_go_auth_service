@@ -17,6 +17,8 @@ service FieldService {
     rpc Delete(FieldPrimaryKey) returns (google.protobuf.Empty) {}
 
     rpc GetAllByLabel(GetAllByLabelReq) returns (GetAllFieldsResponse) {}
+    rpc GetIdsByLabel(GetIdsByLabelReq) returns (GetIdsByLabelResponse) {}
+   
 }
 
 message CreateFieldRequest {
@@ -43,6 +45,7 @@ message CreateFieldRequest {
     string minio_folder = 21;
     string env_id = 22;
     string relation_id = 23;
+    bool is_alt = 24;
 }
 
 message CreateFieldsRequest {
@@ -89,6 +92,7 @@ message Field {
     string minio_folder = 24;
     string env_id = 25;
     bool is_search = 26;
+    bool is_alt = 27;
 }
 
 message SearchUpdate {
@@ -146,3 +150,14 @@ message GetAllByLabelReq {
     string field_label = 2;
     string table_id = 3;
 }
+
+message GetIdsByLabelResponse {
+    repeated string ids = 1;
+}
+
+message GetIdsByLabelReq {
+    string project_id = 1;
+    repeated string field_label = 2;
+    string table_id = 3;
+}
+

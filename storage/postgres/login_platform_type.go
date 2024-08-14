@@ -159,6 +159,7 @@ func (e *loginPlatformTypeRepo) UpdateLoginPlatformType(ctx context.Context, inp
 }
 
 func (e *loginPlatformTypeRepo) GetListLoginPlatformType(ctx context.Context, input *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error) {
+
 	arr := &pb.GetListLoginPlatformTypeResponse{}
 
 	query := `SELECT

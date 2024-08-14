@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"math/big"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -15,9 +16,8 @@ import (
 )
 
 var (
-	digits   = "0123456789"
-	specials = "~=+%^*/()[]{}/!@#$?|"
-	all      = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+	digits = "0123456789"
+	all    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
 		digits
 )
@@ -156,4 +156,27 @@ func MarshalToStruct(data interface{}, resp interface{}) error {
 	}
 
 	return nil
+}
+
+func EmailValidation(email string) bool {
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	checkEmail := emailRegex.MatchString(email)
+
+	return checkEmail
+}
+
+func GetStringFromMap(body map[string]interface{}, key string) string {
+	if value, ok := body[key]; ok {
+		if str, ok := value.(string); ok {
+			return str
+		}
+	}
+	return ""
+}
+func AnyToString(value any, exist bool) string {
+	if !exist {
+		return ""
+	}
+
+	return value.(string)
 }

@@ -21,6 +21,7 @@ func NewUserInfoFieldRepo(db *pgxpool.Pool) storage.UserInfoFieldRepoI {
 }
 
 func (r *userInfoFieldRepo) Add(ctx context.Context, entity *pb.AddUserInfoFieldRequest) (pKey *pb.UserInfoFieldPrimaryKey, err error) {
+
 	query := `INSERT INTO "user_info_field" (
 		id,
 		client_type_id,
@@ -56,6 +57,7 @@ func (r *userInfoFieldRepo) Add(ctx context.Context, entity *pb.AddUserInfoField
 }
 
 func (r *userInfoFieldRepo) GetByPK(ctx context.Context, pKey *pb.UserInfoFieldPrimaryKey) (res *pb.UserInfoField, err error) {
+
 	res = &pb.UserInfoField{}
 	query := `SELECT
 		id,
@@ -84,6 +86,7 @@ func (r *userInfoFieldRepo) GetByPK(ctx context.Context, pKey *pb.UserInfoFieldP
 }
 
 func (r *userInfoFieldRepo) Update(ctx context.Context, entity *pb.UpdateUserInfoFieldRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "user_info_field" SET
 		client_type_id = :client_type_id,
 		field_name = :field_name,
@@ -113,6 +116,7 @@ func (r *userInfoFieldRepo) Update(ctx context.Context, entity *pb.UpdateUserInf
 }
 
 func (r *userInfoFieldRepo) Remove(ctx context.Context, pKey *pb.UserInfoFieldPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "user_info_field" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)

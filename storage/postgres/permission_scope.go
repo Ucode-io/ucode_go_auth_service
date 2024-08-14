@@ -19,6 +19,7 @@ func NewPermissionScopeRepo(db *pgxpool.Pool) storage.PermissionScopeRepoI {
 }
 
 func (r *permissionScopeRepo) Add(ctx context.Context, entity *pb.AddPermissionScopeRequest) (pKey *pb.PermissionScopePrimaryKey, err error) {
+
 	query := `INSERT INTO "permission_scope" (
 		permission_id,
 		client_platform_id,
@@ -49,6 +50,7 @@ func (r *permissionScopeRepo) Add(ctx context.Context, entity *pb.AddPermissionS
 }
 
 func (r *permissionScopeRepo) GetByPK(ctx context.Context, pKey *pb.PermissionScopePrimaryKey) (res *pb.PermissionScope, err error) {
+
 	res = &pb.PermissionScope{}
 	query := `SELECT
 		permission_id,
@@ -75,6 +77,7 @@ func (r *permissionScopeRepo) GetByPK(ctx context.Context, pKey *pb.PermissionSc
 }
 
 func (r *permissionScopeRepo) Remove(ctx context.Context, pKey *pb.PermissionScopePrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM
 		"permission_scope"
 	WHERE
@@ -91,6 +94,7 @@ func (r *permissionScopeRepo) Remove(ctx context.Context, pKey *pb.PermissionSco
 }
 
 func (r *permissionScopeRepo) HasAccess(ctx context.Context, roleID, clientPlatformID, path, method string) (hasAccess bool, err error) {
+
 	var count int32
 
 	query := `SELECT COUNT(*) FROM

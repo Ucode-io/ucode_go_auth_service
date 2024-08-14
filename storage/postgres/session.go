@@ -29,7 +29,6 @@ func NewSessionRepo(db *pgxpool.Pool) storage.SessionRepoI {
 }
 
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
-	log.Printf("--->STRG: CreateSessionRequest: %+v", entity)
 
 	params := make(map[string]interface{})
 	queryInitial := `INSERT INTO "session" (
@@ -141,6 +140,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 }
 
 func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionListRequest) (res *pb.GetSessionListResponse, err error) {
+
 	// @TODO refactor
 	res = &pb.GetSessionListResponse{}
 	params := make(map[string]interface{})
@@ -278,6 +278,7 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
 }
 
 func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "session" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)
@@ -291,6 +292,7 @@ func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (r
 }
 
 func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error) {
+
 	log.Printf("---STRG->DeleteExpiredUserSessions---> %s", userID)
 
 	query := `DELETE FROM "session" WHERE user_id = $1 AND expires_at < $2`
@@ -306,6 +308,7 @@ func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID stri
 }
 
 func (r *sessionRepo) DeleteExpiredIntegrationSessions(ctx context.Context, integrationId string) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "session" WHERE integration_id = $1 AND expires_at < $2`
 
 	result, err := r.db.Exec(ctx, query, integrationId, time.Now().Format("2006-01-02 15:04:05"))
@@ -319,6 +322,7 @@ func (r *sessionRepo) DeleteExpiredIntegrationSessions(ctx context.Context, inte
 }
 
 func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error) {
+
 	res = &pb.GetSessionListResponse{}
 
 	//coalesce(client_platform_id::text, ''),
@@ -372,6 +376,7 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 	return res, nil
 }
 func (r *sessionRepo) GetSessionListByIntegrationID(ctx context.Context, integrationId string) (res *pb.GetSessionListResponse, err error) {
+
 	res = &pb.GetSessionListResponse{}
 
 	query := `SELECT
@@ -425,6 +430,7 @@ func (r *sessionRepo) GetSessionListByIntegrationID(ctx context.Context, integra
 }
 
 func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error) {
+
 	// @TODO remove if not used
 	query := `UPDATE "session" SET
 		is_changed = $2

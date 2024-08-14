@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -97,12 +98,15 @@ type BaseConfig struct {
 
 	CompanyServiceHost string
 	CompanyGRPCPort    string
+
+	JaegerHostPort string
 }
 
 func BaseLoad() BaseConfig {
 
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
+			log.Println("Error loading .env file")
 		}
 	}
 
@@ -125,7 +129,7 @@ func BaseLoad() BaseConfig {
 	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", ""))
 	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", ""))
 	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", ""))
-	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 30))
+	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 400))
 
 	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", ""))
 	config.AuthGRPCPort = cast.ToString(getOrReturnDefaultValue("AUTH_GRPC_PORT", ""))
@@ -140,6 +144,8 @@ func BaseLoad() BaseConfig {
 
 	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "snZV9XNmvf"))
 
+	config.JaegerHostPort = cast.ToString(getOrReturnDefaultValue("JAEGER_HOST_PORT", ""))
+
 	return config
 }
 
@@ -147,6 +153,7 @@ func BaseLoad() BaseConfig {
 func Load() Config {
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
+			log.Println("Error loading .env file")
 		}
 	}
 
@@ -175,8 +182,8 @@ func Load() Config {
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
 
-	config.GoObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_HOST", ""))
-	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ""))
+	config.GoObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_HOST", ""))
+	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_GRPC_PORT", ""))
 
 	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
 	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))

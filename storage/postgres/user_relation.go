@@ -19,6 +19,7 @@ func NewUserRelationRepo(db *pgxpool.Pool) storage.UserRelationRepoI {
 }
 
 func (r *userRelationRepo) Add(ctx context.Context, entity *pb.AddUserRelationRequest) (pKey *pb.UserRelationPrimaryKey, err error) {
+
 	query := `INSERT INTO "user_relation" (
 		user_id,
 		relation_id
@@ -41,6 +42,7 @@ func (r *userRelationRepo) Add(ctx context.Context, entity *pb.AddUserRelationRe
 }
 
 func (r *userRelationRepo) GetByPK(ctx context.Context, pKey *pb.UserRelationPrimaryKey) (res *pb.UserRelation, err error) {
+
 	res = &pb.UserRelation{}
 	query := `SELECT
 		user_id,
@@ -62,6 +64,7 @@ func (r *userRelationRepo) GetByPK(ctx context.Context, pKey *pb.UserRelationPri
 }
 
 func (r *userRelationRepo) Remove(ctx context.Context, pKey *pb.UserRelationPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM
 		"user_relation"
 	WHERE

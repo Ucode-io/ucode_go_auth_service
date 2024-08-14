@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -49,55 +48,44 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		err       error
 		userId    string
 		userData  *pbObject.LoginDataRes
+
+		login    = helper.GetStringFromMap(body, "login")
+		email    = helper.GetStringFromMap(body, "email")
+		password = helper.GetStringFromMap(body, "password")
+		phone    = helper.GetStringFromMap(body, "phone")
 	)
 
-	switch strings.ToUpper(body["type"].(string)) {
+	switch strings.ToUpper(data.Type) {
 	case "EMAIL":
-		{
-			foundUser, err = rs.strg.User().GetByUsername(ctx, body["email"].(string))
-			if err != nil {
-				rs.log.Error("!RegisterUserError--->EmailGetByUsername", logger.Error(err))
-				return nil, err
-			}
+		foundUser, err = rs.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			rs.log.Error("!RegisterUserError--->EmailGetByUsername", logger.Error(err))
+			return nil, err
 		}
 	case "PHONE":
-		{
-			foundUser, err = rs.strg.User().GetByUsername(ctx, body["phone"].(string))
-			if err != nil {
-				rs.log.Error("!RegisterUserError--->PhoneGetByUsernames", logger.Error(err))
-				return nil, err
-			}
+		foundUser, err = rs.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			rs.log.Error("!RegisterUserError--->PhoneGetByUsernames", logger.Error(err))
+			return nil, err
 		}
 	}
 
-	if foundUser.Id == "" {
-		// create user in auth service
-		var login, email, password, phone string
+	userId = foundUser.GetId()
 
-		if _, ok := body["login"]; ok {
-			login = body["login"].(string)
-		}
-		if _, ok := body["password"].(string); ok {
-			password = body["password"].(string)
-		}
-		if _, ok := body["phone"].(string); ok {
-			phone = body["phone"].(string)
-		}
-		if _, ok := body["email"].(string); ok {
-			email = body["email"].(string)
-		}
-		emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-		checkEmail := emailRegex.MatchString(email)
-		if !checkEmail && email != "" {
+	if foundUser.Id == "" {
+
+		if !helper.EmailValidation(email) {
 			err = fmt.Errorf("email is not valid")
-			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			rs.log.Error("!!!CreateUser--->EmailValidation", logger.Error(err))
 			return nil, err
 		}
+
 		hashedPassword, err := security.HashPassword(password)
 		if err != nil {
-			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			rs.log.Error("!!!CreateUser--->HashPassword", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		password = hashedPassword
 
 		pKey, err := rs.strg.User().Create(ctx, &pb.CreateUserRequest{
@@ -105,49 +93,50 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			Password:  password,
 			Email:     email,
 			Phone:     phone,
-			CompanyId: body["company_id"].(string),
+			CompanyId: data.GetCompanyId(),
 		})
-
 		if err != nil {
-			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			rs.log.Error("!!!CreateUser--->CreateRequest", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = pKey.GetId()
-	} else {
-		userId = foundUser.GetId()
 	}
 
 	body["guid"] = userId
 	body["from_auth_service"] = true
 	structData, err := helper.ConvertMapToStruct(body)
-
 	if err != nil {
-		rs.log.Error("!!!CreateUser--->", logger.Error(err))
+		rs.log.Error("!!!CreateUser--->ConvertMapToStruct", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	services, err := rs.serviceNode.GetByNodeType(
-		body["project_id"].(string),
+		data.ProjectId,
 		data.NodeType,
 	)
 	if err != nil {
+		rs.log.Error("!!!CreateUser--->GetByNodeType", logger.Error(err))
 		return nil, err
 	}
 
-	var tableSlug = "user"
-	switch body["resource_type"].(float64) {
+	var (
+		resourceType = body["resource_type"].(float64)
+		tableSlug    = "user"
+	)
+
+	switch resourceType {
 	case 1:
 		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
+			ProjectId: data.ResourceEnvironmentId,
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(body["client_type_id"].(string)),
+					"id": structpb.NewStringValue(data.ClientTypeId),
 				},
 			},
-			ProjectId: body["resource_environment_id"].(string),
 		})
 		if err != nil {
-			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			rs.log.Error("!!!CreateUser--->Node GetSingle", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
@@ -157,45 +146,41 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 				tableSlug = clientTypeTableSlug.(string)
 			}
 		}
+
+		_, err = services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
+			TableSlug: tableSlug,
+			Data:      structData,
+			ProjectId: data.ResourceEnvironmentId,
+		})
+		if err != nil {
+			rs.log.Error("!!!CreateUser--->NodeType Create", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	case 3:
 		response, err := services.GoItemService().GetSingle(ctx, &new_object_builder_service.CommonMessage{
 			TableSlug: "client_type",
+			ProjectId: data.ResourceEnvironmentId,
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(body["client_type_id"].(string)),
+					"id": structpb.NewStringValue(data.ClientTypeId),
 				},
 			},
-			ProjectId: body["resource_environment_id"].(string),
 		})
 		if err != nil {
-			rs.log.Error("!!!CreateUser--->", logger.Error(err))
+			rs.log.Error("!!!CreateUser--->GetSingle", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		clientType, ok := response.Data.AsMap()["response"]
-		if ok {
+
+		if clientType, ok := response.Data.AsMap()["response"]; ok {
 			if clientTypeTableSlug, ok := clientType.(map[string]interface{})["table_slug"]; ok {
 				tableSlug = clientTypeTableSlug.(string)
 			}
 		}
-	}
 
-	// create user in object builder service
-	switch body["resource_type"].(float64) {
-	case 1:
-		_, err = services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
-			TableSlug: tableSlug,
-			Data:      structData,
-			ProjectId: body["resource_environment_id"].(string),
-		})
-		if err != nil {
-			rs.log.Error("!!!CreateUser--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-	case 3:
 		_, err = services.GoItemService().Create(ctx, &new_object_builder_service.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
-			ProjectId: body["resource_environment_id"].(string),
+			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
 			rs.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
@@ -205,11 +190,11 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
-		ProjectId:    body["project_id"].(string),
-		CompanyId:    body["company_id"].(string),
-		ClientTypeId: body["client_type_id"].(string),
-		RoleId:       body["role_id"].(string),
-		EnvId:        body["environment_id"].(string),
+		RoleId:       data.RoleId,
+		CompanyId:    data.CompanyId,
+		ProjectId:    data.ProjectId,
+		ClientTypeId: data.ClientTypeId,
+		EnvId:        data.EnvironmentId,
 	})
 	if err != nil {
 		rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
@@ -217,25 +202,22 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                userId,
-		ClientType:            body["client_type_id"].(string),
-		ProjectId:             body["project_id"].(string),
-		ResourceEnvironmentId: body["resource_environment_id"].(string),
+		ProjectId:             data.ProjectId,
+		ClientType:            data.ClientTypeId,
+		ResourceEnvironmentId: data.ResourceEnvironmentId,
 	}
 
-	switch body["resource_type"].(float64) {
+	switch resourceType {
 	case 1:
-		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(
-			ctx,
-			reqLoginData,
-		)
-
+		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(ctx, reqLoginData)
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
-			rs.log.Error("!!!Login--->", logger.Error(err))
+			rs.log.Error("!!!Login--->LoginData", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
 		pgLoginData := &new_object_builder_service.LoginDataReq{}
+
 		err := helper.MarshalToStruct(reqLoginData, &pgLoginData)
 		if err != nil {
 			rs.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
@@ -262,7 +244,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 
 	if !userData.UserFound {
-		customError := errors.New("User not found")
+		customError := errors.New("user not found")
 		rs.log.Error("!!!Login--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
@@ -279,17 +261,17 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	resp, err := rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
-		ProjectId:     body["project_id"].(string),
+		ProjectId:     data.ProjectId,
 		Tables:        []*pb.Object{},
-		EnvironmentId: body["environment_id"].(string),
+		EnvironmentId: data.EnvironmentId,
 	})
 	if resp == nil {
-		err := errors.New("User Not Found")
-		rs.log.Error("!!!Login--->", logger.Error(err))
+		err := errors.New("user not found")
+		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 	if err != nil {
-		rs.log.Error("!!!Login--->", logger.Error(err))
+		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
