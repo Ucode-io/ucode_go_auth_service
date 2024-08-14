@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net"
-	_ "net/http/pprof"
 
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"

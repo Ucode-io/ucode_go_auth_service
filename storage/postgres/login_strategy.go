@@ -6,8 +6,8 @@ import (
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type loginStrategyRepoI struct {

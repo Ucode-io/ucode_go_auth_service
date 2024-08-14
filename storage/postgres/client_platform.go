@@ -7,7 +7,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/saidamir98/udevs_pkg/util"
 
 	"github.com/google/uuid"

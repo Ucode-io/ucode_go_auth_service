@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
-	github.com/jackc/pgx/v5 v5.6.0
+	github.com/jackc/pgx/v4 v4.17.2
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.7
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d
@@ -26,9 +26,10 @@ require (
 )
 
 require (
-	github.com/jackc/pgx/v4 v4.17.2 // indirect
-	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	golang.org/x/sync v0.1.0 // indirect
+	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
+	github.com/jackc/pgconn v1.13.0 // indirect
+	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
+	github.com/jackc/puddle v1.3.0 // indirect
 )
 
 require (

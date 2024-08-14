@@ -8,7 +8,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 )
 

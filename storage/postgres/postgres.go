@@ -6,7 +6,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Store struct {

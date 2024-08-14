@@ -8,7 +8,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 )
 
