@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
@@ -177,7 +178,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 }
 
 func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListRequest) (res *pb.GetUserListResponse, err error) {
-
 	res = &pb.GetUserListResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -299,7 +299,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 }
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
-
 	query := `UPDATE "user" SET
 		-- name = :name,
 		company_id = :company_id,
@@ -373,7 +372,6 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 }
 
 func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.User, err error) {
-
 	res = &pb.User{}
 
 	query := `SELECT
@@ -443,7 +441,6 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 }
 
 func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
-
 	query := `UPDATE "user" SET
 		login = :login,
 		email = :email,
@@ -477,7 +474,6 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 }
 
 func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
-
 	res = &models.UserProjectClientTypeResponse{}
 
 	query := `SELECT 
@@ -489,7 +485,7 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 			GROUP BY  user_id`
 
 	err = r.db.QueryRow(ctx, query, req.UserId, req.ProjectId).Scan(
-		pq.Array(&res.ClientTypeIds),
+		&res.ClientTypeIds,
 	)
 	if err != nil {
 		return res, err
@@ -499,7 +495,6 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 }
 
 func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error) {
-
 	res := pb.GetUserProjectsRes{}
 
 	query := `SELECT company_id,
@@ -512,22 +507,18 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
 	for rows.Next() {
 		var (
-			// projects []string
-			company  string
 			projects []string
+			company  string
 		)
 
-		err = rows.Scan(&company, &projects)
+		err = rows.Scan(&company, pq.Array(&projects))
 		if err != nil {
 			return nil, err
 		}
-
-		fmt.Printf("projects: %v\n", projects)
 
 		res.Companies = append(res.Companies, &pb.UserCompany{
 			Id:         company,
@@ -539,7 +530,6 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 }
 
 func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
-
 	res := pb.AddUserToProjectRes{}
 
 	var (
@@ -608,7 +598,6 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 }
 
 func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
-
 	res := pb.AddUserToProjectRes{}
 
 	var (
@@ -675,7 +664,6 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 }
 
 func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
-
 	res := pb.GetProjectsByUserIdRes{}
 
 	query := `SELECT
@@ -777,7 +765,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	}, nil
 }
 
-func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error) {
+func (c *userRepo) GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error) {
 	var (
 		res models.ListLanguage
 	)
@@ -852,7 +840,7 @@ func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingRe
 	return &res, nil
 }
 
-func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error) {
+func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error) {
 	var (
 		res models.ListTimezone
 	)
@@ -925,7 +913,6 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 }
 
 func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
-
 	var (
 		params                      = make(map[string]interface{})
 		subQueryEmail, subQueryPass string
@@ -1091,16 +1078,11 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 }
 
 func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
-
 	count := 0
 	query := `SELECT count(distinct project_id)
 	FROM user_project`
 
 	err := r.db.QueryRow(ctx, query).Scan(&count)
-	if err != nil {
-		return nil, err
-	}
-
 	res := make([]string, 0, count)
 
 	query = `SELECT distinct project_id
@@ -1142,7 +1124,6 @@ func (r *userRepo) UpdateUserProjects(ctx context.Context, envId, projectId stri
 }
 
 func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error) {
-
 	res := models.GetUserEnvProjectRes{
 		EnvProjects: map[string][]string{},
 	}
@@ -1165,7 +1146,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 			projectId string
 		)
 
-		err = rows.Scan(&projectId, &envIds)
+		err = rows.Scan(&projectId, pq.Array(&envIds))
 		if err != nil {
 			return nil, err
 		}
