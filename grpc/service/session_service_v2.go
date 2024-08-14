@@ -940,7 +940,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		}
 
 		if session.ClientTypeId != config.AdminClientPlatformID || clientName.(string) != config.AdminClientName {
-			_, err = services.GetObjectBuilderServiceByType("").GetList(ctx, &pbObject.CommonMessage{
+			resp, err := services.GetObjectBuilderServiceByType("").GetList(ctx, &pbObject.CommonMessage{
 				TableSlug: "record_permission",
 				Data:      structPb,
 				ProjectId: session.ProjectId,
@@ -949,6 +949,19 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 				s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
+
+			res, err := helper.ConvertStructToResponse(resp.Data)
+			if err != nil {
+				s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			if len(res["response"].([]interface{})) == 0 {
+				err := errors.New("Permission denied")
+				s.log.Error("!!!V2HasAccess--->", logger.Error(err))
+				return nil, status.Error(codes.PermissionDenied, err.Error())
+			}
+
 		}
 	}
 
