@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
+	"runtime"
+	"runtime/debug"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -297,11 +299,11 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Register(c *gin.Context) {
-	// defer func() {
-	// 	runtime.GC()
-	// 	debug.FreeOSMemory()
+	defer func() {
+		runtime.GC()
+		debug.FreeOSMemory()
 
-	// }()
+	}()
 
 	var (
 		body models.RegisterOtp
