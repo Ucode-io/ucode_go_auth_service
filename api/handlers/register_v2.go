@@ -397,30 +397,30 @@ func (h *Handler) V2Register(c *gin.Context) {
 	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["resource_environment_id"] = serviceResource.GetResourceEnvironmentId()
 
-	_, err = helper.ConvertMapToStruct(body.Data)
+	structData, err := helper.ConvertMapToStruct(body.Data)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	// response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
-	// 	RoleId:                roleId,
-	// 	Data:                  structData,
-	// 	ClientTypeId:          clientTypeId,
-	// 	Type:                  registerType,
-	// 	CompanyId:             project.CompanyId,
-	// 	NodeType:              serviceResource.NodeType,
-	// 	ProjectId:             serviceResource.ProjectId,
-	// 	ResourceId:            serviceResource.ResourceId,
-	// 	EnvironmentId:         serviceResource.EnvironmentId,
-	// 	ResourceEnvironmentId: serviceResource.ResourceEnvironmentId,
-	// })
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
+	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
+		RoleId:                roleId,
+		Data:                  structData,
+		ClientTypeId:          clientTypeId,
+		Type:                  registerType,
+		CompanyId:             project.CompanyId,
+		NodeType:              serviceResource.NodeType,
+		ProjectId:             serviceResource.ProjectId,
+		ResourceId:            serviceResource.ResourceId,
+		EnvironmentId:         serviceResource.EnvironmentId,
+		ResourceEnvironmentId: serviceResource.ResourceEnvironmentId,
+	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
-	h.handleResponse(c, http.Created, "ok")
+	h.handleResponse(c, http.Created, response)
 }
 
 // SendMessage godoc

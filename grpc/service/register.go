@@ -187,6 +187,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 	}
 
+	return nil, nil
+
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
 		RoleId:       data.RoleId,
