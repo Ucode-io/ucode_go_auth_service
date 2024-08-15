@@ -1,11 +1,15 @@
 package helper
 
 import (
+	"fmt"
+	"runtime"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
 
 func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
+	var memBefore, memAfter runtime.MemStats
+	runtime.ReadMemStats(&memBefore)
 
 	tables := make([]*pb.Table, 0, len(data.GetClientType().GetTables()))
 	permissions := make([]*pb.RecordPermission, 0, len(data.GetPermissions()))
@@ -109,6 +113,11 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 			SmsButton:             data.GetGlobalPermission().GetSmsButton(),
 		},
 	}
-
+	
+	fmt.Println("<<<<<<ConvertPbToAnotherPb Memory Usage>>>>>>")
+	fmt.Printf("Alloc: %d bytes\n", (memAfter.Alloc-memBefore.Alloc)/uint64(mb))
+	fmt.Printf("TotalAlloc: %d bytes\n", (memAfter.TotalAlloc-memBefore.TotalAlloc)/uint64(mb))
+	fmt.Printf("HeapAlloc: %d bytes\n", (memAfter.HeapAlloc-memBefore.HeapAlloc)/uint64(mb))
+	fmt.Printf("Mallocs: %d\n", (memAfter.Mallocs-memBefore.Mallocs)/uint64(mb))
 	return res
 }

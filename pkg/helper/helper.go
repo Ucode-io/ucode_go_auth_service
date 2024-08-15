@@ -4,9 +4,11 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -20,11 +22,12 @@ var (
 	all    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
 		digits
+	mb = 1024 * 1024
 )
 
 func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (string, []interface{}) {
 	var (
-		i    int = 1
+		i     = 1
 		args []interface{}
 	)
 
@@ -145,6 +148,9 @@ func GetURLWithTableSlug(c *gin.Context) string {
 }
 
 func MarshalToStruct(data interface{}, resp interface{}) error {
+	var memBefore, memAfter runtime.MemStats
+	runtime.ReadMemStats(&memBefore)
+
 	js, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -154,6 +160,13 @@ func MarshalToStruct(data interface{}, resp interface{}) error {
 	if err != nil {
 		return err
 	}
+	runtime.ReadMemStats(&memAfter)
+
+	fmt.Println("<<<<<<MarshalToStruct Memory Usage>>>>>>")
+	fmt.Printf("Alloc: %d bytes\n", (memAfter.Alloc-memBefore.Alloc)/uint64(mb))
+	fmt.Printf("TotalAlloc: %d bytes\n", (memAfter.TotalAlloc-memBefore.TotalAlloc)/uint64(mb))
+	fmt.Printf("HeapAlloc: %d bytes\n", (memAfter.HeapAlloc-memBefore.HeapAlloc)/uint64(mb))
+	fmt.Printf("Mallocs: %d\n", (memAfter.Mallocs-memBefore.Mallocs)/uint64(mb))
 
 	return nil
 }
