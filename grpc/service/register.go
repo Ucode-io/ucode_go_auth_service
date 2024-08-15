@@ -48,6 +48,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		debug.FreeOSMemory()
 		rs.log.Info("Memory cleaned 2 ")
 	}()
+	mB := 1
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 	body := data.Data.AsMap()
 	var (
@@ -80,7 +81,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	userId = foundUser.GetId()
 
 	if len(foundUser.GetId()) == 0 {
-
 		if !helper.EmailValidation(email) && len(email) > 0 {
 			err = fmt.Errorf("email is not valid")
 			rs.log.Error("!!!CreateUser--->EmailValidation", logger.Error(err))
@@ -131,6 +131,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		tableSlug    = "user"
 	)
 
+	var memBefore, memAfter runtime.MemStats
+	runtime.ReadMemStats(&memBefore)
 	switch resourceType {
 	case 1:
 		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
@@ -195,6 +197,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 	}
 
+	runtime.ReadMemStats(&memAfter)
+	fmt.Println("<<<<<<GETSINLGE Memory Usage>>>>>>")
+	fmt.Printf("Alloc: %d bytes\n", (memAfter.Alloc-memBefore.Alloc)/uint64(mB))
+	fmt.Printf("TotalAlloc: %d bytes\n", (memAfter.TotalAlloc-memBefore.TotalAlloc)/uint64(mB))
+	fmt.Printf("HeapAlloc: %d bytes\n", (memAfter.HeapAlloc-memBefore.HeapAlloc)/uint64(mB))
+	fmt.Printf("Mallocs: %d\n", (memAfter.Mallocs-memBefore.Mallocs)/uint64(mB))
+
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
 		RoleId:       data.RoleId,
@@ -214,6 +223,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ResourceEnvironmentId: data.ResourceEnvironmentId,
 	}
 
+	runtime.ReadMemStats(&memBefore)
 	switch resourceType {
 	case 1:
 		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(ctx, reqLoginData)
@@ -247,8 +257,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
-
 	}
+
+	runtime.ReadMemStats(&memAfter)
+	fmt.Println("<<<<<<LOGINDATA Memory Usage>>>>>>")
+	fmt.Printf("Alloc: %d bytes\n", (memAfter.Alloc-memBefore.Alloc)/uint64(mB))
+	fmt.Printf("TotalAlloc: %d bytes\n", (memAfter.TotalAlloc-memBefore.TotalAlloc)/uint64(mB))
+	fmt.Printf("HeapAlloc: %d bytes\n", (memAfter.HeapAlloc-memBefore.HeapAlloc)/uint64(mB))
+	fmt.Printf("Mallocs: %d\n", (memAfter.Mallocs-memBefore.Mallocs)/uint64(mB))
 
 	if !userData.UserFound {
 		customError := errors.New("user not found")
