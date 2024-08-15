@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
@@ -47,7 +46,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		foundUser *pb.User
 		err       error
 		userId    string
-		userData  *pbObject.LoginDataRes
+		// userData  *pbObject.LoginDataRes
 
 		login    = helper.GetStringFromMap(body, "login")
 		email    = helper.GetStringFromMap(body, "email")
@@ -187,98 +186,98 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 	}
 
-	return nil, nil
+	return &pb.V2LoginResponse{}, nil
 
-	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-		UserId:       userId,
-		RoleId:       data.RoleId,
-		CompanyId:    data.CompanyId,
-		ProjectId:    data.ProjectId,
-		ClientTypeId: data.ClientTypeId,
-		EnvId:        data.EnvironmentId,
-	})
-	if err != nil {
-		rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
-		return nil, err
-	}
-	reqLoginData := &pbObject.LoginDataReq{
-		UserId:                userId,
-		ProjectId:             data.ProjectId,
-		ClientType:            data.ClientTypeId,
-		ResourceEnvironmentId: data.ResourceEnvironmentId,
-	}
+	// _, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+	// 	UserId:       userId,
+	// 	RoleId:       data.RoleId,
+	// 	CompanyId:    data.CompanyId,
+	// 	ProjectId:    data.ProjectId,
+	// 	ClientTypeId: data.ClientTypeId,
+	// 	EnvId:        data.EnvironmentId,
+	// })
+	// if err != nil {
+	// 	rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
+	// 	return nil, err
+	// }
+	// reqLoginData := &pbObject.LoginDataReq{
+	// 	UserId:                userId,
+	// 	ProjectId:             data.ProjectId,
+	// 	ClientType:            data.ClientTypeId,
+	// 	ResourceEnvironmentId: data.ResourceEnvironmentId,
+	// }
 
-	switch resourceType {
-	case 1:
-		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(ctx, reqLoginData)
-		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
-			rs.log.Error("!!!Login--->LoginData", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-		}
-	case 3:
-		pgLoginData := &new_object_builder_service.LoginDataReq{}
+	// switch resourceType {
+	// case 1:
+	// 	userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(ctx, reqLoginData)
+	// 	if err != nil {
+	// 		errGetUserProjectData := errors.New("invalid user project data")
+	// 		rs.log.Error("!!!Login--->LoginData", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+	// 	}
+	// case 3:
+	// 	pgLoginData := &new_object_builder_service.LoginDataReq{}
 
-		err := helper.MarshalToStruct(reqLoginData, &pgLoginData)
-		if err != nil {
-			rs.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	// 	err := helper.MarshalToStruct(reqLoginData, &pgLoginData)
+	// 	if err != nil {
+	// 		rs.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, err.Error())
+	// 	}
 
-		pgUserData, err := services.GoLoginService().LoginData(
-			ctx,
-			pgLoginData,
-		)
-		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
-			rs.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-		}
+	// 	pgUserData, err := services.GoLoginService().LoginData(
+	// 		ctx,
+	// 		pgLoginData,
+	// 	)
+	// 	if err != nil {
+	// 		errGetUserProjectData := errors.New("invalid user project data")
+	// 		rs.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+	// 	}
 
-		err = helper.MarshalToStruct(&pgUserData, &userData)
-		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
-			rs.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-		}
-	}
+	// 	err = helper.MarshalToStruct(&pgUserData, &userData)
+	// 	if err != nil {
+	// 		errGetUserProjectData := errors.New("invalid user project data")
+	// 		rs.log.Error("!!!Login--->", logger.Error(err))
+	// 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+	// 	}
+	// }
 
-	if !userData.UserFound {
-		customError := errors.New("user not found")
-		rs.log.Error("!!!Login--->", logger.Error(customError))
-		return nil, status.Error(codes.NotFound, customError.Error())
-	}
+	// if !userData.UserFound {
+	// 	customError := errors.New("user not found")
+	// 	rs.log.Error("!!!Login--->", logger.Error(customError))
+	// 	return nil, status.Error(codes.NotFound, customError.Error())
+	// }
 
-	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-		ClientPlatform: userData.GetClientPlatform(),
-		ClientType:     userData.GetClientType(),
-		UserFound:      userData.GetUserFound(),
-		UserId:         userData.GetUserId(),
-		Role:           userData.GetRole(),
-		Permissions:    userData.GetPermissions(),
-		LoginTableSlug: userData.GetLoginTableSlug(),
-	})
+	// res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+	// 	ClientPlatform: userData.GetClientPlatform(),
+	// 	ClientType:     userData.GetClientType(),
+	// 	UserFound:      userData.GetUserFound(),
+	// 	UserId:         userData.GetUserId(),
+	// 	Role:           userData.GetRole(),
+	// 	Permissions:    userData.GetPermissions(),
+	// 	LoginTableSlug: userData.GetLoginTableSlug(),
+	// })
 
-	res, err = rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData:     res,
-		ProjectId:     data.ProjectId,
-		Tables:        []*pb.Object{},
-		EnvironmentId: data.EnvironmentId,
-	})
-	if res == nil {
-		err := errors.New("user not found")
-		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-	if err != nil {
-		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// res, err = rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+	// 	LoginData:     res,
+	// 	ProjectId:     data.ProjectId,
+	// 	Tables:        []*pb.Object{},
+	// 	EnvironmentId: data.EnvironmentId,
+	// })
+	// if res == nil {
+	// 	err := errors.New("user not found")
+	// 	rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
+	// 	return nil, status.Error(codes.NotFound, err.Error())
+	// }
+	// if err != nil {
+	// 	rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
 
-	res.GlobalPermission = nil
-	res.UserData = nil
-	res.UserFound = true
-	res.UserId = userId
+	// res.GlobalPermission = nil
+	// res.UserData = nil
+	// res.UserFound = true
+	// res.UserId = userId
 
-	return res, nil
+	// return res, nil
 }
