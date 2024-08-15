@@ -141,6 +141,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		rs.log.Info("!!!Login--->SessionAndTokenGenerator", logger.Any("SIZEOFRESPONSE", unsafe.Sizeof(response)))
+
 		clientType, ok := response.Data.AsMap()["response"]
 		if ok && clientType != nil {
 			if clientTypeTableSlug, ok := clientType.(map[string]interface{})["table_slug"]; ok {
@@ -171,7 +173,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!CreateUser--->GetSingle", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		rs.log.Info("!!!Login--->SessionAndTokenGenerator", logger.Any("SIZEOFRESPONSE", unsafe.Sizeof(response)))
 
 		if clientType, ok := response.Data.AsMap()["response"]; ok {
 			if clientTypeTableSlug, ok := clientType.(map[string]interface{})["table_slug"]; ok {
@@ -260,9 +261,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		Permissions:    userData.GetPermissions(),
 		LoginTableSlug: userData.GetLoginTableSlug(),
 	})
-
-	rs.log.Info("!!!Login--->SessionAndTokenGenerator", logger.Any("SIZEOFRES", unsafe.Sizeof(res)))
-	rs.log.Info("!!!Login--->SessionAndTokenGenerator", logger.Any("SIZEOFUSERDATA", unsafe.Sizeof(userData)))
 
 	res, err = rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
