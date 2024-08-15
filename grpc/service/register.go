@@ -100,6 +100,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		userId = pKey.GetId()
 	}
 
+	return &pb.V2LoginResponse{}, nil
+
 	body["guid"] = userId
 	body["from_auth_service"] = true
 	structData, err := helper.ConvertMapToStruct(body)
