@@ -378,7 +378,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 
 		}
 	default:
-		h.handleResponse(c, http.BadRequest, "register with goole and apple not implemented")
+		h.handleResponse(c, http.BadRequest, "register with google and apple not implemented")
 		return
 
 	}
@@ -397,30 +397,30 @@ func (h *Handler) V2Register(c *gin.Context) {
 	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["resource_environment_id"] = serviceResource.GetResourceEnvironmentId()
 
-	structData, err := helper.ConvertMapToStruct(body.Data)
+	_, err = helper.ConvertMapToStruct(body.Data)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
-		RoleId:                roleId,
-		Data:                  structData,
-		ClientTypeId:          clientTypeId,
-		Type:                  registerType,
-		CompanyId:             project.CompanyId,
-		NodeType:              serviceResource.NodeType,
-		ProjectId:             serviceResource.ProjectId,
-		ResourceId:            serviceResource.ResourceId,
-		EnvironmentId:         serviceResource.EnvironmentId,
-		ResourceEnvironmentId: serviceResource.ResourceEnvironmentId,
-	})
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	// response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
+	// 	RoleId:                roleId,
+	// 	Data:                  structData,
+	// 	ClientTypeId:          clientTypeId,
+	// 	Type:                  registerType,
+	// 	CompanyId:             project.CompanyId,
+	// 	NodeType:              serviceResource.NodeType,
+	// 	ProjectId:             serviceResource.ProjectId,
+	// 	ResourceId:            serviceResource.ResourceId,
+	// 	EnvironmentId:         serviceResource.EnvironmentId,
+	// 	ResourceEnvironmentId: serviceResource.ResourceEnvironmentId,
+	// })
+	// if err != nil {
+	// 	h.handleResponse(c, http.GRPCError, err.Error())
+	// 	return
+	// }
 
-	h.handleResponse(c, http.Created, response)
+	h.handleResponse(c, http.Created, "ok")
 }
 
 // SendMessage godoc
