@@ -108,6 +108,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	return &pb.V2LoginResponse{}, nil
+
 	services, err := rs.serviceNode.GetByNodeType(
 		data.ProjectId,
 		data.NodeType,
