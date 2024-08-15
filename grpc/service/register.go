@@ -122,6 +122,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		tableSlug    = "user"
 	)
 
+	return &pb.V2LoginResponse{}, nil
+
 	switch resourceType {
 	case 1:
 		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
