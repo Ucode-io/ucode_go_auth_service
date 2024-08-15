@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
-	"unsafe"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
@@ -140,8 +139,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!CreateUser--->Node GetSingle", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-
-		rs.log.Info("!!!Login--->SessionAndTokenGenerator", logger.Any("SIZEOFRESPONSE", unsafe.Sizeof(response)))
 
 		clientType, ok := response.Data.AsMap()["response"]
 		if ok && clientType != nil {
