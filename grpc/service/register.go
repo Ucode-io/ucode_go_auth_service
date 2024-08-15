@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
-	"runtime/debug"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -45,11 +44,11 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
 	defer func() {
 		runtime.GC()
-		debug.FreeOSMemory()
-		rs.log.Info("Memory cleaned 2 ")
+		// debug.FreeOSMemory()
+		// rs.log.Info("Memory cleaned 2 ")
 	}()
 	mB := 1
-	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
+	// rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 	body := data.Data.AsMap()
 	var (
 		foundUser *pb.User

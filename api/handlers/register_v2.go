@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
-	"runtime/debug"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -302,8 +301,8 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 func (h *Handler) V2Register(c *gin.Context) {
 	defer func() {
 		runtime.GC()
-		debug.FreeOSMemory()
-		h.log.Info("Memory cleaned")
+		// debug.FreeOSMemory()
+		// h.log.Info("Memory cleaned")
 	}()
 
 	var body models.RegisterOtp
