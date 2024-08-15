@@ -400,7 +400,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		&res.Login,
 		&res.Password,
 	)
-	if errors.Is(err, pgx.ErrNoRows) && IsValidEmailNew(username) {
+	if err == pgx.ErrNoRows && IsValidEmailNew(username) {
 		queryIf := `
 					SELECT
 						id,
@@ -422,13 +422,13 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.Login,
 			&res.Password,
 		)
-		if errors.Is(err, pgx.ErrNoRows) {
+		if err == pgx.ErrNoRows {
 			return res, nil
 		}
 		return res, nil
 	}
 
-	if errors.Is(err, pgx.ErrNoRows) {
+	if err == pgx.ErrNoRows {
 		return res, nil
 	}
 

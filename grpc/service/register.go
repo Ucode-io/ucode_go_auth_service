@@ -79,7 +79,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	userId = foundUser.GetId()
 
-	if len(foundUser.GetId()) > 0 {
+	if len(foundUser.GetId()) == 0 {
 
 		if !helper.EmailValidation(email) && len(email) > 0 {
 			err = fmt.Errorf("email is not valid")
