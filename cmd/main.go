@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net"
-	"runtime"
 
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
@@ -19,7 +18,6 @@ import (
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
 	baseCfg := config.BaseLoad()
 
 	loggerLevel := logger.LevelDebug
