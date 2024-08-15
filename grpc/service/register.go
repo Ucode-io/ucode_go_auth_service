@@ -259,13 +259,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		LoginTableSlug: userData.GetLoginTableSlug(),
 	})
 
-	resp, err := rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+	res, err = rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
 		ProjectId:     data.ProjectId,
 		Tables:        []*pb.Object{},
 		EnvironmentId: data.EnvironmentId,
 	})
-	if resp == nil {
+	if res == nil {
 		err := errors.New("user not found")
 		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -278,18 +278,18 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	return &pb.V2LoginResponse{
 		UserFound:       true,
 		UserId:          userId,
-		Token:           resp.GetToken(),
-		Sessions:        resp.GetSessions(),
-		ClientPlatform:  resp.GetClientPlatform(),
-		ClientType:      resp.GetClientType(),
-		Role:            resp.GetRole(),
-		Permissions:     resp.GetPermissions(),
-		AppPermissions:  resp.GetAppPermissions(),
-		Tables:          resp.GetTables(),
-		LoginTableSlug:  resp.GetLoginTableSlug(),
-		AddationalTable: resp.GetAddationalTable(),
-		ResourceId:      resp.GetResourceId(),
-		EnvironmentId:   resp.GetEnvironmentId(),
-		User:            resp.GetUser(),
+		Token:           res.GetToken(),
+		Sessions:        res.GetSessions(),
+		ClientPlatform:  res.GetClientPlatform(),
+		ClientType:      res.GetClientType(),
+		Role:            res.GetRole(),
+		Permissions:     res.GetPermissions(),
+		AppPermissions:  res.GetAppPermissions(),
+		Tables:          res.GetTables(),
+		LoginTableSlug:  res.GetLoginTableSlug(),
+		AddationalTable: res.GetAddationalTable(),
+		ResourceId:      res.GetResourceId(),
+		EnvironmentId:   res.GetEnvironmentId(),
+		User:            res.GetUser(),
 	}, nil
 }
