@@ -1249,7 +1249,7 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 }
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
-	s.log.Info("--->SessionAndTokenGenerator--->", logger.Any("req", input))
+	// s.log.Info("--->SessionAndTokenGenerator--->", logger.Any("req", input))
 
 	if _, err := uuid.Parse(input.GetLoginData().GetUserId()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
@@ -1311,7 +1311,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// // TODO - wrap in a function
+	// TODO - wrap in a function
 	m := map[string]interface{}{
 		"id":                 session.GetId(),
 		"project_id":         session.GetProjectId(),

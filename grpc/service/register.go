@@ -72,21 +72,21 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	userId = foundUser.GetId()
 
-	if foundUser.Id == "" {
-
+	if len(foundUser.GetId()) == 0 {
 		if !helper.EmailValidation(email) && len(email) > 0 {
 			err = fmt.Errorf("email is not valid")
 			rs.log.Error("!!!CreateUser--->EmailValidation", logger.Error(err))
 			return nil, err
 		}
 
-		hashedPassword, err := security.HashPassword(password)
-		if err != nil {
-			rs.log.Error("!!!CreateUser--->HashPassword", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+		if len(password) > 0 {
+			hashedPassword, err := security.HashPassword(password)
+			if err != nil {
+				rs.log.Error("!!!CreateUser--->HashPassword", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			password = hashedPassword
 		}
-
-		password = hashedPassword
 
 		pKey, err := rs.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:     login,
@@ -240,7 +240,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
-
 	}
 
 	if !userData.UserFound {
@@ -259,13 +258,13 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		LoginTableSlug: userData.GetLoginTableSlug(),
 	})
 
-	resp, err := rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+	res, err = rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData:     res,
 		ProjectId:     data.ProjectId,
 		Tables:        []*pb.Object{},
 		EnvironmentId: data.EnvironmentId,
 	})
-	if resp == nil {
+	if res == nil {
 		err := errors.New("user not found")
 		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -275,21 +274,10 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pb.V2LoginResponse{
-		UserFound:       true,
-		UserId:          userId,
-		Token:           resp.GetToken(),
-		Sessions:        resp.GetSessions(),
-		ClientPlatform:  resp.GetClientPlatform(),
-		ClientType:      resp.GetClientType(),
-		Role:            resp.GetRole(),
-		Permissions:     resp.GetPermissions(),
-		AppPermissions:  resp.GetAppPermissions(),
-		Tables:          resp.GetTables(),
-		LoginTableSlug:  resp.GetLoginTableSlug(),
-		AddationalTable: resp.GetAddationalTable(),
-		ResourceId:      resp.GetResourceId(),
-		EnvironmentId:   resp.GetEnvironmentId(),
-		User:            resp.GetUser(),
-	}, nil
+	res.GlobalPermission = nil
+	res.UserData = nil
+	res.UserFound = true
+	res.UserId = userId
+
+	return res, nil
 }

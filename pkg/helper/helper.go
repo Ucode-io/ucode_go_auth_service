@@ -24,7 +24,7 @@ var (
 
 func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (string, []interface{}) {
 	var (
-		i    int = 1
+		i    = 1
 		args []interface{}
 	)
 

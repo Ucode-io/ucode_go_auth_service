@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"runtime"
-	"runtime/debug"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -300,12 +298,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Register(c *gin.Context) {
-	defer func() {
-		runtime.GC()
-		debug.FreeOSMemory()
-		h.log.Info("Memory cleaned")
-	}()
-
 	var body models.RegisterOtp
 
 	err := c.ShouldBindJSON(&body)
@@ -379,7 +371,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 
 		}
 	default:
-		h.handleResponse(c, http.BadRequest, "register with goole and apple not implemented")
+		h.handleResponse(c, http.BadRequest, "register with google and apple not implemented")
 		return
 
 	}
