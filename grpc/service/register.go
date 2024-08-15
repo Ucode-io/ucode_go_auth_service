@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/saidamir98/udevs_pkg/logger"
@@ -78,13 +79,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, err
 		}
 
-		hashedPassword := ""
-		// if err != nil {
-		// 	rs.log.Error("!!!CreateUser--->HashPassword", logger.Error(err))
-		// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-		// }
-
-		password = hashedPassword
+		if len(password) > 0 {
+			hashedPassword, err := security.HashPassword(password)
+			if err != nil {
+				rs.log.Error("!!!CreateUser--->HashPassword", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			password = hashedPassword
+		}
 
 		pKey, err := rs.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:     login,
@@ -185,8 +187,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-
-	return &pb.V2LoginResponse{}, nil
 
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
