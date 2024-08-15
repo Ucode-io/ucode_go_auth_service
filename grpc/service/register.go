@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"runtime"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -42,13 +41,7 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 }
 
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
-	defer func() {
-		runtime.GC()
-		// debug.FreeOSMemory()
-		// rs.log.Info("Memory cleaned 2 ")
-	}()
-	mB := 1
-	// rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
+	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 	body := data.Data.AsMap()
 	var (
 		foundUser *pb.User
@@ -130,8 +123,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		tableSlug    = "user"
 	)
 
-	var memBefore, memAfter runtime.MemStats
-	runtime.ReadMemStats(&memBefore)
 	switch resourceType {
 	case 1:
 		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
@@ -196,13 +187,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 	}
 
-	runtime.ReadMemStats(&memAfter)
-	fmt.Println("<<<<<<GETSINLGE Memory Usage>>>>>>")
-	fmt.Printf("Alloc: %d bytes\n", (memAfter.Alloc-memBefore.Alloc)/uint64(mB))
-	fmt.Printf("TotalAlloc: %d bytes\n", (memAfter.TotalAlloc-memBefore.TotalAlloc)/uint64(mB))
-	fmt.Printf("HeapAlloc: %d bytes\n", (memAfter.HeapAlloc-memBefore.HeapAlloc)/uint64(mB))
-	fmt.Printf("Mallocs: %d\n", (memAfter.Mallocs-memBefore.Mallocs)/uint64(mB))
-
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,
 		RoleId:       data.RoleId,
@@ -222,7 +206,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ResourceEnvironmentId: data.ResourceEnvironmentId,
 	}
 
-	runtime.ReadMemStats(&memBefore)
 	switch resourceType {
 	case 1:
 		userData, err = services.GetLoginServiceByType(data.NodeType).LoginData(ctx, reqLoginData)
@@ -257,13 +240,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	}
-
-	runtime.ReadMemStats(&memAfter)
-	fmt.Println("<<<<<<LOGINDATA Memory Usage>>>>>>")
-	fmt.Printf("Alloc: %d bytes\n", (memAfter.Alloc-memBefore.Alloc)/uint64(mB))
-	fmt.Printf("TotalAlloc: %d bytes\n", (memAfter.TotalAlloc-memBefore.TotalAlloc)/uint64(mB))
-	fmt.Printf("HeapAlloc: %d bytes\n", (memAfter.HeapAlloc-memBefore.HeapAlloc)/uint64(mB))
-	fmt.Printf("Mallocs: %d\n", (memAfter.Mallocs-memBefore.Mallocs)/uint64(mB))
 
 	if !userData.UserFound {
 		customError := errors.New("user not found")
