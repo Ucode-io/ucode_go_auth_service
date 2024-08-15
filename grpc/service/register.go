@@ -275,21 +275,10 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pb.V2LoginResponse{
-		UserFound:       true,
-		UserId:          userId,
-		Token:           res.GetToken(),
-		Sessions:        res.GetSessions(),
-		ClientPlatform:  res.GetClientPlatform(),
-		ClientType:      res.GetClientType(),
-		Role:            res.GetRole(),
-		Permissions:     res.GetPermissions(),
-		AppPermissions:  res.GetAppPermissions(),
-		Tables:          res.GetTables(),
-		LoginTableSlug:  res.GetLoginTableSlug(),
-		AddationalTable: res.GetAddationalTable(),
-		ResourceId:      res.GetResourceId(),
-		EnvironmentId:   res.GetEnvironmentId(),
-		User:            res.GetUser(),
-	}, nil
+	res.GlobalPermission = nil
+	res.UserData = nil
+	res.UserFound = true
+	res.UserId = userId
+
+	return res, nil
 }
