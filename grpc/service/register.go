@@ -71,13 +71,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	userId = foundUser.GetId()
 
-
 	if len(foundUser.GetId()) == 0 {
 		if !helper.EmailValidation(email) && len(email) > 0 {
 			err = fmt.Errorf("email is not valid")
 			rs.log.Error("!!!CreateUser--->EmailValidation", logger.Error(err))
 			return nil, err
 		}
+
+		return &pb.V2LoginResponse{}, nil
 
 		hashedPassword, err := security.HashPassword(password)
 		if err != nil {
@@ -86,7 +87,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 
 		password = hashedPassword
-		return &pb.V2LoginResponse{}, nil
 
 		pKey, err := rs.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:     login,
