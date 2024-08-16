@@ -84,7 +84,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		u.phone,
 		u.email,
 		u.login,
-		u.company_id
+		u.company_id,
+		u.password
 	FROM
 		"user" u
 	WHERE
@@ -95,6 +96,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.Email,
 		&res.Login,
 		&res.CompanyId,
+		&res.Password,
 	)
 	if err != nil {
 		return res, err
@@ -299,28 +301,19 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "user" SET
-		-- name = :name,
 		company_id = :company_id,
-		-- photo_url = :photo_url,
 		phone = :phone,
 		email = :email,
 		login = :login,
 		updated_at = now()
-    	-- language_id = :language_id,
-        -- timezone_id = :timezone_id
 	WHERE
 		id = :id`
 
 	params := map[string]interface{}{
-		"id": entity.GetId(),
-		// "name":        entity.GetName(),
-		// "photo_url":   entity.GetPhotoUrl(),
 		"phone":      entity.GetPhone(),
 		"email":      entity.GetEmail(),
 		"login":      entity.GetLogin(),
 		"company_id": entity.GetCompanyId(),
-		// "language_id": entity.GetLanguageId(),
-		// "timezone_id": entity.GetTimezoneId(),
 	}
 	q, arr := helper.ReplaceQueryParams(query, params)
 	result, err := r.db.Exec(ctx, q, arr...)
@@ -440,26 +433,28 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 }
 
 func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
+	params := map[string]interface{}{
+		"id":    user.UserId,
+		"login": user.Login,
+		"email": user.Email,
+	}
+
 	query := `UPDATE "user" SET
 		login = :login,
 		email = :email,
-		password = :password,
 		updated_at = now()`
-	if user.Phone != "" {
+
+	if len(user.Phone) > 0 {
 		query += `, phone = :phone`
-	}
-	query += ` WHERE id = :id`
-
-	params := map[string]interface{}{
-		"id":       user.UserId,
-		"login":    user.Login,
-		"email":    user.Email,
-		"password": user.Password,
-	}
-
-	if user.Phone != "" {
 		params["phone"] = user.Phone
 	}
+
+	if len(user.GetPassword()) > 0 {
+		query += `, password = :password`
+		params["password"] = user.Password
+	}
+
+	query += ` WHERE id = :id`
 
 	q, arr := helper.ReplaceQueryParams(query, params)
 	result, err := r.db.Exec(ctx, q, arr...)
@@ -764,7 +759,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	}, nil
 }
 
-func (c *userRepo) GetListLanguage(ctx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error) {
+func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error) {
 	var (
 		res models.ListLanguage
 	)
@@ -839,7 +834,7 @@ func (c *userRepo) GetListLanguage(ctx context.Context, in *pb.GetListSettingReq
 	return &res, nil
 }
 
-func (c *userRepo) GetListTimezone(ctx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error) {
+func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error) {
 	var (
 		res models.ListTimezone
 	)
@@ -1082,6 +1077,10 @@ func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
 	FROM user_project`
 
 	err := r.db.QueryRow(ctx, query).Scan(&count)
+	if err != nil {
+		return nil, err
+	}
+
 	res := make([]string, 0, count)
 
 	query = `SELECT distinct project_id

@@ -239,7 +239,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 
 		if len(emailSettings.GetResources()) > 0 {
-			code, err := util.GenerateCode(4)
+			code, err := util.GenerateCode(int(emailSettings.GetResources()[0].GetSettings().GetSmtp().GetNumberOfOtp()))
 			if err != nil {
 				h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
 				return

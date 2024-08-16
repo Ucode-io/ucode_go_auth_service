@@ -190,55 +190,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	return &response, nil
 }
 
-// func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
-// 	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
-// 	fmt.Println("axaxaxaxaxaax >>> > > > > ")
-// 	// if len(req.Password) < 6 {
-// 	// 	err := fmt.Errorf("password must not be less than 6 characters")
-// 	// 	sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-// 	// 	return nil, err
-// 	// }
-
-// 	if len(req.Login) < 6 {
-// 		err := fmt.Errorf("login must not be less than 6 characters")
-// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-// 		return nil, err
-// 	}
-
-// 	if !IsValidEmailNew(req.Email) {
-// 		err := fmt.Errorf("email is not valid")
-// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-// 		return nil, err
-// 	}
-
-// 	// hashedPassword, err := security.HashPassword(req.Password)
-// 	// if err != nil {
-// 	// 	sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-// 	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	// }
-
-// 	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
-// 		UserId: req.GetGuid(),
-// 		Login:  req.Login,
-// 		Email:  req.Email,
-// 	})
-// 	if err != nil {
-// 		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
-
-// 	if rowsAffected <= 0 {
-// 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-// 	}
-
-// 	return &pb.SyncUserResponse{}, nil
-// }
-
 func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
-	var (
-		response = pb.SyncUserResponse{}
-		user     *pb.User
-	)
 	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
@@ -257,7 +209,6 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	if err != nil {
 		return nil, err
 	}
-	response.UserId = user.GetId()
 
 	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
 		sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
@@ -276,35 +227,29 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 	if req.Password != "" {
 		if len(req.Password) < 6 {
 			err = fmt.Errorf("password must not be less than 6 characters")
-			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-			return nil, err
-		}
-
-		if len(req.Password) == 0 {
-			err = fmt.Errorf("password must not be empty")
-			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+			sus.log.Error("!!!UpdateUser--->CheckPassword", logger.Error(err))
 			return nil, err
 		}
 
 		hashedPassword, err = security.HashPassword(req.Password)
 		if err != nil {
-			sus.log.Error("!!!ResetPassword--->", logger.Error(err))
+			sus.log.Error("!!!ResetPassword--->HashPassword", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+	}
 
-		if req.Login != "" {
-			if len(req.Login) < 6 {
-				err = fmt.Errorf("login must not be less than 6 characters")
-				sus.log.Error("!!!UpdateUser--->", logger.Error(err))
-				return nil, err
-			}
+	if req.Login != "" {
+		if len(req.Login) < 6 {
+			err = fmt.Errorf("login must not be less than 6 characters")
+			sus.log.Error("!!!UpdateUser--->CheckLogin", logger.Error(err))
+			return nil, err
 		}
 	}
 
 	if req.Email != "" {
 		if !IsValidEmailNew(req.Email) {
 			err = fmt.Errorf("email is not valid")
-			sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+			sus.log.Error("!!!UpdateUser--->CheckValidEmail", logger.Error(err))
 			return nil, err
 		}
 	}
@@ -317,7 +262,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		Password: hashedPassword,
 	})
 	if err != nil {
-		sus.log.Error("!!!UpdateUser--->", logger.Error(err))
+		sus.log.Error("!!!UpdateUser--->ResetPassword", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
