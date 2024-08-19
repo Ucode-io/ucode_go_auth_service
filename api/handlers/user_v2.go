@@ -804,7 +804,7 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 
 	user, err := h.services.UserService().V2ResetPassword(context.Background(), userPassword)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err)
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 	h.handleResponse(c, http.OK, user)
