@@ -175,11 +175,11 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
-	limit, err := h.getLimitParam(c)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
+	// limit, err := h.getLimitParam(c)
+	// if err != nil {
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
 
 	projectId := c.DefaultQuery("project-id", "")
 	if !util.IsValidUUID(projectId) {
@@ -207,7 +207,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 
 		c.Request.Context(),
 		&auth_service.GetUserListRequest{
-			Limit:                 int32(limit),
+			Limit:                 10,
 			Offset:                int32(offset),
 			Search:                c.Query("search"),
 			ClientPlatformId:      c.Query("client-platform-id"),
