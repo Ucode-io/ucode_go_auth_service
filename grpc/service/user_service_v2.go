@@ -801,6 +801,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		"guid": map[string]interface{}{
 			"$in": userIds,
 		},
+		"limit": 10,
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
