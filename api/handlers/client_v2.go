@@ -278,7 +278,6 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	var (
 		clientType auth_service.V2UpdateClientTypeRequest
-		// resourceEnvironment *obs.ResourceEnvironment
 		resp *auth_service.CommonMessage
 	)
 
