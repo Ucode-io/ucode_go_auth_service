@@ -4,7 +4,6 @@ import (
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -72,9 +71,6 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	//this used for import auth_service proto
-	var cm = auth_service.CommonMessage{}
-	cm.Data = structData
 
 	connection.ProjectId = resource.ResourceEnvironmentId
 
