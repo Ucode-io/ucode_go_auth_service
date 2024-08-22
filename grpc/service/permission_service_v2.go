@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"runtime"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -14,6 +15,19 @@ import (
 )
 
 func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequest) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2AddRole", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2AddRole", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---AddRole--->", logger.Any("req", req))
 	var (
 		result *pbObject.CommonMessage
@@ -97,6 +111,19 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 }
 
 func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetRoleById", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetRoleById", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---GetRoleById--->", logger.Any("req", req))
 
 	var (
@@ -147,6 +174,18 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 }
 
 func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRolesListRequest) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetRolesList", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetRolesList", memoryUsed))
+		}
+	}()
 	s.log.Info("---GetRolesList--->", logger.Any("req", req))
 
 	var (
@@ -204,6 +243,19 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 }
 
 func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRoleRequest) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2UpdateRole", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2UpdateRole", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---UpdateRole--->", logger.Any("req", req))
 
 	var (
@@ -255,6 +307,18 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 }
 
 func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2RemoveRole", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2RemoveRole", memoryUsed))
+		}
+	}()
 	s.log.Info("---RemoveRole--->", logger.Any("req", req))
 
 	structData, err := helper.ConvertRequestToSturct(req)

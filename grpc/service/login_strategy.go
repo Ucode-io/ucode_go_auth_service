@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"runtime"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -53,6 +54,19 @@ func (ls *loginStrategyService) GetByID(ctx context.Context, req *pb.LoginStrate
 }
 
 func (ls *loginStrategyService) Upsert(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		ls.log.Info("Memory used by the UpsertLoginStrategy", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			ls.log.Info("Memory used over 300 mb", logger.Any("UpsertLoginStrategy", memoryUsed))
+		}
+	}()
+
 	ls.log.Info("Upsert: ", logger.Any("request: --> ", req))
 	for _, value := range req.LoginStrategies {
 		if value.Id == "" {

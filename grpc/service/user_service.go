@@ -9,12 +9,10 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/saidamir98/udevs_pkg/security"
-
 	"github.com/saidamir98/udevs_pkg/logger"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -40,7 +38,7 @@ func NewUserService(cfg config.BaseConfig, log logger.LoggerI, strg storage.Stor
 }
 
 func (s *userService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
-	s.log.Info("\n\n\n\n---CreateUser--->", logger.Any("req", req))
+	s.log.Info("---CreateUser--->", logger.Any("req", req))
 
 	if len(req.Login) < 6 {
 		err := fmt.Errorf("login must not be less than 6 characters")
