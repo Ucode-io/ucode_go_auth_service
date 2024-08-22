@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"runtime"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
@@ -19,11 +20,10 @@ import (
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
-	secure "ucode/ucode_go_auth_service/pkg/security"
+	"ucode/ucode_go_auth_service/pkg/security"
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
-	"github.com/saidamir98/udevs_pkg/security"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -31,6 +31,18 @@ import (
 )
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2Login", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2Login", memoryUsed))
+		}
+	}()
 
 	user := &pb.User{}
 	var err error
@@ -226,6 +238,19 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 }
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2LoginWithOption", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2LoginWithOption", memoryUsed))
+		}
+	}()
+
 	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
 	var (
 		userId   string
@@ -571,11 +596,23 @@ pwd:
 		s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("Login By " + req.GetLoginStrategy() + " done!")
+
 	return data, nil
 }
 
 func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMiddlewareReq) (*pb.V2LoginWithOptionsResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the LoginMiddleware", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("LoginMiddleware", memoryUsed))
+		}
+	}()
 
 	var res *pb.V2LoginResponse
 
@@ -747,6 +784,19 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 }
 
 func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2LoginSuperAdmin", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2LoginSuperAdmin", memoryUsed))
+		}
+	}()
+
 	if len(req.Username) < 6 {
 		err := errors.New("invalid username")
 		s.log.Error("!!!V2LoginSuperAdmin--->", logger.Error(err))
@@ -781,20 +831,6 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	//
-
-	// @TODO:: get user expires from builder
-	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, time.Now().Add(time.Hour).String())
-	// if err != nil {
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// if expiresAt.Unix() < time.Now().Unix() {
-	// 	err := errors.New("User has been expired")
-	// 	s.log.Error("!!!Login--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
 		LoginData: &pb.V2LoginResponse{
 			UserFound:      true,
@@ -828,8 +864,20 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 }
 
 func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
 
-	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2HasAccess", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2HasAccess", memoryUsed))
+		}
+	}()
+
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -993,8 +1041,20 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 }
 
 func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
 
-	tokenInfo, err := secure.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2RefreshToken", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2RefreshToken", memoryUsed))
+		}
+	}()
+
+	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -1033,62 +1093,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// resource, err := s.services.ServiceResource().GetSingle(
-	// 	ctx,
-	// 	&pbCompany.GetSingleServiceResourceReq{
-	// 		ProjectId:     session.ProjectId,
-	// 		EnvironmentId: session.EnvId,
-	// 		ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
-	// 	},
-	// )
-	// if err != nil {
-	// 	s.log.Error("!!!V2Refresh.SessionService().GetUserUpdatedPermission--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// services, err := s.serviceNode.GetByNodeType(
-	// 	resource.ProjectId,
-	// 	resource.NodeType,
-	// )
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// reqLoginData := &pbObject.LoginDataReq{
-	// 	UserId:                user.GetId(),
-	// 	ClientType:            session.GetClientTypeId(),
-	// 	ProjectId:             session.GetProjectId(),
-	// 	ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
-	// }
-
-	// var data *pbObject.LoginDataRes
-
-	// switch resource.ResourceType {
-	// case 1:
-	// 	data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(
-	// 		ctx,
-	// 		reqLoginData,
-	// 	)
-
-	// 	if err != nil {
-	// 		errGetUserProjectData := errors.New("invalid user project data")
-	// 		s.log.Error("!!!Login--->", logger.Error(err))
-	// 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-	// 	}
-	// case 3:
-	// 	data, err = services.PostgresLoginService().LoginData(
-	// 		ctx,
-	// 		reqLoginData,
-	// 	)
-
-	// 	if err != nil {
-	// 		errGetUserProjectData := errors.New("invalid user project data")
-	// 		s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
-	// 		return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-	// 	}
-
-	// }
-
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
 		ProjectId:        session.ProjectId,
@@ -1117,29 +1121,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 			authTables = append(authTables, authTable)
 		}
 	}
-
-	// res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-	// 	ClientPlatform:   data.GetClientPlatform(),
-	// 	ClientType:       data.GetClientType(),
-	// 	UserFound:        data.GetUserFound(),
-	// 	UserId:           data.GetUserId(),
-	// 	Role:             data.GetRole(),
-	// 	Permissions:      data.GetPermissions(),
-	// 	LoginTableSlug:   data.GetLoginTableSlug(),
-	// 	AppPermissions:   data.GetAppPermissions(),
-	// 	GlobalPermission: data.GetGlobalPermission(),
-	// })
-
-	// authTables := []*pb.TableBody{}
-	// if tokenInfo.Tables != nil {
-	// 	for _, table := range tokenInfo.Tables {
-	// 		authTable := &pb.TableBody{
-	// 			TableSlug: table.TableSlug,
-	// 			ObjectId:  table.ObjectID,
-	// 		}
-	// 		authTables = append(authTables, authTable)
-	// 	}
-	// }
 
 	// TODO - wrap in a function
 	m := map[string]interface{}{
@@ -1177,15 +1158,26 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	}
 
 	res := &pb.V2LoginResponse{}
-
 	res.Token = token
 
 	return res, nil
 }
 
 func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenSuperAdminResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
 
-	tokenInfo, err := secure.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2RefreshTokenSuperAdmin", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2RefreshTokenSuperAdmin", memoryUsed))
+		}
+	}()
+
+	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -1249,7 +1241,18 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 }
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
-	// s.log.Info("--->SessionAndTokenGenerator--->", logger.Any("req", input))
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the SessionAndTokenGenerator", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("SessionAndTokenGenerator", memoryUsed))
+		}
+	}()
 
 	if _, err := uuid.Parse(input.GetLoginData().GetUserId()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
@@ -1351,7 +1354,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 }
 
 func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.UpdateSessionByRoleIdRequest) (*emptypb.Empty, error) {
-
 	rowsAffected, err := s.strg.Session().UpdateByRoleId(ctx, input)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -1363,6 +1365,19 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 }
 
 func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyLoginRes, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2MultiCompanyLogin", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2MultiCompanyLogin", memoryUsed))
+		}
+	}()
+
 	resp := pb.V2MultiCompanyLoginRes{
 		Companies: []*pb.V2MultiCompanyLoginRes_Company{},
 	}
@@ -1455,11 +1470,24 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2HasAccessUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2HasAccessUser", memoryUsed))
+		}
+	}()
+
 	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	arr_path := strings.Split(req.Path, "/")
 
-	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -1623,6 +1651,19 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 }
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2MultiCompanyOneLogin", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2MultiCompanyOneLogin", memoryUsed))
+		}
+	}()
+
 	resp := pb.V2MultiCompanyOneLoginRes{
 		Companies: []*pb.Company2{},
 	}
@@ -1867,6 +1908,19 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 }
 
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2ResetPassword", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2ResetPassword", memoryUsed))
+		}
+	}()
+
 	s.log.Info("V2ResetPassword -> ", logger.Any("req: ", req))
 	if req.GetPassword() != "" {
 		if len(req.GetPassword()) < 6 {
@@ -1892,13 +1946,25 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
-	s.log.Info("V2ResetPassword <- ", logger.Any("res: ", rowsAffected))
+
 	return s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: req.GetUserId()})
 }
 
 func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
 
-	tokenInfo, err := secure.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2RefreshTokenForEnv", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2RefreshTokenForEnv", memoryUsed))
+		}
+	}()
+
+	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -2080,14 +2146,12 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	}
 
 	res := &pb.V2LoginResponse{}
-
 	res.Token = token
 
 	return res, nil
 }
 
 func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessionsRequest) (*emptypb.Empty, error) {
-
 	s.log.Info("---ExpireSessions--->>>", logger.Any("req", req.SessionIds))
 
 	err := s.strg.Session().ExpireSessions(ctx, req)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime"
 	"strings"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -43,6 +44,20 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 	body := data.Data.AsMap()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		rs.log.Info("Memory used by the RegisterUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			rs.log.Info("Memory used over 300 mb", logger.Any("RegisterUser", memoryUsed))
+		}
+	}()
+
 	var (
 		foundUser *pb.User
 		err       error
