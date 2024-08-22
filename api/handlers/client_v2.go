@@ -95,7 +95,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.services.ClientService().V2CreateClientType(
@@ -278,7 +278,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	var (
 		clientType auth_service.V2UpdateClientTypeRequest
-		resp *auth_service.CommonMessage
+		resp       *auth_service.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&clientType)
@@ -339,7 +339,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.services.ClientService().V2UpdateClientType(
@@ -430,7 +430,7 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 		} else {
 			logReq.Response = "success"
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err := h.services.ClientService().V2DeleteClientType(

@@ -99,7 +99,7 @@ func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
 	return strconv.Atoi(limitStr)
 }
 
-func (h *Handler) versionHistory(c *gin.Context, req *models.CreateVersionHistoryRequest) error {
+func (h *Handler) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
 		current  = map[string]interface{}{"data": req.Current}
 		previous = map[string]interface{}{"data": req.Previous}

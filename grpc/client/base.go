@@ -76,7 +76,7 @@ func NewGrpcClients(cfg config.BaseConfig) (ServiceManagerI, error) {
 
 	connCompanyService, err := grpc.Dial(
 		cfg.CompanyServiceHost+cfg.CompanyGRPCPort,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func NewGrpcClients(cfg config.BaseConfig) (ServiceManagerI, error) {
 
 	connSmsService, err := grpc.Dial(
 		cfg.SmsServiceHost+cfg.SmsGRPCPort,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		return nil, err

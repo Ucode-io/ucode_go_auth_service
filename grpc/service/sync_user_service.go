@@ -211,7 +211,7 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	}
 
 	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
-		sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+		_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
 			Id: req.GetUserId(),
 		})
 	}
@@ -274,10 +274,6 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 }
 
 func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
-	var (
-		response = pb.SyncUserResponse{}
-		user     *pb.User
-	)
 	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
@@ -293,13 +289,12 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 
 	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
 		for _, v := range req.Users {
-			sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+			_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
 				Id: v.GetUserId(),
 			})
 		}
 	}
 
-	response.UserId = user.GetId()
 	return &empty.Empty{}, nil
 }
 

@@ -547,23 +547,23 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		httpErrorStr = strings.ToLower(httpErrorStr)
 	}
 	if httpErrorStr == "user not found" {
-		err := errors.New("Пользователь не найдено")
+		err := errors.New("пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	} else if httpErrorStr == "user verified but not found" {
-		err := errors.New("Пользователь проверен, но не найден")
+		err := errors.New("пользователь проверен, но не найден")
 		h.handleResponse(c, http.OK, err.Error())
 		return
 	} else if httpErrorStr == "user has been expired" {
-		err := errors.New("Срок действия пользователя истек")
+		err := errors.New("срок действия пользователя истек")
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	} else if httpErrorStr == "invalid username" {
-		err := errors.New("Неверное имя пользователя")
+		err := errors.New("неверное имя пользователя")
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	} else if httpErrorStr == "invalid password" {
-		err := errors.New("Неверное пароль")
+		err := errors.New("неверное пароль")
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	} else if err != nil {
