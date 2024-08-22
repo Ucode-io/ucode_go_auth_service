@@ -90,49 +90,9 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
-	// if util.IsValidUUID(resourceId.(string)) {
-	// 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	// 		c.Request.Context(),
-	// 		&company_service.GetResourceEnvironmentReq{
-	// 			EnvironmentId: environmentId.(string),
-	// 			ResourceId:    resourceId.(string),
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// 	if user.CompanyId == "" {
-	// 		project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
-	// 			ProjectId: resourceEnvironment.GetProjectId(),
-	// 		})
-	// 		if err != nil {
-	// 			h.handleResponse(c, http.GRPCError, err.Error())
-	// 			return
-	// 		}
-	// 		user.CompanyId = project.GetCompanyId()
-	// 		user.ProjectId = resourceEnvironment.GetProjectId()
-	// 	}
-	// } else {
-	// 	if !util.IsValidUUID(user.GetProjectId()) {
-	// 		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
-	// 		return
-	// 	}
-	// 	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	// 		c.Request.Context(),
-	// 		&company_service.GetDefaultResourceEnvironmentReq{
-	// 			ResourceId: resourceId.(string),
-	// 			ProjectId:  user.GetProjectId(),
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// }
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
 	user.ResourceType = int32(resource.GetResourceType())
 	user.EnvironmentId = resource.EnvironmentId
@@ -396,7 +356,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.services.UserService().V2UpdateUser(
@@ -527,7 +487,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		} else {
 			logReq.Response = nil
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err := h.services.UserService().V2DeleteUser(
@@ -763,6 +723,7 @@ func (h *Handler) V2GetUserByLoginType(c *gin.Context) {
 	if request.Email != "" {
 		var isValid = util.IsValidEmail(request.Email)
 		if !isValid {
+			err = errors.New("email is not valid")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		}

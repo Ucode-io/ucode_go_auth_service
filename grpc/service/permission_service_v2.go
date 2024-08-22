@@ -4,7 +4,6 @@ import (
 	"context"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
-	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
@@ -51,7 +50,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		roleDataData := cast.ToStringMap(roleData["data"])
 		_, err = services.BuilderPermissionService().CreateDefaultPermission(
 			ctx,
-			&object_builder_service.CreateDefaultPermissionRequest{
+			&pbObject.CreateDefaultPermissionRequest{
 				ProjectId: req.GetProjectId(),
 				RoleId:    cast.ToString(roleDataData["guid"]),
 			},

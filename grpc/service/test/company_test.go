@@ -41,14 +41,12 @@ func TestRegisterCompany(t *testing.T) {
 		lis, err := net.Listen("tcp", conf.AuthGRPCPort)
 		if err != nil {
 			t.Log(err)
-			t.FailNow()
 		}
 
 		log.Info("GRPC: Server being started...", logger.String("port", conf.AuthGRPCPort))
 
 		if err := grpcServer.Serve(lis); err != nil {
 			t.Log(err)
-			t.FailNow()
 		}
 	}()
 

@@ -756,7 +756,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			logReq.Response = resp
 			h.log.Info("UpdateRoleAppTablePermissions -> success")
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	services, _ := h.GetProjectSrvc(
@@ -968,7 +968,7 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	services, _ := h.GetProjectSrvc(

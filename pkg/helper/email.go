@@ -3,7 +3,7 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	net_http "net/http"
 	"net/smtp"
 	"ucode/ucode_go_auth_service/config"
@@ -45,7 +45,7 @@ func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
 
 	userInfo := make(map[string]interface{})
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

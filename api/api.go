@@ -6,6 +6,8 @@ import (
 	"ucode/ucode_go_auth_service/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
+	"github.com/opentracing/opentracing-go"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
@@ -13,26 +15,23 @@ import (
 // SetUpRouter godoc
 // @description This is a api gateway
 // @termsOfService https://udevs.io
-func SetUpRouter(h handlers.Handler, cfg config.BaseConfig) (r *gin.Engine) {
+func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer) (r *gin.Engine) {
 	r = gin.New()
 
 	r.Use(gin.Logger(), gin.Recovery())
-	// r.Use(ginhttp.Middleware(tracer))
+	r.Use(ginhttp.Middleware(tracer))
 
 	docs.SwaggerInfo.Title = cfg.ServiceName
 	docs.SwaggerInfo.Version = cfg.Version
-	// docs.SwaggerInfo.Host = cfg.ServiceHost + cfg.HTTPPort
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
+
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
 	r.Use(customCORSMiddleware())
-
 	r.GET("/ping", h.Ping)
-	// r.GET("/config", h.GetConfig)
 
-	// CLIENT SERVICE
-	// (admin, bot, mobile ext)
+	// CLIENT SERVICE (admin, bot, mobile ext)
 	r.POST("/client-platform", h.CreateClientPlatform)
 	r.GET("/client-platform", h.GetClientPlatformList)
 	r.GET("/client-platform/:client-platform-id", h.GetClientPlatformByID)

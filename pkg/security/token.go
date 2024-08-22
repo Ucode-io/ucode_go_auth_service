@@ -10,9 +10,7 @@ import (
 
 // GenerateJWT ...
 func GenerateJWT(m map[string]interface{}, tokenExpireTime time.Duration, tokenSecretKey string) (tokenString string, err error) {
-	var token *jwt.Token
-
-	token = jwt.New(jwt.SigningMethodHS256)
+	var token *jwt.Token = jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
 
@@ -71,7 +69,7 @@ type TokenInfo struct {
 	// ClientPlatformID string
 	// ClientTypeID     string
 	// UserID           string
-	RoleID           string
+	RoleID string
 	// IP               string
 	// Data             string
 	LoginTableSlug string
@@ -99,8 +97,8 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 	if claims["tables"] != nil {
 		for _, item := range claims["tables"].([]interface{}) {
 			var table Table
-			if (item != nil) {
-				if (item.(map[string]interface{})["object_id"] != nil && item.(map[string]interface{})["table_slug"] != nil) {
+			if item != nil {
+				if item.(map[string]interface{})["object_id"] != nil && item.(map[string]interface{})["table_slug"] != nil {
 					table.ObjectID = item.(map[string]interface{})["object_id"].(string)
 					table.TableSlug = item.(map[string]interface{})["table_slug"].(string)
 					result.Tables = append(result.Tables, table)
