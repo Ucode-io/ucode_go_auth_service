@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"runtime"
 	"ucode/ucode_go_auth_service/config"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -12,10 +13,10 @@ import (
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/saidamir98/udevs_pkg/logger"
-	"github.com/saidamir98/udevs_pkg/security"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,6 +25,18 @@ import (
 )
 
 func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWithGoogleRequest) (resp *pb.User, err error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the RegisterWithGoogle", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("RegisterWithGoogle", memoryUsed))
+		}
+	}()
 
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
@@ -218,6 +231,18 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 }
 
 func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUserRequest) (resp *pb.User, err error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the RegisterUserViaEmail", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("RegisterUserViaEmail", memoryUsed))
+		}
+	}()
 
 	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
@@ -446,6 +471,19 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2CreateUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2CreateUser", memoryUsed))
+		}
+	}()
+
 	s.log.Info("\n\n\n\n---V2CreateUser--->", logger.Any("req", req))
 
 	unHashedPassword := req.Password
@@ -617,6 +655,19 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 }
 
 func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey) (*pb.User, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetUserByID", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetUserByID", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---V2GetUserByID--->", logger.Any("req", req))
 
 	var (
@@ -770,6 +821,19 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 }
 
 func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetUserList", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetUserList", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---V2GetUserList--->", logger.Any("req", req))
 
 	resp := &pb.GetUserListResponse{}
@@ -982,10 +1046,22 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	}
 
 	return resp, nil
-
 }
 
 func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2UpdateUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2UpdateUser", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---V2UpdateUser--->", logger.Any("req", req))
 
 	//emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
@@ -1142,6 +1218,19 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 }
 
 func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*emptypb.Empty, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2DeleteUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2DeleteUser", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---V2DeleteUser--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
@@ -1273,6 +1362,19 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 }
 
 func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the AddUserToProject", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("AddUserToProject", memoryUsed))
+		}
+	}()
+
 	s.log.Info("AddUserToProject", logger.Any("req", req))
 
 	res, err := s.strg.User().AddUserToProject(ctx, req)
@@ -1286,6 +1388,19 @@ func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToPro
 }
 
 func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the GetProjectsByUserId", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("GetProjectsByUserId", memoryUsed))
+		}
+	}()
+
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
 
 	res, err := s.strg.User().GetProjectsByUserId(ctx, req)
@@ -1297,6 +1412,19 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 }
 
 func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetUserByLoginTypes", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetUserByLoginTypes", memoryUsed))
+		}
+	}()
+
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
 	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
@@ -1316,7 +1444,6 @@ func (s *userService) GetUserByUsername(ctx context.Context, req *pb.GetUserByUs
 	return res, nil
 }
 func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKey) (*pb.GetUserProjectsRes, error) {
-
 	userProjects, err := s.strg.User().GetUserProjects(ctx, req.Id)
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
@@ -1328,6 +1455,18 @@ func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKe
 }
 
 func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2ResetPassword", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2ResetPassword", memoryUsed))
+		}
+	}()
 
 	var (
 		user             = &pb.User{}

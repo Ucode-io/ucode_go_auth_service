@@ -6,17 +6,12 @@ import (
 
 	"time"
 	"ucode/ucode_go_auth_service/config"
+	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
-	secure "ucode/ucode_go_auth_service/pkg/security"
-
-	"github.com/saidamir98/udevs_pkg/security"
-
 	"github.com/saidamir98/udevs_pkg/logger"
-
-	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -373,7 +368,7 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 
 func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
 
-	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -464,7 +459,7 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 
 func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAccessSuperAdminReq) (*pb.HasAccessSuperAdminRes, error) {
 	s.log.Info("---HasAccessSuperAdmin--->", logger.Any("req", req))
-	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!HasAccess token parse--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

@@ -2,18 +2,17 @@ package service
 
 import (
 	"context"
+	"runtime"
 	"ucode/ucode_go_auth_service/config"
+	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
-	"github.com/saidamir98/udevs_pkg/security"
-
-	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -39,7 +38,18 @@ func NewCompanyService(cfg config.BaseConfig, log logger.LoggerI, strg storage.S
 }
 
 func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRequest) (*pb.CompanyPrimaryKey, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
 
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the CompanyRegister", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("CompanyRegister", memoryUsed))
+		}
+	}()
 	//@TODO:: refactor later
 	tempOwnerId, err := uuid.NewRandom()
 	if err != nil {

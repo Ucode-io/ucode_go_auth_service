@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"runtime"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -15,6 +16,19 @@ import (
 )
 
 func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2CreateClientTypeRequest) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2CreateClientType", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2CreateClientType", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---CreateClientType--->", logger.Any("req", req))
 	var (
 		result *pbObject.CommonMessage
@@ -81,6 +95,19 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 }
 
 func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2ClientTypePrimaryKey) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetClientTypeByID", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetClientTypeByID", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---GetClientTypeByID--->", logger.Any("req", req))
 
 	var (
@@ -131,6 +158,7 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 			Data:      result.Data,
 		}, nil
 	}
+
 	return &pb.CommonMessage{
 		TableSlug: result.TableSlug,
 		Data:      result.Data,
@@ -138,6 +166,19 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 }
 
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetClientTypeList", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetClientTypeList", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 	result := &pbObject.CommonMessage{}
 
@@ -210,6 +251,19 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 }
 
 func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2UpdateClientTypeRequest) (*pb.CommonMessage, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2UpdateClientType", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2UpdateClientType", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---UpdateClientType--->", logger.Any("req", req))
 
 	var (
@@ -279,6 +333,19 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 }
 
 func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.V2ClientTypePrimaryKey) (*emptypb.Empty, error) {
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2DeleteClientType", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2DeleteClientType", memoryUsed))
+		}
+	}()
+
 	s.log.Info("---DeleteClientType--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
@@ -326,297 +393,3 @@ func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.V2Client
 
 	return res, nil
 }
-
-// func (s *clientService) V2CreateClientPlatform(ctx context.Context, req *pb.CreateClientPlatformRequest) (*pb.CommonMessage, error) {
-// 	s.log.Info("---CreateClientPlatform--->", logger.Any("req", req))
-
-// 	structData, err := helper.ConvertRequestToSturct(req)
-// 	if err != nil {
-// 		s.log.Error("!!!CreateClientPlatform--->", logger.Error(err))
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
-// 	var result *pbObject.CommonMessage
-// 	switch req.ResourceType {
-// 	case 1:
-// 		result, err = s.services.ObjectBuilderService().Create(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: req.ProjectId,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!CreateClientPlatform.ObjectBuilderService.Create--->", logger.Error(err))
-// 			return nil, status.Error(codes.InvalidArgument, err.Error())
-// 		}
-// 	case 3:
-// 		result, err = s.services.ObjectBuilderService().Create(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: req.ProjectId,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!CreateClientPlatform.ObjectBuilderService.Create--->", logger.Error(err))
-// 			return nil, status.Error(codes.InvalidArgument, err.Error())
-// 		}
-// 	}
-
-// 	return &pb.CommonMessage{
-// 		TableSlug: result.TableSlug,
-// 		Data:      result.Data,
-// 	}, nil
-// }
-
-// func (s *clientService) V2GetClientPlatformByID(ctx context.Context, req *pb.ClientPlatformPrimaryKey) (*pb.CommonMessage, error) {
-// 	s.log.Info("---GetClientPlatformByID--->", logger.Any("req", req))
-
-// 	structData, err := helper.ConvertRequestToSturct(req)
-// 	if err != nil {
-// 		s.log.Error("!!!GetClientPlatformById--->", logger.Error(err))
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
-// 	var result *pbObject.CommonMessage
-// 	switch req.ResourceType {
-// 	case 1:
-// 		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: req.ProjectId,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-// 			return nil, status.Error(codes.NotFound, err.Error())
-// 		}
-// 	case 3:
-// 		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: req.ProjectId,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!GetClientPlatformByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
-// 			return nil, status.Error(codes.NotFound, err.Error())
-// 		}
-
-// 	}
-
-// 	return &pb.CommonMessage{
-// 		TableSlug: result.TableSlug,
-// 		Data:      result.Data,
-// 	}, nil
-// }
-
-// func (s *clientService) V2GetClientPlatformByIDDetailed(ctx context.Context, req *pb.ClientPlatformPrimaryKey) (*pb.CommonMessage, error) {
-// 	s.log.Info("---GetClientPlatformByID--->", logger.Any("req", req))
-
-// 	structData, err := helper.ConvertRequestToSturct(req)
-// 	if err != nil {
-// 		s.log.Error("!!!GetClientPlatformByIDDetailed--->", logger.Error(err))
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
-// 	var result *pbObject.CommonMessage
-// 	switch req.ResourceType {
-// 	case 1:
-// 		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-// 			return nil, status.Error(codes.Internal, err.Error())
-// 		}
-// 	case 3:
-// 		result, err = s.services.ObjectBuilderService().GetSingle(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!GetClientPlatformByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-// 			return nil, status.Error(codes.Internal, err.Error())
-// 		}
-// 	}
-
-// 	return &pb.CommonMessage{
-// 		TableSlug: result.TableSlug,
-// 		Data:      result.Data,
-// 	}, nil
-// }
-
-// func (s *clientService) V2GetClientPlatformList(ctx context.Context, req *pb.GetClientPlatformListRequest) (*pb.CommonMessage, error) {
-// 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
-
-// 	// structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-// 	// 	// "offset": req.Offset,
-// 	// 	// "limit":  req.Limit,
-// 	// 	// "search": req.Search,
-// 	// })
-// 	// if err != nil {
-// 	// 	s.log.Error("!!!ClientPlatform--->", logger.Error(err))
-// 	// }
-// 	// var result *pbObject.CommonMessage
-// 	// switch req.ResourceType {
-// 	// case 1:
-// 	// 	result, err = s.services.ObjectBuilderService().GetList(ctx,
-// 	// 		&pbObject.CommonMessage{
-// 	// 			TableSlug: "client_platform",
-// 	// 			Data:      structData,
-// 	// 			ProjectId: req.ProjectId,
-// 	// 		})
-
-// 	// 	if err != nil {
-// 	// 		s.log.Error("!!!GetClientPlatformList.ObjectBuilderService.GetList--->", logger.Error(err))
-// 	// 		return nil, status.Error(codes.Internal, err.Error())
-// 	// 	}
-// 	// case 3:
-// 	// 	result, err = s.services.PostgresObjectBuilderService().GetList(ctx,
-// 	// 		&pbObject.CommonMessage{
-// 	// 			TableSlug: "client_platform",
-// 	// 			Data:      structData,
-// 	// 			ProjectId: req.ProjectId,
-// 	// 		})
-
-// 	// 	if err != nil {
-// 	// 		s.log.Error("!!!GetClientPlatformList.PostgresObjectBuilderService.GetList--->", logger.Error(err))
-// 	// 		return nil, status.Error(codes.Internal, err.Error())
-// 	// 	}
-
-// 	// }
-
-// 	return &pb.CommonMessage{
-// 		TableSlug: "client_platform",
-// 		Data:      &structpb.Struct{},
-// 	}, nil
-// }
-
-// func (s *clientService) V2UpdateClientPlatform(ctx context.Context, req *pb.UpdateClientPlatformRequest) (*pb.CommonMessage, error) {
-// 	s.log.Info("---UpdateClientPlatform--->", logger.Any("req", req))
-
-// 	structData, err := helper.ConvertRequestToSturct(req)
-// 	if err != nil {
-// 		s.log.Error("!!!UpdateClientPlatform--->", logger.Error(err))
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
-// 	var result *pbObject.CommonMessage
-// 	switch req.ResourceType {
-// 	case 1:
-// 		result, err = s.services.ObjectBuilderService().Update(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!UpdateClientPlatform.ObjectBuilderService.Update--->", logger.Error(err))
-// 			return nil, status.Error(codes.InvalidArgument, err.Error())
-// 		}
-// 		_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
-// 			&pbObject.ManyToManyMessage{
-// 				TableFrom: "client_platform",
-// 				TableTo:   "client_type",
-// 				IdFrom:    req.Id,
-// 				IdTo:      req.ClientTypeIds,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-// 		if err != nil {
-// 			s.log.Error("!!!UpdateClientType.ObjectBuilderService.ManyToManyAppend--->", logger.Error(err))
-// 			return nil, status.Error(codes.NotFound, err.Error())
-// 		}
-// 	case 3:
-// 		result, err = s.services.PostgresObjectBuilderService().Update(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!UpdateClientPlatform.PostgresObjectBuilderService.Update--->", logger.Error(err))
-// 			return nil, status.Error(codes.InvalidArgument, err.Error())
-// 		}
-// 		_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
-// 			&pbObject.ManyToManyMessage{
-// 				TableFrom: "client_platform",
-// 				TableTo:   "client_type",
-// 				IdFrom:    req.Id,
-// 				IdTo:      req.ClientTypeIds,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-// 		if err != nil {
-// 			s.log.Error("!!!UpdateClientType.ObjectBuilderService.ManyToManyAppend--->", logger.Error(err))
-// 			return nil, status.Error(codes.NotFound, err.Error())
-// 		}
-
-// 	}
-
-// 	_, err = s.services.ObjectBuilderService().ManyToManyAppend(ctx,
-// 		&pbObject.ManyToManyMessage{
-// 			TableFrom: "client_platform",
-// 			TableTo:   "client_type",
-// 			IdFrom:    req.Id,
-// 			IdTo:      req.ClientTypeIds,
-// 			ProjectId: config.UcodeDefaultProjectID,
-// 		})
-// 	if err != nil {
-// 		s.log.Error("!!!UpdateClientType.ObjectBuilderService.ManyToManyAppend--->", logger.Error(err))
-// 		return nil, status.Error(codes.NotFound, err.Error())
-// 	}
-
-// 	return &pb.CommonMessage{
-// 		TableSlug: result.TableSlug,
-// 		Data:      result.Data,
-// 	}, nil
-// }
-
-// func (s *clientService) V2DeleteClientPlatform(ctx context.Context, req *pb.ClientPlatformPrimaryKey) (*emptypb.Empty, error) {
-// 	s.log.Info("---DeleteClientPlatform--->", logger.Any("req", req))
-
-// 	res := &emptypb.Empty{}
-// 	structData, err := helper.ConvertRequestToSturct(req)
-// 	if err != nil {
-// 		s.log.Error("!!!DeleteClientPlatform--->", logger.Error(err))
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
-// 	switch req.ResourceType {
-// 	case 1:
-// 		_, err = s.services.ObjectBuilderService().Delete(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!DeleteClientPlatform.ObjectBuilderService.Delete--->", logger.Error(err))
-// 			return nil, status.Error(codes.Internal, err.Error())
-// 		}
-// 	case 3:
-
-// 		_, err = s.services.PostgresObjectBuilderService().Delete(ctx,
-// 			&pbObject.CommonMessage{
-// 				TableSlug: "client_platform",
-// 				Data:      structData,
-// 				ProjectId: config.UcodeDefaultProjectID,
-// 			})
-
-// 		if err != nil {
-// 			s.log.Error("!!!DeleteClientPlatform.PostgresObjectBuilderService.Delete--->", logger.Error(err))
-// 			return nil, status.Error(codes.Internal, err.Error())
-// 		}
-
-// 	}
-
-// 	return res, nil
-// }

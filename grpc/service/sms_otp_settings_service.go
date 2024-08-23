@@ -75,6 +75,7 @@ func (s *smsOtpSettingsService) Delete(ctx context.Context, req *pb.SmsOtpSettin
 		return nil, err
 	}
 	if rowsAffected <= 0 {
+		err = status.Error(codes.InvalidArgument, "no rows were affected")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	return &emptypb.Empty{}, nil
