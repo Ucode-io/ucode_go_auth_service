@@ -547,7 +547,7 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		httpErrorStr = strings.ToLower(httpErrorStr)
 	}
 	if httpErrorStr == "user not found" {
-		err := errors.New("пользователь не найдено")
+		err := errors.New("Пользователь не найдено")
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	} else if httpErrorStr == "user verified but not found" {
