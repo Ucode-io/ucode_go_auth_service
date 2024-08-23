@@ -551,7 +551,7 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		h.handleResponse(c, http.NotFound, err.Error())
 		return
 	} else if httpErrorStr == "user verified but not found" {
-		err := errors.New("пользователь проверен, но не найден")
+		err := errors.New("Пользователь проверен, но не найден")
 		h.handleResponse(c, http.OK, err.Error())
 		return
 	} else if httpErrorStr == "user has been expired" {
