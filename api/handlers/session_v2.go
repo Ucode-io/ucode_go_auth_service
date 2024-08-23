@@ -503,6 +503,9 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 	} else if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
+	} else if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
 	}
 	res := &auth_service.V2LoginSuperAdminRes{
 		UserFound: resp.GetUserFound(),

@@ -365,14 +365,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		// smsOtpSettings, err := s.services.SmsOtpSettingsService().GetList(ctx, &pb.GetListSmsOtpSettingsRequest{
-		// 	EnvironmentId: req.Data["environment_id"],
-		// 	ProjectId:     req.Data["project_id"],
-		// })
-		// if err != nil {
-		// 	s.log.Error("!!!V2LoginWithOption.SmsOtpSettingsService().GetList--->", logger.Error(err))
-		// 	return nil, status.Error(codes.Internal, err.Error())
-		// }
+
 		smsOtpSettings, err := s.services.ResourceService().GetProjectResourceList(
 			context.Background(),
 			&pbCompany.GetProjectResourceListRequest{
@@ -393,10 +386,7 @@ pwd:
 		if defaultOtp != otp {
 			_, err = s.services.SmsService().ConfirmOtp(
 				ctx,
-				&sms_service.ConfirmOtpRequest{
-					SmsId: sms_id,
-					Otp:   otp,
-				},
+				&sms_service.ConfirmOtpRequest{SmsId: sms_id, Otp: otp},
 			)
 			if err != nil {
 				return nil, err
