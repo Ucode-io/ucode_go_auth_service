@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"runtime"
@@ -13,7 +12,6 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 
-	// "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
@@ -350,19 +348,19 @@ pwd:
 		sms_id, ok := req.GetData()["sms_id"]
 		if !ok {
 			err := errors.New("sms_id is empty")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			s.log.Error("!!!V2LoginWithOption--->NoSMSId", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		otp, ok := req.GetData()["otp"]
 		if !ok {
 			err := errors.New("otp is empty")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			s.log.Error("!!!V2LoginWithOption--->NoOTP", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		phone, ok := req.GetData()["phone"]
 		if !ok {
 			err := errors.New("phone is empty")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			s.log.Error("!!!V2LoginWithOption--->NoPhone", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
@@ -383,19 +381,21 @@ pwd:
 				defaultOtp = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetDefaultOtp()
 			}
 		}
+
 		if defaultOtp != otp {
 			_, err = s.services.SmsService().ConfirmOtp(
 				ctx,
 				&sms_service.ConfirmOtpRequest{SmsId: sms_id, Otp: otp},
 			)
 			if err != nil {
+				s.log.Error("!!!V2LoginWithOption--->ConfirmOTP", logger.Error(err))
 				return nil, err
 			}
 		}
 		verified = true
 		user, err := s.strg.User().GetByUsername(ctx, phone)
 		if err != nil {
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			s.log.Error("!!!V2LoginWithOption--->GetUserByUsername", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
@@ -558,11 +558,8 @@ pwd:
 		}
 		userId = userIdRes.GetUserId()
 	case "APPLE_AUTH":
-
-		//
 		err := errors.New("not implemented")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
-
 	default:
 		req.LoginStrategy = "LOGIN_PWD"
 		goto pwd
@@ -580,10 +577,10 @@ pwd:
 
 		if httpErrorStr == "user not found" && verified {
 			err := errors.New("user verified but not found")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			s.log.Error("!!!V2LoginWithOption--->UserNotFound", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+		s.log.Error("!!!V2LoginWithOption--->LoginMiddleware", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -632,6 +629,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			req.NodeType,
 		)
 		if err != nil {
+			s.log.Error("!!!LoginMiddleware--->GetByNodeType", logger.Error(err))
 			return nil, err
 		}
 
@@ -648,19 +646,15 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
 		case 3:
-
 			goReq := &nb.LoginDataReq{}
 
 			err = helper.MarshalToStruct(reqLoginData, &goReq)
 			if err != nil {
+				s.log.Error("!!!LoginMiddleware--->PostgresMarshal2Struct", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
-			goData, err := services.GoLoginService().LoginData(
-				ctx,
-				goReq,
-			)
-
+			goData, err := services.GoLoginService().LoginData(ctx, goReq)
 			if err != nil {
 				errGetUserProjectData := errors.New("invalid user project data")
 				s.log.Error("!!!LoginMiddleware--->PostgresLoginService", logger.Error(err))
@@ -669,6 +663,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 
 			err = helper.MarshalToStruct(goData, &data)
 			if err != nil {
+				s.log.Error("!!!LoginMiddleware--->LoginDataMarshal", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 		}
@@ -712,52 +707,51 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	companies, err := s.services.CompanyServiceClient().GetList(ctx, &pbCompany.GetCompanyListRequest{
-		Offset:  0,
-		Limit:   128,
-		OwnerId: req.Data["user_id"],
-	})
-	if err != nil {
-		return nil, err
-	}
+	// companies, err := s.services.CompanyServiceClient().GetList(ctx, &pbCompany.GetCompanyListRequest{
+	// 	Offset:  0,
+	// 	Limit:   128,
+	// 	OwnerId: req.Data["user_id"],
+	// })
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	companiesResp := []*pb.Company{}
+	// companiesResp := []*pb.Company{}
 
-	if len(companies.Companies) < 1 {
-		companiesById := make([]*pbCompany.Company, 0)
-		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
-			Id: resp.GetUserId(),
-		})
-		if err != nil {
-			return nil, err
-		}
-		company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{
-			Id: user.GetCompanyId(),
-		})
-		if err != nil {
-			return nil, err
-		}
-		companiesById = append(companiesById, company.Company)
-		companies.Companies = companiesById
-		companies.Count = int32(len(companiesById))
+	// if len(companies.Companies) < 1 {
+	// 	companiesById := make([]*pbCompany.Company, 0)
+	// 	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+	// 		Id: resp.GetUserId(),
+	// 	})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{
+	// 		Id: user.GetCompanyId(),
+	// 	})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	companiesById = append(companiesById, company.Company)
+	// 	companies.Companies = companiesById
+	// 	companies.Count = int32(len(companiesById))
+	// }
 
-	}
-	bytes, err := json.Marshal(companies.GetCompanies())
-	if err != nil {
-		return nil, err
-	}
+	// bytes, err := json.Marshal(companies.GetCompanies())
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	err = json.Unmarshal(bytes, &companiesResp)
-	if err != nil {
-		return nil, err
-	}
+	// err = json.Unmarshal(bytes, &companiesResp)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return &pb.V2LoginWithOptionsResponse{
 		UserFound:       true,
 		UserId:          req.Data["user_id"],
 		Token:           resp.GetToken(),
 		Sessions:        resp.GetSessions(),
-		Companies:       companiesResp,
 		ClientPlatform:  resp.GetClientPlatform(),
 		ClientType:      resp.GetClientType(),
 		Role:            resp.GetRole(),
@@ -770,6 +764,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		EnvironmentId:   resp.GetEnvironmentId(),
 		User:            resp.GetUser(),
 		UserData:        res.GetUserData(),
+		// Companies:       companiesResp,
 	}, nil
 }
 
