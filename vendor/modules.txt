@@ -173,7 +173,6 @@ github.com/robfig/cron/v3
 # github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
 ## explicit; go 1.16
 github.com/saidamir98/udevs_pkg/logger
-github.com/saidamir98/udevs_pkg/security
 github.com/saidamir98/udevs_pkg/util
 # github.com/spf13/cast v1.5.0
 ## explicit; go 1.18
