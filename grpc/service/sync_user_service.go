@@ -15,6 +15,7 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,6 +41,9 @@ func NewSyncUserService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 }
 
 func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUserRequest) (*pb.SyncUserResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.CreateUser")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -57,8 +61,9 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		response = pb.SyncUserResponse{}
 		user     *pb.User
 		err      error
+		username string
 	)
-	var username string
+
 	for _, loginStrategy := range req.GetLoginStrategy() {
 		if loginStrategy == "login" {
 			username = req.GetLogin()
@@ -183,6 +188,9 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 }
 
 func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.DeleteUser")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -196,14 +204,14 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		}
 	}()
 
-	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = sus.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+	_, err = sus.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
 		UserId:        req.GetUserId(),
 		CompanyId:     project.GetCompanyId(),
 		RoleId:        req.GetRoleId(),
@@ -225,7 +233,16 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 }
 
 func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
-	var before runtime.MemStats
+	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.UpdateUser")
+	defer dbSpan.Finish()
+
+	var (
+		before         runtime.MemStats
+		hashedPassword string
+		err            error
+	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -237,10 +254,6 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 			sus.log.Info("Memory used over 300 mb", logger.Any("SyncUserUpdateUser", memoryUsed))
 		}
 	}()
-
-	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
-	var hashedPassword string
-	var err error
 
 	if req.Password != "" {
 		if len(req.Password) < 6 {
@@ -292,6 +305,9 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 }
 
 func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.DeleteManyUser")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -305,7 +321,7 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 		}
 	}()
 
-	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
@@ -313,7 +329,7 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 	}
 	req.CompanyId = project.CompanyId
 
-	_, err = sus.strg.User().DeleteUsersFromProject(context.Background(), req)
+	_, err = sus.strg.User().DeleteUsersFromProject(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -330,6 +346,9 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 }
 
 func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUsersRequest) (*pb.SyncUsersResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.CreateUsers")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 

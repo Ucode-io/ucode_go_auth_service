@@ -8,6 +8,7 @@ import (
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
@@ -15,6 +16,9 @@ import (
 )
 
 func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequest) (*pb.CommonMessage, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2AddRole")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -33,7 +37,6 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		result *pbObject.CommonMessage
 	)
 
-	// pKey, err := s.strg.Role().Add(ctx, req)
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
 		s.log.Error("!!!AddRole--->", logger.Error(err))
@@ -111,6 +114,11 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 }
 
 func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
+	s.log.Info("---GetRoleById--->", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2GetRoleById")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -123,8 +131,6 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 			s.log.Info("Memory used over 300 mb", logger.Any("V2GetRoleById", memoryUsed))
 		}
 	}()
-
-	s.log.Info("---GetRoleById--->", logger.Any("req", req))
 
 	var (
 		result *pbObject.CommonMessage
@@ -174,6 +180,11 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 }
 
 func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRolesListRequest) (*pb.CommonMessage, error) {
+	s.log.Info("---GetRolesList--->", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2GetRolesList")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -186,7 +197,6 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 			s.log.Info("Memory used over 300 mb", logger.Any("V2GetRolesList", memoryUsed))
 		}
 	}()
-	s.log.Info("---GetRolesList--->", logger.Any("req", req))
 
 	var (
 		result *pbObject.CommonMessage
@@ -243,6 +253,11 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 }
 
 func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRoleRequest) (*pb.CommonMessage, error) {
+	s.log.Info("---UpdateRole--->", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2UpdateRole")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -255,8 +270,6 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 			s.log.Info("Memory used over 300 mb", logger.Any("V2UpdateRole", memoryUsed))
 		}
 	}()
-
-	s.log.Info("---UpdateRole--->", logger.Any("req", req))
 
 	var (
 		result *pbObject.CommonMessage
@@ -307,6 +320,10 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 }
 
 func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
+	s.log.Info("---RemoveRole--->", logger.Any("req", req))
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2RemoveRole")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -319,7 +336,6 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 			s.log.Info("Memory used over 300 mb", logger.Any("V2RemoveRole", memoryUsed))
 		}
 	}()
-	s.log.Info("---RemoveRole--->", logger.Any("req", req))
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {

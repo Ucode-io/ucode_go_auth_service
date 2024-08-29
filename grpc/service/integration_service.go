@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -36,6 +37,9 @@ func NewIntegrationService(cfg config.BaseConfig, log logger.LoggerI, strg stora
 }
 
 func (s *integrationService) CreateIntegration(ctx context.Context, req *pb.CreateIntegrationRequest) (*pb.Integration, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.Create")
+	defer dbSpan.Finish()
+
 	s.log.Info("---CreateUser--->", logger.Any("req", req))
 
 	pKey, err := s.strg.Integration().Create(ctx, req)
@@ -49,6 +53,9 @@ func (s *integrationService) CreateIntegration(ctx context.Context, req *pb.Crea
 }
 
 func (s *integrationService) AddSessionToIntegration(ctx context.Context, req *pb.AddSessionToIntegrationRequest) (*pb.AddSessionToIntegrationResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.AddSessionToIntegration")
+	defer dbSpan.Finish()
+
 	res := &pb.AddSessionToIntegrationResponse{}
 
 	if len(req.SecretKey) < 6 {
@@ -203,6 +210,9 @@ func (s *integrationService) AddSessionToIntegration(ctx context.Context, req *p
 }
 
 func (s *integrationService) GetIntegrationByID(ctx context.Context, req *pb.IntegrationPrimaryKey) (*pb.Integration, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.GetIntegrationByID")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GetIntegrationByID--->", logger.Any("req", req))
 
 	res, err := s.strg.Integration().GetByPK(ctx, req)
@@ -216,6 +226,9 @@ func (s *integrationService) GetIntegrationByID(ctx context.Context, req *pb.Int
 }
 
 func (s *integrationService) GetIntegrationToken(ctx context.Context, req *pb.GetIntegrationTokenRequest) (*pb.Token, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.GetIntegrationToken")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GetIntegrationToken--->", logger.Any("req", req))
 
 	session, err := s.strg.Integration().GetIntegrationSession(ctx, req)
@@ -260,6 +273,9 @@ func (s *integrationService) GetIntegrationToken(ctx context.Context, req *pb.Ge
 }
 
 func (s *integrationService) GetIntegrationSessions(ctx context.Context, req *pb.IntegrationPrimaryKey) (*pb.GetIntegrationSessionsResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.GetIntegrationSessions")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GetIntegrationSessions--->", logger.Any("req", req))
 
 	res, err := s.strg.Integration().GetIntegrationSessions(ctx, req)
@@ -272,6 +288,9 @@ func (s *integrationService) GetIntegrationSessions(ctx context.Context, req *pb
 }
 
 func (s *integrationService) GetIntegrationListByIDs(ctx context.Context, req *pb.IntegrationPrimaryKeyList) (*pb.GetIntegrationListResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.GetIntegrationListByIDs")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GetIntegrationListByIDs--->", logger.Any("req", req))
 
 	res, err := s.strg.Integration().GetListByPKs(ctx, req)
@@ -284,6 +303,9 @@ func (s *integrationService) GetIntegrationListByIDs(ctx context.Context, req *p
 }
 
 func (s *integrationService) GetIntegrationList(ctx context.Context, req *pb.GetIntegrationListRequest) (*pb.GetIntegrationListResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.GetIntegrationList")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GetIntegrationList--->", logger.Any("req", req))
 
 	res, err := s.strg.Integration().GetList(ctx, req)
@@ -297,6 +319,9 @@ func (s *integrationService) GetIntegrationList(ctx context.Context, req *pb.Get
 }
 
 func (s *integrationService) UpdateIntegration(ctx context.Context, req *pb.UpdateIntegrationRequest) (*pb.Integration, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.Update")
+	defer dbSpan.Finish()
+
 	s.log.Info("---UpdateIntegration--->", logger.Any("req", req))
 
 	rowsAffected, err := s.strg.Integration().Update(ctx, req)
@@ -320,6 +345,9 @@ func (s *integrationService) UpdateIntegration(ctx context.Context, req *pb.Upda
 }
 
 func (s *integrationService) DeleteIntegration(ctx context.Context, req *pb.IntegrationPrimaryKey) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.DeleteIntegration")
+	defer dbSpan.Finish()
+
 	s.log.Info("---DeleteIntegration--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}
@@ -339,6 +367,9 @@ func (s *integrationService) DeleteIntegration(ctx context.Context, req *pb.Inte
 }
 
 func (s *integrationService) DeleteSessionFromIntegration(ctx context.Context, req *pb.GetIntegrationTokenRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_integration.DeleteSessionFromIntegration")
+	defer dbSpan.Finish()
+
 	s.log.Info("---DeleteSessionFromIntegration--->", logger.Any("req", req))
 
 	res := &emptypb.Empty{}

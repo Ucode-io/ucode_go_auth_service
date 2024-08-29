@@ -5,20 +5,22 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 )
 
 type rolePermissionRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewRolePermissionRepo(db *pgxpool.Pool) storage.RolePermissionRepoI {
+func NewRolePermissionRepo(db *Pool) storage.RolePermissionRepoI {
 	return &rolePermissionRepo{
 		db: db,
 	}
 }
 
 func (r *rolePermissionRepo) Add(ctx context.Context, entity *pb.AddRolePermissionRequest) (pKey *pb.RolePermissionPrimaryKey, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role_permission.Add")
+	defer dbSpan.Finish()
 
 	query := `INSERT INTO "role_permission" (
 		role_id,
@@ -42,13 +44,14 @@ func (r *rolePermissionRepo) Add(ctx context.Context, entity *pb.AddRolePermissi
 }
 
 func (r *rolePermissionRepo) AddMultiple(ctx context.Context, entity *pb.AddRolePermissionsRequest) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role_permission.AddMultiple")
+	defer dbSpan.Finish()
 
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return rowsAffected, err
 	}
 
-	// call function to commit or rollback transaction at the end
 	defer func() {
 		if err != nil {
 			err = tx.Rollback(ctx)
@@ -86,6 +89,8 @@ func (r *rolePermissionRepo) AddMultiple(ctx context.Context, entity *pb.AddRole
 }
 
 func (r *rolePermissionRepo) GetByPK(ctx context.Context, pKey *pb.RolePermissionPrimaryKey) (res *pb.RolePermission, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role_permission.GetByPK")
+	defer dbSpan.Finish()
 
 	res = &pb.RolePermission{}
 	query := `SELECT
@@ -108,6 +113,8 @@ func (r *rolePermissionRepo) GetByPK(ctx context.Context, pKey *pb.RolePermissio
 }
 
 func (r *rolePermissionRepo) Remove(ctx context.Context, pKey *pb.RolePermissionPrimaryKey) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role_permission.Remove")
+	defer dbSpan.Finish()
 
 	query := `DELETE FROM
 		"role_permission"

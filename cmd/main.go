@@ -46,7 +46,7 @@ func main() {
 		},
 		Reporter: &jaeger_config.ReporterConfig{
 			LogSpans:           false,
-			LocalAgentHostPort: "localhost:6831",
+			LocalAgentHostPort: baseCfg.JaegerHostPort,
 		},
 	}
 

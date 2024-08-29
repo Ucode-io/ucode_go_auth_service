@@ -14,7 +14,8 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,6 +41,9 @@ func NewApiKeysService(cfg config.BaseConfig, log logger.LoggerI, strg storage.S
 }
 
 func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.CreateRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Create")
+	defer dbSpan.Finish()
+
 	s.log.Info("---Create--->", logger.Any("req", req))
 	id, err := uuid.NewUUID()
 	if err != nil {
@@ -51,9 +55,6 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 	secretId := "P-" + helper.GenerateSecretKey(32)
 
 	hashedSecretKey, _ := security.HashPassword(secretKey)
-
-	// req.AppSecret = hashedSecretKey
-	// req.AppId = secretId
 
 	res, err := s.strg.ApiKeys().Create(ctx, req, hashedSecretKey, secretId, id.String())
 	if err != nil {
@@ -67,6 +68,9 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 }
 
 func (s *apiKeysService) Update(ctx context.Context, req *pb.UpdateReq) (*pb.UpdateRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Update")
+	defer dbSpan.Finish()
+
 	s.log.Info("---Update--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeys().Update(ctx, req)
@@ -83,6 +87,9 @@ func (s *apiKeysService) Update(ctx context.Context, req *pb.UpdateReq) (*pb.Upd
 }
 
 func (s *apiKeysService) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Get")
+	defer dbSpan.Finish()
+
 	s.log.Info("---Get--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeys().Get(ctx, req)
@@ -99,6 +106,9 @@ func (s *apiKeysService) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, e
 }
 
 func (s *apiKeysService) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetListRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.GetList")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GetList--->", logger.Any("req", req))
 
 	if !util.IsValidUUID(req.GetProjectId()) {
@@ -116,6 +126,9 @@ func (s *apiKeysService) GetList(ctx context.Context, req *pb.GetListReq) (*pb.G
 }
 
 func (s *apiKeysService) Delete(ctx context.Context, req *pb.DeleteReq) (*pb.DeleteRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Delete")
+	defer dbSpan.Finish()
+
 	s.log.Info("---Delete--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeys().Delete(ctx, req)
@@ -132,6 +145,9 @@ func (s *apiKeysService) Delete(ctx context.Context, req *pb.DeleteReq) (*pb.Del
 }
 
 func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateApiTokenReq) (*pb.GenerateApiTokenRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.GenerateApiToken")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GenerateApiToken--->")
 
 	if len(req.GetAppId()) != 34 || req.GetAppId()[:2] != "P-" {
@@ -203,7 +219,8 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 }
 
 func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApiTokenReq) (*pb.RefreshApiTokenRes, error) {
-	s.log.Info("---RefreshApiToken--->")
+	dbSpan, _ := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.RefreshApiToken")
+	defer dbSpan.Finish()
 
 	m, err := security.ExtractClaims(req.GetRefreshToken(), s.cfg.SecretKey)
 	if err != nil {
@@ -243,9 +260,12 @@ func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApi
 }
 
 func (s *apiKeysService) GetEnvID(ctx context.Context, req *pb.GetReq) (resp *pb.GetRes, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.GetEnvID")
+	defer dbSpan.Finish()
+
 	s.log.Info("---GetEnvID--->>>>", logger.Any("req", req))
 
-	resp, err = s.strg.ApiKeys().GetEnvID(context.Background(), req)
+	resp, err = s.strg.ApiKeys().GetEnvID(ctx, req)
 	if err != nil {
 		s.log.Error("---GetEnvID->Error--->>>", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

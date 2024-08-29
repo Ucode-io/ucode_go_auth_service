@@ -12,28 +12,30 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"github.com/lib/pq"
 )
 
 type userRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewUserRepo(db *pgxpool.Pool) storage.UserRepoI {
+func NewUserRepo(db *Pool) storage.UserRepoI {
 	return &userRepo{
 		db: db,
 	}
 }
 
 func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.create")
+	defer dbSpan.Finish()
 
 	query := `INSERT INTO "user" (
 		id,
@@ -73,6 +75,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 }
 
 func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.getbypk")
+	defer dbSpan.Finish()
 
 	res = &pb.User{}
 	var (
@@ -108,12 +112,12 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 }
 
 func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyList) (res *pb.GetUserListResponse, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetListByPKs")
+	defer dbSpan.Finish()
 
 	res = &pb.GetUserListResponse{}
 	query := `SELECT
 		id,
-		-- name,
-		-- photo_url,
 		phone,
 		email,
 		login,
@@ -134,15 +138,12 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 
 	for rows.Next() {
 		var (
-			createdAt sql.NullString
-			updatedAt sql.NullString
+			createdAt, updatedAt sql.NullString
 		)
 
 		user := &pb.User{}
 		err = rows.Scan(
 			&user.Id,
-			// &user.Name,
-			// &user.PhotoUrl,
 			&user.Phone,
 			&user.Email,
 			&user.Login,
@@ -156,22 +157,6 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 			return res, err
 		}
 
-		// if active.Valid {
-		// 	user.Active = active.Int32
-		// }
-
-		// if expiresAt.Valid {
-		// 	user.ExpiresAt = expiresAt.String
-		// }
-
-		// if createdAt.Valid {
-		// 	user.CreatedAt = createdAt.String
-		// }
-
-		// if updatedAt.Valid {
-		// 	user.UpdatedAt = updatedAt.String
-		// }
-
 		res.Users = append(res.Users, user)
 	}
 
@@ -179,18 +164,18 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 }
 
 func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListRequest) (res *pb.GetUserListResponse, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetList")
+	defer dbSpan.Finish()
+
 	res = &pb.GetUserListResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
 	query := `SELECT
 		id,
-		-- name,
 		company_id,
-		-- photo_url,
 		phone,
 		email,
 		login,
-		-- password,
 		created_at,
 		updated_at
 	FROM
@@ -205,20 +190,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 		params["search"] = queryParam.Search
 		filter += " AND ((phone || email || login) ILIKE ('%' || :search || '%'))"
 	}
-
-	//if len(queryParam.ClientPlatformId) > 0 {
-	//	params["client_platform_id"] = queryParam.ClientPlatformId
-	//	filter += " AND client_platform_id = :client_platform_id"
-	//}
-	// if len(queryParam.ProjectId) > 0 {
-	// 	params["project_id"] = queryParam.ProjectId
-	// 	filter += " AND project_id = :project_id"
-	// }
-
-	//if len(queryParam.ClientTypeId) > 0 {
-	//	params["client_type_id"] = queryParam.ClientTypeId
-	//	filter += " AND client_type_id = :client_type_id"
-	//}
 
 	if queryParam.Offset > 0 {
 		params["offset"] = queryParam.Offset
@@ -251,22 +222,16 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	for rows.Next() {
 		obj := &pb.User{}
 		var (
-			active    sql.NullInt32
-			expiresAt sql.NullString
-			createdAt sql.NullString
-			updatedAt sql.NullString
-			companyID sql.NullString
+			active                                     sql.NullInt32
+			expiresAt, createdAt, updatedAt, companyID sql.NullString
 		)
 
 		err = rows.Scan(
 			&obj.Id,
-			// &obj.Name,
 			&companyID,
-			// &obj.PhotoUrl,
 			&obj.Phone,
 			&obj.Email,
 			&obj.Login,
-			// &obj.Password,
 			&active,
 			&expiresAt,
 			&createdAt,
@@ -277,22 +242,6 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 			return res, err
 		}
 
-		// if active.Valid {
-		// 	obj.Active = active.Int32
-		// }
-
-		// if expiresAt.Valid {
-		// 	obj.ExpiresAt = expiresAt.String
-		// }
-
-		// if createdAt.Valid {
-		// 	obj.CreatedAt = createdAt.String
-		// }
-
-		// if updatedAt.Valid {
-		// 	obj.UpdatedAt = updatedAt.String
-		// }
-
 		res.Users = append(res.Users, obj)
 	}
 
@@ -300,6 +249,9 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 }
 
 func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.update")
+	defer dbSpan.Finish()
+
 	query := `UPDATE "user" SET
 		company_id = :company_id,
 		phone = :phone,
@@ -327,8 +279,9 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 }
 
 func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.delete")
+	defer dbSpan.Finish()
 
-	// return 0, nil
 	if pKey.GetIsTest() {
 		queryDeleteFromUserProject := `DELETE FROM user_project WHERE user_id = $1`
 
@@ -342,14 +295,6 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 		}
 
 	}
-	// result, err := r.db.Exec(ctx, queryDeleteFromUserProject, pKey.Id)
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// rowsAffected = result.RowsAffected()
-	// if rowsAffected == 0 {
-	// 	return 0, errors.New("user not found")
-	// }
 
 	result, err := r.db.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, pKey.GetId())
 	if err != nil {
@@ -364,6 +309,9 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 }
 
 func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.getbyusername")
+	defer dbSpan.Finish()
+
 	res = &pb.User{}
 
 	query := `SELECT
@@ -433,6 +381,9 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 }
 
 func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.resetpassword")
+	defer dbSpan.Finish()
+
 	params := map[string]interface{}{
 		"id":    user.UserId,
 		"login": user.Login,
@@ -468,6 +419,9 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 }
 
 func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjectClientTypes")
+	defer dbSpan.Finish()
+
 	res = &models.UserProjectClientTypeResponse{}
 
 	query := `SELECT 
@@ -489,6 +443,9 @@ func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.Us
 }
 
 func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjects")
+	defer dbSpan.Finish()
+
 	res := pb.GetUserProjectsRes{}
 
 	query := `SELECT company_id,
@@ -524,6 +481,9 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 }
 
 func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.AddUserToProject")
+	defer dbSpan.Finish()
+
 	res := pb.AddUserToProjectRes{}
 
 	var (
@@ -592,6 +552,9 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 }
 
 func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.UpdateUserToProject")
+	defer dbSpan.Finish()
+
 	res := pb.AddUserToProjectRes{}
 
 	var (
@@ -658,6 +621,9 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 }
 
 func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetProjectsByUserId")
+	defer dbSpan.Finish()
+
 	res := pb.GetProjectsByUserIdRes{}
 
 	query := `SELECT
@@ -692,6 +658,8 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 }
 
 func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (*[]string, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserIds")
+	defer dbSpan.Finish()
 
 	query := `SELECT
 				array_agg(user_id)
@@ -719,6 +687,8 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 }
 
 func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserByLoginType")
+	defer dbSpan.Finish()
 
 	query := `SELECT
 				id
@@ -760,6 +730,9 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 }
 
 func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingReq) (*models.ListLanguage, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(cntx, "user.GetListLanguage")
+	defer dbSpan.Finish()
+
 	var (
 		res models.ListLanguage
 	)
@@ -835,6 +808,9 @@ func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingRe
 }
 
 func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingReq) (*models.ListTimezone, error) {
+	dbSpan, _ := opentracing.StartSpanFromContext(cntx, "user.GetListTimezone")
+	defer dbSpan.Finish()
+
 	var (
 		res models.ListTimezone
 	)
@@ -907,6 +883,9 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 }
 
 func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (int64, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.V2ResetPassword")
+	defer dbSpan.Finish()
+
 	var (
 		params                      = make(map[string]interface{})
 		subQueryEmail, subQueryPass string
@@ -939,6 +918,8 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 }
 
 func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.GetUserProjectByAllFieldsReq) (bool, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjectByAllFields")
+	defer dbSpan.Finish()
 
 	var (
 		isExists bool
@@ -969,6 +950,8 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 }
 
 func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.DeleteUserFromProject")
+	defer dbSpan.Finish()
 
 	params := make(map[string]interface{})
 
@@ -978,31 +961,8 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	client_type_id = :client_type_id
 	`
 
-	// `DELETE FROM "user_project"
-	// 			WHERE
-	// 			project_id = :project_id
-	// 			AND
-	// 			user_id = :user_id
-	// 			AND
-	// 			company_id = :company_id`
-
-	// params["project_id"] = req.ProjectId
 	params["user_id"] = req.UserId
 	params["client_type_id"] = req.ClientTypeId
-
-	// params["company_id"] = req.CompanyId
-	// if req.GetRoleId() != "" {
-	// 	query += " AND role_id = :role_id"
-	// 	params["role_id"] = req.GetRoleId()
-	// }
-	// if req.GetClientTypeId() != "" {
-	// 	query += " AND client_type_id = :client_type_id"
-	// 	params["client_type_id"] = req.GetClientTypeId()
-	// }
-	// if req.GetEnvironmentId() != "" {
-	// 	query += " AND env_id = :env_id"
-	// 	params["env_id"] = req.GetEnvironmentId()
-	// }
 
 	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx,
@@ -1016,12 +976,14 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	return &empty.Empty{}, nil
 }
 func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.DeleteUsersFromProject")
+	defer dbSpan.Finish()
 
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
-	// call function to commit or rollback transaction at the end
+
 	defer func() {
 		if err != nil {
 			err = tx.Rollback(ctx)
@@ -1072,6 +1034,9 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 }
 
 func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetAllUserProjects")
+	defer dbSpan.Finish()
+
 	count := 0
 	query := `SELECT count(distinct project_id)
 	FROM user_project`
@@ -1109,6 +1074,8 @@ func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
 }
 
 func (r *userRepo) UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.UpdateUserProjects")
+	defer dbSpan.Finish()
 
 	query := `UPDATE user_project SET env_id = $1
 	  WHERE project_id = $2`
@@ -1122,6 +1089,9 @@ func (r *userRepo) UpdateUserProjects(ctx context.Context, envId, projectId stri
 }
 
 func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserEnvProjects")
+	defer dbSpan.Finish()
+
 	res := models.GetUserEnvProjectRes{
 		EnvProjects: map[string][]string{},
 	}

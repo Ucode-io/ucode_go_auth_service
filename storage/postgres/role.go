@@ -8,20 +8,22 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 )
 
 type roleRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewRoleRepo(db *pgxpool.Pool) storage.RoleRepoI {
+func NewRoleRepo(db *Pool) storage.RoleRepoI {
 	return &roleRepo{
 		db: db,
 	}
 }
 
 func (r *roleRepo) Add(ctx context.Context, entity *pb.AddRoleRequest) (pKey *pb.RolePrimaryKey, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role.Add")
+	defer dbSpan.Finish()
 
 	query := `INSERT INTO "role" (
 		id,
@@ -58,6 +60,8 @@ func (r *roleRepo) Add(ctx context.Context, entity *pb.AddRoleRequest) (pKey *pb
 }
 
 func (r *roleRepo) GetByPK(ctx context.Context, pKey *pb.RolePrimaryKey) (res *pb.Role, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role.GetByPK")
+	defer dbSpan.Finish()
 
 	res = &pb.Role{}
 	query := `SELECT
@@ -86,6 +90,8 @@ func (r *roleRepo) GetByPK(ctx context.Context, pKey *pb.RolePrimaryKey) (res *p
 }
 
 func (r *roleRepo) GetRoleByIdDetailed(ctx context.Context, entity *pb.RolePrimaryKey) (res *pb.GetRoleByIdResponse, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role.GetRoleByIdDetailed")
+	defer dbSpan.Finish()
 
 	res = &pb.GetRoleByIdResponse{}
 	var confirmBy string
@@ -101,18 +107,10 @@ func (r *roleRepo) GetRoleByIdDetailed(ctx context.Context, entity *pb.RolePrima
 		ct.self_register,
 		ct.self_recover,
 		ct.name AS client_type_name
-	FROM 
-		"role" 
-	AS
-		rl
-	
-	INNER JOIN
-		"client_type" AS ct
-	
-	ON
-		ct.id = rl.client_type_id
-	WHERE
-		rl.id = $1`
+	FROM "role" AS rl
+	INNER JOIN "client_type" AS ct
+	ON ct.id = rl.client_type_id
+	WHERE rl.id = $1`
 
 	res.ClientType = new(pb.ClientType)
 	err = r.db.QueryRow(ctx, query, entity.Id).Scan(
@@ -175,6 +173,8 @@ func (r *roleRepo) GetRoleByIdDetailed(ctx context.Context, entity *pb.RolePrima
 }
 
 func (r *roleRepo) GetList(ctx context.Context, entity *pb.GetRolesListRequest) (*pb.GetRolesResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role.GetList")
+	defer dbSpan.Finish()
 
 	res := new(pb.GetRolesResponse)
 
@@ -235,6 +235,8 @@ func (r *roleRepo) GetList(ctx context.Context, entity *pb.GetRolesListRequest) 
 }
 
 func (r *roleRepo) Update(ctx context.Context, entity *pb.UpdateRoleRequest) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role.Update")
+	defer dbSpan.Finish()
 
 	query := `UPDATE "role" SET
 		client_type_id = :client_type_id,
@@ -265,6 +267,8 @@ func (r *roleRepo) Update(ctx context.Context, entity *pb.UpdateRoleRequest) (ro
 }
 
 func (r *roleRepo) Remove(ctx context.Context, pKey *pb.RolePrimaryKey) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "role.Remove")
+	defer dbSpan.Finish()
 
 	query := `DELETE FROM "role" WHERE id = $1`
 

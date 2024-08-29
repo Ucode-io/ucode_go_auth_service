@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -48,55 +47,6 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
-
-	// environmentId, ok := c.Get("environment_id")
-	// if !ok || !util.IsValidUUID(environmentId.(string)) {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-	// 	return
-	// }
-	// fmt.Println(">>>>>>>>>>>>>>>   test #0.3")
-	// resource, err := h.services.ServiceResource().GetSingle(
-	// 	c.Request.Context(),
-	// 	&pbCompany.GetSingleServiceResourceReq{
-	// 		ProjectId:     projectId,
-	// 		EnvironmentId: environmentId.(string),
-	// 		ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
-	// 	},
-	// )
-	// fmt.Println(">>>>>>>>>>>>>>>   test #1")
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-	// fmt.Println(">>>>>>>>>>>>>>>   test #2")
-	// switch resource.ResourceType {
-	// case pbCompany.ResourceType_MONGODB:
-	// resp, err = h.services.BuilderPermissionService().GetGlobalPermissionByRoleId(
-	// 	c.Request.Context(),
-	// 	&object_builder_service.GetGlobalPermissionsByRoleIdRequest{
-	// 		RoleId:    roleId,
-	// 		ProjectId: "1",
-	// 	},
-	// )
-
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-	// case pbCompany.ResourceType_POSTGRESQL:
-	// resp, err = h.services.PostgresBuilderPermissionService().GetGlobalPermissionByRoleId(
-	// 	c.Request.Context(),
-	// 	&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
-	// 		RoleId:    c.Param("role-id"),
-	// 		ProjectId: resource.ResourceEnvironmentId,
-	// 	},
-	// )
-
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-	// }
 
 	h.handleResponse(c, http.OK, resp)
 }
@@ -565,8 +515,6 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 		}
 
 	}()
-
-	fmt.Printf("roleID: %+v\n", resource)
 
 	resp, err = h.services.PermissionService().V2RemoveRole(
 		c.Request.Context(),

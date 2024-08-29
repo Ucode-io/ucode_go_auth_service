@@ -6,16 +6,15 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type appleSettingsRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewAppleSettingsRepo(db *pgxpool.Pool) storage.AppleSettingsI {
+func NewAppleSettingsRepo(db *Pool) storage.AppleSettingsI {
 	return &appleSettingsRepo{
 		db: db,
 	}

@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -43,6 +44,10 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_register.RegisterUser")
+	defer dbSpan.Finish()
+
 	body := data.Data.AsMap()
 
 	var before runtime.MemStats

@@ -10,15 +10,14 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
 )
 
 type IntegrationRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewIntegrationRepo(db *pgxpool.Pool) storage.IntegrationRepoI {
+func NewIntegrationRepo(db *Pool) storage.IntegrationRepoI {
 	return &IntegrationRepo{
 		db: db,
 	}
