@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"regexp"
+	"runtime"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -12,35 +15,55 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type syncUserService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedSyncUserServiceServer
 }
 
-func NewSyncUserService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *syncUserService {
+func NewSyncUserService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *syncUserService {
 	return &syncUserService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
 func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUserRequest) (*pb.SyncUserResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.CreateUser")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		sus.log.Info("Memory used by the SyncUserCreateUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			sus.log.Info("Memory used over 300 mb", logger.Any("SyncUserCreateUser", memoryUsed))
+		}
+	}()
+
 	var (
 		response = pb.SyncUserResponse{}
 		user     *pb.User
 		err      error
+		username string
 	)
-	var username string
+
 	for _, loginStrategy := range req.GetLoginStrategy() {
 		if loginStrategy == "login" {
 			username = req.GetLogin()
@@ -59,28 +82,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			break
 		}
 	}
-	// if user.GetId() == "" && req.GetLogin() != "" {
-	// 	username = req.GetLogin()
-	// 	user, err = sus.strg.User().GetByUsername(context.Background(), username)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-
-	// if user.GetId() == "" && req.GetEmail() != "" {
-	// 	username = req.GetEmail()
-	// 	user, err = sus.strg.User().GetByUsername(context.Background(), username)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-	// if user.GetId() == "" && req.GetPhone() != "" {
-	// 	username = req.GetPhone()
-	// 	user, err = sus.strg.User().GetByUsername(context.Background(), username)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
 
 	userId := user.GetId()
 	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
@@ -187,18 +188,30 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 }
 
 func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUserRequest) (*empty.Empty, error) {
-	var (
-		response = pb.SyncUserResponse{}
-		user     *pb.User
-	)
-	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.DeleteUser")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		sus.log.Info("Memory used by the SyncUserDeleteUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			sus.log.Info("Memory used over 300 mb", logger.Any("SyncUserDeleteUser", memoryUsed))
+		}
+	}()
+
+	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = sus.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+	_, err = sus.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
 		UserId:        req.GetUserId(),
 		CompanyId:     project.GetCompanyId(),
 		RoleId:        req.GetRoleId(),
@@ -209,16 +222,106 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 	if err != nil {
 		return nil, err
 	}
-	response.UserId = user.GetId()
+
+	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+		_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+			Id: req.GetUserId(),
+		})
+	}
+
 	return &empty.Empty{}, nil
 }
 
-func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
+func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
+	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.UpdateUser")
+	defer dbSpan.Finish()
+
 	var (
-		response = pb.SyncUserResponse{}
-		user     *pb.User
+		before         runtime.MemStats
+		hashedPassword string
+		err            error
 	)
-	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		sus.log.Info("Memory used by the SyncUserUpdateUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			sus.log.Info("Memory used over 300 mb", logger.Any("SyncUserUpdateUser", memoryUsed))
+		}
+	}()
+
+	if req.Password != "" {
+		if len(req.Password) < 6 {
+			err = fmt.Errorf("password must not be less than 6 characters")
+			sus.log.Error("!!!UpdateUser--->CheckPassword", logger.Error(err))
+			return nil, err
+		}
+
+		hashedPassword, err = security.HashPassword(req.Password)
+		if err != nil {
+			sus.log.Error("!!!ResetPassword--->HashPassword", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+
+	if req.Login != "" {
+		if len(req.Login) < 6 {
+			err = fmt.Errorf("login must not be less than 6 characters")
+			sus.log.Error("!!!UpdateUser--->CheckLogin", logger.Error(err))
+			return nil, err
+		}
+	}
+
+	if req.Email != "" {
+		if !IsValidEmailNew(req.Email) {
+			err = fmt.Errorf("email is not valid")
+			sus.log.Error("!!!UpdateUser--->CheckValidEmail", logger.Error(err))
+			return nil, err
+		}
+	}
+
+	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
+		UserId:   req.GetGuid(),
+		Login:    req.Login,
+		Email:    req.Email,
+		Phone:    req.Phone,
+		Password: hashedPassword,
+	})
+	if err != nil {
+		sus.log.Error("!!!UpdateUser--->ResetPassword", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if rowsAffected <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+	}
+
+	return &pb.SyncUserResponse{}, nil
+}
+
+func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.DeleteManyUser")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		sus.log.Info("Memory used by the SyncDeleteManyUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			sus.log.Info("Memory used over 300 mb", logger.Any("SyncDeleteManyUser", memoryUsed))
+		}
+	}()
+
+	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
@@ -226,19 +329,43 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 	}
 	req.CompanyId = project.CompanyId
 
-	_, err = sus.strg.User().DeleteUsersFromProject(context.Background(), req)
+	_, err = sus.strg.User().DeleteUsersFromProject(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	response.UserId = user.GetId()
+
+	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+		for _, v := range req.Users {
+			_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+				Id: v.GetUserId(),
+			})
+		}
+	}
+
 	return &empty.Empty{}, nil
 }
 
 func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUsersRequest) (*pb.SyncUsersResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.CreateUsers")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		sus.log.Info("Memory used by the SyncCreateUsers", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			sus.log.Info("Memory used over 300 mb", logger.Any("SyncCreateUsers", memoryUsed))
+		}
+	}()
+
 	var (
 		response = pb.SyncUsersResponse{}
 		user_ids = make([]string, 0, len(in.Users))
-		err error
+		err      error
 	)
 	for _, req := range in.Users {
 		var user *pb.User
@@ -261,18 +388,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				break
 			}
 		}
-		// username = req.GetLogin()
-		// if username == "" {
-		// 	username = req.GetEmail()
-		// }
-		// if username == "" {
-		// 	username = req.GetPhone()
-		// }
 
-		// user, err := sus.strg.User().GetByUsername(context.Background(), username)
-		// if err != nil {
-		// 	return nil, err
-		// }
 		userId := user.GetId()
 		project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
 			ProjectId: req.GetProjectId(),
@@ -378,4 +494,16 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 	response.UserIds = user_ids
 
 	return &response, nil
+}
+
+func IsValidEmailNew(email string) bool {
+	// Define the regular expression pattern for a valid email address
+	// This is a basic pattern and may not cover all edge cases
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(emailRegex)
+
+	// Use the MatchString method to check if the email matches the pattern
+	return re.MatchString(email)
 }

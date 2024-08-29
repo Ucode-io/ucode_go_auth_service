@@ -8,11 +8,8 @@ import (
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
-	obs "ucode/ucode_go_auth_service/genproto/company_service"
-	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -20,6 +17,97 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
+// V2SendCodeApp godoc
+// @ID V2SendCodeApp
+// @Router /v2/send-code-app [POST]
+// @Summary SendCodeApp
+// @Description SendCode type must be one of the following values ["EMAIL", "PHONE"]
+// @Tags v2_register
+// @Accept json
+// @Produce json
+// @Param login body models.V2SendCodeRequest true "SendCode"
+// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2SendCodeApp(c *gin.Context) {
+
+	var (
+		request models.V2SendCodeRequest
+	)
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	id, err := uuid.NewRandom()
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+	_, valid := util.ValidRecipients[request.Type]
+	if !valid {
+		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
+		return
+	}
+	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
+
+	code, err := util.GenerateCode(4)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+	body := &pbSms.Sms{
+		Id:        id.String(),
+		Text:      request.Text,
+		Otp:       code,
+		Recipient: request.Recipient,
+		ExpiresAt: expire.String()[:19],
+		Type:      request.Type,
+	}
+
+	switch request.Type {
+	case "PHONE":
+		valid = util.IsValidPhone(request.Recipient)
+		if !valid {
+			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
+			return
+		}
+
+	case "EMAIL":
+		valid = util.IsValidEmail(request.Recipient)
+		if !valid {
+			h.handleResponse(c, http.BadRequest, "Email is not valid")
+			return
+		}
+	}
+
+	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &pb.GetUserByLoginTypesRequest{
+		Email: request.Recipient,
+		Phone: request.Recipient,
+	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	resp, err := h.services.SmsService().Send(
+		c.Request.Context(),
+		body,
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	res := models.V2SendCodeResponse{
+		SmsId: resp.SmsId,
+	}
+
+	h.handleResponse(c, http.Created, res)
+}
 
 // V2SendCode godoc
 // @ID V2SendCode
@@ -71,7 +159,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 
 	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
-		&obs.GetResourceEnvironmentReq{
+		&pbc.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
 			ResourceId:    resourceId.(string),
 		},
@@ -101,28 +189,29 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
-		fmt.Println("test 10")
-		smsOtpSettings, err := h.services.SmsOtpSettingsService().GetList(context.Background(), &auth_service.GetListSmsOtpSettingsRequest{
-			ProjectId:     resourceEnvironment.ProjectId,
-			EnvironmentId: environmentId.(string),
-		})
+		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_SMS,
+			})
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-		fmt.Println("test 11")
-		if len(smsOtpSettings.GetItems()) > 0 {
-			if smsOtpSettings.GetItems()[0].GetNumberOfOtp() != 0 {
-				code, err := util.GenerateCode(int(smsOtpSettings.GetItems()[0].GetNumberOfOtp()))
+		if len(smsOtpSettings.GetResources()) > 0 {
+			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
+				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
 				if err != nil {
 					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
 					return
 				}
 				body.Otp = code
 			}
-			body.DevEmail = smsOtpSettings.GetItems()[0].Login
-			body.DevEmailPassword = smsOtpSettings.GetItems()[0].Password
-			body.Originator = smsOtpSettings.GetItems()[0].Originator
+			body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
+			body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
+			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
 		}
 	case "EMAIL":
 
@@ -132,42 +221,53 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			return
 		}
 
-		emailSettings, err := h.services.EmailService().GetListEmailSettings(
-			c.Request.Context(),
-			&pb.GetListEmailSettingsRequest{
-				ProjectId: resourceEnvironment.GetProjectId(),
-			},
-		)
-
+		emailSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_SMTP,
+			})
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
 
-		if len(emailSettings.Items) < 1 {
+		if len(emailSettings.GetResources()) < 1 {
 			h.handleResponse(c, http.InvalidArgument, errors.New("email settings not found"))
 			return
 		}
 
-		body.DevEmail = emailSettings.Items[0].Email
-		body.DevEmailPassword = emailSettings.Items[0].Password
+		if len(emailSettings.GetResources()) > 0 {
+			code, err := util.GenerateCode(int(emailSettings.GetResources()[0].GetSettings().GetSmtp().GetNumberOfOtp()))
+			if err != nil {
+				h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+				return
+			}
+			body.Otp = code
+
+			body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetEmail()
+			body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetPassword()
+		}
 	}
 
-	_, err = h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &auth_service.GetUserByLoginTypesRequest{
-		Email: request.Recipient,
-		Phone: request.Recipient,
-	})
-
-	resp, err := h.services.SmsService().Send(
-		c.Request.Context(),
-		body,
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
+	resp, err := services.SmsService().Send(
+		c.Request.Context(),
+		body,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 	res := models.V2SendCodeResponse{
 		SmsId: resp.SmsId,
 	}
@@ -198,9 +298,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Register(c *gin.Context) {
-	var (
-		body models.RegisterOtp
-	)
+	var body models.RegisterOtp
 
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
@@ -208,51 +306,27 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	if _, ok := body.Data["type"]; !ok {
-		h.handleResponse(c, http.BadRequest, "register type is required")
-		return
-	}
+	var (
+		registerType  = body.Data["type"].(string)
+		clientTypeId  = body.Data["client_type_id"].(string)
+		roleId        = body.Data["role_id"].(string)
+		projectId     = helper.AnyToString(c.Get("project_id"))
+		environmentId = helper.AnyToString(c.Get("environment_id"))
+	)
 
-	if _, ok := cfg.RegisterTypes[body.Data["type"].(string)]; !ok {
-		h.handleResponse(c, http.BadRequest, "invalid register type")
-		return
-	}
-	if _, ok := body.Data["client_type_id"].(string); !ok {
-		if !util.IsValidUUID(body.Data["client_type_id"].(string)) {
-			h.handleResponse(c, http.BadRequest, "client_type_id is an invalid uuid")
+	for _, id := range []string{clientTypeId, roleId, projectId, environmentId} {
+		if !util.IsValidUUID(id) {
+			h.handleResponse(c, http.BadRequest, fmt.Sprintf("%s is an invalid uuid or not exist", id))
 			return
 		}
-		h.handleResponse(c, http.BadRequest, "client_type_id is required")
-		return
-	}
-	if _, ok := body.Data["role_id"].(string); !ok {
-		if !util.IsValidUUID(body.Data["role_id"].(string)) {
-			h.handleResponse(c, http.BadRequest, "role_id is an invalid uuid")
-			return
-		}
-		h.handleResponse(c, http.BadRequest, "role_id is required")
-		return
-	}
-	fmt.Println("::::::::::TESTTEST:::::::::::::4")
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-
-		h.handleResponse(c, http.BadRequest, "cant get project_id")
-		return
-	}
-
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
-		return
 	}
 
 	serviceResource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
-			EnvironmentId: environmentId.(string),
-			ProjectId:     projectId.(string),
-			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		&pbc.GetSingleServiceResourceReq{
+			EnvironmentId: environmentId,
+			ProjectId:     projectId,
+			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
 		},
 	)
 
@@ -261,7 +335,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &pbc.GetProjectByIdRequest{
 		ProjectId: serviceResource.GetProjectId(),
 	})
 	if err != nil {
@@ -269,69 +343,52 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	switch body.Data["type"] {
-	case cfg.WithGoogle:
-		{
-			h.handleResponse(c, http.BadRequest, "register with goole not implemented")
-			return
+	switch registerType {
 
-		}
-	case cfg.WithApple:
-		{
-			h.handleResponse(c, http.BadRequest, "registre with apple not implemented")
-			return
-		}
 	case cfg.WithEmail:
-		{
-			if v, ok := body.Data["email"]; ok {
-				if !util.IsValidEmail(v.(string)) {
-					h.handleResponse(c, http.BadRequest, "Неверный формат email")
-					return
-				}
-			} else {
-				h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+		if value, ok := body.Data["email"]; ok {
+			if !util.IsValidEmail(value.(string)) {
+				h.handleResponse(c, http.BadRequest, "Неверный формат email")
 				return
 			}
+		} else {
+			h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+			return
+		}
 
-			if _, ok := body.Data["login"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле login не заполнено")
-				return
-			}
-
-			if _, ok := body.Data["name"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле name не заполнено")
-				return
-			}
-
-			if _, ok := body.Data["phone"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
+		var fields = []string{"email", "login", "name", "phone"}
+		for _, field := range fields {
+			if _, ok := body.Data[field]; !ok {
+				h.handleResponse(c, http.BadRequest, "Поле "+field+" не заполнено")
 				return
 			}
 		}
+
 	case cfg.WithPhone:
-		{
-			if _, ok := body.Data["phone"]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
-				return
+		if _, ok := body.Data["phone"]; !ok {
+			h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
+			return
 
-			}
 		}
+	default:
+		h.handleResponse(c, http.BadRequest, "register with google and apple not implemented")
+		return
+
 	}
 
-	if body.Data["addational_table"] != nil {
-		if body.Data["addational_table"].(map[string]interface{})["table_slug"] == nil {
-			h.log.Error("Addational user create >>>> ")
+	if value, ok := body.Data["addational_table"]; ok {
+		if value.(map[string]interface{})["table_slug"] == nil {
 			h.handleResponse(c, http.BadRequest, "If addional table have, table slug is required")
 			return
 		}
 	}
 
+	body.Data["company_id"] = project.GetCompanyId()
+	body.Data["node_type"] = serviceResource.GetNodeType()
 	body.Data["project_id"] = serviceResource.GetProjectId()
+	body.Data["resource_type"] = serviceResource.GetResourceType()
 	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
 	body.Data["resource_environment_id"] = serviceResource.GetResourceEnvironmentId()
-	body.Data["environment_id"] = serviceResource.GetEnvironmentId()
-	body.Data["company_id"] = project.GetCompanyId()
-	body.Data["resource_type"] = serviceResource.GetResourceType()
 
 	structData, err := helper.ConvertMapToStruct(body.Data)
 	if err != nil {
@@ -339,8 +396,17 @@ func (h *Handler) V2Register(c *gin.Context) {
 		return
 	}
 
-	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &auth_service.RegisterUserRequest{
-		Data: structData,
+	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
+		RoleId:                roleId,
+		Data:                  structData,
+		ClientTypeId:          clientTypeId,
+		Type:                  registerType,
+		CompanyId:             project.CompanyId,
+		NodeType:              serviceResource.NodeType,
+		ProjectId:             serviceResource.ProjectId,
+		ResourceId:            serviceResource.ResourceId,
+		EnvironmentId:         serviceResource.EnvironmentId,
+		ResourceEnvironmentId: serviceResource.ResourceEnvironmentId,
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -348,4 +414,122 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.Created, response)
+}
+
+// SendMessage godoc
+// @ID SendMessage
+// @Router /v2/send-message [POST]
+// @Summary SendMessage
+// @Description SendMessage type must be one of the following values ["EMAIL", "PHONE"]
+// @Tags v2_register
+// @Accept json
+// @Produce json
+// @Param X-API-KEY header string false "X-API-KEY"
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string false "Environment-Id"
+// @Param login body models.V2SendCodeRequest true "SendCode"
+// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) SendMessage(c *gin.Context) {
+
+	var (
+		request models.V2SendCodeRequest
+	)
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	id, err := uuid.NewRandom()
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+	_, valid := util.ValidRecipients[request.Type]
+	if !valid {
+		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
+		return
+	}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
+		return
+	}
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
+		return
+	}
+	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
+
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&pbc.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	body := &pbSms.Sms{
+		Id:        id.String(),
+		Text:      request.Text,
+		Otp:       "",
+		Recipient: request.Recipient,
+		ExpiresAt: expire.String()[:19],
+		Type:      request.Type,
+	}
+
+	switch request.Type {
+	case "PHONE":
+		valid = util.IsValidPhone(request.Recipient)
+		if !valid {
+			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
+			return
+		}
+		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_SMS,
+			})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		if len(smsOtpSettings.GetResources()) > 0 {
+			body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
+			body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
+			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
+		}
+	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	resp, err := services.SmsService().Send(
+		c.Request.Context(),
+		body,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	res := models.V2SendCodeResponse{
+		SmsId: resp.SmsId,
+	}
+
+	h.handleResponse(c, http.Created, res)
 }

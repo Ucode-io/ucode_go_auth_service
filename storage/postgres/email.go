@@ -6,22 +6,22 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type emailRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewEmailRepo(db *pgxpool.Pool) storage.EmailRepoI {
+func NewEmailRepo(db *Pool) storage.EmailRepoI {
 	return &emailRepo{
 		db: db,
 	}
 }
 
 func (e *emailRepo) Create(ctx context.Context, input *pb.Email) (*pb.Email, error) {
+
 	query := `INSERT INTO "email_sms" (
 		id,
 		email,
@@ -48,6 +48,7 @@ func (e *emailRepo) Create(ctx context.Context, input *pb.Email) (*pb.Email, err
 }
 
 func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (res *pb.Email, err error) {
+
 	res = &pb.Email{}
 	query := `SELECT
 					id,
@@ -64,7 +65,7 @@ func (e *emailRepo) GetByPK(ctx context.Context, pKey *pb.EmailOtpPrimaryKey) (r
 		&res.Otp,
 	)
 	if err == pgx.ErrNoRows {
-		err := errors.New("Otp has been expired")
+		err := errors.New("otp has been expired")
 		return nil, err
 	} else if err != nil {
 		return res, err
@@ -109,6 +110,9 @@ func (e *emailRepo) CreateEmailSettings(ctx context.Context, input *pb.EmailSett
 			&resp.Email,
 			&resp.Password,
 		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
@@ -142,12 +146,16 @@ func (e *emailRepo) UpdateEmailSettings(ctx context.Context, input *pb.UpdateEma
 			&resp.Email,
 			&resp.Password,
 		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
 }
 
 func (e *emailRepo) GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error) {
+
 	arr := &pb.UpdateEmailSettingsResponse{}
 	res := &pb.EmailSettings{}
 

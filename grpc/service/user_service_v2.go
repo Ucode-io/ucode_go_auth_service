@@ -2,20 +2,23 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
+	"runtime"
 	"ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
+	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/pkg/util"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
-	"github.com/saidamir98/udevs_pkg/security"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -23,6 +26,21 @@ import (
 )
 
 func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWithGoogleRequest) (resp *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.RegisterWithGoogle")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the RegisterWithGoogle", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("RegisterWithGoogle", memoryUsed))
+		}
+	}()
 
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
@@ -38,8 +56,16 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 		return nil, err
 	}
 
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	if foundUser.Id == "" {
-		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+		pKey, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:                 "",
 			Password:              "",
 			Email:                 req.Email,
@@ -77,7 +103,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 
 		switch req.ResourceType {
 		case 1:
-			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 				TableSlug: "user",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvironmentId(),
@@ -87,7 +113,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 		case 3:
-			_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 				TableSlug: "user",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvironmentId(),
@@ -123,7 +149,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 		if req.Email != "" {
 			switch req.ResourceType {
 			case 1:
-				objUser, err = s.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				objUser, err = services.GetLoginServiceByType(req.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 					Email:      req.Email,
 					ClientType: "WEB_USER",
@@ -135,7 +161,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 			case 3:
-				objUser, err = s.services.PostgresLoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				objUser, err = services.PostgresLoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 					Email:      req.Email,
 					ClientType: "WEB_USER",
@@ -173,7 +199,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 
 			switch req.ResourceType {
 			case 1:
-				_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 					TableSlug: "user",
 					Data:      structData,
 					ProjectId: req.GetResourceEnvironmentId(),
@@ -183,7 +209,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 			case 3:
-				_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 					TableSlug: "user",
 					Data:      structData,
 					ProjectId: req.GetResourceEnvironmentId(),
@@ -194,16 +220,6 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 				}
 
 			}
-
-			// _, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-			// 	UserId:    foundUser.Id,
-			// 	ProjectId: req.GetProjectId(),
-			// 	CompanyId: req.GetCompanyId(),
-			// })
-			// if err != nil {
-			// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
-			// 	return nil, status.Error(codes.Internal, err.Error())
-			// }
 
 			resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 				Id: foundUser.Id,
@@ -219,6 +235,21 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 }
 
 func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUserRequest) (resp *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.RegisterUserViaEmail")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the RegisterUserViaEmail", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("RegisterUserViaEmail", memoryUsed))
+		}
+	}()
 
 	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
@@ -235,13 +266,21 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		return nil, err
 	}
 
-	foundUser, err := s.strg.User().GetByUsername(ctx, req.Email)
+	foundUser, _ := s.strg.User().GetByUsername(ctx, req.Email)
 	if foundUser.Id == "" {
-		foundUser, err = s.strg.User().GetByUsername(ctx, req.Phone)
+		foundUser, _ = s.strg.User().GetByUsername(ctx, req.Phone)
+	}
+
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	if foundUser.Id == "" {
-		pKey, err := s.strg.User().Create(ctx, &auth_service.CreateUserRequest{
+		pKey, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:    req.GetLogin(),
 			Password: req.GetPassword(),
 			//	Email:                 req.GetEmail(),
@@ -279,7 +318,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 
 		switch req.ResourceType {
 		case 1:
-			_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 				TableSlug: "user",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvironmentId(),
@@ -289,7 +328,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 		case 3:
-			_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+			_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 				TableSlug: "user",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvironmentId(),
@@ -325,7 +364,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		if req.Email != "" {
 			switch req.ResourceType {
 			case 1:
-				objUser, err = s.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				objUser, err = services.GetLoginServiceByType(req.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 					Email:      req.Email,
 					ClientType: "WEB_USER",
@@ -337,7 +376,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 			case 3:
-				objUser, err = s.services.PostgresLoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+				objUser, err = services.PostgresLoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 					Email:      req.Email,
 					ClientType: "WEB_USER",
@@ -354,7 +393,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		if objUser != nil && req.Phone != "" && !objUser.UserFound {
 			switch req.ResourceType {
 			case 1:
-				objUser, err = s.services.LoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
+				objUser, err = services.GetLoginServiceByType(req.NodeType).LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
 
 					PhoneNumber: req.Phone,
 					ClientType:  "WEB_USER",
@@ -365,7 +404,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 			case 3:
-				objUser, err = s.services.PostgresLoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
+				objUser, err = services.PostgresLoginService().LoginWithOtp(context.Background(), &pbObject.PhoneOtpRequst{
 
 					PhoneNumber: req.Phone,
 					ClientType:  "WEB_USER",
@@ -402,7 +441,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 
 			switch req.ResourceType {
 			case 1:
-				_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 					TableSlug: "user",
 					Data:      structData,
 					ProjectId: req.GetResourceEnvironmentId(),
@@ -412,7 +451,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 			case 3:
-				_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+				_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 					TableSlug: "user",
 					Data:      structData,
 					ProjectId: req.GetResourceEnvironmentId(),
@@ -423,16 +462,6 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 				}
 
 			}
-
-			// _, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-			// 	UserId:    foundUser.Id,
-			// 	ProjectId: req.GetProjectId(),
-			// 	CompanyId: req.GetCompanyId(),
-			// })
-			// if err != nil {
-			// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
-			// 	return nil, status.Error(codes.Internal, err.Error())
-			// }
 
 			resp, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 				Id: foundUser.Id,
@@ -449,19 +478,24 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
-	s.log.Info("---V2CreateUser--->", logger.Any("req", req))
+	s.log.Info("\n\n\n\n---V2CreateUser--->", logger.Any("req", req))
 
-	// if len(req.Login) < 6 {
-	// 	err := fmt.Errorf("login must not be less than 6 characters")
-	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2CreateUser")
+	defer dbSpan.Finish()
 
-	// if len(req.Password) < 6 {
-	// 	err := fmt.Errorf("password must not be less than 6 characters")
-	// 	s.log.Error("!!!CreateUser--->", logger.Error(err))
-	// 	return nil, err
-	// }
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2CreateUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2CreateUser", memoryUsed))
+		}
+	}()
+
 	unHashedPassword := req.Password
 
 	hashedPassword, err := security.HashPassword(req.Password)
@@ -478,14 +512,6 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
 		return nil, err
 	}
-
-	// phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
-	// phone := phoneRegex.MatchString(req.Phone)
-	// if !phone {
-	// 	err = fmt.Errorf("phone number is not valid")
-	// 	s.log.Error("!!!V2CreateUser--->", logger.Error(err))
-	// 	return nil, err
-	// }
 
 	pKey, err := s.strg.User().Create(ctx, req)
 
@@ -518,9 +544,17 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 	var tableSlug = "user"
 
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	switch req.ResourceType {
 	case 1:
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -540,7 +574,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		_, err = s.services.ObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -551,7 +585,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -571,7 +605,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		_, err = s.services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
+		_, err = services.PostgresObjectBuilderService().Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -631,10 +665,28 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 }
 
 func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey) (*pb.User, error) {
-	s.log.Info("---GetUserByID--->", logger.Any("req", req))
+	s.log.Info("---V2GetUserByID--->", logger.Any("req", req))
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserByID")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetUserByID", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetUserByID", memoryUsed))
+		}
+	}()
 
 	var (
-		result *pbObject.CommonMessage
+		result   *pbObject.CommonMessage
+		resultGo *nb.CommonMessage
+		userData map[string]interface{}
+		ok       bool
 	)
 	user, err := s.strg.User().GetByPK(ctx, req)
 
@@ -650,13 +702,19 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	fmt.Println("project id::", req.ProjectId)
-	fmt.Println("resource type::", req.ResourceType)
+
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
-		fmt.Println("enter to object builder")
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -676,7 +734,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		result, err = s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		result, err = services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -686,7 +744,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -706,7 +764,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		result, err = s.services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
+		resultGo, err = services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -715,18 +773,18 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			s.log.Error("!!!GetUserByID.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-
 	}
-	userData, ok := result.Data.AsMap()["response"].(map[string]interface{})
+
+	if result != nil {
+		userData, ok = result.Data.AsMap()["response"].(map[string]interface{})
+	} else {
+		userData, ok = resultGo.Data.AsMap()["response"].(map[string]interface{})
+	}
 
 	if !ok {
 		err := errors.New("userData is nil")
 		s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if bytes, err := json.Marshal(userData); err == nil {
-		fmt.Println("userdata", string(bytes))
 	}
 
 	roleId, ok := userData["role_id"].(string)
@@ -754,20 +812,44 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	user.Active = int32(active)
 
-	// projectId, ok := userData["project_id"].(string)
-	// if !ok {
-	// err := errors.New("projectId is nil")
-	// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-	// return nil, status.Error(codes.Internal, err.Error())
-	// }
+	projectId, ok := userData["project_id"].(string)
+	if !ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		projectId = ""
+	}
+	name, ok := userData["name"].(string)
+	if ok {
+		// err := errors.New("projectId is nil")
+		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
+		// return nil, status.Error(codes.Internal, err.Error())
+		user.Name = name
+	}
 
-	user.ProjectId = req.GetProjectId()
+	user.ProjectId = projectId
 
 	return user, nil
 }
 
 func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
 	s.log.Info("---V2GetUserList--->", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserList")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetUserList", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetUserList", memoryUsed))
+		}
+	}()
 
 	resp := &pb.GetUserListResponse{}
 	var (
@@ -798,6 +880,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		"guid": map[string]interface{}{
 			"$in": userIds,
 		},
+		"limit": 10,
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
@@ -814,11 +897,18 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
-		fmt.Println("aaaa:", userIds)
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -838,7 +928,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		usersResp, err = s.services.ObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+		usersResp, err = services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -848,7 +938,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -868,7 +958,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		usersResp, err = s.services.PostgresObjectBuilderService().GetList(ctx, &pbObject.CommonMessage{
+		goUsersResp, err := services.GoObjectBuilderService().GetList2(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -878,6 +968,9 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		if err := helper.MarshalToStruct(goUsersResp, &usersResp); err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	userCount, ok := usersResp.Data.AsMap()["count"].(float64)
@@ -926,6 +1019,29 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		// clientPlatformId, ok := userItem["client_platform_id"].(string)
+		// if !ok {
+		// 	err := errors.New("clientPlatformId is nil")
+		// 	s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+		// 	return nil, status.Error(codes.Internal, err.Error())
+		// }
+
+		projectId, ok := userItem["project_id"].(string)
+		if !ok {
+			// err := errors.New("projectId is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			projectId = ""
+		}
+
+		active, ok := userItem["active"].(float64)
+		if !ok {
+			// err := errors.New("active is nil")
+			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
+			// return nil, status.Error(codes.Internal, err.Error())
+			active = 0
+		}
+
 		user, ok := usersMap[userId]
 		if !ok {
 			err := errors.New("user is nil")
@@ -936,7 +1052,8 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		if ok {
 			user.Name = name
 		}
-
+		user.Active = int32(active)
+		user.ProjectId = projectId
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
 
@@ -944,47 +1061,26 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	}
 
 	return resp, nil
-
 }
 
 func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
 	s.log.Info("---V2UpdateUser--->", logger.Any("req", req))
 
-	//emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	//email := emailRegex.MatchString(req.Email)
-	//if !email {
-	//	err = fmt.Errorf("email is not valid")
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, err
-	//}
-	//
-	//phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
-	//phone := phoneRegex.MatchString(req.Phone)
-	//if !phone {
-	//	err = fmt.Errorf("phone number is not valid")
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, err
-	//}
-	//
-	//if err != nil {
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-	//
-	//result, err := s.services.ObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-	//	TableSlug: "user",
-	//	Data:      structData,
-	//	ProjectId: config.UcodeDefaultProjectID,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!UpdateUser.ObjectBuilderService.GetSingle--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//return &pb.CommonMessage{
-	//	TableSlug: result.TableSlug,
-	//	Data:      result.Data,
-	//}, nil
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2UpdateUser")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2UpdateUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2UpdateUser", memoryUsed))
+		}
+	}()
 
 	rowsAffected, err := s.strg.User().Update(ctx, req)
 
@@ -1016,7 +1112,13 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		s.log.Error("!!!V2UpdateUser user project not update", logger.Error(err))
 	}
 
-	// update user project
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
@@ -1027,7 +1129,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	var tableSlug = "user"
 	switch req.GetResourceType() {
 	case 1:
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1047,7 +1149,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		_, err = s.services.ObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -1057,7 +1159,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1067,7 +1169,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
+			s.log.Error("!!!V2GetUserSingle--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
@@ -1077,7 +1179,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		_, err = s.services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
+		_, err = services.GoItemService().Update(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
@@ -1088,47 +1190,56 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		}
 	}
 
-	//emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	//email := emailRegex.MatchString(req.Email)
-	//if !email {
-	//	err = fmt.Errorf("email is not valid")
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, err
-	//}
-	//
-	//phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
-	//phone := phoneRegex.MatchString(req.Phone)
-	//if !phone {
-	//	err = fmt.Errorf("phone number is not valid")
-	//	s.log.Error("!!!UpdateUser--->", logger.Error(err))
-	//	return nil, err
-	//}
-
 	res, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: req.Id})
 	if err != nil {
 		s.log.Error("!!!V2UpdateUser.GetByPK--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	return res, err
+	return res, nil
 }
 
 func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*emptypb.Empty, error) {
 	s.log.Info("---V2DeleteUser--->", logger.Any("req", req))
 
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2DeleteUser")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2DeleteUser", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2DeleteUser", memoryUsed))
+		}
+	}()
+
 	res := &emptypb.Empty{}
 	responseFromDeleteUser := &pbObject.CommonMessage{}
 
-	_, err := s.strg.User().Delete(ctx, req)
+	// _, err := s.strg.User().Delete(ctx, req)
+	// if err != nil {
+	// 	s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+	// 	return nil, status.Error(codes.Internal, err.Error())
+	// }
+	// return res, nil
 
+	services, err := s.serviceNode.GetByNodeType(
+		req.ProjectId,
+		req.NodeType,
+	)
 	if err != nil {
-		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, err
 	}
+
 	var tableSlug = "user"
 	switch req.GetResourceType() {
 	case 1:
-		clientType, err := s.services.ObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1143,12 +1254,12 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		}
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
 		if ok {
-			clientTypeTableSlug, ok := response["table_slug"].(string)
-			if ok && clientTypeTableSlug != "" {
+			clientTypeTableSlug := cast.ToString(response["table_slug"])
+			if clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		responseFromDeleteUser, err = s.services.ObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+		responseFromDeleteUser, err = services.GetObjectBuilderServiceByType(req.NodeType).Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1162,10 +1273,6 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser.ObjectBuilderService.Update--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if err != nil {
-			s.log.Error("!!!V2DeleteUser.PostgresObjectBuilderService.Update--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
 			UserId:       req.GetId(),
 			ProjectId:    req.GetProjectId(),
@@ -1173,8 +1280,17 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			ClientTypeId: req.GetClientTypeId(),
 			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
 		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		_, err = s.strg.User().Delete(ctx, req)
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	case 3:
-		clientType, err := s.services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.PostgresObjectBuilderService().GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1194,7 +1310,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 				tableSlug = clientTypeTableSlug
 			}
 		}
-		responseFromDeleteUser, err = s.services.PostgresObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
+		responseFromDeleteUser, err = services.PostgresObjectBuilderService().Delete(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data: &structpb.Struct{
 				Fields: map[string]*structpb.Value{
@@ -1215,6 +1331,16 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			ClientTypeId: req.GetClientTypeId(),
 			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
 		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser.PostgresObjectBuilderService.DeleteUserProject--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+
+	_, err = s.strg.User().Delete(ctx, req)
+	if err != nil {
+		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return res, nil
@@ -1222,6 +1348,22 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 
 func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
 	s.log.Info("AddUserToProject", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.AddUserToProject")
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the AddUserToProject", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("AddUserToProject", memoryUsed))
+		}
+	}()
 
 	res, err := s.strg.User().AddUserToProject(ctx, req)
 	if err != nil {
@@ -1236,6 +1378,19 @@ func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToPro
 func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error) {
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
 
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the GetProjectsByUserId", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("GetProjectsByUserId", memoryUsed))
+		}
+	}()
+
 	res, err := s.strg.User().GetProjectsByUserId(ctx, req)
 	if err != nil {
 		return nil, err
@@ -1247,6 +1402,19 @@ func (s *userService) GetProjectsByUserId(ctx context.Context, req *pb.GetProjec
 func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
 
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2GetUserByLoginTypes", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2GetUserByLoginTypes", memoryUsed))
+		}
+	}()
+
 	res, err := s.strg.User().GetUserByLoginType(ctx, req)
 	if err != nil {
 		return nil, err
@@ -1255,8 +1423,16 @@ func (s *userService) V2GetUserByLoginTypes(ctx context.Context, req *pb.GetUser
 	return res, nil
 }
 
+func (s *userService) GetUserByUsername(ctx context.Context, req *pb.GetUserByUsernameRequest) (*pb.User, error) {
+	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
+	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
+	if err != nil {
+		return nil, err
+	}
+	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
+	return res, nil
+}
 func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKey) (*pb.GetUserProjectsRes, error) {
-
 	userProjects, err := s.strg.User().GetUserProjects(ctx, req.Id)
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
@@ -1267,23 +1443,28 @@ func (s *userService) GetUserProjects(ctx context.Context, req *pb.UserPrimaryKe
 	return userProjects, nil
 }
 
-func (s *userService) GetUserByUsername(ctx context.Context, req *auth_service.GetUserByUsernameRequest) (*pb.User, error) {
-	s.log.Info("GetUserByUsername -> ", logger.Any("req: ", req))
-	res, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		return nil, err
-	}
-	s.log.Info("GetUserByUsername <- ", logger.Any("res: ", res))
-	return res, nil
-}
-
 func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPasswordRequest) (*pb.User, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserList")
+	defer dbSpan.Finish()
 
 	var (
+		before           runtime.MemStats
 		user             = &pb.User{}
 		err              error
 		unHashedPassword = req.GetPassword()
 	)
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2ResetPassword", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2ResetPassword", memoryUsed))
+		}
+	}()
+
 	if len(req.GetPassword()) > 6 {
 		user, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: req.UserId,
@@ -1318,6 +1499,15 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 			return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 		}
 		user.Password = hashedPassword
+
+		services, err := s.serviceNode.GetByNodeType(
+			req.ProjectId,
+			req.NodeType,
+		)
+		if err != nil {
+			return nil, err
+		}
+
 		if req.GetClientTypeId() != "" && req.GetEnvironmentId() != "" && req.GetProjectId() != "" {
 			resource, err := s.services.ServiceResource().GetSingle(ctx, &company_service.GetSingleServiceResourceReq{
 				ProjectId:     req.GetProjectId(),
@@ -1325,32 +1515,32 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
 			})
 			if err != nil {
-				err = errors.New("Password updated in auth but not found resource in this project")
+				err = errors.New("password updated in auth but not found resource in this project")
 				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
 				return nil, err
 			}
 			switch resource.ResourceType {
 			case 1:
-				_, err = s.services.LoginService().UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
+				_, err = services.GetLoginServiceByType(resource.NodeType).UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
 					Guid:                  req.UserId,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					Password:              unHashedPassword,
 					ClientTypeId:          req.ClientTypeId,
 				})
 				if err != nil {
-					err = errors.New("Password updated in auth but failed to update in object builder")
-					s.log.Error("!!!V2UserResetPassword.LoginService().UpdateUserPassword--->", logger.Error(err))
+					err = errors.New("password updated in auth but failed to update in object builder")
+					s.log.Error("!!!V2UserResetPassword.GetLoginServiceByType(resource.NodeType).UpdateUserPassword--->", logger.Error(err))
 					return nil, err
 				}
 			case 3:
-				_, err = s.services.PostgresLoginService().UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
+				_, err = services.PostgresLoginService().UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
 					Guid:                  req.UserId,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					Password:              unHashedPassword,
 					ClientTypeId:          req.ClientTypeId,
 				})
 				if err != nil {
-					err = errors.New("Password updated in auth but failed to update in object builder")
+					err = errors.New("password updated in auth but failed to update in object builder")
 					s.log.Error("!!!V2UserResetPassword.PostgresLoginService().UpdateUserPassword--->", logger.Error(err))
 					return nil, err
 				}

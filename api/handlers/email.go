@@ -3,14 +3,12 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	_ "encoding/json"
 	"errors"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
@@ -115,10 +113,21 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	switch request.RegisterType {
 	case cfg.Default:
 		{
-			respObject, err = h.services.LoginService().LoginWithEmailOtp(
+			respObject, err = services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -196,7 +205,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, "Phone required when register type is phone")
 				return
 			}
-			respObject, err = h.services.LoginService().LoginWithOtp(
+			respObject, err = services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithOtp(
 				c.Request.Context(),
 				&pbObject.PhoneOtpRequst{
 					PhoneNumber: phone,
@@ -212,7 +221,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 			} else {
 				text = request.Text
 			}
-			resp, err := h.services.SmsService().Send(
+			resp, err := services.SmsService().Send(
 				c.Request.Context(),
 				&pbSms.Sms{
 					Id:        id.String(),
@@ -269,7 +278,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 
 			request.Email = userInfo["email"].(string)
 
-			respObject, err = h.services.LoginService().LoginWithEmailOtp(
+			respObject, err = services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -308,7 +317,6 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.GRPCError, "Register type must be default or phone type")
-	return
 }
 
 // Verify godoc
@@ -372,6 +380,12 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		return
 	}
 
+	services, _ := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+
 	switch body.RegisterType {
 	case cfg.Default:
 		{
@@ -395,7 +409,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	case cfg.WithPhone:
 		{
 			if c.Param("otp") != "121212" {
-				_, err := h.services.SmsService().ConfirmOtp(
+				_, err := services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
 						SmsId: c.Param("sms_id"),
@@ -425,7 +439,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				return
 			}
 
-			respObject, err := h.services.LoginService().LoginWithEmailOtp(
+			respObject, err := services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -480,7 +494,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 				return
 			}
 
-			respObject, err := h.services.LoginService().LoginWithEmailOtp(
+			respObject, err := services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(
 				c.Request.Context(),
 				&pbObject.EmailOtpRequest{
 					ClientType: "WEB_USER",
@@ -546,7 +560,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param verifyBody body models.VerifyEmail true "verify_body"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=pb.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) VerifyOnlyEmailOtp(c *gin.Context) {
@@ -649,7 +663,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		return
 	}
 
-	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &company_service.GetProjectByIdRequest{
+	project, err := h.services.ProjectServiceClient().GetById(context.Background(), &obs.GetProjectByIdRequest{
 		ProjectId: resourceEnvironment.GetProjectId(),
 	})
 	if err != nil {
@@ -660,6 +674,12 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 	ProjectId = resourceEnvironment.GetProjectId()
 	ResourceEnvironmentId = resourceEnvironment.GetId()
 	CompanyId = project.GetCompanyId()
+
+	services, _ := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
 
 	if body.Data["register_type"] != cfg.WithGoogle && body.Data["register_type"] != cfg.WithApple {
 		body.Data["register_type"] = cfg.Default
@@ -807,7 +827,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.services.LoginService().LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
+	resp, err := services.GetLoginServiceByType(resourceEnvironment.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
 
 		Email:      body.Data["email"].(string),
 		ClientType: "WEB_USER",
@@ -844,7 +864,7 @@ func (h *Handler) RegisterEmailOtp(c *gin.Context) {
 				return
 			}
 
-			respObj, err := h.services.ObjectBuilderService().Create(
+			respObj, err := services.GetObjectBuilderServiceByType(resourceEnvironment.NodeType).Create(
 				context.Background(),
 				&pbObject.CommonMessage{
 					TableSlug: mapedInterface["table_slug"].(string),

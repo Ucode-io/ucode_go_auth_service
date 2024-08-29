@@ -11,7 +11,7 @@ service ViewService {
     rpc Create(CreateViewRequest) returns (View) {}
     rpc GetList(GetAllViewsRequest) returns (GetAllViewsResponse) {}
     rpc GetSingle(ViewPrimaryKey) returns (View) {}
-    rpc Update(View) returns (google.protobuf.Empty) {}
+    rpc Update(View) returns (View) {}
     rpc Delete(ViewPrimaryKey) returns (google.protobuf.Empty) {}
     rpc ConvertHtmlToPdf(HtmlBody) returns (PdfBody) {}
     rpc ConvertTemplateToHtml(HtmlBody) returns (HtmlBody) {}
@@ -56,6 +56,10 @@ message CreateViewRequest {
     string commit_guid = 27;
     bool default_editable = 28;
     int32 order = 29;
+    string name_uz = 30;
+    string name_en = 31;
+    string env_id = 32;
+    string id = 33;
 }
 
 message QuickFilter {
@@ -94,6 +98,9 @@ message View {
     Navigate navigate = 28;
     string function_path = 29;
     int32 order = 30;
+    string name_uz = 31;
+    string name_en = 32;
+    string env_id = 33;
 }
 
 message Navigate {
@@ -117,11 +124,14 @@ message GetAllViewsRequest {
     string table_slug = 1;
     string app_id = 2;
     string project_id = 3;
+    string role_id = 4;
 }
 
 message ViewPrimaryKey {
     string id = 1;
     string project_id = 2;
+    string env_id = 3;
+    string table_slug = 4;
 }
 
 message DisableDates {

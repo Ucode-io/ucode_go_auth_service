@@ -3,8 +3,7 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	net_http "net/http"
 	"net/smtp"
 	"ucode/ucode_go_auth_service/config"
@@ -46,7 +45,7 @@ func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
 
 	userInfo := make(map[string]interface{})
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +79,6 @@ func SendEmail(subject, to, link, token string) error {
 
 func SendCodeToEmail(subject, to, code string, email string, password string) error {
 
-	log.Printf("---SendCodeEmail---> email: %s, code: %s", to, code)
-
 	message := `
 		Your verification code is: ` + code
 
@@ -106,10 +103,58 @@ func SendCodeToEmail(subject, to, code string, email string, password string) er
 	return nil
 }
 
+type loginAuth struct {
+	username, password string
+}
+
+func LoginAuth(username, password string) smtp.Auth {
+	return &loginAuth{username, password}
+}
+
+func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
+	return "LOGIN", []byte{}, nil
+}
+
+func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
+	if more {
+		switch string(fromServer) {
+		case "Username:":
+			return []byte(a.username), nil
+		case "Password:":
+			return []byte(a.password), nil
+		default:
+			return nil, errors.New("Unkown fromServer")
+		}
+	}
+	return nil, nil
+}
+
+func SendCodeToEnvironmentEmail(subject, to, code string, email string, password string) error {
+
+	smtpServer := "outlook.office365.com"
+	smtpPort := 587
+
+	message := `
+		Your verification code is ` + code
+
+	msg := "To: \"" + to + "\" <" + to + ">\n" +
+		"From: \"" + email + "\" <" + email + ">\n" +
+		"Subject: " + subject + "\n" +
+		message + "\n"
+
+	auth := LoginAuth(email, password)
+
+	err := smtp.SendMail(fmt.Sprintf("%s:%d", smtpServer, smtpPort), auth, email, []string{to}, []byte(msg))
+	if err != nil {
+		return errors.Wrap(err, "error while sending message to environment email")
+	}
+
+	return nil
+}
+
 func SendInviteMessageToEmail(input SendMessageToEmailRequest) error {
 
 	cfg := config.Load()
-	log.Printf("---SendInviteMessageToEmail---> email: %s", input.To)
 	url := fmt.Sprintf(
 		cfg.UcodeAppBaseUrl+"/invite-user?user_id=%s&environment_id=%s&project_id=%s&client_type_id=%s",
 		input.UserId,

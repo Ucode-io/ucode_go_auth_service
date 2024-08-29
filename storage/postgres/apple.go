@@ -6,22 +6,22 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type appleSettingsRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewAppleSettingsRepo(db *pgxpool.Pool) storage.AppleSettingsI {
+func NewAppleSettingsRepo(db *Pool) storage.AppleSettingsI {
 	return &appleSettingsRepo{
 		db: db,
 	}
 }
 
 func (e *appleSettingsRepo) Create(ctx context.Context, input *pb.AppleIdSettings) (*pb.AppleIdSettings, error) {
+
 	query := `INSERT INTO "apple_settings" (
 		id,
 		team_id,
@@ -54,6 +54,7 @@ func (e *appleSettingsRepo) Create(ctx context.Context, input *pb.AppleIdSetting
 }
 
 func (e *appleSettingsRepo) GetByPK(ctx context.Context, pKey *pb.AppleIdSettingsPrimaryKey) (res *pb.AppleIdSettings, err error) {
+
 	res = &pb.AppleIdSettings{}
 	query := `SELECT
 	                id,
@@ -83,7 +84,6 @@ func (e *appleSettingsRepo) GetByPK(ctx context.Context, pKey *pb.AppleIdSetting
 	return res, nil
 }
 
-
 func (e *appleSettingsRepo) UpdateAppleSettings(ctx context.Context, input *pb.AppleIdSettings) (string, error) {
 
 	var resp = &pb.AppleIdSettings{}
@@ -104,8 +104,7 @@ func (e *appleSettingsRepo) UpdateAppleSettings(ctx context.Context, input *pb.A
 		input.Secret,
 		input.Id,
 	).Scan(
-		    &resp.Id,
-			
+		&resp.Id,
 	)
 	if err != nil {
 		return "", err
@@ -115,6 +114,7 @@ func (e *appleSettingsRepo) UpdateAppleSettings(ctx context.Context, input *pb.A
 }
 
 func (e *appleSettingsRepo) GetListAppleSettings(ctx context.Context, input *pb.GetListAppleIdSettingsRequest) (*pb.GetListAppleIdSettingsResponse, error) {
+
 	arr := &pb.GetListAppleIdSettingsResponse{}
 
 	query := `SELECT

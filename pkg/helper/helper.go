@@ -6,24 +6,25 @@ import (
 	"errors"
 	"log"
 	"math/big"
+	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var (
-	digits   = "0123456789"
-	specials = "~=+%^*/()[]{}/!@#$?|"
-	all      = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+	digits = "0123456789"
+	all    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
 		digits
 )
 
 func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (string, []interface{}) {
 	var (
-		i    int = 1
+		i    = 1
 		args []interface{}
 	)
 
@@ -128,4 +129,54 @@ func ParsePsqlTypeToEnum(arg string) error {
 		return errors.New("incorrect auth type")
 	}
 	return nil
+}
+
+func GetURLWithTableSlug(c *gin.Context) string {
+	url := c.FullPath()
+	if strings.Contains(url, ":table_slug") {
+		tableSlug := c.Param("table_slug")
+		url = strings.Replace(url, ":table_slug", tableSlug, -1)
+	} else if strings.Contains(url, ":collection") && strings.Contains(url, "/items") {
+		tableSlug := c.Param("collection")
+		url = strings.Replace(url, ":collection", tableSlug, -1)
+	}
+
+	return url
+}
+
+func MarshalToStruct(data interface{}, resp interface{}) error {
+	js, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(js, resp)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func EmailValidation(email string) bool {
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	checkEmail := emailRegex.MatchString(email)
+
+	return checkEmail
+}
+
+func GetStringFromMap(body map[string]interface{}, key string) string {
+	if value, ok := body[key]; ok {
+		if str, ok := value.(string); ok {
+			return str
+		}
+	}
+	return ""
+}
+func AnyToString(value any, exist bool) string {
+	if !exist {
+		return ""
+	}
+
+	return value.(string)
 }

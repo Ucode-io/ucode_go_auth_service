@@ -52,3 +52,4 @@ migration-up:
 
 migration-down:
 	migrate -path ./migrations/postgres -database 'postgres://postgres:qwerty123@0.0.0.0:5432/ucode_auth_service?sslmode=disable' down 
+

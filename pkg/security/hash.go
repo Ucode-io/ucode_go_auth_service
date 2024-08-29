@@ -10,6 +10,10 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+var (
+	Counter int
+)
+
 const (
 	// A2IDtime is the number of iterations (or passes) over the memory used by the algorithm Argon2id
 	A2IDtime = 3
@@ -29,7 +33,6 @@ const (
 
 // HashPassword is used to generate a new password hash for storing and comparing at a later date.
 func HashPassword(password string) (hashedPassword string, err error) {
-
 	// Generate a cryptographically secure random salt.
 	salt, err := GenerateRandomBytes(A2IDsaltLen)
 	if err != nil {
@@ -49,6 +52,7 @@ func HashPassword(password string) (hashedPassword string, err error) {
 
 // ComparePassword is used to compare a user-inputted password to a hash to see if the password matches or not.
 func ComparePassword(hashedPassword, password string) (match bool, err error) {
+
 	parts := strings.Split(hashedPassword, "$")
 
 	if len(parts) <= 5 {

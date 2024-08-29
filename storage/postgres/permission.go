@@ -4,26 +4,26 @@ import (
 	"context"
 	"database/sql"
 	"strings"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type permissionRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewPermissionRepo(db *pgxpool.Pool) storage.PermissionRepoI {
+func NewPermissionRepo(db *Pool) storage.PermissionRepoI {
 	return &permissionRepo{
 		db: db,
 	}
 }
 
 func (r *permissionRepo) Create(ctx context.Context, entity *pb.CreatePermissionRequest) (pKey *pb.PermissionPrimaryKey, err error) {
+
 	query := `INSERT INTO "permission" (
 		id,
 		client_platform_id,
@@ -66,6 +66,7 @@ func (r *permissionRepo) Create(ctx context.Context, entity *pb.CreatePermission
 }
 
 func (r *permissionRepo) GetByPK(ctx context.Context, pKey *pb.PermissionPrimaryKey) (res *pb.GetPermissionByIDResponse, err error) {
+
 	res = &pb.GetPermissionByIDResponse{}
 	var nullableStr *string
 	query := `SELECT
@@ -125,6 +126,7 @@ func (r *permissionRepo) GetByPK(ctx context.Context, pKey *pb.PermissionPrimary
 }
 
 func (r *permissionRepo) GetList(ctx context.Context, queryParam *pb.GetPermissionListRequest) (res *pb.GetPermissionListResponse, err error) {
+
 	res = &pb.GetPermissionListResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -197,6 +199,7 @@ func (r *permissionRepo) GetList(ctx context.Context, queryParam *pb.GetPermissi
 }
 
 func (r *permissionRepo) GetListByRoleId(ctx context.Context, roleID string) (res []*pb.Permission, err error) {
+
 	var (
 		permissionMap = make(map[string]*pb.Permission)
 	)
@@ -255,6 +258,7 @@ func (r *permissionRepo) GetListByRoleId(ctx context.Context, roleID string) (re
 }
 
 func (r *permissionRepo) GetListByClientPlatformId(ctx context.Context, clientPlatformID string) (res []*pb.Permission, err error) {
+
 	var (
 		permissionMap = make(map[string]*pb.Permission)
 	)
@@ -305,6 +309,7 @@ func (r *permissionRepo) GetListByClientPlatformId(ctx context.Context, clientPl
 }
 
 func (r *permissionRepo) Update(ctx context.Context, entity *pb.UpdatePermissionRequest) (rowsAffected int64, err error) {
+
 	if entity.Id == entity.ParentId {
 		err = storage.ErrorTheSameId
 		return
@@ -342,6 +347,7 @@ func (r *permissionRepo) Update(ctx context.Context, entity *pb.UpdatePermission
 }
 
 func (r *permissionRepo) Delete(ctx context.Context, pKey *pb.PermissionPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "permission" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)
@@ -354,14 +360,14 @@ func (r *permissionRepo) Delete(ctx context.Context, pKey *pb.PermissionPrimaryK
 	return rowsAffected, err
 }
 
-func (r *permissionRepo) GeneratePermission(ctx context.Context, req *auth_service.PermissionGenerated) (res *auth_service.Permission, err error) {
+func (r *permissionRepo) GeneratePermission(ctx context.Context, req *pb.PermissionGenerated) (res *pb.Permission, err error) {
 
 	return nil, nil
 }
 
-func MakePermissions(permissions *auth_service.PermissionGenerated_Permission) []*auth_service.Permission {
+func MakePermissions(permissions *pb.PermissionGenerated_Permission) []*pb.Permission {
 	var (
-		res []*auth_service.Permission
+		res []*pb.Permission
 	)
 	if permissions.Children == nil {
 		return res
@@ -370,7 +376,7 @@ func MakePermissions(permissions *auth_service.PermissionGenerated_Permission) [
 	return res
 }
 
-func InsertScopes(scopes []*auth_service.PermissionGenerated_Permission_Scope, permissionID, clientPlatformID string, tx *sql.Tx) error {
+func InsertScopes(scopes []*pb.PermissionGenerated_Permission_Scope, permissionID, clientPlatformID string, tx *sql.Tx) error {
 	values := []interface{}{}
 	query := `
 		INSERT INTO "permission_scope" (

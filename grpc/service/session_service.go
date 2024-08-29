@@ -6,36 +6,33 @@ import (
 
 	"time"
 	"ucode/ucode_go_auth_service/config"
+	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
+	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
-	secure "ucode/ucode_go_auth_service/pkg/security"
-
-	"github.com/saidamir98/udevs_pkg/security"
-
 	"github.com/saidamir98/udevs_pkg/logger"
-
-	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type sessionService struct {
-	cfg      config.Config
-	log      logger.LoggerI
-	strg     storage.StorageI
-	services client.ServiceManagerI
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
 	pb.UnimplementedSessionServiceServer
 }
 
-func NewSessionService(cfg config.Config, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI) *sessionService {
+func NewSessionService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *sessionService {
 	return &sessionService{
-		cfg:      cfg,
-		log:      log,
-		strg:     strg,
-		services: svcs,
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
 	}
 }
 
@@ -101,56 +98,6 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	res.UserFound = true
 	res.User = user
 
-	//clientType, err := s.strg.ClientType().GetByPK(ctx, &pb.ClientTypePrimaryKey{
-	//	Id: user.ClientTypeId,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-	//res.ClientType = clientType
-
-	//clientPlatform, err := s.strg.ClientPlatform().GetByPK(ctx, &pb.ClientPlatformPrimaryKey{
-	//	Id: user.ClientPlatformId,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-	//
-	//res.ClientPlatform = clientPlatform
-	//
-	//client, err := s.strg.Client().GetByPK(ctx, &pb.ClientPrimaryKey{
-	//	ClientPlatformId: user.ClientPlatformId,
-	//	ClientTypeId:     user.ClientTypeId,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-
-	//permissions, err := s.strg.Permission().GetListByRoleId(ctx, user.RoleId)
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-	//
-	//res.Permissions = permissions
-
-	//if client.LoginStrategy != pb.LoginStrategies_STANDARD {
-	//	err := errors.New("incorrect login strategy")
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-
-	//role, err := s.strg.Role().GetByPK(ctx, &pb.RolePrimaryKey{Id: user.RoleId})
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.InvalidArgument, err.Error())
-	//}
-	//
-	//res.Role = role
-
 	companies, err := s.services.CompanyService().GetList(ctx, &pb.GetComapnyListRequest{UserId: user.Id})
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -174,61 +121,6 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	}
 
 	res.Sessions = userSessionList.Sessions
-
-	//sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
-	//	ProjectId:        user.ProjectId,
-	//	ClientPlatformId: user.ClientPlatformId,
-	//	ClientTypeId:     user.ClientTypeId,
-	//	UserId:           user.Id,
-	//	RoleId:           user.RoleId,
-	//	Ip:               "0.0.0.0",
-	//	Data:             "additional json data",
-	//	ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-
-	//session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-
-	// TODO - wrap in a function
-	//m := map[string]interface{}{
-	//	"id":                 session.Id,
-	//	"project_id":         session.ProjectId,
-	//	"client_platform_id": session.ClientPlatformId,
-	//	"client_type_id":     session.ClientTypeId,
-	//	"user_id":            session.UserId,
-	//	"role_id":            session.RoleId,
-	//	"ip":                 session.Data,
-	//	"data":               session.Data,
-	//	"tables":             req.Tables,
-	//}
-	//
-	//accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
-	//if err != nil {
-	//	s.log.Error("!!!Login--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-	//
-	//res.Token = &pb.Token{
-	//	AccessToken:      accessToken,
-	//	RefreshToken:     refreshToken,
-	//	CreatedAt:        session.CreatedAt,
-	//	UpdatedAt:        session.UpdatedAt,
-	//	ExpiresAt:        session.ExpiresAt,
-	//	RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
-	//}
 
 	return res, nil
 }
@@ -261,8 +153,6 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 	}
 
 	session := &pb.Session{}
-
-	// session, err = s.strg.Session().Update(ctx, )
 
 	session, err = s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
@@ -313,24 +203,6 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// if user.Active == 0 {
-	// 	err := errors.New("user hasn't been activated yet")
-	// 	s.log.Error("!!!RefreshToken--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
-	// if err != nil {
-	// 	s.log.Error("!!!RefreshToken--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// if expiresAt.Unix() < time.Now().Unix() {
-	// 	err := errors.New("user has been expired")
-	// 	s.log.Error("!!!RefreshToken--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
 	// TODO - wrap in a function
 	m := map[string]interface{}{
 		"id":                 session.Id,
@@ -342,7 +214,6 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 		"ip":                 session.Data,
 		"data":               session.Data,
 		"env_id":             session.EnvId,
-		// "tables":             tokenInfo.Table,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -371,7 +242,7 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 
 func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
 
-	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!HasAccess--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -389,30 +260,6 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// if user.Active < 0 {
-	// 	err := errors.New("user is not active")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// if user.Active == 0 {
-	// 	err := errors.New("user hasn't been activated yet")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
-	// if err != nil {
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// if expiresAt.Unix() < time.Now().Unix() {
-	// 	err := errors.New("user has been expired")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
 	_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
 		ClientPlatformId: req.ClientPlatformId,
 		Path:             req.Path,
@@ -423,19 +270,6 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// DONT FORGET TO UNCOMMENT THIS!!!
-
-	// hasAccess, err := s.strg.PermissionScope().HasAccess(ctx, user.RoleId, req.ClientPlatformId, req.Path, req.Method)
-	// if err != nil {
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// if !hasAccess {
-	// 	err = errors.New("access denied")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
 	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
 		authTable := &pb.TableBody{
@@ -462,7 +296,7 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 
 func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAccessSuperAdminReq) (*pb.HasAccessSuperAdminRes, error) {
 	s.log.Info("---HasAccessSuperAdmin--->", logger.Any("req", req))
-	tokenInfo, err := secure.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!HasAccess token parse--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -480,73 +314,6 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// @TODO::check user activation status from builders
-	// if user.Active < 0 {
-	// 	err := errors.New("user is not active")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// if user.Active == 0 {
-	// 	err := errors.New("user hasn't been activated yet")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// expiresAt, err := time.Parse(config.DatabaseTimeLayout, user.ExpiresAt)
-	// if err != nil {
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.Internal, err.Error())
-	// }
-
-	// if expiresAt.Unix() < time.Now().Unix() {
-	// 	err := errors.New("user has been expired")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	//@TODO:: check user has permission to this project
-	// project, err := s.services.ProjectServiceClient().GetById(
-	// 	ctx,
-	// 	&company_service.GetProjectByIdRequest{
-	// 		ProjectId: req.ProjectId,
-	// 	})
-
-	// company, err := s.services.CompanyServiceClient().GetById(
-	// 	ctx,
-	// 	&company_service.GetCompanyByIdRequest{
-	// 		Id: project.GetCompanyId(),
-	// 	})
-
-	// if company.GetCompany().GetOwnerId() != user.GetId() {
-	// 	err := errors.New("user has no permission")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	//_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
-	//	ClientPlatformId: req.ClientPlatformId,
-	//	Path:             req.Path,
-	//	Method:           req.Method,
-	//})
-	//if err != nil {
-	//	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	//	return nil, status.Error(codes.Internal, err.Error())
-	//}
-
-	// DONT FORGET TO UNCOMMENT THIS!!!
-
-	// hasAccess, err := s.strg.PermissionScope().HasAccess(ctx, user.RoleId, req.ClientPlatformId, req.Path, req.Method)
-	// if err != nil {
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
-
-	// if !hasAccess {
-	// 	err = errors.New("access denied")
-	// 	s.log.Error("!!!HasAccess--->", logger.Error(err))
-	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
-	// }
 	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
 		authTable := &pb.TableBody{
@@ -556,15 +323,17 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		authTables = append(authTables, authTable)
 	}
 	return &pb.HasAccessSuperAdminRes{
-		Id:        session.Id,
-		ProjectId: session.ProjectId,
-		UserId:    session.UserId,
-		Ip:        session.Ip,
-		Data:      session.Data,
-		ExpiresAt: session.ExpiresAt,
-		CreatedAt: session.CreatedAt,
-		UpdatedAt: session.UpdatedAt,
-		Tables:    authTables,
-		EnvId:     session.EnvId,
+		Id:           session.Id,
+		ProjectId:    session.ProjectId,
+		UserId:       session.UserId,
+		Ip:           session.Ip,
+		Data:         session.Data,
+		ExpiresAt:    session.ExpiresAt,
+		CreatedAt:    session.CreatedAt,
+		UpdatedAt:    session.UpdatedAt,
+		Tables:       authTables,
+		EnvId:        session.EnvId,
+		ClientTypeId: session.ClientTypeId,
+		RoleId:       session.RoleId,
 	}, nil
 }

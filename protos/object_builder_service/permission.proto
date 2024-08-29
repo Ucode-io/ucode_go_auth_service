@@ -17,11 +17,23 @@ service PermissionService {
     rpc GetViewRelationPermissions (GetActionPermissionRequest) returns (CommonMessage) {}
     rpc GetListWithRoleAppTablePermissions(GetListWithRoleAppTablePermissionsRequest) returns (GetListWithRoleAppTablePermissionsResponse) {}
     rpc UpdateRoleAppTablePermissions(UpdateRoleAppTablePermissionsRequest) returns (google.protobuf.Empty) {}
+    rpc CreateDefaultPermission(CreateDefaultPermissionRequest) returns (google.protobuf.Empty) {}
     rpc GetAllMenuPermissions(GetAllMenuPermissionsRequest) returns (GetAllMenuPermissionsResponse) {}
     rpc UpdateMenuPermissions(UpdateMenuPermissionsRequest) returns (google.protobuf.Empty) {}
     rpc UpdatePermissionsByTableSlug(UpdatePermissionsRequest) returns (google.protobuf.Empty) {}
     rpc GetPermissionsByTableSlug(GetPermissionsByTableSlugRequest) returns (GetPermissionsByTableSlugResponse) {}
+    rpc GetGlobalPermissionByRoleId(GetGlobalPermissionsByRoleIdRequest) returns (GlobalPermission) {}
     rpc GetTablePermission(GetTablePermissionRequest) returns (GetTablePermissionResponse) {}
+}
+
+message CreateDefaultPermissionRequest {
+    string project_id = 1;
+    string role_id = 2;
+}
+
+message GetGlobalPermissionsByRoleIdRequest {
+    string project_id = 1;
+    string role_id = 2;
 }
 
 message GetAllPermissionRequest {
@@ -77,6 +89,7 @@ message RoleWithAppTablePermissions {
             bool edit_permission = 4;
             string label = 5;
             string table_slug = 6;
+            google.protobuf.Struct attributes = 7;
         }
         message ViewPermission {
             string guid = 1;
@@ -87,6 +100,7 @@ message RoleWithAppTablePermissions {
             bool create_permission = 6;
             bool delete_permission = 7;
             string table_slug = 8;
+            google.protobuf.Struct attributes = 9;
         }
         message AutomaticFilter {
             string guid = 1;
@@ -101,6 +115,7 @@ message RoleWithAppTablePermissions {
             bool permission = 3;
             string label = 4;
             string table_slug = 5;
+            google.protobuf.Struct attributes = 6;
         }
         message AutomaticFilterWithMethod {
             repeated AutomaticFilter read = 1;
@@ -115,6 +130,7 @@ message RoleWithAppTablePermissions {
             bool edit = 4;
             bool delete = 5;
             string view_id = 6;
+            google.protobuf.Struct attributes = 7;
         }
         message CustomPermission {
             string view_create = 1;
@@ -122,6 +138,17 @@ message RoleWithAppTablePermissions {
             string settings = 3;
             string automation = 4;
             string language_btn = 5;
+            string pdf_action = 6;
+            string add_field = 7;
+            string delete_all = 8;
+            string add_filter = 9;
+            string field_filter = 10;
+            string fix_column = 11;
+            string tab_group = 12;
+            string columns = 13;
+            string group = 14;
+            string excel_menu = 15;
+            string search_button = 16;
         }
 
         string label = 1;
@@ -141,6 +168,7 @@ message RoleWithAppTablePermissions {
         repeated ActionPermission action_permissions = 15;
         repeated TableViewPermission table_view_permissions = 16;
         CustomPermission custom_permission = 17;
+        google.protobuf.Struct attributes = 18;
     }
     string name = 1;
     string guid = 2;
@@ -192,6 +220,7 @@ message MenuPermission {
     string label = 2;
     string type = 3;
     Permission permission = 4;
+    google.protobuf.Struct attributes = 5;
 }
 
 message GetAllMenuPermissionsRequest {

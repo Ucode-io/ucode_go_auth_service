@@ -10,21 +10,21 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
 )
 
 type IntegrationRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewIntegrationRepo(db *pgxpool.Pool) storage.IntegrationRepoI {
+func NewIntegrationRepo(db *Pool) storage.IntegrationRepoI {
 	return &IntegrationRepo{
 		db: db,
 	}
 }
 
 func (r *IntegrationRepo) Create(ctx context.Context, entity *pb.CreateIntegrationRequest) (pKey *pb.IntegrationPrimaryKey, err error) {
+
 	query := `INSERT INTO "integration" (
 		id,
 		project_id,
@@ -80,6 +80,7 @@ func (r *IntegrationRepo) Create(ctx context.Context, entity *pb.CreateIntegrati
 }
 
 func (r *IntegrationRepo) GetByPK(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (res *pb.Integration, err error) {
+
 	res = &pb.Integration{}
 	query := `SELECT
 		id,
@@ -127,6 +128,7 @@ func (r *IntegrationRepo) GetByPK(ctx context.Context, pKey *pb.IntegrationPrima
 }
 
 func (r *IntegrationRepo) GetIntegrationSessions(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (res *pb.GetIntegrationSessionsResponse, err error) {
+
 	res = &pb.GetIntegrationSessionsResponse{}
 
 	query := `
@@ -186,6 +188,7 @@ func (r *IntegrationRepo) GetIntegrationSessions(ctx context.Context, pKey *pb.I
 }
 
 func (r *IntegrationRepo) CreateSession(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
+
 	query := `INSERT INTO "session" (
 		id,
 		project_id,
@@ -233,6 +236,7 @@ func (r *IntegrationRepo) CreateSession(ctx context.Context, entity *pb.CreateSe
 }
 
 func (r *IntegrationRepo) GetListByPKs(ctx context.Context, pKeys *pb.IntegrationPrimaryKeyList) (res *pb.GetIntegrationListResponse, err error) {
+
 	res = &pb.GetIntegrationListResponse{}
 	query := `SELECT
 		id,
@@ -315,6 +319,7 @@ func (r *IntegrationRepo) GetListByPKs(ctx context.Context, pKeys *pb.Integratio
 }
 
 func (r *IntegrationRepo) GetList(ctx context.Context, queryParam *pb.GetIntegrationListRequest) (res *pb.GetIntegrationListResponse, err error) {
+
 	res = &pb.GetIntegrationListResponse{}
 	params := make(map[string]interface{})
 	var arr []interface{}
@@ -443,6 +448,7 @@ func (r *IntegrationRepo) GetList(ctx context.Context, queryParam *pb.GetIntegra
 }
 
 func (r *IntegrationRepo) Update(ctx context.Context, entity *pb.UpdateIntegrationRequest) (rowsAffected int64, err error) {
+
 	query := `UPDATE "integration" SET
 		project_id = :project_id,
 		client_platform_id = :client_platform_id,
@@ -484,6 +490,7 @@ func (r *IntegrationRepo) Update(ctx context.Context, entity *pb.UpdateIntegrati
 }
 
 func (r *IntegrationRepo) Delete(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "integration" WHERE id = $1`
 
 	result, err := r.db.Exec(ctx, query, pKey.Id)
@@ -497,6 +504,7 @@ func (r *IntegrationRepo) Delete(ctx context.Context, pKey *pb.IntegrationPrimar
 }
 
 func (r *IntegrationRepo) DeleteSession(ctx context.Context, pKey *pb.GetIntegrationTokenRequest) (rowsAffected int64, err error) {
+
 	query := `DELETE FROM "session" WHERE id = $1 AND integration_id=$2`
 
 	result, err := r.db.Exec(ctx, query, pKey.SessionId, pKey.IntegrationId)
@@ -510,6 +518,7 @@ func (r *IntegrationRepo) DeleteSession(ctx context.Context, pKey *pb.GetIntegra
 }
 
 func (r *IntegrationRepo) GetIntegrationSession(ctx context.Context, req *pb.GetIntegrationTokenRequest) (res *pb.Session, err error) {
+
 	res = &pb.Session{}
 	query := `SELECT
 		id,
