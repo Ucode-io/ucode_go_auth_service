@@ -448,11 +448,16 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 
 	res := pb.GetUserProjectsRes{}
 
-	query := `SELECT company_id,
-       			array_agg(DISTINCT project_id)
-				FROM user_project
-				WHERE user_id = $1
-				GROUP BY company_id`
+	query := `WITH user_projects AS (
+    				SELECT company_id, project_id
+				    FROM user_project
+    				WHERE user_id = $1
+    				GROUP BY company_id, project_id
+				)
+			 SELECT company_id,
+			 	array_agg(DISTINCT project_id)
+			 FROM user_projects
+			 GROUP BY company_id`
 
 	rows, err := r.db.Query(ctx, query, userId)
 	if err != nil {
