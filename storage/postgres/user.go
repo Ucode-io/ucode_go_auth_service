@@ -448,16 +448,11 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 
 	res := pb.GetUserProjectsRes{}
 
-	query := `WITH user_projects AS (
-    				SELECT company_id, project_id
-				    FROM user_project
-    				WHERE user_id = $1
-    				GROUP BY company_id, project_id
-				)
-			 SELECT company_id,
-			 	array_agg(DISTINCT project_id)
-			 FROM user_projects
-			 GROUP BY company_id`
+	query := `SELECT company_id,
+      			array_agg( DISTINCT project_id)
+				FROM user_project
+				WHERE user_id = $1
+				GROUP BY company_id`
 
 	rows, err := r.db.Query(ctx, query, userId)
 	if err != nil {
@@ -467,20 +462,18 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 
 	for rows.Next() {
 		var (
-			projectIDs []string
-			company    string
+			projects = make([]string, 0)
+			company  string
 		)
 
-		err = rows.Scan(&company, &projectIDs)
+		err = rows.Scan(&company, pq.Array(&projects))
 		if err != nil {
 			return nil, err
 		}
 
-		fmt.Println("company: %s, projects: %s, ", company, projectIDs)
-
 		res.Companies = append(res.Companies, &pb.UserCompany{
 			Id:         company,
-			ProjectIds: projectIDs,
+			ProjectIds: projects,
 		})
 	}
 
