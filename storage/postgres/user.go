@@ -462,18 +462,24 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 
 	for rows.Next() {
 		var (
-			projectIDs = make([]string, 0)
+			projectIDs string
 			company    string
 		)
 
-		err = rows.Scan(&company, pq.Array(&projectIDs))
+		err = rows.Scan(&company, &projectIDs)
 		if err != nil {
 			return nil, err
 		}
 
+		fmt.Printf("company: %s, projects: %s\n", company, projectIDs)
+
+		parsedProjects := strings.Trim(projectIDs, "{}")
+		projectIDsList := strings.Split(parsedProjects, ",")
+		fmt.Println("this is", projectIDsList)
+
 		res.Companies = append(res.Companies, &pb.UserCompany{
 			Id:         company,
-			ProjectIds: projectIDs,
+			ProjectIds: projectIDsList,
 		})
 	}
 
