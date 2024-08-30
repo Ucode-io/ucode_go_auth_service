@@ -449,7 +449,7 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	res := pb.GetUserProjectsRes{}
 
 	query := `SELECT company_id,
-       			array_agg(DISTINCT project_id::text) AS project_ids
+       			array_agg(DISTINCT project_id) AS project_ids
 				FROM user_project
 				WHERE user_id = $1
 				GROUP BY company_id`
@@ -462,7 +462,7 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 
 	for rows.Next() {
 		var (
-			projectIDs string
+			projectIDs sql.NullString
 			company    string
 		)
 
@@ -471,11 +471,14 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 			return nil, err
 		}
 
-		fmt.Printf("company: %s, projects: %s\n", company, projectIDs)
+		fmt.Println("company: %s, projects: %s, ", company, projectIDs.Valid, projectIDs.String)
 
-		parsedProjects := strings.Trim(projectIDs, "{}")
-		projectIDsList := strings.Split(parsedProjects, ",")
-		fmt.Println("this is", projectIDsList)
+		projectIDsList := []string{}
+		if projectIDs.Valid {
+			parsedProjects := strings.Trim(projectIDs.String, "{}")
+			projectIDsList = strings.Split(parsedProjects, ",")
+			fmt.Println("this is", projectIDsList)
+		}
 
 		res.Companies = append(res.Companies, &pb.UserCompany{
 			Id:         company,
