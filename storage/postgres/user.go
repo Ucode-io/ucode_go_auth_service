@@ -462,7 +462,7 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 
 	for rows.Next() {
 		var (
-			projects []string
+			projects = make([]string, 0)
 			company  string
 		)
 
