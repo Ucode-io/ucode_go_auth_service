@@ -449,10 +449,10 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	res := pb.GetUserProjectsRes{}
 
 	query := `SELECT company_id,
-      			array_agg( DISTINCT project_id)
+      			project_id
 				FROM user_project
 				WHERE user_id = $1
-				GROUP BY company_id`
+				ORDER BY company_id`
 
 	rows, err := r.db.Query(ctx, query, userId)
 	if err != nil {
@@ -460,22 +460,32 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	}
 	defer rows.Close()
 
+	var (
+		projectIDsMap = make(map[string]struct{})
+		company       = ""
+		projectIDs    = make([]string, 0)
+	)
+
 	for rows.Next() {
 		var (
-			projects = make([]string, 0)
-			company  string
+			projectID string
 		)
 
-		err = rows.Scan(&company, pq.Array(&projects))
+		err = rows.Scan(&company, &projectID)
 		if err != nil {
 			return nil, err
 		}
 
-		res.Companies = append(res.Companies, &pb.UserCompany{
-			Id:         company,
-			ProjectIds: projects,
-		})
+		if _, ok := projectIDsMap[projectID]; !ok {
+			projectIDsMap[projectID] = struct{}{}
+			projectIDs = append(projectIDs, projectID)
+		}
 	}
+
+	res.Companies = append(res.Companies, &pb.UserCompany{
+		Id:         company,
+		ProjectIds: projectIDs,
+	})
 
 	return &res, nil
 }
@@ -1097,7 +1107,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	}
 
 	query := `SELECT project_id,
-      			array_agg( DISTINCT env_id)
+      			env_id
 				FROM user_project
 				WHERE user_id = $1
 				GROUP BY project_id`
@@ -1108,17 +1118,34 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	}
 	defer rows.Close()
 
+	var (
+		envProjectsMap = make(map[string][]string)
+		envIDsMap      = make(map[string]struct{})
+	)
+
 	for rows.Next() {
 		var (
-			envIds    []string
+			envId     string
 			projectId string
 		)
 
-		err = rows.Scan(&projectId, pq.Array(&envIds))
+		err = rows.Scan(&projectId, &envId)
 		if err != nil {
 			return nil, err
 		}
 
+		if _, ok := envIDsMap[envId]; !ok {
+			envIDsMap[envId] = struct{}{}
+
+			if val, ok := envProjectsMap[projectId]; !ok {
+				envProjectsMap[projectId] = []string{envId}
+			} else {
+				envProjectsMap[projectId] = append(val, envId)
+			}
+		}
+	}
+
+	for projectId, envIds := range envProjectsMap {
 		res.EnvProjects[projectId] = envIds
 	}
 
