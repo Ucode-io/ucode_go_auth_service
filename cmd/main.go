@@ -129,5 +129,4 @@ func main() {
 	r := api.SetUpRouter(h, baseCfg, tracer)
 
 	r.Run(baseCfg.HTTPPort)
-
 }
