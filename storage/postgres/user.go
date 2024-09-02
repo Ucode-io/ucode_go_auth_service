@@ -1109,8 +1109,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	query := `SELECT project_id,
       			env_id
 				FROM user_project
-				WHERE user_id = $1
-				GROUP BY project_id`
+				WHERE user_id = $1`
 
 	rows, err := r.db.Query(ctx, query, userId)
 	if err != nil {
