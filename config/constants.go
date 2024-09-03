@@ -110,10 +110,10 @@ var (
 		{
 			Method:         "POST",
 			Path:           "/v2/send-code",
-			RequestLimit:   5,
+			RequestLimit:   2,
 			Interval:       "minute",
 			Type:           "body",
-			KeyField:       "phone",
+			KeyField:       "recipient",
 			AllowOnFailure: true,
 			NotAllowMsg:    "send-code request limit exceeded",
 			NotAllowCode:   "TOO_MANY_REQUESTS",
