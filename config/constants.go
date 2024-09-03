@@ -110,7 +110,7 @@ var (
 		{
 			Method:         "POST",
 			Path:           "/v2/send-code",
-			RequestLimit:   2,
+			RequestLimit:   5,
 			Interval:       "minute",
 			Type:           "body",
 			KeyField:       "recipient",
