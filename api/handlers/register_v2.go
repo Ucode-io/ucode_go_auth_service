@@ -135,144 +135,144 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	// id, err := uuid.NewRandom()
-	// if err != nil {
-	// 	h.handleResponse(c, http.InternalServerError, err.Error())
-	// 	return
-	// }
-	// _, valid := util.ValidRecipients[request.Type]
-	// if !valid {
-	// 	h.handleResponse(c, http.BadRequest, "Invalid recipient type")
-	// 	return
-	// }
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
-	// 	return
-	// }
-	// environmentId, ok := c.Get("environment_id")
-	// if !ok || !util.IsValidUUID(environmentId.(string)) {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
-	// 	return
-	// }
-	// expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
+	id, err := uuid.NewRandom()
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+	_, valid := util.ValidRecipients[request.Type]
+	if !valid {
+		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
+		return
+	}
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
+		return
+	}
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
+		return
+	}
+	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
 
-	// resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-	// 	c.Request.Context(),
-	// 	&pbc.GetResourceEnvironmentReq{
-	// 		EnvironmentId: environmentId.(string),
-	// 		ResourceId:    resourceId.(string),
-	// 	},
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-	// code, err := util.GenerateCode(4)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InternalServerError, err.Error())
-	// 	return
-	// }
-	// body := &pbSms.Sms{
-	// 	Id:        id.String(),
-	// 	Text:      request.Text,
-	// 	Otp:       code,
-	// 	Recipient: request.Recipient,
-	// 	ExpiresAt: expire.String()[:19],
-	// 	Type:      request.Type,
-	// }
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(),
+		&pbc.GetResourceEnvironmentReq{
+			EnvironmentId: environmentId.(string),
+			ResourceId:    resourceId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	code, err := util.GenerateCode(4)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+	body := &pbSms.Sms{
+		Id:        id.String(),
+		Text:      request.Text,
+		Otp:       code,
+		Recipient: request.Recipient,
+		ExpiresAt: expire.String()[:19],
+		Type:      request.Type,
+	}
 
-	// switch request.Type {
-	// case "PHONE":
-	// 	valid = util.IsValidPhone(request.Recipient)
-	// 	if !valid {
-	// 		h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
-	// 		return
-	// 	}
-	// 	smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
-	// 		context.Background(),
-	// 		&pbc.GetProjectResourceListRequest{
-	// 			ProjectId:     resourceEnvironment.ProjectId,
-	// 			EnvironmentId: environmentId.(string),
-	// 			Type:          pbc.ResourceType_SMS,
-	// 		})
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// 	if len(smsOtpSettings.GetResources()) > 0 {
-	// 		if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
-	// 			code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
-	// 			if err != nil {
-	// 				h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
-	// 				return
-	// 			}
-	// 			body.Otp = code
-	// 		}
-	// 		body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
-	// 		body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
-	// 		body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
-	// 	}
-	// case "EMAIL":
+	switch request.Type {
+	case "PHONE":
+		valid = util.IsValidPhone(request.Recipient)
+		if !valid {
+			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
+			return
+		}
+		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_SMS,
+			})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		if len(smsOtpSettings.GetResources()) > 0 {
+			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
+				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
+				if err != nil {
+					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+					return
+				}
+				body.Otp = code
+			}
+			body.DevEmail = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetLogin()
+			body.DevEmailPassword = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetPassword()
+			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
+		}
+	case "EMAIL":
 
-	// 	valid = util.IsValidEmail(request.Recipient)
-	// 	if !valid {
-	// 		h.handleResponse(c, http.BadRequest, "Email is not valid")
-	// 		return
-	// 	}
+		valid = util.IsValidEmail(request.Recipient)
+		if !valid {
+			h.handleResponse(c, http.BadRequest, "Email is not valid")
+			return
+		}
 
-	// 	emailSettings, err := h.services.ResourceService().GetProjectResourceList(
-	// 		context.Background(),
-	// 		&pbc.GetProjectResourceListRequest{
-	// 			ProjectId:     resourceEnvironment.ProjectId,
-	// 			EnvironmentId: environmentId.(string),
-	// 			Type:          pbc.ResourceType_SMTP,
-	// 		})
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.GRPCError, err.Error())
-	// 		return
-	// 	}
+		emailSettings, err := h.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_SMTP,
+			})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 
-	// 	if len(emailSettings.GetResources()) < 1 {
-	// 		h.handleResponse(c, http.InvalidArgument, errors.New("email settings not found"))
-	// 		return
-	// 	}
+		if len(emailSettings.GetResources()) < 1 {
+			h.handleResponse(c, http.InvalidArgument, errors.New("email settings not found"))
+			return
+		}
 
-	// 	if len(emailSettings.GetResources()) > 0 {
-	// 		code, err := util.GenerateCode(int(emailSettings.GetResources()[0].GetSettings().GetSmtp().GetNumberOfOtp()))
-	// 		if err != nil {
-	// 			h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
-	// 			return
-	// 		}
-	// 		body.Otp = code
+		if len(emailSettings.GetResources()) > 0 {
+			code, err := util.GenerateCode(int(emailSettings.GetResources()[0].GetSettings().GetSmtp().GetNumberOfOtp()))
+			if err != nil {
+				h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+				return
+			}
+			body.Otp = code
 
-	// 		body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetEmail()
-	// 		body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetPassword()
-	// 	}
-	// }
+			body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetEmail()
+			body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetPassword()
+		}
+	}
 
-	// services, err := h.GetProjectSrvc(
-	// 	c,
-	// 	resourceEnvironment.ProjectId,
-	// 	resourceEnvironment.NodeType,
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-	// resp, err := services.SmsService().Send(
-	// 	c.Request.Context(),
-	// 	body,
-	// )
-	// if err != nil {
-	// 	h.handleResponse(c, http.GRPCError, err.Error())
-	// 	return
-	// }
-	// res := models.V2SendCodeResponse{
-	// 	SmsId: resp.SmsId,
-	// }
+	services, err := h.GetProjectSrvc(
+		c,
+		resourceEnvironment.ProjectId,
+		resourceEnvironment.NodeType,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	resp, err := services.SmsService().Send(
+		c.Request.Context(),
+		body,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	res := models.V2SendCodeResponse{
+		SmsId: resp.SmsId,
+	}
 
-	h.handleResponse(c, http.Created, request)
+	h.handleResponse(c, http.Created, res)
 }
 
 // V2Register godoc
