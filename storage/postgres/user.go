@@ -1131,7 +1131,7 @@ func (r *userRepo) V2GetByUsername(ctx context.Context, id, projectId string) (r
 	res = &pb.User{}
 
 	query := `SELECT
-		id
+		user_id
 	FROM
 		"user_project"
 	WHERE user_id = $1 AND project_id = $2`
