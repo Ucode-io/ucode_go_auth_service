@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"time"
+
+	"github.com/golanguzb70/ratelimiter"
 )
 
 const (
@@ -104,4 +106,17 @@ var (
 
 var (
 	ErrUserAlradyMember = errors.New("user is already member")
+	RateLimitCfg        = []*ratelimiter.LeakyBucket{
+		{
+			Method:         "POST",
+			Path:           "/v2/send-code",
+			RequestLimit:   5,
+			Interval:       "minute",
+			Type:           "body",
+			KeyField:       "phone",
+			AllowOnFailure: true,
+			NotAllowMsg:    "send-code request limit exceeded",
+			NotAllowCode:   "TOO_MANY_REQUESTS",
+		},
+	}
 )

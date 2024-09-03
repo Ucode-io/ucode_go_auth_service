@@ -1060,18 +1060,13 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 
 	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->ParseClaims", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	s.log.Info("PROJECT_ID->" + req.ProjectId)
-	s.log.Info("REFRESH TOKEN->" + req.RefreshToken)
-	s.log.Info(fmt.Sprintf("TOKEN INFO->%+v", tokenInfo))
-	s.log.Info(fmt.Sprintf("SECRET KEY->%v", s.cfg.SecretKey))
-
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->SessionGetByPK", logger.Error(err))
 		return nil, status.Error(codes.Code(http.Unauthorized.Code), err.Error())
 	}
 	if req.ClientTypeId != "" {
@@ -1087,9 +1082,9 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
-	_, err = s.strg.User().GetByUsername(ctx, session.GetUserId())
+	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserId(), session.GetProjectId())
 	if err != nil {
-		s.log.Error("!!!V2Login--->", logger.Error(err))
+		s.log.Error("!!!V2Login--->UserGetByUsername", logger.Error(err))
 		if err == sql.ErrNoRows {
 			errNoRows := errors.New("no user found")
 			return nil, status.Error(codes.Internal, errNoRows.Error())
@@ -1142,13 +1137,13 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->GenerateAccessJWT", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->GenerateRefreshJWT", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -1486,6 +1481,8 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccessUser")
 	defer dbSpan.Finish()
 
@@ -1501,8 +1498,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			s.log.Info("Memory used over 300 mb", logger.Any("V2HasAccessUser", memoryUsed))
 		}
 	}()
-
-	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	arr_path := strings.Split(req.Path, "/")
 
@@ -1698,31 +1693,31 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		{
 			if len(req.Username) < 6 {
 				err := errors.New("invalid username")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->InvalidUsername", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
 			if len(req.Password) < 6 {
 				err := errors.New("invalid password")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->InvalidPassword", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
 			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
 			match, err := security.ComparePassword(user.Password, req.Password)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->ComparePassword", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
 			if !match {
 				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLoginMismatch--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 		}
@@ -1773,14 +1768,14 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		s.log.Error("!!!MultiCompanyLogin--->GetUserProjects", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
 
 	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
 	if err != nil {
 		errGetEnvProjects := errors.New("cant get user env projects")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		s.log.Error("!!!MultiCompanyLogin--->GetUserEnvProjects", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
 	}
 
@@ -1793,12 +1788,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 		if err != nil {
 			errGetProjects := errors.New("cant get user projects")
-			s.log.Error("!!!MultiCompanyLogin--->GetById", logger.Error(err))
+			s.log.Error("!!!MultiCompanyLogin--->CompanyGetById", logger.Error(err))
 			return nil, status.Error(codes.NotFound, errGetProjects.Error())
 		}
 
 		for _, projectId := range item.ProjectIds {
-
 			clientType, _ := s.strg.User().GetUserProjectClientTypes(
 				ctx,
 				&models.UserProjectClientTypeRequest{
@@ -1873,7 +1867,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				}
 
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
-
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{

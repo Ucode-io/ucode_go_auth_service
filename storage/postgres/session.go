@@ -12,7 +12,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/lib/pq"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
@@ -469,7 +468,7 @@ func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessi
 
 	queryInitial := `DELETE FROM "session" WHERE id::varchar = ANY($1)`
 
-	result, err := r.db.Exec(ctx, queryInitial, pq.Array(entity.SessionIds))
+	result, err := r.db.Exec(ctx, queryInitial, entity.SessionIds)
 	if err != nil {
 		return err
 	}

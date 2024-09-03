@@ -37,7 +37,6 @@ func ExtractClaims(tokenString string, tokenSecretKey string) (jwt.MapClaims, er
 	)
 
 	token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// check token signing method etc
 		return []byte(tokenSecretKey), nil
 	})
 
@@ -63,16 +62,11 @@ func ExtractToken(bearer string) (token string, err error) {
 }
 
 type TokenInfo struct {
-	ID     string
-	Tables []Table
-	// ProjectID        string
-	// ClientPlatformID string
-	// ClientTypeID     string
-	// UserID           string
-	RoleID string
-	// IP               string
-	// Data             string
+	ID             string
+	Tables         []Table
 	LoginTableSlug string
+	RoleID         string
+	ProjectID      string
 }
 
 type Table struct {
@@ -110,14 +104,6 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 	if ok {
 		result.LoginTableSlug = loginTableSlug.(string)
 	}
-
-	// projectID := claims["project_id"].(string)
-	// clientPlatformID := claims["client_platform_id"].(string)
-	// clientTypeID := claims["client_type_id"].(string)
-	// userID := claims["user_id"].(string)
-	// roleID := claims["role_id"].(string)
-	// ip := claims["ip"].(string)
-	// data := claims["data"].(string)
 
 	return
 }

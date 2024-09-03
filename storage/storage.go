@@ -14,7 +14,7 @@ var ErrorTheSameId = errors.New("cannot use the same uuid for 'id' and 'parent_i
 var ErrorProjectId = errors.New("not valid 'project_id'")
 
 type StorageI interface {
-	CloseDB() 
+	CloseDB()
 	ClientPlatform() ClientPlatformRepoI
 	ClientType() ClientTypeRepoI
 	Client() ClientRepoI
@@ -146,6 +146,7 @@ type UserRepoI interface {
 	GetAllUserProjects(ctx context.Context) ([]string, error)
 	UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error)
 	GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error)
+	V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error)
 }
 
 type IntegrationRepoI interface {

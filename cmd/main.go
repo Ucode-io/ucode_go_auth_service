@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net"
 
 	"ucode/ucode_go_auth_service/api"
@@ -15,6 +14,7 @@ import (
 	"ucode/ucode_go_auth_service/storage/postgres"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golanguzb70/ratelimiter"
 	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/uber/jaeger-client-go"
@@ -23,7 +23,6 @@ import (
 
 func main() {
 	baseCfg := config.BaseLoad()
-
 	loggerLevel := logger.LevelDebug
 
 	switch baseCfg.Environment {
@@ -50,19 +49,30 @@ func main() {
 		},
 	}
 
-	tracer, closer, err := jaegerCfg.NewTracer(jaeger_config.Logger(jaeger.StdLogger))
-	if err != nil {
-		log.Panic("ERROR: cannot init Jaeger", logger.Error(err))
-	}
-	log.Println("Jaeger tracer initialized")
-	defer closer.Close()
-	opentracing.SetGlobalTracer(tracer)
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
 	defer logger.Cleanup(log)
+
+	tracer, closer, err := jaegerCfg.NewTracer(jaeger_config.Logger(jaeger.StdLogger))
+	if err != nil {
+		log.Error("ERROR: cannot init Jaeger", logger.Error(err))
+	}
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
+
+	cfg := &ratelimiter.Config{
+		RedisHost:    baseCfg.GetRequestRedisHost,
+		RedisPort:    baseCfg.GetRequestRedisPort,
+		JwtSignInKey: "jwt_sign_in_key",
+		LeakyBuckets: config.RateLimitCfg,
+	}
+
+	limiter, err := ratelimiter.NewRateLimiter(cfg)
+	if err != nil {
+		log.Panic("Error creating rate limiter", logger.Error(err))
+	}
 
 	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg)
 	if err != nil {
@@ -126,7 +136,7 @@ func main() {
 	}()
 	h := handlers.NewHandler(baseCfg, log, baseSvcs, projectServiceNodes)
 
-	r := api.SetUpRouter(h, baseCfg, tracer)
+	r := api.SetUpRouter(h, baseCfg, tracer, limiter)
 
 	r.Run(baseCfg.HTTPPort)
 

@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 type IntegrationRepo struct {
@@ -256,7 +255,7 @@ func (r *IntegrationRepo) GetListByPKs(ctx context.Context, pKeys *pb.Integratio
 	WHERE
 		id = ANY($1)`
 
-	rows, err := r.db.Query(ctx, query, pq.Array(pKeys.Ids))
+	rows, err := r.db.Query(ctx, query, pKeys.Ids)
 	if err != nil {
 		return res, err
 	}

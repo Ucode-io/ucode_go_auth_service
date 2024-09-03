@@ -20,7 +20,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v5"
-	"github.com/lib/pq"
 )
 
 type userRepo struct {
@@ -130,7 +129,7 @@ func (r *userRepo) GetListByPKs(ctx context.Context, pKeys *pb.UserPrimaryKeyLis
 	WHERE
 		id = ANY($1)`
 
-	rows, err := r.db.Query(ctx, query, pq.Array(pKeys.Ids))
+	rows, err := r.db.Query(ctx, query, pKeys.Ids)
 	if err != nil {
 		return res, err
 	}
@@ -466,7 +465,7 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 			company  string
 		)
 
-		err = rows.Scan(&company, pq.Array(&projects))
+		err = rows.Scan(&company, &projects)
 		if err != nil {
 			return nil, err
 		}
@@ -678,7 +677,7 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 	query, args := helper.ReplaceQueryParams(query+filter, params)
 
 	tmp := make([]string, 0, 20)
-	err := r.db.QueryRow(ctx, query, args...).Scan(pq.Array(&tmp))
+	err := r.db.QueryRow(ctx, query, args...).Scan(&tmp)
 	if err != nil {
 		return nil, err
 	}
@@ -1114,7 +1113,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 			projectId string
 		)
 
-		err = rows.Scan(&projectId, pq.Array(&envIds))
+		err = rows.Scan(&projectId, &envIds)
 		if err != nil {
 			return nil, err
 		}
@@ -1123,6 +1122,25 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	}
 
 	return &res, nil
+}
+
+func (r *userRepo) V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.getbyusername")
+	defer dbSpan.Finish()
+
+	res = &pb.User{}
+
+	query := `SELECT
+		id
+	FROM
+		"user_project"
+	WHERE user_id = $1 AND project_id = $2`
+	err = r.db.QueryRow(ctx, query, id, projectId).Scan(&res.ProjectId)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
 }
 
 func IsValidEmailNew(email string) bool {

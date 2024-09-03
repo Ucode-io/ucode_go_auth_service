@@ -158,8 +158,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	// resource and settings service resource
-
 	resource, err := s.services.ResourceService().CreateResource(
 		ctx,
 		&company_service.CreateResourceReq{
