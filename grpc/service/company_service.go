@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -38,6 +39,9 @@ func NewCompanyService(cfg config.BaseConfig, log logger.LoggerI, strg storage.S
 }
 
 func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRequest) (*pb.CompanyPrimaryKey, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_company.Register")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -154,8 +158,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	// resource and settings service resource
-
 	resource, err := s.services.ResourceService().CreateResource(
 		ctx,
 		&company_service.CreateResourceReq{
@@ -191,6 +193,9 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 }
 
 func (s *companyService) Update(ctx context.Context, req *pb.UpdateCompanyRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_company.Update")
+	defer dbSpan.Finish()
+
 	_, err := s.strg.Company().Update(ctx, req)
 	if err != nil {
 		s.log.Error("---UpdateCompany--->", logger.Error(err))
@@ -201,6 +206,9 @@ func (s *companyService) Update(ctx context.Context, req *pb.UpdateCompanyReques
 }
 
 func (s *companyService) Remove(ctx context.Context, req *pb.CompanyPrimaryKey) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_company.Remove")
+	defer dbSpan.Finish()
+
 	_, err := s.strg.Company().Remove(ctx, req)
 	if err != nil {
 		s.log.Error("---RemoveCompany--->", logger.Error(err))
@@ -211,6 +219,9 @@ func (s *companyService) Remove(ctx context.Context, req *pb.CompanyPrimaryKey) 
 }
 
 func (s *companyService) GetList(ctx context.Context, req *pb.GetComapnyListRequest) (*pb.GetListCompanyResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_company.GetList")
+	defer dbSpan.Finish()
+
 	resp, err := s.strg.Company().GetList(ctx, req)
 	if err != nil {
 		s.log.Error("---RemoveCompany--->", logger.Error(err))
@@ -221,6 +232,9 @@ func (s *companyService) GetList(ctx context.Context, req *pb.GetComapnyListRequ
 }
 
 func (s *companyService) GetByID(ctx context.Context, pKey *pb.CompanyPrimaryKey) (*pb.Company, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_company.GetByID")
+	defer dbSpan.Finish()
+
 	resp, err := s.strg.Company().GetByID(ctx, pKey)
 	if err != nil {
 		s.log.Error("---RemoveCompany--->", logger.Error(err))

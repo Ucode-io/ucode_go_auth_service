@@ -3,21 +3,20 @@ package postgres
 import (
 	"context"
 	"database/sql"
+
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/saidamir98/udevs_pkg/util"
-
 	"github.com/google/uuid"
+	"github.com/saidamir98/udevs_pkg/util"
 )
 
 type clientPlatformRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewClientPlatformRepo(db *pgxpool.Pool) storage.ClientPlatformRepoI {
+func NewClientPlatformRepo(db *Pool) storage.ClientPlatformRepoI {
 	return &clientPlatformRepo{
 		db: db,
 	}

@@ -3,14 +3,18 @@ package postgres
 import (
 	"context"
 	"fmt"
+
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/opentracing/opentracing-go"
 )
 
 type Store struct {
-	db                *pgxpool.Pool
+	db                *Pool
 	clientPlatform    storage.ClientPlatformRepoI
 	clientType        storage.ClientTypeRepoI
 	client            storage.ClientRepoI
@@ -37,6 +41,64 @@ type Store struct {
 	apiKeyUsage       storage.ApiKeyUsageRepoI
 }
 
+type Pool struct {
+	db *pgxpool.Pool
+}
+
+func (b *Pool) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.QueryRow")
+	defer dbSpan.Finish()
+
+	dbSpan.SetTag("sql", sql)
+	dbSpan.SetTag("args", args)
+
+	return b.db.QueryRow(ctx, sql, args...)
+}
+
+func (b *Pool) Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.Query")
+	defer dbSpan.Finish()
+
+	dbSpan.SetTag("sql", sql)
+	dbSpan.SetTag("args", args)
+
+	return b.db.Query(ctx, sql, args...)
+}
+
+func (b *Pool) Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.Exec")
+	defer dbSpan.Finish()
+
+	dbSpan.SetTag("sql", sql)
+	dbSpan.SetTag("args", arguments)
+
+	return b.db.Exec(ctx, sql, arguments...)
+}
+
+func (b *Pool) Begin(ctx context.Context) (pgx.Tx, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.Begin")
+	defer dbSpan.Finish()
+
+	tx, err := b.db.Begin(ctx)
+	if err != nil {
+		dbSpan.SetTag("error", true)
+		dbSpan.LogKV("error.message", err.Error())
+		return nil, err
+	}
+
+	return tx, nil
+}
+
+func (b *Pool) SendBatch(ctx context.Context, batch *pgx.Batch) pgx.BatchResults {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "pgx.SendBatch")
+	defer dbSpan.Finish()
+
+	dbSpan.SetTag("batch_size", batch.Len())
+	dbSpan.SetTag("batch_queued_queries", batch.QueuedQueries)
+
+	return b.db.SendBatch(ctx, batch)
+}
+
 func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, error) {
 	config, err := pgxpool.ParseConfig(fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -58,18 +120,22 @@ func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, 
 
 	config.MaxConns = cfg.PostgresMaxConnections
 
-	pool, err := pgxpool.ConnectConfig(ctx, config)
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Store{
+	dbPool := &Pool{
 		db: pool,
+	}
+
+	return &Store{
+		db: dbPool,
 	}, err
 }
 
 func (s *Store) CloseDB() {
-	s.db.Close()
+	s.db.db.Close()
 }
 
 func (s *Store) ClientPlatform() storage.ClientPlatformRepoI {

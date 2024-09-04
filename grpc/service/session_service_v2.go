@@ -8,10 +8,10 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
-
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
@@ -21,6 +21,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/security"
 
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,6 +30,9 @@ import (
 )
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2Login")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -236,6 +240,9 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 }
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginWithOption")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -588,6 +595,9 @@ pwd:
 }
 
 func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMiddlewareReq) (*pb.V2LoginWithOptionsResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.LoginMiddleware")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -769,6 +779,9 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 }
 
 func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginSuperAdmin")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -849,6 +862,9 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 }
 
 func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccess")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1026,6 +1042,9 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 }
 
 func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshToken")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1041,18 +1060,13 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 
 	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->ParseClaims", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	s.log.Info("PROJECT_ID->" + req.ProjectId)
-	s.log.Info("REFRESH TOKEN->" + req.RefreshToken)
-	s.log.Info(fmt.Sprintf("TOKEN INFO->%+v", tokenInfo))
-	s.log.Info(fmt.Sprintf("SECRET KEY->%v", s.cfg.SecretKey))
-
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->SessionGetByPK", logger.Error(err))
 		return nil, status.Error(codes.Code(http.Unauthorized.Code), err.Error())
 	}
 	if req.ClientTypeId != "" {
@@ -1068,9 +1082,9 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
-	_, err = s.strg.User().GetByUsername(ctx, session.GetUserId())
+	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserId(), session.GetProjectId())
 	if err != nil {
-		s.log.Error("!!!V2Login--->", logger.Error(err))
+		s.log.Error("!!!V2Login--->UserGetByUsername", logger.Error(err))
 		if err == sql.ErrNoRows {
 			errNoRows := errors.New("no user found")
 			return nil, status.Error(codes.Internal, errNoRows.Error())
@@ -1123,13 +1137,13 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->GenerateAccessJWT", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
+		s.log.Error("!!!RefreshToken--->GenerateRefreshJWT", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -1149,6 +1163,9 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 }
 
 func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenSuperAdminResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenSuperAdmin")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1226,6 +1243,9 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 }
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.SessionAndTokenGenerator")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1339,6 +1359,9 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 }
 
 func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.UpdateSessionByRoleIdRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.UpdateSessionsByRoleId")
+	defer dbSpan.Finish()
+
 	rowsAffected, err := s.strg.Session().UpdateByRoleId(ctx, input)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -1350,6 +1373,9 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 }
 
 func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyLoginRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyLogin")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1455,6 +1481,11 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
+
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccessUser")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1467,8 +1498,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			s.log.Info("Memory used over 300 mb", logger.Any("V2HasAccessUser", memoryUsed))
 		}
 	}()
-
-	s.log.Info("\n!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	arr_path := strings.Split(req.Path, "/")
 
@@ -1636,6 +1665,9 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 }
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyOneLogin")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1661,31 +1693,31 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		{
 			if len(req.Username) < 6 {
 				err := errors.New("invalid username")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->InvalidUsername", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
 			if len(req.Password) < 6 {
 				err := errors.New("invalid password")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->InvalidPassword", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
 			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
 			match, err := security.ComparePassword(user.Password, req.Password)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLogin--->ComparePassword", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
 			if !match {
 				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyLoginMismatch--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 		}
@@ -1736,14 +1768,14 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		s.log.Error("!!!MultiCompanyLogin--->GetUserProjects", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetProjects.Error())
 	}
 
 	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
 	if err != nil {
 		errGetEnvProjects := errors.New("cant get user env projects")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+		s.log.Error("!!!MultiCompanyLogin--->GetUserEnvProjects", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
 	}
 
@@ -1756,12 +1788,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 		if err != nil {
 			errGetProjects := errors.New("cant get user projects")
-			s.log.Error("!!!MultiCompanyLogin--->GetById", logger.Error(err))
+			s.log.Error("!!!MultiCompanyLogin--->CompanyGetById", logger.Error(err))
 			return nil, status.Error(codes.NotFound, errGetProjects.Error())
 		}
 
 		for _, projectId := range item.ProjectIds {
-
 			clientType, _ := s.strg.User().GetUserProjectClientTypes(
 				ctx,
 				&models.UserProjectClientTypeRequest{
@@ -1836,7 +1867,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				}
 
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
-
 					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
 						ctx,
 						&pb.V2GetClientTypeListRequest{
@@ -1893,6 +1923,9 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 }
 
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2ResetPassword")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -1936,6 +1969,9 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 }
 
 func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenForEnv")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -2137,6 +2173,9 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 }
 
 func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessionsRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.ExpireSessions")
+	defer dbSpan.Finish()
+
 	s.log.Info("---ExpireSessions--->>>", logger.Any("req", req.SessionIds))
 
 	err := s.strg.Session().ExpireSessions(ctx, req)

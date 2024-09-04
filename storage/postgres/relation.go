@@ -7,14 +7,13 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type relationRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewRelationRepo(db *pgxpool.Pool) storage.RelationRepoI {
+func NewRelationRepo(db *Pool) storage.RelationRepoI {
 	return &relationRepo{
 		db: db,
 	}

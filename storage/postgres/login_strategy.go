@@ -6,21 +6,23 @@ import (
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/opentracing/opentracing-go"
 )
 
 type loginStrategyRepoI struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewLoginStrategy(db *pgxpool.Pool) storage.LoginStrategyI {
+func NewLoginStrategy(db *Pool) storage.LoginStrategyI {
 	return &loginStrategyRepoI{
 		db: db,
 	}
 }
 
 func (ls *loginStrategyRepoI) GetList(ctx context.Context, req *pb.GetListRequest) (*pb.GetListResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "login_strategy.GetList")
+	defer dbSpan.Finish()
 
 	var (
 		res = pb.GetListResponse{}
@@ -57,6 +59,8 @@ func (ls *loginStrategyRepoI) GetList(ctx context.Context, req *pb.GetListReques
 }
 
 func (ls *loginStrategyRepoI) GetByID(ctx context.Context, req *pb.LoginStrategyPrimaryKey) (*pb.LoginStrategy, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "login_strategy.GetByID")
+	defer dbSpan.Finish()
 
 	var (
 		res = pb.LoginStrategy{}
@@ -81,6 +85,8 @@ func (ls *loginStrategyRepoI) GetByID(ctx context.Context, req *pb.LoginStrategy
 }
 
 func (ls *loginStrategyRepoI) Upsert(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "login_strategy.Upsert")
+	defer dbSpan.Finish()
 
 	var (
 		resp = pb.UpdateResponse{}

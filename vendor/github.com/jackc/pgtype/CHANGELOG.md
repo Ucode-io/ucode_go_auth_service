@@ -1,3 +1,28 @@
+# 1.14.2 (February 5, 2024)
+
+* Fix numeric to float64 conversion (Joe Schafer)
+
+# 1.14.1 (January 12, 2024)
+
+* Backport fix numeric to string conversion for small negative values
+* Fix EncodeValueText (horpto)
+* Fix JSON.UnmarshalJSON to make copy of byte slice (horpto)
+
+# 1.14.0 (February 11, 2023)
+
+* Fix: BC timestamp text format support (jozeflami)
+* Add Scanner and Valuer interfaces to CIDR (Yurii Popivniak)
+* Fix crash when nilifying pointer to sql.Scanner
+
+# 1.13.0 (December 1, 2022)
+
+* Fix: Reset jsonb before unmarshal (Tomas Odinas)
+* Fix: return correct zero value when UUID conversion fails (ndrpnt)
+* Fix: EncodeText for Lseg includes [ and ]
+* Support sql Value and Scan for custom date type (Hubert Krauze)
+* Support Ltree binary encoding (AmineChikhaoui)
+* Fix: dates with "BC" (jozeflami)
+
 # 1.12.0 (August 6, 2022)
 
 * Add JSONArray (Jakob Ackermann)

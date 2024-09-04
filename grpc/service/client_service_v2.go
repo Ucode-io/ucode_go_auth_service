@@ -8,6 +8,7 @@ import (
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,6 +16,9 @@ import (
 )
 
 func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2CreateClientTypeRequest) (*pb.CommonMessage, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_client.V2CreateClientType")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -94,6 +98,9 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 }
 
 func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2ClientTypePrimaryKey) (*pb.CommonMessage, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_client.V2GetClientTypeByID")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -165,6 +172,9 @@ func (s *clientService) V2GetClientTypeByID(ctx context.Context, req *pb.V2Clien
 }
 
 func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetClientTypeListRequest) (*pb.CommonMessage, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_client.V2GetClientTypeList")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -250,6 +260,9 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 }
 
 func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2UpdateClientTypeRequest) (*pb.CommonMessage, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_client.V2UpdateClientType")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -332,6 +345,9 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 }
 
 func (s *clientService) V2DeleteClientType(ctx context.Context, req *pb.V2ClientTypePrimaryKey) (*emptypb.Empty, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_client.V2DeleteClientType")
+	defer dbSpan.Finish()
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 

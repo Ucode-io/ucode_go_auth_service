@@ -4,15 +4,13 @@ import (
 	"context"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/storage"
-
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type permissionScopeRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewPermissionScopeRepo(db *pgxpool.Pool) storage.PermissionScopeRepoI {
+func NewPermissionScopeRepo(db *Pool) storage.PermissionScopeRepoI {
 	return &permissionScopeRepo{
 		db: db,
 	}

@@ -7,20 +7,22 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 )
 
 type userInfoFieldRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewUserInfoFieldRepo(db *pgxpool.Pool) storage.UserInfoFieldRepoI {
+func NewUserInfoFieldRepo(db *Pool) storage.UserInfoFieldRepoI {
 	return &userInfoFieldRepo{
 		db: db,
 	}
 }
 
 func (r *userInfoFieldRepo) Add(ctx context.Context, entity *pb.AddUserInfoFieldRequest) (pKey *pb.UserInfoFieldPrimaryKey, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user_info_field.Add")
+	defer dbSpan.Finish()
 
 	query := `INSERT INTO "user_info_field" (
 		id,
@@ -57,6 +59,8 @@ func (r *userInfoFieldRepo) Add(ctx context.Context, entity *pb.AddUserInfoField
 }
 
 func (r *userInfoFieldRepo) GetByPK(ctx context.Context, pKey *pb.UserInfoFieldPrimaryKey) (res *pb.UserInfoField, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user_info_field.GetByPK")
+	defer dbSpan.Finish()
 
 	res = &pb.UserInfoField{}
 	query := `SELECT
@@ -86,6 +90,8 @@ func (r *userInfoFieldRepo) GetByPK(ctx context.Context, pKey *pb.UserInfoFieldP
 }
 
 func (r *userInfoFieldRepo) Update(ctx context.Context, entity *pb.UpdateUserInfoFieldRequest) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user_info_field.Update")
+	defer dbSpan.Finish()
 
 	query := `UPDATE "user_info_field" SET
 		client_type_id = :client_type_id,
@@ -116,6 +122,8 @@ func (r *userInfoFieldRepo) Update(ctx context.Context, entity *pb.UpdateUserInf
 }
 
 func (r *userInfoFieldRepo) Remove(ctx context.Context, pKey *pb.UserInfoFieldPrimaryKey) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user_info_field.Remove")
+	defer dbSpan.Finish()
 
 	query := `DELETE FROM "user_info_field" WHERE id = $1`
 

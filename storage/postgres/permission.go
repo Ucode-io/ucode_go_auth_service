@@ -10,14 +10,13 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type permissionRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewPermissionRepo(db *pgxpool.Pool) storage.PermissionRepoI {
+func NewPermissionRepo(db *Pool) storage.PermissionRepoI {
 	return &permissionRepo{
 		db: db,
 	}

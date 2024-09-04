@@ -8,15 +8,14 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 )
 
 type smsOtpSettingsRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewSmsOtpSettingsRepo(db *pgxpool.Pool) storage.SmsOtpSettingsRepoI {
+func NewSmsOtpSettingsRepo(db *Pool) storage.SmsOtpSettingsRepoI {
 	return &smsOtpSettingsRepo{
 		db: db,
 	}

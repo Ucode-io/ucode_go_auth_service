@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 
-	"log"
 	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -12,23 +11,24 @@ import (
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
 type sessionRepo struct {
-	db *pgxpool.Pool
+	db *Pool
 }
 
-func NewSessionRepo(db *pgxpool.Pool) storage.SessionRepoI {
+func NewSessionRepo(db *Pool) storage.SessionRepoI {
 	return &sessionRepo{
 		db: db,
 	}
 }
 
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Create")
+	defer dbSpan.Finish()
 
 	params := make(map[string]interface{})
 	queryInitial := `INSERT INTO "session" (
@@ -97,6 +97,8 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 }
 
 func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (res *pb.Session, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetByPK")
+	defer dbSpan.Finish()
 
 	res = &pb.Session{}
 
@@ -140,6 +142,8 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 }
 
 func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionListRequest) (res *pb.GetSessionListResponse, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetList")
+	defer dbSpan.Finish()
 
 	// @TODO refactor
 	res = &pb.GetSessionListResponse{}
@@ -226,6 +230,8 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 }
 
 func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionRequest) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Update")
+	defer dbSpan.Finish()
 
 	params := make(map[string]interface{})
 	queryInitial := `UPDATE "session" SET
@@ -278,6 +284,8 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
 }
 
 func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Delete")
+	defer dbSpan.Finish()
 
 	query := `DELETE FROM "session" WHERE id = $1`
 
@@ -292,8 +300,8 @@ func (r *sessionRepo) Delete(ctx context.Context, pKey *pb.SessionPrimaryKey) (r
 }
 
 func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error) {
-
-	log.Printf("---STRG->DeleteExpiredUserSessions---> %s", userID)
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.DeleteExpiredUserSessions")
+	defer dbSpan.Finish()
 
 	query := `DELETE FROM "session" WHERE user_id = $1 AND expires_at < $2`
 
@@ -308,6 +316,8 @@ func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID stri
 }
 
 func (r *sessionRepo) DeleteExpiredIntegrationSessions(ctx context.Context, integrationId string) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.DeleteExpiredIntegrationSessions")
+	defer dbSpan.Finish()
 
 	query := `DELETE FROM "session" WHERE integration_id = $1 AND expires_at < $2`
 
@@ -322,6 +332,8 @@ func (r *sessionRepo) DeleteExpiredIntegrationSessions(ctx context.Context, inte
 }
 
 func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetSessionListByUserID")
+	defer dbSpan.Finish()
 
 	res = &pb.GetSessionListResponse{}
 
@@ -354,7 +366,6 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 		err = rows.Scan(
 			&obj.Id,
 			&obj.ProjectId,
-			// &obj.ClientPlatformId,
 			&obj.ClientTypeId,
 			&obj.UserId,
 			&obj.RoleId,
@@ -376,6 +387,8 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 	return res, nil
 }
 func (r *sessionRepo) GetSessionListByIntegrationID(ctx context.Context, integrationId string) (res *pb.GetSessionListResponse, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetSessionListByIntegrationID")
+	defer dbSpan.Finish()
 
 	res = &pb.GetSessionListResponse{}
 
@@ -430,6 +443,8 @@ func (r *sessionRepo) GetSessionListByIntegrationID(ctx context.Context, integra
 }
 
 func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.UpdateByRoleId")
+	defer dbSpan.Finish()
 
 	// @TODO remove if not used
 	query := `UPDATE "session" SET
@@ -448,10 +463,12 @@ func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessi
 }
 
 func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.ExpireSessions")
+	defer dbSpan.Finish()
 
 	queryInitial := `DELETE FROM "session" WHERE id::varchar = ANY($1)`
 
-	result, err := r.db.Exec(ctx, queryInitial, pq.Array(entity.SessionIds))
+	result, err := r.db.Exec(ctx, queryInitial, entity.SessionIds)
 	if err != nil {
 		return err
 	}
