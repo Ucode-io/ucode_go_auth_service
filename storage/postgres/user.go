@@ -690,7 +690,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 
 	query := `SELECT
 				id
-			from "user" as u JOIN "user_project" as up ON u.id = up.user_id WHERE `
+			from "user" WHERE `
 	var filter string
 	params := map[string]interface{}{}
 	if req.Email != "" {
@@ -713,14 +713,6 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 		}
 		params["phone"] = req.Phone
 	}
-
-	if filter != "" {
-		filter += " AND up.project_id = :project_id"
-	} else {
-		filter = " up.project_id = :project_id"
-	}
-
-	params["project_id"] = req.ProjectId
 
 	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
 	var userId string

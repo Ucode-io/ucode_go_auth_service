@@ -713,19 +713,8 @@ func (h *Handler) V2GetUserByLoginType(c *gin.Context) {
 		return
 	}
 
-	if len(request.ProjectId) == 0 {
-		err := errors.New("project_id is required")
-		h.handleResponse(c, http.BadRequest, err.Error())
-	}
-
-	var isValid = util.IsValidUUID(request.ProjectId)
-	if !isValid {
-		err := errors.New("project_id is not valid")
-		h.handleResponse(c, http.BadRequest, err.Error())
-	}
-
 	if request.Email != "" {
-		isValid = util.IsValidEmail(request.Email)
+		var isValid = util.IsValidEmail(request.Email)
 		if !isValid {
 			err := errors.New("email is not valid")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
