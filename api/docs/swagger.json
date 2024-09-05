@@ -7846,24 +7846,6 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "GetConnectionListResponseBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "400": {
                         "description": "Invalid Argument",
                         "schema": {
@@ -7958,7 +7940,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8059,7 +8041,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8160,7 +8142,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.CommonMessage"
                                         }
                                     }
                                 }
@@ -8833,7 +8815,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.CommonMessage"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.GetConnectionOptionsResponse"
                                         }
                                     }
                                 }
@@ -11883,7 +11865,7 @@
         },
         "/v2/send-message": {
             "post": {
-                "description": "Send Message to Email",
+                "description": "SendMessage type must be one of the following values [\"EMAIL\", \"PHONE\"]",
                 "consumes": [
                     "application/json"
                 ],
@@ -11891,20 +11873,11 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Email"
+                    "v2_register"
                 ],
-                "summary": "Send Message To Email",
-                "operationId": "send_message_to_email",
+                "summary": "SendMessage",
+                "operationId": "SendMessage",
                 "parameters": [
-                    {
-                        "description": "SendMessageToEmailRequestBody",
-                        "name": "send_message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.Email"
-                        }
-                    },
                     {
                         "type": "string",
                         "description": "X-API-KEY",
@@ -11915,15 +11888,22 @@
                         "type": "string",
                         "description": "Resource-Id",
                         "name": "Resource-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
                         "description": "Environment-Id",
                         "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
+                    },
+                    {
+                        "description": "SendCode",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -11938,7 +11918,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.SendCodeResponse"
+                                            "$ref": "#/definitions/ucode_ucode_go_auth_service_api_models.V2SendCodeResponse"
                                         }
                                     }
                                 }
@@ -13592,6 +13572,12 @@
                 "defaultOffset": {
                     "type": "string"
                 },
+                "goObjectBuilderServiceHost": {
+                    "type": "string"
+                },
+                "goObjectBuilderServicePort": {
+                    "type": "string"
+                },
                 "highObjectBuilderGRPCPort": {
                     "type": "string"
                 },
@@ -13636,7 +13622,7 @@
                 }
             }
         },
-        "google_golang_org_protobuf_types_known_structpb.Struct": {
+        "github_com_golang_protobuf_ptypes_struct.Struct": {
             "type": "object",
             "properties": {
                 "fields": {
@@ -13652,7 +13638,7 @@
             "type": "object",
             "properties": {
                 "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
                 }
             }
         },
@@ -14701,7 +14687,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "table_slug": {
                     "type": "string"
@@ -15337,6 +15323,9 @@
                 "phone": {
                     "type": "string"
                 },
+                "project_id": {
+                    "type": "string"
+                },
                 "resource_type": {
                     "type": "integer"
                 }
@@ -15794,7 +15783,7 @@
             "type": "object",
             "properties": {
                 "client_types": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "company_id": {
                     "type": "string"
@@ -15828,13 +15817,31 @@
                 "add_field": {
                     "type": "string"
                 },
+                "add_filter": {
+                    "type": "string"
+                },
                 "automation": {
                     "type": "string"
                 },
                 "client_type_id": {
                     "type": "string"
                 },
+                "columns": {
+                    "type": "string"
+                },
                 "delete": {
+                    "type": "string"
+                },
+                "excel_menu": {
+                    "type": "string"
+                },
+                "field_filter": {
+                    "type": "string"
+                },
+                "fix_column": {
+                    "type": "string"
+                },
+                "group": {
                     "type": "string"
                 },
                 "id": {
@@ -15852,10 +15859,16 @@
                 "role_id": {
                     "type": "string"
                 },
+                "search_button": {
+                    "type": "string"
+                },
                 "settings": {
                     "type": "string"
                 },
                 "share_modal": {
+                    "type": "string"
+                },
+                "tab_group": {
                     "type": "string"
                 },
                 "table_slug": {
@@ -15967,10 +15980,19 @@
         "ucode_ucode_go_auth_service_genproto_auth_service.ResetPasswordRequest": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
                 "node_type": {
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 },
                 "token": {
@@ -15988,7 +16010,7 @@
                     "type": "string"
                 },
                 "client_types": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "description": {
                     "type": "string"
@@ -16167,7 +16189,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -16817,7 +16839,7 @@
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -16871,7 +16893,7 @@
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.User"
                 },
                 "user_data": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -16911,7 +16933,7 @@
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_auth_service.Token"
                 },
                 "user_data": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "user_found": {
                     "type": "boolean"
@@ -17577,6 +17599,35 @@
                 }
             }
         },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.CommonMessage": {
+            "type": "object",
+            "properties": {
+                "blocked_builder": {
+                    "type": "boolean"
+                },
+                "blocked_login_table": {
+                    "type": "boolean"
+                },
+                "custom_message": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "is_cached": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
         "ucode_ucode_go_auth_service_genproto_object_builder_service.ConfirmStrategies": {
             "type": "integer",
             "enum": [
@@ -17598,6 +17649,17 @@
                     "items": {
                         "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.MenuPermission"
                     }
+                }
+            }
+        },
+        "ucode_ucode_go_auth_service_genproto_object_builder_service.GetConnectionOptionsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -17666,7 +17728,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "id": {
                     "type": "string"
@@ -17708,13 +17770,31 @@
                 "add_field": {
                     "type": "string"
                 },
+                "add_filter": {
+                    "type": "string"
+                },
                 "automation": {
                     "type": "string"
                 },
                 "client_type_id": {
                     "type": "string"
                 },
+                "columns": {
+                    "type": "string"
+                },
                 "delete": {
+                    "type": "string"
+                },
+                "excel_menu": {
+                    "type": "string"
+                },
+                "field_filter": {
+                    "type": "string"
+                },
+                "fix_column": {
+                    "type": "string"
+                },
+                "group": {
                     "type": "string"
                 },
                 "guid": {
@@ -17732,10 +17812,16 @@
                 "role_id": {
                     "type": "string"
                 },
+                "search_button": {
+                    "type": "string"
+                },
                 "settings": {
                     "type": "string"
                 },
                 "share_modal": {
+                    "type": "string"
+                },
+                "tab_group": {
                     "type": "string"
                 },
                 "table_slug": {
@@ -17814,7 +17900,7 @@
                     }
                 },
                 "attributes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "automatic_filters": {
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod"
@@ -17879,7 +17965,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "custom_event_id": {
                     "type": "string"
@@ -17953,10 +18039,28 @@
                 "add_field": {
                     "type": "string"
                 },
+                "add_filter": {
+                    "type": "string"
+                },
                 "automation": {
                     "type": "string"
                 },
+                "columns": {
+                    "type": "string"
+                },
                 "delete_all": {
+                    "type": "string"
+                },
+                "excel_menu": {
+                    "type": "string"
+                },
+                "field_filter": {
+                    "type": "string"
+                },
+                "fix_column": {
+                    "type": "string"
+                },
+                "group": {
                     "type": "string"
                 },
                 "language_btn": {
@@ -17965,10 +18069,16 @@
                 "pdf_action": {
                     "type": "string"
                 },
+                "search_button": {
+                    "type": "string"
+                },
                 "settings": {
                     "type": "string"
                 },
                 "share_modal": {
+                    "type": "string"
+                },
+                "tab_group": {
                     "type": "string"
                 },
                 "view_create": {
@@ -17980,7 +18090,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "edit_permission": {
                     "type": "boolean"
@@ -18032,7 +18142,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "delete": {
                     "type": "boolean"
@@ -18058,7 +18168,7 @@
             "type": "object",
             "properties": {
                 "attributes": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "create_permission": {
                     "type": "boolean"
@@ -18090,7 +18200,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "icon": {
                     "type": "string"
@@ -18141,7 +18251,7 @@
             "type": "object",
             "properties": {
                 "addational_table": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "app_permissions": {
                     "type": "array",
@@ -18171,7 +18281,7 @@
                     "$ref": "#/definitions/ucode_ucode_go_auth_service_genproto_object_builder_service.Role"
                 },
                 "user_data": {
-                    "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Struct"
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
                 },
                 "user_found": {
                     "type": "boolean"

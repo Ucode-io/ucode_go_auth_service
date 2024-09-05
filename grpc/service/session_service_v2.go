@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -426,8 +425,26 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+		emailOtpSettings, err := s.services.ResourceService().GetProjectResourceList(
+			context.Background(),
+			&pbCompany.GetProjectResourceListRequest{
+				EnvironmentId: req.Data["environment_id"],
+				ProjectId:     req.Data["project_id"],
+				Type:          pbCompany.ResourceType_SMTP,
+			})
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption.EmailtpSettingsService().GetList--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 
-		if otp != "4554" {
+		var defaultOtp string
+		if len(emailOtpSettings.GetResources()) > 0 {
+			if emailOtpSettings.GetResources()[0].GetSettings().GetSmtp().GetDefaultOtp() != "" {
+				defaultOtp = emailOtpSettings.GetResources()[0].GetSettings().GetSmtp().GetDefaultOtp()
+			}
+		}
+
+		if otp != defaultOtp {
 			_, err := s.services.SmsService().ConfirmOtp(
 				ctx,
 				&sms_service.ConfirmOtpRequest{

@@ -25,14 +25,13 @@ import (
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param connection body models.CreateConnectionRequest true "CreateConnectionRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "Connection data"
+// @Success 201 {object} http.Response{data=obs.CommonMessage} "Connection data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateConnection(c *gin.Context) {
 	var (
 		connection models.CreateConnectionRequest
-		// resourceEnvironment *cps.ResourceEnvironment
-		resp *obs.CommonMessage
+		resp       *obs.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&connection)
@@ -131,14 +130,13 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param connection body models.Connection true "UpdateConnectionRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "Connection data"
+// @Success 201 {object} http.Response{data=obs.CommonMessage} "Connection data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateConnection(c *gin.Context) {
 	var (
 		connection models.Connection
-		// resourceEnvironment *cps.ResourceEnvironment
-		resp *obs.CommonMessage
+		resp       *obs.CommonMessage
 	)
 
 	err := c.ShouldBindJSON(&connection)
@@ -235,13 +233,9 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 // @Param project-id query string false "project-id"
 // @Param user-id query string true "user-id"
 // @Param client_type_id query string true "client_type_id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetConnectionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetConnectionList(c *gin.Context) {
-	var (
-	// resourceEnvironment *cps.ResourceEnvironment
-	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -381,15 +375,14 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 // @Produce json
 // @Param connection_id path string true "connection_id"
 // @Param project-id query string true "project-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ConnectionBody"
+// @Success 200 {object} http.Response{data=obs.CommonMessage} "ConnectionBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 	var (
-		// resourceEnvironment *cps.ResourceEnvironment
-		err error
+		err          error
+		connectionId = c.Param("connection_id")
 	)
-	connectionId := c.Param("connection_id")
 
 	if !util.IsValidUUID(connectionId) {
 		h.handleResponse(c, http.InvalidArgument, "connection id is an invalid uuid")
@@ -594,15 +587,14 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 // @Param connection_id path string true "connection_id"
 // @Param user_id path string true "user_id"
 // @Param project-id query string true "project-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ConnectionOptionsBody"
+// @Success 200 {object} http.Response{data=obs.GetConnectionOptionsResponse} "ConnectionOptionsBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetConnectionOptions(c *gin.Context) {
 	var (
-		// resourceEnvironment *cps.ResourceEnvironment
-		err error
+		connectionId = c.Param("connection_id")
+		err          error
 	)
-	connectionId := c.Param("connection_id")
 
 	if !util.IsValidUUID(connectionId) {
 		h.handleResponse(c, http.InvalidArgument, "connection id is an invalid uuid")

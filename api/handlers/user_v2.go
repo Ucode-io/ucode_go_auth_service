@@ -5,20 +5,16 @@ import (
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
-
-	"ucode/ucode_go_auth_service/pkg/helper"
-
-	"github.com/pkg/errors"
-	"github.com/spf13/cast"
-	"google.golang.org/protobuf/types/known/structpb"
-
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
-
-	"github.com/saidamir98/udevs_pkg/util"
+	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+	"github.com/saidamir98/udevs_pkg/util"
+	"github.com/spf13/cast"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // @Security ApiKeyAuth
@@ -710,30 +706,34 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserByLoginType(c *gin.Context) {
+	var request auth_service.GetUserByLoginTypesRequest
 
-	var (
-		request auth_service.GetUserByLoginTypesRequest
-	)
-
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	if len(request.ProjectId) == 0 {
+		err := errors.New("project_id is required")
+		h.handleResponse(c, http.BadRequest, err.Error())
+	}
+
+	var isValid = util.IsValidUUID(request.ProjectId)
+	if !isValid {
+		err := errors.New("project_id is not valid")
+		h.handleResponse(c, http.BadRequest, err.Error())
+	}
+
 	if request.Email != "" {
-		var isValid = util.IsValidEmail(request.Email)
+		isValid = util.IsValidEmail(request.Email)
 		if !isValid {
-			err = errors.New("email is not valid")
+			err := errors.New("email is not valid")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		}
 	}
 
-	resp, err := h.services.UserService().V2GetUserByLoginTypes(
-		c.Request.Context(),
-		&request,
-	)
-
+	resp, err := h.services.UserService().V2GetUserByLoginTypes(c.Request.Context(), &request)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
