@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
@@ -41,24 +42,25 @@ func NewApiKeysService(cfg config.BaseConfig, log logger.LoggerI, strg storage.S
 }
 
 func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.CreateRes, error) {
+	s.log.Info("---CreateApiKey--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Create")
 	defer dbSpan.Finish()
 
-	s.log.Info("---Create--->", logger.Any("req", req))
 	id, err := uuid.NewUUID()
 	if err != nil {
-		s.log.Error("!!!Create--->", logger.Error(err))
+		s.log.Error("!!!Create--->NewUUID", logger.Error(err))
 		return nil, status.Error(codes.Internal, "internal")
 	}
 
 	secretKey := "S-" + helper.GenerateSecretKey(32)
 	secretId := "P-" + helper.GenerateSecretKey(32)
 
-	hashedSecretKey, _ := security.HashPassword(secretKey)
+	hashedSecretKey, _ := security.HashPasswordBcrypt(secretKey)
 
 	res, err := s.strg.ApiKeys().Create(ctx, req, hashedSecretKey, secretId, id.String())
 	if err != nil {
-		s.log.Error("!!!Create--->", logger.Error(err))
+		s.log.Error("!!!Create--->ApiKeys", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on creating new api key")
 	}
 
@@ -68,17 +70,16 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 }
 
 func (s *apiKeysService) Update(ctx context.Context, req *pb.UpdateReq) (*pb.UpdateRes, error) {
+	s.log.Info("---UpdateApiKey--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Update")
 	defer dbSpan.Finish()
-
-	s.log.Info("---Update--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeys().Update(ctx, req)
 	if err != nil {
 		s.log.Error("!!!Update--->", logger.Error(err))
-		return &pb.UpdateRes{
-			RowEffected: int32(res),
-		}, status.Error(codes.Internal, "error on updating new api key")
+		return &pb.UpdateRes{RowEffected: int32(res)},
+			status.Error(codes.Internal, "error on updating new api key")
 	}
 
 	return &pb.UpdateRes{
@@ -87,18 +88,18 @@ func (s *apiKeysService) Update(ctx context.Context, req *pb.UpdateReq) (*pb.Upd
 }
 
 func (s *apiKeysService) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
+	s.log.Info("---GetApiKey--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Get")
 	defer dbSpan.Finish()
 
-	s.log.Info("---Get--->", logger.Any("req", req))
-
 	res, err := s.strg.ApiKeys().Get(ctx, req)
 	if err == pgx.ErrNoRows {
-		s.log.Error("!!!Get--->", logger.Error(err))
+		s.log.Error("!!!GetApiKey--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, "api-key not found")
 	}
 	if err != nil {
-		s.log.Error("!!!Get--->", logger.Error(err))
+		s.log.Error("!!!GetApiKey--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on getting api key")
 	}
 
@@ -106,19 +107,19 @@ func (s *apiKeysService) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, e
 }
 
 func (s *apiKeysService) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetListRes, error) {
+	s.log.Info("---GetListApiKey--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.GetList")
 	defer dbSpan.Finish()
 
-	s.log.Info("---GetList--->", logger.Any("req", req))
-
 	if !util.IsValidUUID(req.GetProjectId()) {
-		s.log.Error("!!!GetList--->", logger.Error(errors.New("project id is invalid uuid")))
+		s.log.Error("!!!GetListApiKey--->", logger.Error(errors.New("project id is invalid uuid")))
 		return nil, status.Error(codes.Internal, "error on getting api keys, project id is invalid uuid")
 	}
 
 	res, err := s.strg.ApiKeys().GetList(ctx, req)
 	if err != nil {
-		s.log.Error("!!!GetList--->", logger.Error(err))
+		s.log.Error("!!!GetListApiKey--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error on getting api keys")
 	}
 
@@ -126,14 +127,14 @@ func (s *apiKeysService) GetList(ctx context.Context, req *pb.GetListReq) (*pb.G
 }
 
 func (s *apiKeysService) Delete(ctx context.Context, req *pb.DeleteReq) (*pb.DeleteRes, error) {
+	s.log.Info("---DeleteApiKey--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.Delete")
 	defer dbSpan.Finish()
 
-	s.log.Info("---Delete--->", logger.Any("req", req))
-
 	res, err := s.strg.ApiKeys().Delete(ctx, req)
 	if err != nil {
-		s.log.Error("!!!GetList--->", logger.Error(err))
+		s.log.Error("!!!DeleteApiKey--->", logger.Error(err))
 		return &pb.DeleteRes{
 			RowEffected: int32(res),
 		}, status.Error(codes.Internal, "error on deleting api keys")
@@ -145,10 +146,10 @@ func (s *apiKeysService) Delete(ctx context.Context, req *pb.DeleteReq) (*pb.Del
 }
 
 func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateApiTokenReq) (*pb.GenerateApiTokenRes, error) {
+	s.log.Info("---GenerateApiToken--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.GenerateApiToken")
 	defer dbSpan.Finish()
-
-	s.log.Info("---GenerateApiToken--->")
 
 	if len(req.GetAppId()) != 34 || req.GetAppId()[:2] != "P-" {
 		errAppId := errors.New("invalid api id or api secret")
@@ -163,7 +164,6 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 	}
 
 	apiKey, err := s.strg.ApiKeys().GetByAppId(ctx, req.AppId)
-
 	if err != nil {
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
 		if err == sql.ErrNoRows {
@@ -173,7 +173,7 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	match, err := security.ComparePassword(apiKey.GetAppSecret(), req.GetAppSecret())
+	match, err := security.ComparePasswordBcrypt(apiKey.GetAppSecret(), req.GetAppSecret())
 	if err != nil {
 		errComparePass := errors.New("invalid api id or api secret")
 		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
@@ -195,14 +195,14 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 	apiKeyToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
 		errGenerateJWT := errors.New("error on generating token")
-		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		s.log.Error("!!!GenerateApiToken--->GenerateAccessJWT", logger.Error(err))
 		return nil, status.Error(codes.Unavailable, errGenerateJWT.Error())
 	}
 
 	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
 	if err != nil {
 		errGenerateJWT := errors.New("error on generating token")
-		s.log.Error("!!!GenerateApiToken--->", logger.Error(err))
+		s.log.Error("!!!GenerateApiToken--->GenerateRefreshJWT", logger.Error(err))
 		return nil, status.Error(codes.Internal, errGenerateJWT.Error())
 	}
 
@@ -260,10 +260,10 @@ func (s *apiKeysService) RefreshApiToken(ctx context.Context, req *pb.RefreshApi
 }
 
 func (s *apiKeysService) GetEnvID(ctx context.Context, req *pb.GetReq) (resp *pb.GetRes, err error) {
+	s.log.Info("---GetEnvID--->>>>", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_apikey_v2.GetEnvID")
 	defer dbSpan.Finish()
-
-	s.log.Info("---GetEnvID--->>>>", logger.Any("req", req))
 
 	resp, err = s.strg.ApiKeys().GetEnvID(ctx, req)
 	if err != nil {

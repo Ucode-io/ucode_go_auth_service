@@ -52,7 +52,7 @@ func (s *userService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	hashedPassword, err := security.HashPassword(req.Password)
+	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -239,7 +239,7 @@ func (s *userService) ResetPassword(ctx context.Context, req *pb.ResetPasswordRe
 		return nil, err
 	}
 
-	hashedPassword, err := security.HashPassword(req.Password)
+	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!ResetPassword--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

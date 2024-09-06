@@ -57,7 +57,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	//@TODO:: refactor later
 	tempOwnerId, err := uuid.NewRandom()
 	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		s.log.Error("---RegisterCompany-->NewUUID", logger.Error(err))
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		OwnerId:     tempOwnerId.String(),
 	})
 	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		s.log.Error("---RegisterCompany--->CreateCompanyServiceClient", logger.Error(err))
 		return nil, err
 	}
 
@@ -78,7 +78,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		Title:        req.GetName(),
 	})
 	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		s.log.Error("---RegisterCompany--->CreateProject", logger.Error(err))
 		return nil, err
 	}
 
@@ -98,8 +98,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		},
 	)
 
-	environment, err := s.services.EnvironmentService().Create(
-		ctx,
+	environment, err := s.services.EnvironmentService().Create(ctx,
 		&company_service.CreateEnvironmentRequest{
 			ProjectId:    project.ProjectId,
 			Name:         "Production",
@@ -108,30 +107,29 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		},
 	)
 	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		s.log.Error("---RegisterCompany-->CreateEnvironment", logger.Error(err))
 		return nil, err
 	}
 
-	hashedPassword, err := security.HashPassword(req.GetUserInfo().GetPassword())
+	hashedPassword, err := security.HashPasswordBcrypt(req.GetUserInfo().GetPassword())
 	if err != nil {
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		s.log.Error("!!!RegisterCompany-->HashPassword", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	createUserRes, err := s.strg.User().Create(
-		ctx,
+	createUserRes, err := s.strg.User().Create(ctx,
 		&pb.CreateUserRequest{
 			Phone:     req.GetUserInfo().GetPhone(),
 			Email:     req.GetUserInfo().GetEmail(),
 			Login:     req.GetUserInfo().GetLogin(),
 			Password:  hashedPassword,
-			Active:    1, //@TODO:: user must verify himself
+			Active:    1,
 			PhotoUrl:  "",
 			CompanyId: companyPKey.GetId(),
 		},
 	)
 	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		s.log.Error("---RegisterCompany--->CreateUser", logger.Error(err))
 		return nil, err
 	}
 
@@ -143,7 +141,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		OwnerId:     createUserRes.GetId(),
 	})
 	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		s.log.Error("---RegisterCompany-->UpdateCompany", logger.Error(err))
 		return nil, err
 	}
 
@@ -154,12 +152,11 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		EnvId:     environment.GetId(),
 	})
 	if err != nil {
-		s.log.Error("---RegisterCompany--->", logger.Error(err))
+		s.log.Error("---RegisterCompany-->AddUser2Project", logger.Error(err))
 		return nil, err
 	}
 
-	resource, err := s.services.ResourceService().CreateResource(
-		ctx,
+	resource, err := s.services.ResourceService().CreateResource(ctx,
 		&company_service.CreateResourceReq{
 			CompanyId:     companyPKey.GetId(),
 			EnvironmentId: environment.GetId(),
@@ -176,8 +173,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	_, err = s.services.ServiceResource().Update(
-		ctx,
+	_, err = s.services.ServiceResource().Update(ctx,
 		&company_service.UpdateServiceResourceReq{
 			EnvironmentId:    environment.GetId(),
 			ProjectId:        project.GetProjectId(),

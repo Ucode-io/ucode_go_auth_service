@@ -147,6 +147,7 @@ type UserRepoI interface {
 	UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error)
 	GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error)
 	V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error)
+	UpdatePassword(ctx context.Context, userId, password string) error
 }
 
 type IntegrationRepoI interface {

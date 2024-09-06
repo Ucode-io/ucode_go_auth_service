@@ -41,14 +41,16 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		email,
 		login,
 		password,
-		company_id
+		company_id,
+		hash_type
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-		$6
+		$6,
+		'bcrypt'
 	)`
 
 	id, err := uuid.NewRandom()
@@ -87,7 +89,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		u.email,
 		u.login,
 		u.company_id,
-		u.password
+		u.password,
+		u.hash_type
 	FROM
 		"user" u
 	WHERE
@@ -99,6 +102,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.Login,
 		&res.CompanyId,
 		&res.Password,
+		&res.HashType,
 	)
 	if err != nil {
 		return res, err
@@ -317,7 +321,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		phone,
 		email,
 		login,
-		password
+		password,
+		hash_type
 	FROM
 		"user"
 	WHERE`
@@ -338,6 +343,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		&res.Email,
 		&res.Login,
 		&res.Password,
+		&res.HashType,
 	)
 	if err == pgx.ErrNoRows && IsValidEmailNew(username) {
 		queryIf := `
@@ -346,7 +352,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 						phone,
 						email,
 						login,
-						password
+						password,
+						hash_type
 					FROM
 						"user"
 					WHERE
@@ -360,6 +367,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.Email,
 			&res.Login,
 			&res.Password,
+			&res.HashType,
 		)
 		if err == pgx.ErrNoRows {
 			return res, nil
@@ -383,15 +391,22 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	defer dbSpan.Finish()
 
 	params := map[string]interface{}{
-		"id":    user.UserId,
-		"login": user.Login,
-		"email": user.Email,
+		"id": user.UserId,
 	}
 
 	query := `UPDATE "user" SET
-		login = :login,
-		email = :email,
-		updated_at = now()`
+		updated_at = now(),
+		hash_type = 'bcrypt'`
+
+	if len(user.Login) > 0 {
+		query += `, login = :login`
+		params["login"] = user.Login
+	}
+
+	if len(user.Email) > 0 {
+		query += `, email = :email`
+		params["email"] = user.Email
+	}
 
 	if len(user.Phone) > 0 {
 		query += `, phone = :phone`
@@ -898,7 +913,8 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 	}
 
 	query := `UPDATE "user" SET ` + subQueryPass + subQueryEmail + `
-		updated_at = now()
+		updated_at = now(),
+		hash_type = 'bcrypt'
 	WHERE
 		id = :id`
 	params["id"] = req.GetUserId()
@@ -923,7 +939,8 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 		isExists bool
 		count    int
 	)
-	query := `SELECT
+	query := `
+		SELECT
 			COUNT(1)
 		FROM
 			"user_project"
@@ -1124,7 +1141,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 }
 
 func (r *userRepo) V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.getbyusername")
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.v2getbyusername")
 	defer dbSpan.Finish()
 
 	res = &pb.User{}
@@ -1140,6 +1157,30 @@ func (r *userRepo) V2GetByUsername(ctx context.Context, id, projectId string) (r
 	}
 
 	return res, nil
+}
+
+func (r *userRepo) UpdatePassword(ctx context.Context, userId, password string) error {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.update_password")
+	defer dbSpan.Finish()
+
+	query := `UPDATE "user" SET
+		hash_type = :hash_type,
+		password = :password
+	WHERE
+		id = :id`
+
+	params := map[string]interface{}{
+		"id":        userId,
+		"hash_type": "bcrypt",
+		"password":  password,
+	}
+	q, arr := helper.ReplaceQueryParams(query, params)
+	_, err := r.db.Exec(ctx, q, arr...)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func IsValidEmailNew(email string) bool {

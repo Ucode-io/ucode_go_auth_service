@@ -43,8 +43,14 @@ func NewSyncUserService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUserRequest) (*pb.SyncUserResponse, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.CreateUser")
 	defer dbSpan.Finish()
+	var (
+		response = pb.SyncUserResponse{}
+		user     *pb.User
+		err      error
+		username string
+		before   runtime.MemStats
+	)
 
-	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -57,13 +63,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		}
 	}()
 
-	var (
-		response = pb.SyncUserResponse{}
-		user     *pb.User
-		err      error
-		username string
-	)
-
 	for _, loginStrategy := range req.GetLoginStrategy() {
 		if loginStrategy == "login" {
 			username = req.GetLogin()
@@ -75,6 +74,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		if username != "" {
 			user, err = sus.strg.User().GetByUsername(context.Background(), username)
 			if err != nil {
+				sus.log.Error("!!!CreateUser-->UserGetByUsername", logger.Error(err))
 				return nil, err
 			}
 		}
@@ -88,15 +88,15 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
+		sus.log.Error("!!!CreateUser-->ProjectGetById", logger.Error(err))
 		return nil, err
 	}
 
 	if userId == "" {
-		// if user not found in auth service db we have to create it
 		if req.GetPassword() != "" {
-			hashedPassword, err := security.HashPassword(req.GetPassword())
+			hashedPassword, err := security.HashPasswordBcrypt(req.GetPassword())
 			if err != nil {
-				sus.log.Error("!!!CreateUser--->", logger.Error(err))
+				sus.log.Error("!!!CreateUser-->HashPassword", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			req.Password = hashedPassword
@@ -110,7 +110,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			CompanyId: project.GetCompanyId(),
 		})
 		if err != nil {
-			sus.log.Error("!!!CreateUser--->", logger.Error(err))
+			sus.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = user.GetId()
@@ -123,6 +123,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			EnvId:        req.GetEnvironmentId(),
 		})
 		if err != nil {
+			sus.log.Error("!!!CreateUser--->AddUserToProject", logger.Error(err))
 			return nil, err
 		}
 	} else {
@@ -135,6 +136,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			EnvId:        req.GetEnvironmentId(),
 		})
 		if err != nil {
+			sus.log.Error("!!!CreateUser--->GetUserProjectByAllFields", logger.Error(err))
 			return nil, err
 		}
 		if !exists {
@@ -147,6 +149,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
+				sus.log.Error("!!!CreateUser--->AddUserToProjectExists", logger.Error(err))
 				return nil, err
 			}
 		}
@@ -157,6 +160,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
+			sus.log.Error("!!!CreateUser--->AddUserToProjectExists", logger.Error(err))
 			return nil, err
 		}
 		var devEmail string
@@ -233,7 +237,7 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 }
 
 func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
-	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+	sus.log.Info("---UpdateSyncUser--->", logger.Any("req", req))
 
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.UpdateUser")
 	defer dbSpan.Finish()
@@ -262,7 +266,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 			return nil, err
 		}
 
-		hashedPassword, err = security.HashPassword(req.Password)
+		hashedPassword, err = security.HashPasswordBcrypt(req.Password)
 		if err != nil {
 			sus.log.Error("!!!ResetPassword--->HashPassword", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -398,9 +402,8 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 		}
 
 		if userId == "" {
-			// if user not found in auth service db we have to create it
 			if req.GetPassword() != "" {
-				hashedPassword, err := security.HashPassword(req.GetPassword())
+				hashedPassword, err := security.HashPasswordBcrypt(req.GetPassword())
 				if err != nil {
 					sus.log.Error("!!!CreateUsers--->", logger.Error(err))
 					return nil, status.Error(codes.InvalidArgument, err.Error())

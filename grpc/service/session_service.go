@@ -37,7 +37,6 @@ func NewSessionService(cfg config.BaseConfig, log logger.LoggerI, strg storage.S
 }
 
 func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-
 	res := &pb.LoginResponse{}
 
 	if len(req.Username) < 6 {
@@ -59,14 +58,40 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	hashType := user.GetHashType()
+	if config.HashTypes[hashType] == 1 {
+		match, err := security.ComparePassword(user.GetPassword(), req.Password)
+		if err != nil {
+			s.log.Error("!!!Login-->ComparePasswordArgon", logger.Error(err))
+			return nil, err
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!Login-->Wrong", logger.Error(err))
+			return nil, err
+		}
 
-	if !match {
-		err := errors.New("username or password is wrong")
+		go func() {
+			hashedPassword, err := security.HashPasswordBcrypt(req.Password)
+			if err != nil {
+				s.log.Error("!!!V2UserResetPassword--->HashPasswordBcryptGo", logger.Error(err))
+				return
+			}
+			_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+		}()
+	} else if config.HashTypes[hashType] == 2 {
+		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
+		if err != nil {
+			s.log.Error("!!!Login-->ComparePasswordBcrypt", logger.Error(err))
+			return nil, err
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, err
+		}
+	} else {
+		err := errors.New("hash type is not supported")
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -107,12 +132,11 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	res.Companies = companies.Companies
 
 	// TODO - Delete all old sessions & refresh token has this function too
-	rowsAffected, err := s.strg.Session().DeleteExpiredUserSessions(ctx, user.Id)
+	_, err = s.strg.Session().DeleteExpiredUserSessions(ctx, user.Id)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("Login--->DeleteExpiredUserSessions", logger.Any("rowsAffected", rowsAffected))
 
 	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, user.Id)
 	if err != nil {

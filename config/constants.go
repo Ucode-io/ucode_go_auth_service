@@ -102,6 +102,11 @@ var (
 		"function":            1,
 		"invoke_function":     1,
 	}
+
+	HashTypes = map[string]int{
+		"argon":  1,
+		"bcrypt": 2,
+	}
 )
 
 var (

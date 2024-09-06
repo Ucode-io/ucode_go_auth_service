@@ -251,7 +251,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		}
 	}()
 
-	hashedPassword, err := security.HashPassword(req.Password)
+	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -262,7 +262,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	email := emailRegex.MatchString(req.Email)
 	if !email {
 		err = fmt.Errorf("email is not valid")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		s.log.Error("!!!CreateUser--->EmailRegex", logger.Error(err))
 		return nil, err
 	}
 
@@ -271,19 +271,16 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 		foundUser, _ = s.strg.User().GetByUsername(ctx, req.Phone)
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
+		s.log.Error("!!!CreateUser--->GetByNodeType", logger.Error(err))
 		return nil, err
 	}
 
 	if foundUser.Id == "" {
 		pKey, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
-			Login:    req.GetLogin(),
-			Password: req.GetPassword(),
-			//	Email:                 req.GetEmail(),
+			Login:                 req.GetLogin(),
+			Password:              req.GetPassword(),
 			Phone:                 req.GetPhone(),
 			Name:                  req.GetName(),
 			CompanyId:             req.GetCompanyId(),
@@ -295,7 +292,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			Active:                req.GetActive(),
 		})
 		if err != nil {
-			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			s.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
@@ -312,7 +309,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			"login":          req.GetLogin(),
 		})
 		if err != nil {
-			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			s.log.Error("!!!CreateUser--->ConvertReq", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
@@ -345,7 +342,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			CompanyId: req.GetCompanyId(),
 		})
 		if err != nil {
-			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			s.log.Error("!!!CreateUser--->AddUserToProject", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
@@ -353,7 +350,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			Id: pKey.Id,
 		})
 		if err != nil {
-			s.log.Error("!!!CreateUser--->", logger.Error(err))
+			s.log.Error("!!!CreateUser-->UserGetByPK", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
@@ -365,7 +362,6 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			switch req.ResourceType {
 			case 1:
 				objUser, err = services.GetLoginServiceByType(req.NodeType).LoginWithEmailOtp(context.Background(), &pbObject.EmailOtpRequest{
-
 					Email:      req.Email,
 					ClientType: "WEB_USER",
 					ProjectId:  req.GetResourceEnvironmentId(),
@@ -478,7 +474,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
-	s.log.Info("\n\n\n\n---V2CreateUser--->", logger.Any("req", req))
+	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
 
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2CreateUser")
 	defer dbSpan.Finish()
@@ -498,9 +494,9 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 	unHashedPassword := req.Password
 
-	hashedPassword, err := security.HashPassword(req.Password)
+	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
-		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+		s.log.Error("!!!V2CreateUser--->HashPassword", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	req.Password = hashedPassword
@@ -509,14 +505,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	email := emailRegex.MatchString(req.Email)
 	if !email && req.Email != "" {
 		err = fmt.Errorf("email is not valid")
-		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+		s.log.Error("!!!V2CreateUser--->EmailRegex", logger.Error(err))
 		return nil, err
 	}
 
 	pKey, err := s.strg.User().Create(ctx, req)
-
 	if err != nil {
-		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+		s.log.Error("!!!V2CreateUser--->UserCreate", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -539,16 +534,14 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		"from_auth_service":  true,
 	})
 	if err != nil {
-		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+		s.log.Error("!!!V2CreateUser--->ConvertReq", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	var tableSlug = "user"
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
+		s.log.Error("!!!V2CreateUser--->GetByNodeType", logger.Error(err))
 		return nil, err
 	}
 
@@ -564,7 +557,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+			s.log.Error("!!!V2CreateUser--->GetSingle", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
@@ -581,7 +574,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		})
 
 		if err != nil {
-			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
@@ -595,7 +588,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+			s.log.Error("!!!V2CreateUser--->GetSinglePostgres", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
@@ -627,7 +620,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	})
 
 	if err != nil {
-		s.log.Error("!!!V2CreateUser--->", logger.Error(err))
+		s.log.Error("!!!V2CreateUser--->AddUserToProject", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if req.GetInvite() {
@@ -635,10 +628,10 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
+			s.log.Error("!!!V2CreateUser--->GetListEmailSettings", logger.Error(err))
 			return nil, err
 		}
-		var devEmail string
-		var devEmailPassword string
+		var devEmail, devEmailPassword string
 		if len(emailSettings.GetItems()) > 0 {
 			devEmail = emailSettings.GetItems()[0].GetEmail()
 			devEmailPassword = emailSettings.GetItems()[0].GetPassword()
@@ -656,8 +649,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId:     req.GetProjectId(),
 		})
 		if err != nil {
-			s.log.Error("Error while sending message to invite")
-			s.log.Error(err.Error())
+			s.log.Error("Error while sending message to invite", logger.Error(err))
 		}
 	}
 
@@ -1470,20 +1462,42 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 			Id: req.UserId,
 		})
 		if err != nil {
+			s.log.Error("!!!V2UserResetPassword-->UserGetByPK", logger.Error(err))
 			return nil, err
 		}
-		match, err := security.ComparePassword(user.GetPassword(), req.OldPassword)
+
+		hashType := user.GetHashType()
+		if config.HashTypes[hashType] == 1 {
+			match, err := security.ComparePassword(user.GetPassword(), req.OldPassword)
+			if err != nil {
+				s.log.Error("!!!V2UserResetPassword-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("wrong old password")
+				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+				return nil, err
+			}
+		} else if config.HashTypes[hashType] == 2 {
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.OldPassword)
+			if err != nil {
+				s.log.Error("!!!V2UserResetPassword-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("wrong old password")
+				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+				return nil, err
+			}
+		} else {
+			err := errors.New("hash type not found")
+			s.log.Error("!!!V2ResetPassword--->", logger.Error(err))
+			return nil, err
+		}
+
+		hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 		if err != nil {
-			return nil, err
-		}
-		if !match {
-			err := errors.New("wrong old password")
-			s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
-			return nil, err
-		}
-		hashedPassword, err := security.HashPassword(req.Password)
-		if err != nil {
-			s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+			s.log.Error("!!!V2UserResetPassword--->HashPasswordBcrypt", logger.Error(err))
 			return nil, err
 		}
 		req.Password = hashedPassword
@@ -1492,7 +1506,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 			Password: req.Password,
 		})
 		if err != nil {
-			s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+			s.log.Error("!!!V2UserResetPassword--->V2ResetPassword", logger.Error(err))
 			return nil, err
 		}
 		if rowsAffected <= 0 {
@@ -1500,11 +1514,9 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 		}
 		user.Password = hashedPassword
 
-		services, err := s.serviceNode.GetByNodeType(
-			req.ProjectId,
-			req.NodeType,
-		)
+		services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 		if err != nil {
+			s.log.Error("!!!V2UserResetPassword--->GetByNodeType", logger.Error(err))
 			return nil, err
 		}
 

@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"context"
-
 	"time"
+
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
