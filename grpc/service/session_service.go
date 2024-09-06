@@ -77,7 +77,11 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 				s.log.Error("!!!V2UserResetPassword--->HashPasswordBcryptGo", logger.Error(err))
 				return
 			}
-			_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+			if err != nil {
+				s.log.Error("!!!V2UserResetPassword--->UpdatePassword", logger.Error(err))
+				return
+			}
 		}()
 	} else if config.HashTypes[hashType] == 2 {
 		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
