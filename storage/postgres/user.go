@@ -90,7 +90,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		u.login,
 		u.company_id,
 		u.password,
-		u.hash_type,
+		u.hash_type
 	FROM
 		"user" u
 	WHERE
