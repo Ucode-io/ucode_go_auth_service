@@ -45,83 +45,106 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		}
 	}()
 
-	user := &pb.User{}
-	var err error
+	var (
+		user = &pb.User{}
+		err  error
+		data *pbObject.LoginDataRes
+	)
 
 	switch req.Type {
 	case config.Default:
-		{
-			if len(req.Username) < 6 {
-				err := errors.New("invalid username")
-				s.log.Error("!!!MultiCompanyLogin--->InvalidUsername", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
-			}
+		if len(req.Username) < 6 {
+			err := errors.New("invalid username")
+			s.log.Error("!!!V2Login--->InvalidUsername", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 
-			if len(req.Password) < 6 {
-				err := errors.New("invalid password")
-				s.log.Error("!!!MultiCompanyLogin--->InvalidPassword", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
-			}
+		if len(req.Password) < 6 {
+			err := errors.New("invalid password")
+			s.log.Error("!!!V2Login--->InvalidPassword", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 
-			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		if err != nil {
+			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		hashType := user.GetHashType()
+		if config.HashTypes[hashType] == 1 {
+			match, err := security.ComparePassword(user.GetPassword(), req.Password)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->GetByUsername", logger.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
+				s.log.Error("!!!V2Login-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
 			}
-
-			match, err := security.ComparePassword(user.Password, req.Password)
-			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->ComparePassword", logger.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-
 			if !match {
 				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyLogin Default--->", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
+				s.log.Error("!!!V2Login-->Wrong", logger.Error(err))
+				return nil, err
 			}
+
+			go func() {
+				hashedPassword, err := security.HashPasswordBcrypt(req.Password)
+				if err != nil {
+					s.log.Error("!!!V2Login--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			}()
+		} else if config.HashTypes[hashType] == 2 {
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
+			if err != nil {
+				s.log.Error("!!!V2Login-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!V2Login--->", logger.Error(err))
+				return nil, err
+			}
+		} else {
+			err := errors.New("invalid hash type")
+			s.log.Error("!!!V2Login--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case config.WithPhone:
-		{
-			if config.DefaultOtp != req.Otp {
-				_, err := s.services.SmsService().ConfirmOtp(
-					ctx,
-					&sms_service.ConfirmOtpRequest{
-						SmsId: req.GetSmsId(),
-						Otp:   req.GetOtp(),
-					},
-				)
-				if err != nil {
-					return nil, err
-				}
-			}
-
-			user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+		if config.DefaultOtp != req.Otp {
+			_, err := s.services.SmsService().ConfirmOtp(
+				ctx,
+				&sms_service.ConfirmOtpRequest{
+					SmsId: req.GetSmsId(),
+					Otp:   req.GetOtp(),
+				},
+			)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin Phone--->GetByUsername", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
+				return nil, err
 			}
 		}
-	case config.WithEmail:
-		{
-			if config.DefaultOtp != req.Otp {
-				_, err := s.services.SmsService().ConfirmOtp(
-					ctx,
-					&sms_service.ConfirmOtpRequest{
-						SmsId: req.GetSmsId(),
-						Otp:   req.GetOtp(),
-					},
-				)
-				if err != nil {
-					return nil, err
-				}
-			}
 
-			user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+		user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+		if err != nil {
+			s.log.Error("!!!MultiCompanyLogin Phone--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case config.WithEmail:
+		if config.DefaultOtp != req.Otp {
+			_, err := s.services.SmsService().ConfirmOtp(
+				ctx,
+				&sms_service.ConfirmOtpRequest{
+					SmsId: req.GetSmsId(),
+					Otp:   req.GetOtp(),
+				},
+			)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
+				return nil, err
 			}
+		}
+
+		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+		if err != nil {
+			s.log.Error("!!!V2Login Email--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
 
@@ -131,12 +154,8 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
-	var data *pbObject.LoginDataRes
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -147,14 +166,12 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			ctx,
 			reqLoginData,
 		)
-
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-
 		newReq := nb.LoginDataReq{}
 
 		err = helper.MarshalToStruct(&reqLoginData, &newReq)
@@ -165,10 +182,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 		newReq.ProjectId = newReq.ResourceEnvironmentId
 
-		newData, err := services.GoLoginService().LoginData(
-			ctx,
-			&newReq,
-		)
+		newData, err := services.GoLoginService().LoginData(ctx, &newReq)
 
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
@@ -239,10 +253,16 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 }
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
+	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginWithOption")
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
+	var (
+		before   runtime.MemStats
+		userId   string
+		verified bool
+	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -254,12 +274,6 @@ func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginW
 			s.log.Info("Memory used over 300 mb", logger.Any("V2LoginWithOption", memoryUsed))
 		}
 	}()
-
-	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
-	var (
-		userId   string
-		verified bool
-	)
 
 pwd:
 	switch strings.ToUpper(req.GetLoginStrategy()) {
@@ -299,15 +313,42 @@ pwd:
 			}
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		match, err := security.ComparePassword(user.Password, password)
-		if err != nil {
+		hashType := user.GetHashType()
+		if config.HashTypes[hashType] == 1 {
+			match, err := security.ComparePassword(user.GetPassword(), password)
+			if err != nil {
+				s.log.Error("!!!V2LoginWithOption-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!V2LoginWithOption-->Wrong", logger.Error(err))
+				return nil, err
+			}
+
+			go func() {
+				hashedPassword, err := security.HashPasswordBcrypt(password)
+				if err != nil {
+					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			}()
+		} else if config.HashTypes[hashType] == 2 {
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
+			if err != nil {
+				s.log.Error("!!!V2LoginWithOption-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, err
+			}
+		} else {
+			err := errors.New("invalid hash type")
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
-		}
-		if !match {
-			err := errors.New("username or password is wrong")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = user.Id
 	case "PHONE":
@@ -494,15 +535,42 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		match, err := security.ComparePassword(user.Password, password)
-		if err != nil {
+		hashType := user.GetHashType()
+		if config.HashTypes[hashType] == 1 {
+			match, err := security.ComparePassword(user.GetPassword(), password)
+			if err != nil {
+				s.log.Error("!!!V2LoginWithOption-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!V2LoginWithOption-->Wrong", logger.Error(err))
+				return nil, err
+			}
+
+			go func() {
+				hashedPassword, err := security.HashPasswordBcrypt(password)
+				if err != nil {
+					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			}()
+		} else if config.HashTypes[hashType] == 2 {
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
+			if err != nil {
+				s.log.Error("!!!V2LoginWithOption-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, err
+			}
+		} else {
+			err := errors.New("invalid hash type")
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
-		}
-		if !match {
-			err := errors.New("username or password is wrong")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = user.GetId()
 	case "EMAIL_PWD":
@@ -537,15 +605,42 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		match, err := security.ComparePassword(user.Password, password)
-		if err != nil {
+		hashType := user.GetHashType()
+		if config.HashTypes[hashType] == 1 {
+			match, err := security.ComparePassword(user.GetPassword(), password)
+			if err != nil {
+				s.log.Error("!!!V2LoginWithOption-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!V2LoginWithOption-->Wrong", logger.Error(err))
+				return nil, err
+			}
+
+			go func() {
+				hashedPassword, err := security.HashPasswordBcrypt(password)
+				if err != nil {
+					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			}()
+		} else if config.HashTypes[hashType] == 2 {
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
+			if err != nil {
+				s.log.Error("!!!V2LoginWithOption-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, err
+			}
+		} else {
+			err := errors.New("invalid hash type")
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
-		}
-		if !match {
-			err := errors.New("username or password is wrong")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = userIdRes.GetId()
 	case "GOOGLE_AUTH":
@@ -791,7 +886,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		EnvironmentId:   resp.GetEnvironmentId(),
 		User:            resp.GetUser(),
 		UserData:        res.GetUserData(),
-		// Companies:       companiesResp,
+		// Companies:        companiesResp,
 	}, nil
 }
 
@@ -834,16 +929,42 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	hashType := user.GetHashType()
+	if config.HashTypes[hashType] == 1 {
+		match, err := security.ComparePassword(user.GetPassword(), req.Password)
+		if err != nil {
+			s.log.Error("!!!SuperAdminLogin-->ComparePasswordArgon", logger.Error(err))
+			return nil, err
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!SuperAdminLogin-->Wrong", logger.Error(err))
+			return nil, err
+		}
 
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		go func() {
+			hashedPassword, err := security.HashPasswordBcrypt(req.Password)
+			if err != nil {
+				s.log.Error("!!!SuperAdminLogin--->HashPasswordBcryptGo", logger.Error(err))
+				return
+			}
+			_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+		}()
+	} else if config.HashTypes[hashType] == 2 {
+		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
+		if err != nil {
+			s.log.Error("!!!SuperAdminLogin-->ComparePasswordBcrypt", logger.Error(err))
+			return nil, err
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!SuperAdminLogin--->", logger.Error(err))
+			return nil, err
+		}
+	} else {
+		err := errors.New("invalid hash type")
+		s.log.Error("!!!SuperAdminLogin--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
@@ -1428,16 +1549,42 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	match, err := security.ComparePassword(user.Password, req.Password)
-	if err != nil {
+	hashType := user.GetHashType()
+	if config.HashTypes[hashType] == 1 {
+		match, err := security.ComparePassword(user.GetPassword(), req.Password)
+		if err != nil {
+			s.log.Error("!!!MultiCompanyLogin-->ComparePasswordArgon", logger.Error(err))
+			return nil, err
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!MultiCompanyLogin-->Wrong", logger.Error(err))
+			return nil, err
+		}
+
+		go func() {
+			hashedPassword, err := security.HashPasswordBcrypt(req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->HashPasswordBcryptGo", logger.Error(err))
+				return
+			}
+			_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+		}()
+	} else if config.HashTypes[hashType] == 2 {
+		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
+		if err != nil {
+			s.log.Error("!!!MultiCompanyLogin-->ComparePasswordBcrypt", logger.Error(err))
+			return nil, err
+		}
+		if !match {
+			err := errors.New("username or password is wrong")
+			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+			return nil, err
+		}
+	} else {
+		err := errors.New("invalid hash type")
 		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if !match {
-		err := errors.New("username or password is wrong")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
@@ -1707,57 +1854,79 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 	switch req.Type {
 	case config.Default:
-		{
-			if len(req.Username) < 6 {
-				err := errors.New("invalid username")
-				s.log.Error("!!!MultiCompanyLogin--->InvalidUsername", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
-			}
+		if len(req.Username) < 6 {
+			err := errors.New("invalid username")
+			s.log.Error("!!!MultiCompanyLogin--->InvalidUsername", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 
-			if len(req.Password) < 6 {
-				err := errors.New("invalid password")
-				s.log.Error("!!!MultiCompanyLogin--->InvalidPassword", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
-			}
+		if len(req.Password) < 6 {
+			err := errors.New("invalid password")
+			s.log.Error("!!!MultiCompanyLogin--->InvalidPassword", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 
-			user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		if err != nil {
+			s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		hashType := user.GetHashType()
+		if config.HashTypes[hashType] == 1 {
+			match, err := security.ComparePassword(user.GetPassword(), req.Password)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
+				s.log.Error("!!!MultiCompanyLogin-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
 			}
-
-			match, err := security.ComparePassword(user.Password, req.Password)
-			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->ComparePassword", logger.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-
 			if !match {
 				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyLoginMismatch--->", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
-			}
-		}
-	case config.WithPhone:
-		{
-			if config.DefaultOtp != req.Otp {
-				_, err := s.services.SmsService().ConfirmOtp(
-					ctx,
-					&sms_service.ConfirmOtpRequest{
-						SmsId: req.GetSmsId(),
-						Otp:   req.GetOtp(),
-					},
-				)
-				if err != nil {
-					return nil, err
-				}
+				s.log.Error("!!!MultiCompanyLogin-->Wrong", logger.Error(err))
+				return nil, err
 			}
 
-			user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+			go func() {
+				hashedPassword, err := security.HashPasswordBcrypt(req.Password)
+				if err != nil {
+					s.log.Error("!!!MultiCompanyLogin--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			}()
+		} else if config.HashTypes[hashType] == 2 {
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
+				s.log.Error("!!!MultiCompanyLogin-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
 			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				return nil, err
+			}
+		} else {
+			err := errors.New("invalid hash type")
+			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case config.WithPhone:
+		if config.DefaultOtp != req.Otp {
+			_, err := s.services.SmsService().ConfirmOtp(
+				ctx,
+				&sms_service.ConfirmOtpRequest{
+					SmsId: req.GetSmsId(),
+					Otp:   req.GetOtp(),
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+		if err != nil {
+			s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case config.WithEmail:
 		{
@@ -1940,6 +2109,8 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 }
 
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
+	s.log.Info("V2ResetPassword -> ", logger.Any("req: ", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2ResetPassword")
 	defer dbSpan.Finish()
 
@@ -1956,17 +2127,16 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 		}
 	}()
 
-	s.log.Info("V2ResetPassword -> ", logger.Any("req: ", req))
 	if req.GetPassword() != "" {
 		if len(req.GetPassword()) < 6 {
 			err := fmt.Errorf("password must not be less than 6 characters")
-			s.log.Error("!!!ResetPassword--->", logger.Error(err))
+			s.log.Error("!!!ResetPassword-->PasswordCheck", logger.Error(err))
 			return nil, err
 		}
 
-		hashedPassword, err := security.HashPassword(req.GetPassword())
+		hashedPassword, err := security.HashPasswordBcrypt(req.GetPassword())
 		if err != nil {
-			s.log.Error("!!!ResetPassword--->", logger.Error(err))
+			s.log.Error("!!!ResetPassword-->HashPassword", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
@@ -1974,7 +2144,7 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 	}
 	rowsAffected, err := s.strg.User().V2ResetPassword(ctx, req)
 	if err != nil {
-		s.log.Error("!!!ResetPassword--->", logger.Error(err))
+		s.log.Error("!!!ResetPassword-->V2ResetPassword", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

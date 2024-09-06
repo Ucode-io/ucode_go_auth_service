@@ -8,10 +8,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/argon2"
-)
-
-var (
-	Counter int
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -52,7 +49,6 @@ func HashPassword(password string) (hashedPassword string, err error) {
 
 // ComparePassword is used to compare a user-inputted password to a hash to see if the password matches or not.
 func ComparePassword(hashedPassword, password string) (match bool, err error) {
-
 	parts := strings.Split(hashedPassword, "$")
 
 	if len(parts) <= 5 {
@@ -82,4 +78,24 @@ func ComparePassword(hashedPassword, password string) (match bool, err error) {
 	comparisonHash := argon2.IDKey([]byte(password), salt, A2IDtime, A2IDmemory, A2IDthreads, keyLen)
 
 	return (subtle.ConstantTimeCompare(decodedHash, comparisonHash) == 1), nil
+}
+
+// bcrypt.DefaultCost is a good starting point for cost (recommended between 10-14 for most applications).
+func HashPasswordBcrypt(password string) (hashedPassword string, err error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hash), nil
+}
+
+// bcrypt.CompareHashAndPassword will hash the plain text password and compare it with the hashed password
+func ComparePasswordBcrypt(hashedPassword, password string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

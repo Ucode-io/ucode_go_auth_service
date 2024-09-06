@@ -100,7 +100,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		}
 
 		if len(password) > 0 {
-			hashedPassword, err := security.HashPassword(password)
+			hashedPassword, err := security.HashPasswordBcrypt(password)
 			if err != nil {
 				rs.log.Error("!!!CreateUser--->HashPassword", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())

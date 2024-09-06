@@ -1,13 +1,15 @@
 module ucode/ucode_go_auth_service
 
-go 1.21.6
+go 1.22
+
+toolchain go1.23.0
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang/protobuf v1.5.2
 	github.com/golanguzb70/ratelimiter v1.1.2
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgtype v1.14.3
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/joho/godotenv v1.4.0
@@ -23,10 +25,10 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.8.9
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
-	go.uber.org/zap v1.23.0
-	golang.org/x/crypto v0.20.0
+	go.uber.org/zap v1.27.0
+	golang.org/x/crypto v0.26.0
 	google.golang.org/grpc v1.52.0
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
@@ -41,11 +43,12 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
 )
 
 require (
@@ -53,7 +56,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/manveru/gobdd v0.0.0-20131210092515-f1a17fdd710b // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/tideland/golib v4.24.2+incompatible // indirect
 	github.com/tideland/gorest v2.15.5+incompatible // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -84,12 +87,12 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
-	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/term v0.17.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.8.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/term v0.23.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/genproto v0.0.0-20221227171554-f9683d7f8bef // indirect
 )

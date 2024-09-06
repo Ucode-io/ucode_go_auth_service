@@ -3,3 +3,4 @@
 .env
 vendor
 any.go
+any_test.go
