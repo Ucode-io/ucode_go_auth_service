@@ -90,7 +90,11 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 					s.log.Error("!!!V2Login--->HashPasswordBcryptGo", logger.Error(err))
 					return
 				}
-				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+				if err != nil {
+					s.log.Error("!!!V2Login--->UpdatePassword", logger.Error(err))
+					return
+				}
 			}()
 		} else if config.HashTypes[hashType] == 2 {
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
@@ -332,7 +336,11 @@ pwd:
 					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
 					return
 				}
-				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+				if err != nil {
+					s.log.Error("!!!V2LoginWithOption--->UpdatePassword", logger.Error(err))
+					return
+				}
 			}()
 		} else if config.HashTypes[hashType] == 2 {
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
@@ -554,7 +562,11 @@ pwd:
 					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
 					return
 				}
-				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+				if err != nil {
+					s.log.Error("!!!V2LoginWithOption--->UpdatePassword", logger.Error(err))
+					return
+				}
 			}()
 		} else if config.HashTypes[hashType] == 2 {
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
@@ -624,7 +636,11 @@ pwd:
 					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
 					return
 				}
-				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+				if err != nil {
+					s.log.Error("!!!V2LoginWithOption--->UpdatePassword", logger.Error(err))
+					return
+				}
 			}()
 		} else if config.HashTypes[hashType] == 2 {
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
@@ -948,7 +964,11 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 				s.log.Error("!!!SuperAdminLogin--->HashPasswordBcryptGo", logger.Error(err))
 				return
 			}
-			_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+			if err != nil {
+				s.log.Error("!!!SuperAdminLogin--->UpdatePassword", logger.Error(err))
+				return
+			}
 		}()
 	} else if config.HashTypes[hashType] == 2 {
 		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
@@ -1568,7 +1588,11 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 				s.log.Error("!!!MultiCompanyLogin--->HashPasswordBcryptGo", logger.Error(err))
 				return
 			}
-			_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+			err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin--->UpdatePassword", logger.Error(err))
+				return
+			}
 		}()
 	} else if config.HashTypes[hashType] == 2 {
 		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
