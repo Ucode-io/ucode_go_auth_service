@@ -1881,32 +1881,37 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			}
 			if !match {
 				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyLogin-->Wrong", logger.Error(err))
+				s.log.Error("!!!MultiCompanyOneLogin-->Wrong", logger.Error(err))
 				return nil, err
 			}
 
 			go func() {
 				hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 				if err != nil {
-					s.log.Error("!!!MultiCompanyLogin--->HashPasswordBcryptGo", logger.Error(err))
+					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
 					return
 				}
-				_ = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+				err = s.strg.User().UpdatePassword(ctx, user.Id, hashedPassword)
+				if err != nil {
+					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
 			}()
 		} else if config.HashTypes[hashType] == 2 {
+			fmt.Println("BCRYPTED")
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin-->ComparePasswordBcrypt", logger.Error(err))
+				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
 				return nil, err
 			}
 			if !match {
 				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+				s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
 				return nil, err
 			}
 		} else {
 			err := errors.New("invalid hash type")
-			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
+			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case config.WithPhone:

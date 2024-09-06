@@ -391,16 +391,22 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	defer dbSpan.Finish()
 
 	params := map[string]interface{}{
-		"id":    user.UserId,
-		"login": user.Login,
-		"email": user.Email,
+		"id": user.UserId,
 	}
 
 	query := `UPDATE "user" SET
-		login = :login,
-		email = :email,
 		updated_at = now(),
 		hash_type = 'bcrypt'`
+
+	if len(user.Login) > 0 {
+		query += `, login = :login`
+		params["login"] = user.Login
+	}
+
+	if len(user.Email) > 0 {
+		query += `, email = :email`
+		params["email"] = user.Email
+	}
 
 	if len(user.Phone) > 0 {
 		query += `, phone = :phone`

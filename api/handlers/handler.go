@@ -57,13 +57,6 @@ func (h *Handler) GetProjectSrvc(c *gin.Context, projectId string, nodeType stri
 func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interface{}) {
 	switch code := status.Code; {
 	case code < 300:
-		h.log.Info(
-			"---Response--->",
-			logger.Int("code", status.Code),
-			logger.String("status", status.Status),
-			logger.Any("description", status.Description),
-			logger.Any("data", data),
-		)
 	case code < 400:
 		h.log.Warn(
 			"!!!Response--->",

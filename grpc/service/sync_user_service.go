@@ -237,7 +237,7 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 }
 
 func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
-	sus.log.Info("---UpdateUser--->", logger.Any("req", req))
+	sus.log.Info("---UpdateSyncUser--->", logger.Any("req", req))
 
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.UpdateUser")
 	defer dbSpan.Finish()
