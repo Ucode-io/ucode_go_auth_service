@@ -1,8 +1,6 @@
 module ucode/ucode_go_auth_service
 
-go 1.22
-
-toolchain go1.23.0
+go 1.21.6
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
