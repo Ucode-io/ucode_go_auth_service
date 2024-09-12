@@ -42,6 +42,8 @@ func NewSyncUserService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 }
 
 func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUserRequest) (*pb.SyncUserResponse, error) {
+	sus.log.Info("---CreateSyncUser--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.CreateUser")
 	defer dbSpan.Finish()
 	var (
