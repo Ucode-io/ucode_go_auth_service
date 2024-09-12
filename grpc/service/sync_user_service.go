@@ -52,6 +52,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		err      error
 		username string
 		before   runtime.MemStats
+		skip     bool
 	)
 
 	runtime.ReadMemStats(&before)
@@ -69,6 +70,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	for _, loginStrategy := range req.GetLoginStrategy() {
 		if loginStrategy == "login" {
 			username = req.GetLogin()
+			skip = true
 		} else if loginStrategy == "email" {
 			username = req.GetEmail()
 		} else if loginStrategy == "phone" {
@@ -79,6 +81,13 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			if err != nil {
 				sus.log.Error("!!!CreateUser-->UserGetByUsername", logger.Error(err))
 				return nil, err
+			}
+
+			if skip {
+				if len(user.GetId()) > 0 {
+					sus.log.Error("!!!CreateSyncUser-->LoginCheck", logger.Error(err))
+					return nil, status.Error(codes.InvalidArgument, "user with this login already exists")
+				}
 			}
 		}
 		if user.GetId() != "" {
