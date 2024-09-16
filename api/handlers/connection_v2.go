@@ -553,10 +553,11 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.NoContent, resp)
 	case 3:
-		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Delete(
+		resp, err := services.GoItemService().Delete(
 			c.Request.Context(),
-			&obs.CommonMessage{
+			&nobs.CommonMessage{
 				TableSlug: "connections",
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -567,9 +568,8 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.NoContent, resp)
 	}
-
-	h.handleResponse(c, http.NoContent, resp)
 }
 
 // GetConnectionOptions godoc
