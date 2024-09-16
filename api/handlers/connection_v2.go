@@ -99,10 +99,11 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.Created, resp)
 	case 3:
-		resp, err = services.PostgresObjectBuilderService().Create(
+		resp, err := services.GoItemService().Create(
 			c.Request.Context(),
-			&obs.CommonMessage{
+			&nobs.CommonMessage{
 				TableSlug: "connections",
 				ProjectId: connection.ProjectId,
 				Data:      structData,
@@ -113,9 +114,8 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.Created, resp)
 	}
-
-	h.handleResponse(c, http.Created, resp)
 }
 
 // V2UpdateConnection godoc
@@ -448,10 +448,11 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.OK, resp)
 	case 3:
-		resp, err = services.PostgresObjectBuilderService().GetSingle(
+		resp, err := services.GoItemService().GetSingle(
 			c.Request.Context(),
-			&obs.CommonMessage{
+			&nobs.CommonMessage{
 				TableSlug: "connections",
 				ProjectId: resource.ResourceEnvironmentId,
 				Data:      structData,
@@ -462,11 +463,8 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.OK, resp)
 	}
-
-	// this is get list connection list from object builder
-
-	h.handleResponse(c, http.OK, resp)
 }
 
 // V2DeleteConnection godoc
