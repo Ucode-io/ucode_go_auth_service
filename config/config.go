@@ -147,7 +147,7 @@ func BaseLoad() BaseConfig {
 
 	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "snZV9XNmvf"))
 
-	config.JaegerHostPort = cast.ToString(getOrReturnDefaultValue("JAEGER_HOST_PORT", ""))
+	config.JaegerHostPort = cast.ToString(getOrReturnDefaultValue("JAEGER_URL", ""))
 
 	config.GetRequestRedisHost = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
