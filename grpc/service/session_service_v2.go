@@ -29,10 +29,18 @@ import (
 )
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
+	s.log.Info("V2Login --> ", logger.Any("request: ", req))
+
+	var (
+		user   = &pb.User{}
+		err    error
+		data   *pbObject.LoginDataRes
+		before runtime.MemStats
+	)
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2Login")
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -44,12 +52,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Info("Memory used over 300 mb", logger.Any("V2Login", memoryUsed))
 		}
 	}()
-
-	var (
-		user = &pb.User{}
-		err  error
-		data *pbObject.LoginDataRes
-	)
 
 	switch req.Type {
 	case config.Default:

@@ -260,6 +260,8 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 }
 
 func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2UpdateClientTypeRequest) (*pb.CommonMessage, error) {
+	s.log.Info("---UpdateClientType--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_client.V2UpdateClientType")
 	defer dbSpan.Finish()
 
@@ -275,8 +277,6 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 			s.log.Info("Memory used over 300 mb", logger.Any("V2UpdateClientType", memoryUsed))
 		}
 	}()
-
-	s.log.Info("---UpdateClientType--->", logger.Any("req", req))
 
 	var (
 		result *pbObject.CommonMessage

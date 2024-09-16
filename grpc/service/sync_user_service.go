@@ -48,10 +48,10 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	defer dbSpan.Finish()
 	var (
 		response = pb.SyncUserResponse{}
+		before   runtime.MemStats
 		user     *pb.User
 		err      error
 		username string
-		before   runtime.MemStats
 		skip     bool
 	)
 
@@ -90,9 +90,9 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 				}
 			}
 		}
-		if user.GetId() != "" {
-			break
-		}
+		// if user.GetId() != "" {
+		// 	break
+		// }
 	}
 
 	userId := user.GetId()
@@ -384,8 +384,10 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 		err      error
 	)
 	for _, req := range in.Users {
-		var user *pb.User
-		var username string
+		var (
+			user     *pb.User
+			username string
+		)
 		for _, loginStrategy := range req.GetLoginStrategy() {
 			if loginStrategy == "login" {
 				username = req.GetLogin()
@@ -480,8 +482,8 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			if err != nil {
 				return nil, err
 			}
-			var devEmail string
-			var devEmailPassword string
+			var devEmail, devEmailPassword string
+
 			if len(emailSettings.GetItems()) > 0 {
 				devEmail = emailSettings.GetItems()[0].GetEmail()
 				devEmailPassword = emailSettings.GetItems()[0].GetPassword()
