@@ -66,6 +66,9 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 
 		resp.UserId = req.GetGuid()
 	} else if err == nil {
+		if loginType == "login" {
+			return nil, errors.New("login already exists")
+		}
 		if _, err = uuid.Parse(userId); err == nil {
 			query = `
 				UPDATE 

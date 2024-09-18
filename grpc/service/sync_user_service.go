@@ -90,9 +90,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 				}
 			}
 		}
-		// if user.GetId() != "" {
-		// 	break
-		// }
 	}
 
 	userId := user.GetId()
@@ -220,17 +217,8 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		}
 	}()
 
-	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
-		ProjectId: req.GetProjectId(),
-	})
-	if err != nil {
-		sus.log.Info("!!!DeleteSyncUser-->ProjectGetById", logger.Error(err))
-		return nil, err
-	}
-
-	_, err = sus.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
+	_, err := sus.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
 		UserId:        req.GetUserId(),
-		CompanyId:     project.GetCompanyId(),
 		RoleId:        req.GetRoleId(),
 		ProjectId:     req.GetProjectId(),
 		ClientTypeId:  req.GetClientTypeId(),
@@ -257,7 +245,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		before                        runtime.MemStats
 		hashedPassword                string
 		err                           error
-		syncUser                      *pb.SyncUserResponse
+		syncUser                      = &pb.SyncUserResponse{}
 		hasPassword, hasLoginStrategy bool
 	)
 
@@ -354,6 +342,10 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		}
 	}
 
+	if !hasLoginStrategy && !hasPassword {
+		syncUser.UserId = req.GetGuid()
+	}
+
 	return syncUser, nil
 }
 
@@ -378,22 +370,24 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
+		sus.log.Error("!!!DeleteManyUser--->GetProjectById", logger.Error(err))
 		return nil, err
 	}
 	req.CompanyId = project.CompanyId
 
 	_, err = sus.strg.User().DeleteUsersFromProject(ctx, req)
 	if err != nil {
+		sus.log.Error("!!!DeleteManyUser--->DeleteUsersFromProject", logger.Error(err))
 		return nil, err
 	}
 
-	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
-		for _, v := range req.Users {
-			_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
-				Id: v.GetUserId(),
-			})
-		}
-	}
+	// if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+	// 	for _, v := range req.Users {
+	// 		_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+	// 			Id: v.GetUserId(),
+	// 		})
+	// 	}
+	// }
 
 	return &empty.Empty{}, nil
 }
@@ -436,6 +430,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			if username != "" {
 				user, err = sus.strg.User().GetByUsername(context.Background(), username)
 				if err != nil {
+					sus.log.Error("!!!CreateSyncUsers--->GetUserByUsername", logger.Error(err))
 					return nil, err
 				}
 			}
@@ -449,6 +444,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
+			sus.log.Error("!!!CreateSyncUsers--->GetProjectById", logger.Error(err))
 			return nil, err
 		}
 
@@ -456,7 +452,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			if req.GetPassword() != "" {
 				hashedPassword, err := security.HashPasswordBcrypt(req.GetPassword())
 				if err != nil {
-					sus.log.Error("!!!CreateUsers--->", logger.Error(err))
+					sus.log.Error("!!!CreateSyncUsers--->HashPasswordBcrypt", logger.Error(err))
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 				req.Password = hashedPassword
@@ -470,7 +466,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				CompanyId: project.GetCompanyId(),
 			})
 			if err != nil {
-				sus.log.Error("!!!CreateUsers--->", logger.Error(err))
+				sus.log.Error("!!!CreateSyncUsers--->CreateUser", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			userId = user.GetId()
@@ -483,6 +479,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
+				sus.log.Error("!!!CreateSyncUsers-->AddUserToProject", logger.Error(err))
 				return nil, err
 			}
 		} else {
@@ -495,6 +492,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
+				sus.log.Error("!!!CreateSyncUsers-->GetUserProjectByAllFields", logger.Error(err))
 				return nil, err
 			}
 			if !exists {
@@ -507,6 +505,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 					EnvId:        req.GetEnvironmentId(),
 				})
 				if err != nil {
+					sus.log.Error("!!!CreateSyncUsers-->AddUserToProjectExists", logger.Error(err))
 					return nil, err
 				}
 			}
