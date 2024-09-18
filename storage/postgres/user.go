@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
 	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -386,7 +387,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	return res, nil
 }
 
-func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
+func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest, tx pgx.Tx) (rowsAffected int64, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.resetpassword")
 	defer dbSpan.Finish()
 
@@ -398,17 +399,17 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 		updated_at = now(),
 		hash_type = 'bcrypt'`
 
-	if len(user.Login) > 0 {
+	if len(user.GetLogin()) > 0 {
 		query += `, login = :login`
 		params["login"] = user.Login
 	}
 
-	if len(user.Email) > 0 {
+	if len(user.GetEmail()) > 0 {
 		query += `, email = :email`
 		params["email"] = user.Email
 	}
 
-	if len(user.Phone) > 0 {
+	if len(user.GetPhone()) > 0 {
 		query += `, phone = :phone`
 		params["phone"] = user.Phone
 	}
@@ -421,14 +422,22 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	query += ` WHERE id = :id`
 
 	q, arr := helper.ReplaceQueryParams(query, params)
-	result, err := r.db.Exec(ctx, q, arr...)
-	if err != nil {
-		return 0, err
+	if tx == nil {
+		result, err := r.db.Exec(ctx, q, arr...)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to update user")
+		}
+
+		rowsAffected = result.RowsAffected()
+	} else {
+		result, err := tx.Exec(ctx, q, arr...)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to update user with tx")
+		}
+		rowsAffected = result.RowsAffected()
 	}
 
-	rowsAffected = result.RowsAffected()
-
-	return rowsAffected, err
+	return rowsAffected, nil
 }
 
 func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
@@ -497,9 +506,8 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.AddUserToProject")
 	defer dbSpan.Finish()
 
-	res := pb.AddUserToProjectRes{}
-
 	var (
+		res                         = pb.AddUserToProjectRes{}
 		clientTypeId, roleId, envId pgtype.UUID
 	)
 	if req.GetClientTypeId() != "" {
@@ -961,6 +969,7 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 	if count > 0 {
 		isExists = true
 	}
+
 	return isExists, nil
 }
 

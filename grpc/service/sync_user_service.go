@@ -224,6 +224,7 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
+		sus.log.Info("!!!DeleteSyncUser-->ProjectGetById", logger.Error(err))
 		return nil, err
 	}
 
@@ -236,14 +237,15 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		EnvironmentId: req.GetEnvironmentId(),
 	})
 	if err != nil {
+		sus.log.Info("!!!DeleteSyncUser-->DeleteUserFromProject", logger.Error(err))
 		return nil, err
 	}
 
-	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
-		_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
-			Id: req.GetUserId(),
-		})
-	}
+	// if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+	// 	_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+	// 		Id: req.GetUserId(),
+	// 	})
+	// }
 
 	return &empty.Empty{}, nil
 }
@@ -251,14 +253,17 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
 	sus.log.Info("---UpdateSyncUser--->", logger.Any("req", req))
 
+	var (
+		before                        runtime.MemStats
+		hashedPassword                string
+		err                           error
+		syncUser                      *pb.SyncUserResponse
+		hasPassword, hasLoginStrategy bool
+	)
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.UpdateUser")
 	defer dbSpan.Finish()
 
-	var (
-		before         runtime.MemStats
-		hashedPassword string
-		err            error
-	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -271,53 +276,85 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		}
 	}()
 
-	if req.Password != "" {
+	project, err := sus.services.ProjectServiceClient().GetById(ctx,
+		&pbCompany.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+	if err != nil {
+		sus.log.Error("!!!UpdateSyncUser-->ProjectGetById", logger.Error(err))
+		return nil, err
+	}
+
+	req.CompanyId = project.GetCompanyId()
+
+	if len(req.Password) > 0 {
 		if len(req.Password) < 6 {
 			err = fmt.Errorf("password must not be less than 6 characters")
-			sus.log.Error("!!!UpdateUser--->CheckPassword", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->CheckPassword", logger.Error(err))
 			return nil, err
 		}
 
 		hashedPassword, err = security.HashPasswordBcrypt(req.Password)
 		if err != nil {
-			sus.log.Error("!!!ResetPassword--->HashPassword", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->HashPassword", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		hasPassword = true
+		req.Password = hashedPassword
 	}
 
-	if req.Login != "" {
+	if len(req.GetLogin()) > 0 {
 		if len(req.Login) < 6 {
 			err = fmt.Errorf("login must not be less than 6 characters")
-			sus.log.Error("!!!UpdateUser--->CheckLogin", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->CheckLogin", logger.Error(err))
 			return nil, err
 		}
+
+		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "login")
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserLogin", logger.Error(err))
+			return nil, err
+		}
+
+		hasLoginStrategy = true
 	}
 
-	if req.Email != "" {
+	if len(req.GetEmail()) > 0 {
 		if !IsValidEmailNew(req.Email) {
 			err = fmt.Errorf("email is not valid")
-			sus.log.Error("!!!UpdateUser--->CheckValidEmail", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->CheckValidEmail", logger.Error(err))
+			return nil, err
+		}
+
+		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "email")
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserEmail", logger.Error(err))
+			return nil, err
+		}
+
+		hasLoginStrategy = true
+	}
+
+	if len(req.GetPhone()) > 0 {
+		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "phone")
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPhone", logger.Error(err))
+			return nil, err
+		}
+
+		hasLoginStrategy = true
+	}
+
+	if hasPassword && !hasLoginStrategy {
+		_, err = sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
+			UserId:   req.GetGuid(),
+			Password: hashedPassword}, nil)
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPassword", logger.Error(err))
 			return nil, err
 		}
 	}
 
-	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
-		UserId:   req.GetGuid(),
-		Login:    req.Login,
-		Email:    req.Email,
-		Phone:    req.Phone,
-		Password: hashedPassword,
-	})
-	if err != nil {
-		sus.log.Error("!!!UpdateUser--->ResetPassword", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
-
-	return &pb.SyncUserResponse{}, nil
+	return syncUser, nil
 }
 
 func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {

@@ -7,6 +7,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
 	// "github.com/jackc/pgconn/internal/ctxwatch"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -129,7 +130,7 @@ type UserRepoI interface {
 	Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error)
 	Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
 	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
-	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error)
+	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest, tx pgx.Tx) (rowsAffected int64, err error)
 	GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error)
 	GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (*models.UserProjectClientTypeResponse, error)
 	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
@@ -148,6 +149,7 @@ type UserRepoI interface {
 	GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error)
 	V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error)
 	UpdatePassword(ctx context.Context, userId, password string) error
+	UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserRequest, loginType string) (*pb.SyncUserResponse, error)
 }
 
 type IntegrationRepoI interface {

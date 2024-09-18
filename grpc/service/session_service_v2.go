@@ -1025,7 +1025,13 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccess")
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
+	var (
+		authTables             []*pb.TableBody
+		before                 runtime.MemStats
+		methodField, tableSlug string
+		request                = make(map[string]interface{})
+	)
+
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -1078,7 +1084,6 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	var methodField string
 	switch req.Method {
 	case "GET":
 		methodField = "read"
@@ -1097,7 +1102,6 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	splitedPath := strings.Split(req.Path, "/")
 	splitedPath = splitedPath[1:]
 
-	var tableSlug string
 	tableSlug = splitedPath[len(splitedPath)-1]
 	if tableSlug[len(tableSlug)-2:] == "id" {
 		tableSlug = splitedPath[len(splitedPath)-2]
@@ -1107,7 +1111,6 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		tableSlug = "app"
 	}
 
-	request := make(map[string]interface{})
 	request["client_type_id"] = session.ClientTypeId
 	request[methodField] = "Yes"
 	request["table_slug"] = tableSlug
@@ -1174,7 +1177,6 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		}
 	}
 
-	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
 		authTable := &pb.TableBody{
 			TableSlug: table.TableSlug,
@@ -1676,7 +1678,13 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccessUser")
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
+	var (
+		before                 runtime.MemStats
+		arr_path               = strings.Split(req.Path, "/")
+		methodField            string
+		exist, checkPermission bool
+		authTables             []*pb.TableBody
+	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -1688,8 +1696,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			s.log.Info("Memory used over 300 mb", logger.Any("V2HasAccessUser", memoryUsed))
 		}
 	}()
-
-	arr_path := strings.Split(req.Path, "/")
 
 	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
@@ -1715,7 +1721,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	var methodField string
 	switch req.Method {
 	case "GET":
 		methodField = "read"
@@ -1739,7 +1744,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
 		return nil, err
 	}
-	exist := false
 	for _, item := range projects.GetUserProjects() {
 		if item.ProjectId == session.GetProjectId() {
 			exist = true
@@ -1768,8 +1772,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 	}
 
-	var checkPermission bool
-	// guess role check
 	for _, path := range arr_path {
 		if path == "object" || path == "object-slim" {
 			checkPermission = true
@@ -1828,7 +1830,6 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 	}
 
-	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
 		authTable := &pb.TableBody{
 			TableSlug: table.TableSlug,
@@ -1855,10 +1856,18 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 }
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
+	var (
+		before runtime.MemStats
+		user   = &pb.User{}
+		err    error
+		resp   = pb.V2MultiCompanyOneLoginRes{
+			Companies: []*pb.Company2{},
+		}
+	)
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyOneLogin")
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -1870,13 +1879,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			s.log.Info("Memory used over 300 mb", logger.Any("V2MultiCompanyOneLogin", memoryUsed))
 		}
 	}()
-
-	resp := pb.V2MultiCompanyOneLoginRes{
-		Companies: []*pb.Company2{},
-	}
-
-	user := &pb.User{}
-	var err error
 
 	switch req.Type {
 	case config.Default:
@@ -1924,7 +1926,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				}
 			}()
 		} else if config.HashTypes[hashType] == 2 {
-			fmt.Println("BCRYPTED")
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
 			if err != nil {
 				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
@@ -2190,7 +2191,13 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenForEnv")
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
+	var (
+		res        = &pb.V2LoginResponse{}
+		before     runtime.MemStats
+		data       *pbObject.LoginDataRes
+		roleId     string
+		authTables = []*pb.TableBody{}
+	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -2267,8 +2274,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
 	}
 
-	var data *pbObject.LoginDataRes
-
 	switch resource.ResourceType {
 	case 1:
 		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(
@@ -2282,11 +2287,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
-		data, err = services.PostgresLoginService().LoginData(
-			ctx,
-			reqLoginData,
-		)
-
+		data, err = services.PostgresLoginService().LoginData(ctx, reqLoginData)
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
@@ -2314,9 +2315,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		UserData:         data.GetUserData(),
 	})
 
-	roleId := ""
 	if userRole, ok := userResp.UserData.Fields["role_id"].GetKind().(*structpb.Value_StringValue); ok {
-
 		roleId = userRole.StringValue
 	}
 
@@ -2338,7 +2337,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	authTables := []*pb.TableBody{}
 	if tokenInfo.Tables != nil {
 		for _, table := range tokenInfo.Tables {
 			authTable := &pb.TableBody{
@@ -2384,7 +2382,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
 
-	res := &pb.V2LoginResponse{}
 	res.Token = token
 
 	return res, nil
