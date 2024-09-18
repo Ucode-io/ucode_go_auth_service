@@ -230,43 +230,6 @@ func (s *userService) UpsertUserInfo(ctx context.Context, req *pb.UpsertUserInfo
 	return s.strg.UserInfo().GetByPK(ctx, pKey)
 }
 
-func (s *userService) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest) (*pb.User, error) {
-	s.log.Info("---ResetPassword--->", logger.Any("req", req))
-
-	if len(req.Password) < 6 {
-		err := fmt.Errorf("password must not be less than 6 characters")
-		s.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, err
-	}
-
-	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
-	if err != nil {
-		s.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	tokenInfo, err := security.ParseClaims(req.Token, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	req.Password = hashedPassword
-	req.UserId = tokenInfo.ID
-
-	rowsAffected, err := s.strg.User().ResetPassword(ctx, req)
-	if err != nil {
-		s.log.Error("!!!ResetPassword--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
-
-	return s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: req.UserId})
-}
-
 func (s *userService) SendMessageToEmail(ctx context.Context, req *pb.SendMessageToEmailRequest) (*emptypb.Empty, error) {
 	user, err := s.strg.User().GetByUsername(context.Background(), req.GetEmail())
 	if err != nil {
