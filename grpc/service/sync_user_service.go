@@ -434,9 +434,6 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 					return nil, err
 				}
 			}
-			if user.GetId() != "" {
-				break
-			}
 		}
 
 		userId := user.GetId()
@@ -544,19 +541,16 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 		}
 		user_ids = append(user_ids, userId)
 	}
+
 	response.UserIds = user_ids
 
 	return &response, nil
 }
 
 func IsValidEmailNew(email string) bool {
-	// Define the regular expression pattern for a valid email address
-	// This is a basic pattern and may not cover all edge cases
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
-	// Compile the regular expression
 	re := regexp.MustCompile(emailRegex)
 
-	// Use the MatchString method to check if the email matches the pattern
 	return re.MatchString(email)
 }
