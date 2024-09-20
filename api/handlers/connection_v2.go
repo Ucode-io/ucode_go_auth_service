@@ -99,10 +99,11 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.Created, resp)
 	case 3:
-		resp, err = services.PostgresObjectBuilderService().Create(
+		resp, err := services.GoItemService().Create(
 			c.Request.Context(),
-			&obs.CommonMessage{
+			&nobs.CommonMessage{
 				TableSlug: "connections",
 				ProjectId: connection.ProjectId,
 				Data:      structData,
@@ -113,9 +114,9 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.Created, resp)
 	}
 
-	h.handleResponse(c, http.Created, resp)
 }
 
 // V2UpdateConnection godoc
@@ -326,25 +327,50 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	response, ok := resp.Data.AsMap()["response"].([]interface{})
 	responseWithOptions := make([]interface{}, 0, len(response))
 	if ok && c.Query("user-id") != "" {
-		for _, v := range response {
-			if res, ok := v.(map[string]interface{}); ok {
-				if guid, ok := res["guid"].(string); ok {
-					options, err := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(
-						c.Request.Context(),
-						&obs.GetConnetionOptionsRequest{
-							ConnectionId:          guid,
-							ResourceEnvironmentId: resource.ResourceEnvironmentId,
-							UserId:                c.Query("user-id"),
-						},
-					)
-					if err != nil {
-						continue
+		switch resource.ResourceType {
+		case pbCompany.ResourceType_MONGODB:
+			for _, v := range response {
+				if res, ok := v.(map[string]interface{}); ok {
+					if guid, ok := res["guid"].(string); ok {
+						options, err := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(
+							c.Request.Context(),
+							&obs.GetConnetionOptionsRequest{
+								ConnectionId:          guid,
+								ResourceEnvironmentId: resource.ResourceEnvironmentId,
+								UserId:                c.Query("user-id"),
+							},
+						)
+						if err != nil {
+							continue
+						}
+						res["options"] = options.Data.AsMap()["response"]
 					}
-					res["options"] = options.Data.AsMap()["response"]
+					v = res
 				}
-				v = res
+				responseWithOptions = append(responseWithOptions, v)
 			}
-			responseWithOptions = append(responseWithOptions, v)
+		case pbCompany.ResourceType_POSTGRESQL:
+			for _, v := range response {
+				if res, ok := v.(map[string]interface{}); ok {
+					if guid, ok := res["guid"].(string); ok {
+						options, err := services.GoLoginService().GetConnetionOptions(
+							c.Request.Context(),
+							&nobs.GetConnetionOptionsRequest{
+								ConnectionId:          guid,
+								ResourceEnvironmentId: resource.ResourceEnvironmentId,
+								UserId:                c.Query("user-id"),
+								ProjectId:             resource.ProjectId,
+							},
+						)
+						if err != nil {
+							continue
+						}
+						res["options"] = options.Data.AsMap()["response"]
+					}
+					v = res
+				}
+				responseWithOptions = append(responseWithOptions, v)
+			}
 		}
 	}
 	if len(responseWithOptions) <= 0 {
@@ -555,10 +581,11 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.NoContent, resp)
 	case 3:
-		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Delete(
+		resp, err := services.GoItemService().Delete(
 			c.Request.Context(),
-			&obs.CommonMessage{
+			&nobs.CommonMessage{
 				TableSlug: "connections",
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,
@@ -569,9 +596,9 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
+		h.handleResponse(c, http.NoContent, resp)
 	}
 
-	h.handleResponse(c, http.NoContent, resp)
 }
 
 // GetConnectionOptions godoc
