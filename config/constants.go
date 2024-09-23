@@ -110,7 +110,7 @@ var (
 	Path = map[string]bool{
 		"object":      true,
 		"object-slim": true,
-		"items":       true,
+		// "items":       true,
 	}
 )
 
