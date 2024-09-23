@@ -106,6 +106,12 @@ var (
 		"argon":  1,
 		"bcrypt": 2,
 	}
+
+	Path = map[string]bool{
+		"object":      true,
+		"object-slim": true,
+		"items":       true,
+	}
 )
 
 var (

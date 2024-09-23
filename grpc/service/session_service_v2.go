@@ -1773,9 +1773,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	for _, path := range arr_path {
-		if path == "object" || path == "object-slim" {
-			checkPermission = true
-			break
+		if exist := config.Path[path]; exist {
+			checkPermission = exist
 		}
 	}
 	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" && checkPermission {
