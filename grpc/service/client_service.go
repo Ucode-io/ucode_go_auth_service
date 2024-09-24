@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
-
+ 
 type clientService struct {
 	cfg         config.BaseConfig
 	log         logger.LoggerI

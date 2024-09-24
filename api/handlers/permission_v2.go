@@ -11,11 +11,10 @@ import (
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
+	"github.com/gin-gonic/gin"
 	"github.com/saidamir98/udevs_pkg/util"
 	"github.com/spf13/cast"
 	"google.golang.org/protobuf/types/known/emptypb"
-
-	"github.com/gin-gonic/gin"
 )
 
 // GetGlobalPermissionByRoleId godoc
@@ -645,7 +644,6 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	var (
 		permission object_builder_service.UpdateRoleAppTablePermissionsRequest
 		resp       *emptypb.Empty
-		// resourceEnvironment *obs.ResourceEnvironment
 	)
 
 	err := c.ShouldBindJSON(&permission)

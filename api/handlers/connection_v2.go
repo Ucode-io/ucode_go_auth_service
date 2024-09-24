@@ -270,15 +270,6 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"limit":                     limit,
-		"offset":                    offset,
-		"client_type_id_from_token": c.DefaultQuery("client_type_id", ""),
-	})
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
 	// this is get list connection list from object builder
 	services, err := h.GetProjectSrvc(
 		c,
@@ -293,6 +284,16 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	resp := &obs.CommonMessage{}
 	switch resource.ResourceType {
 	case 1:
+		structData, err := helper.ConvertMapToStruct(map[string]interface{}{
+			"limit":          limit,
+			"offset":         offset,
+			"client_type_id": c.DefaultQuery("client_type_id", ""),
+		})
+		if err != nil {
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		}
+
 		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).GetList(
 			c.Request.Context(),
 			&obs.CommonMessage{
@@ -307,6 +308,15 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			return
 		}
 	case 3:
+		structData, err := helper.ConvertMapToStruct(map[string]interface{}{
+			"limit":                     limit,
+			"offset":                    offset,
+			"client_type_id_from_token": c.DefaultQuery("client_type_id", ""),
+		})
+		if err != nil {
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		}
 		result2, err := services.GoObjectBuilderService().GetList(
 			c.Request.Context(),
 			&nobs.CommonMessage{
