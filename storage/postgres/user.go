@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
 	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -55,7 +56,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return pKey, err
+		return pKey, errors.Wrap(err, "failed to generate uuid")
 	}
 
 	_, err = r.db.Exec(ctx, query,
@@ -66,12 +67,15 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.GetPassword(),
 		entity.GetCompanyId(),
 	)
+	if err != nil {
+		return pKey, errors.Wrap(err, "failed to create user")
+	}
 
 	pKey = &pb.UserPrimaryKey{
 		Id: id.String(),
 	}
 
-	return pKey, err
+	return pKey, nil
 }
 
 func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *pb.User, err error) {
@@ -380,13 +384,13 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	}
 
 	if err != nil {
-		return res, err
+		return res, errors.Wrap(err, "failed to get user by username")
 	}
 
 	return res, nil
 }
 
-func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest) (rowsAffected int64, err error) {
+func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest, tx pgx.Tx) (rowsAffected int64, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.resetpassword")
 	defer dbSpan.Finish()
 
@@ -398,17 +402,17 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 		updated_at = now(),
 		hash_type = 'bcrypt'`
 
-	if len(user.Login) > 0 {
+	if len(user.GetLogin()) > 0 {
 		query += `, login = :login`
 		params["login"] = user.Login
 	}
 
-	if len(user.Email) > 0 {
+	if len(user.GetEmail()) > 0 {
 		query += `, email = :email`
 		params["email"] = user.Email
 	}
 
-	if len(user.Phone) > 0 {
+	if len(user.GetPhone()) > 0 {
 		query += `, phone = :phone`
 		params["phone"] = user.Phone
 	}
@@ -421,14 +425,22 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	query += ` WHERE id = :id`
 
 	q, arr := helper.ReplaceQueryParams(query, params)
-	result, err := r.db.Exec(ctx, q, arr...)
-	if err != nil {
-		return 0, err
+	if tx == nil {
+		result, err := r.db.Exec(ctx, q, arr...)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to update user")
+		}
+
+		rowsAffected = result.RowsAffected()
+	} else {
+		result, err := tx.Exec(ctx, q, arr...)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to update user with tx")
+		}
+		rowsAffected = result.RowsAffected()
 	}
 
-	rowsAffected = result.RowsAffected()
-
-	return rowsAffected, err
+	return rowsAffected, nil
 }
 
 func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
@@ -497,15 +509,14 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.AddUserToProject")
 	defer dbSpan.Finish()
 
-	res := pb.AddUserToProjectRes{}
-
 	var (
+		res                         = pb.AddUserToProjectRes{}
 		clientTypeId, roleId, envId pgtype.UUID
 	)
 	if req.GetClientTypeId() != "" {
 		err := clientTypeId.Set(req.GetClientTypeId())
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to set client type id")
 		}
 	} else {
 		clientTypeId.Status = pgtype.Null
@@ -513,7 +524,7 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	if req.GetRoleId() != "" {
 		err := roleId.Set(req.GetRoleId())
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to set role id")
 		}
 	} else {
 		roleId.Status = pgtype.Null
@@ -521,7 +532,7 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 	if req.GetEnvId() != "" {
 		err := envId.Set(req.GetEnvId())
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to set env id")
 		}
 	} else {
 		envId.Status = pgtype.Null
@@ -549,7 +560,7 @@ func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjec
 		&envId,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to insert user to project")
 	}
 	if roleId.Status != pgtype.Null {
 		req.RoleId = fmt.Sprintf("%v", roleId.Status)
@@ -961,6 +972,7 @@ func (c *userRepo) GetUserProjectByAllFields(ctx context.Context, req models.Get
 	if count > 0 {
 		isExists = true
 	}
+
 	return isExists, nil
 }
 
@@ -980,12 +992,9 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	params["client_type_id"] = req.ClientTypeId
 
 	q, args := helper.ReplaceQueryParams(query, params)
-	_, err := r.db.Exec(ctx,
-		q,
-		args...,
-	)
+	_, err := r.db.Exec(ctx, q, args...)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to delete user from project")
 	}
 
 	return &empty.Empty{}, nil
@@ -998,14 +1007,7 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 	if err != nil {
 		return nil, err
 	}
-
-	defer func() {
-		if err != nil {
-			err = tx.Rollback(ctx)
-		} else {
-			err = tx.Commit(ctx)
-		}
-	}()
+	defer tx.Rollback(ctx)
 
 	query := `DELETE FROM "user_project" 
 				WHERE 
@@ -1036,13 +1038,14 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 		}
 
 		q, args := helper.ReplaceQueryParams(query, params)
-		_, err = r.db.Exec(ctx,
-			q,
-			args...,
-		)
+		_, err = tx.Exec(ctx, q, args...)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to delete user from project")
 		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errors.Wrap(err, "failed to commit transaction")
 	}
 
 	return &empty.Empty{}, nil
@@ -1177,7 +1180,7 @@ func (r *userRepo) UpdatePassword(ctx context.Context, userId, password string) 
 	q, arr := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx, q, arr...)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to update user password")
 	}
 
 	return nil

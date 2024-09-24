@@ -11,7 +11,6 @@ const (
 	DatabaseQueryTimeLayout = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
 	// DatabaseTimeLayout
 	DatabaseTimeLayout string = time.RFC3339
-	// AccessTokenExpiresInTime ... 1 * 24 *
 	// AccessTokenExpiresInTime time.Duration = 1 * time.Minute
 	AccessTokenExpiresInTime time.Duration = 1 * 60 * 24 * time.Minute
 	// RefreshTokenExpiresInTime ... 30 * 24 * 60
@@ -106,6 +105,12 @@ var (
 	HashTypes = map[string]int{
 		"argon":  1,
 		"bcrypt": 2,
+	}
+
+	Path = map[string]bool{
+		"object":      true,
+		"object-slim": true,
+		// "items":       true,
 	}
 )
 

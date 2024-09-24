@@ -449,7 +449,7 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		return
 	}
 	if ok := util.IsValidUUID(clientType); !ok {
-		h.handleResponse(c, http.InvalidArgument, "lient_type_id is an invalid uuid")
+		h.handleResponse(c, http.InvalidArgument, "client_type_id is an invalid uuid")
 		return
 	}
 	projectId, ok := c.Get("project_id")

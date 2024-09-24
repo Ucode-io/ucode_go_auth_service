@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"runtime"
+
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -41,14 +42,17 @@ func NewSyncUserService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 }
 
 func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUserRequest) (*pb.SyncUserResponse, error) {
+	sus.log.Info("---CreateSyncUser--->", logger.Any("req", req))
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.CreateUser")
 	defer dbSpan.Finish()
 	var (
 		response = pb.SyncUserResponse{}
+		before   runtime.MemStats
 		user     *pb.User
 		err      error
 		username string
-		before   runtime.MemStats
+		skip     bool
 	)
 
 	runtime.ReadMemStats(&before)
@@ -66,6 +70,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	for _, loginStrategy := range req.GetLoginStrategy() {
 		if loginStrategy == "login" {
 			username = req.GetLogin()
+			skip = true
 		} else if loginStrategy == "email" {
 			username = req.GetEmail()
 		} else if loginStrategy == "phone" {
@@ -77,9 +82,13 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 				sus.log.Error("!!!CreateUser-->UserGetByUsername", logger.Error(err))
 				return nil, err
 			}
-		}
-		if user.GetId() != "" {
-			break
+
+			if skip {
+				if len(user.GetId()) > 0 {
+					sus.log.Error("!!!CreateSyncUser-->LoginCheck", logger.Error(err))
+					return nil, status.Error(codes.InvalidArgument, "user with this login already exists")
+				}
+			}
 		}
 	}
 
@@ -208,30 +217,23 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		}
 	}()
 
-	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
-		ProjectId: req.GetProjectId(),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = sus.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
+	_, err := sus.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
 		UserId:        req.GetUserId(),
-		CompanyId:     project.GetCompanyId(),
 		RoleId:        req.GetRoleId(),
 		ProjectId:     req.GetProjectId(),
 		ClientTypeId:  req.GetClientTypeId(),
 		EnvironmentId: req.GetEnvironmentId(),
 	})
 	if err != nil {
+		sus.log.Info("!!!DeleteSyncUser-->DeleteUserFromProject", logger.Error(err))
 		return nil, err
 	}
 
-	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
-		_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
-			Id: req.GetUserId(),
-		})
-	}
+	// if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+	// 	_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+	// 		Id: req.GetUserId(),
+	// 	})
+	// }
 
 	return &empty.Empty{}, nil
 }
@@ -239,14 +241,17 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUserRequest) (*pb.SyncUserResponse, error) {
 	sus.log.Info("---UpdateSyncUser--->", logger.Any("req", req))
 
+	var (
+		before                        runtime.MemStats
+		hashedPassword                string
+		err                           error
+		syncUser                      = &pb.SyncUserResponse{}
+		hasPassword, hasLoginStrategy bool
+	)
+
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_sync_user.UpdateUser")
 	defer dbSpan.Finish()
 
-	var (
-		before         runtime.MemStats
-		hashedPassword string
-		err            error
-	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -259,53 +264,89 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		}
 	}()
 
-	if req.Password != "" {
+	project, err := sus.services.ProjectServiceClient().GetById(ctx,
+		&pbCompany.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+	if err != nil {
+		sus.log.Error("!!!UpdateSyncUser-->ProjectGetById", logger.Error(err))
+		return nil, err
+	}
+
+	req.CompanyId = project.GetCompanyId()
+
+	if len(req.Password) > 0 {
 		if len(req.Password) < 6 {
 			err = fmt.Errorf("password must not be less than 6 characters")
-			sus.log.Error("!!!UpdateUser--->CheckPassword", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->CheckPassword", logger.Error(err))
 			return nil, err
 		}
 
 		hashedPassword, err = security.HashPasswordBcrypt(req.Password)
 		if err != nil {
-			sus.log.Error("!!!ResetPassword--->HashPassword", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->HashPassword", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		hasPassword = true
+		req.Password = hashedPassword
 	}
 
-	if req.Login != "" {
+	if len(req.GetLogin()) > 0 {
 		if len(req.Login) < 6 {
 			err = fmt.Errorf("login must not be less than 6 characters")
-			sus.log.Error("!!!UpdateUser--->CheckLogin", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->CheckLogin", logger.Error(err))
 			return nil, err
 		}
+
+		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "login")
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserLogin", logger.Error(err))
+			return nil, err
+		}
+
+		hasLoginStrategy = true
 	}
 
-	if req.Email != "" {
+	if len(req.GetEmail()) > 0 {
 		if !IsValidEmailNew(req.Email) {
 			err = fmt.Errorf("email is not valid")
-			sus.log.Error("!!!UpdateUser--->CheckValidEmail", logger.Error(err))
+			sus.log.Error("!!!UpdateSyncUser--->CheckValidEmail", logger.Error(err))
+			return nil, err
+		}
+
+		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "email")
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserEmail", logger.Error(err))
+			return nil, err
+		}
+
+		hasLoginStrategy = true
+	}
+
+	if len(req.GetPhone()) > 0 {
+		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "phone")
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPhone", logger.Error(err))
+			return nil, err
+		}
+
+		hasLoginStrategy = true
+	}
+
+	if hasPassword && !hasLoginStrategy {
+		_, err = sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
+			UserId:   req.GetGuid(),
+			Password: hashedPassword}, nil)
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPassword", logger.Error(err))
 			return nil, err
 		}
 	}
 
-	rowsAffected, err := sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
-		UserId:   req.GetGuid(),
-		Login:    req.Login,
-		Email:    req.Email,
-		Phone:    req.Phone,
-		Password: hashedPassword,
-	})
-	if err != nil {
-		sus.log.Error("!!!UpdateUser--->ResetPassword", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if !hasLoginStrategy && !hasPassword {
+		syncUser.UserId = req.GetGuid()
 	}
 
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
-
-	return &pb.SyncUserResponse{}, nil
+	return syncUser, nil
 }
 
 func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {
@@ -329,22 +370,24 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
+		sus.log.Error("!!!DeleteManyUser--->GetProjectById", logger.Error(err))
 		return nil, err
 	}
 	req.CompanyId = project.CompanyId
 
 	_, err = sus.strg.User().DeleteUsersFromProject(ctx, req)
 	if err != nil {
+		sus.log.Error("!!!DeleteManyUser--->DeleteUsersFromProject", logger.Error(err))
 		return nil, err
 	}
 
-	if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
-		for _, v := range req.Users {
-			_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
-				Id: v.GetUserId(),
-			})
-		}
-	}
+	// if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
+	// 	for _, v := range req.Users {
+	// 		_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
+	// 			Id: v.GetUserId(),
+	// 		})
+	// 	}
+	// }
 
 	return &empty.Empty{}, nil
 }
@@ -372,8 +415,10 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 		err      error
 	)
 	for _, req := range in.Users {
-		var user *pb.User
-		var username string
+		var (
+			user     *pb.User
+			username string
+		)
 		for _, loginStrategy := range req.GetLoginStrategy() {
 			if loginStrategy == "login" {
 				username = req.GetLogin()
@@ -385,11 +430,9 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			if username != "" {
 				user, err = sus.strg.User().GetByUsername(context.Background(), username)
 				if err != nil {
+					sus.log.Error("!!!CreateSyncUsers--->GetUserByUsername", logger.Error(err))
 					return nil, err
 				}
-			}
-			if user.GetId() != "" {
-				break
 			}
 		}
 
@@ -398,6 +441,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			ProjectId: req.GetProjectId(),
 		})
 		if err != nil {
+			sus.log.Error("!!!CreateSyncUsers--->GetProjectById", logger.Error(err))
 			return nil, err
 		}
 
@@ -405,7 +449,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			if req.GetPassword() != "" {
 				hashedPassword, err := security.HashPasswordBcrypt(req.GetPassword())
 				if err != nil {
-					sus.log.Error("!!!CreateUsers--->", logger.Error(err))
+					sus.log.Error("!!!CreateSyncUsers--->HashPasswordBcrypt", logger.Error(err))
 					return nil, status.Error(codes.InvalidArgument, err.Error())
 				}
 				req.Password = hashedPassword
@@ -419,7 +463,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				CompanyId: project.GetCompanyId(),
 			})
 			if err != nil {
-				sus.log.Error("!!!CreateUsers--->", logger.Error(err))
+				sus.log.Error("!!!CreateSyncUsers--->CreateUser", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			userId = user.GetId()
@@ -432,6 +476,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
+				sus.log.Error("!!!CreateSyncUsers-->AddUserToProject", logger.Error(err))
 				return nil, err
 			}
 		} else {
@@ -444,6 +489,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				EnvId:        req.GetEnvironmentId(),
 			})
 			if err != nil {
+				sus.log.Error("!!!CreateSyncUsers-->GetUserProjectByAllFields", logger.Error(err))
 				return nil, err
 			}
 			if !exists {
@@ -456,6 +502,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 					EnvId:        req.GetEnvironmentId(),
 				})
 				if err != nil {
+					sus.log.Error("!!!CreateSyncUsers-->AddUserToProjectExists", logger.Error(err))
 					return nil, err
 				}
 			}
@@ -468,8 +515,8 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			if err != nil {
 				return nil, err
 			}
-			var devEmail string
-			var devEmailPassword string
+			var devEmail, devEmailPassword string
+
 			if len(emailSettings.GetItems()) > 0 {
 				devEmail = emailSettings.GetItems()[0].GetEmail()
 				devEmailPassword = emailSettings.GetItems()[0].GetPassword()
@@ -494,19 +541,16 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 		}
 		user_ids = append(user_ids, userId)
 	}
+
 	response.UserIds = user_ids
 
 	return &response, nil
 }
 
 func IsValidEmailNew(email string) bool {
-	// Define the regular expression pattern for a valid email address
-	// This is a basic pattern and may not cover all edge cases
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
-	// Compile the regular expression
 	re := regexp.MustCompile(emailRegex)
 
-	// Use the MatchString method to check if the email matches the pattern
 	return re.MatchString(email)
 }
