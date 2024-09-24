@@ -374,13 +374,13 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.HashType,
 		)
 		if err == pgx.ErrNoRows {
-			return res, nil
+			return res, errors.New("user verified but not found")
 		}
 		return res, nil
 	}
 
 	if err == pgx.ErrNoRows {
-		return res, nil
+		return res, errors.New("user verified but not found")
 	}
 
 	if err != nil {
