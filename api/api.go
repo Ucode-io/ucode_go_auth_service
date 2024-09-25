@@ -113,7 +113,13 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	v2 := r.Group("/v2")
 	v2.POST("/login/superadmin", h.V2LoginSuperAdmin) // @TODO
 	v2.PUT("/refresh", h.V2RefreshToken)
-	v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
+
+	v2.Use(h.LoginMiddleware())
+	{
+		v2.GET("/connection", h.V2GetConnectionList)
+		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
+		v2.POST("/login", h.V2Login)
+	}
 
 	v2.Use(h.AuthMiddleware())
 	{
@@ -141,7 +147,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		//connection
 		v2.POST("/connection", h.V2CreateConnection)
-		v2.GET("/connection", h.V2GetConnectionList)
 		v2.GET("/connection/:connection_id", h.V2GetConnectionByID)
 		v2.PUT("/connection", h.V2UpdateConnection)
 		v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
@@ -172,7 +177,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.PUT("/user", h.V2UpdateUser)
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
 		v2.PUT("/user/reset-password", h.V2UserResetPassword)
-		v2.POST("/login", h.V2Login) // @TODO
 
 		// api keys
 		v2.POST("/api-key/:project-id", h.CreateApiKey)
