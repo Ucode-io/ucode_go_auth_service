@@ -12,6 +12,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
@@ -122,8 +123,11 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		userId = pKey.GetId()
 	}
 
-	body["guid"] = userId
+	objectBuilderUserId := uuid.NewString()
+
+	body["guid"] = objectBuilderUserId
 	body["from_auth_service"] = true
+	body["user_id_auth"] = userId
 	structData, err := helper.ConvertMapToStruct(body)
 	if err != nil {
 		rs.log.Error("!!!CreateUser--->ConvertMapToStruct", logger.Error(err))
@@ -297,7 +301,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	res.GlobalPermission = nil
 	res.UserData = nil
 	res.UserFound = true
-	res.UserId = userId
+	res.UserId = objectBuilderUserId
 
 	return res, nil
 }
