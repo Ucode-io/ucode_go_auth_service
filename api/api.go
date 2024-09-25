@@ -113,6 +113,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	v2 := r.Group("/v2")
 	v2.POST("/login/superadmin", h.V2LoginSuperAdmin) // @TODO
 	v2.PUT("/refresh", h.V2RefreshToken)
+	v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
 
 	v2.Use(h.AuthMiddleware())
 	{
@@ -135,7 +136,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
-		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
 		v2.POST("/user/invite", h.AddUserToProject)
 		v2.POST("/user/check", h.V2GetUserByLoginType)
 
