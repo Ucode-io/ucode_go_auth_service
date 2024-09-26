@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	nethttp "net/http"
 	"strings"
 	"ucode/ucode_go_auth_service/api/http"
@@ -14,6 +15,21 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+func (h *Handler) LoginMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		resourceId := c.GetHeader("Resource-Id")
+		environmentId := c.GetHeader("Environment-Id")
+		projectId := c.DefaultQuery("project-id", "")
+
+		c.Set("resource_id", resourceId)
+		c.Set("environment_id", environmentId)
+		c.Set("project_id", projectId)
+		fmt.Println("Project id->", projectId)
+		//c.Set("namespace", h.cfg.UcodeNamespace)
+		c.Next()
+	}
+}
 
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
