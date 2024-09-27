@@ -1389,13 +1389,13 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 
 	// TODO - Delete all old sessions & refresh token has this function too
-	_, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.GetLoginData().GetUserId())
+	_, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.GetLoginData().GetUserIdAuth())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.GetLoginData().GetUserId())
+	userSessionList, err := s.strg.Session().GetSessionListByUserID(ctx, input.GetLoginData().GetUserIdAuth())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -1412,7 +1412,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		ProjectId:        input.GetProjectId(),
 		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
 		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
-		UserId:           input.GetLoginData().GetUserId(),
+		UserId:           input.GetLoginData().GetUserIdAuth(),
 		RoleId:           input.GetLoginData().GetRole().GetId(),
 		Ip:               "0.0.0.0",
 		Data:             "additional json data",
