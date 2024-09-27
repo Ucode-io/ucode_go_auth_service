@@ -124,6 +124,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 
 	objectBuilderUserId := uuid.NewString()
+	rs.log.Info("!!!CreateUser--->", logger.Any("objectBuilderUserId", objectBuilderUserId))
 
 	body["guid"] = objectBuilderUserId
 	body["from_auth_service"] = true
