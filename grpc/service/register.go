@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -172,7 +173,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 
-		_, err = services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
+		getResp, err := services.GetObjectBuilderServiceByType(data.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: data.ResourceEnvironmentId,
@@ -181,6 +182,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!CreateUser--->NodeType Create", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		objectBuilderUserId = cast.ToString(cast.ToStringMap(getResp.Data.AsMap()["data"])["guid"])
 	case 3:
 		response, err := services.GoItemService().GetSingle(ctx, &new_object_builder_service.CommonMessage{
 			TableSlug: "client_type",
