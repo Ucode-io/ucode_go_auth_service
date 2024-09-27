@@ -64,6 +64,7 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 
 	res := &pb.V2LoginResponse{
 		UserId:         data.GetUserId(),
+		UserIdAuth:     data.GetUserIdAuth(),
 		LoginTableSlug: data.GetLoginTableSlug(),
 		ClientType: &pb.ClientType{
 			Id:           data.GetClientType().GetGuid(),

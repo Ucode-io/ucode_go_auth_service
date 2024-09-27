@@ -232,6 +232,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		AppPermissions:   data.GetAppPermissions(),
 		GlobalPermission: data.GetGlobalPermission(),
 		UserData:         data.GetUserData(),
+		UserIdAuth:       data.GetUserIdAuth(),
 	})
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
@@ -823,6 +824,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			Permissions:    data.GetPermissions(),
 			LoginTableSlug: data.GetLoginTableSlug(),
 			UserData:       data.GetUserData(),
+			UserIdAuth:     data.GetUserIdAuth(),
 		})
 
 	}
@@ -847,49 +849,9 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// companies, err := s.services.CompanyServiceClient().GetList(ctx, &pbCompany.GetCompanyListRequest{
-	// 	Offset:  0,
-	// 	Limit:   128,
-	// 	OwnerId: req.Data["user_id"],
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// companiesResp := []*pb.Company{}
-
-	// if len(companies.Companies) < 1 {
-	// 	companiesById := make([]*pbCompany.Company, 0)
-	// 	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
-	// 		Id: resp.GetUserId(),
-	// 	})
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{
-	// 		Id: user.GetCompanyId(),
-	// 	})
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	companiesById = append(companiesById, company.Company)
-	// 	companies.Companies = companiesById
-	// 	companies.Count = int32(len(companiesById))
-	// }
-
-	// bytes, err := json.Marshal(companies.GetCompanies())
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// err = json.Unmarshal(bytes, &companiesResp)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	return &pb.V2LoginWithOptionsResponse{
 		UserFound:       true,
-		UserId:          req.Data["user_id"],
+		UserId:          resp.GetUserId(),
 		Token:           resp.GetToken(),
 		Sessions:        resp.GetSessions(),
 		ClientPlatform:  resp.GetClientPlatform(),
@@ -904,7 +866,6 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		EnvironmentId:   resp.GetEnvironmentId(),
 		User:            resp.GetUser(),
 		UserData:        res.GetUserData(),
-		// Companies:        companiesResp,
 	}, nil
 }
 
@@ -1474,7 +1435,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	userData, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 		ProjectId: input.GetProjectId(),
-		Id:        input.GetLoginData().GetUserId(),
+		Id:        input.GetLoginData().GetUserIdAuth(),
 	})
 	if err != nil {
 		s.log.Error("!!!Login->GetByPK--->", logger.Error(err))

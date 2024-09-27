@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	nethttp "net/http"
 	"strings"
+
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
@@ -25,8 +25,6 @@ func (h *Handler) LoginMiddleware() gin.HandlerFunc {
 		c.Set("resource_id", resourceId)
 		c.Set("environment_id", environmentId)
 		c.Set("project_id", projectId)
-		fmt.Println("Project id->", projectId)
-		//c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
 }
@@ -41,7 +39,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
 			c.Set("project_id", projectId)
-			//c.Set("namespace", h.cfg.UcodeNamespace)
 			c.Next()
 			return
 		}
