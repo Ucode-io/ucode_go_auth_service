@@ -1382,9 +1382,9 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		}
 	}()
 
-	if _, err := uuid.Parse(input.GetLoginData().GetUserId()); err != nil {
+	if _, err := uuid.Parse(input.GetLoginData().GetUserIdAuth()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
-		s.log.Error("---ERR->GetLoginData().GetUserId-->", logger.Error(err))
+		s.log.Error("---ERR->GetLoginData().GetUserIdAuth-->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

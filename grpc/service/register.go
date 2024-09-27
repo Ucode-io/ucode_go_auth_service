@@ -280,6 +280,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		Role:           userData.GetRole(),
 		Permissions:    userData.GetPermissions(),
 		LoginTableSlug: userData.GetLoginTableSlug(),
+		UserIdAuth:     userData.GetUserIdAuth(),
 	})
 
 	res, err = rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
