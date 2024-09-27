@@ -12,7 +12,6 @@ import (
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
-	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/spf13/cast"
@@ -66,10 +65,10 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}()
 
 	var (
-		foundUser *pb.User
-		err       error
-		userId    string
-		userData  *pbObject.LoginDataRes
+		foundUser                   *pb.User
+		err                         error
+		userId, objectBuilderUserId string
+		userData                    *pbObject.LoginDataRes
 
 		login    = helper.GetStringFromMap(body, "login")
 		email    = helper.GetStringFromMap(body, "email")
@@ -124,10 +123,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		userId = pKey.GetId()
 	}
 
-	objectBuilderUserId := uuid.NewString()
-	rs.log.Info("!!!CreateUser--->", logger.Any("objectBuilderUserId", objectBuilderUserId))
-
-	body["guid"] = objectBuilderUserId
 	body["from_auth_service"] = true
 	body["user_id_auth"] = userId
 	structData, err := helper.ConvertMapToStruct(body)
@@ -205,7 +200,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			}
 		}
 
-		_, err = services.GoItemService().Create(ctx, &new_object_builder_service.CommonMessage{
+		getResp, err := services.GoItemService().Create(ctx, &new_object_builder_service.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: data.ResourceEnvironmentId,
@@ -214,6 +209,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+		objectBuilderUserId = cast.ToString(cast.ToStringMap(getResp.Data.AsMap()["data"])["guid"])
 	}
 
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
@@ -303,6 +299,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	rs.log.Info("!!!CreateUser--->", logger.Any("objectBuilderUserId", objectBuilderUserId))
 	res.GlobalPermission = nil
 	res.UserData = nil
 	res.UserFound = true
