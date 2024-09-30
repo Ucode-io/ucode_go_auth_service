@@ -340,6 +340,8 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPassword", logger.Error(err))
 			return nil, err
 		}
+
+		syncUser.UserId = req.GetGuid()
 	}
 
 	if !hasLoginStrategy && !hasPassword {

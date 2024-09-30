@@ -7,4 +7,6 @@ var (
 	ErrNilService     = errors.New("ServiceManagerI cannot be nil")
 	ErrNodeExists     = errors.New("namespace already exists with this name")
 	ErrNodeNotExists  = errors.New("namespace does not exist with this name")
+	ErrPasswordLength = errors.New("password must not be less than 6 characters")
+	ErrFailedUpdate   = errors.New("password updated in auth but failed to update in object builder")
 )
