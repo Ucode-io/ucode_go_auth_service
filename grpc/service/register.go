@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
+
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -209,7 +210,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		objectBuilderUserId = cast.ToString(cast.ToStringMap(getResp.Data.AsMap()["data"])["guid"])
+
+		objectBuilderUserId = cast.ToString(getResp.Data.AsMap()["guid"])
 	}
 
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
