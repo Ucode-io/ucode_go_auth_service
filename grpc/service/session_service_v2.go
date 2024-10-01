@@ -1783,7 +1783,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 			if !resp.IsHavePermission {
 				err := status.Error(codes.PermissionDenied, "Permission denied")
-				return nil, err //fmt.Errorf("Permission denied")
+				return nil, err
 			}
 		case pbCompany.ResourceType_POSTGRESQL:
 

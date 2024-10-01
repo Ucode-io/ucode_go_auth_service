@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"regexp"
 	"runtime"
 	"ucode/ucode_go_auth_service/config"
@@ -45,7 +44,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
 	if !email {
-		err = fmt.Errorf("email is not valid")
+		err = config.ErrInvalidEmail
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, err
 	}
@@ -261,7 +260,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
 	if !email {
-		err = fmt.Errorf("email is not valid")
+		err = config.ErrInvalidEmail
 		s.log.Error("!!!CreateUser--->EmailRegex", logger.Error(err))
 		return nil, err
 	}
@@ -504,7 +503,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
 	if !email && req.Email != "" {
-		err = fmt.Errorf("email is not valid")
+		err = config.ErrInvalidEmail
 		s.log.Error("!!!V2CreateUser--->EmailRegex", logger.Error(err))
 		return nil, err
 	}

@@ -308,7 +308,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 
 	if len(req.GetEmail()) > 0 {
 		if !IsValidEmailNew(req.Email) {
-			err = fmt.Errorf("email is not valid")
+			err = config.ErrInvalidEmail
 			sus.log.Error("!!!UpdateSyncUser--->CheckValidEmail", logger.Error(err))
 			return nil, err
 		}
