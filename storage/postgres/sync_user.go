@@ -7,6 +7,7 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 )
@@ -59,12 +60,12 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 
 	err = tx.QueryRow(ctx, query, loginValue).Scan(&userId)
 	if err == pgx.ErrNoRows {
-		_, err = r.ResetPassword(ctx, resetPasswordReq, tx)
+		pKey, err := r.UpdateLoginStrategy(ctx, req, resetPasswordReq, tx)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to reset password")
 		}
 
-		resp.UserId = req.GetGuid()
+		resp.UserId = pKey
 	} else if err == nil {
 		if loginType == "login" {
 			return nil, errors.New("login already exists")
@@ -104,4 +105,175 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 	}
 
 	return resp, nil
+}
+
+func (r *userRepo) UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error) {
+	var (
+		count  int
+		userId string
+	)
+
+	query := `
+		SELECT
+			COUNT(*)
+		FROM
+			"user_project"
+		WHERE
+			user_id = $1`
+
+	err := tx.QueryRow(ctx, query, req.GetGuid()).Scan(&count)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get user_project count")
+	}
+
+	switch {
+	case count == 0:
+		var (
+			clientTypeId, roleId, envId pgtype.UUID
+		)
+
+		pKey, err := r.CreateWithTx(ctx, &pb.CreateUserRequest{
+			Login:     req.GetLogin(),
+			Password:  req.GetPassword(),
+			Email:     req.GetEmail(),
+			Phone:     req.GetPhone(),
+			CompanyId: req.GetCompanyId(),
+		}, tx)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to create user")
+		}
+
+		userId = pKey.GetId()
+
+		if req.GetClientTypeId() != "" {
+			err := clientTypeId.Set(req.GetClientTypeId())
+			if err != nil {
+				return "", errors.Wrap(err, "failed to set client type id")
+			}
+		} else {
+			clientTypeId.Status = pgtype.Null
+		}
+		if req.GetRoleId() != "" {
+			err := roleId.Set(req.GetRoleId())
+			if err != nil {
+				return "", errors.Wrap(err, "failed to set role id")
+			}
+		} else {
+			roleId.Status = pgtype.Null
+		}
+		if req.GetEnvId() != "" {
+			err := envId.Set(req.GetEnvId())
+			if err != nil {
+				return "", errors.Wrap(err, "failed to set env id")
+			}
+		} else {
+			envId.Status = pgtype.Null
+		}
+
+		query = `INSERT INTO
+				user_project(user_id, company_id, project_id, client_type_id, role_id, env_id)
+				VALUES ($1, $2, $3, $4, $5, $6)`
+
+		_, err = tx.Exec(ctx,
+			query,
+			userId,
+			req.GetCompanyId(),
+			req.GetProjectId(),
+			clientTypeId,
+			roleId,
+			envId,
+		)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to insert user to project")
+		}
+	case count == 1:
+		_, err = r.ResetPassword(ctx, user, tx)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to reset password")
+		}
+		userId = req.GetGuid()
+	case count > 1:
+		pKey, err := r.CreateWithTx(ctx, &pb.CreateUserRequest{
+			Login:     req.GetLogin(),
+			Password:  req.GetPassword(),
+			Email:     req.GetEmail(),
+			Phone:     req.GetPhone(),
+			CompanyId: req.GetCompanyId(),
+		}, tx)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to create user")
+		}
+
+		userId = pKey.GetId()
+
+		query = `
+				UPDATE 
+					user_project
+				SET user_id = $1
+				WHERE user_id = $2
+		  		AND project_id = $3
+		  		AND client_type_id = $4
+		  		AND role_id = $5
+		  		AND env_id = $6
+				AND company_id = $7`
+
+		_, err = tx.Exec(ctx,
+			query,
+			userId,
+			req.GetGuid(),
+			req.GetProjectId(),
+			req.GetClientTypeId(),
+			req.GetRoleId(),
+			req.GetEnvId(),
+			req.GetCompanyId(),
+		)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to update user_project")
+		}
+	}
+
+	return userId, nil
+}
+
+func (r *userRepo) CreateWithTx(ctx context.Context, entity *pb.CreateUserRequest, tx pgx.Tx) (pKey *pb.UserPrimaryKey, err error) {
+	query := `INSERT INTO "user" (
+		id,
+		phone,
+		email,
+		login,
+		password,
+		company_id,
+		hash_type
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4,
+		$5,
+		$6,
+		'bcrypt'
+	)`
+
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return pKey, errors.Wrap(err, "failed to generate uuid")
+	}
+
+	_, err = tx.Exec(ctx, query,
+		id.String(),
+		entity.GetPhone(),
+		entity.GetEmail(),
+		entity.GetLogin(),
+		entity.GetPassword(),
+		entity.GetCompanyId(),
+	)
+	if err != nil {
+		return pKey, errors.Wrap(err, "failed to create user")
+	}
+
+	pKey = &pb.UserPrimaryKey{
+		Id: id.String(),
+	}
+
+	return pKey, nil
 }
