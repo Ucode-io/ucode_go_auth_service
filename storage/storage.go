@@ -3,10 +3,10 @@ package storage
 import (
 	"context"
 	"errors"
+
 	"ucode/ucode_go_auth_service/api/models"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 
-	// "github.com/jackc/pgconn/internal/ctxwatch"
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -150,6 +150,7 @@ type UserRepoI interface {
 	V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error)
 	UpdatePassword(ctx context.Context, userId, password string) error
 	UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserRequest, loginType string) (*pb.SyncUserResponse, error)
+	UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error)
 }
 
 type IntegrationRepoI interface {
