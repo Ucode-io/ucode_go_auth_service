@@ -129,9 +129,6 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientTypeList(c *gin.Context) {
-	var (
-	// resourceEnvironment *obs.ResourceEnvironment
-	)
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -144,8 +141,13 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if ok {
+		h.handleResponse(c, http.BadRequest, "project_id is required")
+		return
+	}
+
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -158,7 +160,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 		},
@@ -204,10 +206,8 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
-	var (
-		// resourceEnvironment *obs.ResourceEnvironment
-		err error
-	)
+	var err error
+
 	clientTypeid := c.Param("client-type-id")
 
 	if !util.IsValidUUID(clientTypeid) {
@@ -215,8 +215,13 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project-id")
-	if !util.IsValidUUID(projectId) {
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "project id is required")
+		return
+	}
+
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -230,7 +235,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 		},
