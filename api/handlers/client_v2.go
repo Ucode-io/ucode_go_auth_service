@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -142,13 +143,8 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 	}
 
 	projectId, ok := c.Get("project_id")
-	if ok {
+	if !ok && !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.BadRequest, "project_id is required")
-		return
-	}
-
-	if !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -215,13 +211,14 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 		return
 	}
 
-	projectId := c.Query("project_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, "project id is required")
-	// 	return
-	// }
+	projectId, ok := c.Get("project_id")
+	fmt.Println("Project id", projectId)
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "project id is required")
+		return
+	}
 
-	if !util.IsValidUUID(projectId) {
+	if !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -235,7 +232,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
-			ProjectId:     projectId,
+			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 		},

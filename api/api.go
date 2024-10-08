@@ -154,7 +154,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		// admin, dev, hr, ceo
 		v2.POST("/client-type", h.V2CreateClientType)
-		v2.GET("/client-type", h.V2GetClientTypeList) //
+		v2.GET("/client-type", h.V2GetClientTypeList)
 		v2.GET("/client-type/:client-type-id", h.V2GetClientTypeByID)
 		v2.PUT("/client-type", h.V2UpdateClientType)
 		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)

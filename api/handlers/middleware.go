@@ -31,10 +31,13 @@ func (h *Handler) LoginMiddleware() gin.HandlerFunc {
 
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		resourceId := c.GetHeader("Resource-Id")
-		environmentId := c.GetHeader("Environment-Id")
-		projectId := c.DefaultQuery("project-id", "")
-		bearerToken := c.GetHeader("Authorization")
+		var (
+			resourceId    = c.GetHeader("Resource-Id")
+			environmentId = c.GetHeader("Environment-Id")
+			bearerToken   = c.GetHeader("Authorization")
+			projectId     = c.Query("project-id")
+		)
+
 		if len(bearerToken) == 0 {
 			c.Set("resource_id", resourceId)
 			c.Set("environment_id", environmentId)
@@ -58,10 +61,10 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			//}
-			resourceId := c.GetHeader("Resource-Id")
-			environmentId := c.GetHeader("Environment-Id")
-			projectId := c.Query("Project-Id")
+
+			resourceId = c.GetHeader("Resource-Id")
+			environmentId = c.GetHeader("Environment-Id")
+			projectId = c.Query("Project-Id")
 
 			if res.ProjectId != "" {
 				projectId = res.ProjectId
@@ -70,9 +73,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				environmentId = res.EnvId
 			}
 
-			c.Set("resource_id", resourceId)
-			c.Set("environment_id", environmentId)
-			c.Set("project_id", projectId)
 			c.Set("user_id", res.UserId)
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
@@ -121,14 +121,11 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				})
 				c.Abort()
 			}
-
 		}
 
-		//c.Set("Auth", res)
 		c.Set("resource_id", resourceId)
 		c.Set("environment_id", environmentId)
 		c.Set("project_id", projectId)
-		//c.Set("namespace", h.cfg.UcodeNamespace)
 		c.Next()
 	}
 }
