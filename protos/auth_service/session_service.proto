@@ -225,6 +225,7 @@ message CreateSessionRequest {
     string expires_at = 9;
     string integration_id = 10;
     string env_id = 11;
+    string user_id_auth = 12;
 }
 
 message UpdateSessionRequest {
