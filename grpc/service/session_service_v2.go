@@ -220,17 +220,17 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	}
 
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-		ClientPlatform:   data.GetClientPlatform(),
-		ClientType:       data.GetClientType(),
-		UserFound:        data.GetUserFound(),
-		UserId:           data.GetUserId(),
 		Role:             data.GetRole(),
+		UserId:           data.GetUserId(),
+		UserData:         data.GetUserData(),
+		UserFound:        data.GetUserFound(),
+		ClientType:       data.GetClientType(),
+		UserIdAuth:       data.GetUserIdAuth(),
 		Permissions:      data.GetPermissions(),
+		ClientPlatform:   data.GetClientPlatform(),
 		LoginTableSlug:   data.GetLoginTableSlug(),
 		AppPermissions:   data.GetAppPermissions(),
 		GlobalPermission: data.GetGlobalPermission(),
-		UserData:         data.GetUserData(),
-		UserIdAuth:       data.GetUserIdAuth(),
 	})
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
@@ -743,6 +743,8 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	var res *pb.V2LoginResponse
 
 	if req.Data["project_id"] != "" && req.Data["environment_id"] != "" {
+		var data *pbObject.LoginDataRes
+
 		serviceResource, err := s.services.ServiceResource().GetSingle(ctx, &pbCompany.GetSingleServiceResourceReq{
 			EnvironmentId: req.Data["environment_id"],
 			ProjectId:     req.Data["project_id"],
@@ -761,12 +763,8 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			ClientType:            req.Data["client_type_id"],
 			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
 		}
-		var data *pbObject.LoginDataRes
 
-		services, err := s.serviceNode.GetByNodeType(
-			req.Data["project_id"],
-			req.NodeType,
-		)
+		services, err := s.serviceNode.GetByNodeType(req.Data["project_id"], req.NodeType)
 		if err != nil {
 			s.log.Error("!!!LoginMiddleware--->GetByNodeType", logger.Error(err))
 			return nil, err
@@ -774,8 +772,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 
 		switch serviceResource.ResourceType {
 		case 1:
-			data, err = services.GetLoginServiceByType(req.NodeType).LoginData(
-				ctx, reqLoginData)
+			data, err = services.GetLoginServiceByType(req.NodeType).LoginData(ctx, reqLoginData)
 			if err != nil {
 				errGetUserProjectData := errors.New("invalid user project data")
 				s.log.Error("!!!LoginMiddleware--->LoginService()", logger.Error(err))
@@ -845,22 +842,22 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	}
 
 	return &pb.V2LoginWithOptionsResponse{
-		UserFound:       true,
-		UserId:          resp.GetUserId(),
-		Token:           resp.GetToken(),
-		Sessions:        resp.GetSessions(),
-		ClientPlatform:  resp.GetClientPlatform(),
-		ClientType:      resp.GetClientType(),
+		User:            resp.GetUser(),
 		Role:            resp.GetRole(),
-		Permissions:     resp.GetPermissions(),
-		AppPermissions:  resp.GetAppPermissions(),
+		Token:           resp.GetToken(),
 		Tables:          resp.GetTables(),
+		UserId:          resp.GetUserId(),
+		Sessions:        resp.GetSessions(),
+		UserData:        res.GetUserData(),
+		UserFound:       true,
+		ResourceId:      resp.GetResourceId(),
+		ClientType:      resp.GetClientType(),
+		Permissions:     resp.GetPermissions(),
+		EnvironmentId:   resp.GetEnvironmentId(),
+		ClientPlatform:  resp.GetClientPlatform(),
+		AppPermissions:  resp.GetAppPermissions(),
 		LoginTableSlug:  resp.GetLoginTableSlug(),
 		AddationalTable: resp.GetAddationalTable(),
-		ResourceId:      resp.GetResourceId(),
-		EnvironmentId:   resp.GetEnvironmentId(),
-		User:            resp.GetUser(),
-		UserData:        res.GetUserData(),
 	}, nil
 }
 
@@ -1380,7 +1377,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	if _, err := uuid.Parse(input.GetLoginData().GetUserIdAuth()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
-		s.log.Error("---ERR->GetLoginData().GetUserIdAuth-->", logger.Error(err))
+		s.log.Error("!!!TokenGenerator->UserIdAuthExist-->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -1407,16 +1404,16 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
-		ProjectId:        input.GetProjectId(),
-		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
-		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
-		UserId:           input.GetLoginData().GetUserIdAuth(),
-		RoleId:           input.GetLoginData().GetRole().GetId(),
 		Ip:               "0.0.0.0",
 		Data:             "additional json data",
-		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 		EnvId:            input.GetEnvironmentId(),
+		UserId:           input.GetLoginData().GetUserId(),
+		RoleId:           input.GetLoginData().GetRole().GetId(),
+		ProjectId:        input.GetProjectId(),
+		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 		UserIdAuth:       input.GetLoginData().GetUserIdAuth(),
+		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
+		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
 	})
 	if err != nil {
 		s.log.Error("!!!Create--->", logger.Error(err))
@@ -1696,7 +1693,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
-		UserId: session.GetUserId(),
+		UserId: session.GetUserIdAuth(),
 	})
 	if err != nil {
 		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
@@ -1803,6 +1800,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		ExpiresAt:        session.ExpiresAt,
 		CreatedAt:        session.CreatedAt,
 		UpdatedAt:        session.UpdatedAt,
+		UserIdAuth:       session.UserIdAuth,
 		ClientTypeId:     session.ClientTypeId,
 		ClientPlatformId: session.ClientPlatformId,
 	}, nil

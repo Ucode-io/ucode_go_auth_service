@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS "session" ADD COLUMN IF NOT EXISTS "user_id_auth" UUID DEFAULT "user_id";

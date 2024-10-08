@@ -36,6 +36,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		user_id,
 		ip,
 		data,
+		user_id_auth,
 		expires_at`
 
 	queryValue := ` VALUES (
@@ -43,6 +44,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		:user_id,
 		:ip,
 		:data,
+		:user_id_auth,
 		:expires_at`
 
 	queryReturn := ` RETURNING id`
@@ -51,11 +53,12 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		return pKey, err
 	}
 
-	params["id"] = random.String()
-	params["user_id"] = entity.UserId
 	params["ip"] = entity.Ip
+	params["id"] = random.String()
 	params["data"] = entity.Data
+	params["user_id"] = entity.UserId
 	params["expires_at"] = entity.ExpiresAt
+	params["user_id_auth"] = entity.UserIdAuth
 
 	if util.IsValidUUID(entity.ProjectId) {
 		params["project_id"] = entity.ProjectId
@@ -110,6 +113,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		coalesce(role_id::text, ''),
 		TEXT(ip) AS ip,
 		data,
+		COALESCE(user_id_auth::text, ''),
 		COALESCE(is_changed, FALSE),
 		coalesce(env_id::text, ''),
 		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
@@ -128,6 +132,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		&res.RoleId,
 		&res.Ip,
 		&res.Data,
+		&res.UserIdAuth,
 		&res.IsChanged,
 		&res.EnvId,
 		&res.ExpiresAt,
@@ -216,7 +221,7 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 			&obj.ExpiresAt,
 			&obj.CreatedAt,
 			&obj.UpdatedAt,
-			obj.IsChanged,
+			&obj.IsChanged,
 		)
 
 		if err != nil {
