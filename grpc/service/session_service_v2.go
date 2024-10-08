@@ -758,10 +758,10 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 
 		reqLoginData := &pbObject.LoginDataReq{
 			UserId:                req.Data["user_id"],
-			ProjectId:             req.Data["project_id"],
-			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
-			ClientType:            req.Data["client_type_id"],
 			NodeType:              serviceResource.GetNodeType(),
+			ProjectId:             req.Data["project_id"],
+			ClientType:            req.Data["client_type_id"],
+			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
 		}
 		var data *pbObject.LoginDataRes
 
@@ -1405,7 +1405,9 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	_, err = uuid.Parse(input.GetProjectId())
 	if err != nil {
-		input.ProjectId = "8104fded-dfdf-4ee3-87a4-4fa1edca1f68"
+		err = errors.New("project id is invalid")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
@@ -1738,7 +1740,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			checkPermission = exist
 		}
 	}
-	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" && checkPermission {
+	if checkPermission {
 		var tableSlug string
 		if strings.Contains(arr_path[len(arr_path)-1], ":") {
 			tableSlug = arr_path[len(arr_path)-2]
@@ -1755,6 +1757,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			},
 		)
 		if err != nil {
+			s.log.Error("!!!V2HasAccessUser->GetSingleServiceResource--->", logger.Error(err))
 			return nil, err
 		}
 
@@ -1778,12 +1781,13 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 				},
 			)
 			if err != nil {
+				s.log.Error("!!!V2HasAccessUser->GetTablePermission--->", logger.Error(err))
 				return nil, err
 			}
 
 			if !resp.IsHavePermission {
 				err := status.Error(codes.PermissionDenied, "Permission denied")
-				return nil, err //fmt.Errorf("Permission denied")
+				return nil, err
 			}
 		case pbCompany.ResourceType_POSTGRESQL:
 
