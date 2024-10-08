@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -212,7 +211,6 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 	}
 
 	projectId, ok := c.Get("project_id")
-	fmt.Println("Project id", projectId)
 	if !ok {
 		h.handleResponse(c, http.BadRequest, "project id is required")
 		return
