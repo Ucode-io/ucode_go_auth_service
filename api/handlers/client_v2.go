@@ -215,13 +215,13 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 		return
 	}
 
-	projectId, ok := c.Get("project_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, "project id is required")
-		return
-	}
+	projectId := c.Query("project_id")
+	// if !ok {
+	// 	h.handleResponse(c, http.BadRequest, "project id is required")
+	// 	return
+	// }
 
-	if !util.IsValidUUID(projectId.(string)) {
+	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
@@ -235,7 +235,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
+			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
 		},
