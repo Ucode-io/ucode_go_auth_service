@@ -115,12 +115,6 @@ func (h *Handler) V2Login(c *gin.Context) {
 		}
 	}
 
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	// 	return
-	// }
-
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
@@ -149,7 +143,6 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 	login.NodeType = resourceEnvironment.GetNodeType()
 
-	//userId, _ := c.Get("user_id")
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
 			NodeType:     resourceEnvironment.NodeType,
