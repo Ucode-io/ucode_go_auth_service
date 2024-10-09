@@ -1197,7 +1197,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
-	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserId(), session.GetProjectId())
+	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserIdAuth(), session.GetProjectId())
 	if err != nil {
 		s.log.Error("!!!V2Login--->UserGetByUsername", logger.Error(err))
 		if err == sql.ErrNoRows {
@@ -1225,7 +1225,8 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	authTables := []*pb.TableBody{}
+	var authTables []*pb.TableBody
+
 	if tokenInfo.Tables != nil {
 		for _, table := range tokenInfo.Tables {
 			authTables = append(authTables, &pb.TableBody{
@@ -1262,17 +1263,15 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	token := &pb.Token{
-		AccessToken:      accessToken,
-		RefreshToken:     refreshToken,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
-		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
-	}
-
 	res := &pb.V2LoginResponse{
-		Token: token,
+		Token: &pb.Token{
+			AccessToken:      accessToken,
+			RefreshToken:     refreshToken,
+			CreatedAt:        session.CreatedAt,
+			UpdatedAt:        session.UpdatedAt,
+			ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
+			RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+		},
 	}
 
 	return res, nil

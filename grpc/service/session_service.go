@@ -160,14 +160,11 @@ func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	rowsAffected, err := s.strg.Session().Delete(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	_, err = s.strg.Session().Delete(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!Logout--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	s.log.Info("---Logout--->", logger.Any("tokenInfo", tokenInfo))
-	s.log.Info("---Logout--->", logger.Any("rowsAffected", rowsAffected))
 
 	return &emptypb.Empty{}, nil
 }
