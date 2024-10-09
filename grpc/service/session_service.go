@@ -333,7 +333,7 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
+	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserIdAuth})
 	if err != nil {
 		s.log.Error("!!!HasAccess user--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
