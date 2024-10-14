@@ -78,16 +78,8 @@ func SendEmail(subject, to, link, token string) error {
 }
 
 func SendCodeToEmail(subject, to, code string, email string, password string) error {
-
 	message := `
 		Your verification code is: ` + code
-
-	// if email == "" {
-	// 	email = from
-	// }
-	// if password == "" {
-	// 	password = defaultPassword
-	// }
 
 	auth := smtp.PlainAuth("", email, password, host)
 

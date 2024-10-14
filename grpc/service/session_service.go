@@ -160,14 +160,11 @@ func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	rowsAffected, err := s.strg.Session().Delete(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	_, err = s.strg.Session().Delete(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!Logout--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	s.log.Info("---Logout--->", logger.Any("tokenInfo", tokenInfo))
-	s.log.Info("---Logout--->", logger.Any("rowsAffected", rowsAffected))
 
 	return &emptypb.Empty{}, nil
 }
@@ -336,7 +333,7 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
+	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserIdAuth})
 	if err != nil {
 		s.log.Error("!!!HasAccess user--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

@@ -276,14 +276,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}
 
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-		ClientPlatform: userData.GetClientPlatform(),
-		ClientType:     userData.GetClientType(),
-		UserFound:      userData.GetUserFound(),
-		UserId:         userData.GetUserId(),
 		Role:           userData.GetRole(),
-		Permissions:    userData.GetPermissions(),
-		LoginTableSlug: userData.GetLoginTableSlug(),
+		UserId:         userData.GetUserId(),
+		UserFound:      userData.GetUserFound(),
+		ClientType:     userData.GetClientType(),
 		UserIdAuth:     userData.GetUserIdAuth(),
+		Permissions:    userData.GetPermissions(),
+		ClientPlatform: userData.GetClientPlatform(),
+		LoginTableSlug: userData.GetLoginTableSlug(),
 	})
 
 	res, err = rs.services.SessionService().SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
@@ -302,7 +302,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	rs.log.Info("!!!CreateUser--->", logger.Any("objectBuilderUserId", objectBuilderUserId))
 	res.GlobalPermission = nil
 	res.UserData = nil
 	res.UserFound = true

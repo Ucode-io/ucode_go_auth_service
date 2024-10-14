@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"ucode/ucode_go_auth_service/config"
@@ -30,61 +31,66 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Create")
 	defer dbSpan.Finish()
 
-	params := make(map[string]interface{})
 	queryInitial := `INSERT INTO "session" (
 		id,
 		user_id,
 		ip,
 		data,
+		user_id_auth,
 		expires_at`
 
 	queryValue := ` VALUES (
-		:id,
-		:user_id,
-		:ip,
-		:data,
-		:expires_at`
+		$1, $2, $3, $4, $5, $6`
 
 	queryReturn := ` RETURNING id`
+
 	random, err := uuid.NewRandom()
 	if err != nil {
 		return pKey, err
 	}
 
-	params["id"] = random.String()
-	params["user_id"] = entity.UserId
-	params["ip"] = entity.Ip
-	params["data"] = entity.Data
-	params["expires_at"] = entity.ExpiresAt
+	args := []interface{}{
+		random.String(),   // $1 - id
+		entity.UserId,     // $2 - user_id
+		entity.Ip,         // $3 - ip
+		entity.Data,       // $4 - data
+		entity.UserIdAuth, // $5 - user_id_auth
+		entity.ExpiresAt,  // $6 - expires_at
+	}
+
+	argIndex := 7
 
 	if util.IsValidUUID(entity.ProjectId) {
-		params["project_id"] = entity.ProjectId
 		queryInitial += `, project_id`
-		queryValue += `, :project_id`
+		queryValue += `, $` + strconv.Itoa(argIndex)
+		args = append(args, entity.ProjectId)
+		argIndex++
 	}
 
 	if util.IsValidUUID(entity.EnvId) {
-		params["env_id"] = entity.EnvId
 		queryInitial += `, env_id`
-		queryValue += `, :env_id`
+		queryValue += `, $` + strconv.Itoa(argIndex)
+		args = append(args, entity.EnvId)
+		argIndex++
 	}
 
 	if util.IsValidUUID(entity.ClientTypeId) {
-		params["client_type_id"] = entity.ClientTypeId
 		queryInitial += `, client_type_id`
-		queryValue += `, :client_type_id`
+		queryValue += `, $` + strconv.Itoa(argIndex)
+		args = append(args, entity.ClientTypeId)
+		argIndex++
 	}
 
 	if util.IsValidUUID(entity.RoleId) {
-		params["role_id"] = entity.RoleId
 		queryInitial += `, role_id`
-		queryValue += `, :role_id`
+		queryValue += `, $` + strconv.Itoa(argIndex)
+		args = append(args, entity.RoleId)
+		argIndex++
 	}
 
 	query := queryInitial + ")" + queryValue + ")" + queryReturn
-	cQuery, arr := helper.ReplaceQueryParams(query, params)
 
-	_, err = r.db.Exec(ctx, cQuery, arr...)
+	_, err = r.db.Exec(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +116,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		coalesce(role_id::text, ''),
 		TEXT(ip) AS ip,
 		data,
+		COALESCE(user_id_auth::text, ''),
 		COALESCE(is_changed, FALSE),
 		coalesce(env_id::text, ''),
 		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
@@ -128,6 +135,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		&res.RoleId,
 		&res.Ip,
 		&res.Data,
+		&res.UserIdAuth,
 		&res.IsChanged,
 		&res.EnvId,
 		&res.ExpiresAt,
@@ -216,7 +224,7 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 			&obj.ExpiresAt,
 			&obj.CreatedAt,
 			&obj.UpdatedAt,
-			obj.IsChanged,
+			&obj.IsChanged,
 		)
 
 		if err != nil {

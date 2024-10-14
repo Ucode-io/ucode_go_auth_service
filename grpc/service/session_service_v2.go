@@ -168,8 +168,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 	switch req.ResourceType {
 	case 1:
-		data, err = services.GetLoginServiceByType(req.NodeType).LoginData(
-			ctx,
+		data, err = services.GetLoginServiceByType(req.NodeType).LoginData(ctx,
 			reqLoginData,
 		)
 		if err != nil {
@@ -189,7 +188,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		newReq.ProjectId = newReq.ResourceEnvironmentId
 
 		newData, err := services.GoLoginService().LoginData(ctx, &newReq)
-
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
@@ -222,17 +220,17 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	}
 
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-		ClientPlatform:   data.GetClientPlatform(),
-		ClientType:       data.GetClientType(),
-		UserFound:        data.GetUserFound(),
-		UserId:           data.GetUserId(),
 		Role:             data.GetRole(),
+		UserId:           data.GetUserId(),
+		UserData:         data.GetUserData(),
+		UserFound:        data.GetUserFound(),
+		ClientType:       data.GetClientType(),
+		UserIdAuth:       data.GetUserIdAuth(),
 		Permissions:      data.GetPermissions(),
+		ClientPlatform:   data.GetClientPlatform(),
 		LoginTableSlug:   data.GetLoginTableSlug(),
 		AppPermissions:   data.GetAppPermissions(),
 		GlobalPermission: data.GetGlobalPermission(),
-		UserData:         data.GetUserData(),
-		UserIdAuth:       data.GetUserIdAuth(),
 	})
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
@@ -669,8 +667,8 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		gooleToken, ok := req.GetData()["google_token"]
-		if ok {
+
+		if gooleToken, ok := req.GetData()["google_token"]; ok {
 			userInfo, err := helper.GetGoogleUserInfo(gooleToken)
 			if err != nil {
 				err = errors.New("invalid arguments google auth")
@@ -745,6 +743,8 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	var res *pb.V2LoginResponse
 
 	if req.Data["project_id"] != "" && req.Data["environment_id"] != "" {
+		var data *pbObject.LoginDataRes
+
 		serviceResource, err := s.services.ServiceResource().GetSingle(ctx, &pbCompany.GetSingleServiceResourceReq{
 			EnvironmentId: req.Data["environment_id"],
 			ProjectId:     req.Data["project_id"],
@@ -758,17 +758,13 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 
 		reqLoginData := &pbObject.LoginDataReq{
 			UserId:                req.Data["user_id"],
-			ProjectId:             req.Data["project_id"],
-			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
-			ClientType:            req.Data["client_type_id"],
 			NodeType:              serviceResource.GetNodeType(),
+			ProjectId:             req.Data["project_id"],
+			ClientType:            req.Data["client_type_id"],
+			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
 		}
-		var data *pbObject.LoginDataRes
 
-		services, err := s.serviceNode.GetByNodeType(
-			req.Data["project_id"],
-			req.NodeType,
-		)
+		services, err := s.serviceNode.GetByNodeType(req.Data["project_id"], req.NodeType)
 		if err != nil {
 			s.log.Error("!!!LoginMiddleware--->GetByNodeType", logger.Error(err))
 			return nil, err
@@ -776,11 +772,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 
 		switch serviceResource.ResourceType {
 		case 1:
-			data, err = services.GetLoginServiceByType(req.NodeType).LoginData(
-				ctx,
-				reqLoginData,
-			)
-
+			data, err = services.GetLoginServiceByType(req.NodeType).LoginData(ctx, reqLoginData)
 			if err != nil {
 				errGetUserProjectData := errors.New("invalid user project data")
 				s.log.Error("!!!LoginMiddleware--->LoginService()", logger.Error(err))
@@ -816,15 +808,15 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		}
 
 		res = helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-			ClientPlatform: data.GetClientPlatform(),
-			ClientType:     data.GetClientType(),
-			UserFound:      data.GetUserFound(),
-			UserId:         data.GetUserId(),
 			Role:           data.GetRole(),
-			Permissions:    data.GetPermissions(),
-			LoginTableSlug: data.GetLoginTableSlug(),
+			UserId:         data.GetUserId(),
 			UserData:       data.GetUserData(),
+			UserFound:      data.GetUserFound(),
 			UserIdAuth:     data.GetUserIdAuth(),
+			ClientType:     data.GetClientType(),
+			Permissions:    data.GetPermissions(),
+			ClientPlatform: data.GetClientPlatform(),
+			LoginTableSlug: data.GetLoginTableSlug(),
 		})
 
 	}
@@ -833,9 +825,9 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	}
 
 	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
+		Tables:        req.Tables,
 		LoginData:     res,
 		ProjectId:     req.Data["project_id"],
-		Tables:        req.Tables,
 		EnvironmentId: req.Data["environment_id"],
 	})
 
@@ -850,22 +842,22 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 	}
 
 	return &pb.V2LoginWithOptionsResponse{
-		UserFound:       true,
-		UserId:          resp.GetUserId(),
-		Token:           resp.GetToken(),
-		Sessions:        resp.GetSessions(),
-		ClientPlatform:  resp.GetClientPlatform(),
-		ClientType:      resp.GetClientType(),
+		User:            resp.GetUser(),
 		Role:            resp.GetRole(),
-		Permissions:     resp.GetPermissions(),
-		AppPermissions:  resp.GetAppPermissions(),
+		Token:           resp.GetToken(),
 		Tables:          resp.GetTables(),
+		UserId:          resp.GetUserId(),
+		Sessions:        resp.GetSessions(),
+		UserData:        res.GetUserData(),
+		UserFound:       true,
+		ResourceId:      resp.GetResourceId(),
+		ClientType:      resp.GetClientType(),
+		Permissions:     resp.GetPermissions(),
+		EnvironmentId:   resp.GetEnvironmentId(),
+		ClientPlatform:  resp.GetClientPlatform(),
+		AppPermissions:  resp.GetAppPermissions(),
 		LoginTableSlug:  resp.GetLoginTableSlug(),
 		AddationalTable: resp.GetAddationalTable(),
-		ResourceId:      resp.GetResourceId(),
-		EnvironmentId:   resp.GetEnvironmentId(),
-		User:            resp.GetUser(),
-		UserData:        res.GetUserData(),
 	}, nil
 }
 
@@ -1205,7 +1197,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
-	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserId(), session.GetProjectId())
+	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserIdAuth(), session.GetProjectId())
 	if err != nil {
 		s.log.Error("!!!V2Login--->UserGetByUsername", logger.Error(err))
 		if err == sql.ErrNoRows {
@@ -1217,45 +1209,46 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
-		ProjectId:        session.ProjectId,
-		ClientPlatformId: session.ClientPlatformId,
-		ClientTypeId:     session.ClientTypeId,
-		UserId:           session.UserId,
-		RoleId:           session.RoleId,
 		Ip:               session.Ip,
 		Data:             session.Data,
+		EnvId:            session.EnvId,
+		UserId:           session.UserId,
+		RoleId:           session.RoleId,
+		ProjectId:        session.ProjectId,
 		ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
 		IsChanged:        session.IsChanged,
-		EnvId:            session.EnvId,
+		ClientTypeId:     session.ClientTypeId,
+		ClientPlatformId: session.ClientPlatformId,
 	})
 	if err != nil {
 		s.log.Error("!!!V2RefreshToken.SessionUpdate--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	authTables := []*pb.TableBody{}
+	var authTables []*pb.TableBody
+
 	if tokenInfo.Tables != nil {
 		for _, table := range tokenInfo.Tables {
-			authTable := &pb.TableBody{
+			authTables = append(authTables, &pb.TableBody{
 				TableSlug: table.TableSlug,
 				ObjectId:  table.ObjectID,
-			}
-			authTables = append(authTables, authTable)
+			})
 		}
 	}
 
 	// TODO - wrap in a function
 	m := map[string]interface{}{
 		"id":                 session.Id,
-		"project_id":         session.ProjectId,
-		"client_platform_id": session.ClientPlatformId,
-		"client_type_id":     session.ClientTypeId,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
 		"ip":                 session.Data,
 		"data":               session.Data,
 		"tables":             authTables,
+		"user_id":            session.UserId,
+		"role_id":            session.RoleId,
+		"project_id":         session.ProjectId,
+		"user_id_auth":       session.UserIdAuth,
+		"client_type_id":     session.ClientTypeId,
 		"login_table_slug":   tokenInfo.LoginTableSlug,
+		"client_platform_id": session.ClientPlatformId,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -1270,17 +1263,16 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	token := &pb.Token{
-		AccessToken:      accessToken,
-		RefreshToken:     refreshToken,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
-		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+	res := &pb.V2LoginResponse{
+		Token: &pb.Token{
+			AccessToken:      accessToken,
+			RefreshToken:     refreshToken,
+			CreatedAt:        session.CreatedAt,
+			UpdatedAt:        session.UpdatedAt,
+			ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
+			RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+		},
 	}
-
-	res := &pb.V2LoginResponse{}
-	res.Token = token
 
 	return res, nil
 }
@@ -1384,7 +1376,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	if _, err := uuid.Parse(input.GetLoginData().GetUserIdAuth()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
-		s.log.Error("---ERR->GetLoginData().GetUserIdAuth-->", logger.Error(err))
+		s.log.Error("!!!TokenGenerator->UserIdAuthExist-->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -1405,19 +1397,22 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 
 	_, err = uuid.Parse(input.GetProjectId())
 	if err != nil {
-		input.ProjectId = "8104fded-dfdf-4ee3-87a4-4fa1edca1f68"
+		err = errors.New("project id is invalid")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
-		ProjectId:        input.GetProjectId(),
-		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
-		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
-		UserId:           input.GetLoginData().GetUserIdAuth(),
-		RoleId:           input.GetLoginData().GetRole().GetId(),
 		Ip:               "0.0.0.0",
 		Data:             "additional json data",
-		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 		EnvId:            input.GetEnvironmentId(),
+		UserId:           input.GetLoginData().GetUserId(),
+		RoleId:           input.GetLoginData().GetRole().GetId(),
+		ProjectId:        input.GetProjectId(),
+		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+		UserIdAuth:       input.GetLoginData().GetUserIdAuth(),
+		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
+		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
 	})
 	if err != nil {
 		s.log.Error("!!!Create--->", logger.Error(err))
@@ -1445,15 +1440,16 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	// TODO - wrap in a function
 	m := map[string]interface{}{
 		"id":                 session.GetId(),
-		"project_id":         session.GetProjectId(),
-		"client_platform_id": session.GetClientPlatformId(),
-		"client_type_id":     session.GetClientTypeId(),
-		"user_id":            session.GetUserId(),
-		"role_id":            session.GetRoleId(),
 		"ip":                 session.GetData(),
 		"data":               session.GetData(),
 		"tables":             input.GetTables(),
+		"user_id":            session.GetUserId(),
+		"role_id":            session.GetRoleId(),
+		"project_id":         session.GetProjectId(),
+		"user_id_auth":       session.GetUserIdAuth(),
+		"client_type_id":     session.GetClientTypeId(),
 		"login_table_slug":   input.GetLoginData().GetLoginTableSlug(),
+		"client_platform_id": session.GetClientPlatformId(),
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
@@ -1485,12 +1481,11 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.UpdateSessionsByRoleId")
 	defer dbSpan.Finish()
 
-	rowsAffected, err := s.strg.Session().UpdateByRoleId(ctx, input)
+	_, err := s.strg.Session().UpdateByRoleId(ctx, input)
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.log.Info("UpdateByRoleId--->UpdateByRoleId", logger.Any("rowsAffected", rowsAffected))
 
 	return &emptypb.Empty{}, nil
 }
@@ -1597,9 +1592,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 		}
 
 		for _, projectId := range item.ProjectIds {
-
-			projectInfo, err := s.services.ProjectServiceClient().GetById(
-				ctx,
+			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx,
 				&pbCompany.GetProjectByIdRequest{
 					ProjectId: projectId,
 					CompanyId: item.Id,
@@ -1699,7 +1692,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
-		UserId: session.GetUserId(),
+		UserId: session.GetUserIdAuth(),
 	})
 	if err != nil {
 		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
@@ -1738,7 +1731,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			checkPermission = exist
 		}
 	}
-	if session.RoleId != "027944d2-0460-11ee-be56-0242ac120002" && checkPermission {
+	if checkPermission {
 		var tableSlug string
 		if strings.Contains(arr_path[len(arr_path)-1], ":") {
 			tableSlug = arr_path[len(arr_path)-2]
@@ -1746,8 +1739,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			tableSlug = arr_path[len(arr_path)-1]
 		}
 
-		resource, err := s.services.ServiceResource().GetSingle(
-			ctx,
+		resource, err := s.services.ServiceResource().GetSingle(ctx,
 			&pbCompany.GetSingleServiceResourceReq{
 				ProjectId:     session.ProjectId,
 				EnvironmentId: session.EnvId,
@@ -1755,15 +1747,13 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			},
 		)
 		if err != nil {
+			s.log.Error("!!!V2HasAccessUser->GetSingleServiceResource--->", logger.Error(err))
 			return nil, err
 		}
 
 		switch resource.ResourceType {
 		case pbCompany.ResourceType_MONGODB:
-			services, err := s.serviceNode.GetByNodeType(
-				resource.ProjectId,
-				resource.NodeType,
-			)
+			services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
 			if err != nil {
 				return nil, err
 			}
@@ -1778,6 +1768,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 				},
 			)
 			if err != nil {
+				s.log.Error("!!!V2HasAccessUser->GetTablePermission--->", logger.Error(err))
 				return nil, err
 			}
 
@@ -1786,32 +1777,31 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 				return nil, err
 			}
 		case pbCompany.ResourceType_POSTGRESQL:
-
 		}
 	}
 
 	for _, table := range tokenInfo.Tables {
-		authTable := &pb.TableBody{
+		authTables = append(authTables, &pb.TableBody{
 			TableSlug: table.TableSlug,
 			ObjectId:  table.ObjectID,
-		}
-		authTables = append(authTables, authTable)
+		})
 	}
 
 	return &pb.V2HasAccessUserRes{
 		Id:               session.Id,
-		ProjectId:        session.ProjectId,
-		UserId:           session.UserId,
 		Ip:               session.Ip,
 		Data:             session.Data,
+		EnvId:            session.EnvId,
+		UserId:           session.UserId,
+		RoleId:           session.RoleId,
+		Tables:           authTables,
+		ProjectId:        session.ProjectId,
 		ExpiresAt:        session.ExpiresAt,
 		CreatedAt:        session.CreatedAt,
 		UpdatedAt:        session.UpdatedAt,
-		Tables:           authTables,
-		ClientPlatformId: session.ClientPlatformId,
+		UserIdAuth:       session.UserIdAuth,
 		ClientTypeId:     session.ClientTypeId,
-		RoleId:           session.RoleId,
-		EnvId:            session.EnvId,
+		ClientPlatformId: session.ClientPlatformId,
 	}, nil
 }
 
@@ -1820,9 +1810,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		before runtime.MemStats
 		user   = &pb.User{}
 		err    error
-		resp   = pb.V2MultiCompanyOneLoginRes{
-			Companies: []*pb.Company2{},
-		}
+		resp   = pb.V2MultiCompanyOneLoginRes{Companies: []*pb.Company2{}}
 	)
 
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyOneLogin")
@@ -1903,13 +1891,10 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		}
 	case config.WithPhone:
 		if config.DefaultOtp != req.Otp {
-			_, err := s.services.SmsService().ConfirmOtp(
-				ctx,
-				&sms_service.ConfirmOtpRequest{
-					SmsId: req.GetSmsId(),
-					Otp:   req.GetOtp(),
-				},
-			)
+			_, err := s.services.SmsService().ConfirmOtp(ctx, &sms_service.ConfirmOtpRequest{
+				SmsId: req.GetSmsId(),
+				Otp:   req.GetOtp(),
+			})
 			if err != nil {
 				return nil, err
 			}
@@ -1921,25 +1906,20 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case config.WithEmail:
-		{
-			if config.DefaultOtp != req.Otp {
-				_, err := s.services.SmsService().ConfirmOtp(
-					ctx,
-					&sms_service.ConfirmOtpRequest{
-						SmsId: req.GetSmsId(),
-						Otp:   req.GetOtp(),
-					},
-				)
-				if err != nil {
-					return nil, err
-				}
-			}
-
-			user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+		if config.DefaultOtp != req.Otp {
+			_, err := s.services.SmsService().ConfirmOtp(ctx, &sms_service.ConfirmOtpRequest{
+				SmsId: req.GetSmsId(),
+				Otp:   req.GetOtp(),
+			})
 			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
+				return nil, err
 			}
+		}
+
+		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+		if err != nil {
+			s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
 
@@ -1959,11 +1939,9 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
-		company, err := s.services.CompanyServiceClient().GetById(ctx,
-			&pbCompany.GetCompanyByIdRequest{
-				Id: item.Id,
-			})
-
+		company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{
+			Id: item.Id,
+		})
 		if err != nil {
 			errGetProjects := errors.New("cant get user projects")
 			s.log.Error("!!!MultiCompanyLogin--->CompanyGetById", logger.Error(err))
@@ -1971,20 +1949,12 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		}
 
 		for _, projectId := range item.ProjectIds {
-			clientType, _ := s.strg.User().GetUserProjectClientTypes(
-				ctx,
-				&models.UserProjectClientTypeRequest{
-					UserId:    user.GetId(),
-					ProjectId: projectId,
-				},
-			)
+			clientType, _ := s.strg.User().GetUserProjectClientTypes(ctx,
+				&models.UserProjectClientTypeRequest{UserId: user.GetId(), ProjectId: projectId})
 
-			projectInfo, err := s.services.ProjectServiceClient().GetById(
-				ctx,
-				&pbCompany.GetProjectByIdRequest{
-					ProjectId: projectId,
-					CompanyId: item.Id,
-				})
+			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
+				ProjectId: projectId, CompanyId: item.Id,
+			})
 			if err != nil {
 				errGetProjects := errors.New("cant get user projects")
 				s.log.Error("!!!MultiCompanyLogin---->ProjectInfo", logger.Error(err))
@@ -1998,12 +1968,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				Domain:    projectInfo.GetK8SNamespace(),
 			}
 
-			environments, err := s.services.EnvironmentService().GetList(
-				ctx,
+			environments, err := s.services.EnvironmentService().GetList(ctx,
 				&pbCompany.GetEnvironmentListRequest{
-					ProjectId: projectId,
-					Limit:     1000,
 					Ids:       userEnvProject.EnvProjects[projectId],
+					Limit:     1000,
+					ProjectId: projectId,
 				},
 			)
 			if err != nil {
@@ -2013,8 +1982,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			}
 
 			for _, en := range environments.Environments {
-				resourceEnv, err := s.services.ServiceResource().GetList(
-					ctx,
+				resourceEnv, err := s.services.ServiceResource().GetList(ctx,
 					&pbCompany.GetListServiceResourceReq{
 						ProjectId:     projectId,
 						EnvironmentId: en.Id,
@@ -2030,14 +1998,14 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 					Id:            resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId,
 					Name:          en.Name,
 					ProjectId:     en.ProjectId,
+					AccessType:    en.AccessType,
 					ResourceId:    resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceId,
-					EnvironmentId: en.Id,
+					ServiceType:   int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ServiceType.Number()),
+					Description:   en.Description,
 					IsConfigured:  true,
 					ResourceType:  int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
-					ServiceType:   int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ServiceType.Number()),
 					DisplayColor:  en.DisplayColor,
-					Description:   en.Description,
-					AccessType:    en.AccessType,
+					EnvironmentId: en.Id,
 				}
 
 				if resourceEnv.ServiceResources[config.ObjectBuilderService] == nil || resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceEnvironmentId == "" {
@@ -2045,8 +2013,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				}
 
 				if clientType == nil || len(clientType.ClientTypeIds) == 0 {
-					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
-						ctx,
+					clientTypes, err := s.services.ClientService().V2GetClientTypeList(ctx,
 						&pb.V2GetClientTypeListRequest{
 							ProjectId:              resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
 							ResourceType:           int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
@@ -2059,11 +2026,10 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 						s.log.Error("!!!MultiCompanyLogin--->ClientTypes", logger.Error(err))
 						return nil, status.Error(codes.NotFound, errGetProjects.Error())
 					}
-					respResourceEnvironment.ClientTypes = clientTypes.Data
 
+					respResourceEnvironment.ClientTypes = clientTypes.Data
 				} else if len(clientType.ClientTypeIds) > 0 {
-					clientTypes, err := s.services.ClientService().V2GetClientTypeList(
-						ctx,
+					clientTypes, err := s.services.ClientService().V2GetClientTypeList(ctx,
 						&pb.V2GetClientTypeListRequest{
 							ProjectId:              resourceEnv.ServiceResources[config.ObjectBuilderService].ProjectId,
 							ResourceType:           int32(resourceEnv.ServiceResources[config.ObjectBuilderService].ResourceType.Number()),
@@ -2077,6 +2043,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 						s.log.Error("!!!MultiCompanyLogin--->ClientTypes2", logger.Error(err))
 						return nil, status.Error(codes.NotFound, errGetProjects.Error())
 					}
+
 					respResourceEnvironment.ClientTypes = clientTypes.Data
 				}
 
@@ -2206,8 +2173,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	resource, err := s.services.ServiceResource().GetSingle(
-		ctx,
+	resource, err := s.services.ServiceResource().GetSingle(ctx,
 		&pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     session.ProjectId,
 			EnvironmentId: req.EnvId,
@@ -2219,10 +2185,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		resource.ProjectId,
-		resource.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -2236,11 +2199,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	switch resource.ResourceType {
 	case 1:
-		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(
-			ctx,
-			reqLoginData,
-		)
-
+		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(ctx, reqLoginData)
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
@@ -2253,7 +2212,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
-
 	}
 
 	if !data.UserFound {
@@ -2299,26 +2257,23 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	if tokenInfo.Tables != nil {
 		for _, table := range tokenInfo.Tables {
-			authTable := &pb.TableBody{
-				TableSlug: table.TableSlug,
-				ObjectId:  table.ObjectID,
-			}
-			authTables = append(authTables, authTable)
+			authTables = append(authTables, &pb.TableBody{TableSlug: table.TableSlug, ObjectId: table.ObjectID})
 		}
 	}
 
 	// TODO - wrap in a function
 	m := map[string]interface{}{
 		"id":                 session.Id,
-		"project_id":         session.ProjectId,
-		"client_platform_id": session.ClientPlatformId,
-		"client_type_id":     session.ClientTypeId,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
 		"ip":                 session.Data,
 		"data":               session.Data,
 		"tables":             authTables,
+		"user_id":            session.UserId,
+		"role_id":            session.RoleId,
+		"project_id":         session.ProjectId,
+		"user_id_auth":       session.GetUserIdAuth(),
+		"client_type_id":     session.ClientTypeId,
 		"login_table_slug":   tokenInfo.LoginTableSlug,
+		"client_platform_id": session.ClientPlatformId,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
