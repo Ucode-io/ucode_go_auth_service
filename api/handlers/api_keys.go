@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
@@ -142,11 +143,23 @@ func (h *Handler) GetListApiKeys(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.handleResponse(c, http.InvalidArgument, errors.New("project_id is required"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, http.InvalidArgument, errors.New("environment_id is required"))
+		return
+	}
+
 	res, err := h.services.ApiKeysService().GetList(
 		c.Request.Context(),
 		&auth_service.GetListReq{
-			ProjectId:     c.Param("project-id"),
-			EnvironmentId: c.DefaultQuery("environment-id", ""),
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
 			Offset:        int32(offset),
 			Limit:         int32(limit),
 			Search:        c.Query("search"),

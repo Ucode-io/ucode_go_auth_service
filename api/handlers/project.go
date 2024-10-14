@@ -221,39 +221,5 @@ func (h *Handler) DeleteProject(c *gin.Context) {
 func (h *Handler) UpdateProjectUserData(c *gin.Context) {
 	var updateProjectUserDataReq company_service.UpdateProjectUserDataReq
 
-	// err := c.ShouldBindJSON(&UpdateProjectUserDataReq)
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
-	// }
-
-	// req, err := helper.ConvertMapToStruct(map[string]interface{}{
-	// 	"client_type_id":     UpdateProjectUserDataReq.GetClientTypeId(),
-	// 	"role_id":            UpdateProjectUserDataReq.GetRoleId(),
-	// 	"client_platform_id": UpdateProjectUserDataReq.GetClientPlatformId(),
-	// 	"guid":               UpdateProjectUserDataReq.GetUserId(),
-	// })
-	// if err != nil {
-	// 	errConvertMapToStruct := errors.New("cant parse to struct")
-	// 	h.handleResponse(c, http.InvalidArgument, errConvertMapToStruct.Error())
-	// 	return
-	// }
-
-	// ctx, finish := context.WithTimeout(context.Background(), 20*time.Second)
-	// defer finish()
-	// resp, err := h.services.GetObjectBuilderServiceByType("").Update(
-	// 	ctx,
-	// 	&object_builder_service.CommonMessage{
-	// 		TableSlug: "user",
-	// 		Data:      req,
-	// 		ProjectId: UpdateProjectUserDataReq.GetProjectId(),
-	// 	},
-	// )
-	// if err != nil {
-	// 	errUpdateUserData := errors.New("cant update user project data")
-	// 	h.handleResponse(c, http.InvalidArgument, errUpdateUserData.Error())
-	// 	return
-	// }
-
 	h.handleResponse(c, http.OK, &updateProjectUserDataReq)
 }
