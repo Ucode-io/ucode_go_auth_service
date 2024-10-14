@@ -344,9 +344,8 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	switch registerType {
-
 	case cfg.WithEmail:
-		if value, ok := body.Data["email"]; ok {
+		if value, ok := body.Data[cfg.WithEmail]; ok {
 			if !util.IsValidEmail(value.(string)) {
 				h.handleResponse(c, http.BadRequest, "Неверный формат email")
 				return
@@ -355,15 +354,10 @@ func (h *Handler) V2Register(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
 			return
 		}
-
-		var fields = []string{"email", "login", "name", "phone"}
-		for _, field := range fields {
-			if _, ok := body.Data[field]; !ok {
-				h.handleResponse(c, http.BadRequest, "Поле "+field+" не заполнено")
-				return
-			}
+		if _, ok := body.Data[cfg.WithEmail]; !ok {
+			h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
+			return
 		}
-
 	case cfg.WithPhone:
 		if _, ok := body.Data["phone"]; !ok {
 			h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
