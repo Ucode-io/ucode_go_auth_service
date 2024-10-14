@@ -354,12 +354,8 @@ func (h *Handler) V2Register(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
 			return
 		}
-		if _, ok := body.Data[cfg.WithEmail]; !ok {
-			h.handleResponse(c, http.BadRequest, "Поле email не заполнено")
-			return
-		}
 	case cfg.WithPhone:
-		if _, ok := body.Data["phone"]; !ok {
+		if _, ok := body.Data[cfg.WithPhone]; !ok {
 			h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
 			return
 

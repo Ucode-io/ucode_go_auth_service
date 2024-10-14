@@ -41,16 +41,16 @@ const (
 	LOW_NODE_TYPE    string = "LOW"
 	HIGH_NODE_TYPE   string = "HIGH"
 	ENTER_PRICE_TYPE string = "ENTER_PRICE"
-)
-
-var (
-	// these apis also manage by app's permission
 
 	WithGoogle    = "google"
 	Default       = "default"
 	WithPhone     = "phone"
 	WithApple     = "apple"
 	WithEmail     = "email"
+)
+
+var (
+	// these apis also manage by app's permission
 	RegisterTypes = map[string]int{
 		"google":  1,
 		"default": 1,
