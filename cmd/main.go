@@ -23,7 +23,7 @@ import (
 
 func main() {
 	baseCfg := config.BaseLoad()
-	loggerLevel := logger.LevelDebug
+	var loggerLevel string
 
 	switch baseCfg.Environment {
 	case config.DebugMode:
@@ -53,7 +53,9 @@ func main() {
 	defer cancel()
 
 	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
-	defer logger.Cleanup(log)
+	defer func() {
+		_ = logger.Cleanup(log)
+	}()
 
 	tracer, closer, err := jaegerCfg.NewTracer(jaeger_config.Logger(jaeger.StdLogger))
 	if err != nil {
@@ -120,7 +122,9 @@ func main() {
 	projectServiceNodes.SetConfigs(mapProjectConfs)
 
 	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
-	go cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
+	go func() {
+		_ = cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
+	}()
 
 	go func() {
 		lis, err := net.Listen("tcp", baseCfg.AuthGRPCPort)
@@ -138,5 +142,5 @@ func main() {
 
 	r := api.SetUpRouter(h, baseCfg, tracer, limiter)
 
-	r.Run(baseCfg.HTTPPort)
+	_ = r.Run(baseCfg.HTTPPort)
 }

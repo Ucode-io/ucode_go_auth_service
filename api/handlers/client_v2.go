@@ -95,7 +95,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err = h.services.ClientService().V2CreateClientType(
@@ -339,7 +339,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err = h.services.ClientService().V2UpdateClientType(
@@ -430,7 +430,7 @@ func (h *Handler) V2DeleteClientType(c *gin.Context) {
 		} else {
 			logReq.Response = "success"
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err := h.services.ClientService().V2DeleteClientType(

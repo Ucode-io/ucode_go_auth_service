@@ -39,7 +39,7 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	}
 
 	if resp.Error != "" {
-		return nil, fmt.Errorf("apple returned an error: %s - %s\n", resp.Error, resp.ErrorDescription)
+		return nil, fmt.Errorf("apple returned an error: %s - %s", resp.Error, resp.ErrorDescription)
 	}
 
 	// Get the unique user ID
