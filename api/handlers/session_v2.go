@@ -493,9 +493,6 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 			err := errors.New("неверное пароль")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
-		} else if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
 		} else {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -723,7 +720,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 			err := errors.New("неверный пароль")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
-		} else if err != nil {
+		} else {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
