@@ -30,85 +30,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	// @in header
 	// @name Authorization
 	r.Use(customCORSMiddleware())
-	r.GET("/ping", h.Ping)
-
-	// CLIENT SERVICE (admin, bot, mobile ext)
-	r.POST("/client-platform", h.CreateClientPlatform)
-	r.GET("/client-platform", h.GetClientPlatformList)
-	r.GET("/client-platform/:client-platform-id", h.GetClientPlatformByID)
-	r.GET("/client-platform-detailed/:client-platform-id", h.GetClientPlatformByIDDetailed)
-	r.PUT("/client-platform", h.UpdateClientPlatform)
-	r.DELETE("/client-platform/:client-platform-id", h.DeleteClientPlatform)
-
-	// admin, dev, hr, ceo
-	r.POST("/client-type", h.CreateClientType)
-	r.GET("/client-type", h.GetClientTypeList)
-	r.GET("/client-type/:client-type-id", h.GetClientTypeByID)
-	r.PUT("/client-type", h.UpdateClientType)
-	r.DELETE("/client-type/:client-type-id", h.DeleteClientType)
-
-	r.POST("/client", h.AddClient)
-	r.GET("/client/:project-id", h.GetClientMatrix)
-	r.PUT("/client", h.UpdateClient)
-	r.DELETE("/client", h.RemoveClient)
-
-	r.POST("/relation", h.AddRelation)
-	r.PUT("/relation", h.UpdateRelation)
-	r.DELETE("/relation/:relation-id", h.RemoveRelation)
-
-	r.POST("/user-info-field", h.AddUserInfoField)
-	r.PUT("/user-info-field", h.UpdateUserInfoField)
-	r.DELETE("/user-info-field/:user-info-field-id", h.RemoveUserInfoField)
-
-	// PERMISSION SERVICE
-	r.GET("/role/:role-id", h.GetRoleByID)
-	r.GET("/role", h.GetRolesList)
-	r.POST("/role", h.AddRole)
-	r.PUT("/role", h.UpdateRole)
-	r.DELETE("/role/:role-id", h.RemoveRole)
-
-	r.POST("/permission", h.CreatePermission)
-	r.GET("/permission", h.GetPermissionList)
-	r.GET("/permission/:permission-id", h.GetPermissionByID)
-	r.PUT("/permission", h.UpdatePermission)
-	r.DELETE("/permission/:permission-id", h.DeletePermission)
-
-	r.POST("/upsert-scope", h.UpsertScope)
-	r.POST("/permission-scope", h.AddPermissionScope)
-	r.DELETE("/permission-scope", h.RemovePermissionScope)
-
-	r.POST("/role-permission", h.AddRolePermission)
-	r.POST("/role-permission/many", h.AddRolePermissions)
-	r.DELETE("/role-permission", h.RemoveRolePermission)
-
-	r.POST("/user", h.CreateUser)
-	r.GET("/user", h.GetUserList)
-	r.GET("/user/:user-id", h.GetUserByID)
-	r.PUT("/user", h.UpdateUser)
-	r.DELETE("/user/:user-id", h.DeleteUser)
-	r.PUT("/user/reset-password", h.ResetPassword)
-	r.POST("/user/send-message", h.SendMessageToUserEmail)
-	r.POST("/add-user-project", h.AddUserProject)
-	r.DELETE("/delete-many-user-project", h.DeleteManyUserProject)
-
-	r.POST("/integration", h.CreateIntegration)
-	r.GET("/integration", h.GetIntegrationList)
-	r.GET("/integration/:integration-id", h.GetIntegrationByID)
-	r.DELETE("/integration/:integration-id", h.DeleteIntegration)
-	r.GET("/integration/:integration-id/session", h.GetIntegrationSessions)
-	r.POST("/integration/:integration-id/session", h.AddSessionToIntegration)
-	r.GET("/integration/:integration-id/session/:session-id", h.GetIntegrationToken)
-	r.DELETE("/integration/:integration-id/session/:session-id", h.RemoveSessionFromIntegration)
-
-	r.POST("/user-relation", h.AddUserRelation)
-	r.DELETE("/user-relation", h.RemoveUserRelation)
-
-	r.POST("/upsert-user-info/:user-id", h.UpsertUserInfo)
-
-	r.DELETE("/logout", h.Logout)
-	r.PUT("/refresh", h.RefreshToken)
-	r.POST("/has-acess", h.HasAccess)
-	r.POST("/has-access-super-admin", h.HasAccessSuperAdmin)
 
 	v2 := r.Group("/v2")
 	v2.POST("/login/superadmin", h.V2LoginSuperAdmin) // @TODO
@@ -123,16 +44,12 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 	v2.Use(h.AuthMiddleware())
 	{
-		// sms-otp-settings
-		v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
-		v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)
-		v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
-		v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
-		v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
 
-		v2.POST("/send/message", h.SendMessage)
+		// register
 		v2.POST("/register", h.V2Register)
+
 		v2.POST("/login/with-option", h.V2LoginWithOption)
+		v2.POST("/send/message", h.SendMessage)
 		v2.POST("/send-code-app", h.V2SendCodeApp)
 		v2.POST("/forgot-password", h.ForgotPassword)
 		v2.POST("/forgot-password-with-environment-email", h.ForgotPasswordWithEnvironmentEmail)
@@ -142,8 +59,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
-		v2.POST("/user/invite", h.AddUserToProject)
-		v2.POST("/user/check", h.V2GetUserByLoginType)
 
 		//connection
 		v2.POST("/connection", h.V2CreateConnection)
@@ -159,24 +74,29 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.PUT("/client-type", h.V2UpdateClientType)
 		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)
 
-		// PERMISSION SERVICE
+		// ROLE SERVICE
 		v2.GET("/role/:role-id", h.V2GetRoleByID)
 		v2.GET("/role", h.V2GetRolesList)
 		v2.POST("/role", h.V2AddRole)
 		v2.DELETE("/role/:role-id", h.V2RemoveRole)
 
+		// role-permission
 		v2.GET("/role-permission/detailed/:project-id/:role-id", h.GetListWithRoleAppTablePermissions)
 		v2.PUT("/role-permission/detailed", h.UpdateRoleAppTablePermissions)
 
+		// menu-permission
 		v2.GET("/menu-permission/detailed/:project-id/:role-id/:parent-id", h.GetListMenuPermissions)
 		v2.PUT("/menu-permission/detailed", h.UpdateMenuPermissions)
 
+		// user
 		v2.POST("/user", h.V2CreateUser)
 		v2.GET("/user", h.V2GetUserList)
 		v2.GET("/user/:user-id", h.V2GetUserByID)
 		v2.PUT("/user", h.V2UpdateUser)
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
 		v2.PUT("/user/reset-password", h.V2UserResetPassword)
+		v2.POST("/user/invite", h.AddUserToProject)
+		v2.POST("/user/check", h.V2GetUserByLoginType)
 
 		// api keys
 		v2.POST("/api-key/:project-id", h.CreateApiKey)
@@ -198,6 +118,17 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.GET("/login-strategy", h.GetLoginStrategy)
 		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
 		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
+	}
+
+	auth := v2.Group("/auth")
+	{
+		auth.POST("/register/:provider", h.V2RegisterProvider)
+		auth.POST("/verify/:verify_id", h.V2VerifyOtp)
+		auth.POST("/login/:provider", h.V2LoginProvider)
+		auth.POST("/refresh", h.V2RefreshToken)
+		auth.POST("/send-code", h.V2SendCode)
+		auth.POST("/logout", h.V2Logout)
+		auth.POST("/password/reset", h.V2UserResetPassword)
 	}
 
 	v2Sms := r.Group("/v2")
@@ -229,6 +160,13 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	v2.GET("/email-settings", h.GetEmailSettings)
 	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
 
+	// sms-otp-settings
+	v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
+	v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)
+	v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
+	v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
+	v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
+
 	v2.POST("/apple-id-settings", h.CreateAppleIdSettings)
 	v2.PUT("/apple-id-settings", h.UpdateAppleIdSettings)
 	v2.GET("/apple-id-settings", h.GetAppleIdSettings)
@@ -239,17 +177,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	v2.GET("/login-platform-type", h.GetLoginPlatformType)
 	v2.GET("/login-platform-type/:id", h.LoginPlatformTypePrimaryKey)
 	v2.DELETE("/login-platform-type/:id", h.DeleteLoginPlatformType)
-
-	auth := v2.Group("/auth")
-	{
-		auth.POST("/register/:provider", h.V2RegisterProvider)
-		auth.POST("/verify/:verify_id", h.V2VerifyOtp)
-		auth.POST("/login/:provider", h.V2LoginProvider)
-		auth.POST("/refresh", h.V2RefreshToken)
-		auth.POST("/send-code", h.V2SendCode)
-		auth.POST("/logout", h.V2Logout)
-		auth.POST("/password/reset", h.V2UserResetPassword)
-	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return
