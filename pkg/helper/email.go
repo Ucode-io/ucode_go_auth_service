@@ -88,7 +88,7 @@ func SendCodeToEmail(subject, to, code string, email string, password string) er
 		"Subject: " + subject + "\n" +
 		message + "\n"
 
-	if err := smtp.SendMail(host+hostPort, auth, from, []string{to}, []byte(msg)); err != nil {
+	if err := smtp.SendMail(host+hostPort, auth, email, []string{to}, []byte(msg)); err != nil {
 		return errors.Wrap(err, "error while sending message to email")
 	}
 

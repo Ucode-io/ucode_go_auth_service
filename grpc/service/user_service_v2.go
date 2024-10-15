@@ -1085,8 +1085,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	userProject, err := s.strg.User().UpdateUserToProject(
-		ctx,
+	userProject, err := s.strg.User().UpdateUserToProject(ctx,
 		&pb.AddUserToProjectReq{
 			UserId:       req.Id,
 			CompanyId:    req.CompanyId,
@@ -1104,10 +1103,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 		s.log.Error("!!!V2UpdateUser user project not update", logger.Error(err))
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}

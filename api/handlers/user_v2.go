@@ -295,22 +295,12 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// if !util.IsValidUUID(user.GetProjectId()) {
-	// 	h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
-	// 	return
-	// }
 	projectId, ok := c.Get("project_id")
 
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get project-id in query param"))
 		return
 	}
-
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	// 	return
-	// }
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
