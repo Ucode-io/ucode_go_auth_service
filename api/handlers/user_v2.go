@@ -86,7 +86,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
@@ -342,7 +342,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err = h.services.UserService().V2UpdateUser(
@@ -473,7 +473,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		} else {
 			logReq.Response = nil
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err := h.services.UserService().V2DeleteUser(

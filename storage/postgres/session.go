@@ -85,7 +85,6 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		queryInitial += `, role_id`
 		queryValue += `, $` + strconv.Itoa(argIndex)
 		args = append(args, entity.RoleId)
-		argIndex++
 	}
 
 	query := queryInitial + ")" + queryValue + ")" + queryReturn

@@ -33,10 +33,10 @@ func New(cfg config.Config, log logger.LoggerI, storage storage.StorageI) TaskSc
 
 func (t *TaskScheduler) RunJobs(ctx context.Context) error {
 	t.log.Info("Jobs Started:")
-	t.cron.AddFunc("0 0 1 * *", func() { // every month
+	_, _ = t.cron.AddFunc("0 0 1 * *", func() { // every month
 		t.ApiKeyLimit(context.Background())
 	})
-	t.cron.AddFunc("*/2 * * * *", func() { // every 2 minutes
+	_, _ = t.cron.AddFunc("*/2 * * * *", func() { // every 2 minutes
 		t.UpdateMonthlyLimit(context.Background())
 	})
 

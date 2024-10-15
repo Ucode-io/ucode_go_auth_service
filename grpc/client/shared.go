@@ -64,45 +64,33 @@ type sharedGrpcClients struct {
 
 func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 
-	connObjectBuilderService, err := grpc.Dial(
+	connObjectBuilderService, _ := grpc.Dial(
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
-	if err != nil {
-	}
-	connHighObjectBuilderService, err := grpc.Dial(
+	connHighObjectBuilderService, _ := grpc.Dial(
 		cfg.HighObjectBuilderServiceHost+cfg.HighObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
-	if err != nil {
-	}
-	connSmsService, err := grpc.Dial(
+	connSmsService, _ := grpc.Dial(
 		cfg.SmsServiceHost+cfg.SmsGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	if err != nil {
-	}
-	connWebPageService, err := grpc.Dial(
+	connWebPageService, _ := grpc.Dial(
 		cfg.WebPageServiceHost+cfg.WebPageServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	if err != nil {
-	}
-	connPostgresObjectBuilderService, err := grpc.Dial(
+	connPostgresObjectBuilderService, _ := grpc.Dial(
 		cfg.PostgresObjectBuidlerServiceHost+cfg.PostgresObjectBuidlerServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	if err != nil {
-	}
 
-	connGoObjectBuilderService, err := grpc.Dial(
+	connGoObjectBuilderService, _ := grpc.Dial(
 		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	if err != nil {
-	}
 
 	return &sharedGrpcClients{
 		objectBuilderService:             object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
