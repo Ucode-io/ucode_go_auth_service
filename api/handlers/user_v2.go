@@ -86,7 +86,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
@@ -295,22 +295,12 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// if !util.IsValidUUID(user.GetProjectId()) {
-	// 	h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
-	// 	return
-	// }
 	projectId, ok := c.Get("project_id")
 
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get project-id in query param"))
 		return
 	}
-
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	// 	return
-	// }
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
@@ -352,7 +342,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err = h.services.UserService().V2UpdateUser(
@@ -483,7 +473,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		} else {
 			logReq.Response = nil
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err := h.services.UserService().V2DeleteUser(

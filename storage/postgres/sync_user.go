@@ -23,7 +23,9 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to begin transaction")
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	query := `SELECT
 		id

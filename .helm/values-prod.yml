@@ -120,17 +120,13 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-        acme.cert-manager.io/http01-edit-in-place: "true"
+        # cert-manager.io/cluster-issuer: letsencrypt-prod
+        # acme.cert-manager.io/http01-edit-in-place: "true"
       type: web
       hosts:
         - host: "api.auth.u-code.io"
           path: /
           servicePort: 8080
-      tls:
-        - secretName: auth-api-tls
-          hosts:
-            - "api.auth.u-code.io"
     - annotations:
         # type of authentication
         nginx.ingress.kubernetes.io/auth-type: basic
@@ -142,17 +138,13 @@ ingress:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
         kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-        acme.cert-manager.io/http01-edit-in-place: "true"
+        # cert-manager.io/cluster-issuer: letsencrypt-prod
+        # acme.cert-manager.io/http01-edit-in-place: "true"
       type: auth
       hosts:
         - host: "api.auth.u-code.io"
           path: /swagger
           servicePort: 8080
-      tls:
-        - secretName: api-auth-tls
-          hosts:
-            - "api.auth.u-code.io"
 
 resources:
   limits:

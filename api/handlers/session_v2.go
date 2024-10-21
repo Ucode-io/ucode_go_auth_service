@@ -164,7 +164,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
-		go h.versionHistory(logReq)
+		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
 	resp, err = h.services.SessionService().V2Login(
@@ -472,34 +472,33 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 	if err != nil {
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
+
+		if httpErrorStr == "user not found" {
+			err := errors.New("Пользователь не найдено")
+			h.handleResponse(c, http.NotFound, err.Error())
+			return
+		} else if httpErrorStr == "user verified but not found" {
+			err := errors.New("Пользователь проверен, но не найден")
+			h.handleResponse(c, http.OK, err.Error())
+			return
+		} else if httpErrorStr == "user has been expired" {
+			err := errors.New("срок действия пользователя истек")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		} else if httpErrorStr == "invalid username" {
+			err := errors.New("неверное имя пользователя")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		} else if httpErrorStr == "invalid password" {
+			err := errors.New("неверное пароль")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		} else {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
 	}
-	if httpErrorStr == "user not found" {
-		err := errors.New("Пользователь не найдено")
-		h.handleResponse(c, http.NotFound, err.Error())
-		return
-	} else if httpErrorStr == "user verified but not found" {
-		err := errors.New("Пользователь проверен, но не найден")
-		h.handleResponse(c, http.OK, err.Error())
-		return
-	} else if httpErrorStr == "user has been expired" {
-		err := errors.New("срок действия пользователя истек")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid username" {
-		err := errors.New("неверное имя пользователя")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid password" {
-		err := errors.New("неверное пароль")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	} else if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+
 	res := &auth_service.V2LoginSuperAdminRes{
 		UserFound: resp.GetUserFound(),
 		Token:     resp.GetToken(),
@@ -721,7 +720,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 			err := errors.New("неверный пароль")
 			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
-		} else if err != nil {
+		} else {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}

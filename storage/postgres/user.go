@@ -259,22 +259,23 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 	defer dbSpan.Finish()
 
 	query := `UPDATE "user" SET
-		company_id = :company_id,
-		phone = :phone,
-		email = :email,
-		login = :login,
+		company_id = $1,
+		phone = $2,
+		email = $3,
+		login = $4,
 		updated_at = now()
 	WHERE
-		id = :id`
+		id = $5`
 
-	params := map[string]interface{}{
-		"phone":      entity.GetPhone(),
-		"email":      entity.GetEmail(),
-		"login":      entity.GetLogin(),
-		"company_id": entity.GetCompanyId(),
+	params := []interface{}{
+		entity.GetCompanyId(),
+		entity.GetPhone(),
+		entity.GetEmail(),
+		entity.GetLogin(),
+		entity.GetId(),
 	}
-	q, arr := helper.ReplaceQueryParams(query, params)
-	result, err := r.db.Exec(ctx, q, arr...)
+
+	result, err := r.db.Exec(ctx, query, params...)
 	if err != nil {
 		return 0, err
 	}
@@ -1007,7 +1008,9 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	query := `DELETE FROM "user_project" 
 				WHERE 

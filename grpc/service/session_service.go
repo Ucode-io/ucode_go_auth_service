@@ -170,16 +170,14 @@ func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 }
 
 func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
-	res := &pb.RefreshTokenResponse{}
+	var res = &pb.RefreshTokenResponse{}
 	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	session := &pb.Session{}
-
-	session, err = s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!RefreshToken session getbypk--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
