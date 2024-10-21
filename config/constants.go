@@ -42,11 +42,16 @@ const (
 	HIGH_NODE_TYPE   string = "HIGH"
 	ENTER_PRICE_TYPE string = "ENTER_PRICE"
 
-	WithGoogle    = "google"
-	Default       = "default"
-	WithPhone     = "phone"
-	WithApple     = "apple"
-	WithEmail     = "email"
+	WithGoogle = "google"
+	Default    = "default"
+	WithPhone  = "phone"
+	WithApple  = "apple"
+	WithEmail  = "email"
+
+	K8SNamespace string = "cp-region-type-id"
+	LanguageId   string = "e2d68f08-8587-4136-8cd4-c26bf1b9cda1"
+	NativeName   string = "English"
+	ShortName    string = "en"
 )
 
 var (

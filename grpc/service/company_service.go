@@ -54,7 +54,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			s.log.Info("Memory used over 300 mb", logger.Any("CompanyRegister", memoryUsed))
 		}
 	}()
-	//@TODO:: refactor later
+
 	tempOwnerId, err := uuid.NewRandom()
 	if err != nil {
 		s.log.Error("---RegisterCompany-->NewUUID", logger.Error(err))
@@ -62,10 +62,8 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	}
 
 	companyPKey, err := s.services.CompanyServiceClient().Create(ctx, &company_service.CreateCompanyRequest{
-		Title:       req.Name,
-		Logo:        "",
-		Description: "",
-		OwnerId:     tempOwnerId.String(),
+		Title:   req.Name,
+		OwnerId: tempOwnerId.String(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->CreateCompanyServiceClient", logger.Error(err))
@@ -74,7 +72,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	project, err := s.services.ProjectServiceClient().Create(ctx, &company_service.CreateProjectRequest{
 		CompanyId:    companyPKey.GetId(),
-		K8SNamespace: "cp-region-type-id",
+		K8SNamespace: config.K8SNamespace,
 		Title:        req.GetName(),
 	})
 	if err != nil {
@@ -82,21 +80,18 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	_, _ = s.services.ProjectServiceClient().Update(
-		ctx,
-		&company_service.Project{
-			CompanyId:    companyPKey.GetId(),
-			K8SNamespace: "cp-region-type-id",
-			ProjectId:    project.GetProjectId(),
-			Title:        req.Name,
-			Language: []*company_service.Language{{
-				Id:         "e2d68f08-8587-4136-8cd4-c26bf1b9cda1",
-				Name:       "English",
-				NativeName: "English",
-				ShortName:  "en",
-			}},
-		},
-	)
+	_, _ = s.services.ProjectServiceClient().Update(ctx, &company_service.Project{
+		CompanyId:    companyPKey.GetId(),
+		K8SNamespace: config.K8SNamespace,
+		ProjectId:    project.GetProjectId(),
+		Title:        req.Name,
+		Language: []*company_service.Language{{
+			Id:         config.LanguageId,
+			Name:       config.NativeName,
+			NativeName: config.NativeName,
+			ShortName:  config.ShortName,
+		}},
+	})
 
 	environment, err := s.services.EnvironmentService().Create(ctx,
 		&company_service.CreateEnvironmentRequest{
@@ -117,28 +112,23 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	createUserRes, err := s.strg.User().Create(ctx,
-		&pb.CreateUserRequest{
-			Phone:     req.GetUserInfo().GetPhone(),
-			Email:     req.GetUserInfo().GetEmail(),
-			Login:     req.GetUserInfo().GetLogin(),
-			Password:  hashedPassword,
-			Active:    1,
-			PhotoUrl:  "",
-			CompanyId: companyPKey.GetId(),
-		},
-	)
+	createUserRes, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
+		Phone:     req.GetUserInfo().GetPhone(),
+		Email:     req.GetUserInfo().GetEmail(),
+		Login:     req.GetUserInfo().GetLogin(),
+		Password:  hashedPassword,
+		Active:    1,
+		CompanyId: companyPKey.GetId(),
+	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->CreateUser", logger.Error(err))
 		return nil, err
 	}
 
 	_, err = s.services.CompanyServiceClient().Update(ctx, &company_service.Company{
-		Id:          companyPKey.Id,
-		Name:        req.Name,
-		Logo:        "",
-		Description: "",
-		OwnerId:     createUserRes.GetId(),
+		Id:      companyPKey.Id,
+		Name:    req.Name,
+		OwnerId: createUserRes.GetId(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany-->UpdateCompany", logger.Error(err))
@@ -156,30 +146,26 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	resource, err := s.services.ResourceService().CreateResource(ctx,
-		&company_service.CreateResourceReq{
-			CompanyId:     companyPKey.GetId(),
-			EnvironmentId: environment.GetId(),
-			ProjectId:     project.GetProjectId(),
-			Resource: &company_service.Resource{
-				ResourceType: 1,
-				NodeType:     config.LOW_NODE_TYPE,
-			},
-			UserId: createUserRes.GetId(),
+	resource, err := s.services.ResourceService().CreateResource(ctx, &company_service.CreateResourceReq{
+		CompanyId:     companyPKey.GetId(),
+		EnvironmentId: environment.GetId(),
+		ProjectId:     project.GetProjectId(),
+		Resource: &company_service.Resource{
+			ResourceType: 1,
+			NodeType:     config.LOW_NODE_TYPE,
 		},
-	)
+		UserId: createUserRes.GetId(),
+	})
 	if err != nil {
 		s.log.Error("---RegisterCompany-AutoCreateResource--->", logger.Error(err))
 		return nil, err
 	}
 
-	_, err = s.services.ServiceResource().Update(ctx,
-		&company_service.UpdateServiceResourceReq{
-			EnvironmentId:    environment.GetId(),
-			ProjectId:        project.GetProjectId(),
-			ServiceResources: helper.MakeBodyServiceResource(resource.GetId()),
-		},
-	)
+	_, err = s.services.ServiceResource().Update(ctx, &company_service.UpdateServiceResourceReq{
+		EnvironmentId:    environment.GetId(),
+		ProjectId:        project.GetProjectId(),
+		ServiceResources: helper.MakeBodyServiceResource(resource.GetId()),
+	})
 	if err != nil {
 		s.log.Error("---RegisterCompany-AutoSettingMicroServices--->", logger.Error(err))
 		return nil, err
