@@ -62,7 +62,7 @@ func (s *userService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
 	if !email {
-		err = fmt.Errorf("email is not valid")
+		err = config.ErrInvalidEmail
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (s *userService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	email := emailRegex.MatchString(req.Email)
 	if !email {
-		err = fmt.Errorf("email is not valid")
+		err = config.ErrInvalidEmail
 		s.log.Error("!!!UpdateUser--->", logger.Error(err))
 		return nil, err
 	}

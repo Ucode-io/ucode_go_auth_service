@@ -10,10 +10,8 @@ import (
 const (
 	DatabaseQueryTimeLayout = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
 	// DatabaseTimeLayout
-	DatabaseTimeLayout string = time.RFC3339
-	// AccessTokenExpiresInTime time.Duration = 1 * time.Minute
-	AccessTokenExpiresInTime time.Duration = 1 * 60 * 24 * time.Minute
-	// RefreshTokenExpiresInTime ... 30 * 24 * 60
+	DatabaseTimeLayout        string        = time.RFC3339
+	AccessTokenExpiresInTime  time.Duration = 1 * 60 * 24 * time.Minute
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
 	// ProjectID
