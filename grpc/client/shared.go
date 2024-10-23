@@ -17,9 +17,6 @@ type SharedServiceManagerI interface {
 	LoginService() object_builder_service.LoginServiceClient
 	GoLoginService() new_object_builder_service.LoginServiceClient
 	BuilderPermissionService() object_builder_service.PermissionServiceClient
-	PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
-	PostgresLoginService() object_builder_service.LoginServiceClient
-	PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient
 	VersionHistoryService() object_builder_service.VersionHistoryServiceClient
 
 	GoObjectBuilderService() new_object_builder_service.ObjectBuilderServiceClient
@@ -39,14 +36,11 @@ type SharedServiceManagerI interface {
 }
 
 type sharedGrpcClients struct {
-	objectBuilderService             object_builder_service.ObjectBuilderServiceClient
-	loginService                     object_builder_service.LoginServiceClient
-	goLoginService                   new_object_builder_service.LoginServiceClient
-	builderPermissionService         object_builder_service.PermissionServiceClient
-	postgresObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
-	postgresLoginService             object_builder_service.LoginServiceClient
-	postgresBuilderPermissionService object_builder_service.PermissionServiceClient
-	versionHisotryService            object_builder_service.VersionHistoryServiceClient
+	objectBuilderService     object_builder_service.ObjectBuilderServiceClient
+	loginService             object_builder_service.LoginServiceClient
+	goLoginService           new_object_builder_service.LoginServiceClient
+	builderPermissionService object_builder_service.PermissionServiceClient
+	versionHisotryService    object_builder_service.VersionHistoryServiceClient
 
 	goObjectBuilderService           new_object_builder_service.ObjectBuilderServiceClient
 	goItemsService                   new_object_builder_service.ItemsServiceClient
@@ -63,27 +57,25 @@ type sharedGrpcClients struct {
 }
 
 func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
-
 	connObjectBuilderService, _ := grpc.Dial(
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
+
 	connHighObjectBuilderService, _ := grpc.Dial(
 		cfg.HighObjectBuilderServiceHost+cfg.HighObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
 	)
+
 	connSmsService, _ := grpc.Dial(
 		cfg.SmsServiceHost+cfg.SmsGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
+
 	connWebPageService, _ := grpc.Dial(
 		cfg.WebPageServiceHost+cfg.WebPageServicePort,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	connPostgresObjectBuilderService, _ := grpc.Dial(
-		cfg.PostgresObjectBuidlerServiceHost+cfg.PostgresObjectBuidlerServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
@@ -93,14 +85,11 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 	)
 
 	return &sharedGrpcClients{
-		objectBuilderService:             object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
-		loginService:                     object_builder_service.NewLoginServiceClient(connObjectBuilderService),
-		goLoginService:                   new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
-		builderPermissionService:         object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
-		postgresLoginService:             object_builder_service.NewLoginServiceClient(connPostgresObjectBuilderService),
-		postgresObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connPostgresObjectBuilderService),
-		postgresBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connPostgresObjectBuilderService),
-		versionHisotryService:            object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
+		objectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
+		loginService:             object_builder_service.NewLoginServiceClient(connObjectBuilderService),
+		goLoginService:           new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
+		builderPermissionService: object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
+		versionHisotryService:    object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 
 		highObjectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connHighObjectBuilderService),
 		highLoginService:             object_builder_service.NewLoginServiceClient(connHighObjectBuilderService),
@@ -154,24 +143,12 @@ func (g *sharedGrpcClients) BuilderPermissionService() object_builder_service.Pe
 	return g.builderPermissionService
 }
 
-func (g *sharedGrpcClients) PostgresObjectBuilderService() object_builder_service.ObjectBuilderServiceClient {
-	return g.postgresObjectBuilderService
-}
-
-func (g *sharedGrpcClients) PostgresLoginService() object_builder_service.LoginServiceClient {
-	return g.postgresLoginService
-}
-
 func (g *sharedGrpcClients) ObjectBuilderService() object_builder_service.ObjectBuilderServiceClient {
 	return g.objectBuilderService
 }
 
 func (g *sharedGrpcClients) SmsService() sms_service.SmsServiceClient {
 	return g.smsService
-}
-
-func (g *sharedGrpcClients) PostgresBuilderPermissionService() object_builder_service.PermissionServiceClient {
-	return g.postgresBuilderPermissionService
 }
 
 func (g *sharedGrpcClients) HighObjectBuilderService() object_builder_service.ObjectBuilderServiceClient {

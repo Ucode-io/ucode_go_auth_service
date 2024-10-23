@@ -377,15 +377,15 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteUser(c *gin.Context) {
 	var (
-		// resourceEnvironment *company_service.ResourceEnvironment
-		err error
+		err    error
+		userID = c.Param("user-id")
 	)
-	userID := c.Param("user-id")
 
 	if !util.IsValidUUID(userID) {
 		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
 		return
 	}
+
 	clientTypeID := c.Query("client-type-id")
 	if clientTypeID == "" {
 		h.handleResponse(c, http.InvalidArgument, "client type id is required")
@@ -398,52 +398,20 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	}
 
 	projectID := c.Query("project-id")
-
 	if !util.IsValidUUID(projectID) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
-
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	// 	return
-	// }
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+
 	project, _ := h.services.ProjectServiceClient().GetById(context.Background(), &pb.GetProjectByIdRequest{
 		ProjectId: projectID,
 	})
-
-	// if util.IsValidUUID(resourceId.(string)) {
-	// 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
-	// 		c.Request.Context(),
-	// 		&company_service.GetResourceEnvironmentReq{
-	// 			EnvironmentId: environmentId.(string),
-	// 			ResourceId:    resourceId.(string),
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// } else {
-	// 	resourceEnvironment, err = h.services.ResourceService().GetDefaultResourceEnvironment(
-	// 		c.Request.Context(),
-	// 		&company_service.GetDefaultResourceEnvironmentReq{
-	// 			ResourceId: resourceId.(string),
-	// 			ProjectId:  projectID,
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.GRPCError, err.Error())
-	// 		return
-	// 	}
-	// }
 
 	resource, _ := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
@@ -492,27 +460,6 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-
-	// userDataToMap["id"] = userID
-	// structData, err := helper.ConvertMapToStruct(userDataToMap)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
-
-	// _, err = h.services.ObjectBuilderService().Delete(
-	// 	context.Background(),
-	// 	&obs.CommonMessage{
-	// 		TableSlug: "user",
-	// 		Data:      structData,
-	// 		ProjectId: resourceEnvironment.GetId(),
-	// 	},
-	// )
-
-	// if err != nil {
-	// 	h.handleResponse(c, http.InternalServerError, err.Error())
-	// 	return
-	// }
 
 	h.handleResponse(c, http.NoContent, resp)
 }
@@ -639,34 +586,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			tableSlug = clientTypeTableSlug
 		}
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: tableSlug,
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.InternalServerError, err.Error())
-			return
-		}
-	case 3:
-		clientType, _ := services.PostgresObjectBuilderService().GetSingle(
-			context.Background(),
-			&obs.CommonMessage{
-				TableSlug: "client_type",
-				Data: &structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"id": structpb.NewStringValue(req.ClientTypeId),
-					},
-				},
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
-			tableSlug = clientTypeTableSlug
-		}
-		_, err = services.PostgresObjectBuilderService().Create(
 			context.Background(),
 			&obs.CommonMessage{
 				TableSlug: tableSlug,

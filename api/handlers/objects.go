@@ -89,15 +89,6 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 				Data:      structData,
 			},
 		)
-	case 3:
-		resp, _ = services.PostgresObjectBuilderService().GetList(
-			c.Request.Context(),
-			&obs.CommonMessage{
-				TableSlug: c.Param("table_slug"),
-				ProjectId: resource.ResourceEnvironmentId,
-				Data:      structData,
-			},
-		)
 	}
 
 	h.handleResponse(c, http.OK, resp)

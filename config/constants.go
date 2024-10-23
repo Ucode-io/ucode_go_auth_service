@@ -52,6 +52,9 @@ const (
 	LanguageId   string = "e2d68f08-8587-4136-8cd4-c26bf1b9cda1"
 	NativeName   string = "English"
 	ShortName    string = "en"
+
+	UserProjectIdConstraint   string = "user_project_idx_unique"
+	DuplicateUserProjectError string = "user with this client_type already exists in the project"
 )
 
 var (

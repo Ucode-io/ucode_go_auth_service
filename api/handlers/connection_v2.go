@@ -667,11 +667,7 @@ func (h *Handler) GetConnectionOptions(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c,
-		projectId,
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, projectId, resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -694,23 +690,7 @@ func (h *Handler) GetConnectionOptions(c *gin.Context) {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
-	case 3:
-		resp, err = services.PostgresLoginService().GetConnetionOptions(
-			c.Request.Context(),
-			&obs.GetConnetionOptionsRequest{
-				ConnectionId:          connectionId,
-				ResourceEnvironmentId: resource.ResourceEnvironmentId,
-				UserId:                userId,
-			},
-		)
-
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
 	}
-
-	// this is get list connection list from object builder
 
 	h.handleResponse(c, http.OK, resp)
 }

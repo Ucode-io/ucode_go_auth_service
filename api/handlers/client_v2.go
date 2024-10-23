@@ -152,6 +152,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
 		&pbCompany.GetSingleServiceResourceReq{
@@ -204,20 +205,14 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 	var err error
 
 	clientTypeid := c.Param("client-type-id")
-
 	if !util.IsValidUUID(clientTypeid) {
 		h.handleResponse(c, http.InvalidArgument, "client_type id is an invalid uuid")
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
-	if !ok {
+	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.BadRequest, "project id is required")
-		return
-	}
-
-	if !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -250,7 +245,6 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 			NodeType:               resource.NodeType,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -281,8 +275,7 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 		resp       *auth_service.CommonMessage
 	)
 
-	err := c.ShouldBindJSON(&clientType)
-	if err != nil {
+	if err := c.ShouldBindJSON(&clientType); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -372,10 +365,9 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteClientType(c *gin.Context) {
-	clientTypeid := c.Param("client-type-id")
 	var (
-		// resourceEnvironment *obs.ResourceEnvironment
-		err error
+		clientTypeid = c.Param("client-type-id")
+		err          error
 	)
 
 	if !util.IsValidUUID(clientTypeid) {

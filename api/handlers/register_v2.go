@@ -358,7 +358,6 @@ func (h *Handler) V2Register(c *gin.Context) {
 		if _, ok := body.Data[cfg.WithPhone]; !ok {
 			h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
 			return
-
 		}
 	default:
 		h.handleResponse(c, http.BadRequest, "register with google and apple not implemented")
