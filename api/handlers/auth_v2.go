@@ -10,7 +10,6 @@ import (
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 
-	// pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -34,8 +33,7 @@ import (
 func (h *Handler) V2Logout(c *gin.Context) {
 	var logout auth_service.LogoutRequest
 
-	err := c.ShouldBindJSON(&logout)
-	if err != nil {
+	if err := c.ShouldBindJSON(&logout); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -76,12 +74,9 @@ func (h *Handler) V2Logout(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RegisterProvider(c *gin.Context) {
-	var (
-		body models.RegisterOtp
-	)
+	var body models.RegisterOtp
 
-	err := c.ShouldBindJSON(&body)
-	if err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -102,6 +97,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "invalid register type")
 		return
 	}
+
 	if _, ok := body.Data["client_type_id"].(string); !ok {
 		if !util.IsValidUUID(body.Data["client_type_id"].(string)) {
 			h.handleResponse(c, http.BadRequest, "client_type_id is an invalid uuid")
@@ -110,6 +106,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "client_type_id is required")
 		return
 	}
+
 	if _, ok := body.Data["role_id"].(string); !ok {
 		if !util.IsValidUUID(body.Data["role_id"].(string)) {
 			h.handleResponse(c, http.BadRequest, "role_id is an invalid uuid")
@@ -118,9 +115,9 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "role_id is required")
 		return
 	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-
 		h.handleResponse(c, http.BadRequest, "cant get project_id")
 		return
 	}
@@ -258,9 +255,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		resourceEnvironment *obs.ResourceEnvironment
 	)
 
-	err := c.ShouldBindJSON(&body)
-
-	if err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -276,20 +271,18 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	}
 
 	resourceId, ok := c.Get("resource_id")
-	if !ok {
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	if !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),

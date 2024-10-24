@@ -161,16 +161,6 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 			s.log.Error("!!!GetRoleById.ObjectBuilderService.GetSingle--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-	case 3:
-		result, err = services.PostgresObjectBuilderService().GetSingle(ctx, &pbObject.CommonMessage{
-			TableSlug: "role",
-			Data:      structData,
-			ProjectId: req.GetResourceEnvironmentId(),
-		})
-		if err != nil {
-			s.log.Error("!!!GetRoleById.PostgresObjectBuilderService.GetSingle--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 	}
 
 	return &pb.CommonMessage{
@@ -299,16 +289,6 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 		})
 		if err != nil {
 			s.log.Error("!!!UpdateRole.ObjectBuilderService.Update--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-	case 3:
-		result, err = services.PostgresObjectBuilderService().Update(ctx, &pbObject.CommonMessage{
-			TableSlug: "role",
-			Data:      structData,
-			ProjectId: req.GetResourceEnvironmentId(),
-		})
-		if err != nil {
-			s.log.Error("!!!UpdateRole.PostgresObjectBuilderService.Update--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}

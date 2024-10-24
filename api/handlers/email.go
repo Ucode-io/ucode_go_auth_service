@@ -37,7 +37,6 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) SendMessageToEmail(c *gin.Context) {
-
 	var (
 		resourceEnvironment *obs.ResourceEnvironment
 		request             models.Email
@@ -46,8 +45,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		text                string
 	)
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -70,6 +68,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 			return
 		}
 	}
+
 	if request.Phone != "" {
 		valid := util.IsValidPhone(request.Phone)
 		if !valid {
@@ -89,19 +88,17 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 	}
 
 	resourceId, ok := c.Get("resource_id")
-	if !ok {
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
 		return
 	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
 		return
 	}
-	if !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id").Error())
-		return
-	}
+
 	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
@@ -114,11 +111,7 @@ func (h *Handler) SendMessageToEmail(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c,
-		resourceEnvironment.ProjectId,
-		resourceEnvironment.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, resourceEnvironment.ProjectId, resourceEnvironment.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -342,9 +335,7 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 		resourceEnvironment *obs.ResourceEnvironment
 	)
 
-	err := c.ShouldBindJSON(&body)
-
-	if err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -355,20 +346,18 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 	}
 
 	resourceId, ok := c.Get("resource_id")
-	if !ok {
+	if !ok || !util.IsValidUUID(resourceId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
 		return
 	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
-	if !util.IsValidUUID(resourceId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-		return
-	}
-	resourceEnvironment, err = h.services.ResourceService().GetResourceEnvironment(
+
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
 		c.Request.Context(),
 		&obs.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),

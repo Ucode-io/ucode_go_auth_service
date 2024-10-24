@@ -2205,13 +2205,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
-	case 3:
-		data, err = services.PostgresLoginService().LoginData(ctx, reqLoginData)
-		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
-			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
-		}
 	}
 
 	if !data.UserFound {

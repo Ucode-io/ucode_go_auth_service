@@ -46,7 +46,6 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
-
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_register.RegisterUser")
 	defer dbSpan.Finish()
 
@@ -147,6 +146,22 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		tableSlug    = "user"
 	)
 
+	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+		UserId:       userId,
+		RoleId:       data.RoleId,
+		CompanyId:    data.CompanyId,
+		ProjectId:    data.ProjectId,
+		ClientTypeId: data.ClientTypeId,
+		EnvId:        data.EnvironmentId,
+	})
+	if err != nil {
+		rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
+		if strings.Contains(err.Error(), config.UserProjectIdConstraint) {
+			return nil, status.Error(codes.Internal, config.DuplicateUserProjectError)
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	switch resourceType {
 	case 1:
 		response, err := services.GetObjectBuilderServiceByType(data.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
@@ -179,7 +194,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			rs.log.Error("!!!CreateUser--->NodeType Create", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-
 		objectBuilderUserId = cast.ToString(cast.ToStringMap(getResp.Data.AsMap()["data"])["guid"])
 	case 3:
 		response, err := services.GoItemService().GetSingle(ctx, &new_object_builder_service.CommonMessage{
@@ -215,18 +229,6 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		objectBuilderUserId = cast.ToString(getResp.Data.AsMap()["guid"])
 	}
 
-	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-		UserId:       userId,
-		RoleId:       data.RoleId,
-		CompanyId:    data.CompanyId,
-		ProjectId:    data.ProjectId,
-		ClientTypeId: data.ClientTypeId,
-		EnvId:        data.EnvironmentId,
-	})
-	if err != nil {
-		rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
-		return nil, err
-	}
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                userId,
 		ProjectId:             data.ProjectId,
