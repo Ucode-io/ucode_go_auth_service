@@ -27,7 +27,7 @@ func TestRegisterCompany(t *testing.T) {
 	}
 	defer pgStore.CloseDB()
 
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()

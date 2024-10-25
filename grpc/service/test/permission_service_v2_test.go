@@ -17,7 +17,7 @@ var (
 )
 
 func TestAddRole(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -47,7 +47,7 @@ func TestAddRole(t *testing.T) {
 	roleId = userData["guid"].(string)
 }
 func TestV2GetRoleById(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -66,7 +66,7 @@ func TestV2GetRoleById(t *testing.T) {
 	}
 }
 func TestV2GetRolesList(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -85,7 +85,7 @@ func TestV2GetRolesList(t *testing.T) {
 }
 
 func TestV2UpdateRole(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -108,7 +108,7 @@ func TestV2UpdateRole(t *testing.T) {
 }
 
 func TestV2RemoveRole(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()

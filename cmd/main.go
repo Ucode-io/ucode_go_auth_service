@@ -85,7 +85,7 @@ func main() {
 	defer pgStore.CloseDB()
 
 	// connection with auth and company
-	baseSvcs, err := client.NewGrpcClients(baseCfg)
+	baseSvcs, err := client.NewGrpcClients(ctx, baseCfg)
 	if err != nil {
 		log.Panic("--- U-code auth service and company service grpc client error: ", logger.Error(err))
 	}

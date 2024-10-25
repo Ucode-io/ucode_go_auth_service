@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	}
 	defer pgStore.CloseDB()
 
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
