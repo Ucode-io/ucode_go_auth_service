@@ -9,11 +9,11 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
@@ -45,11 +45,10 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 }
 
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
-	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_register.RegisterUser")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_register.RegisterUser", data)
 	defer dbSpan.Finish()
 
-	body := data.Data.AsMap()
+	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -65,6 +64,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	}()
 
 	var (
+		body = data.Data.AsMap()
+
 		foundUser                   *pb.User
 		err                         error
 		userId, objectBuilderUserId string

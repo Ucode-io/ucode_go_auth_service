@@ -34,9 +34,11 @@ func NewSmsOtpSettingsService(cfg config.BaseConfig, log logger.LoggerI, strg st
 
 func (s *smsOtpSettingsService) Create(ctx context.Context, req *pb.CreateSmsOtpSettingsRequest) (*pb.SmsOtpSettings, error) {
 	res, err := s.strg.SmsOtpSettings().Create(ctx, req)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return res, nil
 }
 func (s *smsOtpSettingsService) Update(ctx context.Context, req *pb.SmsOtpSettings) (*pb.SmsOtpSettings, error) {
@@ -44,9 +46,11 @@ func (s *smsOtpSettingsService) Update(ctx context.Context, req *pb.SmsOtpSettin
 	if err != nil {
 		return nil, err
 	}
+
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
+
 	res, err := s.strg.SmsOtpSettings().GetById(ctx, &pb.SmsOtpSettingsPrimaryKey{
 		Id: req.Id,
 	})
@@ -60,6 +64,7 @@ func (s *smsOtpSettingsService) GetById(ctx context.Context, req *pb.SmsOtpSetti
 	if err != nil {
 		return nil, err
 	}
+
 	return res, nil
 }
 func (s *smsOtpSettingsService) GetList(ctx context.Context, req *pb.GetListSmsOtpSettingsRequest) (*pb.SmsOtpSettingsResponse, error) {
@@ -67,6 +72,7 @@ func (s *smsOtpSettingsService) GetList(ctx context.Context, req *pb.GetListSmsO
 	if err != nil {
 		return nil, err
 	}
+
 	return res, nil
 }
 func (s *smsOtpSettingsService) Delete(ctx context.Context, req *pb.SmsOtpSettingsPrimaryKey) (*emptypb.Empty, error) {
@@ -74,6 +80,7 @@ func (s *smsOtpSettingsService) Delete(ctx context.Context, req *pb.SmsOtpSettin
 	if err != nil {
 		return nil, err
 	}
+
 	if rowsAffected <= 0 {
 		err = status.Error(codes.InvalidArgument, "no rows were affected")
 		return nil, status.Error(codes.InvalidArgument, err.Error())

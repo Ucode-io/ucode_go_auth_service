@@ -12,6 +12,7 @@ import (
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/pkg/util"
 
@@ -25,7 +26,7 @@ import (
 )
 
 func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWithGoogleRequest) (resp *pb.User, err error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.RegisterWithGoogle")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.RegisterWithGoogle", req)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -200,7 +201,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 }
 
 func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUserRequest) (resp *pb.User, err error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.RegisterUserViaEmail")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.RegisterUserViaEmail", req)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -391,14 +392,13 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			return resp, err
 		}
 	}
-
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
-	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2CreateUser")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2CreateUser", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -547,9 +547,10 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 }
 
 func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey) (*pb.User, error) {
-	s.log.Info("---V2GetUserByID--->", logger.Any("req", req))
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserByID")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserByID", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---V2GetUserByID--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -715,10 +716,10 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 }
 
 func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
-	s.log.Info("---V2GetUserList--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserList")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserList", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---V2GetUserList--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -946,10 +947,10 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 }
 
 func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
-	s.log.Info("---V2UpdateUser--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2UpdateUser")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2UpdateUser", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---V2UpdateUser--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -1078,10 +1079,10 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 }
 
 func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*emptypb.Empty, error) {
-	s.log.Info("---V2DeleteUser--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2DeleteUser")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2DeleteUser", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---V2DeleteUser--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -1179,10 +1180,10 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 }
 
 func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
-	s.log.Info("AddUserToProject", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.AddUserToProject")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.AddUserToProject", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("AddUserToProject", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)

@@ -33,9 +33,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 	}()
 
 	s.log.Info("---CreateClientType--->", logger.Any("req", req))
-	var (
-		result *pbObject.CommonMessage
-	)
+	var result *pbObject.CommonMessage
 
 	requestToObjBuilderService := &pb.CreateClientTypeRequestToObjService{
 		Name:         req.Name,
@@ -52,10 +50,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}

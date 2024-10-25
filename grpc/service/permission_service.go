@@ -50,7 +50,6 @@ func (s *permissionService) GetRoleById(ctx context.Context, req *pb.RolePrimary
 	s.log.Info("---GetRoleById--->", logger.Any("req", req))
 
 	res, err := s.strg.Role().GetRoleByIdDetailed(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetRoleById--->", logger.Error(err))
 		return res, status.Error(codes.InvalidArgument, err.Error())
@@ -63,7 +62,6 @@ func (s *permissionService) GetRolesList(ctx context.Context, req *pb.GetRolesLi
 	s.log.Info("---GetRolesList--->", logger.Any("req", req))
 
 	res, err := s.strg.Role().GetList(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetRolesList--->", logger.Error(err))
 		return res, status.Error(codes.InvalidArgument, err.Error())
@@ -76,7 +74,6 @@ func (s *permissionService) UpdateRole(ctx context.Context, req *pb.UpdateRoleRe
 	s.log.Info("---UpdateRole--->", logger.Any("req", req))
 
 	rowsAffected, err := s.strg.Role().Update(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!UpdateRole--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -86,10 +83,7 @@ func (s *permissionService) UpdateRole(ctx context.Context, req *pb.UpdateRoleRe
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	res, err := s.strg.Role().GetByPK(ctx, &pb.RolePrimaryKey{
-		Id: req.Id,
-	})
-
+	res, err := s.strg.Role().GetByPK(ctx, &pb.RolePrimaryKey{Id: req.Id})
 	if err != nil {
 		s.log.Error("!!!UpdateRole--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -102,14 +96,12 @@ func (s *permissionService) RemoveRole(ctx context.Context, req *pb.RolePrimaryK
 	s.log.Info("---RemoveRole--->", logger.Any("req", req))
 
 	res, err := s.strg.Role().GetByPK(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetRolePlatformByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	rowsAffected, err := s.strg.Role().Remove(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!RemoveRole--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -126,7 +118,6 @@ func (s *permissionService) CreatePermission(ctx context.Context, req *pb.Create
 	s.log.Info("---CreatePermission--->", logger.Any("req", req))
 
 	pKey, err := s.strg.Permission().Create(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!CreatePermission--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -139,7 +130,6 @@ func (s *permissionService) GetPermissionByID(ctx context.Context, req *pb.Permi
 	s.log.Info("---GetPermissionByID--->", logger.Any("req", req))
 
 	res, err := s.strg.Permission().GetByPK(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetPermissionByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -152,7 +142,6 @@ func (s *permissionService) GetPermissionList(ctx context.Context, req *pb.GetPe
 	s.log.Info("---GetPermissionList--->", logger.Any("req", req))
 
 	res, err := s.strg.Permission().GetList(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetPermissionList--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -165,7 +154,6 @@ func (s *permissionService) UpdatePermission(ctx context.Context, req *pb.Update
 	s.log.Info("---UpdatePermission--->", logger.Any("req", req))
 
 	rowsAffected, err := s.strg.Permission().Update(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!UpdatePermission--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -187,10 +175,7 @@ func (s *permissionService) UpdatePermission(ctx context.Context, req *pb.Update
 func (s *permissionService) DeletePermission(ctx context.Context, req *pb.PermissionPrimaryKey) (*emptypb.Empty, error) {
 	s.log.Info("---DeletePermission--->", logger.Any("req", req))
 
-	res := &emptypb.Empty{}
-
 	rowsAffected, err := s.strg.Permission().Delete(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!DeletePermission--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -200,14 +185,13 @@ func (s *permissionService) DeletePermission(ctx context.Context, req *pb.Permis
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	return res, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *permissionService) UpsertScope(ctx context.Context, req *pb.UpsertScopeRequest) (*pb.Scope, error) {
 	s.log.Info("---UpsertScope--->", logger.Any("req", req))
 
 	pKey, err := s.strg.Scope().Upsert(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!UpsertScope--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -220,7 +204,6 @@ func (s *permissionService) GetScopesList(ctx context.Context, req *pb.GetScopeL
 	s.log.Info("---GetScopesList--->", logger.Any("req", req))
 
 	res, err := s.strg.Scope().GetList(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetScopesList--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -245,14 +228,12 @@ func (s *permissionService) RemovePermissionScope(ctx context.Context, req *pb.P
 	s.log.Info("---RemovePermissionScope--->", logger.Any("req", req))
 
 	res, err := s.strg.PermissionScope().GetByPK(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetPermissionScopePlatformByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	rowsAffected, err := s.strg.PermissionScope().Remove(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!RemovePermissionScope--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -286,23 +267,19 @@ func (s *permissionService) AddRolePermissions(ctx context.Context, req *pb.AddR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &pb.AddRolePermissionsResponse{
-		AddedRoles: rowsAffected,
-	}, err
+	return &pb.AddRolePermissionsResponse{AddedRoles: rowsAffected}, err
 }
 
 func (s *permissionService) RemoveRolePermission(ctx context.Context, req *pb.RolePermissionPrimaryKey) (*pb.RolePermission, error) {
 	s.log.Info("---RemoveRolePermission--->", logger.Any("req", req))
 
 	res, err := s.strg.RolePermission().GetByPK(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetRolePermissionPlatformByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	rowsAffected, err := s.strg.RolePermission().Remove(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!RemoveRolePermission--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())

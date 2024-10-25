@@ -1,12 +1,16 @@
 package client
 
 import (
+	"context"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/genproto/web_page_service"
+
+	otgrpc "github.com/opentracing-contrib/go-grpc"
+	"github.com/opentracing/opentracing-go"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -56,7 +60,7 @@ type sharedGrpcClients struct {
 	smsService        sms_service.SmsServiceClient
 }
 
-func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
+func NewSharedGrpcClients(ctx context.Context, cfg config.Config) (SharedServiceManagerI, error) {
 	connObjectBuilderService, _ := grpc.Dial(
 		cfg.ObjectBuilderServiceHost+cfg.ObjectBuilderGRPCPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -79,15 +83,20 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
-	connGoObjectBuilderService, _ := grpc.Dial(
+	connGoObjectBuilderService, _ := grpc.DialContext(
+		ctx,
 		cfg.GoObjectBuilderServiceHost+cfg.GoObjectBuilderServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(52428800), grpc.MaxCallSendMsgSize(52428800)),
+		grpc.WithUnaryInterceptor(
+			otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
+		grpc.WithStreamInterceptor(
+			otgrpc.OpenTracingStreamClientInterceptor(opentracing.GlobalTracer())),
 	)
 
 	return &sharedGrpcClients{
 		objectBuilderService:     object_builder_service.NewObjectBuilderServiceClient(connObjectBuilderService),
 		loginService:             object_builder_service.NewLoginServiceClient(connObjectBuilderService),
-		goLoginService:           new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
 		builderPermissionService: object_builder_service.NewPermissionServiceClient(connObjectBuilderService),
 		versionHisotryService:    object_builder_service.NewVersionHistoryServiceClient(connObjectBuilderService),
 
@@ -98,6 +107,7 @@ func NewSharedGrpcClients(cfg config.Config) (SharedServiceManagerI, error) {
 		webPageAppService: web_page_service.NewAppServiceClient(connWebPageService),
 		smsService:        sms_service.NewSmsServiceClient(connSmsService),
 
+		goLoginService:                   new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
 		goObjectBuilderService:           new_object_builder_service.NewObjectBuilderServiceClient(connGoObjectBuilderService),
 		goItemsService:                   new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 		goObjectBuilderPermissionService: new_object_builder_service.NewPermissionServiceClient(connGoObjectBuilderService),

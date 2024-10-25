@@ -148,7 +148,7 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, serviceNodes ServiceNodesI,
 				SmsGRPCPort:    v.SMS_GRPC_PORT,
 			}
 
-			grpcSvcs, err := client.NewSharedGrpcClients(projectConf)
+			grpcSvcs, err := client.NewSharedGrpcClients(ctx, projectConf)
 			if err != nil {
 				log.Error("Error connecting grpc client "+v.ProjectId, logger.Error(err))
 			}

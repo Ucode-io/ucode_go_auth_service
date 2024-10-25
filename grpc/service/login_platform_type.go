@@ -34,10 +34,8 @@ func NewLoginPlatformTypeService(cfg config.BaseConfig, log logger.LoggerI, strg
 
 func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb.LoginPlatform) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.CreateLoginPlatformType--->", logger.Any("req", req))
-	res, err := e.strg.LoginPlatformType().CreateLoginPlatformType(
-		ctx,
-		req,
-	)
+
+	res, err := e.strg.LoginPlatformType().CreateLoginPlatformType(ctx, req)
 	if err != nil {
 		e.log.Error("!!!---LoginPlatformType.CreateLoginPlatformType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -49,31 +47,15 @@ func (e *loginPlatformType) CreateLoginPlatformType(ctx context.Context, req *pb
 func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb.UpdateLoginPlatformTypeRequest) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.UpdateLoginPlatformType--->", logger.Any("req", req))
 
-	types, _ := e.strg.LoginPlatformType().GetLoginPlatformType(
-		ctx,
-		&pb.LoginPlatformTypePrimaryKey{
-			Id: req.Id,
-		},
-	)
+	types, _ := e.strg.LoginPlatformType().GetLoginPlatformType(ctx, &pb.LoginPlatformTypePrimaryKey{Id: req.Id})
 
-	id, err := e.strg.LoginPlatformType().UpdateLoginPlatformType(
-		ctx,
-		req,
-		types.Type,
-	)
-
+	id, err := e.strg.LoginPlatformType().UpdateLoginPlatformType(ctx, req, types.Type)
 	if err != nil {
 		e.log.Error("!!!---LoginPlatformType.UpdateLoginPlatformType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	res, err := e.strg.LoginPlatformType().GetLoginPlatformType(
-		ctx,
-		&pb.LoginPlatformTypePrimaryKey{
-			Id: id,
-		},
-	)
-
+	res, err := e.strg.LoginPlatformType().GetLoginPlatformType(ctx, &pb.LoginPlatformTypePrimaryKey{Id: id})
 	if err != nil {
 		e.log.Error("!!!---LoginPlatformType.UpdateLoginPlatformType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -85,10 +67,7 @@ func (e *loginPlatformType) UpdateLoginPlatformType(ctx context.Context, req *pb
 func (e *loginPlatformType) GetListLoginPlatformType(ctx context.Context, req *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error) {
 	e.log.Info("---LoginPlatformType.GetListLoginPlatformType--->", logger.Any("req", req))
 
-	res, err := e.strg.LoginPlatformType().GetListLoginPlatformType(
-		ctx,
-		req,
-	)
+	res, err := e.strg.LoginPlatformType().GetListLoginPlatformType(ctx, req)
 	if err != nil {
 		e.log.Error("!!!---LoginPlatformType.GetListLoginPlatformType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -100,11 +79,7 @@ func (e *loginPlatformType) GetListLoginPlatformType(ctx context.Context, req *p
 func (e *loginPlatformType) GetLoginPlatformType(ctx context.Context, req *pb.LoginPlatformTypePrimaryKey) (*pb.LoginPlatform, error) {
 	e.log.Info("---LoginPlatformType.GetLoginPlatformTypeByPK--->", logger.Any("req", req))
 
-	res, err := e.strg.LoginPlatformType().GetLoginPlatformType(
-		ctx,
-		req,
-	)
-
+	res, err := e.strg.LoginPlatformType().GetLoginPlatformType(ctx, req)
 	if err != nil {
 		e.log.Error("!!!---LoginPlatformType.GetLoginPlatformTypeByPK--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -116,11 +91,7 @@ func (e *loginPlatformType) GetLoginPlatformType(ctx context.Context, req *pb.Lo
 func (e *loginPlatformType) DeleteLoginPlatformType(ctx context.Context, req *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error) {
 	e.log.Info("---LoginPlatformTypeService.DeleteLoginPlatformType--->", logger.Any("req", req))
 
-	res, err := e.strg.LoginPlatformType().DeleteLoginSettings(
-		ctx,
-		req,
-	)
-
+	res, err := e.strg.LoginPlatformType().DeleteLoginSettings(ctx, req)
 	if err != nil {
 		e.log.Error("!!!LoginPlatformTypeService.DeleteLoginId--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
