@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
- 
+
 type clientService struct {
 	cfg         config.BaseConfig
 	log         logger.LoggerI
@@ -40,7 +40,6 @@ func (s *clientService) CreateClientPlatform(ctx context.Context, req *pb.Create
 	s.log.Info("---CreateClientPlatform--->", logger.Any("req", req))
 
 	pKey, err := s.strg.ClientPlatform().Create(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!CreateClientPlatform--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -53,7 +52,6 @@ func (s *clientService) GetClientPlatformByID(ctx context.Context, req *pb.Clien
 	s.log.Info("---GetClientPlatformByID--->", logger.Any("req", req))
 
 	res, err := s.strg.ClientPlatform().GetByPK(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetClientPlatformByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -66,7 +64,6 @@ func (s *clientService) GetClientPlatformByIDDetailed(ctx context.Context, req *
 	s.log.Info("---GetClientPlatformByID--->", logger.Any("req", req))
 
 	res, err := s.strg.ClientPlatform().GetByPKDetailed(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetClientPlatformByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -79,7 +76,6 @@ func (s *clientService) GetClientPlatformList(ctx context.Context, req *pb.GetCl
 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
 
 	res, err := s.strg.ClientPlatform().GetList(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetClientPlatformList--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -92,7 +88,6 @@ func (s *clientService) UpdateClientPlatform(ctx context.Context, req *pb.Update
 	s.log.Info("---UpdateClientPlatform--->", logger.Any("req", req))
 
 	rowsAffected, err := s.strg.ClientPlatform().Update(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!UpdateClientPlatform--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -114,10 +109,7 @@ func (s *clientService) UpdateClientPlatform(ctx context.Context, req *pb.Update
 func (s *clientService) DeleteClientPlatform(ctx context.Context, req *pb.ClientPlatformPrimaryKey) (*emptypb.Empty, error) {
 	s.log.Info("---DeleteClientPlatform--->", logger.Any("req", req))
 
-	res := &emptypb.Empty{}
-
 	rowsAffected, err := s.strg.ClientPlatform().Delete(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!DeleteClientPlatform--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -127,14 +119,13 @@ func (s *clientService) DeleteClientPlatform(ctx context.Context, req *pb.Client
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	return res, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *clientService) CreateClientType(ctx context.Context, req *pb.CreateClientTypeRequest) (*pb.ClientType, error) {
 	s.log.Info("---CreateClientType--->", logger.Any("req", req))
 
 	pKey, err := s.strg.ClientType().Create(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!CreateClientType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -147,7 +138,6 @@ func (s *clientService) GetClientTypeByID(ctx context.Context, req *pb.ClientTyp
 	s.log.Info("---GetClientTypeByID--->", logger.Any("req", req))
 
 	res, err := s.strg.ClientType().GetCompleteByPK(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetClientTypeByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -160,16 +150,12 @@ func (s *clientService) GetClientTypeList(ctx context.Context, req *pb.GetClient
 	s.log.Info("---GetClientTypeList--->", logger.Any("req", req))
 
 	res, err := s.strg.ClientType().GetList(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!GetClientTypeList--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		"LOW",
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, "LOW")
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +194,6 @@ func (s *clientService) UpdateClientType(ctx context.Context, req *pb.UpdateClie
 	s.log.Info("---UpdateClientType--->", logger.Any("req", req))
 
 	rowsAffected, err := s.strg.ClientType().Update(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!UpdateClientType--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -230,10 +215,7 @@ func (s *clientService) UpdateClientType(ctx context.Context, req *pb.UpdateClie
 func (s *clientService) DeleteClientType(ctx context.Context, req *pb.ClientTypePrimaryKey) (*emptypb.Empty, error) {
 	s.log.Info("---DeleteClientType--->", logger.Any("req", req))
 
-	res := &emptypb.Empty{}
-
 	rowsAffected, err := s.strg.ClientType().Delete(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!DeleteClientType--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -243,7 +225,7 @@ func (s *clientService) DeleteClientType(ctx context.Context, req *pb.ClientType
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	return res, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *clientService) AddClient(ctx context.Context, req *pb.AddClientRequest) (*pb.Client, error) {

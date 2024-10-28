@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	}
 	defer pgStore.CloseDB()
 
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
@@ -198,7 +198,7 @@ func EnterPriceProjectsGrpcSvcs(ctx context.Context, serviceNodes ServiceNodesI,
 				SmsGRPCPort:    v.SMS_GRPC_PORT,
 			}
 
-			grpcSvcs, err := client.NewSharedGrpcClients(projectConf)
+			grpcSvcs, err := client.NewSharedGrpcClients(context.Background(), projectConf)
 			if err != nil {
 				log.Error("Error connecting grpc client "+v.ProjectId, logger.Error(err))
 			}

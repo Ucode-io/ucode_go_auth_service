@@ -15,7 +15,7 @@ import (
 var clientTypeId string
 
 func TestV2CreateClientType(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -48,7 +48,7 @@ func TestV2CreateClientType(t *testing.T) {
 }
 
 func TestV2GetClientTypeByID(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -67,7 +67,7 @@ func TestV2GetClientTypeByID(t *testing.T) {
 }
 
 func TestV2GetClientTypeList(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -85,7 +85,7 @@ func TestV2GetClientTypeList(t *testing.T) {
 }
 
 func TestV2UpdateClientType(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -109,7 +109,7 @@ func TestV2UpdateClientType(t *testing.T) {
 }
 
 func TestV2DeleteClientType(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()

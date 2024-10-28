@@ -21,9 +21,7 @@ func NewApiKeyUsageRepo(db *Pool) storage.ApiKeyUsageRepoI {
 func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequest) (*pb.CheckLimitResponse, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_key_usage.CheckLimit")
 	defer dbSpan.Finish()
-	var (
-		res pb.CheckLimitResponse
-	)
+	var res pb.CheckLimitResponse
 
 	query := `
 		SELECT
@@ -36,9 +34,7 @@ func (r *apiKeyUsageRepo) CheckLimit(ctx context.Context, req *pb.CheckLimitRequ
 		ctx,
 		query,
 		req.GetApiKey(),
-	).Scan(
-		&res.IsLimitReached,
-	)
+	).Scan(&res.IsLimitReached)
 	if err != nil {
 		return nil, err
 	}

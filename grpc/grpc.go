@@ -7,13 +7,18 @@ import (
 	"ucode/ucode_go_auth_service/grpc/service"
 	"ucode/ucode_go_auth_service/storage"
 
+	otgrpc "github.com/opentracing-contrib/go-grpc"
+	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 func SetUpServer(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes service.ServiceNodesI) (grpcServer *grpc.Server) {
-	grpcServer = grpc.NewServer()
+	grpcServer = grpc.NewServer(
+		grpc.UnaryInterceptor(otgrpc.OpenTracingServerInterceptor(opentracing.GlobalTracer())),
+		grpc.StreamInterceptor(otgrpc.OpenTracingStreamServerInterceptor(opentracing.GlobalTracer())),
+	)
 
 	auth_service.RegisterClientServiceServer(grpcServer, service.NewClientService(cfg, log, strg, svcs, projectServiceNodes))
 	auth_service.RegisterPermissionServiceServer(grpcServer, service.NewPermissionService(cfg, log, strg, svcs, projectServiceNodes))

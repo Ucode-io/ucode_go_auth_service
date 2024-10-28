@@ -17,10 +17,10 @@ import (
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
 
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,6 +29,9 @@ import (
 )
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2Login", req)
+	defer dbSpan.Finish()
+
 	s.log.Info("V2Login --> ", logger.Any("request: ", req))
 
 	var (
@@ -37,9 +40,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		data   *pbObject.LoginDataRes
 		before runtime.MemStats
 	)
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2Login")
-	defer dbSpan.Finish()
 
 	runtime.ReadMemStats(&before)
 
@@ -258,10 +258,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 }
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
-	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginWithOption")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginWithOption", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
 
 	var (
 		before   runtime.MemStats
@@ -724,7 +724,7 @@ pwd:
 }
 
 func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMiddlewareReq) (*pb.V2LoginWithOptionsResponse, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.LoginMiddleware")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.LoginMiddleware", req)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -862,7 +862,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 }
 
 func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginSuperAdmin")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginSuperAdmin", req)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -975,7 +975,7 @@ func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginS
 }
 
 func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccess")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccess", req)
 	defer dbSpan.Finish()
 
 	var (
@@ -1047,6 +1047,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 	case "DELETE":
 		methodField = "delete"
 	}
+
 	// this is for object get list api because our object/get-list api is post method.
 	if strings.Contains(req.GetPath(), "object/get-list/") || strings.Contains(req.GetPath(), "object-slim/get-list") {
 		methodField = "read"
@@ -1082,10 +1083,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		session.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(session.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -1157,7 +1155,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 }
 
 func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshToken")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshToken", req)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -1278,7 +1276,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 }
 
 func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenSuperAdminResponse, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenSuperAdmin")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenSuperAdmin", req)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -1350,15 +1348,13 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 		ExpiresAt:        session.ExpiresAt,
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
-	res := &pb.V2RefreshTokenSuperAdminResponse{
-		Token: token,
-	}
 
+	res := &pb.V2RefreshTokenSuperAdminResponse{Token: token}
 	return res, nil
 }
 
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.SessionAndTokenGenerator")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.SessionAndTokenGenerator", input)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -1478,7 +1474,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 }
 
 func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.UpdateSessionByRoleIdRequest) (*emptypb.Empty, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.UpdateSessionsByRoleId")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.UpdateSessionsByRoleId", input)
 	defer dbSpan.Finish()
 
 	_, err := s.strg.Session().UpdateByRoleId(ctx, input)
@@ -1491,7 +1487,7 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 }
 
 func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyLoginRes, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyLogin")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyLogin", req)
 	defer dbSpan.Finish()
 
 	var before runtime.MemStats
@@ -1627,10 +1623,10 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
-	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccessUser")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccessUser", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	var (
 		before                 runtime.MemStats
@@ -1731,6 +1727,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			checkPermission = exist
 		}
 	}
+
 	if checkPermission {
 		var tableSlug string
 		if strings.Contains(arr_path[len(arr_path)-1], ":") {
@@ -1806,15 +1803,15 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 }
 
 func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyOneLoginRes, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyOneLogin", req)
+	defer dbSpan.Finish()
+
 	var (
 		before runtime.MemStats
 		user   = &pb.User{}
 		err    error
 		resp   = pb.V2MultiCompanyOneLoginRes{Companies: []*pb.Company2{}}
 	)
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyOneLogin")
-	defer dbSpan.Finish()
 
 	runtime.ReadMemStats(&before)
 
@@ -2068,10 +2065,10 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 }
 
 func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordRequest) (*pb.User, error) {
-	s.log.Info("V2ResetPassword -> ", logger.Any("req: ", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2ResetPassword")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2ResetPassword", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("V2ResetPassword -> ", logger.Any("req: ", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -2115,7 +2112,7 @@ func (s *sessionService) V2ResetPassword(ctx context.Context, req *pb.V2ResetPas
 }
 
 func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenForEnv")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenForEnv", req)
 	defer dbSpan.Finish()
 
 	var (
@@ -2296,7 +2293,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 }
 
 func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessionsRequest) (*emptypb.Empty, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_session_v2.ExpireSessions")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.ExpireSessions", req)
 	defer dbSpan.Finish()
 
 	s.log.Info("---ExpireSessions--->>>", logger.Any("req", req.SessionIds))

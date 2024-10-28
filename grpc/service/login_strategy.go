@@ -33,27 +33,31 @@ func NewLoginStrategyService(cfg config.BaseConfig, log logger.LoggerI, strg sto
 
 func (ls *loginStrategyService) GetList(ctx context.Context, req *pb.GetListRequest) (*pb.GetListResponse, error) {
 	ls.log.Info("GetList: ", logger.Any("request: --> ", req))
+
 	res, err := ls.strg.LoginStrategy().GetList(ctx, req)
 	if err != nil {
 		ls.log.Error("! GetList:", logger.Error(err))
 		return nil, err
 	}
-	ls.log.Info("GetList: ", logger.Any("response: <-- ", res))
+
 	return res, nil
 }
 
 func (ls *loginStrategyService) GetByID(ctx context.Context, req *pb.LoginStrategyPrimaryKey) (*pb.LoginStrategy, error) {
 	ls.log.Info("GetByID: ", logger.Any("request: --> ", req))
+
 	res, err := ls.strg.LoginStrategy().GetByID(ctx, req)
 	if err != nil {
 		ls.log.Error("! GetByID:", logger.Error(err))
 		return nil, err
 	}
-	ls.log.Info("GetByID: ", logger.Any("response: <-- ", res))
+
 	return res, nil
 }
 
 func (ls *loginStrategyService) Upsert(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+	ls.log.Info("Upsert: ", logger.Any("request: --> ", req))
+
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
 
@@ -67,7 +71,6 @@ func (ls *loginStrategyService) Upsert(ctx context.Context, req *pb.UpdateReques
 		}
 	}()
 
-	ls.log.Info("Upsert: ", logger.Any("request: --> ", req))
 	for _, value := range req.LoginStrategies {
 		if value.Id == "" {
 			uuid, err := uuid.NewRandom()
@@ -78,10 +81,12 @@ func (ls *loginStrategyService) Upsert(ctx context.Context, req *pb.UpdateReques
 			value.Id = uuid.String()
 		}
 	}
+
 	res, err := ls.strg.LoginStrategy().Upsert(ctx, req)
 	if err != nil {
 		ls.log.Error("! Upsert:", logger.Error(err))
 		return nil, err
 	}
+
 	return res, nil
 }

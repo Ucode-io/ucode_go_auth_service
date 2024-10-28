@@ -14,7 +14,7 @@ import (
 var userId string
 
 func TestV2CreateUser(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -45,7 +45,7 @@ func TestV2CreateUser(t *testing.T) {
 }
 
 func TestV2GetUserByID(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -54,12 +54,9 @@ func TestV2GetUserByID(t *testing.T) {
 
 	if userId != "" {
 		res, err := svcs.UserService().V2GetUserByID(context.Background(), &auth_service.UserPrimaryKey{
-			Id:        userId,
-			ProjectId: config.CreadentialsForTest[conf.Environment]["resourceEnvironmentId"],
-			// ResourceEnvironmentId: config.CreadentialsForTest[conf.Environment]["resourceEnvironmentId"],
+			Id:           userId,
+			ProjectId:    config.CreadentialsForTest[conf.Environment]["resourceEnvironmentId"],
 			ResourceType: 1,
-			// ClientTypeId:          config.CreadentialsForTest[conf.Environment]["clientTypeId"],
-			// CompanyId:             config.CreadentialsForTest[conf.Environment]["companyId"],
 		})
 
 		assert.NoError(t, err)
@@ -68,7 +65,7 @@ func TestV2GetUserByID(t *testing.T) {
 }
 
 func TestV2GetUserList(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -87,7 +84,7 @@ func TestV2GetUserList(t *testing.T) {
 }
 
 func TestV2UpdateUser(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -111,7 +108,7 @@ func TestV2UpdateUser(t *testing.T) {
 }
 
 func TestGetProjectsByUserId(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -128,7 +125,7 @@ func TestGetProjectsByUserId(t *testing.T) {
 }
 
 func TestV2GetUserByLoginTypes(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -156,7 +153,7 @@ func TestV2GetUserByLoginTypes(t *testing.T) {
 }
 
 func TestGetUserProjects(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -173,7 +170,7 @@ func TestGetUserProjects(t *testing.T) {
 }
 
 func TestGetUserByUsername(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -199,7 +196,7 @@ func TestGetUserByUsername(t *testing.T) {
 }
 
 func TestV2DeleteUser(t *testing.T) {
-	svcs, err := client.NewGrpcClients(conf)
+	svcs, err := client.NewGrpcClients(context.Background(), conf)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()
@@ -209,13 +206,9 @@ func TestV2DeleteUser(t *testing.T) {
 	if userId != "" {
 		res, err := svcs.UserService().V2DeleteUser(context.Background(),
 			&auth_service.UserPrimaryKey{
-				Id: userId,
-				// ResourceEnvironmentId: config.CreadentialsForTest[conf.Environment]["resourceEnvironmentId"],
+				Id:           userId,
 				ResourceType: 1,
-				// ClientTypeId:          config.CreadentialsForTest[conf.Environment]["clientTypeId"],
-				// CompanyId:             config.CreadentialsForTest[conf.Environment]["companyId"],
-				// ProjectId:             config.CreadentialsForTest[conf.Environment]["projectId"],
-				IsTest: true,
+				IsTest:       true,
 			},
 		)
 		assert.NoError(t, err)

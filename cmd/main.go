@@ -22,8 +22,10 @@ import (
 )
 
 func main() {
-	baseCfg := config.BaseLoad()
-	var loggerLevel string
+	var (
+		loggerLevel string
+		baseCfg     = config.BaseLoad()
+	)
 
 	switch baseCfg.Environment {
 	case config.DebugMode:
@@ -49,9 +51,6 @@ func main() {
 		},
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	log := logger.NewLogger(baseCfg.ServiceName, loggerLevel)
 	defer func() {
 		_ = logger.Cleanup(log)
@@ -63,6 +62,9 @@ func main() {
 	}
 	defer closer.Close()
 	opentracing.SetGlobalTracer(tracer)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	cfg := &ratelimiter.Config{
 		RedisHost:    baseCfg.GetRequestRedisHost,
@@ -83,7 +85,7 @@ func main() {
 	defer pgStore.CloseDB()
 
 	// connection with auth and company
-	baseSvcs, err := client.NewGrpcClients(baseCfg)
+	baseSvcs, err := client.NewGrpcClients(ctx, baseCfg)
 	if err != nil {
 		log.Panic("--- U-code auth service and company service grpc client error: ", logger.Error(err))
 	}
@@ -92,22 +94,23 @@ func main() {
 
 	// connection with shared services
 	uConf := config.Load()
-	grpcSvcs, err := client.NewSharedGrpcClients(uConf)
+	grpcSvcs, err := client.NewSharedGrpcClients(ctx, uConf)
 	if err != nil {
 		log.Error("Error adding grpc client with base config. NewGrpcClients", logger.Error(err))
 		return
 	}
+
 	err = serviceNodes.Add(grpcSvcs, baseCfg.UcodeNamespace)
 	if err != nil {
 		log.Error("Error adding company grpc client to serviceNode. ServiceNode", logger.Error(err))
 		return
 	}
+
 	log.Info(" --- U-code company services --- added to serviceNodes!")
 
 	projectServiceNodes, mapProjectConfs, err := service.EnterPriceProjectsGrpcSvcs(ctx, serviceNodes, baseSvcs, log)
 	if err != nil {
 		log.Error("Error maping company enter price projects to serviceNode. ServiceNode", logger.Error(err))
-		// return
 	}
 
 	if projectServiceNodes == nil {
@@ -138,6 +141,7 @@ func main() {
 			log.Panic("grpcServer.Serve", logger.Error(err))
 		}
 	}()
+
 	h := handlers.NewHandler(baseCfg, log, baseSvcs, projectServiceNodes)
 
 	r := api.SetUpRouter(h, baseCfg, tracer, limiter)

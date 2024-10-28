@@ -7,8 +7,8 @@ import (
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	span "ucode/ucode_go_auth_service/pkg/jaeger"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
@@ -16,8 +16,10 @@ import (
 )
 
 func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequest) (*pb.CommonMessage, error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2AddRole")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_permission_v2.V2AddRole", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---AddRole--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -32,10 +34,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		}
 	}()
 
-	s.log.Info("---AddRole--->", logger.Any("req", req))
-	var (
-		result *pbObject.CommonMessage
-	)
+	var result *pbObject.CommonMessage
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {
@@ -43,10 +42,7 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -114,10 +110,10 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 }
 
 func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
-	s.log.Info("---GetRoleById--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2GetRoleById")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_permission_v2.V2GetRoleById", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---GetRoleById--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -142,10 +138,7 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -170,10 +163,10 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 }
 
 func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRolesListRequest) (*pb.CommonMessage, error) {
-	s.log.Info("---GetRolesList--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2GetRolesList")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_permission_v2.V2GetRolesList", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---GetRolesList--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -188,22 +181,15 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 		}
 	}()
 
-	var (
-		result *pbObject.CommonMessage
-	)
-	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		// "client_platform_id": req.GetClientPlatformId(),
-		"client_type_id": req.GetClientTypeId(),
-	})
+	var result *pbObject.CommonMessage
+
+	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{"client_type_id": req.GetClientTypeId()})
 	if err != nil {
 		s.log.Error("!!!GetRolesList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -243,10 +229,10 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 }
 
 func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRoleRequest) (*pb.CommonMessage, error) {
-	s.log.Info("---UpdateRole--->", logger.Any("req", req))
-
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2UpdateRole")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_permission_v2.V2UpdateRole", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---UpdateRole--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -261,14 +247,9 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 		}
 	}()
 
-	var (
-		result *pbObject.CommonMessage
-	)
+	var result *pbObject.CommonMessage
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -300,9 +281,10 @@ func (s *permissionService) V2UpdateRole(ctx context.Context, req *pb.V2UpdateRo
 }
 
 func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrimaryKey) (*pb.CommonMessage, error) {
-	s.log.Info("---RemoveRole--->", logger.Any("req", req))
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_permission_v2.V2RemoveRole")
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_permission_v2.V2RemoveRole", req)
 	defer dbSpan.Finish()
+
+	s.log.Info("---RemoveRole--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -322,14 +304,9 @@ func (s *permissionService) V2RemoveRole(ctx context.Context, req *pb.V2RolePrim
 		s.log.Error("!!!GetRoleById--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var (
-		result *pbObject.CommonMessage
-	)
+	var result *pbObject.CommonMessage
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}

@@ -59,10 +59,7 @@ func (e *emailService) GetEmailByID(ctx context.Context, req *pb.EmailOtpPrimary
 func (e *emailService) CreateEmailSettings(ctx context.Context, req *pb.EmailSettings) (*pb.EmailSettings, error) {
 	e.log.Info("---EmailService.CreateEmailSettings--->", logger.Any("req", req))
 
-	res, err := e.strg.Email().CreateEmailSettings(
-		ctx,
-		req,
-	)
+	res, err := e.strg.Email().CreateEmailSettings(ctx, req)
 	if err != nil {
 		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -74,11 +71,7 @@ func (e *emailService) CreateEmailSettings(ctx context.Context, req *pb.EmailSet
 func (e *emailService) UpdateEmailSettings(ctx context.Context, req *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error) {
 	e.log.Info("---EmailService.UpdateEmailSettings--->", logger.Any("req", req))
 
-	res, err := e.strg.Email().UpdateEmailSettings(
-		ctx,
-		req,
-	)
-
+	res, err := e.strg.Email().UpdateEmailSettings(ctx, req)
 	if err != nil {
 		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -90,10 +83,7 @@ func (e *emailService) UpdateEmailSettings(ctx context.Context, req *pb.UpdateEm
 func (e *emailService) GetListEmailSettings(ctx context.Context, req *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error) {
 	e.log.Info("---EmailService.GetListEmailSettings--->", logger.Any("req", req))
 
-	res, err := e.strg.Email().GetListEmailSettings(
-		ctx,
-		req,
-	)
+	res, err := e.strg.Email().GetListEmailSettings(ctx, req)
 	if err != nil {
 		e.log.Error("!!!EmailService.GetEmailSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -105,11 +95,7 @@ func (e *emailService) GetListEmailSettings(ctx context.Context, req *pb.GetList
 func (e *emailService) DeleteEmailSettings(ctx context.Context, req *pb.EmailSettingsPrimaryKey) (*emptypb.Empty, error) {
 	e.log.Info("---EmailService.DeleteEmailSettings--->", logger.Any("req", req))
 
-	res, err := e.strg.Email().DeleteEmailSettings(
-		ctx,
-		req,
-	)
-
+	res, err := e.strg.Email().DeleteEmailSettings(ctx, req)
 	if err != nil {
 		e.log.Error("!!!EmailService.CreateEmailSettings--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

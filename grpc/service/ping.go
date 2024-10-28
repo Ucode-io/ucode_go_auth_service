@@ -7,7 +7,7 @@ import (
 	l "ucode/ucode_go_auth_service/pkg/logger"
 )
 
-/// AdminService ...
+// / AdminService ...
 type PingService struct {
 	logger l.LoggerI
 	pb.UnimplementedAuthPingServiceServer
@@ -20,10 +20,7 @@ func NewPingService(log l.LoggerI, services ServiceNodesI) *PingService {
 }
 
 func (s *PingService) Ping(ctx context.Context, req *pb.PingRequest) (res *pb.PingResponse, err error) {
-
 	s.logger.Info("--AuthServicePing-- requested")
 
-	return &pb.PingResponse{
-		Message: "Pong",
-	}, nil
+	return &pb.PingResponse{Message: "Pong"}, nil
 }
