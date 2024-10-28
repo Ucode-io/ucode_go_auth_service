@@ -100,7 +100,7 @@ func main() {
 
 	// connection with shared services
 	uConf := config.Load()
-	if bytes, err := json.MarshalIndent(baseCfg, "", " "); err == nil {
+	if bytes, err := json.MarshalIndent(uConf, "", " "); err == nil {
 		fmt.Println("--uconf config--", string(bytes))
 	}
 	grpcSvcs, err := client.NewSharedGrpcClients(ctx, uConf)
