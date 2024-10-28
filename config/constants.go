@@ -15,7 +15,7 @@ const (
 	// RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
 	AccessTokenExpiresInTime  time.Duration = 1 * time.Minute
-	RefreshTokenExpiresInTime time.Duration = 2 * time.Minute
+	RefreshTokenExpiresInTime time.Duration = 3 * time.Minute
 
 	// ProjectID
 	ProjectID string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
