@@ -22,6 +22,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -148,6 +149,31 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		}
 
 		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+		if err != nil {
+			s.log.Error("!!!V2Login Email--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case config.WithGoogle:
+		var email string
+		if req.GetGoogleToken() != "" {
+			userInfo, err := helper.GetGoogleUserInfo(req.GetGoogleToken())
+			if err != nil {
+				err = errors.New("invalid arguments google auth")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+				err = errors.New("invalid arguments google auth")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			email = cast.ToString(userInfo["email"])
+		} else {
+			err := errors.New("google token is required when login type is google auth")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user, err = s.strg.User().GetByUsername(ctx, email)
 		if err != nil {
 			s.log.Error("!!!V2Login Email--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -1916,6 +1942,31 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
 		if err != nil {
 			s.log.Error("!!!MultiCompanyLogin Email--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case config.WithGoogle:
+		var email string
+		if req.GetGoogleToken() != "" {
+			userInfo, err := helper.GetGoogleUserInfo(req.GoogleToken)
+			if err != nil {
+				err = errors.New("invalid arguments google auth")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+				err = errors.New("invalid arguments google auth")
+				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			email = cast.ToString(userInfo["email"])
+		} else {
+			err := errors.New("google token is required when login type is google auth")
+			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		user, err = s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!MultiCompanyOneLogin Email--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
