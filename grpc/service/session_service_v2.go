@@ -1968,6 +1968,12 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			s.log.Error("!!!MultiCompanyOneLogin Email--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		if user.Id == "" {
+			err = errors.New("user not found with this email")
+			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
 	}
 
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())

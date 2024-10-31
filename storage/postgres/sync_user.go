@@ -100,6 +100,8 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 
 			resp.UserId = userId
 		}
+	} else {
+		return nil, errors.Wrap(err, "failed to get user")
 	}
 
 	if err = tx.Commit(ctx); err != nil {
