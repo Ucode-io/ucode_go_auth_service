@@ -285,7 +285,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		req.Password = hashedPassword
 	}
 
-	if req.GetIsChangedEmail() {
+	if req.GetIsChangedLogin() {
 		if len(req.Login) < 6 {
 			err = fmt.Errorf("login must not be less than 6 characters")
 			sus.log.Error("!!!UpdateSyncUser--->CheckLogin", logger.Error(err))
