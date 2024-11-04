@@ -1240,6 +1240,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		RoleId:           session.RoleId,
 		ProjectId:        session.ProjectId,
 		IsChanged:        session.IsChanged,
+		ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
 		ClientTypeId:     session.ClientTypeId,
 		ClientPlatformId: session.ClientPlatformId,
 	})
