@@ -241,11 +241,11 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 	sus.log.Info("---UpdateSyncUser--->", logger.Any("req", req))
 
 	var (
-		before                        runtime.MemStats
-		hashedPassword                string
-		err                           error
-		syncUser                      = &pb.SyncUserResponse{}
-		hasPassword, hasLoginStrategy bool
+		before           runtime.MemStats
+		hashedPassword   string
+		err              error
+		syncUser         = &pb.SyncUserResponse{}
+		hasLoginStrategy bool
 	)
 
 	runtime.ReadMemStats(&before)
@@ -282,11 +282,10 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		hasPassword = true
 		req.Password = hashedPassword
 	}
 
-	if len(req.GetLogin()) > 0 {
+	if req.GetIsChangedLogin() {
 		if len(req.Login) < 6 {
 			err = fmt.Errorf("login must not be less than 6 characters")
 			sus.log.Error("!!!UpdateSyncUser--->CheckLogin", logger.Error(err))
@@ -302,7 +301,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		hasLoginStrategy = true
 	}
 
-	if len(req.GetEmail()) > 0 {
+	if req.GetIsChangedEmail() {
 		if !IsValidEmailNew(req.Email) {
 			err = config.ErrInvalidEmail
 			sus.log.Error("!!!UpdateSyncUser--->CheckValidEmail", logger.Error(err))
@@ -318,7 +317,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		hasLoginStrategy = true
 	}
 
-	if len(req.GetPhone()) > 0 {
+	if req.GetIsChangedPhone() {
 		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "phone")
 		if err != nil {
 			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPhone", logger.Error(err))
@@ -328,19 +327,19 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		hasLoginStrategy = true
 	}
 
-	if hasPassword && !hasLoginStrategy {
+	if !hasLoginStrategy {
 		_, err = sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
 			UserId:   req.GetGuid(),
-			Password: hashedPassword}, nil)
+			Password: hashedPassword,
+			Login:    req.GetLogin(),
+			Email:    req.GetEmail(),
+			Phone:    req.GetPhone(),
+		}, nil)
 		if err != nil {
 			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPassword", logger.Error(err))
 			return nil, err
 		}
 
-		syncUser.UserId = req.GetGuid()
-	}
-
-	if !hasLoginStrategy && !hasPassword {
 		syncUser.UserId = req.GetGuid()
 	}
 

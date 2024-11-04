@@ -60,58 +60,58 @@ func (h *Handler) V2Login(c *gin.Context) {
 
 	switch login.Type {
 	case config.Default:
-		{
-			if login.Username == "" {
-				err := errors.New("username is required")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Username == "" {
+			err := errors.New("username is required")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Password == "" {
-				err := errors.New("password is required")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Password == "" {
+			err := errors.New("password is required")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
 		}
 	case config.WithPhone:
-		{
-			if login.SmsId == "" {
-				err := errors.New("SmsId is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.SmsId == "" {
+			err := errors.New("SmsId is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Otp == "" {
-				err := errors.New("otp is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Otp == "" {
+			err := errors.New("otp is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Phone == "" {
-				err := errors.New("phone is required when type is phone")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Phone == "" {
+			err := errors.New("phone is required when type is phone")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
 		}
 	case config.WithEmail:
-		{
-			if login.SmsId == "" {
-				err := errors.New("SmsId is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.SmsId == "" {
+			err := errors.New("SmsId is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Otp == "" {
-				err := errors.New("otp is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Otp == "" {
+			err := errors.New("otp is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Email == "" {
-				err := errors.New("email is required when type is email")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Email == "" {
+			err := errors.New("email is required when type is email")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	case config.WithGoogle:
+		if login.GoogleToken == "" {
+			err := errors.New("google token is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
 		}
 	}
 
@@ -641,58 +641,58 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 
 	switch login.Type {
 	case config.Default:
-		{
-			if login.Username == "" {
-				err := errors.New("username is required")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Username == "" {
+			err := errors.New("username is required")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Password == "" {
-				err := errors.New("password is required")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Password == "" {
+			err := errors.New("password is required")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
 		}
 	case config.WithPhone:
-		{
-			if login.SmsId == "" {
-				err := errors.New("SmsId is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.SmsId == "" {
+			err := errors.New("SmsId is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Otp == "" {
-				err := errors.New("otp is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Otp == "" {
+			err := errors.New("otp is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Phone == "" {
-				err := errors.New("phone is required when type is phone")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Phone == "" {
+			err := errors.New("phone is required when type is phone")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
 		}
 	case config.WithEmail:
-		{
-			if login.SmsId == "" {
-				err := errors.New("SmsId is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.SmsId == "" {
+			err := errors.New("SmsId is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Otp == "" {
-				err := errors.New("otp is required when type is not default")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Otp == "" {
+			err := errors.New("otp is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
 
-			if login.Email == "" {
-				err := errors.New("email is required when type is email")
-				h.handleResponse(c, http.BadRequest, err.Error())
-				return
-			}
+		if login.Email == "" {
+			err := errors.New("email is required when type is email")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	case config.WithGoogle:
+		if login.GoogleToken == "" {
+			err := errors.New("google token is required when type is google")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
 		}
 	}
 
