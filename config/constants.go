@@ -68,6 +68,7 @@ var (
 		"email":   1,
 	}
 	ErrUserNotFound = errors.New("user not found")
+	ErrEmailRequired = errors.New("email required for register company")
 
 	LoginStrategyTypes = map[string]int{
 		"EMAIL":       1,

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -59,6 +61,31 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	if err != nil {
 		s.log.Error("---RegisterCompany-->NewUUID", logger.Error(err))
 		return nil, err
+	}
+
+	var (
+		email       string = req.GetUserInfo().GetEmail()
+		googleToken        = req.GetUserInfo().GetGoogleToken()
+	)
+	if googleToken != "" {
+		userInfo, err := helper.GetGoogleUserInfo(googleToken)
+		if err != nil {
+			err = errors.New("invalid arguments google auth")
+			s.log.Error("!!!RegisterCompany--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+			err = errors.New("invalid arguments google auth")
+			s.log.Error("!!!RegisterCompany-->EmailVerified", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		email = cast.ToString(userInfo["email"])
+	}
+
+	if email == "" {
+		err = config.ErrEmailRequired
+		s.log.Error("!!!RegisterCompany-->EmailRequired", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	companyPKey, err := s.services.CompanyServiceClient().Create(ctx, &company_service.CreateCompanyRequest{
@@ -114,7 +141,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	createUserRes, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 		Phone:     req.GetUserInfo().GetPhone(),
-		Email:     req.GetUserInfo().GetEmail(),
+		Email:     email,
 		Login:     req.GetUserInfo().GetLogin(),
 		Password:  hashedPassword,
 		Active:    1,
