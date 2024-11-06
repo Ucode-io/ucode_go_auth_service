@@ -11,6 +11,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
+	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
@@ -65,7 +66,8 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	var (
 		email       string = req.GetUserInfo().GetEmail()
-		googleToken        = req.GetUserInfo().GetGoogleToken()
+		googleToken string = req.GetUserInfo().GetGoogleToken()
+		password    string = req.GetUserInfo().GetPassword()
 	)
 	if googleToken != "" {
 		userInfo, err := helper.GetGoogleUserInfo(googleToken)
@@ -86,6 +88,12 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		err = config.ErrEmailRequired
 		s.log.Error("!!!RegisterCompany-->EmailRequired", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	err = util.ValidStrongPassword(password)
+	if err != nil {
+		s.log.Error("!!!RegisterCompany-->ValidStrong password", logger.Error(err))
+		return nil, err
 	}
 
 	companyPKey, err := s.services.CompanyServiceClient().Create(ctx, &company_service.CreateCompanyRequest{
@@ -133,7 +141,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	hashedPassword, err := security.HashPasswordBcrypt(req.GetUserInfo().GetPassword())
+	hashedPassword, err := security.HashPasswordBcrypt(password)
 	if err != nil {
 		s.log.Error("!!!RegisterCompany-->HashPassword", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
