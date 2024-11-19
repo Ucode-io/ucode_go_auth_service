@@ -67,13 +67,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
 		v2.GET("/get-connection-options/:connection_id/:user_id", h.GetConnectionOptions)
 
-		// admin, dev, hr, ceo
-		v2.POST("/client-type", h.V2CreateClientType)
-		v2.GET("/client-type", h.V2GetClientTypeList)
-		v2.GET("/client-type/:client-type-id", h.V2GetClientTypeByID)
-		v2.PUT("/client-type", h.V2UpdateClientType)
-		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)
-
 		// ROLE SERVICE
 		v2.GET("/role/:role-id", h.V2GetRoleByID)
 		v2.GET("/role", h.V2GetRolesList)
@@ -109,15 +102,9 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
-		v2.GET("/webpage-app", h.GetListWebPageApp)
 
 		// objects
 		v2.POST("/object/get-list/:table_slug", h.V2GetListObjects)
-
-		// login strategy
-		v2.GET("/login-strategy", h.GetLoginStrategy)
-		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
-		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
 	}
 
 	auth := v2.Group("/auth")
@@ -159,24 +146,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	v2.PUT("/email-settings", h.UpdateEmailSettings)
 	v2.GET("/email-settings", h.GetEmailSettings)
 	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
-
-	// sms-otp-settings
-	v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
-	v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)
-	v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
-	v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
-	v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
-
-	v2.POST("/apple-id-settings", h.CreateAppleIdSettings)
-	v2.PUT("/apple-id-settings", h.UpdateAppleIdSettings)
-	v2.GET("/apple-id-settings", h.GetAppleIdSettings)
-	v2.DELETE("/apple-id-settings/:id", h.DeleteAppleIdSettings)
-
-	v2.POST("/login-platform-type", h.CreateLoginPlatformType)
-	v2.PUT("/login-platform-type", h.UpdateLoginPlatformType)
-	v2.GET("/login-platform-type", h.GetLoginPlatformType)
-	v2.GET("/login-platform-type/:id", h.LoginPlatformTypePrimaryKey)
-	v2.DELETE("/login-platform-type/:id", h.DeleteLoginPlatformType)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return
