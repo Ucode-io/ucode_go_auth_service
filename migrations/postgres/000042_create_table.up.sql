@@ -31,6 +31,6 @@ BEGIN;
         client_id VARCHAR NOT NULL,
         info JSONB DEFAULT '{}',
         given_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    )
+    );
 
 COMMIT;
