@@ -8,46 +8,30 @@ import (
 )
 
 const (
-	DatabaseQueryTimeLayout = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
-	// DatabaseTimeLayout
-	DatabaseTimeLayout string = time.RFC3339
+	DatabaseQueryTimeLayout   string        = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
+	DatabaseTimeLayout        string        = time.RFC3339
 	AccessTokenExpiresInTime  time.Duration = 1 * 60 * 24 * time.Minute
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
 	// AccessTokenExpiresInTime  time.Duration = 1 * time.Minute
 	// RefreshTokenExpiresInTime time.Duration = 3 * time.Minute
 
-	// ProjectID
-	ProjectID string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
-	// CustomerClientPlatformID
-	CustomerClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c02"
-	// CustomerClientTypeID
-	CustomerClientTypeID string = "5a3818a9-90f0-44e9-a053-3be0ba1e2c04"
-	// CustomerDefaultRoleID
-	CustomerDefaultRoleID string = "a1ca1301-4da9-424d-a9e2-578ae6dcde04"
-	// AdminClientPlatformID
+	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
-	// DeveloperClientTypeID
-	DeveloperClientTypeID string = "5a3818a9-90f0-44e9-a053-3be0ba1e2c02"
+	AdminClientName       string = "ADMIN"
+	OpenFaaSPlatformID    string = "7d4a4c38-dd84-4902-b744-0488b80a4c04"
 
-	AdminClientTypeID    string = "142e9d0b-d9d3-4f71-bde1-5f1dbd70e83d"
-	AdminClientName      string = "ADMIN"
-	UcodeTestAdminDomain string = "test.admin.u-code.io"
-	// UcodeDefaultProjectID string = "ucode_default_project_id"
-	UcodeDefaultProjectID string = "39f1b0cc-8dc3-42df-b2bf-813310c007a4"
+	DefaultOtp           string = "208071"
+	LOW_NODE_TYPE        string = "LOW"
+	HIGH_NODE_TYPE       string = "HIGH"
+	ENTER_PRICE_TYPE     string = "ENTER_PRICE"
+	ObjectBuilderService string = "BUILDER_SERVICE"
 
-	ObjectBuilderService = "BUILDER_SERVICE"
-
-	DefaultOtp       string = "208071"
-	LOW_NODE_TYPE    string = "LOW"
-	HIGH_NODE_TYPE   string = "HIGH"
-	ENTER_PRICE_TYPE string = "ENTER_PRICE"
-
-	WithGoogle = "google"
-	Default    = "default"
-	WithPhone  = "phone"
-	WithApple  = "apple"
-	WithEmail  = "email"
+	WithGoogle string = "google"
+	Default    string = "default"
+	WithPhone  string = "phone"
+	WithApple  string = "apple"
+	WithEmail  string = "email"
 
 	K8SNamespace string = "cp-region-type-id"
 	LanguageId   string = "e2d68f08-8587-4136-8cd4-c26bf1b9cda1"
@@ -59,57 +43,47 @@ const (
 )
 
 var (
-	// these apis also manage by app's permission
-	RegisterTypes = map[string]int{
-		"google":  1,
-		"default": 1,
-		"phone":   1,
-		"apple":   1,
-		"email":   1,
-	}
-	ErrUserNotFound = errors.New("user not found")
-	ErrEmailRequired = errors.New("email required for register company")
+	ErrUserNotFound     = errors.New("user not found")
+	ErrEmailRequired    = errors.New("email required for register company")
+	ErrUserAlradyMember = errors.New("user is already member")
 
-	LoginStrategyTypes = map[string]int{
-		"EMAIL":       1,
-		"PHONE":       1,
-		"EMAIL_OTP":   1,
-		"PHONE_OTP":   1,
-		"LOGIN":       1,
-		"LOGIN_PWD":   1,
-		"GOOGLE_AUTH": 1,
-		"APPLE_AUTH":  1,
+	RegisterTypes = map[string]bool{
+		"google":  true,
+		"default": true,
+		"phone":   true,
+		"apple":   true,
+		"email":   true,
 	}
 
-	ObjectBuilderTableSlugs = map[string]int{
-		"field":               1,
-		"view":                1,
-		"table":               1,
-		"relation":            1,
-		"section":             1,
-		"view_relation":       1,
-		"html-template":       1,
-		"variable":            1,
-		"dashboard":           1,
-		"panel":               1,
-		"html-to-pdf":         1,
-		"document":            1,
-		"template-to-html":    1,
-		"many-to-many":        1,
-		"upload":              1,
-		"upload-file":         1,
-		"close-cashbox":       1,
-		"open-cashbox":        1,
-		"cashbox_transaction": 1,
-		"query":               1,
-		"event":               1,
-		"event-log":           1,
-		"permission-upsert":   1,
-		"custom-event":        1,
-		"excel":               1,
-		"field-permission":    1,
-		"function":            1,
-		"invoke_function":     1,
+	ObjectBuilderTableSlugs = map[string]bool{
+		"field":               true,
+		"view":                true,
+		"table":               true,
+		"relation":            true,
+		"section":             true,
+		"view_relation":       true,
+		"html-template":       true,
+		"variable":            true,
+		"dashboard":           true,
+		"panel":               true,
+		"html-to-pdf":         true,
+		"document":            true,
+		"template-to-html":    true,
+		"many-to-many":        true,
+		"upload":              true,
+		"upload-file":         true,
+		"close-cashbox":       true,
+		"open-cashbox":        true,
+		"cashbox_transaction": true,
+		"query":               true,
+		"event":               true,
+		"event-log":           true,
+		"permission-upsert":   true,
+		"custom-event":        true,
+		"excel":               true,
+		"field-permission":    true,
+		"function":            true,
+		"invoke_function":     true,
 	}
 
 	HashTypes = map[string]int{
@@ -122,11 +96,8 @@ var (
 		"object-slim": true,
 		// "items":       true,
 	}
-)
 
-var (
-	ErrUserAlradyMember = errors.New("user is already member")
-	RateLimitCfg        = []*ratelimiter.LeakyBucket{
+	RateLimitCfg = []*ratelimiter.LeakyBucket{
 		{
 			Method:         "POST",
 			Path:           "/v2/send-code",

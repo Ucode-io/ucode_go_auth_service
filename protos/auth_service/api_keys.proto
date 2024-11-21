@@ -41,6 +41,9 @@ message CreateReq {
   string client_type_id = 5;
   int32 rps_limit = 6;
   int32 monthly_request_limit = 7;
+  string client_platform_id = 8;
+  bool disable = 9;
+  string client_id = 10;
 }
 
 message CreateRes {
@@ -57,6 +60,8 @@ message CreateRes {
   string client_type_id = 11;
   int32 rps_limit = 12;
   int32 monthly_request_limit = 13;
+  string client_id = 14;
+  bool disable = 15;
 }
 
 message UpdateReq {
@@ -93,6 +98,8 @@ message GetRes {
   int32 rps_limit = 12;
   int32 monthly_request_limit = 13;
   int32 used_count = 14;
+  string client_id = 15;
+  bool disable = 16;
 }
 
 message GetListReq {

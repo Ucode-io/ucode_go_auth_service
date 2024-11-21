@@ -55,8 +55,10 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 
 	secretKey := "S-" + helper.GenerateSecretKey(32)
 	secretId := "P-" + helper.GenerateSecretKey(32)
+	clientId := helper.GenerateSecretKey(32)
 
 	hashedSecretKey, _ := security.HashPasswordBcrypt(secretKey)
+	req.ClientId = clientId
 
 	res, err := s.strg.ApiKeys().Create(ctx, req, hashedSecretKey, secretId, id.String())
 	if err != nil {
@@ -70,10 +72,10 @@ func (s *apiKeysService) Create(ctx context.Context, req *pb.CreateReq) (*pb.Cre
 }
 
 func (s *apiKeysService) Update(ctx context.Context, req *pb.UpdateReq) (*pb.UpdateRes, error) {
+	s.log.Info("---UpdateApiKey--->", logger.Any("req", req))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_apikey_v2.Update", req)
 	defer dbSpan.Finish()
-
-	s.log.Info("---UpdateApiKey--->", logger.Any("req", req))
 
 	res, err := s.strg.ApiKeys().Update(ctx, req)
 	if err != nil {

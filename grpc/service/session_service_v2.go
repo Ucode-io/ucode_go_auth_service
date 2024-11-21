@@ -30,10 +30,10 @@ import (
 )
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
+	s.log.Info("V2Login --> ", logger.Any("request: ", req))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2Login", req)
 	defer dbSpan.Finish()
-
-	s.log.Info("V2Login --> ", logger.Any("request: ", req))
 
 	var (
 		user   = &pb.User{}
@@ -1087,7 +1087,7 @@ func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessReque
 		tableSlug = splitedPath[len(splitedPath)-2]
 	}
 
-	if _, ok := config.ObjectBuilderTableSlugs[tableSlug]; ok {
+	if config.ObjectBuilderTableSlugs[tableSlug] {
 		tableSlug = "app"
 	}
 
@@ -1648,10 +1648,10 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccessUser", req)
 	defer dbSpan.Finish()
-
-	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
 
 	var (
 		before                 runtime.MemStats
@@ -1780,8 +1780,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 				return nil, err
 			}
 
-			resp, err := services.GetBuilderPermissionServiceByType(resource.NodeType).GetTablePermission(
-				context.Background(),
+			resp, err := services.GetBuilderPermissionServiceByType(resource.NodeType).GetTablePermission(ctx,
 				&pbObject.GetTablePermissionRequest{
 					TableSlug:             tableSlug,
 					RoleId:                session.RoleId,

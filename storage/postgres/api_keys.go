@@ -27,10 +27,8 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 	defer dbSpan.Finish()
 
 	var (
-		res pb.CreateRes
-
-		createdAt sql.NullString
-		updatedAt sql.NullString
+		res                  pb.CreateRes
+		createdAt, updatedAt sql.NullString
 	)
 
 	query := `
@@ -43,6 +41,9 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			environment_id, 
 			project_id, 
 			client_type_id,
+			client_platform_id,
+			"disable",
+			client_id,
 			created_at, 
 			updated_at
 		)
@@ -55,13 +56,14 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			$6, 
 			$7, 
 			$8,
+			$9,
+			$10,
+			$11,
 			now(), 
 			now()) 
 		RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id, rps_limit, monthly_request_limit`
 
-	err := r.db.QueryRow(
-		ctx,
-		query,
+	err := r.db.QueryRow(ctx, query,
 		id,
 		req.GetName(),
 		appId,
@@ -70,6 +72,8 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetEnvironmentId(),
 		req.GetProjectId(),
 		req.GetClientTypeId(),
+		req.GetClientPlatformId(),
+		req.GetDisable(),
 	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId, &res.RpsLimit, &res.MonthlyRequestLimit)
 
 	if err != nil {

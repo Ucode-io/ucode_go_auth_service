@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"runtime"
+
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
@@ -69,6 +70,10 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		googleToken string = req.GetUserInfo().GetGoogleToken()
 		password    string = req.GetUserInfo().GetPassword()
 	)
+
+	clientTypeId := uuid.NewString()
+	roleId := uuid.NewString()
+
 	if googleToken != "" {
 		userInfo, err := helper.GetGoogleUserInfo(googleToken)
 		if err != nil {
@@ -141,6 +146,20 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
+	_, err = s.services.ApiKeysService().Create(ctx, &pb.CreateReq{
+		Name:             "Function",
+		ProjectId:        project.ProjectId,
+		EnvironmentId:    environment.GetId(),
+		ClientPlatformId: config.OpenFaaSPlatformID,
+		Disable:          true,
+		ClientTypeId:     clientTypeId,
+		RoleId:           roleId,
+	})
+	if err != nil {
+		s.log.Error("!!!RegisterCompany-->CreateApiKey", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	hashedPassword, err := security.HashPasswordBcrypt(password)
 	if err != nil {
 		s.log.Error("!!!RegisterCompany-->HashPassword", logger.Error(err))
@@ -171,10 +190,12 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	}
 
 	_, err = s.services.UserService().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-		CompanyId: companyPKey.GetId(),
-		ProjectId: project.GetProjectId(),
-		UserId:    createUserRes.GetId(),
-		EnvId:     environment.GetId(),
+		CompanyId:    companyPKey.GetId(),
+		ProjectId:    project.GetProjectId(),
+		UserId:       createUserRes.GetId(),
+		EnvId:        environment.GetId(),
+		ClientTypeId: clientTypeId,
+		RoleId:       roleId,
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany-->AddUser2Project", logger.Error(err))
@@ -189,7 +210,9 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			ResourceType: 1,
 			NodeType:     config.LOW_NODE_TYPE,
 		},
-		UserId: createUserRes.GetId(),
+		UserId:       createUserRes.GetId(),
+		ClientTypeId: clientTypeId,
+		RoleId:       roleId,
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany-AutoCreateResource--->", logger.Error(err))

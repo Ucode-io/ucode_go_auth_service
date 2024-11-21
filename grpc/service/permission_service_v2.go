@@ -3,17 +3,39 @@ package service
 import (
 	"context"
 	"runtime"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
+	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	span "ucode/ucode_go_auth_service/pkg/jaeger"
+	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+type permissionService struct {
+	cfg         config.BaseConfig
+	log         logger.LoggerI
+	strg        storage.StorageI
+	services    client.ServiceManagerI
+	serviceNode ServiceNodesI
+	pb.UnimplementedPermissionServiceServer
+}
+
+func NewPermissionService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *permissionService {
+	return &permissionService{
+		cfg:         cfg,
+		log:         log,
+		strg:        strg,
+		services:    svcs,
+		serviceNode: projectServiceNodes,
+	}
+}
 
 func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequest) (*pb.CommonMessage, error) {
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_permission_v2.V2AddRole", req)

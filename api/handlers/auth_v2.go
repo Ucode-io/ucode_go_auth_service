@@ -93,7 +93,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		return
 	}
 
-	if _, ok := cfg.RegisterTypes[body.Data["type"].(string)]; !ok {
+	if !cfg.RegisterTypes[body.Data["type"].(string)] {
 		h.handleResponse(c, http.BadRequest, "invalid register type")
 		return
 	}
