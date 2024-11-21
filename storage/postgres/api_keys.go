@@ -450,3 +450,75 @@ func (r *apiKeysRepo) UpdateIsMonthlyLimitReached(ctx context.Context) error {
 
 	return nil
 }
+
+func (a *apiKeysRepo) ListClientToken(ctx context.Context, req *pb.ListClientTokenRequest) (*pb.ListClientTokenResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.ListClientToken")
+	defer dbSpan.Finish()
+
+	var (
+		res = &pb.ListClientTokenResponse{Count: 0}
+	)
+
+	query := `SELECT
+				id,
+  				client_id,
+  				info,
+  				given_time
+			FROM
+			    client_tokens`
+
+	filter := ` WHERE client_id = :client_id`
+	params := make(map[string]interface{})
+	offset := " OFFSET 0"
+	limit := " LIMIT 10"
+	order := " ORDER BY given_time"
+	arrangement := " DESC"
+	params["client_id"] = req.GetClientId()
+
+	if req.Offset > 0 {
+		params["offset"] = req.Offset
+		offset = " OFFSET :offset"
+	}
+
+	if req.Limit > 0 {
+		params["limit"] = req.Limit
+		limit = " LIMIT :limit"
+	}
+
+	countQuery := `SELECT COUNT(*) FROM client_tokens` + filter
+	countStmt, countArgs := helper.ReplaceQueryParams(countQuery, params)
+
+	err := a.db.QueryRow(ctx, countStmt, countArgs...).Scan(
+		&res.Count,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	q := query + filter + order + arrangement + offset + limit
+	stmt, args := helper.ReplaceQueryParams(q, params)
+
+	rows, err := a.db.Query(ctx, stmt, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var row pb.ClientIdToken
+
+		err = rows.Scan(
+			&row.Id,
+			&row.ClientId,
+			&row.Info,
+			&row.GivenTime,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		res.ClientTokens = append(res.ClientTokens, &row)
+	}
+
+	return res, nil
+}

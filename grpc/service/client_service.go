@@ -60,18 +60,6 @@ func (s *clientService) GetClientPlatformByID(ctx context.Context, req *pb.Clien
 	return res, nil
 }
 
-func (s *clientService) GetClientPlatformByIDDetailed(ctx context.Context, req *pb.ClientPlatformPrimaryKey) (*pb.ClientPlatformDetailedResponse, error) {
-	s.log.Info("---GetClientPlatformByID--->", logger.Any("req", req))
-
-	res, err := s.strg.ClientPlatform().GetByPKDetailed(ctx, req)
-	if err != nil {
-		s.log.Error("!!!GetClientPlatformByID--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-
-	return res, nil
-}
-
 func (s *clientService) GetClientPlatformList(ctx context.Context, req *pb.GetClientPlatformListRequest) (*pb.GetClientPlatformListResponse, error) {
 	s.log.Info("---GetClientPlatformList--->", logger.Any("req", req))
 
@@ -82,44 +70,6 @@ func (s *clientService) GetClientPlatformList(ctx context.Context, req *pb.GetCl
 	}
 
 	return res, err
-}
-
-func (s *clientService) UpdateClientPlatform(ctx context.Context, req *pb.UpdateClientPlatformRequest) (*pb.ClientPlatform, error) {
-	s.log.Info("---UpdateClientPlatform--->", logger.Any("req", req))
-
-	rowsAffected, err := s.strg.ClientPlatform().Update(ctx, req)
-	if err != nil {
-		s.log.Error("!!!UpdateClientPlatform--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
-
-	res, err := s.strg.ClientPlatform().GetByPK(ctx, &pb.ClientPlatformPrimaryKey{Id: req.Id})
-	if err != nil {
-		s.log.Error("!!!UpdateClientPlatform--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-
-	return res, err
-}
-
-func (s *clientService) DeleteClientPlatform(ctx context.Context, req *pb.ClientPlatformPrimaryKey) (*emptypb.Empty, error) {
-	s.log.Info("---DeleteClientPlatform--->", logger.Any("req", req))
-
-	rowsAffected, err := s.strg.ClientPlatform().Delete(ctx, req)
-	if err != nil {
-		s.log.Error("!!!DeleteClientPlatform--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
-
-	return &emptypb.Empty{}, nil
 }
 
 func (s *clientService) CreateClientType(ctx context.Context, req *pb.CreateClientTypeRequest) (*pb.ClientType, error) {

@@ -29,7 +29,8 @@ BEGIN;
     CREATE TABLE IF NOT EXISTS "client_tokens" (
         id UUID PRIMARY KEY,
         client_id VARCHAR NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+        info JSONB DEFAULT '{}',
+        given_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
     )
 
 COMMIT;

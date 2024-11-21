@@ -73,6 +73,9 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.POST("/role", h.V2AddRole)
 		v2.DELETE("/role/:role-id", h.V2RemoveRole)
 
+		// CLIENT PLATFORM
+		v2.GET("/client-platform", h.GetClientPlatformList)
+
 		// role-permission
 		v2.GET("/role-permission/detailed/:project-id/:role-id", h.GetListWithRoleAppTablePermissions)
 		v2.PUT("/role-permission/detailed", h.UpdateRoleAppTablePermissions)

@@ -271,3 +271,47 @@ func (h *Handler) RefreshApiKeyToken(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, res)
 }
+
+// GetClientPlatformList godoc
+// @ID get_client_platform_list
+// @Router /v2/client-platform [GET]
+// @Summary Get ClientPlatform List
+// @Description  Get ClientPlatform List
+// @Tags ClientPlatform
+// @Accept json
+// @Produce json
+// @Param offset query integer false "offset"
+// @Param limit query integer false "limit"
+// @Param search query string false "search"
+// @Success 200 {object} http.Response{data=auth_service.GetClientPlatformListResponse} "GetClientPlatformListResponseBody"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) GetClientPlatformList(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.services.ClientService().GetClientPlatformList(
+		c.Request.Context(),
+		&auth_service.GetClientPlatformListRequest{
+			Limit:  int32(limit),
+			Offset: int32(offset),
+			Search: c.Query("search"),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}

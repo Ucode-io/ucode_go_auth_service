@@ -19,7 +19,6 @@ type StorageI interface {
 	ClientPlatform() ClientPlatformRepoI
 	ClientType() ClientTypeRepoI
 	Client() ClientRepoI
-	Scope() ScopeRepoI
 	User() UserRepoI
 	Session() SessionRepoI
 	Company() CompanyRepoI
@@ -33,9 +32,6 @@ type ClientPlatformRepoI interface {
 	Create(ctx context.Context, entity *pb.CreateClientPlatformRequest) (pKey *pb.ClientPlatformPrimaryKey, err error)
 	GetList(ctx context.Context, queryParam *pb.GetClientPlatformListRequest) (res *pb.GetClientPlatformListResponse, err error)
 	GetByPK(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (res *pb.ClientPlatform, err error)
-	GetByPKDetailed(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (res *pb.ClientPlatformDetailedResponse, err error)
-	Update(ctx context.Context, entity *pb.UpdateClientPlatformRequest) (rowsAffected int64, err error)
-	Delete(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (rowsAffected int64, err error)
 }
 
 type ClientTypeRepoI interface {
@@ -54,12 +50,6 @@ type ClientRepoI interface {
 	Remove(ctx context.Context, entity *pb.ClientPrimaryKey) (rowsAffected int64, err error)
 	GetList(ctx context.Context, queryParam *pb.GetClientListRequest) (res *pb.GetClientListResponse, err error)
 	GetMatrix(ctx context.Context, req *pb.GetClientMatrixRequest) (res *pb.GetClientMatrixResponse, err error)
-}
-
-type ScopeRepoI interface {
-	Upsert(ctx context.Context, entity *pb.UpsertScopeRequest) (res *pb.ScopePrimaryKey, err error)
-	GetByPK(ctx context.Context, pKey *pb.ScopePrimaryKey) (res *pb.Scope, err error)
-	GetList(ctx context.Context, queryParam *pb.GetScopeListRequest) (res *pb.GetScopesResponse, err error)
 }
 
 type UserRepoI interface {
@@ -133,6 +123,7 @@ type ApiKeysRepoI interface {
 	GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error)
 	GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error)
 	UpdateIsMonthlyLimitReached(ctx context.Context) error
+	ListClientToken(ctx context.Context, req *pb.ListClientTokenRequest) (res *pb.ListClientTokenResponse, err error)
 }
 
 type AppleSettingsI interface {

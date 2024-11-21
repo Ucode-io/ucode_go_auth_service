@@ -264,6 +264,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		Tables:        req.Tables,
 		ProjectId:     req.GetProjectId(),
 		EnvironmentId: req.GetEnvironmentId(),
+		ClientId:      req.GetClientId(),
 	})
 	if resp == nil {
 		errGenerateToken := errors.New("unable to generate token")
@@ -284,10 +285,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 }
 
 func (s *sessionService) V2LoginWithOption(ctx context.Context, req *pb.V2LoginWithOptionRequest) (*pb.V2LoginWithOptionsResponse, error) {
+	s.log.Info("V2LoginWithOption-->", logger.Any("request: ", req))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginWithOption", req)
 	defer dbSpan.Finish()
-
-	s.log.Info("V2LoginWithOption --> ", logger.Any("request: ", req))
 
 	var (
 		before   runtime.MemStats
@@ -728,8 +729,9 @@ pwd:
 	}
 	req.Data["user_id"] = userId
 	data, err := s.LoginMiddleware(ctx, models.LoginMiddlewareReq{
-		Data:   req.Data,
-		Tables: req.Tables,
+		Data:     req.Data,
+		Tables:   req.Tables,
+		ClientId: req.ClientId,
 	})
 	if err != nil {
 		httpErrorStr := ""
@@ -855,6 +857,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		LoginData:     res,
 		ProjectId:     req.Data["project_id"],
 		EnvironmentId: req.Data["environment_id"],
+		ClientId:      req.ClientId,
 	})
 
 	if resp == nil {
@@ -884,299 +887,6 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		AppPermissions:  resp.GetAppPermissions(),
 		LoginTableSlug:  resp.GetLoginTableSlug(),
 		AddationalTable: resp.GetAddationalTable(),
-	}, nil
-}
-
-func (s *sessionService) V2LoginSuperAdmin(ctx context.Context, req *pb.V2LoginSuperAdminReq) (*pb.V2LoginSuperAdminRes, error) {
-	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2LoginSuperAdmin", req)
-	defer dbSpan.Finish()
-
-	var before runtime.MemStats
-	runtime.ReadMemStats(&before)
-
-	defer func() {
-		var after runtime.MemStats
-		runtime.ReadMemStats(&after)
-		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
-		s.log.Info("Memory used by the V2LoginSuperAdmin", logger.Any("memoryUsed", memoryUsed))
-		if memoryUsed > 300 {
-			s.log.Info("Memory used over 300 mb", logger.Any("V2LoginSuperAdmin", memoryUsed))
-		}
-	}()
-
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!V2LoginSuperAdmin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!SuperAdminLogin--->", logger.Error(err))
-		if err == sql.ErrNoRows {
-			customError := errors.New("user not found")
-			return nil, status.Error(codes.NotFound, customError.Error())
-		}
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	hashType := user.GetHashType()
-	if config.HashTypes[hashType] == 1 {
-		match, err := security.ComparePassword(user.GetPassword(), req.Password)
-		if err != nil {
-			s.log.Error("!!!SuperAdminLogin-->ComparePasswordArgon", logger.Error(err))
-			return nil, err
-		}
-		if !match {
-			err := errors.New("username or password is wrong")
-			s.log.Error("!!!SuperAdminLogin-->Wrong", logger.Error(err))
-			return nil, err
-		}
-
-		go func() {
-			hashedPassword, err := security.HashPasswordBcrypt(req.Password)
-			if err != nil {
-				s.log.Error("!!!SuperAdminLogin--->HashPasswordBcryptGo", logger.Error(err))
-				return
-			}
-			err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
-			if err != nil {
-				s.log.Error("!!!SuperAdminLogin--->UpdatePassword", logger.Error(err))
-				return
-			}
-		}()
-	} else if config.HashTypes[hashType] == 2 {
-		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
-		if err != nil {
-			s.log.Error("!!!SuperAdminLogin-->ComparePasswordBcrypt", logger.Error(err))
-			return nil, err
-		}
-		if !match {
-			err := errors.New("username or password is wrong")
-			s.log.Error("!!!SuperAdminLogin--->", logger.Error(err))
-			return nil, err
-		}
-	} else {
-		err := errors.New("invalid hash type")
-		s.log.Error("!!!SuperAdminLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	resp, err := s.SessionAndTokenGenerator(ctx, &pb.SessionAndTokenRequest{
-		LoginData: &pb.V2LoginResponse{
-			UserFound:      true,
-			ClientPlatform: &pb.ClientPlatform{},
-			ClientType:     &pb.ClientType{},
-			Role:           &pb.Role{},
-			UserId:         user.GetId(),
-			Permissions:    []*pb.RecordPermission{},
-			Sessions:       []*pb.Session{},
-			LoginTableSlug: "",
-			AppPermissions: []*pb.RecordPermission{},
-		},
-		ProjectId: user.ProjectId,
-	})
-	if resp == nil {
-		err := errors.New("user Not Found")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &pb.V2LoginSuperAdminRes{
-		UserFound: true,
-		UserId:    user.GetId(),
-		Token:     resp.Token,
-		Sessions:  resp.Sessions,
-	}, nil
-}
-
-func (s *sessionService) V2HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
-	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccess", req)
-	defer dbSpan.Finish()
-
-	var (
-		authTables             []*pb.TableBody
-		before                 runtime.MemStats
-		methodField, tableSlug string
-		request                = make(map[string]interface{})
-	)
-
-	runtime.ReadMemStats(&before)
-
-	defer func() {
-		var after runtime.MemStats
-		runtime.ReadMemStats(&after)
-		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
-		s.log.Info("Memory used by the V2HasAccess", logger.Any("memoryUsed", memoryUsed))
-		if memoryUsed > 300 {
-			s.log.Info("Memory used over 300 mb", logger.Any("V2HasAccess", memoryUsed))
-		}
-	}()
-
-	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
-	if err != nil {
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if session.IsChanged {
-		err := errors.New("permision update")
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
-	if err != nil {
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("user has been expired")
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
-		ClientPlatformId: session.ClientPlatformId,
-		Path:             req.Path,
-		Method:           req.Method,
-	})
-	if err != nil {
-		s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	switch req.Method {
-	case "GET":
-		methodField = "read"
-	case "POST":
-		methodField = "write"
-	case "PUT":
-		methodField = "update"
-	case "DELETE":
-		methodField = "delete"
-	}
-
-	// this is for object get list api because our object/get-list api is post method.
-	if strings.Contains(req.GetPath(), "object/get-list/") || strings.Contains(req.GetPath(), "object-slim/get-list") {
-		methodField = "read"
-	}
-
-	splitedPath := strings.Split(req.Path, "/")
-	splitedPath = splitedPath[1:]
-
-	tableSlug = splitedPath[len(splitedPath)-1]
-	if tableSlug[len(tableSlug)-2:] == "id" {
-		tableSlug = splitedPath[len(splitedPath)-2]
-	}
-
-	if config.ObjectBuilderTableSlugs[tableSlug] {
-		tableSlug = "app"
-	}
-
-	request["client_type_id"] = session.ClientTypeId
-	request[methodField] = "Yes"
-	request["table_slug"] = tableSlug
-
-	clientType, err := s.services.ClientService().V2GetClientTypeByID(ctx, &pb.V2ClientTypePrimaryKey{
-		Id: session.ClientTypeId,
-	})
-	if err != nil {
-		s.log.Error("!!!V2HasAccess.ClientService.V2GetClientTypeByID--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	convertedClientType, err := helper.ConvertStructToResponse(clientType.Data)
-	if err != nil {
-		s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	services, err := s.serviceNode.GetByNodeType(session.ProjectId, req.NodeType)
-	if err != nil {
-		return nil, err
-	}
-
-	clientName, ok := convertedClientType["response"].(map[string]interface{})["name"]
-	if !ok {
-		if clientName == nil {
-			err := errors.New("wrong client type")
-			s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		structPb, err := helper.ConvertMapToStruct(request)
-		if err != nil {
-			s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		if session.ClientTypeId != config.AdminClientPlatformID || clientName.(string) != config.AdminClientName {
-			resp, err := services.GetObjectBuilderServiceByType("").GetList(ctx, &pbObject.CommonMessage{
-				TableSlug: "record_permission",
-				Data:      structPb,
-				ProjectId: session.ProjectId,
-			})
-			if err != nil {
-				s.log.Error("!!!V2HasAccess.ObjectBuilderService.GetList--->", logger.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-
-			res, err := helper.ConvertStructToResponse(resp.Data)
-			if err != nil {
-				s.log.Error("!!!V2HasAccess.ConvertStructToResponse--->", logger.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-
-			if len(res["response"].([]interface{})) == 0 {
-				err := errors.New("permission denied")
-				s.log.Error("!!!V2HasAccess--->", logger.Error(err))
-				return nil, status.Error(codes.PermissionDenied, err.Error())
-			}
-
-		}
-	}
-
-	for _, table := range tokenInfo.Tables {
-		authTable := &pb.TableBody{
-			TableSlug: table.TableSlug,
-			ObjectId:  table.ObjectID,
-		}
-		authTables = append(authTables, authTable)
-	}
-
-	return &pb.HasAccessResponse{
-		Id:               session.Id,
-		ProjectId:        session.ProjectId,
-		ClientPlatformId: session.ClientPlatformId,
-		ClientTypeId:     session.ClientTypeId,
-		UserId:           session.UserId,
-		RoleId:           session.RoleId,
-		Ip:               session.Ip,
-		Data:             session.Data,
-		ExpiresAt:        session.ExpiresAt,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		Tables:           authTables,
-		LoginTableSlug:   tokenInfo.LoginTableSlug,
-		EnvId:            session.EnvId,
 	}, nil
 }
 
@@ -1300,84 +1010,6 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	return res, nil
 }
 
-func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenSuperAdminResponse, error) {
-	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshTokenSuperAdmin", req)
-	defer dbSpan.Finish()
-
-	var before runtime.MemStats
-	runtime.ReadMemStats(&before)
-
-	defer func() {
-		var after runtime.MemStats
-		runtime.ReadMemStats(&after)
-		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
-		s.log.Info("Memory used by the V2RefreshTokenSuperAdmin", logger.Any("memoryUsed", memoryUsed))
-		if memoryUsed > 300 {
-			s.log.Info("Memory used over 300 mb", logger.Any("V2RefreshTokenSuperAdmin", memoryUsed))
-		}
-	}()
-
-	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
-	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	authTables := []*pb.TableBody{}
-	if tokenInfo.Tables != nil {
-		for _, table := range tokenInfo.Tables {
-			authTable := &pb.TableBody{
-				TableSlug: table.TableSlug,
-				ObjectId:  table.ObjectID,
-			}
-			authTables = append(authTables, authTable)
-		}
-	}
-
-	// TODO - wrap in a function
-	m := map[string]interface{}{
-		"id":                 session.Id,
-		"project_id":         session.ProjectId,
-		"client_platform_id": session.ClientPlatformId,
-		"client_type_id":     session.ClientTypeId,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
-		"ip":                 session.Data,
-		"data":               session.Data,
-		"tables":             authTables,
-	}
-
-	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!RefreshToken--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	token := &pb.Token{
-		AccessToken:      accessToken,
-		RefreshToken:     refreshToken,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		ExpiresAt:        session.ExpiresAt,
-		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
-	}
-
-	res := &pb.V2RefreshTokenSuperAdminResponse{Token: token}
-	return res, nil
-}
-
 func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb.SessionAndTokenRequest) (*pb.V2LoginResponse, error) {
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.SessionAndTokenGenerator", input)
 	defer dbSpan.Finish()
@@ -1429,6 +1061,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		EnvId:            input.GetEnvironmentId(),
 		UserId:           input.GetLoginData().GetUserId(),
 		RoleId:           input.GetLoginData().GetRole().GetId(),
+		ClientId:         input.GetClientId(),
 		ProjectId:        input.GetProjectId(),
 		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 		UserIdAuth:       input.GetLoginData().GetUserIdAuth(),
@@ -1466,6 +1099,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		"tables":             input.GetTables(),
 		"user_id":            session.GetUserId(),
 		"role_id":            session.GetRoleId(),
+		"client_id":          session.GetClientId(),
 		"project_id":         session.GetProjectId(),
 		"user_id_auth":       session.GetUserIdAuth(),
 		"client_type_id":     session.GetClientTypeId(),
@@ -1509,142 +1143,6 @@ func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.U
 	}
 
 	return &emptypb.Empty{}, nil
-}
-
-func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2MultiCompanyLoginReq) (*pb.V2MultiCompanyLoginRes, error) {
-	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2MultiCompanyLogin", req)
-	defer dbSpan.Finish()
-
-	var before runtime.MemStats
-	runtime.ReadMemStats(&before)
-
-	defer func() {
-		var after runtime.MemStats
-		runtime.ReadMemStats(&after)
-		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
-		s.log.Info("Memory used by the V2MultiCompanyLogin", logger.Any("memoryUsed", memoryUsed))
-		if memoryUsed > 300 {
-			s.log.Info("Memory used over 300 mb", logger.Any("V2MultiCompanyLogin", memoryUsed))
-		}
-	}()
-
-	resp := pb.V2MultiCompanyLoginRes{
-		Companies: []*pb.V2MultiCompanyLoginRes_Company{},
-	}
-
-	if len(req.Username) < 6 {
-		err := errors.New("invalid username")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if len(req.Password) < 6 {
-		err := errors.New("invalid password")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	user, err := s.strg.User().GetByUsername(ctx, req.GetUsername())
-	if err != nil {
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	hashType := user.GetHashType()
-	if config.HashTypes[hashType] == 1 {
-		match, err := security.ComparePassword(user.GetPassword(), req.Password)
-		if err != nil {
-			s.log.Error("!!!MultiCompanyLogin-->ComparePasswordArgon", logger.Error(err))
-			return nil, err
-		}
-		if !match {
-			err := errors.New("username or password is wrong")
-			s.log.Error("!!!MultiCompanyLogin-->Wrong", logger.Error(err))
-			return nil, err
-		}
-
-		go func() {
-			hashedPassword, err := security.HashPasswordBcrypt(req.Password)
-			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->HashPasswordBcryptGo", logger.Error(err))
-				return
-			}
-			err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
-			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin--->UpdatePassword", logger.Error(err))
-				return
-			}
-		}()
-	} else if config.HashTypes[hashType] == 2 {
-		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
-		if err != nil {
-			s.log.Error("!!!MultiCompanyLogin-->ComparePasswordBcrypt", logger.Error(err))
-			return nil, err
-		}
-		if !match {
-			err := errors.New("username or password is wrong")
-			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-			return nil, err
-		}
-	} else {
-		err := errors.New("invalid hash type")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
-	if err != nil {
-		errGetProjects := errors.New("cant get user projects")
-		s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, errGetProjects.Error())
-	}
-
-	for _, item := range userProjects.Companies {
-		projects := make([]*pb.V2MultiCompanyLoginRes_Company_Project, 0, 20)
-		company, err := s.services.CompanyServiceClient().GetById(ctx,
-			&pbCompany.GetCompanyByIdRequest{
-				Id: item.Id,
-			})
-
-		if err != nil {
-			errGetProjects := errors.New("cant get user projects")
-			s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-			return nil, status.Error(codes.NotFound, errGetProjects.Error())
-		}
-
-		for _, projectId := range item.ProjectIds {
-			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx,
-				&pbCompany.GetProjectByIdRequest{
-					ProjectId: projectId,
-					CompanyId: item.Id,
-				})
-
-			if err != nil {
-				errGetProjects := errors.New("cant get user projects")
-				s.log.Error("!!!MultiCompanyLogin--->", logger.Error(err))
-				return nil, status.Error(codes.NotFound, errGetProjects.Error())
-			}
-
-			projects = append(projects, &pb.V2MultiCompanyLoginRes_Company_Project{
-				Id:        projectInfo.GetProjectId(),
-				CompanyId: projectInfo.GetCompanyId(),
-				Name:      projectInfo.GetTitle(),
-				Domain:    projectInfo.GetK8SNamespace(),
-			})
-		}
-
-		resp.Companies = append(resp.Companies, &pb.V2MultiCompanyLoginRes_Company{
-			Id:          company.GetCompany().GetId(),
-			Name:        company.GetCompany().GetName(),
-			Logo:        company.GetCompany().GetLogo(),
-			Description: company.GetCompany().GetLogo(),
-			OwnerId:     company.GetCompany().GetOwnerId(),
-			Projects:    projects,
-			UserId:      user.GetId(),
-		})
-	}
-
-	return &resp, nil
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {

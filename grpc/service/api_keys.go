@@ -275,3 +275,18 @@ func (s *apiKeysService) GetEnvID(ctx context.Context, req *pb.GetReq) (resp *pb
 
 	return resp, nil
 }
+
+func (s *apiKeysService) ListClientToken(ctx context.Context, req *pb.ListClientTokenRequest) (resp *pb.ListClientTokenResponse, err error) {
+	s.log.Info("---ListClientToken--->>>>", logger.Any("req", req))
+
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_apikey_v2.ListClientToken", req)
+	defer dbSpan.Finish()
+
+	resp, err = s.strg.ApiKeys().ListClientToken(ctx, req)
+	if err != nil {
+		s.log.Error("---ListClientToken->Error--->>>", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return resp, nil
+}

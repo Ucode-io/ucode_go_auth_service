@@ -18,7 +18,6 @@ type Store struct {
 	clientPlatform storage.ClientPlatformRepoI
 	clientType     storage.ClientTypeRepoI
 	client         storage.ClientRepoI
-	scope          storage.ScopeRepoI
 	user           storage.UserRepoI
 	session        storage.SessionRepoI
 	company        storage.CompanyRepoI
@@ -147,14 +146,6 @@ func (s *Store) Client() storage.ClientRepoI {
 	}
 
 	return s.client
-}
-
-func (s *Store) Scope() storage.ScopeRepoI {
-	if s.scope == nil {
-		s.scope = NewScopeRepo(s.db)
-	}
-
-	return s.scope
 }
 
 func (s *Store) User() storage.UserRepoI {
