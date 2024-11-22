@@ -1120,7 +1120,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 
 	go func() {
-		err = s.strg.ApiKeys().CreateClientToken(ctx, input.ClientId, m)
+		err = s.strg.ApiKeys().CreateClientToken(context.Background(), input.ClientId, m)
 	}()
 
 	input.LoginData.Token = &pb.Token{

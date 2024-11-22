@@ -1,5 +1,6 @@
 package models
 
 type CommonMessage struct {
-	Data map[string]interface{} `json:"data"`
+	TableSlug string                 `json:"table_slug"`
+	Data      map[string]interface{} `json:"data"`
 }

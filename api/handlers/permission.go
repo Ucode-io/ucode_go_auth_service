@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"ucode/ucode_go_auth_service/api/http"
-
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
-	"github.com/saidamir98/udevs_pkg/util"
-
 	"github.com/gin-gonic/gin"
+	"github.com/saidamir98/udevs_pkg/util"
 )
 
 // AddRole godoc
@@ -19,7 +17,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param role body auth_service.AddRoleRequest true "AddRoleRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRole(c *gin.Context) {
@@ -53,7 +51,7 @@ func (h *Handler) AddRole(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role-id path string true "role-id"
-// @Success 200 {object} http.Response{data=auth_service.CompleteClientType} "ClientTypeBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "ClientTypeBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetRoleByID(c *gin.Context) {
@@ -87,7 +85,7 @@ func (h *Handler) GetRoleByID(c *gin.Context) {
 // @Param limit query integer false "limit"
 // @Param client-platform-id query string false "client-platform-id"
 // @Param client-type-id query string false "client-type-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetRolesListResponseBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "GetRolesListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetRolesList(c *gin.Context) {
@@ -130,7 +128,7 @@ func (h *Handler) GetRolesList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role body auth_service.UpdateRoleRequest true "UpdateRoleRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRole(c *gin.Context) {
@@ -199,7 +197,7 @@ func (h *Handler) RemoveRole(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission body auth_service.CreatePermissionRequest true "CreatePermissionRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "Permission data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "Permission data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreatePermission(c *gin.Context) {
@@ -235,7 +233,7 @@ func (h *Handler) CreatePermission(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetPermissionListResponseBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "GetPermissionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetPermissionList(c *gin.Context) {
@@ -277,7 +275,7 @@ func (h *Handler) GetPermissionList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission-id path string true "permission-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "PermissionBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "PermissionBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetPermissionByID(c *gin.Context) {
@@ -312,7 +310,7 @@ func (h *Handler) GetPermissionByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission body auth_service.UpdatePermissionRequest true "UpdatePermissionRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Permission data"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Permission data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdatePermission(c *gin.Context) {
@@ -420,7 +418,7 @@ func (h *Handler) UpsertScope(c *gin.Context) {
 // @Param search query string false "search"
 // @Param order_by query string false "order_by"
 // @Param order_type query string false "order_type"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetScopesListResponseBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "GetScopesListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetScopesList(c *gin.Context) {
@@ -471,7 +469,7 @@ func (h *Handler) GetScopesList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission-scope body auth_service.AddPermissionScopeRequest true "AddPermissionScopeRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "PermissionScope data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "PermissionScope data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddPermissionScope(c *gin.Context) {
@@ -506,7 +504,7 @@ func (h *Handler) AddPermissionScope(c *gin.Context) {
 // @Produce json
 // @Param permission-scope body auth_service.PermissionScopePrimaryKey true "PermissionScopePrimaryKeyBody"
 // @Success 204
-// @Response 400 {object} http.Response{data=auth_service.CommonMessage} "Invalid Argument"
+// @Response 400 {object} http.Response{data=models.CommonMessage} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RemovePermissionScope(c *gin.Context) {
 	var permissionScope auth_service.PermissionScopePrimaryKey
@@ -539,7 +537,7 @@ func (h *Handler) RemovePermissionScope(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role-permission body auth_service.AddRolePermissionRequest true "AddRolePermissionRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "RolePermission data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "RolePermission data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRolePermission(c *gin.Context) {

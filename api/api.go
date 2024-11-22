@@ -152,9 +152,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
-	v2.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
-	v2.POST("/verify-only-email", h.VerifyOnlyEmailOtp)
-	v2.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	v2.POST("/email-settings", h.CreateEmailSettings)
 	v2.PUT("/email-settings", h.UpdateEmailSettings)

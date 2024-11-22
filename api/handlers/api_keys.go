@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"ucode/ucode_go_auth_service/api/http"
+	status "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/gin-gonic/gin"
@@ -18,15 +18,15 @@ import (
 // @Produce json
 // @Param project-id path string true "project-id"
 // @Param api-key body auth_service.CreateReq true "ApiKeyReqBody"
-// @Success 201 {object} http.Response{data=auth_service.CreateRes} "ApiKey data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.CreateRes} "ApiKey data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) CreateApiKey(c *gin.Context) {
 	var apiKey auth_service.CreateReq
 
 	err := c.ShouldBindJSON(&apiKey)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status.BadRequest, err.Error())
 		return
 	}
 
@@ -36,11 +36,11 @@ func (h *Handler) CreateApiKey(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, res)
+	h.handleResponse(c, status.Created, res)
 }
 
 // UpdateApiKey godoc
@@ -54,15 +54,15 @@ func (h *Handler) CreateApiKey(c *gin.Context) {
 // @Param project-id path string true "project-id"
 // @Param id path string true "id"
 // @Param api-key body auth_service.UpdateReq true "ApiKeyReqBody"
-// @Success 201 {object} http.Response{data=auth_service.UpdateRes} "ApiKey data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.UpdateRes} "ApiKey data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) UpdateApiKey(c *gin.Context) {
 	var apiKey auth_service.UpdateReq
 
 	err := c.ShouldBindJSON(&apiKey)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status.BadRequest, err.Error())
 		return
 	}
 
@@ -74,11 +74,11 @@ func (h *Handler) UpdateApiKey(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, status.OK, res)
 }
 
 // GetApiKey godoc
@@ -91,9 +91,9 @@ func (h *Handler) UpdateApiKey(c *gin.Context) {
 // @Produce json
 // @Param id path string true "id"
 // @Param project-id path string true "project-id"
-// @Success 201 {object} http.Response{data=auth_service.GetRes} "ApiKey data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.GetRes} "ApiKey data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) GetApiKey(c *gin.Context) {
 
 	res, err := h.services.ApiKeysService().Get(
@@ -104,11 +104,11 @@ func (h *Handler) GetApiKey(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, status.OK, res)
 }
 
 // GetListApiKeys godoc
@@ -126,32 +126,32 @@ func (h *Handler) GetApiKey(c *gin.Context) {
 // @Param search query string false "search"
 // @Param client_type_id query string false "client_type_id"
 // @Param role_id query string false "role_id"
-// @Success 201 {object} http.Response{data=auth_service.GetListRes} "ApiKey data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.GetListRes} "ApiKey data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) GetListApiKeys(c *gin.Context) {
 
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status.InvalidArgument, err.Error())
 		return
 	}
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status.InvalidArgument, err.Error())
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok {
-		h.handleResponse(c, http.InvalidArgument, errors.New("project_id is required"))
+		h.handleResponse(c, status.InvalidArgument, errors.New("project_id is required"))
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
-		h.handleResponse(c, http.InvalidArgument, errors.New("environment_id is required"))
+		h.handleResponse(c, status.InvalidArgument, errors.New("environment_id is required"))
 		return
 	}
 
@@ -169,11 +169,11 @@ func (h *Handler) GetListApiKeys(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, status.OK, res)
 }
 
 // DeleteApiKeys godoc
@@ -186,9 +186,9 @@ func (h *Handler) GetListApiKeys(c *gin.Context) {
 // @Produce json
 // @Param project-id path string true "project-id"
 // @Param id path string true "id"
-// @Success 201 {object} http.Response{data=auth_service.DeleteRes} "ApiKey data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.DeleteRes} "ApiKey data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) DeleteApiKeys(c *gin.Context) {
 
 	res, err := h.services.ApiKeysService().Delete(
@@ -197,11 +197,11 @@ func (h *Handler) DeleteApiKeys(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, status.OK, res)
 }
 
 // GenerateApiKeyToken godoc
@@ -213,15 +213,15 @@ func (h *Handler) DeleteApiKeys(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api-key body auth_service.GenerateApiTokenReq true "ApiKeyReqBody"
-// @Success 201 {object} http.Response{data=auth_service.GenerateApiTokenRes} "ApiKey data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.GenerateApiTokenRes} "ApiKey data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) GenerateApiKeyToken(c *gin.Context) {
 	var apiKey auth_service.GenerateApiTokenReq
 
 	err := c.ShouldBindJSON(&apiKey)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status.BadRequest, err.Error())
 		return
 	}
 
@@ -231,11 +231,11 @@ func (h *Handler) GenerateApiKeyToken(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, status.OK, res)
 }
 
 // RefreshApiKeyToken godoc
@@ -247,15 +247,15 @@ func (h *Handler) GenerateApiKeyToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param api-key body auth_service.RefreshApiTokenReq true "ApiKeyReqBody"
-// @Success 201 {object} http.Response{data=auth_service.RefreshApiTokenReq} "ApiKey data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.RefreshApiTokenReq} "ApiKey data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) RefreshApiKeyToken(c *gin.Context) {
 	var apiKey auth_service.RefreshApiTokenReq
 
 	err := c.ShouldBindJSON(&apiKey)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status.BadRequest, err.Error())
 		return
 	}
 
@@ -265,11 +265,11 @@ func (h *Handler) RefreshApiKeyToken(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, res)
+	h.handleResponse(c, status.OK, res)
 }
 
 // GetClientPlatformList godoc
@@ -283,19 +283,19 @@ func (h *Handler) RefreshApiKeyToken(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
-// @Success 200 {object} http.Response{data=auth_service.GetClientPlatformListResponse} "GetClientPlatformListResponseBody"
-// @Response 400 {object} http.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 200 {object} status.Response{data=auth_service.GetClientPlatformListResponse} "GetClientPlatformListResponseBody"
+// @Response 400 {object} status.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) GetClientPlatformList(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status.InvalidArgument, err.Error())
 		return
 	}
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status.InvalidArgument, err.Error())
 		return
 	}
 
@@ -309,11 +309,11 @@ func (h *Handler) GetClientPlatformList(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status.OK, resp)
 }
 
 // GetListClientTokens godoc
@@ -328,19 +328,19 @@ func (h *Handler) GetClientPlatformList(c *gin.Context) {
 // @Param client-id query string false "client-id"
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
-// @Success 201 {object} http.Response{data=auth_service.ListClientTokenResponse} "Tokens data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
+// @Success 201 {object} status.Response{data=auth_service.ListClientTokenResponse} "Tokens data"
+// @Response 400 {object} status.Response{data=string} "Bad Request"
+// @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *Handler) ListClientTokens(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status.InvalidArgument, err.Error())
 		return
 	}
 
 	limit, err := h.getLimitParam(c)
 	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, status.InvalidArgument, err.Error())
 		return
 	}
 
@@ -353,9 +353,9 @@ func (h *Handler) ListClientTokens(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	h.handleResponse(c, status.OK, resp)
 }

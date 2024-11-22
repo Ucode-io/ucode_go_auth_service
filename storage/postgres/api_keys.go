@@ -75,6 +75,7 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetClientTypeId(),
 		req.GetClientPlatformId(),
 		req.GetDisable(),
+		req.GetClientId(),
 	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId, &res.RpsLimit, &res.MonthlyRequestLimit)
 
 	if err != nil {
@@ -505,18 +506,23 @@ func (a *apiKeysRepo) ListClientToken(ctx context.Context, req *pb.ListClientTok
 	}
 
 	for rows.Next() {
-		var row pb.ClientIdToken
+		var (
+			row       pb.ClientIdToken
+			givenTime sql.NullString
+		)
 
 		err = rows.Scan(
 			&row.Id,
 			&row.ClientId,
 			&row.Info,
-			&row.GivenTime,
+			&givenTime,
 		)
 
 		if err != nil {
 			return nil, err
 		}
+
+		row.GivenTime = givenTime.String
 
 		res.ClientTokens = append(res.ClientTokens, &row)
 	}
