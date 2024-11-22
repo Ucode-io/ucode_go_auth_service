@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
@@ -521,4 +522,34 @@ func (a *apiKeysRepo) ListClientToken(ctx context.Context, req *pb.ListClientTok
 	}
 
 	return res, nil
+}
+
+func (r *apiKeysRepo) CreateClientToken(ctx context.Context, clientId string, info map[string]any) error {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.CreateClientToken")
+	defer dbSpan.Finish()
+
+	id := uuid.NewString()
+
+	query := `
+		INSERT INTO client_tokens(
+			id, 
+			client_id,
+			info
+		)
+		VALUES (
+			$1, 
+			$2, 
+			$3)`
+
+	_, err := r.db.Exec(ctx, query,
+		id,
+		clientId,
+		info,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

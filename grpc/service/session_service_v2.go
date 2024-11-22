@@ -1092,7 +1092,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 
 	// TODO - wrap in a function
-	m := map[string]interface{}{
+	m := map[string]any{
 		"id":                 session.GetId(),
 		"ip":                 session.GetData(),
 		"data":               session.GetData(),
@@ -1118,6 +1118,10 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	go func() {
+		err = s.strg.ApiKeys().CreateClientToken(ctx, input.ClientId, m)
+	}()
 
 	input.LoginData.Token = &pb.Token{
 		AccessToken:      accessToken,

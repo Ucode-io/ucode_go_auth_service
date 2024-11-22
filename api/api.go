@@ -102,13 +102,17 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.POST("/user/check", h.V2GetUserByLoginType)
 
 		// api keys
-		v2.POST("/api-key/:project-id", h.CreateApiKey)
-		v2.PUT("/api-key/:project-id/:id", h.UpdateApiKey)
-		v2.GET("/api-key/:project-id/:id", h.GetApiKey)
-		v2.GET("/api-key/:project-id", h.GetListApiKeys)
-		v2.DELETE("/api-key/:project-id/:id", h.DeleteApiKeys)
-		v2.POST("/api-key/generate-token", h.GenerateApiKeyToken)
-		v2.POST("/api-key/refresh-token", h.RefreshApiKeyToken)
+		apiKeys := v2.Group("/api-key")
+		{
+			apiKeys.POST("/:project-id", h.CreateApiKey)
+			apiKeys.PUT("/:project-id/:id", h.UpdateApiKey)
+			apiKeys.GET("/:project-id/:id", h.GetApiKey)
+			apiKeys.GET("/:project-id", h.GetListApiKeys)
+			apiKeys.DELETE("/:project-id/:id", h.DeleteApiKeys)
+			apiKeys.POST("/generate-token", h.GenerateApiKeyToken)
+			apiKeys.POST("/refresh-token", h.RefreshApiKeyToken)
+			apiKeys.POST("/:project-id/tokens", h.ListClientTokens)
+		}
 
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)

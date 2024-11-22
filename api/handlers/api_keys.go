@@ -315,3 +315,47 @@ func (h *Handler) GetClientPlatformList(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, resp)
 }
+
+// GetListClientTokens godoc
+// @ID get_list_client_tokens
+// @Router /v2/api-key/{project-id}/tokens [GET]
+// @Summary Get List Clint Tokens
+// @Description Get List Clint Tokens
+// @Tags V2_ApiKey_Token
+// @Accept json
+// @Produce json
+// @Param project-id path string true "project-id"
+// @Param client-id query string false "client-id"
+// @Param offset query integer false "offset"
+// @Param limit query integer false "limit"
+// @Success 201 {object} http.Response{data=auth_service.ListClientTokenResponse} "Tokens data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) ListClientTokens(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.services.ApiKeysService().ListClientToken(
+		c.Request.Context(), &auth_service.ListClientTokenRequest{
+			ClientId: c.Query("client_id"),
+			Offset:   int32(offset),
+			Limit:    int32(limit),
+		},
+	)
+
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
