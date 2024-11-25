@@ -277,6 +277,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 				ak.monthly_request_limit,
   				ak.created_at,
   				ak.updated_at,
+				ak.client_id,
 				cp.id AS client_platform_id,
 				cp.name AS client_platform_name
 			FROM
@@ -302,6 +303,7 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.MonthlyRequestLimit,
 		&createdAt,
 		&updatedAt,
+		&res.ClientId,
 		&clientPlatformId,
 		&clientPlatformName,
 	)
