@@ -101,31 +101,36 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	)
 
 	query := `SELECT
-				id,
-  				status,
-  				name,
-  				app_id,
-				app_secret,
-  				role_id,
-  				created_at,
-  				updated_at,
-  				environment_id,
-				project_id,
-				client_type_id,
-				rps_limit,
-				monthly_request_limit,
-				(SELECT request_count FROM api_key_usage WHERE api_key=app_id AND creation_month=TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE),
-				client_platform_id,
-				disable,
-				client_id
+				ak.id,
+  				ak.status,
+  				ak.name,
+  				ak.app_id,
+				ak.app_secret,
+  				ak.role_id,
+  				ak.created_at,
+  				ak.updated_at,
+  				ak.environment_id,
+				ak.project_id,
+				ak.client_type_id,
+				ak.rps_limit,
+				ak.monthly_request_limit,
+				cp.id AS client_platform_id,
+				cp.name AS client_platform_name,
+				cp.subdomain AS client_platform_subdomain,
+				ak.disable,
+				ak.client_id
 			FROM
-			    api_keys`
+			    api_keys ak
+			LEFT JOIN
+			    client_platform cp
+			ON 
+			    ak.client_platform_id = cp.id`
 
-	filter := ` WHERE project_id = :project_id`
+	filter := ` WHERE ak.project_id = :project_id`
 	params := make(map[string]interface{})
 	offset := " OFFSET 0"
 	limit := " LIMIT 10"
-	order := " ORDER BY created_at"
+	order := " ORDER BY ak.created_at"
 	arrangement := " DESC"
 	params["project_id"] = req.GetProjectId()
 
@@ -141,25 +146,25 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 
 	if len(req.Search) > 0 {
 		params["search"] = req.Search
-		filter += " AND (name ILIKE '%' || :search || '%')"
+		filter += " AND (ak.name ILIKE '%' || :search || '%')"
 	}
 
 	if util.IsValidUUID(req.EnvironmentId) {
-		filter += ` AND environment_id = :environment_id`
+		filter += ` AND ak.environment_id = :environment_id`
 		params["environment_id"] = req.GetEnvironmentId()
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
-		filter += ` AND client_type_id = :client_type_id`
+		filter += ` AND ak.client_type_id = :client_type_id`
 		params["client_type_id"] = req.ClientTypeId
 	}
 
 	if util.IsValidUUID(req.RoleId) {
-		filter += ` AND role_id = :role_id`
+		filter += ` AND ak.role_id = :role_id`
 		params["role_id"] = req.RoleId
 	}
 
-	countQuery := `SELECT count(*) from api_keys` + filter
+	countQuery := `SELECT count(*) from api_keys ak` + filter
 	countStmt, countArgs := helper.ReplaceQueryParams(countQuery, params)
 
 	err := r.db.QueryRow(ctx, countStmt, countArgs...).Scan(
@@ -176,14 +181,18 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		row := pb.GetRes{}
 		var (
-			createdAt    sql.NullString
-			updatedAt    sql.NullString
-			clientTypeId sql.NullString
-			usedCount    sql.NullInt32
+			createdAt               sql.NullString
+			updatedAt               sql.NullString
+			clientTypeId            sql.NullString
+			clientPlatformId        sql.NullString
+			clientPlatformName      sql.NullString
+			clientPlatformSubdomain sql.NullString
+			usedCount               sql.NullInt32
 		)
 
 		err = rows.Scan(
@@ -200,8 +209,9 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&clientTypeId,
 			&row.RpsLimit,
 			&row.MonthlyRequestLimit,
-			&usedCount,
-			&row.ClientPlatformId,
+			&clientPlatformId,
+			&clientPlatformName,
+			&clientPlatformSubdomain,
 			&row.Disable,
 			&row.ClientId,
 		)
@@ -226,11 +236,20 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			row.UsedCount = usedCount.Int32
 		}
 
+		if clientPlatformId.Valid {
+			row.ClientPlatform = &pb.ClientPlatform{
+				Id:        clientPlatformId.String,
+				Name:      clientPlatformName.String,
+				Subdomain: clientPlatformSubdomain.String,
+			}
+		}
+
 		res.Data = append(res.Data, &row)
 	}
 
 	return &res, nil
 }
+
 func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.Get")
 	defer dbSpan.Finish()
