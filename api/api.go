@@ -111,7 +111,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 			apiKeys.DELETE("/:project-id/:id", h.DeleteApiKeys)
 			apiKeys.POST("/generate-token", h.GenerateApiKeyToken)
 			apiKeys.POST("/refresh-token", h.RefreshApiKeyToken)
-			apiKeys.POST("/:project-id/tokens", h.ListClientTokens)
+			apiKeys.GET("/:project-id/tokens", h.ListClientTokens)
 		}
 
 		// environment
