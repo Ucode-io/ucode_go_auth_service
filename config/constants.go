@@ -46,6 +46,7 @@ var (
 	ErrUserNotFound     = errors.New("user not found")
 	ErrEmailRequired    = errors.New("email required for register company")
 	ErrUserAlradyMember = errors.New("user is already member")
+	ErrInactiveClientId = errors.New("client id is an inactive")
 
 	RegisterTypes = map[string]bool{
 		"google":  true,

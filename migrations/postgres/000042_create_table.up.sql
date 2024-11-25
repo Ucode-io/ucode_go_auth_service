@@ -21,6 +21,9 @@ BEGIN;
         ADD COLUMN IF NOT EXISTS "client_id" VARCHAR,
         ADD COLUMN IF NOT EXISTS "disable" BOOLEAN DEFAULT FALSE;
 
+    CREATE UNIQUE INDEX IF NOT EXISTS api_keys_client_id_uindex ON api_keys (client_id)
+        WHERE client_id IS NOT NULL;
+
     ALTER TABLE IF EXISTS "session" 
         ADD COLUMN IF NOT EXISTS "client_id" VARCHAR;
 

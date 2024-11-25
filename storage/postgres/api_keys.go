@@ -559,3 +559,24 @@ func (r *apiKeysRepo) CreateClientToken(ctx context.Context, clientId string, in
 
 	return nil
 }
+
+func (r *apiKeysRepo) CheckClientIdStatus(ctx context.Context, clientId string) (bool, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.CheckClientIdStatus")
+	defer dbSpan.Finish()
+
+	var status bool
+
+	query := `SELECT
+  				status
+			FROM
+			    api_keys
+			WHERE
+			    client_id = $1`
+
+	err := r.db.QueryRow(ctx, query, clientId).Scan(&status)
+	if err != nil {
+		return false, err
+	}
+
+	return status, nil
+}

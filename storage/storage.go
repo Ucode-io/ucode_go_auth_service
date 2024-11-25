@@ -125,6 +125,7 @@ type ApiKeysRepoI interface {
 	UpdateIsMonthlyLimitReached(ctx context.Context) error
 	ListClientToken(ctx context.Context, req *pb.ListClientTokenRequest) (res *pb.ListClientTokenResponse, err error)
 	CreateClientToken(ctx context.Context, clientId string, info map[string]any) error
+	CheckClientIdStatus(ctx context.Context, clientId string) (bool, error)
 }
 
 type AppleSettingsI interface {

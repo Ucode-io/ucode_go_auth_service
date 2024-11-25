@@ -1180,6 +1180,19 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	if tokenInfo.ClientID != "" {
+		stats, err := s.strg.ApiKeys().CheckClientIdStatus(ctx, tokenInfo.ClientID)
+		if err != nil {
+			s.log.Error("!!!V2HasAccessUser->CheckClientIdStatus--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		if !stats {
+			err = config.ErrInactiveClientId
+			s.log.Error("!!!V2HasAccessUser->InactiveClientId--->", logger.Error(err))
+			return nil, status.Error(codes.Unauthenticated, err.Error())
+		}
+	}
+
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
