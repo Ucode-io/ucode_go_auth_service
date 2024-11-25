@@ -116,7 +116,8 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 				monthly_request_limit,
 				(SELECT request_count FROM api_key_usage WHERE api_key=app_id AND creation_month=TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE),
 				client_platform_id,
-				disable
+				disable,
+				client_id
 			FROM
 			    api_keys`
 
@@ -202,6 +203,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&usedCount,
 			&row.ClientPlatformId,
 			&row.Disable,
+			&row.ClientId,
 		)
 
 		if err != nil {
