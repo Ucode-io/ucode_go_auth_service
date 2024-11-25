@@ -255,31 +255,38 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 	defer dbSpan.Finish()
 
 	var (
-		res       pb.GetRes
-		createdAt sql.NullString
-		updatedAt sql.NullString
-		usedCount sql.NullInt32
+		res                pb.GetRes
+		createdAt          sql.NullString
+		updatedAt          sql.NullString
+		usedCount          sql.NullInt32
+		clientPlatformId   sql.NullString
+		clientPlatformName sql.NullString
 	)
 
 	query := `SELECT
-				id,
-  				status,
-  				name,
-  				app_id,
-  				app_secret,
-  				role_id,
-  				environment_id,
-				project_id,
-				client_type_id,
-				rps_limit,
-				monthly_request_limit,
-				(SELECT request_count FROM api_key_usage WHERE api_key=app_id AND creation_month=TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE),
-  				created_at,
-  				updated_at
+				ak.id,
+  				ak.status,
+  				ak.name,
+  				ak.app_id,
+  				ak.app_secret,
+  				ak.role_id,
+  				ak.environment_id,
+				ak.project_id,
+				ak.client_type_id,
+				ak.rps_limit,
+				ak.monthly_request_limit,
+  				ak.created_at,
+  				ak.updated_at,
+				cp.id AS client_platform_id,
+				cp.name AS client_platform_name
 			FROM
-			    api_keys
+			    api_keys ak
+			LEFT JOIN
+			    client_platform cp
+			ON 
+			    ak.client_platform_id = cp.id
 			WHERE
-			    id = $1`
+			    ak.id = $1`
 
 	err := r.db.QueryRow(ctx, query, req.GetId()).Scan(
 		&res.Id,
@@ -293,9 +300,10 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.ClientTypeId,
 		&res.RpsLimit,
 		&res.MonthlyRequestLimit,
-		&usedCount,
 		&createdAt,
 		&updatedAt,
+		&clientPlatformId,
+		&clientPlatformName,
 	)
 	if err != nil {
 		return nil, err
@@ -312,8 +320,17 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 	if usedCount.Valid {
 		res.UsedCount = usedCount.Int32
 	}
+
+	if clientPlatformId.Valid {
+		res.ClientPlatform = &pb.ClientPlatform{
+			Id:   clientPlatformId.String,
+			Name: clientPlatformName.String,
+		}
+	}
+
 	return &res, nil
 }
+
 func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffected int64, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.Update")
 	defer dbSpan.Finish()
