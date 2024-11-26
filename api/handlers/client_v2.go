@@ -27,14 +27,13 @@ import (
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param client-type body auth_service.V2CreateClientTypeRequest true "CreateClientTypeRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "ClientType data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "ClientType data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateClientType(c *gin.Context) {
 	var (
 		clientType auth_service.V2CreateClientTypeRequest
 		resp       *auth_service.CommonMessage
-		// resourceEnvironment *obs.ResourceEnvironment
 	)
 
 	err := c.ShouldBindJSON(&clientType)
@@ -125,7 +124,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
 // @Param project-id query string false "project-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetClientTypeListResponseBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "GetClientTypeListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientTypeList(c *gin.Context) {
@@ -198,7 +197,7 @@ func (h *Handler) V2GetClientTypeList(c *gin.Context) {
 // @Produce json
 // @Param client-type-id path string true "client-type-id"
 // @Param project-id query string false "project-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientTypeBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "ClientTypeBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
@@ -266,7 +265,7 @@ func (h *Handler) V2GetClientTypeByID(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param client-type body auth_service.V2UpdateClientTypeRequest true "UpdateClientTypeRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientType data"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "ClientType data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateClientType(c *gin.Context) {

@@ -67,6 +67,7 @@ type TokenInfo struct {
 	LoginTableSlug string
 	RoleID         string
 	ProjectID      string
+	ClientID       string
 }
 
 type Table struct {

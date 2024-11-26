@@ -6,4 +6,5 @@ type LoginMiddlewareReq struct {
 	Data     map[string]string      `json:"data"`
 	Tables   []*auth_service.Object `json:"tables"`
 	NodeType string                 `json:"node_type"`
+	ClientId string                 `json:"client_id"`
 }

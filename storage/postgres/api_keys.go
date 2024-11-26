@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
@@ -27,10 +28,8 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 	defer dbSpan.Finish()
 
 	var (
-		res pb.CreateRes
-
-		createdAt sql.NullString
-		updatedAt sql.NullString
+		res                  pb.CreateRes
+		createdAt, updatedAt sql.NullString
 	)
 
 	query := `
@@ -43,6 +42,9 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			environment_id, 
 			project_id, 
 			client_type_id,
+			client_platform_id,
+			"disable",
+			client_id,
 			created_at, 
 			updated_at
 		)
@@ -55,13 +57,14 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 			$6, 
 			$7, 
 			$8,
+			$9,
+			$10,
+			$11,
 			now(), 
 			now()) 
 		RETURNING id, status, name, app_id, app_secret, role_id, created_at, updated_at, environment_id, project_id, client_type_id, rps_limit, monthly_request_limit`
 
-	err := r.db.QueryRow(
-		ctx,
-		query,
+	err := r.db.QueryRow(ctx, query,
 		id,
 		req.GetName(),
 		appId,
@@ -70,6 +73,9 @@ func (r *apiKeysRepo) Create(ctx context.Context, req *pb.CreateReq, appSecret, 
 		req.GetEnvironmentId(),
 		req.GetProjectId(),
 		req.GetClientTypeId(),
+		req.GetClientPlatformId(),
+		req.GetDisable(),
+		req.GetClientId(),
 	).Scan(&res.Id, &res.Status, &res.Name, &res.AppId, &res.AppSecret, &res.RoleId, &createdAt, &updatedAt, &res.EnvironmentId, &res.ProjectId, &res.ClientTypeId, &res.RpsLimit, &res.MonthlyRequestLimit)
 
 	if err != nil {
@@ -95,28 +101,36 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	)
 
 	query := `SELECT
-				id,
-  				status,
-  				name,
-  				app_id,
-				app_secret,
-  				role_id,
-  				created_at,
-  				updated_at,
-  				environment_id,
-				project_id,
-				client_type_id,
-				rps_limit,
-				monthly_request_limit,
-				(SELECT request_count FROM api_key_usage WHERE api_key=app_id AND creation_month=TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE)
+				ak.id,
+  				ak.status,
+  				ak.name,
+  				ak.app_id,
+				ak.app_secret,
+  				ak.role_id,
+  				ak.created_at,
+  				ak.updated_at,
+  				ak.environment_id,
+				ak.project_id,
+				ak.client_type_id,
+				ak.rps_limit,
+				ak.monthly_request_limit,
+				cp.id AS client_platform_id,
+				cp.name AS client_platform_name,
+				cp.subdomain AS client_platform_subdomain,
+				ak.disable,
+				ak.client_id
 			FROM
-			    api_keys`
+			    api_keys ak
+			LEFT JOIN
+			    client_platform cp
+			ON 
+			    ak.client_platform_id = cp.id`
 
-	filter := ` WHERE project_id = :project_id`
+	filter := ` WHERE ak.project_id = :project_id`
 	params := make(map[string]interface{})
 	offset := " OFFSET 0"
 	limit := " LIMIT 10"
-	order := " ORDER BY created_at"
+	order := " ORDER BY ak.created_at"
 	arrangement := " DESC"
 	params["project_id"] = req.GetProjectId()
 
@@ -132,25 +146,25 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 
 	if len(req.Search) > 0 {
 		params["search"] = req.Search
-		filter += " AND (name ILIKE '%' || :search || '%')"
+		filter += " AND (ak.name ILIKE '%' || :search || '%')"
 	}
 
 	if util.IsValidUUID(req.EnvironmentId) {
-		filter += ` AND environment_id = :environment_id`
+		filter += ` AND ak.environment_id = :environment_id`
 		params["environment_id"] = req.GetEnvironmentId()
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
-		filter += ` AND client_type_id = :client_type_id`
+		filter += ` AND ak.client_type_id = :client_type_id`
 		params["client_type_id"] = req.ClientTypeId
 	}
 
 	if util.IsValidUUID(req.RoleId) {
-		filter += ` AND role_id = :role_id`
+		filter += ` AND ak.role_id = :role_id`
 		params["role_id"] = req.RoleId
 	}
 
-	countQuery := `SELECT count(*) from api_keys` + filter
+	countQuery := `SELECT count(*) from api_keys ak` + filter
 	countStmt, countArgs := helper.ReplaceQueryParams(countQuery, params)
 
 	err := r.db.QueryRow(ctx, countStmt, countArgs...).Scan(
@@ -167,14 +181,18 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		row := pb.GetRes{}
 		var (
-			createdAt    sql.NullString
-			updatedAt    sql.NullString
-			clientTypeId sql.NullString
-			usedCount    sql.NullInt32
+			createdAt               sql.NullString
+			updatedAt               sql.NullString
+			clientTypeId            sql.NullString
+			clientPlatformId        sql.NullString
+			clientPlatformName      sql.NullString
+			clientPlatformSubdomain sql.NullString
+			usedCount               sql.NullInt32
 		)
 
 		err = rows.Scan(
@@ -191,7 +209,11 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			&clientTypeId,
 			&row.RpsLimit,
 			&row.MonthlyRequestLimit,
-			&usedCount,
+			&clientPlatformId,
+			&clientPlatformName,
+			&clientPlatformSubdomain,
+			&row.Disable,
+			&row.ClientId,
 		)
 
 		if err != nil {
@@ -214,41 +236,58 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			row.UsedCount = usedCount.Int32
 		}
 
+		if clientPlatformId.Valid {
+			row.ClientPlatform = &pb.ClientPlatform{
+				Id:        clientPlatformId.String,
+				Name:      clientPlatformName.String,
+				Subdomain: clientPlatformSubdomain.String,
+			}
+		}
+
 		res.Data = append(res.Data, &row)
 	}
 
 	return &res, nil
 }
+
 func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.Get")
 	defer dbSpan.Finish()
 
 	var (
-		res       pb.GetRes
-		createdAt sql.NullString
-		updatedAt sql.NullString
-		usedCount sql.NullInt32
+		res                pb.GetRes
+		createdAt          sql.NullString
+		updatedAt          sql.NullString
+		usedCount          sql.NullInt32
+		clientPlatformId   sql.NullString
+		clientPlatformName sql.NullString
 	)
 
 	query := `SELECT
-				id,
-  				status,
-  				name,
-  				app_id,
-  				app_secret,
-  				role_id,
-  				environment_id,
-				project_id,
-				client_type_id,
-				rps_limit,
-				monthly_request_limit,
-				(SELECT request_count FROM api_key_usage WHERE api_key=app_id AND creation_month=TO_CHAR(DATE_TRUNC('month', CURRENT_TIMESTAMP), 'YYYY-MM-DD')::DATE),
-  				created_at,
-  				updated_at
+				ak.id,
+  				ak.status,
+  				ak.name,
+  				ak.app_id,
+  				ak.app_secret,
+  				ak.role_id,
+  				ak.environment_id,
+				ak.project_id,
+				ak.client_type_id,
+				ak.rps_limit,
+				ak.monthly_request_limit,
+  				ak.created_at,
+  				ak.updated_at,
+				ak.client_id,
+				cp.id AS client_platform_id,
+				cp.name AS client_platform_name
 			FROM
-			    api_keys
+			    api_keys ak
+			LEFT JOIN
+			    client_platform cp
+			ON 
+			    ak.client_platform_id = cp.id
 			WHERE
-			    id = $1`
+			    ak.id = $1`
 
 	err := r.db.QueryRow(ctx, query, req.GetId()).Scan(
 		&res.Id,
@@ -262,9 +301,11 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 		&res.ClientTypeId,
 		&res.RpsLimit,
 		&res.MonthlyRequestLimit,
-		&usedCount,
 		&createdAt,
 		&updatedAt,
+		&res.ClientId,
+		&clientPlatformId,
+		&clientPlatformName,
 	)
 	if err != nil {
 		return nil, err
@@ -281,8 +322,17 @@ func (r *apiKeysRepo) Get(ctx context.Context, req *pb.GetReq) (*pb.GetRes, erro
 	if usedCount.Valid {
 		res.UsedCount = usedCount.Int32
 	}
+
+	if clientPlatformId.Valid {
+		res.ClientPlatform = &pb.ClientPlatform{
+			Id:   clientPlatformId.String,
+			Name: clientPlatformName.String,
+		}
+	}
+
 	return &res, nil
 }
+
 func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffected int64, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.Update")
 	defer dbSpan.Finish()
@@ -445,4 +495,132 @@ func (r *apiKeysRepo) UpdateIsMonthlyLimitReached(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (a *apiKeysRepo) ListClientToken(ctx context.Context, req *pb.ListClientTokenRequest) (*pb.ListClientTokenResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.ListClientToken")
+	defer dbSpan.Finish()
+
+	var (
+		res = &pb.ListClientTokenResponse{Count: 0}
+	)
+
+	query := `SELECT
+				id,
+  				client_id,
+  				info,
+  				given_time
+			FROM
+			    client_tokens`
+
+	filter := ` WHERE client_id = :client_id`
+	params := make(map[string]interface{})
+	offset := " OFFSET 0"
+	limit := " LIMIT 10"
+	order := " ORDER BY given_time"
+	arrangement := " DESC"
+	params["client_id"] = req.GetClientId()
+
+	if req.Offset > 0 {
+		params["offset"] = req.Offset
+		offset = " OFFSET :offset"
+	}
+
+	if req.Limit > 0 {
+		params["limit"] = req.Limit
+		limit = " LIMIT :limit"
+	}
+
+	countQuery := `SELECT COUNT(*) FROM client_tokens` + filter
+	countStmt, countArgs := helper.ReplaceQueryParams(countQuery, params)
+
+	err := a.db.QueryRow(ctx, countStmt, countArgs...).Scan(
+		&res.Count,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	q := query + filter + order + arrangement + offset + limit
+	stmt, args := helper.ReplaceQueryParams(q, params)
+
+	rows, err := a.db.Query(ctx, stmt, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var (
+			row       pb.ClientIdToken
+			givenTime sql.NullString
+		)
+
+		err = rows.Scan(
+			&row.Id,
+			&row.ClientId,
+			&row.Info,
+			&givenTime,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		row.GivenTime = givenTime.String
+
+		res.ClientTokens = append(res.ClientTokens, &row)
+	}
+
+	return res, nil
+}
+
+func (r *apiKeysRepo) CreateClientToken(ctx context.Context, clientId string, info map[string]any) error {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.CreateClientToken")
+	defer dbSpan.Finish()
+
+	id := uuid.NewString()
+
+	query := `
+		INSERT INTO client_tokens(
+			id, 
+			client_id,
+			info
+		)
+		VALUES (
+			$1, 
+			$2, 
+			$3)`
+
+	_, err := r.db.Exec(ctx, query,
+		id,
+		clientId,
+		info,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *apiKeysRepo) CheckClientIdStatus(ctx context.Context, clientId string) (bool, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.CheckClientIdStatus")
+	defer dbSpan.Finish()
+
+	var status bool
+
+	query := `SELECT
+  				status
+			FROM
+			    api_keys
+			WHERE
+			    client_id = $1`
+
+	err := r.db.QueryRow(ctx, query, clientId).Scan(&status)
+	if err != nil {
+		return false, err
+	}
+
+	return status, nil
 }

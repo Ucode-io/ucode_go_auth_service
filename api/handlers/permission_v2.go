@@ -63,12 +63,11 @@ func (h *Handler) GetGlobalPermission(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param role body auth_service.V2AddRoleRequest true "AddRoleRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2AddRole(c *gin.Context) {
 	var (
-		// resourceEnvironment *obs.ResourceEnvironment
 		role auth_service.V2AddRoleRequest
 		resp *auth_service.CommonMessage
 	)
@@ -159,7 +158,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 // @Produce json
 // @Param role-id path string true "role-id"
 // @Param project-id query string false "project-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "ClientTypeBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "ClientTypeBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetRoleByID(c *gin.Context) {
@@ -228,12 +227,11 @@ func (h *Handler) V2GetRoleByID(c *gin.Context) {
 // @Param client-platform-id query string false "client-platform-id"
 // @Param client-type-id query string false "client-type-id"
 // @Param project-id query string false "project-id"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "GetRolesListResponseBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "GetRolesListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetRolesList(c *gin.Context) {
 	var (
-		// resourceEnvironment *obs.ResourceEnvironment
 		err error
 	)
 	offset, err := h.getOffsetParam(c)
@@ -313,12 +311,11 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param role body auth_service.V2UpdateRoleRequest true "UpdateRoleRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateRole(c *gin.Context) {
 	var (
-		// resourceEnvironment *obs.ResourceEnvironment
 		role auth_service.V2UpdateRoleRequest
 	)
 
@@ -420,7 +417,6 @@ func (h *Handler) V2UpdateRole(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RemoveRole(c *gin.Context) {
 	var (
-		// resourceEnvironment *obs.ResourceEnvironment
 		err  error
 		resp *auth_service.CommonMessage
 	)
@@ -637,7 +633,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param permission body object_builder_service.UpdateRoleAppTablePermissionsRequest true "UpdateRoleRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
@@ -851,14 +847,13 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param permission body object_builder_service.UpdateMenuPermissionsRequest true "UpdateMenuPermissionRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.CommonMessage} "Role data"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 	var (
 		permission object_builder_service.UpdateMenuPermissionsRequest
 		resp       *emptypb.Empty
-		// resourceEnvironment *obs.ResourceEnvironment
 	)
 
 	err := c.ShouldBindJSON(&permission)

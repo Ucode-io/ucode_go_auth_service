@@ -174,60 +174,7 @@ func (s *userService) DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// if rowsAffected <= 0 {
-	// 	return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	// }
-
 	return res, nil
-}
-
-func (s *userService) AddUserRelation(ctx context.Context, req *pb.AddUserRelationRequest) (*pb.UserRelation, error) {
-	s.log.Info("---AddUserRelation--->", logger.Any("req", req))
-
-	pKey, err := s.strg.UserRelation().Add(ctx, req)
-	if err != nil {
-		s.log.Error("!!!AddUserRelation--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	return s.strg.UserRelation().GetByPK(ctx, pKey)
-}
-
-func (s *userService) RemoveUserRelation(ctx context.Context, req *pb.UserRelationPrimaryKey) (*pb.UserRelation, error) {
-	s.log.Info("---RemoveUserRelation--->", logger.Any("req", req))
-
-	res, err := s.strg.UserRelation().GetByPK(ctx, req)
-
-	if err != nil {
-		s.log.Error("!!!GetUserRelationPlatformByID--->", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-
-	rowsAffected, err := s.strg.UserRelation().Remove(ctx, req)
-
-	if err != nil {
-		s.log.Error("!!!RemoveUserRelation--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-	}
-
-	return res, nil
-}
-
-func (s *userService) UpsertUserInfo(ctx context.Context, req *pb.UpsertUserInfoRequest) (*pb.UserInfo, error) {
-	s.log.Info("---UpsertUserInfo--->", logger.Any("req", req))
-
-	pKey, err := s.strg.UserInfo().Upsert(ctx, req)
-
-	if err != nil {
-		s.log.Error("!!!UpsertUserInfo--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	return s.strg.UserInfo().GetByPK(ctx, pKey)
 }
 
 func (s *userService) SendMessageToEmail(ctx context.Context, req *pb.SendMessageToEmailRequest) (*emptypb.Empty, error) {

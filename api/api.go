@@ -67,18 +67,21 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.DELETE("/connection/:connection_id", h.V2DeleteConnection)
 		v2.GET("/get-connection-options/:connection_id/:user_id", h.GetConnectionOptions)
 
+		// ROLE SERVICE
+		v2.GET("/role/:role-id", h.V2GetRoleByID)
+		v2.GET("/role", h.V2GetRolesList)
+		v2.POST("/role", h.V2AddRole)
+		v2.DELETE("/role/:role-id", h.V2RemoveRole)
+
+		// CLIENT PLATFORM
+		v2.GET("/client-platform", h.GetClientPlatformList)
+
 		// admin, dev, hr, ceo
 		v2.POST("/client-type", h.V2CreateClientType)
 		v2.GET("/client-type", h.V2GetClientTypeList)
 		v2.GET("/client-type/:client-type-id", h.V2GetClientTypeByID)
 		v2.PUT("/client-type", h.V2UpdateClientType)
 		v2.DELETE("/client-type/:client-type-id", h.V2DeleteClientType)
-
-		// ROLE SERVICE
-		v2.GET("/role/:role-id", h.V2GetRoleByID)
-		v2.GET("/role", h.V2GetRolesList)
-		v2.POST("/role", h.V2AddRole)
-		v2.DELETE("/role/:role-id", h.V2RemoveRole)
 
 		// role-permission
 		v2.GET("/role-permission/detailed/:project-id/:role-id", h.GetListWithRoleAppTablePermissions)
@@ -99,25 +102,23 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.POST("/user/check", h.V2GetUserByLoginType)
 
 		// api keys
-		v2.POST("/api-key/:project-id", h.CreateApiKey)
-		v2.PUT("/api-key/:project-id/:id", h.UpdateApiKey)
-		v2.GET("/api-key/:project-id/:id", h.GetApiKey)
-		v2.GET("/api-key/:project-id", h.GetListApiKeys)
-		v2.DELETE("/api-key/:project-id/:id", h.DeleteApiKeys)
-		v2.POST("/api-key/generate-token", h.GenerateApiKeyToken)
-		v2.POST("/api-key/refresh-token", h.RefreshApiKeyToken)
+		apiKeys := v2.Group("/api-key")
+		{
+			apiKeys.POST("/:project-id", h.CreateApiKey)
+			apiKeys.PUT("/:project-id/:id", h.UpdateApiKey)
+			apiKeys.GET("/:project-id/:id", h.GetApiKey)
+			apiKeys.GET("/:project-id", h.GetListApiKeys)
+			apiKeys.DELETE("/:project-id/:id", h.DeleteApiKeys)
+			apiKeys.POST("/generate-token", h.GenerateApiKeyToken)
+			apiKeys.POST("/refresh-token", h.RefreshApiKeyToken)
+			apiKeys.GET("/:project-id/tokens", h.ListClientTokens)
+		}
 
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
-		v2.GET("/webpage-app", h.GetListWebPageApp)
 
 		// objects
 		v2.POST("/object/get-list/:table_slug", h.V2GetListObjects)
-
-		// login strategy
-		v2.GET("/login-strategy", h.GetLoginStrategy)
-		v2.GET("/login-strategy/:login-strategy-id", h.GetLoginStrategyById)
-		v2.POST("/upsert-login-strategy", h.UpsertLoginStrategy)
 	}
 
 	auth := v2.Group("/auth")
@@ -151,32 +152,11 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
-	v2.POST("/verify-email/:sms_id/:otp", h.VerifyEmail)
-	v2.POST("/verify-only-email", h.VerifyOnlyEmailOtp)
-	v2.POST("/register-email-otp/:table_slug", h.RegisterEmailOtp)
 
 	v2.POST("/email-settings", h.CreateEmailSettings)
 	v2.PUT("/email-settings", h.UpdateEmailSettings)
 	v2.GET("/email-settings", h.GetEmailSettings)
 	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
-
-	// sms-otp-settings
-	v2.POST("/sms-otp-settings", h.CreateSmsOtpSettings)
-	v2.GET("/sms-otp-settings", h.GetListSmsOtpSettings)
-	v2.GET("/sms-otp-settings/:id", h.GetByIdSmsOtpSettings)
-	v2.PUT("/sms-otp-settings", h.UpdateSmsOtpSettings)
-	v2.DELETE("/sms-otp-settings/:id", h.DeleteSmsOtpSettings)
-
-	v2.POST("/apple-id-settings", h.CreateAppleIdSettings)
-	v2.PUT("/apple-id-settings", h.UpdateAppleIdSettings)
-	v2.GET("/apple-id-settings", h.GetAppleIdSettings)
-	v2.DELETE("/apple-id-settings/:id", h.DeleteAppleIdSettings)
-
-	v2.POST("/login-platform-type", h.CreateLoginPlatformType)
-	v2.PUT("/login-platform-type", h.UpdateLoginPlatformType)
-	v2.GET("/login-platform-type", h.GetLoginPlatformType)
-	v2.GET("/login-platform-type/:id", h.LoginPlatformTypePrimaryKey)
-	v2.DELETE("/login-platform-type/:id", h.DeleteLoginPlatformType)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return

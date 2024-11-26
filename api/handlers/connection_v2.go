@@ -25,7 +25,7 @@ import (
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param connection body models.CreateConnectionRequest true "CreateConnectionRequestBody"
-// @Success 201 {object} http.Response{data=obs.CommonMessage} "Connection data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "Connection data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateConnection(c *gin.Context) {
@@ -130,7 +130,7 @@ func (h *Handler) V2CreateConnection(c *gin.Context) {
 // @Produce json
 // @Param project-id query string true "project-id"
 // @Param connection body models.Connection true "UpdateConnectionRequestBody"
-// @Success 201 {object} http.Response{data=obs.CommonMessage} "Connection data"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "Connection data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UpdateConnection(c *gin.Context) {
@@ -411,7 +411,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 // @Produce json
 // @Param connection_id path string true "connection_id"
 // @Param project-id query string true "project-id"
-// @Success 200 {object} http.Response{data=obs.CommonMessage} "ConnectionBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "ConnectionBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetConnectionByID(c *gin.Context) {
@@ -621,7 +621,7 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 // @Param connection_id path string true "connection_id"
 // @Param user_id path string true "user_id"
 // @Param project-id query string true "project-id"
-// @Success 200 {object} http.Response{data=obs.GetConnectionOptionsResponse} "ConnectionOptionsBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "ConnectionOptionsBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetConnectionOptions(c *gin.Context) {
