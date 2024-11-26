@@ -12,7 +12,6 @@ import (
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
-	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -40,15 +39,17 @@ func (h *Handler) V2Login(c *gin.Context) {
 		login auth_service.V2LoginRequest
 		resp  *auth_service.V2LoginResponse
 	)
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
 	if login.ClientType == "" {
 		h.handleResponse(c, http.BadRequest, "Необходимо выбрать тип пользователя")
 		return
 	}
+
 	if login.ProjectId == "" {
 		h.handleResponse(c, http.BadRequest, "Необходимо выбрать проекта")
 		return
@@ -61,63 +62,54 @@ func (h *Handler) V2Login(c *gin.Context) {
 	switch login.Type {
 	case config.Default:
 		if login.Username == "" {
-			err := errors.New("username is required")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "username is required")
 			return
 		}
 
 		if login.Password == "" {
-			err := errors.New("password is required")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "password is required")
 			return
 		}
 	case config.WithPhone:
 		if login.SmsId == "" {
-			err := errors.New("SmsId is required when type is not default")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "SmsId is required when type is not default")
 			return
 		}
 
 		if login.Otp == "" {
-			err := errors.New("otp is required when type is not default")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "otp is required when type is not default")
 			return
 		}
 
 		if login.Phone == "" {
-			err := errors.New("phone is required when type is phone")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "phone is required when type is phone")
 			return
 		}
 	case config.WithEmail:
 		if login.SmsId == "" {
-			err := errors.New("SmsId is required when type is not default")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "SmsId is required when type is not default")
 			return
 		}
 
 		if login.Otp == "" {
-			err := errors.New("otp is required when type is not default")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "otp is required when type is not default")
 			return
 		}
 
 		if login.Email == "" {
-			err := errors.New("email is required when type is email")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "email is required when type is email")
 			return
 		}
 	case config.WithGoogle:
 		if login.GoogleToken == "" {
-			err := errors.New("google token is required when type is not default")
-			h.handleResponse(c, http.BadRequest, err.Error())
+			h.handleResponse(c, http.BadRequest, "google token is required when type is not default")
 			return
 		}
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
@@ -134,10 +126,6 @@ func (h *Handler) V2Login(c *gin.Context) {
 		return
 	}
 
-	h.log.Info("---SessionV2---", logger.Any("body", resourceEnvironment))
-	h.log.Info("---SessionV2---", logger.Any("resource-type", resourceEnvironment.ResourceType.Number()))
-	h.log.Info("---SessionV2---", logger.Any("login-req", int32(resourceEnvironment.ResourceType)))
-
 	login.ResourceEnvironmentId = resourceEnvironment.GetResourceEnvironmentId()
 	login.ResourceType = int32(resourceEnvironment.GetResourceType())
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
@@ -149,12 +137,9 @@ func (h *Handler) V2Login(c *gin.Context) {
 			ProjectId:    resourceEnvironment.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "LOGIN",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(resourceEnvironment.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(login.Username),
-			Request:   &login,
-			TableSlug: "User",
+			UserInfo:     cast.ToString(login.Username),
+			Request:      &login,
+			TableSlug:    "User",
 		}
 	)
 
@@ -168,33 +153,31 @@ func (h *Handler) V2Login(c *gin.Context) {
 	}()
 
 	resp, err = h.services.SessionService().V2Login(
-		c.Request.Context(),
-		&login,
+		c.Request.Context(), &login,
 	)
-	httpErrorStr := ""
 	if err != nil {
+		var httpErrorStr = ""
+
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
-	}
-	if httpErrorStr == "user not found" {
-		err := errors.New("Пользователь не найдено")
-		h.handleResponse(c, http.NotFound, err.Error())
-		return
-	} else if httpErrorStr == "user has been expired" {
-		err := errors.New("срок действия пользователя истек")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid username" {
-		err := errors.New("неверное имя пользователя")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid password" {
-		err := errors.New("неверное пароль")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+
+		switch httpErrorStr {
+		case "user not found":
+			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
+			return
+		case "user has been expired":
+			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
+			return
+		case "invalid username":
+			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
+			return
+		case "invalid password":
+			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+			return
+		default:
+			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+			return
+		}
 	}
 
 	resp.EnvironmentId = resourceEnvironment.GetEnvironmentId()
@@ -431,20 +414,23 @@ func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginWithOption(c *gin.Context) {
 	var login auth_service.V2LoginWithOptionRequest
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
 	clientType := login.Data["client_type_id"]
 	if clientType == "" {
 		h.handleResponse(c, http.InvalidArgument, "inside data client_type_id is required")
 		return
 	}
+
 	if ok := util.IsValidUUID(clientType); !ok {
 		h.handleResponse(c, http.InvalidArgument, "client_type_id is an invalid uuid")
 		return
 	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
@@ -453,10 +439,10 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, http.BadRequest, err)
+		h.handleResponse(c, http.BadRequest, "error getting environment id | not valid")
 		return
 	}
+
 	login.Data["environment_id"] = environmentId.(string)
 	login.Data["project_id"] = projectId.(string)
 
@@ -468,47 +454,42 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 			Tables:        login.GetTables(),
 		})
 
-	httpErrorStr := ""
 	if err != nil {
+		var httpErrorStr = ""
+
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
 
-		if httpErrorStr == "user not found" {
-			err := errors.New("Пользователь не найдено")
-			h.handleResponse(c, http.NotFound, err.Error())
+		switch httpErrorStr {
+		case "user not found":
+			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
 			return
-		} else if httpErrorStr == "user verified but not found" {
-			err := errors.New("Пользователь проверен, но не найден")
-			h.handleResponse(c, http.OK, err.Error())
+		case "user verified but not found":
+			h.handleResponse(c, http.OK, "Пользователь проверен, но не найден")
 			return
-		} else if httpErrorStr == "user has been expired" {
-			err := errors.New("срок действия пользователя истек")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+		case "user has been expired":
+			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
-		} else if httpErrorStr == "invalid username" {
-			err := errors.New("неверное имя пользователя")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+		case "invalid username":
+			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
-		} else if httpErrorStr == "invalid password" {
-			err := errors.New("неверное пароль")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+		case "invalid password":
+			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
-		} else {
+		default:
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
 	}
 
-	res := &auth_service.V2LoginSuperAdminRes{
+	h.handleResponse(c, http.Created, &auth_service.V2LoginSuperAdminRes{
 		UserFound: resp.GetUserFound(),
 		Token:     resp.GetToken(),
 		Companies: resp.GetCompanies(),
 		UserId:    resp.GetUserId(),
 		Sessions:  resp.GetSessions(),
 		UserData:  resp.GetUserData(),
-	}
-
-	h.handleResponse(c, http.Created, res)
+	})
 }
 
 // MultiCompanyLogin godoc
@@ -629,8 +610,7 @@ func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 	var login auth_service.V2MultiCompanyLoginReq
 
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -697,8 +677,7 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 	}
 
 	resp, err := h.services.SessionService().V2MultiCompanyOneLogin(
-		c.Request.Context(),
-		&login,
+		c.Request.Context(), &login,
 	)
 	if err != nil {
 		httpErrorStr := strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]

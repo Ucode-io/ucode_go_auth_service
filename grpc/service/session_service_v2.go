@@ -185,6 +185,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ClientType:            req.GetClientType(),
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
+		Password:              req.GetPassword(),
 	}
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
@@ -194,9 +195,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 
 	switch req.ResourceType {
 	case 1:
-		data, err = services.GetLoginServiceByType(req.NodeType).LoginData(ctx,
-			reqLoginData,
-		)
+		data, err = services.GetLoginServiceByType(req.NodeType).LoginData(ctx, reqLoginData)
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!Login--->", logger.Error(err))
@@ -225,6 +224,12 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(400, err.Error())
 		}
+	}
+
+	if !data.ComparePassword {
+		err := errors.New("invalid password")
+		s.log.Error("!!!Login--->", logger.Error(err))
+		return nil, err
 	}
 
 	if !data.UserFound {
@@ -344,47 +349,7 @@ pwd:
 			}
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		hashType := user.GetHashType()
-		if config.HashTypes[hashType] == 1 {
-			match, err := security.ComparePassword(user.GetPassword(), password)
-			if err != nil {
-				s.log.Error("!!!V2LoginWithOption-->ComparePasswordArgon", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2LoginWithOption-->Wrong", logger.Error(err))
-				return nil, err
-			}
 
-			go func() {
-				hashedPassword, err := security.HashPasswordBcrypt(password)
-				if err != nil {
-					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
-					return
-				}
-				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
-				if err != nil {
-					s.log.Error("!!!V2LoginWithOption--->UpdatePassword", logger.Error(err))
-					return
-				}
-			}()
-		} else if config.HashTypes[hashType] == 2 {
-			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
-			if err != nil {
-				s.log.Error("!!!V2LoginWithOption-->ComparePasswordBcrypt", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-				return nil, err
-			}
-		} else {
-			err := errors.New("invalid hash type")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 		userId = user.Id
 	case "PHONE":
 		phone, ok := req.GetData()["phone"]
@@ -546,6 +511,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		password, ok := req.GetData()["password"]
 		if ok {
 			if len(password) < 6 {
@@ -558,11 +524,13 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		userIdRes, err := s.strg.User().GetByUsername(ctx, phone)
 		if err != nil {
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: userIdRes.GetId(),
 		})
@@ -570,47 +538,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		hashType := user.GetHashType()
-		if config.HashTypes[hashType] == 1 {
-			match, err := security.ComparePassword(user.GetPassword(), password)
-			if err != nil {
-				s.log.Error("!!!V2LoginWithOption-->ComparePasswordArgon", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2LoginWithOption-->Wrong", logger.Error(err))
-				return nil, err
-			}
 
-			go func() {
-				hashedPassword, err := security.HashPasswordBcrypt(password)
-				if err != nil {
-					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
-					return
-				}
-				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
-				if err != nil {
-					s.log.Error("!!!V2LoginWithOption--->UpdatePassword", logger.Error(err))
-					return
-				}
-			}()
-		} else if config.HashTypes[hashType] == 2 {
-			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
-			if err != nil {
-				s.log.Error("!!!V2LoginWithOption-->ComparePasswordBcrypt", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-				return nil, err
-			}
-		} else {
-			err := errors.New("invalid hash type")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 		userId = user.GetId()
 	case "EMAIL_PWD":
 		email, ok := req.GetData()["email"]
@@ -631,12 +559,13 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		userIdRes, err := s.strg.User().GetByUsername(ctx, email)
 
+		userIdRes, err := s.strg.User().GetByUsername(ctx, email)
 		if err != nil {
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
 			Id: userIdRes.GetId(),
 		})
@@ -644,48 +573,8 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		hashType := user.GetHashType()
-		if config.HashTypes[hashType] == 1 {
-			match, err := security.ComparePassword(user.GetPassword(), password)
-			if err != nil {
-				s.log.Error("!!!V2LoginWithOption-->ComparePasswordArgon", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2LoginWithOption-->Wrong", logger.Error(err))
-				return nil, err
-			}
 
-			go func() {
-				hashedPassword, err := security.HashPasswordBcrypt(password)
-				if err != nil {
-					s.log.Error("!!!V2LoginWithOption--->HashPasswordBcryptGo", logger.Error(err))
-					return
-				}
-				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
-				if err != nil {
-					s.log.Error("!!!V2LoginWithOption--->UpdatePassword", logger.Error(err))
-					return
-				}
-			}()
-		} else if config.HashTypes[hashType] == 2 {
-			match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
-			if err != nil {
-				s.log.Error("!!!V2LoginWithOption-->ComparePasswordBcrypt", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-				return nil, err
-			}
-		} else {
-			err := errors.New("invalid hash type")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		userId = userIdRes.GetId()
+		userId = user.GetId()
 	case "GOOGLE_AUTH":
 		email, ok := req.GetData()["email"]
 		if !ok {
@@ -726,13 +615,14 @@ pwd:
 		req.LoginStrategy = "LOGIN_PWD"
 		goto pwd
 	}
+
 	req.Data["user_id"] = userId
 	data, err := s.LoginMiddleware(ctx, models.LoginMiddlewareReq{
 		Data:   req.Data,
 		Tables: req.Tables,
 	})
 	if err != nil {
-		httpErrorStr := ""
+		var httpErrorStr = ""
 
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
@@ -788,6 +678,7 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			ProjectId:             req.Data["project_id"],
 			ClientType:            req.Data["client_type_id"],
 			ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
+			Password:              req.Data["password"],
 		}
 
 		services, err := s.serviceNode.GetByNodeType(req.Data["project_id"], req.NodeType)
@@ -820,11 +711,16 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 				return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 			}
 
-			err = helper.MarshalToStruct(goData, &data)
-			if err != nil {
+			if err = helper.MarshalToStruct(goData, &data); err != nil {
 				s.log.Error("!!!LoginMiddleware--->LoginDataMarshal", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
+		}
+
+		if !data.ComparePassword {
+			err := errors.New("invalid password")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, err
 		}
 
 		if !data.UserFound {
