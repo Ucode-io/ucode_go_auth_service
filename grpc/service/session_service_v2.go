@@ -73,6 +73,48 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
+		hashType := user.GetHashType()
+		if config.HashTypes[hashType] == 1 {
+			match, err := security.ComparePassword(user.GetPassword(), req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyOneLogin-->Wrong", logger.Error(err))
+				return nil, err
+			}
+
+			go func() {
+				hashedPassword, err := security.HashPasswordBcrypt(req.Password)
+				if err != nil {
+					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+				if err != nil {
+					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+			}()
+		} else if config.HashTypes[hashType] == 2 {
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
+			if err != nil {
+				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
+				return nil, err
+			}
+		} else {
+			err := errors.New("invalid hash type")
+			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	case config.WithPhone:
 		if config.DefaultOtp != req.Otp {
 			_, err := s.services.SmsService().ConfirmOtp(
@@ -143,7 +185,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ClientType:            req.GetClientType(),
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
-		Password:              req.GetPassword(),
 	}
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
@@ -182,12 +223,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, status.Error(400, err.Error())
 		}
-	}
-
-	if !data.ComparePassword {
-		err := errors.New("invalid password")
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, err
 	}
 
 	if !data.UserFound {
