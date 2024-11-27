@@ -73,48 +73,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-
-		hashType := user.GetHashType()
-		if config.HashTypes[hashType] == 1 {
-			match, err := security.ComparePassword(user.GetPassword(), req.Password)
-			if err != nil {
-				s.log.Error("!!!V2Login-->ComparePasswordArgon", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2Login-->Wrong", logger.Error(err))
-				return nil, err
-			}
-
-			go func() {
-				hashedPassword, err := security.HashPasswordBcrypt(req.Password)
-				if err != nil {
-					s.log.Error("!!!V2Login--->HashPasswordBcryptGo", logger.Error(err))
-					return
-				}
-				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
-				if err != nil {
-					s.log.Error("!!!V2Login--->UpdatePassword", logger.Error(err))
-					return
-				}
-			}()
-		} else if config.HashTypes[hashType] == 2 {
-			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
-			if err != nil {
-				s.log.Error("!!!V2Login-->ComparePasswordBcrypt", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!V2Login--->", logger.Error(err))
-				return nil, err
-			}
-		} else {
-			err := errors.New("invalid hash type")
-			s.log.Error("!!!V2Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 	case config.WithPhone:
 		if config.DefaultOtp != req.Otp {
 			_, err := s.services.SmsService().ConfirmOtp(
