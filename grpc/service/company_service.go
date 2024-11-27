@@ -46,7 +46,13 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_company.Register", req)
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
+	var (
+		before      runtime.MemStats
+		email       string = req.GetUserInfo().GetEmail()
+		googleToken string = req.GetUserInfo().GetGoogleToken()
+		password    string = req.GetUserInfo().GetPassword()
+		login              = req.GetUserInfo().GetLogin()
+	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -64,12 +70,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		s.log.Error("---RegisterCompany-->NewUUID", logger.Error(err))
 		return nil, err
 	}
-
-	var (
-		email       string = req.GetUserInfo().GetEmail()
-		googleToken string = req.GetUserInfo().GetGoogleToken()
-		password    string = req.GetUserInfo().GetPassword()
-	)
 
 	clientTypeId := uuid.NewString()
 	roleId := uuid.NewString()
@@ -93,6 +93,12 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		err = config.ErrEmailRequired
 		s.log.Error("!!!RegisterCompany-->EmailRequired", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if len(login) < 6 {
+		err = errors.New("invalid username")
+		s.log.Error("!!!RegisterCompany-->InvalidUsername", logger.Error(err))
+		return nil, err
 	}
 
 	err = util.ValidStrongPassword(password)
@@ -169,7 +175,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	createUserRes, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 		Phone:     req.GetUserInfo().GetPhone(),
 		Email:     email,
-		Login:     req.GetUserInfo().GetLogin(),
+		Login:     login,
 		Password:  hashedPassword,
 		Active:    1,
 		CompanyId: companyPKey.GetId(),
