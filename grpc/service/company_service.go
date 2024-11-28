@@ -49,7 +49,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	var (
 		before      runtime.MemStats
 		email       string = req.GetUserInfo().GetEmail()
-		googleToken string = req.GetUserInfo().GetGoogleToken()
+		googleToken string = req.GetGoogleToken().GetAccessToken()
 		password    string = req.GetUserInfo().GetPassword()
 		login              = req.GetUserInfo().GetLogin()
 	)
