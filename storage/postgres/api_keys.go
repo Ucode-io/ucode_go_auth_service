@@ -118,7 +118,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 				cp.name AS client_platform_name,
 				cp.subdomain AS client_platform_subdomain,
 				ak.disable,
-				ak.client_id
+				COALESCE(ak.client_id::text, '')
 			FROM
 			    api_keys ak
 			LEFT JOIN
