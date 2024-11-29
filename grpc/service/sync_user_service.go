@@ -52,7 +52,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		user     *pb.User
 		err      error
 		username string
-		skip     bool
 	)
 
 	runtime.ReadMemStats(&before)
@@ -68,6 +67,8 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	}()
 
 	for _, loginStrategy := range req.GetLoginStrategy() {
+		skip := false
+
 		if loginStrategy == "login" {
 			username = req.GetLogin()
 			skip = true
