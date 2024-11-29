@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"errors"
 	"runtime"
+
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
@@ -10,10 +12,12 @@ import (
 	"ucode/ucode_go_auth_service/pkg/helper"
 	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
+	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -42,7 +46,13 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_company.Register", req)
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
+	var (
+		before      runtime.MemStats
+		email       string = req.GetUserInfo().GetEmail()
+		googleToken string = req.GetGoogleToken().GetAccessToken()
+		password    string = req.GetUserInfo().GetPassword()
+		login              = req.GetUserInfo().GetLogin()
+	)
 	runtime.ReadMemStats(&before)
 
 	defer func() {
@@ -58,6 +68,42 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	tempOwnerId, err := uuid.NewRandom()
 	if err != nil {
 		s.log.Error("---RegisterCompany-->NewUUID", logger.Error(err))
+		return nil, err
+	}
+
+	clientTypeId := uuid.NewString()
+	roleId := uuid.NewString()
+
+	if googleToken != "" {
+		userInfo, err := helper.GetGoogleUserInfo(googleToken)
+		if err != nil {
+			err = errors.New("invalid arguments google auth")
+			s.log.Error("!!!RegisterCompany--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+			err = errors.New("invalid arguments google auth")
+			s.log.Error("!!!RegisterCompany-->EmailVerified", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		email = cast.ToString(userInfo["email"])
+	}
+
+	if email == "" {
+		err = config.ErrEmailRequired
+		s.log.Error("!!!RegisterCompany-->EmailRequired", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if len(login) < 6 {
+		err = errors.New("invalid username")
+		s.log.Error("!!!RegisterCompany-->InvalidUsername", logger.Error(err))
+		return nil, err
+	}
+
+	err = util.ValidStrongPassword(password)
+	if err != nil {
+		s.log.Error("!!!RegisterCompany-->ValidStrong password", logger.Error(err))
 		return nil, err
 	}
 
@@ -106,7 +152,21 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		return nil, err
 	}
 
-	hashedPassword, err := security.HashPasswordBcrypt(req.GetUserInfo().GetPassword())
+	_, err = s.services.ApiKeysService().Create(ctx, &pb.CreateReq{
+		Name:             "Function",
+		ProjectId:        project.ProjectId,
+		EnvironmentId:    environment.GetId(),
+		ClientPlatformId: config.OpenFaaSPlatformID,
+		Disable:          true,
+		ClientTypeId:     clientTypeId,
+		RoleId:           roleId,
+	})
+	if err != nil {
+		s.log.Error("!!!RegisterCompany-->CreateApiKey", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	hashedPassword, err := security.HashPasswordBcrypt(password)
 	if err != nil {
 		s.log.Error("!!!RegisterCompany-->HashPassword", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -114,8 +174,8 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 
 	createUserRes, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 		Phone:     req.GetUserInfo().GetPhone(),
-		Email:     req.GetUserInfo().GetEmail(),
-		Login:     req.GetUserInfo().GetLogin(),
+		Email:     email,
+		Login:     login,
 		Password:  hashedPassword,
 		Active:    1,
 		CompanyId: companyPKey.GetId(),
@@ -136,10 +196,12 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	}
 
 	_, err = s.services.UserService().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-		CompanyId: companyPKey.GetId(),
-		ProjectId: project.GetProjectId(),
-		UserId:    createUserRes.GetId(),
-		EnvId:     environment.GetId(),
+		CompanyId:    companyPKey.GetId(),
+		ProjectId:    project.GetProjectId(),
+		UserId:       createUserRes.GetId(),
+		EnvId:        environment.GetId(),
+		ClientTypeId: clientTypeId,
+		RoleId:       roleId,
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany-->AddUser2Project", logger.Error(err))
@@ -154,7 +216,9 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			ResourceType: 1,
 			NodeType:     config.LOW_NODE_TYPE,
 		},
-		UserId: createUserRes.GetId(),
+		UserId:       createUserRes.GetId(),
+		ClientTypeId: clientTypeId,
+		RoleId:       roleId,
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany-AutoCreateResource--->", logger.Error(err))

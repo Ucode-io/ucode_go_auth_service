@@ -283,16 +283,6 @@ func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err = s.strg.Scope().Upsert(ctx, &pb.UpsertScopeRequest{
-		ClientPlatformId: req.ClientPlatformId,
-		Path:             req.Path,
-		Method:           req.Method,
-	})
-	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
 	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
 		authTable := &pb.TableBody{

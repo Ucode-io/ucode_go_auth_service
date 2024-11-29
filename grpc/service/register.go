@@ -133,10 +133,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := rs.serviceNode.GetByNodeType(
-		data.ProjectId,
-		data.NodeType,
-	)
+	services, err := rs.serviceNode.GetByNodeType(data.ProjectId, data.NodeType)
 	if err != nil {
 		rs.log.Error("!!!CreateUser--->GetByNodeType", logger.Error(err))
 		return nil, err
@@ -294,6 +291,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		ProjectId:     data.ProjectId,
 		Tables:        []*pb.Object{},
 		EnvironmentId: data.EnvironmentId,
+		ClientId:      data.ClientId,
 	})
 	if res == nil {
 		err := errors.New("user not found")

@@ -413,8 +413,6 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		}
 	}()
 
-	unHashedPassword := req.Password
-
 	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->HashPassword", logger.Error(err))
@@ -512,35 +510,6 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->AddUserToProject", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-	if req.GetInvite() {
-		emailSettings, err := s.strg.Email().GetListEmailSettings(ctx, &pb.GetListEmailSettingsRequest{
-			ProjectId: req.GetProjectId(),
-		})
-		if err != nil {
-			s.log.Error("!!!V2CreateUser--->GetListEmailSettings", logger.Error(err))
-			return nil, err
-		}
-		var devEmail, devEmailPassword string
-		if len(emailSettings.GetItems()) > 0 {
-			devEmail = emailSettings.GetItems()[0].GetEmail()
-			devEmailPassword = emailSettings.GetItems()[0].GetPassword()
-		}
-		err = helper.SendInviteMessageToEmail(helper.SendMessageToEmailRequest{
-			Subject:       "Invite message",
-			To:            req.GetEmail(),
-			UserId:        pKey.Id,
-			Email:         devEmail,
-			Password:      devEmailPassword,
-			Username:      req.GetLogin(),
-			TempPassword:  unHashedPassword,
-			EnvironmentId: req.GetEnvironmentId(),
-			ClientTypeId:  req.GetClientTypeId(),
-			ProjectId:     req.GetProjectId(),
-		})
-		if err != nil {
-			s.log.Error("Error while sending message to invite", logger.Error(err))
-		}
 	}
 
 	return s.strg.User().GetByPK(ctx, pKey)

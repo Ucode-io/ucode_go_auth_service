@@ -19,26 +19,12 @@ type StorageI interface {
 	ClientPlatform() ClientPlatformRepoI
 	ClientType() ClientTypeRepoI
 	Client() ClientRepoI
-	Relation() RelationRepoI
-	UserInfoField() UserInfoFieldRepoI
-	Role() RoleRepoI
-	Permission() PermissionRepoI
-	Scope() ScopeRepoI
-	PermissionScope() PermissionScopeRepoI
-	RolePermission() RolePermissionRepoI
 	User() UserRepoI
-	Integration() IntegrationRepoI
-	UserRelation() UserRelationRepoI
-	UserInfo() UserInfoRepoI
 	Session() SessionRepoI
-	Email() EmailRepoI
 	Company() CompanyRepoI
 	Project() ProjectRepoI
 	ApiKeys() ApiKeysRepoI
 	AppleSettings() AppleSettingsI
-	LoginStrategy() LoginStrategyI
-	LoginPlatformType() LoginPlatformType
-	SmsOtpSettings() SmsOtpSettingsRepoI
 	ApiKeyUsage() ApiKeyUsageRepoI
 }
 
@@ -46,9 +32,6 @@ type ClientPlatformRepoI interface {
 	Create(ctx context.Context, entity *pb.CreateClientPlatformRequest) (pKey *pb.ClientPlatformPrimaryKey, err error)
 	GetList(ctx context.Context, queryParam *pb.GetClientPlatformListRequest) (res *pb.GetClientPlatformListResponse, err error)
 	GetByPK(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (res *pb.ClientPlatform, err error)
-	GetByPKDetailed(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (res *pb.ClientPlatformDetailedResponse, err error)
-	Update(ctx context.Context, entity *pb.UpdateClientPlatformRequest) (rowsAffected int64, err error)
-	Delete(ctx context.Context, pKey *pb.ClientPlatformPrimaryKey) (rowsAffected int64, err error)
 }
 
 type ClientTypeRepoI interface {
@@ -67,59 +50,6 @@ type ClientRepoI interface {
 	Remove(ctx context.Context, entity *pb.ClientPrimaryKey) (rowsAffected int64, err error)
 	GetList(ctx context.Context, queryParam *pb.GetClientListRequest) (res *pb.GetClientListResponse, err error)
 	GetMatrix(ctx context.Context, req *pb.GetClientMatrixRequest) (res *pb.GetClientMatrixResponse, err error)
-}
-
-type RelationRepoI interface {
-	Add(ctx context.Context, entity *pb.AddRelationRequest) (pKey *pb.RelationPrimaryKey, err error)
-	GetByPK(ctx context.Context, entity *pb.RelationPrimaryKey) (res *pb.Relation, err error)
-	Update(ctx context.Context, entity *pb.UpdateRelationRequest) (rowsAffected int64, err error)
-	Remove(ctx context.Context, entity *pb.RelationPrimaryKey) (rowsAffected int64, err error)
-}
-
-type UserInfoFieldRepoI interface {
-	Add(ctx context.Context, entity *pb.AddUserInfoFieldRequest) (pKey *pb.UserInfoFieldPrimaryKey, err error)
-	GetByPK(ctx context.Context, entity *pb.UserInfoFieldPrimaryKey) (res *pb.UserInfoField, err error)
-	Update(ctx context.Context, entity *pb.UpdateUserInfoFieldRequest) (rowsAffected int64, err error)
-	Remove(ctx context.Context, entity *pb.UserInfoFieldPrimaryKey) (rowsAffected int64, err error)
-}
-
-type RoleRepoI interface {
-	Add(ctx context.Context, entity *pb.AddRoleRequest) (pKey *pb.RolePrimaryKey, err error)
-	GetByPK(ctx context.Context, entity *pb.RolePrimaryKey) (res *pb.Role, err error)
-	GetList(ctx context.Context, entity *pb.GetRolesListRequest) (res *pb.GetRolesResponse, err error)
-	GetRoleByIdDetailed(ctx context.Context, entity *pb.RolePrimaryKey) (res *pb.GetRoleByIdResponse, err error)
-	Update(ctx context.Context, entity *pb.UpdateRoleRequest) (rowsAffected int64, err error)
-	Remove(ctx context.Context, entity *pb.RolePrimaryKey) (rowsAffected int64, err error)
-}
-
-type PermissionRepoI interface {
-	Create(ctx context.Context, entity *pb.CreatePermissionRequest) (pKey *pb.PermissionPrimaryKey, err error)
-	GetList(ctx context.Context, queryParam *pb.GetPermissionListRequest) (res *pb.GetPermissionListResponse, err error)
-	GetByPK(ctx context.Context, pKey *pb.PermissionPrimaryKey) (res *pb.GetPermissionByIDResponse, err error)
-	Update(ctx context.Context, entity *pb.UpdatePermissionRequest) (rowsAffected int64, err error)
-	Delete(ctx context.Context, pKey *pb.PermissionPrimaryKey) (rowsAffected int64, err error)
-	GetListByClientPlatformId(ctx context.Context, clientPlatformID string) (res []*pb.Permission, err error)
-	GetListByRoleId(ctx context.Context, roleID string) (res []*pb.Permission, err error)
-}
-
-type ScopeRepoI interface {
-	Upsert(ctx context.Context, entity *pb.UpsertScopeRequest) (res *pb.ScopePrimaryKey, err error)
-	GetByPK(ctx context.Context, pKey *pb.ScopePrimaryKey) (res *pb.Scope, err error)
-	GetList(ctx context.Context, queryParam *pb.GetScopeListRequest) (res *pb.GetScopesResponse, err error)
-}
-
-type PermissionScopeRepoI interface {
-	Add(ctx context.Context, entity *pb.AddPermissionScopeRequest) (res *pb.PermissionScopePrimaryKey, err error)
-	Remove(ctx context.Context, entity *pb.PermissionScopePrimaryKey) (rowsAffected int64, err error)
-	GetByPK(ctx context.Context, pKey *pb.PermissionScopePrimaryKey) (res *pb.PermissionScope, err error)
-	HasAccess(ctx context.Context, roleID, clientPlatformID, path, method string) (hasAccess bool, err error)
-}
-
-type RolePermissionRepoI interface {
-	Add(ctx context.Context, entity *pb.AddRolePermissionRequest) (res *pb.RolePermissionPrimaryKey, err error)
-	AddMultiple(ctx context.Context, entity *pb.AddRolePermissionsRequest) (rowsAffected int64, err error)
-	Remove(ctx context.Context, entity *pb.RolePermissionPrimaryKey) (rowsAffected int64, err error)
-	GetByPK(ctx context.Context, pKey *pb.RolePermissionPrimaryKey) (res *pb.RolePermission, err error)
 }
 
 type UserRepoI interface {
@@ -153,30 +83,6 @@ type UserRepoI interface {
 	UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error)
 }
 
-type IntegrationRepoI interface {
-	GetListByPKs(ctx context.Context, pKeys *pb.IntegrationPrimaryKeyList) (res *pb.GetIntegrationListResponse, err error)
-	Create(ctx context.Context, entity *pb.CreateIntegrationRequest) (pKey *pb.IntegrationPrimaryKey, err error)
-	GetList(ctx context.Context, queryParam *pb.GetIntegrationListRequest) (res *pb.GetIntegrationListResponse, err error)
-	CreateSession(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error)
-	GetByPK(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (res *pb.Integration, err error)
-	Update(ctx context.Context, entity *pb.UpdateIntegrationRequest) (rowsAffected int64, err error)
-	Delete(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (rowsAffected int64, err error)
-	GetIntegrationSessions(ctx context.Context, pKey *pb.IntegrationPrimaryKey) (res *pb.GetIntegrationSessionsResponse, err error)
-	DeleteSession(ctx context.Context, pKey *pb.GetIntegrationTokenRequest) (rowsAffected int64, err error)
-	GetIntegrationSession(ctx context.Context, req *pb.GetIntegrationTokenRequest) (res *pb.Session, err error)
-}
-
-type UserRelationRepoI interface {
-	Add(ctx context.Context, entity *pb.AddUserRelationRequest) (res *pb.UserRelationPrimaryKey, err error)
-	Remove(ctx context.Context, entity *pb.UserRelationPrimaryKey) (rowsAffected int64, err error)
-	GetByPK(ctx context.Context, pKey *pb.UserRelationPrimaryKey) (res *pb.UserRelation, err error)
-}
-
-type UserInfoRepoI interface {
-	Upsert(ctx context.Context, entity *pb.UpsertUserInfoRequest) (res *pb.UserInfoPrimaryKey, err error)
-	GetByPK(ctx context.Context, pKey *pb.UserInfoPrimaryKey) (res *pb.UserInfo, err error)
-}
-
 type SessionRepoI interface {
 	Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error)
 	GetList(ctx context.Context, queryParam *pb.GetSessionListRequest) (res *pb.GetSessionListResponse, err error)
@@ -189,15 +95,6 @@ type SessionRepoI interface {
 	GetSessionListByIntegrationID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error)
 	ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error)
-}
-
-type EmailRepoI interface {
-	Create(ctx context.Context, input *pb.Email) (*pb.Email, error)
-	GetByPK(ctx context.Context, input *pb.EmailOtpPrimaryKey) (*pb.Email, error)
-	CreateEmailSettings(ctx context.Context, input *pb.EmailSettings) (*pb.EmailSettings, error)
-	UpdateEmailSettings(ctx context.Context, input *pb.UpdateEmailSettingsRequest) (*pb.EmailSettings, error)
-	GetListEmailSettings(ctx context.Context, input *pb.GetListEmailSettingsRequest) (*pb.UpdateEmailSettingsResponse, error)
-	DeleteEmailSettings(ctx context.Context, input *pb.EmailSettingsPrimaryKey) (*emptypb.Empty, error)
 }
 
 type CompanyRepoI interface {
@@ -226,6 +123,9 @@ type ApiKeysRepoI interface {
 	GetByAppId(ctx context.Context, appId string) (*pb.GetRes, error)
 	GetEnvID(ctx context.Context, req *pb.GetReq) (*pb.GetRes, error)
 	UpdateIsMonthlyLimitReached(ctx context.Context) error
+	ListClientToken(ctx context.Context, req *pb.ListClientTokenRequest) (res *pb.ListClientTokenResponse, err error)
+	CreateClientToken(ctx context.Context, clientId string, info map[string]any) error
+	CheckClientIdStatus(ctx context.Context, clientId string) (bool, error)
 }
 
 type AppleSettingsI interface {
@@ -234,30 +134,6 @@ type AppleSettingsI interface {
 	UpdateAppleSettings(ctx context.Context, input *pb.AppleIdSettings) (string, error)
 	GetListAppleSettings(ctx context.Context, input *pb.GetListAppleIdSettingsRequest) (*pb.GetListAppleIdSettingsResponse, error)
 	DeleteAppleSettings(ctx context.Context, input *pb.AppleIdSettingsPrimaryKey) (*emptypb.Empty, error)
-}
-
-type LoginStrategyI interface {
-	GetList(ctx context.Context, req *pb.GetListRequest) (res *pb.GetListResponse, err error)
-	GetByID(ctx context.Context, req *pb.LoginStrategyPrimaryKey) (res *pb.LoginStrategy, err error)
-	Upsert(ctx context.Context, req *pb.UpdateRequest) (res *pb.UpdateResponse, err error)
-}
-
-// LoginPlatformType
-type LoginPlatformType interface {
-	CreateLoginPlatformType(ctx context.Context, input *pb.LoginPlatform) (*pb.LoginPlatform, error)
-	GetLoginPlatformType(ctx context.Context, pKey *pb.LoginPlatformTypePrimaryKey) (res *pb.LoginPlatform, err error)
-	UpdateLoginPlatformType(ctx context.Context, input *pb.UpdateLoginPlatformTypeRequest, types string) (string, error)
-	GetListLoginPlatformType(ctx context.Context, input *pb.GetListLoginPlatformTypeRequest) (*pb.GetListLoginPlatformTypeResponse, error)
-	DeleteLoginSettings(ctx context.Context, input *pb.LoginPlatformTypePrimaryKey) (*emptypb.Empty, error)
-}
-
-// sms otp settings repo is used to save otp creds for each project and environment
-type SmsOtpSettingsRepoI interface {
-	Create(context.Context, *pb.CreateSmsOtpSettingsRequest) (*pb.SmsOtpSettings, error)
-	Update(context.Context, *pb.SmsOtpSettings) (int64, error)
-	GetById(context.Context, *pb.SmsOtpSettingsPrimaryKey) (*pb.SmsOtpSettings, error)
-	GetList(context.Context, *pb.GetListSmsOtpSettingsRequest) (*pb.SmsOtpSettingsResponse, error)
-	Delete(context.Context, *pb.SmsOtpSettingsPrimaryKey) (int64, error)
 }
 
 type ApiKeyUsageRepoI interface {

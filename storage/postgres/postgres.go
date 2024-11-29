@@ -14,31 +14,17 @@ import (
 )
 
 type Store struct {
-	db                *Pool
-	clientPlatform    storage.ClientPlatformRepoI
-	clientType        storage.ClientTypeRepoI
-	client            storage.ClientRepoI
-	relation          storage.RelationRepoI
-	userInfoField     storage.UserInfoFieldRepoI
-	role              storage.RoleRepoI
-	permission        storage.PermissionRepoI
-	scope             storage.ScopeRepoI
-	permissionScope   storage.PermissionScopeRepoI
-	rolePermission    storage.RolePermissionRepoI
-	user              storage.UserRepoI
-	integration       storage.IntegrationRepoI
-	userRelation      storage.UserRelationRepoI
-	userInfo          storage.UserInfoRepoI
-	session           storage.SessionRepoI
-	email             storage.EmailRepoI
-	company           storage.CompanyRepoI
-	project           storage.ProjectRepoI
-	apiKeys           storage.ApiKeysRepoI
-	appleId           storage.AppleSettingsI
-	loginStrategy     storage.LoginStrategyI
-	loginPlatformType storage.LoginPlatformType
-	smsOtpSettings    storage.SmsOtpSettingsRepoI
-	apiKeyUsage       storage.ApiKeyUsageRepoI
+	db             *Pool
+	clientPlatform storage.ClientPlatformRepoI
+	clientType     storage.ClientTypeRepoI
+	client         storage.ClientRepoI
+	user           storage.UserRepoI
+	session        storage.SessionRepoI
+	company        storage.CompanyRepoI
+	project        storage.ProjectRepoI
+	apiKeys        storage.ApiKeysRepoI
+	appleId        storage.AppleSettingsI
+	apiKeyUsage    storage.ApiKeyUsageRepoI
 }
 
 type Pool struct {
@@ -162,62 +148,6 @@ func (s *Store) Client() storage.ClientRepoI {
 	return s.client
 }
 
-func (s *Store) Relation() storage.RelationRepoI {
-	if s.relation == nil {
-		s.relation = NewRelationRepo(s.db)
-	}
-
-	return s.relation
-}
-
-func (s *Store) UserInfoField() storage.UserInfoFieldRepoI {
-	if s.userInfoField == nil {
-		s.userInfoField = NewUserInfoFieldRepo(s.db)
-	}
-
-	return s.userInfoField
-}
-
-func (s *Store) Role() storage.RoleRepoI {
-	if s.role == nil {
-		s.role = NewRoleRepo(s.db)
-	}
-
-	return s.role
-}
-
-func (s *Store) Permission() storage.PermissionRepoI {
-	if s.permission == nil {
-		s.permission = NewPermissionRepo(s.db)
-	}
-
-	return s.permission
-}
-
-func (s *Store) Scope() storage.ScopeRepoI {
-	if s.scope == nil {
-		s.scope = NewScopeRepo(s.db)
-	}
-
-	return s.scope
-}
-
-func (s *Store) PermissionScope() storage.PermissionScopeRepoI {
-	if s.permissionScope == nil {
-		s.permissionScope = NewPermissionScopeRepo(s.db)
-	}
-
-	return s.permissionScope
-}
-
-func (s *Store) RolePermission() storage.RolePermissionRepoI {
-	if s.rolePermission == nil {
-		s.rolePermission = NewRolePermissionRepo(s.db)
-	}
-
-	return s.rolePermission
-}
-
 func (s *Store) User() storage.UserRepoI {
 	if s.user == nil {
 		s.user = NewUserRepo(s.db)
@@ -226,41 +156,12 @@ func (s *Store) User() storage.UserRepoI {
 	return s.user
 }
 
-func (s *Store) UserRelation() storage.UserRelationRepoI {
-	if s.userRelation == nil {
-		s.userRelation = NewUserRelationRepo(s.db)
-	}
-
-	return s.userRelation
-}
-
-func (s *Store) UserInfo() storage.UserInfoRepoI {
-	if s.userInfo == nil {
-		s.userInfo = NewUserInfoRepo(s.db)
-	}
-
-	return s.userInfo
-}
-
 func (s *Store) Session() storage.SessionRepoI {
 	if s.session == nil {
 		s.session = NewSessionRepo(s.db)
 	}
 
 	return s.session
-}
-func (s *Store) Integration() storage.IntegrationRepoI {
-	if s.integration == nil {
-		s.integration = NewIntegrationRepo(s.db)
-	}
-	return s.integration
-}
-
-func (s *Store) Email() storage.EmailRepoI {
-	if s.email == nil {
-		s.email = NewEmailRepo(s.db)
-	}
-	return s.email
 }
 
 func (s *Store) Company() storage.CompanyRepoI {
@@ -289,27 +190,6 @@ func (s *Store) AppleSettings() storage.AppleSettingsI {
 		s.appleId = NewAppleSettingsRepo(s.db)
 	}
 	return s.appleId
-}
-
-func (s *Store) LoginStrategy() storage.LoginStrategyI {
-	if s.loginStrategy == nil {
-		s.loginStrategy = NewLoginStrategy(s.db)
-	}
-	return s.loginStrategy
-}
-
-func (s *Store) LoginPlatformType() storage.LoginPlatformType {
-	if s.loginPlatformType == nil {
-		s.loginPlatformType = NewLoginPlatformTypeRepo(s.db)
-	}
-	return s.loginPlatformType
-}
-
-func (s *Store) SmsOtpSettings() storage.SmsOtpSettingsRepoI {
-	if s.smsOtpSettings == nil {
-		s.smsOtpSettings = NewSmsOtpSettingsRepo(s.db)
-	}
-	return s.smsOtpSettings
 }
 
 func (s *Store) ApiKeyUsage() storage.ApiKeyUsageRepoI {

@@ -37,10 +37,11 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		ip,
 		data,
 		user_id_auth,
-		expires_at`
+		expires_at,
+		client_id`
 
 	queryValue := ` VALUES (
-		$1, $2, $3, $4, $5, $6`
+		$1, $2, $3, $4, $5, $6, $7`
 
 	queryReturn := ` RETURNING id`
 
@@ -56,9 +57,10 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		entity.Data,       // $4 - data
 		entity.UserIdAuth, // $5 - user_id_auth
 		entity.ExpiresAt,  // $6 - expires_at
+		entity.ClientId,   // $7 - client_id
 	}
 
-	argIndex := 7
+	argIndex := 8
 
 	if util.IsValidUUID(entity.ProjectId) {
 		queryInitial += `, project_id`
@@ -109,15 +111,16 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 
 	query := `SELECT
 		id,
-		coalesce(project_id::text, ''),
-		coalesce(client_type_id::text, ''),
+		COALESCE(project_id::text, ''),
+		COALESCE(client_type_id::text, ''),
 		user_id,
-		coalesce(role_id::text, ''),
+		COALESCE(role_id::text, ''),
 		TEXT(ip) AS ip,
 		data,
 		COALESCE(user_id_auth::text, ''),
 		COALESCE(is_changed, FALSE),
-		coalesce(env_id::text, ''),
+		COALESCE(env_id::text, ''),
+		COALESCE(client_id, ''),
 		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
 		COALESCE(TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS created_at,
 		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at
@@ -137,6 +140,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		&res.UserIdAuth,
 		&res.IsChanged,
 		&res.EnvId,
+		&res.ClientId,
 		&res.ExpiresAt,
 		&res.CreatedAt,
 		&res.UpdatedAt,

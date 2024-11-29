@@ -11,7 +11,6 @@ import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/grpc/client"
-	"ucode/ucode_go_auth_service/pkg/helper"
 	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
@@ -165,38 +164,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		}
 	}
 
-	if req.GetInvite() {
-		emailSettings, err := sus.strg.Email().GetListEmailSettings(ctx, &pb.GetListEmailSettingsRequest{
-			ProjectId: req.GetProjectId(),
-		})
-		if err != nil {
-			sus.log.Error("!!!CreateUser--->AddUserToProjectExists", logger.Error(err))
-			return nil, err
-		}
-		var devEmail string
-		var devEmailPassword string
-		if len(emailSettings.GetItems()) > 0 {
-			devEmail = emailSettings.GetItems()[0].GetEmail()
-			devEmailPassword = emailSettings.GetItems()[0].GetPassword()
-		}
-		err = helper.SendInviteMessageToEmail(helper.SendMessageToEmailRequest{
-			Subject:       "Invite message",
-			To:            req.GetEmail(),
-			UserId:        userId,
-			Email:         devEmail,
-			Password:      devEmailPassword,
-			Username:      req.GetLogin(),
-			TempPassword:  req.GetPassword(),
-			EnvironmentId: req.GetEnvironmentId(),
-			ClientTypeId:  req.GetClientTypeId(),
-			ProjectId:     req.GetProjectId(),
-		},
-		)
-		if err != nil {
-			sus.log.Error("Error while sending message to invite")
-			sus.log.Error(err.Error())
-		}
-	}
 	response.UserId = userId
 	return &response, nil
 }
@@ -505,37 +472,6 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			}
 		}
 
-		if req.GetInvite() {
-			emailSettings, err := sus.strg.Email().GetListEmailSettings(ctx, &pb.GetListEmailSettingsRequest{
-				ProjectId: req.GetProjectId(),
-			})
-			if err != nil {
-				return nil, err
-			}
-			var devEmail, devEmailPassword string
-
-			if len(emailSettings.GetItems()) > 0 {
-				devEmail = emailSettings.GetItems()[0].GetEmail()
-				devEmailPassword = emailSettings.GetItems()[0].GetPassword()
-			}
-			err = helper.SendInviteMessageToEmail(helper.SendMessageToEmailRequest{
-				Subject:       "Invite message",
-				To:            req.GetEmail(),
-				UserId:        userId,
-				Email:         devEmail,
-				Password:      devEmailPassword,
-				Username:      req.GetLogin(),
-				TempPassword:  req.GetPassword(),
-				EnvironmentId: req.GetEnvironmentId(),
-				ClientTypeId:  req.GetClientTypeId(),
-				ProjectId:     req.GetProjectId(),
-			},
-			)
-			if err != nil {
-				sus.log.Error("Error while sending message to invite")
-				sus.log.Error(err.Error())
-			}
-		}
 		user_ids = append(user_ids, userId)
 	}
 
