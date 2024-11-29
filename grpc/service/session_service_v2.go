@@ -406,7 +406,7 @@ pwd:
 		}
 
 		smsOtpSettings, err := s.services.ResourceService().GetProjectResourceList(
-			context.Background(),
+			ctx,
 			&pbCompany.GetProjectResourceListRequest{
 				EnvironmentId: req.Data["environment_id"],
 				ProjectId:     req.Data["project_id"],
@@ -416,6 +416,7 @@ pwd:
 			s.log.Error("!!!V2LoginWithOption.SmsOtpSettingsService().GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
 		var defaultOtp string
 		if len(smsOtpSettings.GetResources()) > 0 {
 			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetDefaultOtp() != "" {
@@ -712,16 +713,16 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			}
 		}
 
-		if !data.ComparePassword {
-			err := errors.New("invalid password")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
-			return nil, err
-		}
-
 		if !data.UserFound {
 			customError := errors.New("user not found")
 			s.log.Error("!!!LoginMiddleware--->", logger.Error(customError))
 			return nil, status.Error(codes.NotFound, customError.Error())
+		}
+
+		if !data.ComparePassword {
+			err := errors.New("invalid password")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, err
 		}
 
 		res = helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
