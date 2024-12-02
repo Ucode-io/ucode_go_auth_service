@@ -129,6 +129,8 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.ResourceType = int32(resourceEnvironment.GetResourceType())
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 	login.NodeType = resourceEnvironment.GetNodeType()
+	login.ClientIp = c.ClientIP()
+	login.UserAgent = c.Request.UserAgent()
 
 	var (
 		logReq = &models.CreateVersionHistoryRequest{
@@ -330,6 +332,8 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 			Data:          login.GetData(),
 			LoginStrategy: login.GetLoginStrategy(),
 			Tables:        login.GetTables(),
+			ClientIp:      c.ClientIP(),
+			UserAgent:     c.Request.UserAgent(),
 		})
 
 	if err != nil {

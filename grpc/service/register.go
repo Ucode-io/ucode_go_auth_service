@@ -292,6 +292,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		Tables:        []*pb.Object{},
 		EnvironmentId: data.EnvironmentId,
 		ClientId:      data.ClientId,
+		ClientIp:      data.ClientIp,
+		UserAgent:     data.UserAgent,
 	})
 	if res == nil {
 		err := errors.New("user not found")
