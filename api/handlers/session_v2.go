@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -268,127 +267,6 @@ func (h *Handler) V2RefreshTokenSuperAdmin(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, resp)
-}
-
-// V2LoginSuperAdmin godoc
-// @ID V2login_superadmin
-// @Router /v2/login/superadmin [POST]
-// @Summary V2LoginSuperAdmin
-// @Description V2LoginSuperAdmin
-// @Tags V2_Session
-// @Accept json
-// @Produce json
-// @Param login body auth_service.V2LoginSuperAdminReq true "V2LoginRequest"
-// @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) V2LoginSuperAdmin(c *gin.Context) {
-	var login auth_service.V2LoginRequest
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	if !strings.HasSuffix(login.GetUsername(), "_kibr") {
-		err := errors.New("Пользователь не найдено")
-		h.handleResponse(c, http.NotFound, err.Error())
-		return
-	} else {
-		login.Username = strings.TrimSuffix(login.GetUsername(), "_kibr")
-	}
-
-	resp, err := h.services.SessionService().V2LoginSuperAdmin(
-		c.Request.Context(),
-		&auth_service.V2LoginSuperAdminReq{
-			Username: login.GetUsername(),
-			Password: login.GetPassword(),
-		})
-
-	httpErrorStr := ""
-	if err != nil {
-		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
-		httpErrorStr = strings.ToLower(httpErrorStr)
-	}
-	if httpErrorStr == "user not found" {
-		err := errors.New("Пользователь не найдено")
-		h.handleResponse(c, http.NotFound, err.Error())
-		return
-	} else if httpErrorStr == "user has been expired" {
-		err := errors.New("срок действия пользователя истек")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid username" {
-		err := errors.New("неверное имя пользователя")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid password" {
-		err := errors.New("неверное пароль")
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	} else if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
-
-	companies, err := h.services.CompanyServiceClient().GetList(context.Background(), &obs.GetCompanyListRequest{
-		Offset:  0,
-		Limit:   128,
-		OwnerId: resp.GetUserId(),
-	})
-
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	companiesResp := []*auth_service.Company{}
-
-	if len(companies.Companies) < 1 {
-		companiesById := make([]*obs.Company, 0)
-
-		user, err := h.services.UserService().GetUserByID(c.Request.Context(), &auth_service.UserPrimaryKey{
-			Id: resp.GetUserId(),
-		})
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
-
-		company, err := h.services.CompanyServiceClient().GetById(c.Request.Context(), &obs.GetCompanyByIdRequest{
-			Id: user.GetCompanyId(),
-		})
-		if err != nil {
-			h.handleResponse(c, http.BadRequest, err.Error())
-			return
-		}
-
-		companiesById = append(companiesById, company.Company)
-		companies.Companies = companiesById
-		companies.Count = 1
-
-	}
-	bytes, err := json.Marshal(companies.GetCompanies())
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	err = json.Unmarshal(bytes, &companiesResp)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	res := &auth_service.V2LoginSuperAdminRes{
-		UserFound: resp.GetUserFound(),
-		Token:     resp.GetToken(),
-		Companies: companiesResp,
-		UserId:    resp.GetUserId(),
-		Sessions:  resp.GetSessions(),
-	}
-
-	h.handleResponse(c, http.Created, res)
 }
 
 // V2LoginWithOption godoc
