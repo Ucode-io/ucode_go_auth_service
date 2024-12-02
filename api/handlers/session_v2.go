@@ -129,7 +129,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 	login.ResourceType = int32(resourceEnvironment.GetResourceType())
 	login.EnvironmentId = resourceEnvironment.GetEnvironmentId()
 	login.NodeType = resourceEnvironment.GetNodeType()
-	login.ClientIp = c.ClientIP()
+	login.ClientIp = c.RemoteIP()
 	login.UserAgent = c.Request.UserAgent()
 
 	var (
