@@ -876,7 +876,6 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		user.ProjectId = projectId
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
-		user.Id = userItem["guid"].(string)
 		resp.Users = append(resp.Users, user)
 	}
 
