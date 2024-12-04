@@ -686,15 +686,14 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserIds")
 	defer dbSpan.Finish()
 
-	query := `SELECT
-				array_agg(user_id)
-			from user_project
-			where true=true`
-
-	filter := ` and project_id = :project_id`
-	params := map[string]interface{}{}
-	params["project_id"] = req.ProjectId
-
+	var (
+		query  = `SELECT array_agg(user_id) FROM "user_project" WHERE 1=1`
+		tmp    = make([]string, 0, 20)
+		filter = ` AND project_id = :project_id`
+		params = map[string]any{
+			"project_id": req.ProjectId,
+		}
+	)
 	if len(req.Search) > 0 {
 		params["search"] = req.Search
 		filter += " AND ((name || phone || email || login) ILIKE ('%' || :search || '%'))"
@@ -702,7 +701,6 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 
 	query, args := helper.ReplaceQueryParams(query+filter, params)
 
-	tmp := make([]string, 0, 20)
 	err := r.db.QueryRow(ctx, query, args...).Scan(&tmp)
 	if err != nil {
 		return nil, err

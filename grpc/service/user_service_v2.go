@@ -84,7 +84,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+		structData, err := helper.ConvertRequestToSturct(map[string]any{
 			"guid":           pKey.GetId(),
 			"project_id":     req.GetProjectId(),
 			"role_id":        "",
@@ -157,7 +157,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 			s.log.Error("!!!Found user from obj--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, "User already exists")
 		} else {
-			structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+			structData, err := helper.ConvertRequestToSturct(map[string]any{
 				"guid":           foundUser.Id,
 				"project_id":     req.GetProjectId(),
 				"role_id":        "",
@@ -262,7 +262,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+		structData, err := helper.ConvertRequestToSturct(map[string]any{
 			"guid":           pKey.GetId(),
 			"project_id":     req.GetProjectId(),
 			"role_id":        req.GetRoleId(),
@@ -351,7 +351,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 			s.log.Error("!!!Found user from obj--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, "User already exists")
 		} else {
-			structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+			structData, err := helper.ConvertRequestToSturct(map[string]any{
 				"guid":           foundUser.Id,
 				"project_id":     req.GetProjectId(),
 				"role_id":        req.GetRoleId(),
@@ -435,7 +435,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	// objectBuilder -> auth service
-	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
+	structData, err := helper.ConvertRequestToSturct(map[string]any{
 		"guid":               pKey.GetId(),
 		"project_id":         req.GetProjectId(),
 		"role_id":            req.GetRoleId(),
@@ -479,7 +479,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			s.log.Error("!!!V2CreateUser--->GetSingle", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
 			if ok && clientTypeTableSlug != "" {
@@ -537,28 +537,23 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	var (
 		result   *pbObject.CommonMessage
 		resultGo *nb.CommonMessage
-		userData map[string]interface{}
+		userData map[string]any
 		ok       bool
 	)
-	user, err := s.strg.User().GetByPK(ctx, req)
 
+	user, err := s.strg.User().GetByPK(ctx, req)
 	if err != nil {
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"id": req.Id,
-	})
+	structData, err := helper.ConvertRequestToSturct(map[string]any{"user_id_auth": req.Id})
 	if err != nil {
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -566,26 +561,24 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
-		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!GetUserByID--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
 			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		result, err = services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -596,26 +589,24 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!GetUserByID--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
 			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		resultGo, err = services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -628,9 +619,9 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	}
 
 	if result != nil {
-		userData, ok = result.Data.AsMap()["response"].(map[string]interface{})
+		userData, ok = result.Data.AsMap()["response"].(map[string]any)
 	} else {
-		userData, ok = resultGo.Data.AsMap()["response"].(map[string]interface{})
+		userData, ok = resultGo.Data.AsMap()["response"].(map[string]any)
 	}
 
 	if !ok {
@@ -666,16 +657,11 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	projectId, ok := userData["project_id"].(string)
 	if !ok {
-		// err := errors.New("projectId is nil")
-		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		// return nil, status.Error(codes.Internal, err.Error())
 		projectId = ""
 	}
+
 	name, ok := userData["name"].(string)
 	if ok {
-		// err := errors.New("projectId is nil")
-		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		// return nil, status.Error(codes.Internal, err.Error())
 		user.Name = name
 	}
 
@@ -703,8 +689,8 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		}
 	}()
 
-	resp := &pb.GetUserListResponse{}
 	var (
+		resp      = &pb.GetUserListResponse{}
 		usersResp *pbObject.CommonMessage
 	)
 
@@ -714,25 +700,25 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	users, err := s.strg.User().GetListByPKs(ctx, &pb.UserPrimaryKeyList{
-		Ids: *userIds,
-	})
+	users, err := s.strg.User().GetListByPKs(ctx,
+		&pb.UserPrimaryKeyList{
+			Ids: *userIds,
+		},
+	)
 	if err != nil {
 		s.log.Error("!!!V2GetUserList--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	usersMap := make(map[string]*pb.User, users.Count)
+	var usersMap = make(map[string]*pb.User, users.Count)
 
 	for _, user := range users.Users {
 		usersMap[user.Id] = user
 	}
 
-	structReq := map[string]interface{}{
-		"guid": map[string]interface{}{
-			"$in": userIds,
-		},
-		"limit": 10,
+	structReq := map[string]any{
+		"user_id_auth": map[string]any{"$in": userIds},
+		"limit":        10,
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
@@ -749,10 +735,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -762,24 +745,22 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	case 1:
 		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
 			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		usersResp, err = services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -792,24 +773,22 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	case 3:
 		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2GetUserList--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
 			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		goUsersResp, err := services.GoObjectBuilderService().GetList2(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -832,7 +811,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	usersData, ok := usersResp.Data.AsMap()["response"].([]interface{})
+	usersData, ok := usersResp.Data.AsMap()["response"].([]any)
 	if !ok {
 		err := errors.New("usersData is nil")
 		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
@@ -843,14 +822,14 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	resp.Count = int32(userCount)
 
 	for _, userData := range usersData {
-		userItem, ok := userData.(map[string]interface{})
+		userItem, ok := userData.(map[string]any)
 		if !ok {
 			err := errors.New("userItem is nil")
 			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		userId, ok := userItem["guid"].(string)
+		userId, ok := userItem["user_id_auth"].(string)
 		if !ok {
 			err := errors.New("userId is nil")
 			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
@@ -871,26 +850,13 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		// clientPlatformId, ok := userItem["client_platform_id"].(string)
-		// if !ok {
-		// 	err := errors.New("clientPlatformId is nil")
-		// 	s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-		// 	return nil, status.Error(codes.Internal, err.Error())
-		// }
-
 		projectId, ok := userItem["project_id"].(string)
 		if !ok {
-			// err := errors.New("projectId is nil")
-			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			// return nil, status.Error(codes.Internal, err.Error())
 			projectId = ""
 		}
 
 		active, ok := userItem["active"].(float64)
 		if !ok {
-			// err := errors.New("active is nil")
-			// s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-			// return nil, status.Error(codes.Internal, err.Error())
 			active = 0
 		}
 
@@ -900,15 +866,16 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 			s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
 		name, ok := userItem["name"].(string)
 		if ok {
 			user.Name = name
 		}
+
 		user.Active = int32(active)
 		user.ProjectId = projectId
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
-
 		resp.Users = append(resp.Users, user)
 	}
 
@@ -979,24 +946,22 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	case 1:
 		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
 			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -1009,24 +974,22 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	case 3:
 		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2GetUserSingle--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
 			if ok && clientTypeTableSlug != "" {
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		_, err = services.GoItemService().Update(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -1100,7 +1063,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		response, ok := clientType.Data.AsMap()["response"].(map[string]interface{})
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug := cast.ToString(response["table_slug"])
 			if clientTypeTableSlug != "" {
