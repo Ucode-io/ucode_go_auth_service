@@ -269,8 +269,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		resp *auth_service.User
 	)
 
-	err := c.ShouldBindJSON(&user)
-	if err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -278,20 +277,24 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	projectId, ok := c.Get("project_id")
 
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get project-id in query param"))
+		h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
-	resource, _ := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
+	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     projectId.(string),
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	user.ResourceType = int32(resource.GetResourceType())
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
@@ -326,8 +329,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	}()
 
 	resp, err = h.services.UserService().V2UpdateUser(
-		c.Request.Context(),
-		&user,
+		c.Request.Context(), &user,
 	)
 
 	if err != nil {

@@ -547,6 +547,12 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
+	userStatus, err := s.strg.User().GetUserStatus(ctx, user.GetId(), req.GetProjectId())
+	if err != nil {
+		s.log.Error("!!!GetUserByID--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+
 	structData, err := helper.ConvertRequestToSturct(map[string]any{"user_id_auth": req.Id})
 	if err != nil {
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
@@ -666,6 +672,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	}
 
 	user.ProjectId = projectId
+	user.Status = userStatus
 
 	return user, nil
 }
@@ -702,7 +709,8 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 
 	users, err := s.strg.User().GetListByPKs(ctx,
 		&pb.UserPrimaryKeyList{
-			Ids: *userIds,
+			Ids:       *userIds,
+			ProjectId: req.ProjectId,
 		},
 	)
 	if err != nil {
@@ -920,6 +928,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			ClientTypeId: req.ClientTypeId,
 			RoleId:       req.RoleId,
 			EnvId:        req.EnvironmentId,
+			Status:       req.Status,
 		},
 	)
 	if err != nil {
@@ -1218,7 +1227,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 		userIdAuth       string
 	)
 
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2GetUserList")
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2ResetPassword")
 	defer dbSpan.Finish()
 
 	runtime.ReadMemStats(&before)

@@ -112,4 +112,8 @@ var (
 			NotAllowCode:   "TOO_MANY_REQUESTS",
 		},
 	}
+
+	UserStatus = map[string]bool{
+		"BLOCKED": true,
+	}
 )

@@ -82,6 +82,7 @@ type UserRepoI interface {
 	V2GetByUsername(ctx context.Context, username, strategy string) (res *pb.User, err error)
 	UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserRequest, loginType string) (*pb.SyncUserResponse, error)
 	UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error)
+	GetUserStatus(ctx context.Context, userId, projectId string) (status string, err error)
 }
 
 type SessionRepoI interface {

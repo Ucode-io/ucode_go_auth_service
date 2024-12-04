@@ -175,8 +175,11 @@ func (h *Handler) V2Login(c *gin.Context) {
 		case "invalid password":
 			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
+		case "user blocked":
+			h.handleResponse(c, http.BadRequest, "Пользователь заблокирован")
+			return
 		default:
-			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		}
 	}
