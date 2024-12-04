@@ -540,23 +540,20 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 		userData map[string]any
 		ok       bool
 	)
-	user, err := s.strg.User().GetByPK(ctx, req)
 
+	user, err := s.strg.User().GetByPK(ctx, req)
 	if err != nil {
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	structData, err := helper.ConvertRequestToSturct(map[string]any{"id": req.Id})
+	structData, err := helper.ConvertRequestToSturct(map[string]any{"user_id_auth": req.Id})
 	if err != nil {
 		s.log.Error("!!!GetUserByID--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -564,19 +561,16 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 	var tableSlug = "user"
 	switch req.ResourceType {
 	case 1:
-		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(context.Background(), &pbObject.CommonMessage{
+		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!GetUserByID--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
@@ -584,6 +578,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		result, err = services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -594,19 +589,16 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		clientType, err := services.GoItemService().GetSingle(context.Background(), &nb.CommonMessage{
+		clientType, err := services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!GetUserByID--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
@@ -614,6 +606,7 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		resultGo, err = services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
@@ -664,16 +657,11 @@ func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey)
 
 	projectId, ok := userData["project_id"].(string)
 	if !ok {
-		// err := errors.New("projectId is nil")
-		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		// return nil, status.Error(codes.Internal, err.Error())
 		projectId = ""
 	}
+
 	name, ok := userData["name"].(string)
 	if ok {
-		// err := errors.New("projectId is nil")
-		// s.log.Error("!!!GetUserByID.ObjectBuilderService.GetSingle--->", logger.Error(err))
-		// return nil, status.Error(codes.Internal, err.Error())
 		user.Name = name
 	}
 
@@ -888,7 +876,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 		user.ProjectId = projectId
 		user.RoleId = roleId
 		user.ClientTypeId = clientTypeId
-
+		user.Id = userItem["guid"].(string)
 		resp.Users = append(resp.Users, user)
 	}
 
