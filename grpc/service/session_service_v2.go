@@ -68,7 +68,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		user, err = s.strg.User().V2GetByUsername(ctx, req.GetUsername(), config.WithLogin)
 		if err != nil {
 			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
@@ -827,9 +827,9 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
-	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserIdAuth(), session.GetProjectId())
+	_, err = s.strg.User().CHeckUserProject(ctx, session.GetUserIdAuth(), session.GetProjectId())
 	if err != nil {
-		s.log.Error("!!!V2Login--->UserGetByUsername", logger.Error(err))
+		s.log.Error("!!!V2Login--->CHeckUserProject", logger.Error(err))
 		if err == sql.ErrNoRows {
 			errNoRows := errors.New("no user found")
 			return nil, status.Error(codes.Internal, errNoRows.Error())
@@ -1276,7 +1276,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		user, err = s.strg.User().V2GetByUsername(ctx, req.GetUsername(), config.WithLogin)
 		if err != nil {
 			s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())

@@ -1146,7 +1146,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	return &res, nil
 }
 
-func (r *userRepo) V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error) {
+func (r *userRepo) CHeckUserProject(ctx context.Context, id, projectId string) (res *pb.User, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.v2getbyusername")
 	defer dbSpan.Finish()
 
@@ -1189,14 +1189,49 @@ func (r *userRepo) UpdatePassword(ctx context.Context, userId, password string) 
 	return nil
 }
 
+func (r *userRepo) V2GetByUsername(ctx context.Context, username, strategy string) (res *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.v2_getbyusername")
+	defer dbSpan.Finish()
+
+	res = &pb.User{}
+
+	query := fmt.Sprintf(`SELECT
+		id,
+		phone,
+		email,
+		login,
+		password,
+		hash_type
+	FROM
+		"user"
+	WHERE %s = $1`, strategy)
+
+	lowercasedUsername := strings.ToLower(username)
+
+	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
+		&res.Id,
+		&res.Phone,
+		&res.Email,
+		&res.Login,
+		&res.Password,
+		&res.HashType,
+	)
+
+	if err == pgx.ErrNoRows {
+		return res, nil
+	}
+
+	if err != nil {
+		return res, errors.Wrap(err, "failed to get user by username")
+	}
+
+	return res, nil
+}
+
 func IsValidEmailNew(email string) bool {
-	// Define the regular expression pattern for a valid email address
-	// This is a basic pattern and may not cover all edge cases
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
-	// Compile the regular expression
 	re := regexp.MustCompile(emailRegex)
 
-	// Use the MatchString method to check if the email matches the pattern
 	return re.MatchString(email)
 }

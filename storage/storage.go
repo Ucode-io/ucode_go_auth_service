@@ -77,8 +77,9 @@ type UserRepoI interface {
 	GetAllUserProjects(ctx context.Context) ([]string, error)
 	UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error)
 	GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error)
-	V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error)
+	CHeckUserProject(ctx context.Context, id, projectId string) (res *pb.User, err error)
 	UpdatePassword(ctx context.Context, userId, password string) error
+	V2GetByUsername(ctx context.Context, username, strategy string) (res *pb.User, err error)
 	UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserRequest, loginType string) (*pb.SyncUserResponse, error)
 	UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error)
 }
