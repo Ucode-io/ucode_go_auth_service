@@ -916,10 +916,10 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 }
 
 func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+	s.log.Info("---V2UpdateUser--->", logger.Any("req", req))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2UpdateUser", req)
 	defer dbSpan.Finish()
-
-	s.log.Info("---V2UpdateUser--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
