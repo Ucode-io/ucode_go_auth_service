@@ -121,7 +121,7 @@ func (s *clientService) GetClientTypeList(ctx context.Context, req *pb.GetClient
 				s.log.Error("!!!GetClientTypeList.ConvertMapToStruct--->", logger.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-			resp, err := services.ObjectBuilderService().GetList(context.Background(), &object_builder_service.CommonMessage{
+			resp, err := services.ObjectBuilderService().GetList(ctx, &object_builder_service.CommonMessage{
 				TableSlug: table.Slug,
 				Data:      structData,
 				ProjectId: config.ProjectID,

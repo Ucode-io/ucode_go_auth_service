@@ -105,6 +105,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
 					return
 				}
+				
 				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
 				if err != nil {
 					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))

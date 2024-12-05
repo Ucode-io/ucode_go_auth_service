@@ -760,7 +760,7 @@ func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingRe
 		res models.ListLanguage
 	)
 	params := make(map[string]interface{})
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
 	var arr []interface{}
@@ -838,7 +838,7 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 		res models.ListTimezone
 	)
 	params := make(map[string]interface{})
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
 	var arr []interface{}

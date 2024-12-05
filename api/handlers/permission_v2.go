@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -597,7 +596,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 
 		h.handleResponse(c, http.OK, resp)
 	case pbCompany.ResourceType_POSTGRESQL:
-		resp, err := services.GoObjectBuilderPermissionService().GetListWithRoleAppTablePermissions(context.Background(),
+		resp, err := services.GoObjectBuilderPermissionService().GetListWithRoleAppTablePermissions(c.Request.Context(),
 			&nb.GetListWithRoleAppTablePermissionsRequest{
 				ProjectId: resource.ResourceEnvironmentId,
 				RoleId:    c.Param("role-id"),
@@ -706,7 +705,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
 		resp, err = services.GetBuilderPermissionServiceByType(resource.NodeType).UpdateRoleAppTablePermissions(
-			context.Background(),
+			c.Request.Context(),
 			&permission,
 		)
 
@@ -906,18 +905,17 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
-	services, _ := h.GetProjectSrvc(
-		c,
-		resource.ProjectId,
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, resource.ProjectId, resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
 
 	permission.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-
 		resp, err = services.GetBuilderPermissionServiceByType(resource.NodeType).UpdateMenuPermissions(
-			context.Background(),
+			c.Request.Context(),
 			&permission,
 		)
 
@@ -928,15 +926,14 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 
 	case pbCompany.ResourceType_POSTGRESQL:
 		newReq := nb.UpdateMenuPermissionsRequest{}
-		err = helper.MarshalToStruct(&permission, &newReq)
-		if err != nil {
+
+		if err = helper.MarshalToStruct(&permission, &newReq); err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
 
 		resp, err = services.GoObjectBuilderPermissionService().UpdateMenuPermissions(
-			c.Request.Context(),
-			&newReq,
+			c.Request.Context(), &newReq,
 		)
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
