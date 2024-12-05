@@ -686,15 +686,14 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserIds")
 	defer dbSpan.Finish()
 
-	query := `SELECT
-				array_agg(user_id)
-			from user_project
-			where true=true`
-
-	filter := ` and project_id = :project_id`
-	params := map[string]interface{}{}
-	params["project_id"] = req.ProjectId
-
+	var (
+		query  = `SELECT array_agg(user_id) FROM "user_project" WHERE 1=1`
+		tmp    = make([]string, 0, 20)
+		filter = ` AND project_id = :project_id`
+		params = map[string]any{
+			"project_id": req.ProjectId,
+		}
+	)
 	if len(req.Search) > 0 {
 		params["search"] = req.Search
 		filter += " AND ((name || phone || email || login) ILIKE ('%' || :search || '%'))"
@@ -702,7 +701,6 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 
 	query, args := helper.ReplaceQueryParams(query+filter, params)
 
-	tmp := make([]string, 0, 20)
 	err := r.db.QueryRow(ctx, query, args...).Scan(&tmp)
 	if err != nil {
 		return nil, err
@@ -1146,7 +1144,7 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 	return &res, nil
 }
 
-func (r *userRepo) V2GetByUsername(ctx context.Context, id, projectId string) (res *pb.User, err error) {
+func (r *userRepo) CHeckUserProject(ctx context.Context, id, projectId string) (res *pb.User, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.v2getbyusername")
 	defer dbSpan.Finish()
 
@@ -1189,14 +1187,47 @@ func (r *userRepo) UpdatePassword(ctx context.Context, userId, password string) 
 	return nil
 }
 
+func (r *userRepo) V2GetByUsername(ctx context.Context, username, strategy string) (res *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.v2_getbyusername")
+	defer dbSpan.Finish()
+
+	res = &pb.User{}
+
+	query := fmt.Sprintf(`SELECT
+		id,
+		phone,
+		email,
+		login,
+		password,
+		hash_type
+	FROM
+		"user"
+	WHERE %s = $1`, strategy)
+
+	err = r.db.QueryRow(ctx, query, username).Scan(
+		&res.Id,
+		&res.Phone,
+		&res.Email,
+		&res.Login,
+		&res.Password,
+		&res.HashType,
+	)
+
+	if err == pgx.ErrNoRows {
+		return res, nil
+	}
+
+	if err != nil {
+		return res, errors.Wrap(err, "failed to get user by username")
+	}
+
+	return res, nil
+}
+
 func IsValidEmailNew(email string) bool {
-	// Define the regular expression pattern for a valid email address
-	// This is a basic pattern and may not cover all edge cases
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
-	// Compile the regular expression
 	re := regexp.MustCompile(emailRegex)
 
-	// Use the MatchString method to check if the email matches the pattern
 	return re.MatchString(email)
 }

@@ -131,12 +131,6 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
-	// limit, err := h.getLimitParam(c)
-	// if err != nil {
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
-
 	projectId := c.DefaultQuery("project-id", "")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.BadEnvironment, "project-id is required")
@@ -160,7 +154,6 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 	}
 
 	resp, err := h.services.UserService().V2GetUserList(
-
 		c.Request.Context(),
 		&auth_service.GetUserListRequest{
 			Limit:                 10,
@@ -200,45 +193,32 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserByID(c *gin.Context) {
-	var (
-		// resourceEnvironment *company_service.ResourceEnvironment
-		err error
-	)
-	userID := c.Param("user-id")
+	var err error
 
+	userID := c.Param("user-id")
 	if !util.IsValidUUID(userID) {
 		h.handleResponse(c, http.InvalidArgument, "user-id is an invalid uuid")
 		return
 	}
-	clientTypeID := c.Query("client-type-id")
-	if clientTypeID == "" {
-		h.handleResponse(c, http.InvalidArgument, "client type id is required")
-		return
-	}
 
+	clientTypeID := c.Query("client-type-id")
 	if !util.IsValidUUID(clientTypeID) {
 		h.handleResponse(c, http.InvalidArgument, "client type id is an invalid uuid")
 		return
 	}
 
 	projectID := c.Query("project-id")
-
 	if !util.IsValidUUID(projectID) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
-
-	// resourceId, ok := c.Get("resource_id")
-	// if !ok {
-	// 	h.handleResponse(c, http.BadRequest, errors.New("cant get resource_id"))
-	// 	return
-	// }
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
 		return
 	}
+
 	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
 		ProjectId:     projectID,
 		EnvironmentId: environmentId.(string),

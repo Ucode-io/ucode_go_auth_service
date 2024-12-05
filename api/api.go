@@ -32,7 +32,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	r.Use(customCORSMiddleware())
 
 	v2 := r.Group("/v2")
-	v2.POST("/login/superadmin", h.V2LoginSuperAdmin)
 	v2.PUT("/refresh", h.V2RefreshToken)
 
 	v2.Use(h.LoginMiddleware())

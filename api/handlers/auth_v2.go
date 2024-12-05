@@ -374,11 +374,13 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 
 			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
 			res, err := h.services.SessionService().SessionAndTokenGenerator(
-				context.Background(),
+				c.Request.Context(),
 				&auth_service.SessionAndTokenRequest{
 					LoginData: convertedToAuthPb,
 					Tables:    body.Tables,
-					ProjectId: resourceEnvironment.GetProjectId(), //@TODO:: temp added hardcoded project id
+					ProjectId: resourceEnvironment.GetProjectId(),
+					ClientIp:  c.ClientIP(),
+					UserAgent: c.Request.UserAgent(),
 				})
 			if err != nil {
 				h.handleResponse(c, status.GRPCError, err.Error())
@@ -429,11 +431,13 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 
 			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
 			res, err := h.services.SessionService().SessionAndTokenGenerator(
-				context.Background(),
+				c.Request.Context(),
 				&auth_service.SessionAndTokenRequest{
 					LoginData: convertedToAuthPb,
 					Tables:    body.Tables,
 					ProjectId: resourceEnvironment.GetProjectId(),
+					ClientIp:  c.ClientIP(),
+					UserAgent: c.Request.UserAgent(),
 				})
 			if err != nil {
 				h.handleResponse(c, status.GRPCError, err.Error())
@@ -456,11 +460,13 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 	res, err := h.services.SessionService().SessionAndTokenGenerator(
-		context.Background(),
+		c.Request.Context(),
 		&auth_service.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
-			ProjectId: resourceEnvironment.GetProjectId(), //@TODO:: temp added hardcoded project id
+			ProjectId: resourceEnvironment.GetProjectId(),
+			ClientIp:  c.ClientIP(),
+			UserAgent: c.Request.UserAgent(),
 		})
 	if err != nil {
 		h.handleResponse(c, status.GRPCError, err.Error())

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
@@ -31,7 +32,6 @@ import (
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2SendCodeApp(c *gin.Context) {
-
 	var (
 		request models.V2SendCodeRequest
 	)
@@ -125,7 +125,6 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2SendCode(c *gin.Context) {
-
 	var (
 		request models.V2SendCodeRequest
 	)
@@ -388,9 +387,11 @@ func (h *Handler) V2Register(c *gin.Context) {
 	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pb.RegisterUserRequest{
 		RoleId:                roleId,
 		Data:                  structData,
+		ClientIp:              c.ClientIP(),
 		ClientTypeId:          clientTypeId,
 		Type:                  registerType,
 		CompanyId:             project.CompanyId,
+		UserAgent:             c.Request.UserAgent(),
 		NodeType:              serviceResource.NodeType,
 		ProjectId:             serviceResource.ProjectId,
 		ResourceId:            serviceResource.ResourceId,
@@ -421,7 +422,6 @@ func (h *Handler) V2Register(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) SendMessage(c *gin.Context) {
-
 	var (
 		request models.V2SendCodeRequest
 	)
@@ -482,7 +482,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 			return
 		}
 		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
-			context.Background(),
+			c.Request.Context(),
 			&pbc.GetProjectResourceListRequest{
 				ProjectId:     resourceEnvironment.ProjectId,
 				EnvironmentId: environmentId.(string),
@@ -499,19 +499,12 @@ func (h *Handler) SendMessage(c *gin.Context) {
 		}
 	}
 
-	services, err := h.GetProjectSrvc(
-		c,
-		resourceEnvironment.ProjectId,
-		resourceEnvironment.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, resourceEnvironment.ProjectId, resourceEnvironment.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	resp, err := services.SmsService().Send(
-		c.Request.Context(),
-		body,
-	)
+	resp, err := services.SmsService().Send(c.Request.Context(), body)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

@@ -68,7 +68,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		user, err = s.strg.User().V2GetByUsername(ctx, req.GetUsername(), config.WithLogin)
 		if err != nil {
 			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
@@ -263,6 +263,8 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ProjectId:     req.GetProjectId(),
 		EnvironmentId: req.GetEnvironmentId(),
 		ClientId:      req.GetClientId(),
+		ClientIp:      req.GetClientIp(),
+		UserAgent:     req.GetUserAgent(),
 	})
 	if resp == nil {
 		errGenerateToken := errors.New("unable to generate token")
@@ -613,9 +615,11 @@ pwd:
 
 	req.Data["user_id"] = userId
 	data, err := s.LoginMiddleware(ctx, models.LoginMiddlewareReq{
-		Data:     req.Data,
-		Tables:   req.Tables,
-		ClientId: req.ClientId,
+		Data:      req.Data,
+		Tables:    req.Tables,
+		ClientId:  req.ClientId,
+		ClientIp:  req.GetClientIp(),
+		UserAgent: req.GetUserAgent(),
 	})
 	if err != nil {
 		var httpErrorStr = ""
@@ -748,6 +752,8 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		ProjectId:     req.Data["project_id"],
 		EnvironmentId: req.Data["environment_id"],
 		ClientId:      req.ClientId,
+		ClientIp:      req.ClientIp,
+		UserAgent:     req.UserAgent,
 	})
 
 	if resp == nil {
@@ -821,9 +827,9 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
-	_, err = s.strg.User().V2GetByUsername(ctx, session.GetUserIdAuth(), session.GetProjectId())
+	_, err = s.strg.User().CHeckUserProject(ctx, session.GetUserIdAuth(), session.GetProjectId())
 	if err != nil {
-		s.log.Error("!!!V2Login--->UserGetByUsername", logger.Error(err))
+		s.log.Error("!!!V2Login--->CHeckUserProject", logger.Error(err))
 		if err == sql.ErrNoRows {
 			errNoRows := errors.New("no user found")
 			return nil, status.Error(codes.Internal, errNoRows.Error())
@@ -947,8 +953,8 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	}
 
 	sessionPKey, err := s.strg.Session().Create(ctx, &pb.CreateSessionRequest{
-		Ip:               "0.0.0.0",
-		Data:             "additional json data",
+		Ip:               input.GetClientIp(),
+		Data:             input.GetUserAgent(),
 		EnvId:            input.GetEnvironmentId(),
 		UserId:           input.GetLoginData().GetUserId(),
 		RoleId:           input.GetLoginData().GetRole().GetId(),
@@ -1116,8 +1122,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	// this condition need our object/get-list-group-by and object/get-group-by-field api because this api's method is post we change it to get
 	if ((strings.Contains(req.GetPath(), "object/get-list")) ||
 		(strings.Contains(req.GetPath(), "object/get-list-group-by")) ||
-		(strings.Contains(req.GetPath(), "object/get-group-by-field"))) &&
-		req.GetMethod() != "GET" {
+		(strings.Contains(req.GetPath(), "object/get-group-by-field"))) && req.GetMethod() != "GET" {
 		methodField = "read"
 	}
 
@@ -1272,7 +1277,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		user, err = s.strg.User().V2GetByUsername(ctx, req.GetUsername(), config.WithLogin)
 		if err != nil {
 			s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())

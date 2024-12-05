@@ -710,7 +710,6 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	permission.ProjectId = resource.ResourceEnvironmentId
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-
 		resp, err = services.GetBuilderPermissionServiceByType(resource.NodeType).UpdateRoleAppTablePermissions(
 			context.Background(),
 			&permission,
