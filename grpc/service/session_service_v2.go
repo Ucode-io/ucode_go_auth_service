@@ -445,8 +445,7 @@ pwd:
 		}
 
 		smsOtpSettings, err := s.services.ResourceService().GetProjectResourceList(
-			ctx,
-			&pbCompany.GetProjectResourceListRequest{
+			ctx, &pbCompany.GetProjectResourceListRequest{
 				EnvironmentId: req.Data["environment_id"],
 				ProjectId:     req.Data["project_id"],
 				Type:          pbCompany.ResourceType_SMS,
@@ -465,8 +464,9 @@ pwd:
 
 		if defaultOtp != otp {
 			_, err = s.services.SmsService().ConfirmOtp(
-				ctx,
-				&sms_service.ConfirmOtpRequest{SmsId: sms_id, Otp: otp},
+				ctx, &sms_service.ConfirmOtpRequest{
+					SmsId: sms_id, Otp: otp,
+				},
 			)
 			if err != nil {
 				s.log.Error("!!!V2LoginWithOption--->ConfirmOTP", logger.Error(err))
@@ -505,8 +505,7 @@ pwd:
 		}
 
 		emailOtpSettings, err := s.services.ResourceService().GetProjectResourceList(
-			context.Background(),
-			&pbCompany.GetProjectResourceListRequest{
+			ctx, &pbCompany.GetProjectResourceListRequest{
 				EnvironmentId: req.Data["environment_id"],
 				ProjectId:     req.Data["project_id"],
 				Type:          pbCompany.ResourceType_SMTP,

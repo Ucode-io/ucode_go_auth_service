@@ -7,8 +7,8 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
-	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
-	"ucode/ucode_go_auth_service/genproto/object_builder_service"
+	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
+	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/gin-gonic/gin"
@@ -29,13 +29,12 @@ import (
 // @Produce json
 // @Param role-id path string true "role-id"
 // @Param project-id query string false "project-id"
-// @Success 200 {object} http.Response{data=object_builder_service.GlobalPermission} "ClientTypeBody"
+// @Success 200 {object} http.Response{data=string} "ClientTypeBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetGlobalPermission(c *gin.Context) {
-	var (
-		resp *object_builder_service.GlobalPermission
-	)
+	var resp *obs.GlobalPermission
+
 	roleId := c.Param("role-id")
 	if !util.IsValidUUID(roleId) {
 		h.handleResponse(c, http.InvalidArgument, "role id is an invalid uuid")
@@ -72,8 +71,7 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 		resp *auth_service.CommonMessage
 	)
 
-	err := c.ShouldBindJSON(&role)
-	if err != nil {
+	if err := c.ShouldBindJSON(&role); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -543,30 +541,29 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 // @Produce json
 // @Param project-id path string false "project-id"
 // @Param role-id path string false "role-id"
-// @Success 200 {object} http.Response{data=object_builder_service.GetListWithRoleAppTablePermissionsResponse} "GetPermissionListResponseBody"
+// @Success 200 {object} http.Response{data=string} "GetPermissionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 	var (
-		resp *object_builder_service.GetListWithRoleAppTablePermissionsResponse
+		resp *obs.GetListWithRoleAppTablePermissionsResponse
 		err  error
 	)
 
 	projectId := c.Param("project-id")
 	if !util.IsValidUUID(projectId) {
-		h.handleResponse(c, http.BadRequest, errors.New("not valid project id"))
+		h.handleResponse(c, http.BadRequest, "not valid project id")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
 	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
+		c.Request.Context(), &pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
@@ -585,10 +582,8 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 
 	switch resource.ResourceType {
 	case pbCompany.ResourceType_MONGODB:
-
 		resp, err = services.GetBuilderPermissionServiceByType(resource.NodeType).GetListWithRoleAppTablePermissions(
-			c.Request.Context(),
-			&object_builder_service.GetListWithRoleAppTablePermissionsRequest{
+			c.Request.Context(), &obs.GetListWithRoleAppTablePermissionsRequest{
 				RoleId:    c.Param("role-id"),
 				ProjectId: resource.ResourceEnvironmentId,
 			},
@@ -603,7 +598,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 		h.handleResponse(c, http.OK, resp)
 	case pbCompany.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderPermissionService().GetListWithRoleAppTablePermissions(context.Background(),
-			&new_object_builder_service.GetListWithRoleAppTablePermissionsRequest{
+			&nb.GetListWithRoleAppTablePermissionsRequest{
 				ProjectId: resource.ResourceEnvironmentId,
 				RoleId:    c.Param("role-id"),
 			})
@@ -638,7 +633,7 @@ func (h *Handler) GetListWithRoleAppTablePermissions(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 	var (
-		permission object_builder_service.UpdateRoleAppTablePermissionsRequest
+		permission obs.UpdateRoleAppTablePermissionsRequest
 		resp       *emptypb.Empty
 	)
 
@@ -723,7 +718,7 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 		h.handleResponse(c, http.OK, resp)
 	case pbCompany.ResourceType_POSTGRESQL:
 
-		newPermission := &new_object_builder_service.UpdateRoleAppTablePermissionsRequest{}
+		newPermission := &nb.UpdateRoleAppTablePermissionsRequest{}
 
 		err := helper.MarshalToStruct(&permission, &newPermission)
 		if err != nil {
@@ -760,12 +755,12 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 // @Param project-id path string true "project-id"
 // @Param role-id path string true "role-id"
 // @Param parent-id path string true "parent-id"
-// @Success 200 {object} http.Response{data=object_builder_service.GetAllMenuPermissionsResponse} "GetMenuPermissionListResponseBody"
+// @Success 200 {object} http.Response{data=string} "GetMenuPermissionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 	var (
-		resp *object_builder_service.GetAllMenuPermissionsResponse
+		resp *obs.GetAllMenuPermissionsResponse
 		err  error
 	)
 
@@ -804,7 +799,7 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 
 		resp, err = services.GetBuilderPermissionServiceByType(resource.NodeType).GetAllMenuPermissions(
 			c.Request.Context(),
-			&object_builder_service.GetAllMenuPermissionsRequest{
+			&obs.GetAllMenuPermissionsRequest{
 				RoleId:    c.Param("role-id"),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.Param("parent-id"),
@@ -817,7 +812,7 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 	case pbCompany.ResourceType_POSTGRESQL:
 		resp, err := services.GoObjectBuilderPermissionService().GetAllMenuPermissions(
 			c.Request.Context(),
-			&new_object_builder_service.GetAllMenuPermissionsRequest{
+			&nb.GetAllMenuPermissionsRequest{
 				RoleId:    c.Param("role-id"),
 				ProjectId: resource.ResourceEnvironmentId,
 				ParentId:  c.Param("parent-id"),
@@ -851,7 +846,7 @@ func (h *Handler) GetListMenuPermissions(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 	var (
-		permission object_builder_service.UpdateMenuPermissionsRequest
+		permission obs.UpdateMenuPermissionsRequest
 		resp       *emptypb.Empty
 	)
 
@@ -932,7 +927,7 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 		}
 
 	case pbCompany.ResourceType_POSTGRESQL:
-		newReq := new_object_builder_service.UpdateMenuPermissionsRequest{}
+		newReq := nb.UpdateMenuPermissionsRequest{}
 		err = helper.MarshalToStruct(&permission, &newReq)
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())

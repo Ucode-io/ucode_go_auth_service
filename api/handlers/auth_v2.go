@@ -8,7 +8,7 @@ import (
 	status "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	cfg "ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+	pba "ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
@@ -28,10 +28,10 @@ import (
 // @Produce json
 // @Param data body auth_service.LogoutRequest true "LogoutRequest"
 // @Success 204
-// @Response 400 {object} status.Response{data=string} "Invalid Argument"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Logout(c *gin.Context) {
-	var logout auth_service.LogoutRequest
+	var logout pba.LogoutRequest
 
 	if err := c.ShouldBindJSON(&logout); err != nil {
 		h.handleResponse(c, status.BadRequest, err.Error())
@@ -70,9 +70,9 @@ func (h *Handler) V2Logout(c *gin.Context) {
 // @Param Environment-Id header string false "Environment-Id"
 // @Param project-id query string false "project-id"
 // @Param registerBody body models.RegisterOtp true "register_body"
-// @Success 201 {object} status.Response{data=models.CommonMessage} "User data"
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RegisterProvider(c *gin.Context) {
 	var body models.RegisterOtp
 
@@ -221,7 +221,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 		return
 	}
 
-	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &auth_service.RegisterUserRequest{
+	response, err := h.services.RegisterService().RegisterUser(c.Request.Context(), &pba.RegisterUserRequest{
 		Data:     structData,
 		NodeType: serviceResource.NodeType,
 	})
@@ -246,9 +246,9 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Param verifyBody body models.Verify true "verify_body"
-// @Success 201 {object} status.Response{data=models.CommonMessage} "User data"
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	var (
 		body                models.Verify
@@ -306,7 +306,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 			if c.Param("otp") != "121212" {
 				resp, err := h.services.EmailService().GetEmailByID(
 					c.Request.Context(),
-					&auth_service.EmailOtpPrimaryKey{
+					&pba.EmailOtpPrimaryKey{
 						Id: c.Param("verify_id"),
 					},
 				)
@@ -375,7 +375,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
 			res, err := h.services.SessionService().SessionAndTokenGenerator(
 				c.Request.Context(),
-				&auth_service.SessionAndTokenRequest{
+				&pba.SessionAndTokenRequest{
 					LoginData: convertedToAuthPb,
 					Tables:    body.Tables,
 					ProjectId: resourceEnvironment.GetProjectId(),
@@ -397,8 +397,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 				return
 			}
 
-			appleConfig, err := h.GetAppleConfig(resourceEnvironment.ProjectId)
-
+			appleConfig, err := h.GetAppleConfig(resourceEnvironment.ProjectId, c.Request.Context())
 			if err != nil {
 				h.handleResponse(c, status.BadRequest, "can't get apple configs to get user info")
 				return
@@ -432,7 +431,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 			convertedToAuthPb := helper.ConvertPbToAnotherPb(respObject)
 			res, err := h.services.SessionService().SessionAndTokenGenerator(
 				c.Request.Context(),
-				&auth_service.SessionAndTokenRequest{
+				&pba.SessionAndTokenRequest{
 					LoginData: convertedToAuthPb,
 					Tables:    body.Tables,
 					ProjectId: resourceEnvironment.GetProjectId(),
@@ -461,7 +460,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	convertedToAuthPb := helper.ConvertPbToAnotherPb(body.Data)
 	res, err := h.services.SessionService().SessionAndTokenGenerator(
 		c.Request.Context(),
-		&auth_service.SessionAndTokenRequest{
+		&pba.SessionAndTokenRequest{
 			LoginData: convertedToAuthPb,
 			Tables:    body.Tables,
 			ProjectId: resourceEnvironment.GetProjectId(),
@@ -494,82 +493,81 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 // @Param X-API-KEY header string false "X-API-KEY"
 // @Param project-id query string false "project-id"
 // @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
-// @Success 201 {object} status.Response{data=models.CommonMessage} "User data"
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Success 201 {object} http.Response{data=models.CommonMessage} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginProvider(c *gin.Context) {
-	var login auth_service.V2LoginWithOptionRequest
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+	var login pba.V2LoginWithOptionRequest
+
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, status.BadRequest, err.Error())
 		return
 	}
+
 	clientType := login.Data["client_type_id"]
-	if clientType == "" {
+	if !util.IsValidUUID(clientType) {
 		h.handleResponse(c, status.InvalidArgument, "inside data client_type_id is required")
 		return
 	}
-	if ok := util.IsValidUUID(clientType); !ok {
-		h.handleResponse(c, status.InvalidArgument, "lient_type_id is an invalid uuid")
-		return
-	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, status.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		err = errors.New("error getting environment id | not valid")
-		h.handleResponse(c, status.BadRequest, err)
+		h.handleResponse(c, status.BadRequest, "error getting environment id | not valid")
 		return
 	}
+
 	provider := c.Param("provider")
 	if provider == "" {
 		h.handleResponse(c, status.InvalidArgument, "provider is required(param)")
 		return
 	}
+
 	login.LoginStrategy = provider
 	login.Data["environment_id"] = environmentId.(string)
 	login.Data["project_id"] = projectId.(string)
 
 	resp, err := h.services.SessionService().V2LoginWithOption(
-		c.Request.Context(),
-		&auth_service.V2LoginWithOptionRequest{
+		c.Request.Context(), &pba.V2LoginWithOptionRequest{
 			Data:          login.GetData(),
 			LoginStrategy: login.GetLoginStrategy(),
 			Tables:        login.GetTables(),
-		})
-	httpErrorStr := ""
+		},
+	)
 	if err != nil {
+		var httpErrorStr = ""
+
 		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
+
+		switch httpErrorStr {
+		case "user not found":
+			h.handleResponse(c, status.NotFound, "Пользователь не найдено")
+			return
+		case "user has been expired":
+			h.handleResponse(c, status.InvalidArgument, "срок действия пользователя истек")
+			return
+		case "invalid username":
+			h.handleResponse(c, status.InvalidArgument, "неверное имя пользователя")
+			return
+		case "invalid password":
+			h.handleResponse(c, status.InvalidArgument, "неверное пароль")
+			return
+		case "user blocked":
+			h.handleResponse(c, status.BadRequest, "Пользователь заблокирован")
+			return
+		default:
+			h.handleResponse(c, status.InvalidArgument, err.Error())
+			return
+		}
 	}
-	if httpErrorStr == "user not found" {
-		err := errors.New("Пользователь не найдено")
-		h.handleResponse(c, status.NotFound, err.Error())
-		return
-	} else if httpErrorStr == "user verified but not found" {
-		err := errors.New("Пользователь проверен, но не найден")
-		h.handleResponse(c, status.OK, err.Error())
-		return
-	} else if httpErrorStr == "user has been expired" {
-		err := errors.New("срок действия пользователя истек")
-		h.handleResponse(c, status.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid username" {
-		err := errors.New("неверное имя пользователя")
-		h.handleResponse(c, status.InvalidArgument, err.Error())
-		return
-	} else if httpErrorStr == "invalid password" {
-		err := errors.New("неверное пароль")
-		h.handleResponse(c, status.InvalidArgument, err.Error())
-		return
-	} else if err != nil {
-		h.handleResponse(c, status.GRPCError, err.Error())
-		return
-	}
-	res := &auth_service.V2LoginSuperAdminRes{
+
+	res := &pba.V2LoginSuperAdminRes{
 		UserFound: resp.GetUserFound(),
 		Token:     resp.GetToken(),
 		Companies: resp.GetCompanies(),

@@ -275,7 +275,6 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	}
 
 	projectId, ok := c.Get("project_id")
-
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
 		return
@@ -286,6 +285,7 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
+	
 	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     projectId.(string),

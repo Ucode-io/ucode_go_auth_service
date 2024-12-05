@@ -321,7 +321,7 @@ func (r *userRepo) Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (int64, 
 }
 
 func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.User, err error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.getbyusername")
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetByUsername")
 	defer dbSpan.Finish()
 
 	res = &pb.User{}
