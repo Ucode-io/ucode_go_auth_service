@@ -43,9 +43,7 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
-
-	_, valid := util.ValidRecipients[request.Type]
-	if !valid {
+	if !util.ValidRecipients[request.Type] {
 		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
 		return
 	}
@@ -69,15 +67,13 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 
 	switch request.Type {
 	case "PHONE":
-		valid = util.IsValidPhone(request.Recipient)
-		if !valid {
+		if !util.IsValidPhone(request.Recipient) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
 
 	case "EMAIL":
-		valid = util.IsValidEmail(request.Recipient)
-		if !valid {
+		if !util.IsValidEmail(request.Recipient) {
 			h.handleResponse(c, http.BadRequest, "Email is not valid")
 			return
 		}
@@ -132,8 +128,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
-	_, valid := util.ValidRecipients[request.Type]
-	if !valid {
+	if !util.ValidRecipients[request.Type] {
 		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
 		return
 	}
@@ -180,8 +175,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 
 	switch request.Type {
 	case "PHONE":
-		valid = util.IsValidPhone(request.Recipient)
-		if !valid {
+		if !util.IsValidPhone(request.Recipient) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
@@ -209,8 +203,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			body.Originator = smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetOriginator()
 		}
 	case "EMAIL":
-		valid = util.IsValidEmail(request.Recipient)
-		if !valid {
+		if !util.IsValidEmail(request.Recipient) {
 			h.handleResponse(c, http.BadRequest, "Email is not valid")
 			return
 		}
@@ -419,9 +412,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
-
-	_, valid := util.ValidRecipients[request.Type]
-	if !valid {
+	if !util.ValidRecipients[request.Type] {
 		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
 		return
 	}
@@ -462,8 +453,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 
 	switch request.Type {
 	case "PHONE":
-		valid = util.IsValidPhone(request.Recipient)
-		if !valid {
+		if !util.IsValidPhone(request.Recipient) {
 			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
 			return
 		}
