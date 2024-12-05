@@ -42,13 +42,6 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 		return nil, fmt.Errorf("apple returned an error: %s - %s", resp.Error, resp.ErrorDescription)
 	}
 
-	// Get the unique user ID
-	// unique, err := apple.GetUniqueID(resp.IDToken)
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
 	// Get the email
 	claim, err := apple.GetClaims(resp.IDToken)
 	if err != nil {
@@ -57,9 +50,6 @@ func GetAppleUserInfo(code string, c *models.AppleConfig) (*models.AppleUserPayl
 	}
 
 	email := (*claim)["email"].(string)
-	// emailVerified := (*claim)["email_verified"]
-	// isPrivateEmail := (*claim)["is_private_email"]
-	// name := (*claim)["name"]
 
 	return &models.AppleUserPayload{
 		Email: email,

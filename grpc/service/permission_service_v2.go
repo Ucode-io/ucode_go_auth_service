@@ -150,9 +150,7 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 		}
 	}()
 
-	var (
-		result *pbObject.CommonMessage
-	)
+	var result *pbObject.CommonMessage
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {

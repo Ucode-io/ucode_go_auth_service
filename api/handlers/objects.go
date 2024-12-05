@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -25,18 +24,16 @@ import (
 // @Param project-id query string false "project-id"
 // @Param table_slug path string true "table_slug"
 // @Param data body models.CommonMessage true "data"
-// @Success 200 {object} http.Response{data=string} "GetObjectListResponseBody"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "GetObjectListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetListObjects(c *gin.Context) {
 	var (
-		//resourceEnvironment *cps.ResourceEnvironment
 		body models.CommonMessage
 		resp *obs.CommonMessage
 	)
 
-	err := c.ShouldBindJSON(&body)
-	if err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
@@ -49,7 +46,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
@@ -72,11 +69,7 @@ func (h *Handler) V2GetListObjects(c *gin.Context) {
 		return
 	}
 
-	services, _ := h.GetProjectSrvc(
-		c,
-		resource.ProjectId,
-		resource.NodeType,
-	)
+	services, _ := h.GetProjectSrvc(c, resource.ProjectId, resource.NodeType)
 
 	// this is get list objects list from object builder
 	switch resource.ResourceType {

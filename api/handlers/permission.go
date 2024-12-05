@@ -17,23 +17,20 @@ import (
 // @Accept json
 // @Produce json
 // @Param role body auth_service.AddRoleRequest true "AddRoleRequestBody"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "Role data"
+// @Success 201 {object} http.Response{data=auth_service.Role} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRole(c *gin.Context) {
 	var role auth_service.AddRoleRequest
 
-	err := c.ShouldBindJSON(&role)
-	if err != nil {
+	if err := c.ShouldBindJSON(&role); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.PermissionService().AddRole(
-		c.Request.Context(),
-		&role,
+		c.Request.Context(), &role,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -51,7 +48,7 @@ func (h *Handler) AddRole(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role-id path string true "role-id"
-// @Success 200 {object} http.Response{data=models.CommonMessage} "ClientTypeBody"
+// @Success 200 {object} http.Response{data=models.GetRoleByIdResponse} "Role data"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetRoleByID(c *gin.Context) {
@@ -61,10 +58,11 @@ func (h *Handler) GetRoleByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.PermissionService().GetRoleById(c.Request.Context(), &auth_service.RolePrimaryKey{
-		Id: roleId,
-	})
-
+	resp, err := h.services.PermissionService().GetRoleById(
+		c.Request.Context(), &auth_service.RolePrimaryKey{
+			Id: roleId,
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -85,7 +83,7 @@ func (h *Handler) GetRoleByID(c *gin.Context) {
 // @Param limit query integer false "limit"
 // @Param client-platform-id query string false "client-platform-id"
 // @Param client-type-id query string false "client-type-id"
-// @Success 200 {object} http.Response{data=models.CommonMessage} "GetRolesListResponseBody"
+// @Success 200 {object} http.Response{data=auth_service.GetRolesResponse} "GetRolesListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetRolesList(c *gin.Context) {
@@ -128,23 +126,20 @@ func (h *Handler) GetRolesList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role body auth_service.UpdateRoleRequest true "UpdateRoleRequestBody"
-// @Success 200 {object} http.Response{data=models.CommonMessage} "Role data"
+// @Success 200 {object} http.Response{data=auth_service.Role} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateRole(c *gin.Context) {
 	var role auth_service.UpdateRoleRequest
 
-	err := c.ShouldBindJSON(&role)
-	if err != nil {
+	if err := c.ShouldBindJSON(&role); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.PermissionService().UpdateRole(
-		c.Request.Context(),
-		&role,
+		c.Request.Context(), &role,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -179,7 +174,6 @@ func (h *Handler) RemoveRole(c *gin.Context) {
 			Id: roleID,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -197,23 +191,20 @@ func (h *Handler) RemoveRole(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission body auth_service.CreatePermissionRequest true "CreatePermissionRequestBody"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "Permission data"
+// @Success 201 {object} http.Response{data=auth_service.GetPermissionByIDResponse} "Permission data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreatePermission(c *gin.Context) {
 	var permission auth_service.CreatePermissionRequest
 
-	err := c.ShouldBindJSON(&permission)
-	if err != nil {
+	if err := c.ShouldBindJSON(&permission); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.PermissionService().CreatePermission(
-		c.Request.Context(),
-		&permission,
+		c.Request.Context(), &permission,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -233,7 +224,7 @@ func (h *Handler) CreatePermission(c *gin.Context) {
 // @Param offset query integer false "offset"
 // @Param limit query integer false "limit"
 // @Param search query string false "search"
-// @Success 200 {object} http.Response{data=models.CommonMessage} "GetPermissionListResponseBody"
+// @Success 200 {object} http.Response{data=auth_service.GetPermissionListResponse} "GetPermissionListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetPermissionList(c *gin.Context) {
@@ -250,14 +241,12 @@ func (h *Handler) GetPermissionList(c *gin.Context) {
 	}
 
 	resp, err := h.services.PermissionService().GetPermissionList(
-		c.Request.Context(),
-		&auth_service.GetPermissionListRequest{
+		c.Request.Context(), &auth_service.GetPermissionListRequest{
 			Limit:  int32(limit),
 			Offset: int32(offset),
 			Search: c.Query("search"),
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -275,7 +264,7 @@ func (h *Handler) GetPermissionList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission-id path string true "permission-id"
-// @Success 200 {object} http.Response{data=models.CommonMessage} "PermissionBody"
+// @Success 200 {object} http.Response{data=auth_service.GetPermissionByIDResponse} "PermissionBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetPermissionByID(c *gin.Context) {
@@ -292,7 +281,6 @@ func (h *Handler) GetPermissionByID(c *gin.Context) {
 			Id: permissionID,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -310,23 +298,20 @@ func (h *Handler) GetPermissionByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission body auth_service.UpdatePermissionRequest true "UpdatePermissionRequestBody"
-// @Success 200 {object} http.Response{data=models.CommonMessage} "Permission data"
+// @Success 200 {object} http.Response{data=auth_service.GetPermissionByIDResponse} "Permission data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdatePermission(c *gin.Context) {
 	var permission auth_service.UpdatePermissionRequest
 
-	err := c.ShouldBindJSON(&permission)
-	if err != nil {
+	if err := c.ShouldBindJSON(&permission); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.PermissionService().UpdatePermission(
-		c.Request.Context(),
-		&permission,
+		c.Request.Context(), &permission,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -361,7 +346,6 @@ func (h *Handler) DeletePermission(c *gin.Context) {
 			Id: permissionID,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -379,23 +363,20 @@ func (h *Handler) DeletePermission(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param upsert-scope body auth_service.UpsertScopeRequest true "UpsertScopeRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.Role} "Role data"
+// @Success 201 {object} http.Response{data=auth_service.Scope} "Role data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpsertScope(c *gin.Context) {
 	var upsertScope auth_service.UpsertScopeRequest
 
-	err := c.ShouldBindJSON(&upsertScope)
-	if err != nil {
+	if err := c.ShouldBindJSON(&upsertScope); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.PermissionService().UpsertScope(
-		c.Request.Context(),
-		&upsertScope,
+		c.Request.Context(), &upsertScope,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -418,7 +399,7 @@ func (h *Handler) UpsertScope(c *gin.Context) {
 // @Param search query string false "search"
 // @Param order_by query string false "order_by"
 // @Param order_type query string false "order_type"
-// @Success 200 {object} http.Response{data=models.CommonMessage} "GetScopesListResponseBody"
+// @Success 200 {object} http.Response{data=auth_service.GetScopesResponse} "GetScopesListResponseBody"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetScopesList(c *gin.Context) {
@@ -451,7 +432,6 @@ func (h *Handler) GetScopesList(c *gin.Context) {
 			ClientPlatformId: clientPlatformID,
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -469,23 +449,20 @@ func (h *Handler) GetScopesList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param permission-scope body auth_service.AddPermissionScopeRequest true "AddPermissionScopeRequestBody"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "PermissionScope data"
+// @Success 201 {object} http.Response{data=auth_service.PermissionScope} "PermissionScope data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddPermissionScope(c *gin.Context) {
 	var permissionScope auth_service.AddPermissionScopeRequest
 
-	err := c.ShouldBindJSON(&permissionScope)
-	if err != nil {
+	if err := c.ShouldBindJSON(&permissionScope); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.PermissionService().AddPermissionScope(
-		c.Request.Context(),
-		&permissionScope,
+		c.Request.Context(), &permissionScope,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -509,17 +486,14 @@ func (h *Handler) AddPermissionScope(c *gin.Context) {
 func (h *Handler) RemovePermissionScope(c *gin.Context) {
 	var permissionScope auth_service.PermissionScopePrimaryKey
 
-	err := c.ShouldBindJSON(&permissionScope)
-	if err != nil {
+	if err := c.ShouldBindJSON(&permissionScope); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.PermissionService().RemovePermissionScope(
-		c.Request.Context(),
-		&permissionScope,
+		c.Request.Context(), &permissionScope,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -537,7 +511,7 @@ func (h *Handler) RemovePermissionScope(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param role-permission body auth_service.AddRolePermissionRequest true "AddRolePermissionRequestBody"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "RolePermission data"
+// @Success 201 {object} http.Response{data=auth_service.RolePermission} "RolePermission data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddRolePermission(c *gin.Context) {
@@ -546,15 +520,12 @@ func (h *Handler) AddRolePermission(c *gin.Context) {
 		resp           *auth_service.RolePermission
 	)
 
-	err := c.ShouldBindJSON(&rolePermission)
-	if err != nil {
+	if err := c.ShouldBindJSON(&rolePermission); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	//
-
-	resp, err = h.services.PermissionService().AddRolePermission(
+	resp, err := h.services.PermissionService().AddRolePermission(
 		c.Request.Context(),
 		&rolePermission,
 	)
@@ -621,17 +592,15 @@ func (h *Handler) RemoveRolePermission(c *gin.Context) {
 		resp           *auth_service.RolePermission
 	)
 
-	err := c.ShouldBindJSON(&rolePermission)
-	if err != nil {
+	if err := c.ShouldBindJSON(&rolePermission); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	resp, err = h.services.PermissionService().RemoveRolePermission(
+	resp, err := h.services.PermissionService().RemoveRolePermission(
 		c.Request.Context(),
 		&rolePermission,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

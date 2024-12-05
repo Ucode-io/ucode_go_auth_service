@@ -15,7 +15,7 @@ import (
 
 // SetUpRouter godoc
 // @description This is a api gateway
-// @termsOfService https://udevs.io
+// @termsOfService https://u-code.io
 func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.Tracer, limiter ratelimiter.RateLimiterI) (r *gin.Engine) {
 	r = gin.New()
 
@@ -43,7 +43,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 	v2.Use(h.AuthMiddleware())
 	{
-
 		// register
 		v2.POST("/register", h.V2Register)
 
@@ -57,7 +56,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.PUT("/expire-sessions", h.ExpireSessions)
 
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
-		v2.POST("/multi-company/login", h.V2MultiCompanyLogin) // @TODO
+		v2.POST("/multi-company/login", h.V2MultiCompanyLogin)
 
 		//connection
 		v2.POST("/connection", h.V2CreateConnection)
@@ -177,5 +176,3 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-//

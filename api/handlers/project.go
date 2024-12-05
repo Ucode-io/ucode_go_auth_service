@@ -20,27 +20,24 @@ import (
 // @Produce json
 // @Param user_id query string false "user_id"
 // @Param project body company_service.CreateProjectRequest true "CreateProjectRequestBody"
-// @Success 201 {object} http.Response{data=company_service.Project} "Project data"
+// @Success 201 {object} http.Response{data=company_service.CreateProjectResponse} "Project data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateProject(c *gin.Context) {
-	//var project auth_service.CreateProjectRequest
 	var (
 		project company_service.CreateProjectRequest
 		resp    *company_service.CreateProjectResponse
 	)
 
-	err := c.ShouldBindJSON(&project)
-	if err != nil {
+	if err := c.ShouldBindJSON(&project); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	resp, err = h.services.ProjectServiceClient().Create(
+	resp, err := h.services.ProjectServiceClient().Create(
 		c.Request.Context(),
 		&project,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -90,13 +87,12 @@ func (h *Handler) GetProjectList(c *gin.Context) {
 	}
 
 	resp, err := h.services.ProjectServiceClient().GetList(
-		c.Request.Context(),
-		&company_service.GetProjectListRequest{
+		c.Request.Context(), &company_service.GetProjectListRequest{
 			Limit:  int32(limit),
 			Offset: int32(offset),
 			Search: c.Query("search"),
-		})
-
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -129,8 +125,8 @@ func (h *Handler) GetProjectByID(c *gin.Context) {
 		c.Request.Context(),
 		&company_service.GetProjectByIdRequest{
 			ProjectId: projectID,
-		})
-
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -154,16 +150,14 @@ func (h *Handler) GetProjectByID(c *gin.Context) {
 func (h *Handler) UpdateProject(c *gin.Context) {
 	var project company_service.Project
 
-	err := c.ShouldBindJSON(&project)
-	if err != nil {
+	if err := c.ShouldBindJSON(&project); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.ProjectServiceClient().Update(
-		c.Request.Context(),
-		&project)
-
+		c.Request.Context(), &project,
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -193,11 +187,10 @@ func (h *Handler) DeleteProject(c *gin.Context) {
 	}
 
 	resp, err := h.services.ProjectServiceClient().Delete(
-		c.Request.Context(),
-		&company_service.DeleteProjectRequest{
+		c.Request.Context(), &company_service.DeleteProjectRequest{
 			ProjectId: projectID,
-		})
-
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

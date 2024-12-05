@@ -78,7 +78,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			username = req.GetPhone()
 		}
 		if username != "" {
-			user, err = sus.strg.User().GetByUsername(context.Background(), username)
+			user, err = sus.strg.User().GetByUsername(ctx, username)
 			if err != nil {
 				sus.log.Error("!!!CreateUser-->UserGetByUsername", logger.Error(err))
 				return nil, err
@@ -94,9 +94,12 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	}
 
 	userId := user.GetId()
-	project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
-		ProjectId: req.GetProjectId(),
-	})
+
+	project, err := sus.services.ProjectServiceClient().GetById(
+		ctx, &pbCompany.GetProjectByIdRequest{
+			ProjectId: req.GetProjectId(),
+		},
+	)
 	if err != nil {
 		sus.log.Error("!!!CreateUser-->ProjectGetById", logger.Error(err))
 		return nil, err
@@ -124,7 +127,8 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		userId = user.GetId()
-		_, err = sus.strg.User().AddUserToProject(context.Background(), &pb.AddUserToProjectReq{
+
+		_, err = sus.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 			UserId:       userId,
 			CompanyId:    project.GetCompanyId(),
 			RoleId:       req.GetRoleId(),
@@ -137,7 +141,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			return nil, err
 		}
 	} else {
-		exists, err := sus.strg.User().GetUserProjectByAllFields(context.Background(), models.GetUserProjectByAllFieldsReq{
+		exists, err := sus.strg.User().GetUserProjectByAllFields(ctx, models.GetUserProjectByAllFieldsReq{
 			ClientTypeId: req.GetClientTypeId(),
 			RoleId:       req.GetRoleId(),
 			UserId:       userId,
@@ -150,7 +154,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			return nil, err
 		}
 		if !exists {
-			_, err = sus.strg.User().AddUserToProject(context.Background(), &pb.AddUserToProjectReq{
+			_, err = sus.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 				UserId:       userId,
 				CompanyId:    project.GetCompanyId(),
 				RoleId:       req.GetRoleId(),
@@ -198,7 +202,7 @@ func (sus *syncUserService) DeleteUser(ctx context.Context, req *pb.DeleteSyncUs
 		return nil, err
 	}
 
-	_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{Id: req.GetUserId()})
+	_, _ = sus.strg.User().Delete(ctx, &pb.UserPrimaryKey{Id: req.GetUserId()})
 	return &empty.Empty{}, nil
 }
 
@@ -346,14 +350,6 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 		return nil, err
 	}
 
-	// if req.GetProjectId() != "42ab0799-deff-4f8c-bf3f-64bf9665d304" {
-	// 	for _, v := range req.Users {
-	// 		_, _ = sus.strg.User().Delete(context.Background(), &pb.UserPrimaryKey{
-	// 			Id: v.GetUserId(),
-	// 		})
-	// 	}
-	// }
-
 	return &empty.Empty{}, nil
 }
 
@@ -393,7 +389,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				username = req.GetPhone()
 			}
 			if username != "" {
-				user, err = sus.strg.User().GetByUsername(context.Background(), username)
+				user, err = sus.strg.User().GetByUsername(ctx, username)
 				if err != nil {
 					sus.log.Error("!!!CreateSyncUsers--->GetUserByUsername", logger.Error(err))
 					return nil, err
@@ -402,9 +398,11 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 		}
 
 		userId := user.GetId()
-		project, err := sus.services.ProjectServiceClient().GetById(context.Background(), &pbCompany.GetProjectByIdRequest{
-			ProjectId: req.GetProjectId(),
-		})
+		project, err := sus.services.ProjectServiceClient().GetById(
+			ctx, &pbCompany.GetProjectByIdRequest{
+				ProjectId: req.GetProjectId(),
+			},
+		)
 		if err != nil {
 			sus.log.Error("!!!CreateSyncUsers--->GetProjectById", logger.Error(err))
 			return nil, err
@@ -432,7 +430,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			userId = user.GetId()
-			_, err = sus.strg.User().AddUserToProject(context.Background(), &pb.AddUserToProjectReq{
+			_, err = sus.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 				UserId:       userId,
 				CompanyId:    project.GetCompanyId(),
 				RoleId:       req.GetRoleId(),
@@ -445,7 +443,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				return nil, err
 			}
 		} else {
-			exists, err := sus.strg.User().GetUserProjectByAllFields(context.Background(), models.GetUserProjectByAllFieldsReq{
+			exists, err := sus.strg.User().GetUserProjectByAllFields(ctx, models.GetUserProjectByAllFieldsReq{
 				ClientTypeId: req.GetClientTypeId(),
 				RoleId:       req.GetRoleId(),
 				UserId:       userId,
@@ -458,7 +456,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 				return nil, err
 			}
 			if !exists {
-				_, err = sus.strg.User().AddUserToProject(context.Background(), &pb.AddUserToProjectReq{
+				_, err = sus.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 					UserId:       userId,
 					CompanyId:    project.GetCompanyId(),
 					RoleId:       req.GetRoleId(),
