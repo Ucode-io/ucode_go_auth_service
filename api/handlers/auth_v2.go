@@ -70,7 +70,7 @@ func (h *Handler) V2Logout(c *gin.Context) {
 // @Param Environment-Id header string false "Environment-Id"
 // @Param project-id query string false "project-id"
 // @Param registerBody body models.RegisterOtp true "register_body"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RegisterProvider(c *gin.Context) {
@@ -246,7 +246,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 // @Param Resource-Id header string true "Resource-Id"
 // @Param Environment-Id header string true "Environment-Id"
 // @Param verifyBody body models.Verify true "verify_body"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2VerifyOtp(c *gin.Context) {
@@ -493,7 +493,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 // @Param X-API-KEY header string false "X-API-KEY"
 // @Param project-id query string false "project-id"
 // @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
-// @Success 201 {object} http.Response{data=models.CommonMessage} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginSuperAdminRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginProvider(c *gin.Context) {
@@ -575,6 +575,6 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		Sessions:  resp.GetSessions(),
 		UserData:  resp.GetUserData(),
 	}
-
+	
 	h.handleResponse(c, status.Created, res)
 }

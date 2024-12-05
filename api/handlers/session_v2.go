@@ -30,7 +30,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param login body auth_service.V2LoginRequest true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Login(c *gin.Context) {
@@ -175,7 +175,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
 		case "user blocked":
-			h.handleResponse(c, http.BadRequest, "Пользователь заблокирован")
+			h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
 			return
 		default:
 			h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -199,22 +199,21 @@ func (h *Handler) V2Login(c *gin.Context) {
 // @Produce json
 // @Param for_env query string false "for_env"
 // @Param user body auth_service.RefreshTokenRequest true "RefreshTokenRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.V2RefreshTokenResponse} "User data"
+// @Success 200 {object} http.Response{data=models.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RefreshToken(c *gin.Context) {
 	var (
-		user pba.RefreshTokenRequest
-		resp *pba.V2LoginResponse
-		err  error
+		user    pba.RefreshTokenRequest
+		resp    *pba.V2LoginResponse
+		for_env = c.DefaultQuery("for_env", "")
+		err     error
 	)
 
 	if err = c.ShouldBindJSON(&user); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
-	for_env := c.DefaultQuery("for_env", "")
 
 	if for_env == "true" {
 		resp, err = h.services.SessionService().V2RefreshTokenForEnv(
@@ -288,7 +287,7 @@ func (h *Handler) V2RefreshTokenSuperAdmin(c *gin.Context) {
 // @Param X-API-KEY header string false "X-API-KEY"
 // @Param project-id query string false "project-id"
 // @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginWithOptionsResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginWithOption(c *gin.Context) {
@@ -357,7 +356,7 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
 		case "user blocked":
-			h.handleResponse(c, http.BadRequest, "Пользователь заблокирован")
+			h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
 			return
 		default:
 			h.handleResponse(c, http.GRPCError, err.Error())
@@ -384,7 +383,7 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body auth_service.MultiCompanyLoginRequest true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=models.MultiCompanyLoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) MultiCompanyLogin(c *gin.Context) {
@@ -474,7 +473,7 @@ func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body auth_service.V2MultiCompanyLoginReq true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=models.V2MultiCompanyOneLoginRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {

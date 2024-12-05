@@ -47,10 +47,12 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
+
 	if !util.IsValidUUID(user.ProjectId) {
 		h.handleResponse(c, http.BadRequest, "cant get project_id")
 		return
 	}
+
 	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     user.ProjectId,
@@ -466,12 +468,9 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
-	var (
-		req = auth_service.AddUserToProjectReq{}
-	)
+	var req = auth_service.AddUserToProjectReq{}
 
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		errCantParseReq := errors.New("cant parse json")
 		h.log.Error("!!!AddUserToProject -> cant parse json")
 		h.handleResponse(c, http.BadRequest, errCantParseReq.Error())
@@ -482,6 +481,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
+
 	if req.ClientTypeId == "" {
 		h.handleResponse(c, http.InvalidArgument, "client_type_id is required")
 		return
@@ -519,8 +519,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	}
 
 	user, err := h.services.UserService().V2GetUserByID(
-		c.Request.Context(),
-		&auth_service.UserPrimaryKey{
+		c.Request.Context(), &auth_service.UserPrimaryKey{
 			Id:                    req.UserId,
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ProjectId:             resource.GetProjectId(),

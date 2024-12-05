@@ -138,6 +138,28 @@ definitions:
       subdomain:
         type: string
     type: object
+  auth_service.Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  auth_service.CompanyPrimaryKey:
+    properties:
+      id:
+        type: string
+    type: object
   auth_service.ConfirmStrategies:
     enum:
     - 0
@@ -347,6 +369,30 @@ definitions:
           $ref: '#/definitions/auth_service.GetRes'
         type: array
     type: object
+  auth_service.GetPermissionByIDResponse:
+    properties:
+      client_platform_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      permission_scopes:
+        items:
+          $ref: '#/definitions/auth_service.PermissionScope'
+        type: array
+    type: object
+  auth_service.GetPermissionListResponse:
+    properties:
+      count:
+        type: integer
+      permissions:
+        items:
+          $ref: '#/definitions/auth_service.Permission'
+        type: array
+    type: object
   auth_service.GetRes:
     properties:
       app_id:
@@ -384,6 +430,22 @@ definitions:
       used_count:
         type: integer
     type: object
+  auth_service.GetRolesResponse:
+    properties:
+      roles:
+        items:
+          $ref: '#/definitions/auth_service.Role'
+        type: array
+    type: object
+  auth_service.GetScopesResponse:
+    properties:
+      count:
+        type: integer
+      scopes:
+        items:
+          $ref: '#/definitions/auth_service.Scope'
+        type: array
+    type: object
   auth_service.GetUserByLoginTypesRequest:
     properties:
       email:
@@ -413,6 +475,39 @@ definitions:
           $ref: '#/definitions/auth_service.User'
         type: array
     type: object
+  auth_service.GlobalPermission:
+    properties:
+      api_keys_button:
+        type: boolean
+      chat:
+        type: boolean
+      environment_button:
+        type: boolean
+      environments_button:
+        type: boolean
+      id:
+        type: string
+      menu_button:
+        type: boolean
+      menu_setting_button:
+        type: boolean
+      profile_settings_button:
+        type: boolean
+      project_button:
+        type: boolean
+      project_settings_button:
+        type: boolean
+      projects_button:
+        type: boolean
+      redirects_button:
+        type: boolean
+      settings_button:
+        type: boolean
+      sms_button:
+        type: boolean
+      version_button:
+        type: boolean
+    type: object
   auth_service.HasAccessRequest:
     properties:
       access_token:
@@ -426,6 +521,39 @@ definitions:
       path:
         type: string
       project_id:
+        type: string
+    type: object
+  auth_service.HasAccessResponse:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      created_at:
+        type: string
+      data:
+        type: string
+      env_id:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      ip:
+        type: string
+      login_table_slug:
+        type: string
+      project_id:
+        type: string
+      role_id:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/auth_service.TableBody'
+        type: array
+      updated_at:
+        type: string
+      user_id:
         type: string
     type: object
   auth_service.HasAccessSuperAdminReq:
@@ -511,11 +639,69 @@ definitions:
       username:
         type: string
     type: object
+  auth_service.MultiCompanyLoginResponse_Company:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/auth_service.MultiCompanyLoginResponse_Company_Project'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  auth_service.MultiCompanyLoginResponse_Company_Project:
+    properties:
+      company_id:
+        type: string
+      created_at:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
   auth_service.Object:
     properties:
       object_id:
         type: string
       table_slug:
+        type: string
+    type: object
+  auth_service.Permission:
+    properties:
+      client_platform_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  auth_service.PermissionScope:
+    properties:
+      client_platform_id:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      permission_id:
         type: string
     type: object
   auth_service.PermissionScopePrimaryKey:
@@ -598,6 +784,11 @@ definitions:
       role_id:
         type: string
     type: object
+  auth_service.RefreshTokenResponse:
+    properties:
+      token:
+        $ref: '#/definitions/auth_service.Token'
+    type: object
   auth_service.RegisterCompanyRequest:
     properties:
       googleToken:
@@ -659,6 +850,13 @@ definitions:
       project_id:
         type: string
     type: object
+  auth_service.RolePermission:
+    properties:
+      permission_id:
+        type: string
+      role_id:
+        type: string
+    type: object
   auth_service.RolePermissionPrimaryKey:
     properties:
       node_type:
@@ -667,6 +865,17 @@ definitions:
         type: string
       role_id:
         type: string
+    type: object
+  auth_service.Scope:
+    properties:
+      client_platform_id:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      requests:
+        type: integer
     type: object
   auth_service.SendMessageToEmailRequest:
     properties:
@@ -677,6 +886,41 @@ definitions:
       node_type:
         type: string
       token:
+        type: string
+    type: object
+  auth_service.Session:
+    properties:
+      client_id:
+        type: string
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      created_at:
+        type: string
+      data:
+        type: string
+      env_id:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      integration_id:
+        type: string
+      ip:
+        type: string
+      is_changed:
+        type: boolean
+      project_id:
+        type: string
+      role_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      user_id_auth:
         type: string
     type: object
   auth_service.TableBody:
@@ -1068,15 +1312,6 @@ definitions:
       updated_at:
         type: string
     type: object
-  auth_service.V2RefreshTokenResponse:
-    properties:
-      permissions:
-        items:
-          $ref: '#/definitions/auth_service.RecordPermission'
-        type: array
-      token:
-        $ref: '#/definitions/auth_service.Token'
-    type: object
   auth_service.V2RefreshTokenSuperAdminResponse:
     properties:
       token:
@@ -1164,6 +1399,11 @@ definitions:
           $ref: '#/definitions/company_service.Resource'
         type: array
       title:
+        type: string
+    type: object
+  company_service.CreateProjectResponse:
+    properties:
+      project_id:
         type: string
     type: object
   company_service.Currency:
@@ -1393,12 +1633,48 @@ definitions:
       status:
         type: string
     type: object
+  models.ClientType:
+    properties:
+      confirm_by:
+        $ref: '#/definitions/auth_service.ConfirmStrategies'
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      self_recover:
+        type: boolean
+      self_register:
+        type: boolean
+    type: object
   models.CommonMessage:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       table_slug:
+        type: string
+    type: object
+  models.Company2:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      logo:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/models.Project2'
+        type: array
+      updated_at:
         type: string
     type: object
   models.Connection:
@@ -1463,6 +1739,109 @@ definitions:
       user_id:
         type: string
     type: object
+  models.GetAllMenuPermissionsResponse:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/models.MenuPermission'
+        type: array
+    type: object
+  models.GetListWithRoleAppTablePermissionsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.RoleWithAppTablePermissions'
+      project_id:
+        type: string
+    type: object
+  models.GetRoleByIdResponse:
+    properties:
+      client_type:
+        $ref: '#/definitions/models.ClientType'
+      client_type_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/auth_service.Permission'
+        type: array
+    type: object
+  models.LoginResponse:
+    properties:
+      client_platform:
+        $ref: '#/definitions/auth_service.ClientPlatform'
+      client_type:
+        $ref: '#/definitions/models.ClientType'
+      companies:
+        items:
+          $ref: '#/definitions/auth_service.Company'
+        type: array
+      permissions:
+        items:
+          $ref: '#/definitions/auth_service.Permission'
+        type: array
+      role:
+        $ref: '#/definitions/auth_service.Role'
+      sessions:
+        items:
+          $ref: '#/definitions/auth_service.Session'
+        type: array
+      token:
+        $ref: '#/definitions/auth_service.Token'
+      user:
+        $ref: '#/definitions/auth_service.User'
+      user_found:
+        type: boolean
+    type: object
+  models.MenuPermission:
+    properties:
+      attributes:
+        additionalProperties: {}
+        type: object
+      id:
+        type: string
+      label:
+        type: string
+      permission:
+        $ref: '#/definitions/object_builder_service.MenuPermission_Permission'
+      type:
+        type: string
+    type: object
+  models.MultiCompanyLoginResponse:
+    properties:
+      client_types:
+        items:
+          $ref: '#/definitions/models.ClientType'
+        type: array
+      companies:
+        items:
+          $ref: '#/definitions/auth_service.MultiCompanyLoginResponse_Company'
+        type: array
+    type: object
+  models.Project2:
+    properties:
+      client_types:
+        additionalProperties: {}
+        type: object
+      company_id:
+        type: string
+      created_at:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      resource_environments:
+        items:
+          $ref: '#/definitions/models.ResourceEnvironmentV2MultiCompany'
+        type: array
+      updated_at:
+        type: string
+    type: object
   models.RegisterOtp:
     properties:
       data:
@@ -1475,6 +1854,179 @@ definitions:
         type: string
       user_id:
         type: string
+    type: object
+  models.ResourceEnvironmentV2MultiCompany:
+    properties:
+      access_type:
+        additionalProperties: {}
+        type: object
+      client_types:
+        type: string
+      description:
+        type: string
+      display_color:
+        type: string
+      environment_id:
+        type: string
+      id:
+        type: string
+      is_configured:
+        type: boolean
+      name:
+        type: string
+      node_type:
+        type: string
+      project_id:
+        type: string
+      resource_id:
+        type: string
+      resource_type:
+        type: integer
+      service_type:
+        type: integer
+    type: object
+  models.RoleWithAppTablePermissions:
+    properties:
+      client_platform_id:
+        type: string
+      client_type_id:
+        type: string
+      global_permission:
+        $ref: '#/definitions/auth_service.GlobalPermission'
+      grant_access:
+        type: boolean
+      guid:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      tables:
+        items:
+          $ref: '#/definitions/models.RoleWithAppTablePermissions_Table'
+        type: array
+    type: object
+  models.RoleWithAppTablePermissions_Table:
+    properties:
+      action_permissions:
+        items:
+          $ref: '#/definitions/models.RoleWithAppTablePermissions_Table_ActionPermission'
+        type: array
+      attributes:
+        additionalProperties: {}
+        type: object
+      automatic_filters:
+        $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod'
+      custom_permission:
+        $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission'
+      description:
+        type: string
+      digit_number:
+        type: integer
+      field_permissions:
+        items:
+          $ref: '#/definitions/models.RoleWithAppTablePermissions_Table_FieldPermission'
+        type: array
+      icon:
+        type: string
+      id:
+        type: string
+      is_changed:
+        type: boolean
+      label:
+        type: string
+      record_permissions:
+        $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission'
+      show_in_menu:
+        type: boolean
+      slug:
+        type: string
+      subtitle_field_slug:
+        type: string
+      table_view_permissions:
+        items:
+          $ref: '#/definitions/models.RoleWithAppTablePermissions_Table_TableViewPermission'
+        type: array
+      view_permissions:
+        items:
+          $ref: '#/definitions/models.RoleWithAppTablePermissions_Table_ViewPermission'
+        type: array
+      with_increment_id:
+        type: boolean
+    type: object
+  models.RoleWithAppTablePermissions_Table_ActionPermission:
+    properties:
+      attributes:
+        additionalProperties: {}
+        type: object
+      custom_event_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      permission:
+        type: boolean
+      table_slug:
+        type: string
+    type: object
+  models.RoleWithAppTablePermissions_Table_FieldPermission:
+    properties:
+      attributes:
+        additionalProperties: {}
+        type: object
+      edit_permission:
+        type: boolean
+      field_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
+    type: object
+  models.RoleWithAppTablePermissions_Table_TableViewPermission:
+    properties:
+      attributes:
+        additionalProperties: {}
+        type: object
+      delete:
+        type: boolean
+      edit:
+        type: boolean
+      guid:
+        type: string
+      name:
+        type: string
+      view:
+        type: boolean
+      view_id:
+        type: string
+    type: object
+  models.RoleWithAppTablePermissions_Table_ViewPermission:
+    properties:
+      attributes:
+        additionalProperties: {}
+        type: object
+      create_permission:
+        type: boolean
+      delete_permission:
+        type: boolean
+      edit_permission:
+        type: boolean
+      guid:
+        type: string
+      label:
+        type: string
+      relation_id:
+        type: string
+      table_slug:
+        type: string
+      view_permission:
+        type: boolean
     type: object
   models.SendCodeResponse:
     properties:
@@ -1497,6 +2049,144 @@ definitions:
       body:
         additionalProperties: true
         type: object
+    type: object
+  models.UpdateMenuPermissionsRequest:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/models.MenuPermission'
+        type: array
+      project_id:
+        type: string
+      role_id:
+        type: string
+    type: object
+  models.V2LoginResponse:
+    properties:
+      addational_table:
+        additionalProperties: {}
+        type: object
+      app_permissions:
+        items:
+          $ref: '#/definitions/auth_service.RecordPermission'
+        type: array
+      client_platform:
+        $ref: '#/definitions/auth_service.ClientPlatform'
+      client_type:
+        $ref: '#/definitions/models.ClientType'
+      environment_id:
+        type: string
+      global_permission:
+        $ref: '#/definitions/auth_service.GlobalPermission'
+      login_table_slug:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/auth_service.RecordPermission'
+        type: array
+      resource_id:
+        type: string
+      role:
+        $ref: '#/definitions/auth_service.Role'
+      sessions:
+        items:
+          $ref: '#/definitions/auth_service.Session'
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/auth_service.Object'
+        type: array
+      token:
+        $ref: '#/definitions/auth_service.Token'
+      user:
+        $ref: '#/definitions/auth_service.User'
+      user_data:
+        additionalProperties: {}
+        type: object
+      user_found:
+        type: boolean
+      user_id:
+        type: string
+      user_id_auth:
+        type: string
+    type: object
+  models.V2LoginSuperAdminRes:
+    properties:
+      companies:
+        items:
+          $ref: '#/definitions/auth_service.Company'
+        type: array
+      sessions:
+        items:
+          $ref: '#/definitions/auth_service.Session'
+        type: array
+      token:
+        $ref: '#/definitions/auth_service.Token'
+      user_data:
+        additionalProperties: {}
+        type: object
+      user_found:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  models.V2LoginWithOptionsResponse:
+    properties:
+      addational_table:
+        additionalProperties: {}
+        type: object
+      app_permissions:
+        items:
+          $ref: '#/definitions/auth_service.RecordPermission'
+        type: array
+      client_platform:
+        $ref: '#/definitions/auth_service.ClientPlatform'
+      client_type:
+        $ref: '#/definitions/models.ClientType'
+      companies:
+        items:
+          $ref: '#/definitions/auth_service.Company'
+        type: array
+      environment_id:
+        type: string
+      login_table_slug:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/auth_service.RecordPermission'
+        type: array
+      resource_id:
+        type: string
+      role:
+        $ref: '#/definitions/auth_service.Role'
+      sessions:
+        items:
+          $ref: '#/definitions/auth_service.Session'
+        type: array
+      tables:
+        items:
+          $ref: '#/definitions/auth_service.Object'
+        type: array
+      token:
+        $ref: '#/definitions/auth_service.Token'
+      user:
+        $ref: '#/definitions/auth_service.User'
+      user_data:
+        additionalProperties: {}
+        type: object
+      user_found:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  models.V2MultiCompanyOneLoginRes:
+    properties:
+      companies:
+        items:
+          $ref: '#/definitions/models.Company2'
+        type: array
+      user_id:
+        type: string
     type: object
   models.V2SendCodeRequest:
     properties:
@@ -1551,6 +2241,73 @@ definitions:
         type: boolean
       write:
         type: boolean
+    type: object
+  object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter:
+    properties:
+      custom_field:
+        type: string
+      guid:
+        type: string
+      not_use_in_tab:
+        type: boolean
+      object_field:
+        type: string
+      table_slug:
+        type: string
+    type: object
+  object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod:
+    properties:
+      delete:
+        items:
+          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
+        type: array
+      read:
+        items:
+          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
+        type: array
+      update:
+        items:
+          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
+        type: array
+      write:
+        items:
+          $ref: '#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter'
+        type: array
+    type: object
+  object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission:
+    properties:
+      add_field:
+        type: string
+      add_filter:
+        type: string
+      automation:
+        type: string
+      columns:
+        type: string
+      delete_all:
+        type: string
+      excel_menu:
+        type: string
+      field_filter:
+        type: string
+      fix_column:
+        type: string
+      group:
+        type: string
+      language_btn:
+        type: string
+      pdf_action:
+        type: string
+      search_button:
+        type: string
+      settings:
+        type: string
+      share_modal:
+        type: string
+      tab_group:
+        type: string
+      view_create:
+        type: string
     type: object
   object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission:
     properties:
@@ -1649,7 +2406,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/auth_service.CompanyPrimaryKey'
               type: object
         "400":
           description: Bad Request
@@ -1687,15 +2444,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: Company data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -1857,13 +2607,13 @@ paths:
       - application/json
       responses:
         "201":
-          description: User data
+          description: User access data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/auth_service.HasAccessResponse'
               type: object
         "400":
           description: Bad Request
@@ -1903,7 +2653,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: User data
+          description: Admin access data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -1949,13 +2699,13 @@ paths:
       - application/json
       responses:
         "201":
-          description: User data
+          description: Login data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -2046,7 +2796,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.GetPermissionListResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -2091,7 +2841,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.GetPermissionByIDResponse'
               type: object
         "400":
           description: Bad Request
@@ -2136,7 +2886,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.GetPermissionByIDResponse'
               type: object
         "400":
           description: Bad Request
@@ -2220,7 +2970,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.PermissionScope'
               type: object
         "400":
           description: Bad Request
@@ -2302,7 +3052,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.GetPermissionByIDResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -2403,7 +3153,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/company_service.Project'
+                  $ref: '#/definitions/company_service.CreateProjectResponse'
               type: object
         "400":
           description: Bad Request
@@ -2616,13 +3366,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: User data
+          description: Refresh token data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.User'
+                  $ref: '#/definitions/auth_service.RefreshTokenResponse'
               type: object
         "400":
           description: Bad Request
@@ -2678,7 +3428,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.GetRolesResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -2723,7 +3473,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.Role'
               type: object
         "400":
           description: Bad Request
@@ -2768,7 +3518,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.Role'
               type: object
         "400":
           description: Bad Request
@@ -2852,7 +3602,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.RolePermission'
               type: object
         "400":
           description: Bad Request
@@ -2974,13 +3724,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: ClientTypeBody
+          description: Role data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/models.GetRoleByIdResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -3045,7 +3795,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/auth_service.GetScopesResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -3091,7 +3841,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.Role'
+                  $ref: '#/definitions/auth_service.Scope'
               type: object
         "400":
           description: Bad Request
@@ -4271,7 +5021,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/models.V2LoginSuperAdminRes'
               type: object
         "400":
           description: Bad Request
@@ -4375,7 +5125,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/models.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -4788,6 +5538,15 @@ paths:
       produces:
       - application/json
       responses:
+        "200":
+          description: Connection data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CommonMessage'
+              type: object
         "400":
           description: Invalid Argument
           schema:
@@ -5403,7 +6162,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -5470,7 +6229,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.V2LoginWithOptionsResponse'
               type: object
         "400":
           description: Bad Request
@@ -5530,7 +6289,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/models.UpdateMenuPermissionsRequest'
               type: object
         "400":
           description: Bad Request
@@ -5596,7 +6355,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.GetAllMenuPermissionsResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -5644,7 +6403,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.MultiCompanyLoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -5690,7 +6449,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.V2MultiCompanyOneLoginRes'
               type: object
         "400":
           description: Bad Request
@@ -5754,7 +6513,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.CommonMessage'
               type: object
         "400":
           description: Invalid Argument
@@ -5804,7 +6563,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2RefreshTokenResponse'
+                  $ref: '#/definitions/models.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -5913,13 +6672,13 @@ paths:
       - application/json
       responses:
         "201":
-          description: User data
+          description: Register Data data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -5989,7 +6748,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.CommonMessage'
+                  $ref: '#/definitions/models.V2LoginResponse'
               type: object
         "400":
           description: Bad Request
@@ -6073,7 +6832,7 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: Environment data
           schema:
             allOf:
@@ -6320,15 +7079,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: ClientTypeBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
+        "204":
+          description: No Content
         "400":
           description: Invalid Argument
           schema:
@@ -6380,15 +7132,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: Role data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.CommonMessage'
-              type: object
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -6447,7 +7192,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.GetListWithRoleAppTablePermissionsResponse'
               type: object
         "400":
           description: Invalid Argument
@@ -6611,7 +7356,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: User data
+          description: Send Code data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -6657,7 +7402,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: User data
+          description: Send Code data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -6716,7 +7461,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: User data
+          description: Send Message data
           schema:
             allOf:
             - $ref: '#/definitions/http.Response'
@@ -7168,7 +7913,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/auth_service.User'
               type: object
         "400":
           description: Bad Request

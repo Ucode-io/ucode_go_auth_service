@@ -3,7 +3,7 @@ package handlers
 import (
 	"ucode/ucode_go_auth_service/api/http"
 
-	"ucode/ucode_go_auth_service/genproto/auth_service"
+	pba "ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/saidamir98/udevs_pkg/util"
 
@@ -19,23 +19,20 @@ import (
 // @Accept json
 // @Produce json
 // @Param company body auth_service.RegisterCompanyRequest true "RegisterCompanyRequestBody"
-// @Success 201 {object} http.Response{data=string} "Company data"
+// @Success 201 {object} http.Response{data=auth_service.CompanyPrimaryKey} "Company data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RegisterCompany(c *gin.Context) {
-	var company auth_service.RegisterCompanyRequest
+	var company pba.RegisterCompanyRequest
 
-	err := c.ShouldBindJSON(&company)
-	if err != nil {
+	if err := c.ShouldBindJSON(&company); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.CompanyService().Register(
-		c.Request.Context(),
-		&company,
+		c.Request.Context(), &company,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -53,23 +50,20 @@ func (h *Handler) RegisterCompany(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param company body auth_service.UpdateCompanyRequest true "UpdateCompanyRequestBody"
-// @Success 200 {object} http.Response{data=string} "Company data"
+// @Success 204
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateCompany(c *gin.Context) {
-	var company auth_service.UpdateCompanyRequest
+	var company pba.UpdateCompanyRequest
 
-	err := c.ShouldBindJSON(&company)
-	if err != nil {
+	if err := c.ShouldBindJSON(&company); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.CompanyService().Update(
-		c.Request.Context(),
-		&company,
+		c.Request.Context(), &company,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -99,8 +93,7 @@ func (h *Handler) RemoveCompany(c *gin.Context) {
 	}
 
 	resp, err := h.services.CompanyService().Remove(
-		c.Request.Context(),
-		&auth_service.CompanyPrimaryKey{
+		c.Request.Context(), &pba.CompanyPrimaryKey{
 			Id: companyID,
 		},
 	)

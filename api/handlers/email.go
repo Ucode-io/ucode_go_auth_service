@@ -442,5 +442,5 @@ func (h *Handler) DeleteEmailSettings(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, http.NoContent, resp)
 }

@@ -17,22 +17,20 @@ import (
 // @Accept json
 // @Produce json
 // @Param login body auth_service.LoginRequest true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=models.LoginResponse} "Login data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) Login(c *gin.Context) {
 	var login auth_service.LoginRequest
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.SessionService().Login(
-		c.Request.Context(),
-		&login,
+		c.Request.Context(), &login,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -84,23 +82,20 @@ func (h *Handler) Logout(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user body auth_service.RefreshTokenRequest true "RefreshTokenRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.User} "User data"
+// @Success 200 {object} http.Response{data=auth_service.RefreshTokenResponse} "Refresh token data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) RefreshToken(c *gin.Context) {
 	var user auth_service.RefreshTokenRequest
 
-	err := c.ShouldBindJSON(&user)
-	if err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.SessionService().RefreshToken(
-		c.Request.Context(),
-		&user,
+		c.Request.Context(), &user,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -118,23 +113,20 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param has-access body auth_service.HasAccessRequest true "HasAccessRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.User} "User data"
+// @Success 201 {object} http.Response{data=auth_service.HasAccessResponse} "User access data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) HasAccess(c *gin.Context) {
 	var login auth_service.HasAccessRequest
 
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.SessionService().HasAccess(
-		c.Request.Context(),
-		&login,
+		c.Request.Context(), &login,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -152,23 +144,20 @@ func (h *Handler) HasAccess(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param has-access body auth_service.HasAccessSuperAdminReq true "HasAccessRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.HasAccessSuperAdminRes} "User data"
+// @Success 201 {object} http.Response{data=auth_service.HasAccessSuperAdminRes} "Admin access data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) HasAccessSuperAdmin(c *gin.Context) {
 	var login auth_service.HasAccessSuperAdminReq
 
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.SessionService().HasAccessSuperAdmin(
-		c.Request.Context(),
-		&login,
+		c.Request.Context(), &login,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

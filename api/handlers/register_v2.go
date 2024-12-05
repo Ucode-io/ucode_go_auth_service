@@ -27,7 +27,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param login body models.V2SendCodeRequest true "SendCode"
-// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "User data"
+// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "Send Code data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2SendCodeApp(c *gin.Context) {
@@ -111,7 +111,7 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string false "Environment-Id"
 // @Param login body models.V2SendCodeRequest true "SendCode"
-// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "User data"
+// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "Send Code data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2SendCode(c *gin.Context) {
@@ -273,7 +273,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 // @Param Environment-Id header string false "Environment-Id"
 // @Param project-id query string false "project-id"
 // @Param registerBody body models.RegisterOtp true "register_body"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginResponse} "Register Data data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Register(c *gin.Context) {
@@ -396,7 +396,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 // @Param Resource-Id header string false "Resource-Id"
 // @Param Environment-Id header string false "Environment-Id"
 // @Param login body models.V2SendCodeRequest true "SendCode"
-// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "User data"
+// @Success 201 {object} http.Response{data=models.V2SendCodeResponse} "Send Message data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) SendMessage(c *gin.Context) {

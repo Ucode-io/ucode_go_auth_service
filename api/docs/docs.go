@@ -125,23 +125,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Company data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -217,7 +202,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/auth_service.CompanyPrimaryKey"
                                         }
                                     }
                                 }
@@ -507,7 +492,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User data",
+                        "description": "User access data",
                         "schema": {
                             "allOf": [
                                 {
@@ -517,7 +502,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/auth_service.HasAccessResponse"
                                         }
                                     }
                                 }
@@ -590,7 +575,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User data",
+                        "description": "Admin access data",
                         "schema": {
                             "allOf": [
                                 {
@@ -673,7 +658,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User data",
+                        "description": "Login data",
                         "schema": {
                             "allOf": [
                                 {
@@ -683,7 +668,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.LoginResponse"
                                         }
                                     }
                                 }
@@ -843,7 +828,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.GetPermissionListResponse"
                                         }
                                     }
                                 }
@@ -924,7 +909,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.GetPermissionByIDResponse"
                                         }
                                     }
                                 }
@@ -1005,7 +990,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.GetPermissionByIDResponse"
                                         }
                                     }
                                 }
@@ -1088,7 +1073,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.PermissionScope"
                                         }
                                     }
                                 }
@@ -1235,7 +1220,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.GetPermissionByIDResponse"
                                         }
                                     }
                                 }
@@ -1559,7 +1544,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/company_service.Project"
+                                            "$ref": "#/definitions/company_service.CreateProjectResponse"
                                         }
                                     }
                                 }
@@ -1860,7 +1845,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User data",
+                        "description": "Refresh token data",
                         "schema": {
                             "allOf": [
                                 {
@@ -1870,7 +1855,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.User"
+                                            "$ref": "#/definitions/auth_service.RefreshTokenResponse"
                                         }
                                     }
                                 }
@@ -1968,7 +1953,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.GetRolesResponse"
                                         }
                                     }
                                 }
@@ -2049,7 +2034,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.Role"
                                         }
                                     }
                                 }
@@ -2130,7 +2115,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.Role"
                                         }
                                     }
                                 }
@@ -2213,7 +2198,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.RolePermission"
                                         }
                                     }
                                 }
@@ -2433,7 +2418,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ClientTypeBody",
+                        "description": "Role data",
                         "schema": {
                             "allOf": [
                                 {
@@ -2443,7 +2428,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/models.GetRoleByIdResponse"
                                         }
                                     }
                                 }
@@ -2618,7 +2603,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/auth_service.GetScopesResponse"
                                         }
                                     }
                                 }
@@ -2701,7 +2686,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.Role"
+                                            "$ref": "#/definitions/auth_service.Scope"
                                         }
                                     }
                                 }
@@ -4766,7 +4751,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/models.V2LoginSuperAdminRes"
                                         }
                                     }
                                 }
@@ -4944,7 +4929,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/models.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -5655,6 +5640,24 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "Connection data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CommonMessage"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "400": {
                         "description": "Invalid Argument",
                         "schema": {
@@ -6726,7 +6729,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -6827,7 +6830,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.V2LoginWithOptionsResponse"
                                         }
                                     }
                                 }
@@ -6935,7 +6938,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/models.UpdateMenuPermissionsRequest"
                                         }
                                     }
                                 }
@@ -7048,7 +7051,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.GetAllMenuPermissionsResponse"
                                         }
                                     }
                                 }
@@ -7131,7 +7134,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.MultiCompanyLoginResponse"
                                         }
                                     }
                                 }
@@ -7214,7 +7217,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.V2MultiCompanyOneLoginRes"
                                         }
                                     }
                                 }
@@ -7323,7 +7326,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.CommonMessage"
                                         }
                                     }
                                 }
@@ -7412,7 +7415,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2RefreshTokenResponse"
+                                            "$ref": "#/definitions/models.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -7592,7 +7595,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User data",
+                        "description": "Register Data data",
                         "schema": {
                             "allOf": [
                                 {
@@ -7602,7 +7605,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -7710,7 +7713,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
+                                            "$ref": "#/definitions/models.V2LoginResponse"
                                         }
                                     }
                                 }
@@ -7863,7 +7866,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Environment data",
                         "schema": {
                             "allOf": [
@@ -8287,23 +8290,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "ClientTypeBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Invalid Argument",
@@ -8395,23 +8383,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Role data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -8511,7 +8484,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.GetListWithRoleAppTablePermissionsResponse"
                                         }
                                     }
                                 }
@@ -8790,7 +8763,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User data",
+                        "description": "Send Code data",
                         "schema": {
                             "allOf": [
                                 {
@@ -8873,7 +8846,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User data",
+                        "description": "Send Code data",
                         "schema": {
                             "allOf": [
                                 {
@@ -8974,7 +8947,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "User data",
+                        "description": "Send Message data",
                         "schema": {
                             "allOf": [
                                 {
@@ -9556,7 +9529,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/auth_service.User"
                                         }
                                     }
                                 }
@@ -10104,6 +10077,40 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.Company": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.CompanyPrimaryKey": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.ConfirmStrategies": {
             "type": "integer",
             "enum": [
@@ -10423,6 +10430,43 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.GetPermissionByIDResponse": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "permission_scopes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.PermissionScope"
+                    }
+                }
+            }
+        },
+        "auth_service.GetPermissionListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Permission"
+                    }
+                }
+            }
+        },
         "auth_service.GetRes": {
             "type": "object",
             "properties": {
@@ -10479,6 +10523,31 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.GetRolesResponse": {
+            "type": "object",
+            "properties": {
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Role"
+                    }
+                }
+            }
+        },
+        "auth_service.GetScopesResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "scopes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Scope"
+                    }
+                }
+            }
+        },
         "auth_service.GetUserByLoginTypesRequest": {
             "type": "object",
             "properties": {
@@ -10524,6 +10593,56 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.GlobalPermission": {
+            "type": "object",
+            "properties": {
+                "api_keys_button": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "environment_button": {
+                    "type": "boolean"
+                },
+                "environments_button": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menu_button": {
+                    "type": "boolean"
+                },
+                "menu_setting_button": {
+                    "type": "boolean"
+                },
+                "profile_settings_button": {
+                    "type": "boolean"
+                },
+                "project_button": {
+                    "type": "boolean"
+                },
+                "project_settings_button": {
+                    "type": "boolean"
+                },
+                "projects_button": {
+                    "type": "boolean"
+                },
+                "redirects_button": {
+                    "type": "boolean"
+                },
+                "settings_button": {
+                    "type": "boolean"
+                },
+                "sms_button": {
+                    "type": "boolean"
+                },
+                "version_button": {
+                    "type": "boolean"
+                }
+            }
+        },
         "auth_service.HasAccessRequest": {
             "type": "object",
             "properties": {
@@ -10543,6 +10662,56 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.HasAccessResponse": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "env_id": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "login_table_slug": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.TableBody"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -10675,6 +10844,61 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.MultiCompanyLoginResponse_Company": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.MultiCompanyLoginResponse_Company_Project"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.MultiCompanyLoginResponse_Company_Project": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.Object": {
             "type": "object",
             "properties": {
@@ -10682,6 +10906,40 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.Permission": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.PermissionScope": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "permission_id": {
                     "type": "string"
                 }
             }
@@ -10808,6 +11066,14 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "$ref": "#/definitions/auth_service.Token"
+                }
+            }
+        },
         "auth_service.RegisterCompanyRequest": {
             "type": "object",
             "properties": {
@@ -10902,6 +11168,17 @@ const docTemplate = `{
                 }
             }
         },
+        "auth_service.RolePermission": {
+            "type": "object",
+            "properties": {
+                "permission_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.RolePermissionPrimaryKey": {
             "type": "object",
             "properties": {
@@ -10913,6 +11190,23 @@ const docTemplate = `{
                 },
                 "role_id": {
                     "type": "string"
+                }
+            }
+        },
+        "auth_service.Scope": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "requests": {
+                    "type": "integer"
                 }
             }
         },
@@ -10929,6 +11223,59 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_service.Session": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "env_id": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "integration_id": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "is_changed": {
+                    "type": "boolean"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "user_id_auth": {
                     "type": "string"
                 }
             }
@@ -11528,20 +11875,6 @@ const docTemplate = `{
                 }
             }
         },
-        "auth_service.V2RefreshTokenResponse": {
-            "type": "object",
-            "properties": {
-                "permissions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.RecordPermission"
-                    }
-                },
-                "token": {
-                    "$ref": "#/definitions/auth_service.Token"
-                }
-            }
-        },
         "auth_service.V2RefreshTokenSuperAdminResponse": {
             "type": "object",
             "properties": {
@@ -11674,6 +12007,14 @@ const docTemplate = `{
                     }
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.CreateProjectResponse": {
+            "type": "object",
+            "properties": {
+                "project_id": {
                     "type": "string"
                 }
             }
@@ -12018,14 +12359,69 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ClientType": {
+            "type": "object",
+            "properties": {
+                "confirm_by": {
+                    "$ref": "#/definitions/auth_service.ConfirmStrategies"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "self_recover": {
+                    "type": "boolean"
+                },
+                "self_register": {
+                    "type": "boolean"
+                }
+            }
+        },
         "models.CommonMessage": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Company2": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Project2"
+                    }
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -12125,6 +12521,163 @@ const docTemplate = `{
                 }
             }
         },
+        "models.GetAllMenuPermissionsResponse": {
+            "type": "object",
+            "properties": {
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuPermission"
+                    }
+                }
+            }
+        },
+        "models.GetListWithRoleAppTablePermissionsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.RoleWithAppTablePermissions"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GetRoleByIdResponse": {
+            "type": "object",
+            "properties": {
+                "client_type": {
+                    "$ref": "#/definitions/models.ClientType"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Permission"
+                    }
+                }
+            }
+        },
+        "models.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "client_platform": {
+                    "$ref": "#/definitions/auth_service.ClientPlatform"
+                },
+                "client_type": {
+                    "$ref": "#/definitions/models.ClientType"
+                },
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Company"
+                    }
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Permission"
+                    }
+                },
+                "role": {
+                    "$ref": "#/definitions/auth_service.Role"
+                },
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Session"
+                    }
+                },
+                "token": {
+                    "$ref": "#/definitions/auth_service.Token"
+                },
+                "user": {
+                    "$ref": "#/definitions/auth_service.User"
+                },
+                "user_found": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.MenuPermission": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "permission": {
+                    "$ref": "#/definitions/object_builder_service.MenuPermission_Permission"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MultiCompanyLoginResponse": {
+            "type": "object",
+            "properties": {
+                "client_types": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ClientType"
+                    }
+                },
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.MultiCompanyLoginResponse_Company"
+                    }
+                }
+            }
+        },
+        "models.Project2": {
+            "type": "object",
+            "properties": {
+                "client_types": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "company_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resource_environments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ResourceEnvironmentV2MultiCompany"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.RegisterOtp": {
             "type": "object",
             "properties": {
@@ -12142,6 +12695,266 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "models.ResourceEnvironmentV2MultiCompany": {
+            "type": "object",
+            "properties": {
+                "access_type": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "client_types": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_color": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_configured": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "node_type": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
+                "service_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.RoleWithAppTablePermissions": {
+            "type": "object",
+            "properties": {
+                "client_platform_id": {
+                    "type": "string"
+                },
+                "client_type_id": {
+                    "type": "string"
+                },
+                "global_permission": {
+                    "$ref": "#/definitions/auth_service.GlobalPermission"
+                },
+                "grant_access": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.RoleWithAppTablePermissions_Table"
+                    }
+                }
+            }
+        },
+        "models.RoleWithAppTablePermissions_Table": {
+            "type": "object",
+            "properties": {
+                "action_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.RoleWithAppTablePermissions_Table_ActionPermission"
+                    }
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "automatic_filters": {
+                    "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod"
+                },
+                "custom_permission": {
+                    "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "digit_number": {
+                    "type": "integer"
+                },
+                "field_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.RoleWithAppTablePermissions_Table_FieldPermission"
+                    }
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_changed": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "record_permissions": {
+                    "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission"
+                },
+                "show_in_menu": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "subtitle_field_slug": {
+                    "type": "string"
+                },
+                "table_view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.RoleWithAppTablePermissions_Table_TableViewPermission"
+                    }
+                },
+                "view_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.RoleWithAppTablePermissions_Table_ViewPermission"
+                    }
+                },
+                "with_increment_id": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.RoleWithAppTablePermissions_Table_ActionPermission": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "custom_event_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "boolean"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RoleWithAppTablePermissions_Table_FieldPermission": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "edit_permission": {
+                    "type": "boolean"
+                },
+                "field_id": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.RoleWithAppTablePermissions_Table_TableViewPermission": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "delete": {
+                    "type": "boolean"
+                },
+                "edit": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "view": {
+                    "type": "boolean"
+                },
+                "view_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RoleWithAppTablePermissions_Table_ViewPermission": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "create_permission": {
+                    "type": "boolean"
+                },
+                "delete_permission": {
+                    "type": "boolean"
+                },
+                "edit_permission": {
+                    "type": "boolean"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "relation_id": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                },
+                "view_permission": {
+                    "type": "boolean"
                 }
             }
         },
@@ -12176,6 +12989,213 @@ const docTemplate = `{
                 "body": {
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "models.UpdateMenuPermissionsRequest": {
+            "type": "object",
+            "properties": {
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuPermission"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.V2LoginResponse": {
+            "type": "object",
+            "properties": {
+                "addational_table": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "app_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.RecordPermission"
+                    }
+                },
+                "client_platform": {
+                    "$ref": "#/definitions/auth_service.ClientPlatform"
+                },
+                "client_type": {
+                    "$ref": "#/definitions/models.ClientType"
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "global_permission": {
+                    "$ref": "#/definitions/auth_service.GlobalPermission"
+                },
+                "login_table_slug": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.RecordPermission"
+                    }
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/auth_service.Role"
+                },
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Session"
+                    }
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Object"
+                    }
+                },
+                "token": {
+                    "$ref": "#/definitions/auth_service.Token"
+                },
+                "user": {
+                    "$ref": "#/definitions/auth_service.User"
+                },
+                "user_data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "user_found": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "user_id_auth": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.V2LoginSuperAdminRes": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Company"
+                    }
+                },
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Session"
+                    }
+                },
+                "token": {
+                    "$ref": "#/definitions/auth_service.Token"
+                },
+                "user_data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "user_found": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.V2LoginWithOptionsResponse": {
+            "type": "object",
+            "properties": {
+                "addational_table": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "app_permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.RecordPermission"
+                    }
+                },
+                "client_platform": {
+                    "$ref": "#/definitions/auth_service.ClientPlatform"
+                },
+                "client_type": {
+                    "$ref": "#/definitions/models.ClientType"
+                },
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Company"
+                    }
+                },
+                "environment_id": {
+                    "type": "string"
+                },
+                "login_table_slug": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.RecordPermission"
+                    }
+                },
+                "resource_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/auth_service.Role"
+                },
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Session"
+                    }
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Object"
+                    }
+                },
+                "token": {
+                    "$ref": "#/definitions/auth_service.Token"
+                },
+                "user": {
+                    "$ref": "#/definitions/auth_service.User"
+                },
+                "user_data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "user_found": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.V2MultiCompanyOneLoginRes": {
+            "type": "object",
+            "properties": {
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Company2"
+                    }
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -12260,6 +13280,108 @@ const docTemplate = `{
                 }
             }
         },
+        "object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter": {
+            "type": "object",
+            "properties": {
+                "custom_field": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "not_use_in_tab": {
+                    "type": "boolean"
+                },
+                "object_field": {
+                    "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilterWithMethod": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
+                    }
+                },
+                "read": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
+                    }
+                },
+                "update": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
+                    }
+                },
+                "write": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object_builder_service.RoleWithAppTablePermissions_Table_AutomaticFilter"
+                    }
+                }
+            }
+        },
+        "object_builder_service.RoleWithAppTablePermissions_Table_CustomPermission": {
+            "type": "object",
+            "properties": {
+                "add_field": {
+                    "type": "string"
+                },
+                "add_filter": {
+                    "type": "string"
+                },
+                "automation": {
+                    "type": "string"
+                },
+                "columns": {
+                    "type": "string"
+                },
+                "delete_all": {
+                    "type": "string"
+                },
+                "excel_menu": {
+                    "type": "string"
+                },
+                "field_filter": {
+                    "type": "string"
+                },
+                "fix_column": {
+                    "type": "string"
+                },
+                "group": {
+                    "type": "string"
+                },
+                "language_btn": {
+                    "type": "string"
+                },
+                "pdf_action": {
+                    "type": "string"
+                },
+                "search_button": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "string"
+                },
+                "share_modal": {
+                    "type": "string"
+                },
+                "tab_group": {
+                    "type": "string"
+                },
+                "view_create": {
+                    "type": "string"
+                }
+            }
+        },
         "object_builder_service.RoleWithAppTablePermissions_Table_RecordPermission": {
             "type": "object",
             "properties": {
@@ -12315,6 +13437,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "This is a api gateway",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
