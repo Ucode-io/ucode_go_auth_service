@@ -68,7 +68,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		user, err = s.strg.User().V2GetByUsername(ctx, req.GetUsername(), config.WithLogin)
+		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
 		if err != nil {
 			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
@@ -1277,7 +1277,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		user, err = s.strg.User().V2GetByUsername(ctx, req.GetUsername(), config.WithLogin)
+		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
 		if err != nil {
 			s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
