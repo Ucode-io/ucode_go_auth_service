@@ -909,7 +909,6 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 	}()
 
 	rowsAffected, err := s.strg.User().Update(ctx, req)
-
 	if err != nil {
 		s.log.Error("!!!V2UpdateUser--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -970,7 +969,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			}
 		}
 
-		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Update(ctx, &pbObject.CommonMessage{
+		_, err = services.GetObjectBuilderServiceByType(req.NodeType).UpdateByUserIdAuth(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),

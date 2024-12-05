@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
@@ -587,7 +588,7 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 
 	var (
 		res                         = pb.AddUserToProjectRes{}
-		status                      string
+		status, query               string
 		clientTypeId, roleId, envId pgtype.UUID
 	)
 
@@ -618,7 +619,23 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		envId.Status = pgtype.Null
 	}
 
-	query := `UPDATE "user_project" 
+	if req.Status == config.UserStatusInactive {
+		var (
+			roleIdBeforeUpdate string
+			query              = `SELECT role_id FROM "user_project" WHERE user_id = $1 AND project_id = $2 AND env_id = $3`
+		)
+
+		err := r.db.QueryRow(ctx, query, req.UserId, req.ProjectId, envId).Scan(&roleIdBeforeUpdate)
+		if err != nil {
+			return nil, err
+		}
+
+		if roleIdBeforeUpdate == req.RoleId {
+			req.Status = config.UserStatusBlocked
+		}
+	}
+
+	query = `UPDATE "user_project" 
 			  SET client_type_id = $4, role_id = $5, status = $6
 			  WHERE user_id = $1 AND project_id = $2 AND env_id = $3
 			  RETURNING user_id, company_id, project_id, client_type_id, role_id, env_id, status`

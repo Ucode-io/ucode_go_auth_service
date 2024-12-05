@@ -74,18 +74,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, req.GetProjectId())
-		if err != nil {
-			s.log.Error("!!!V2Login--->GetUserStatus", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		if config.UserStatus[userStatus] {
-			err := errors.New("user blocked")
-			s.log.Error("!!!V2Login--->UserBlocked", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-
 		hashType := user.GetHashType()
 		if config.HashTypes[hashType] == 1 {
 			match, err := security.ComparePassword(user.GetPassword(), req.Password)
@@ -105,7 +93,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
 					return
 				}
-				
+
 				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
 				if err != nil {
 					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
@@ -147,7 +135,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Error("!!!MultiCompanyLogin Phone--->GetByUsername", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-
 	case config.WithEmail:
 		if config.DefaultOtp != req.Otp {
 			_, err := s.services.SmsService().ConfirmOtp(
@@ -167,7 +154,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Error("!!!V2Login Email--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-
 	case config.WithGoogle:
 		var email string
 		if req.GetGoogleToken() != "" {
@@ -194,7 +180,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			s.log.Error("!!!V2Login Email--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-
 	}
 
 	userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, req.GetProjectId())
@@ -203,7 +188,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if config.UserStatus[userStatus] {
+	if userStatus == config.UserStatusBlocked {
 		err := errors.New("user blocked")
 		s.log.Error("!!!V2Login--->UserBlocked", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -664,7 +649,7 @@ pwd:
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if config.UserStatus[userStatus] {
+	if userStatus == config.UserStatusBlocked {
 		err := errors.New("user blocked")
 		s.log.Error("!!!V2Login--->UserBlocked", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
