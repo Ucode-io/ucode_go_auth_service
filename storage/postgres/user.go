@@ -1204,9 +1204,7 @@ func (r *userRepo) V2GetByUsername(ctx context.Context, username, strategy strin
 		"user"
 	WHERE %s = $1`, strategy)
 
-	lowercasedUsername := strings.ToLower(username)
-
-	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
+	err = r.db.QueryRow(ctx, query, username).Scan(
 		&res.Id,
 		&res.Phone,
 		&res.Email,
