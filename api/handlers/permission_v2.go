@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"strings"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -108,12 +109,9 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE ROLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &role,
-			TableSlug: "ROLE",
+			UserInfo:     cast.ToString(userId),
+			Request:      &role,
+			TableSlug:    "ROLE",
 		}
 	)
 
@@ -125,17 +123,26 @@ func (h *Handler) V2AddRole(c *gin.Context) {
 			logReq.Response = resp
 			h.log.Info("V2AddRole -> success")
 		}
-		// go h.versionHistory(c, logReq)
+		go h.versionHistory(logReq)
 	}()
 
 	resp, err = h.services.PermissionService().V2AddRole(
 		c.Request.Context(), &role,
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+		var httpErrorStr = ""
+		httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+		httpErrorStr = strings.ToLower(httpErrorStr)
 
+		switch httpErrorStr {
+		case "invalid role":
+			h.handleResponse(c, http.InvalidArgument, "Inactive role is already exist for this client_type")
+			return
+		default:
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+	}
 	h.handleResponse(c, http.Created, resp)
 }
 
@@ -409,12 +416,9 @@ func (h *Handler) V2RemoveRole(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "DELETE ROLE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   roleID,
-			TableSlug: "ROLE",
+			UserInfo:     cast.ToString(userId),
+			Request:      roleID,
+			TableSlug:    "ROLE",
 		}
 	)
 
@@ -594,12 +598,9 @@ func (h *Handler) UpdateRoleAppTablePermissions(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE PERMISSION",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &permission,
-			TableSlug: "ROLE_PERMISSION",
+			UserInfo:     cast.ToString(userId),
+			Request:      &permission,
+			TableSlug:    "ROLE_PERMISSION",
 		}
 	)
 
@@ -794,12 +795,9 @@ func (h *Handler) UpdateMenuPermissions(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE PERMISSION",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &permission,
-			TableSlug: "MENU_PERMISSION",
+			UserInfo:     cast.ToString(userId),
+			Request:      &permission,
+			TableSlug:    "MENU_PERMISSION",
 		}
 	)
 

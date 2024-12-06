@@ -997,7 +997,7 @@ func (s *userService) V2UpdateUser(ctx context.Context, req *pb.UpdateUserReques
 			}
 		}
 
-		_, err = services.GoItemService().Update(ctx, &nb.CommonMessage{
+		_, err = services.GoItemService().UpdateByUserIdAuth(ctx, &nb.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),

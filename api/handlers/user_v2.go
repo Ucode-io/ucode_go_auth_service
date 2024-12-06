@@ -70,12 +70,9 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE USER",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(user.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &user,
-			TableSlug: "USER",
+			UserInfo:     cast.ToString(userId),
+			Request:      &user,
+			TableSlug:    "USER",
 		}
 	)
 
@@ -85,6 +82,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
+
 		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
@@ -92,10 +90,8 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	user.ResourceType = int32(resource.GetResourceType())
 	user.EnvironmentId = resource.EnvironmentId
 	resp, err = h.services.UserService().V2CreateUser(
-		c.Request.Context(),
-		&user,
+		c.Request.Context(), &user,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -153,8 +149,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 	}
 
 	resp, err := h.services.UserService().V2GetUserList(
-		c.Request.Context(),
-		&auth_service.GetUserListRequest{
+		c.Request.Context(), &auth_service.GetUserListRequest{
 			Limit:                 10,
 			Offset:                int32(offset),
 			Search:                c.Query("search"),
@@ -229,8 +224,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 	}
 
 	resp, err := h.services.UserService().V2GetUserByID(
-		c.Request.Context(),
-		&auth_service.UserPrimaryKey{
+		c.Request.Context(), &auth_service.UserPrimaryKey{
 			Id:                    userID,
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ResourceType:          int32(resource.GetResourceType()),
@@ -309,12 +303,9 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE USER",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(user.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &user,
-			TableSlug: "USER",
+			UserInfo:     cast.ToString(userId),
+			Request:      &user,
+			TableSlug:    "USER",
 		}
 	)
 
@@ -330,7 +321,6 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	resp, err = h.services.UserService().V2UpdateUser(
 		c.Request.Context(), &user,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
