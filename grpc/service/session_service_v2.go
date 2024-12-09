@@ -643,16 +643,18 @@ pwd:
 		goto pwd
 	}
 
-	userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, req.Data["project_id"])
-	if err != nil {
-		s.log.Error("!!!V2Login--->GetUserStatus", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	if user.Id != "" {
+		userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, req.Data["project_id"])
+		if err != nil {
+			s.log.Error("!!!V2Login--->GetUserStatus", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 
-	if userStatus == config.UserStatusBlocked {
-		err := errors.New("user blocked")
-		s.log.Error("!!!V2Login--->UserBlocked", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		if userStatus == config.UserStatusBlocked {
+			err := errors.New("user blocked")
+			s.log.Error("!!!V2Login--->UserBlocked", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 
 	req.Data["user_id"] = userId
