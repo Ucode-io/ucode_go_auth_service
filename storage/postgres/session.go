@@ -247,12 +247,14 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
 	params := make(map[string]interface{})
 	queryInitial := `UPDATE "session" SET
         ip = :ip,
+		expires_at = :expires_at,
         is_changed = TRUE,
 		updated_at = now()`
 
 	filter := ` WHERE id = :id`
-	params["ip"] = entity.Ip
 	params["id"] = entity.Id
+	params["ip"] = entity.Ip
+	params["expires_at"] = entity.ExpiresAt
 
 	if util.IsValidUUID(entity.ProjectId) {
 		params["project_id"] = entity.ProjectId
