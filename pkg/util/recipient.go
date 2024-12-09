@@ -1,5 +1,5 @@
 package util
 
-var ValidRecipients = map[string]int8{
-	"EMAIL": 1, "PHONE": 1,
+var ValidRecipients = map[string]bool{
+	"EMAIL": true, "PHONE": true,
 }

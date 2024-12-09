@@ -2,7 +2,7 @@ package models
 
 import (
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
+	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
 
 type Sms struct {
@@ -12,19 +12,19 @@ type Sms struct {
 }
 
 type SendCodeResponse struct {
-	SmsId       string                    `json:"sms_id"`
-	GoogleAcces bool                      `json:"google_acces"`
-	Data        *pbObject.V2LoginResponse `json:"data"`
+	SmsId       string                                  `json:"sms_id"`
+	GoogleAcces bool                                    `json:"google_acces"`
+	Data        *object_builder_service.V2LoginResponse `json:"data"`
 }
 
 type Verify struct {
-	Data         *pbObject.V2LoginResponse `json:"data"`
-	Tables       []*pb.Object              `json:"tables"`
-	Provider     string                    `json:"provider"`
-	GoogleToken  string                    `json:"google_token"`
-	AppleCode    string                    `json:"apple_code"`
-	Otp          string                    `json:"otp"`
-	RegisterType string                    `json:"register_type"`
+	Data         *object_builder_service.V2LoginResponse `json:"data"`
+	Tables       []*pb.Object                            `json:"tables"`
+	Provider     string                                  `json:"provider"`
+	GoogleToken  string                                  `json:"google_token"`
+	AppleCode    string                                  `json:"apple_code"`
+	Otp          string                                  `json:"otp"`
+	RegisterType string                                  `json:"register_type"`
 }
 
 type RegisterOtp struct {

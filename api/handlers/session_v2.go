@@ -8,8 +8,8 @@ import (
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
-	"ucode/ucode_go_auth_service/genproto/auth_service"
-	obs "ucode/ucode_go_auth_service/genproto/company_service"
+	pba "ucode/ucode_go_auth_service/genproto/auth_service"
+	pb "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
 
@@ -30,13 +30,13 @@ import (
 // @Accept json
 // @Produce json
 // @Param login body auth_service.V2LoginRequest true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=string} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2Login(c *gin.Context) {
 	var (
-		login auth_service.V2LoginRequest
-		resp  *auth_service.V2LoginResponse
+		login pba.V2LoginRequest
+		resp  *pba.V2LoginResponse
 	)
 
 	if err := c.ShouldBindJSON(&login); err != nil {
@@ -113,11 +113,10 @@ func (h *Handler) V2Login(c *gin.Context) {
 	}
 
 	resourceEnvironment, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&obs.GetSingleServiceResourceReq{
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			EnvironmentId: environmentId.(string),
 			ProjectId:     login.GetProjectId(),
-			ServiceType:   obs.ServiceType_BUILDER_SERVICE,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
@@ -175,8 +174,11 @@ func (h *Handler) V2Login(c *gin.Context) {
 		case "invalid password":
 			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
+		case "user blocked":
+			h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
+			return
 		default:
-			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		}
 	}
@@ -197,22 +199,21 @@ func (h *Handler) V2Login(c *gin.Context) {
 // @Produce json
 // @Param for_env query string false "for_env"
 // @Param user body auth_service.RefreshTokenRequest true "RefreshTokenRequestBody"
-// @Success 200 {object} http.Response{data=auth_service.V2RefreshTokenResponse} "User data"
+// @Success 200 {object} http.Response{data=models.V2LoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RefreshToken(c *gin.Context) {
 	var (
-		user auth_service.RefreshTokenRequest
-		resp *auth_service.V2LoginResponse
+		user    pba.RefreshTokenRequest
+		resp    *pba.V2LoginResponse
+		for_env = c.DefaultQuery("for_env", "")
+		err     error
 	)
 
-	err := c.ShouldBindJSON(&user)
-	if err != nil {
+	if err = c.ShouldBindJSON(&user); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
-	for_env := c.DefaultQuery("for_env", "")
 
 	if for_env == "true" {
 		resp, err = h.services.SessionService().V2RefreshTokenForEnv(
@@ -250,19 +251,16 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2RefreshTokenSuperAdmin(c *gin.Context) {
-	var user auth_service.RefreshTokenRequest
+	var user pba.RefreshTokenRequest
 
-	err := c.ShouldBindJSON(&user)
-	if err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.SessionService().V2RefreshTokenSuperAdmin(
-		c.Request.Context(),
-		&user,
+		c.Request.Context(), &user,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -289,11 +287,11 @@ func (h *Handler) V2RefreshTokenSuperAdmin(c *gin.Context) {
 // @Param X-API-KEY header string false "X-API-KEY"
 // @Param project-id query string false "project-id"
 // @Param login body auth_service.V2LoginWithOptionRequest true "V2LoginRequest"
-// @Success 201 {object} http.Response{data=auth_service.V2LoginSuperAdminRes} "User data"
+// @Success 201 {object} http.Response{data=models.V2LoginWithOptionsResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2LoginWithOption(c *gin.Context) {
-	var login auth_service.V2LoginWithOptionRequest
+	var login pba.V2LoginWithOptionRequest
 
 	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -327,8 +325,7 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 	login.Data["project_id"] = projectId.(string)
 
 	resp, err := h.services.SessionService().V2LoginWithOption(
-		c.Request.Context(),
-		&auth_service.V2LoginWithOptionRequest{
+		c.Request.Context(), &pba.V2LoginWithOptionRequest{
 			Data:          login.GetData(),
 			LoginStrategy: login.GetLoginStrategy(),
 			Tables:        login.GetTables(),
@@ -358,13 +355,16 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		case "invalid password":
 			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
+		case "user blocked":
+			h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
+			return
 		default:
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
 		}
 	}
 
-	h.handleResponse(c, http.Created, &auth_service.V2LoginSuperAdminRes{
+	h.handleResponse(c, http.Created, &pba.V2LoginSuperAdminRes{
 		UserFound: resp.GetUserFound(),
 		Token:     resp.GetToken(),
 		Companies: resp.GetCompanies(),
@@ -383,42 +383,35 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body auth_service.MultiCompanyLoginRequest true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.MultiCompanyLoginResponse} "User data"
+// @Success 201 {object} http.Response{data=models.MultiCompanyLoginResponse} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) MultiCompanyLogin(c *gin.Context) {
-	var login auth_service.MultiCompanyLoginRequest
+	var login pba.MultiCompanyLoginRequest
 
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.SessionService().MultiCompanyLogin(
-		c.Request.Context(),
-		&login,
+		c.Request.Context(), &login,
 	)
-
 	if err != nil {
 		httpErrorStr := strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
 
 		if httpErrorStr == "user not found" {
-			err := errors.New("Пользователь не найдено")
-			h.handleResponse(c, http.NotFound, err.Error())
+			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
 			return
 		} else if httpErrorStr == "user has been expired" {
-			err := errors.New("срок действия пользователя истек")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
 		} else if httpErrorStr == "invalid username" {
-			err := errors.New("неверное имя пользователя")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
 			return
 		} else if httpErrorStr == "invalid password" {
-			err := errors.New("неверное пароль")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
 		}
 	}
@@ -439,37 +432,31 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
-	var login auth_service.V2MultiCompanyLoginReq
-	err := c.ShouldBindJSON(&login)
-	if err != nil {
+	var login pba.V2MultiCompanyLoginReq
+
+	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.SessionService().V2MultiCompanyLogin(
-		c.Request.Context(),
-		&login,
+		c.Request.Context(), &login,
 	)
-
 	if err != nil {
-		httpErrorStr := strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+		var httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
 
 		if httpErrorStr == "user not found" {
-			err := errors.New("Пользователь не найдено")
-			h.handleResponse(c, http.NotFound, err.Error())
+			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
 			return
 		} else if httpErrorStr == "user has been expired" {
-			err := errors.New("срок действия пользователя истек")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
 		} else if httpErrorStr == "invalid username" {
-			err := errors.New("неверное имя пользователя")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
 			return
 		} else if httpErrorStr == "invalid password" {
-			err := errors.New("неверное пароль")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
 		}
 	}
@@ -486,11 +473,11 @@ func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body auth_service.V2MultiCompanyLoginReq true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.V2MultiCompanyOneLoginRes} "User data"
+// @Success 201 {object} http.Response{data=models.V2MultiCompanyOneLoginRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
-	var login auth_service.V2MultiCompanyLoginReq
+	var login pba.V2MultiCompanyLoginReq
 
 	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -566,20 +553,16 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 		httpErrorStr = strings.ToLower(httpErrorStr)
 
 		if httpErrorStr == "user not found" {
-			err := errors.New("Пользователь не найден")
-			h.handleResponse(c, http.NotFound, err.Error())
+			h.handleResponse(c, http.NotFound, "Пользователь не найден")
 			return
 		} else if httpErrorStr == "user has been expired" {
-			err := errors.New("срок действия пользователя истек")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
 		} else if httpErrorStr == "invalid username" {
-			err := errors.New("неверное имя пользователя")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
 			return
 		} else if httpErrorStr == "invalid password" {
-			err := errors.New("неверный пароль")
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			h.handleResponse(c, http.InvalidArgument, "неверный пароль")
 			return
 		} else {
 			h.handleResponse(c, http.GRPCError, err.Error())
@@ -599,30 +582,30 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body auth_service.ForgotPasswordRequest true "ForgotPasswordRequest"
-// @Success 201 {object} http.Response{data=auth_service.ForgotPasswordResponse} "Response"
+// @Success 201 {object} http.Response{data=models.ForgotPasswordResponse} "Response"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) ForgotPassword(c *gin.Context) {
-	var (
-		request auth_service.ForgotPasswordRequest
-	)
+	var request pba.ForgotPasswordRequest
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
 	defer cancel()
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	user, err := h.services.UserService().GetUserByUsername(ctx, &auth_service.GetUserByUsernameRequest{
-		Username: request.Login,
-	})
+	user, err := h.services.UserService().GetUserByUsername(
+		ctx, &pba.GetUserByUsernameRequest{
+			Username: request.Login,
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
 	if user.GetEmail() == "" {
 		h.handleResponse(c, http.OK, models.ForgotPasswordResponse{
 			EmailFound: false,
@@ -631,11 +614,13 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 		})
 		return
 	}
+
 	code, err := util.GenerateCode(6)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
+
 	expire := time.Now().Add(time.Hour * 5).Add(time.Minute * 5)
 
 	id, err := uuid.NewRandom()
@@ -645,8 +630,7 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 	}
 
 	resp, err := h.services.EmailService().Create(
-		c.Request.Context(),
-		&auth_service.Email{
+		c.Request.Context(), &pba.Email{
 			Id:        id.String(),
 			Email:     user.GetEmail(),
 			Otp:       code,
@@ -685,34 +669,33 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
-	var (
-		request auth_service.ForgotPasswordRequest
-	)
+	var request pba.ForgotPasswordRequest
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
 	defer cancel()
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id").Error())
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id").Error())
+		h.handleResponse(c, http.BadRequest, "cant get project_id")
 		return
 	}
 
-	user, err := h.services.UserService().GetUserByUsername(ctx, &auth_service.GetUserByUsernameRequest{
-		Username: request.Login,
-	})
+	user, err := h.services.UserService().GetUserByUsername(
+		ctx, &pba.GetUserByUsernameRequest{
+			Username: request.Login,
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -726,11 +709,13 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 		})
 		return
 	}
+
 	code, err := util.GenerateCode(6)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
+
 	expire := time.Now().Add(time.Hour * 5).Add(time.Minute * 5)
 
 	id, err := uuid.NewRandom()
@@ -740,8 +725,7 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 	}
 
 	resp, err := h.services.EmailService().Create(
-		c.Request.Context(),
-		&auth_service.Email{
+		c.Request.Context(), &pba.Email{
 			Id:        id.String(),
 			Email:     user.GetEmail(),
 			Otp:       code,
@@ -754,19 +738,17 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 	}
 
 	emailSettings, err := h.services.EmailService().GetListEmailSettings(
-		c.Request.Context(),
-		&auth_service.GetListEmailSettingsRequest{
+		c.Request.Context(), &pba.GetListEmailSettingsRequest{
 			ProjectId: projectId.(string),
 		},
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 	if len(emailSettings.Items) < 1 {
-		h.handleResponse(c, http.InvalidArgument, errors.New("email settings not found"))
+		h.handleResponse(c, http.InvalidArgument, "email settings not found")
 		return
 	}
 
@@ -793,24 +775,21 @@ func (h *Handler) ForgotPasswordWithEnvironmentEmail(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body models.SetEmail true "SetEmailRequest"
-// @Success 201 {object} http.Response{data=auth_service.ForgotPasswordResponse} "Response"
+// @Success 201 {object} http.Response{data=models.ForgotPasswordResponse} "Response"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) EmailEnter(c *gin.Context) {
-	var (
-		request models.SetEmail
-	)
+	var request models.SetEmail
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
 	defer cancel()
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	res, err := h.services.SessionService().V2ResetPassword(ctx, &auth_service.V2ResetPasswordRequest{
+	res, err := h.services.SessionService().V2ResetPassword(ctx, &pba.V2ResetPasswordRequest{
 		UserId: request.UserId,
 		Email:  request.Email,
 	})
@@ -834,7 +813,7 @@ func (h *Handler) EmailEnter(c *gin.Context) {
 
 	resp, err := h.services.EmailService().Create(
 		c.Request.Context(),
-		&auth_service.Email{
+		&pba.Email{
 			Id:        id.String(),
 			Email:     res.GetEmail(),
 			Otp:       code,
@@ -869,24 +848,21 @@ func (h *Handler) EmailEnter(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param body body models.ResetPassword true "ResetPasswordRequest"
-// @Success 201 {object} http.Response{data=string} "Response"
+// @Success 201 {object} http.Response{data=auth_service.User} "Response"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2ResetPassword(c *gin.Context) {
-	var (
-		request models.ResetPassword
-	)
+	var request models.ResetPassword
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*60)
 	defer cancel()
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	res, err := h.services.SessionService().V2ResetPassword(ctx, &auth_service.V2ResetPasswordRequest{
+	res, err := h.services.SessionService().V2ResetPassword(ctx, &pba.V2ResetPasswordRequest{
 		Password: request.Password,
 		UserId:   request.UserId,
 	})
@@ -910,17 +886,14 @@ func (h *Handler) V2ResetPassword(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) ExpireSessions(c *gin.Context) {
-	var (
-		req auth_service.ExpireSessionsRequest
-	)
+	var req pba.ExpireSessionsRequest
 
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	_, err = h.services.SessionService().ExpireSessions(
+	_, err := h.services.SessionService().ExpireSessions(
 		c.Request.Context(),
 		&req,
 	)

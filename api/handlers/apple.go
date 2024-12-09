@@ -22,12 +22,11 @@ import (
 // @Accept json
 // @Produce json
 // @Param X-API-KEY header string false "X-API-KEY"
-// @Param registerBody body pb.AppleIdSettings true "register_body"
-// @Success 201 {object} status.Response{data=pb.AppleIdSettings} "User data"
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Param registerBody body auth_service.AppleIdSettings true "register_body"
+// @Success 201 {object} http.Response{data=auth_service.AppleIdSettings} "User data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) CreateAppleIdSettings(c *gin.Context) {
-
 	var body *pb.AppleIdSettings
 
 	err := c.ShouldBindJSON(&body)
@@ -43,8 +42,7 @@ func (h *Handler) CreateAppleIdSettings(c *gin.Context) {
 	}
 
 	resp, err := h.services.AppleIdService().CreateAppleIdSettings(
-		c.Request.Context(),
-		&pb.AppleIdSettings{
+		c.Request.Context(), &pb.AppleIdSettings{
 			Id:        uuid.String(),
 			ProjectId: body.ProjectId,
 			ClientId:  body.ClientId,
@@ -70,23 +68,20 @@ func (h *Handler) CreateAppleIdSettings(c *gin.Context) {
 // @Tags AppleId
 // @Accept json
 // @Produce json
-// @Param registerBody body pb.AppleIdSettings true "register_body"
-// @Success 200 {object} status.Response{data=pb.AppleIdSettings} "Apple Config data"
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Param registerBody body auth_service.AppleIdSettings true "register_body"
+// @Success 200 {object} http.Response{data=auth_service.AppleIdSettings} "Apple Config data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) UpdateAppleIdSettings(c *gin.Context) {
-
 	var body *pb.AppleIdSettings
 
-	err := c.ShouldBindJSON(&body)
-	if err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, status.BadRequest, err.Error())
 		return
 	}
 
 	resp, err := h.services.AppleIdService().UpdateAppleIdSettings(
-		c.Request.Context(),
-		&pb.AppleIdSettings{
+		c.Request.Context(), &pb.AppleIdSettings{
 			Id:        body.Id,
 			ProjectId: body.ProjectId,
 			ClientId:  body.ClientId,
@@ -113,19 +108,16 @@ func (h *Handler) UpdateAppleIdSettings(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param project_id query string true "project_id"
-// @Success 200 {object} status.Response{data=pb.GetListAppleIdSettingsResponse} "Apple Config data"
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Success 200 {object} http.Response{data=auth_service.GetListAppleIdSettingsResponse} "Apple Config data"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetAppleIdSettings(c *gin.Context) {
-
 	resp, err := h.services.AppleIdService().GetListAppleIdSettings(
-		c.Request.Context(),
-		&pb.GetListAppleIdSettingsRequest{
+		c.Request.Context(), &pb.GetListAppleIdSettingsRequest{
 			ProjectId: c.Query("project_id"),
 		},
 	)
 	if err != nil {
-		h.log.Error("---> error in get list apple settings", logger.Error(err))
 		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
@@ -143,21 +135,16 @@ func (h *Handler) GetAppleIdSettings(c *gin.Context) {
 // @Produce json
 // @Param id path string true "id"
 // @Success 204
-// @Response 400 {object} status.Response{data=string} "Bad Request"
-// @Failure 500 {object} status.Response{data=string} "Server Error"
+// @Response 400 {object} http.Response{data=string} "Bad Request"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteAppleIdSettings(c *gin.Context) {
-
-	id := c.Param("id")
-
 	resp, err := h.services.AppleIdService().DeleteAppleIdSettings(
-		c.Request.Context(),
-		&pb.AppleIdSettingsPrimaryKey{
-			Id: id,
+		c.Request.Context(), &pb.AppleIdSettingsPrimaryKey{
+			Id: c.Param("id"),
 		},
 	)
 
 	if err != nil {
-		h.log.Error("---> error in delete apple settings", logger.Error(err))
 		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}
@@ -165,23 +152,20 @@ func (h *Handler) DeleteAppleIdSettings(c *gin.Context) {
 	h.handleResponse(c, status.NoContent, resp)
 }
 
-func (h *Handler) GetAppleConfig(projectId string) (*models.AppleConfig, error) {
-
+func (h *Handler) GetAppleConfig(projectId string, ctx context.Context) (*models.AppleConfig, error) {
 	resp, err := h.services.AppleIdService().GetListAppleIdSettings(
-		context.Background(),
-		&pb.GetListAppleIdSettingsRequest{
+		ctx, &pb.GetListAppleIdSettingsRequest{
 			ProjectId: projectId,
 		},
 	)
 	if err != nil {
-		h.log.Error("---> error in apple id config ", logger.Error(err))
-
 		return nil, err
 	}
 
 	if len(resp.Items) < 1 {
 		return nil, errors.New("project hasn't apple configs")
 	}
+
 	return &models.AppleConfig{
 		TeamId:    resp.Items[0].TeamId,
 		ClientId:  resp.Items[0].ClientId,

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -34,27 +33,27 @@ import (
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2CreateUser(c *gin.Context) {
 	var (
-		// resourceEnvironment *company_service.ResourceEnvironment
 		user auth_service.CreateUserRequest
 		resp *auth_service.User
 	)
 
-	err := c.ShouldBindJSON(&user)
-	if err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
+
 	if !util.IsValidUUID(user.ProjectId) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get project_id"))
+		h.handleResponse(c, http.BadRequest, "cant get project_id")
 		return
 	}
-	resource, err := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
+
+	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     user.ProjectId,
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
@@ -71,12 +70,9 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE USER",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(user.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &user,
-			TableSlug: "USER",
+			UserInfo:     cast.ToString(userId),
+			Request:      &user,
+			TableSlug:    "USER",
 		}
 	)
 
@@ -86,6 +82,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		} else {
 			logReq.Response = resp
 		}
+
 		go func() { _ = h.versionHistory(logReq) }()
 	}()
 
@@ -93,10 +90,8 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	user.ResourceType = int32(resource.GetResourceType())
 	user.EnvironmentId = resource.EnvironmentId
 	resp, err = h.services.UserService().V2CreateUser(
-		c.Request.Context(),
-		&user,
+		c.Request.Context(), &user,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -154,8 +149,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 	}
 
 	resp, err := h.services.UserService().V2GetUserList(
-		c.Request.Context(),
-		&auth_service.GetUserListRequest{
+		c.Request.Context(), &auth_service.GetUserListRequest{
 			Limit:                 10,
 			Offset:                int32(offset),
 			Search:                c.Query("search"),
@@ -230,8 +224,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 	}
 
 	resp, err := h.services.UserService().V2GetUserByID(
-		c.Request.Context(),
-		&auth_service.UserPrimaryKey{
+		c.Request.Context(), &auth_service.UserPrimaryKey{
 			Id:                    userID,
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ResourceType:          int32(resource.GetResourceType()),
@@ -269,29 +262,32 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 		resp *auth_service.User
 	)
 
-	err := c.ShouldBindJSON(&user)
-	if err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
-
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get project-id in query param"))
+		h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
-	resource, _ := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
+
+	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     projectId.(string),
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	user.ResourceType = int32(resource.GetResourceType())
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
@@ -307,12 +303,9 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "UPDATE USER",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(user.EnvironmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &user,
-			TableSlug: "USER",
+			UserInfo:     cast.ToString(userId),
+			Request:      &user,
+			TableSlug:    "USER",
 		}
 	)
 
@@ -326,10 +319,8 @@ func (h *Handler) V2UpdateUser(c *gin.Context) {
 	}()
 
 	resp, err = h.services.UserService().V2UpdateUser(
-		c.Request.Context(),
-		&user,
+		c.Request.Context(), &user,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -385,19 +376,27 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
-	project, _ := h.services.ProjectServiceClient().GetById(context.Background(), &pb.GetProjectByIdRequest{
+	project, err := h.services.ProjectServiceClient().GetById(c.Request.Context(), &pb.GetProjectByIdRequest{
 		ProjectId: projectID,
 	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
-	resource, _ := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
+	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     projectID,
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
 
 	userId, _ := c.Get("user_id")
 	var (
@@ -459,12 +458,9 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
-	var (
-		req = auth_service.AddUserToProjectReq{}
-	)
+	var req = auth_service.AddUserToProjectReq{}
 
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		errCantParseReq := errors.New("cant parse json")
 		h.log.Error("!!!AddUserToProject -> cant parse json")
 		h.handleResponse(c, http.BadRequest, errCantParseReq.Error())
@@ -475,6 +471,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
+
 	if req.ClientTypeId == "" {
 		h.handleResponse(c, http.InvalidArgument, "client_type_id is required")
 		return
@@ -482,23 +479,29 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get project-id in query param"))
+		h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
 		return
 	}
-	resource, _ := h.services.ServiceResource().GetSingle(context.Background(), &pb.GetSingleServiceResourceReq{
+
+	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
 		ProjectId:     projectId.(string),
 	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
 	req.EnvId = environmentId.(string)
 
 	res, err := h.services.UserService().AddUserToProject(
-		c.Request.Context(),
-		&req,
+		c.Request.Context(), &req,
 	)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
@@ -506,8 +509,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	}
 
 	user, err := h.services.UserService().V2GetUserByID(
-		c.Request.Context(),
-		&auth_service.UserPrimaryKey{
+		c.Request.Context(), &auth_service.UserPrimaryKey{
 			Id:                    req.UserId,
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ProjectId:             resource.GetProjectId(),
@@ -541,17 +543,17 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	services, _ := h.GetProjectSrvc(
-		c,
-		resource.ProjectId,
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, resource.ProjectId, resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
 
 	var tableSlug = "user"
 	switch int32(resource.ResourceType.Number()) {
 	case 1:
 		clientType, _ := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: "client_type",
 				Data: &structpb.Struct{
@@ -566,7 +568,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			tableSlug = clientTypeTableSlug
 		}
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
-			context.Background(),
+			c.Request.Context(),
 			&obs.CommonMessage{
 				TableSlug: tableSlug,
 				Data:      structData,
@@ -629,22 +631,22 @@ func (h *Handler) V2GetUserByLoginType(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param reset_password body auth_service.V2UserResetPasswordRequest true "ResetPasswordRequestBody"
-// @Success 200 {object} http.Response{data=string} "User data"
+// @Success 200 {object} http.Response{data=auth_service.User} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2UserResetPassword(c *gin.Context) {
-
 	var userPassword = &auth_service.V2UserResetPasswordRequest{}
-	err := c.ShouldBindJSON(&userPassword)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&userPassword); err != nil {
 		h.handleResponse(c, http.BadRequest, err)
 		return
 	}
 
-	user, err := h.services.UserService().V2ResetPassword(context.Background(), userPassword)
+	user, err := h.services.UserService().V2ResetPassword(c.Request.Context(), userPassword)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
 	h.handleResponse(c, http.OK, user)
 }

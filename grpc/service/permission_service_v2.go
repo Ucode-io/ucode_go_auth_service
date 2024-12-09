@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -16,6 +17,7 @@ import (
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type permissionService struct {
@@ -71,6 +73,27 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 
 	switch req.ResourceType {
 	case 1:
+		if !req.Status {
+			roleGetList, err := services.GetObjectBuilderServiceByType(req.NodeType).GetList(ctx, &pbObject.CommonMessage{
+				TableSlug: "role",
+				Data: &structpb.Struct{Fields: map[string]*structpb.Value{
+					"status":         structpb.NewBoolValue(req.Status),
+					"client_type_id": structpb.NewStringValue(req.ClientTypeId),
+				}},
+				ProjectId: req.GetProjectId(),
+			})
+			if err != nil {
+				s.log.Error("!!!AddRole.ObjectBuilderService.GetList--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			roleResponse := roleGetList.Data.AsMap()["response"].([]any)
+
+			if len(roleResponse) >= 1 {
+				return nil, status.Error(codes.InvalidArgument, "invalid role")
+			}
+		}
+
 		result, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
@@ -81,11 +104,15 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		roleData, _ := helper.ConvertStructToResponse(result.Data)
-		roleDataData := cast.ToStringMap(roleData["data"])
+		roleData, err := helper.ConvertStructToResponse(result.Data)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		var roleDataData = cast.ToStringMap(roleData["data"])
+
 		_, err = services.BuilderPermissionService().CreateDefaultPermission(
-			ctx,
-			&pbObject.CreateDefaultPermissionRequest{
+			ctx, &pbObject.CreateDefaultPermissionRequest{
 				ProjectId: req.GetProjectId(),
 				RoleId:    cast.ToString(roleDataData["guid"]),
 			},
@@ -96,6 +123,27 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 		}
 
 	case 3:
+		if !req.Status {
+			roleGetList, err := services.GoObjectBuilderService().GetList2(ctx, &nobs.CommonMessage{
+				TableSlug: "role",
+				Data: &structpb.Struct{Fields: map[string]*structpb.Value{
+					"status":         structpb.NewBoolValue(req.Status),
+					"client_type_id": structpb.NewStringValue(req.ClientTypeId),
+				}},
+				ProjectId: req.GetProjectId(),
+			})
+			if err != nil {
+				s.log.Error("!!!AddRole.ObjectBuilderService.GetList--->", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			roleResponse := cast.ToSlice(roleGetList.Data.AsMap()["response"])
+			structData.Fields["status"] = structpb.NewBoolValue(false)
+			if len(roleResponse) >= 1 {
+				return nil, status.Error(codes.InvalidArgument, "invalid role")
+			}
+		}
+
 		result, err := services.GoItemService().Create(ctx, &nobs.CommonMessage{
 			TableSlug: "role",
 			Data:      structData,
@@ -105,11 +153,11 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			s.log.Error("!!!AddRole.PostgresObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-
+		fmt.Println(req)
+		fmt.Println(req.Status)
 		roleData, _ := helper.ConvertStructToResponse(result.Data)
 		_, err = services.GoObjectBuilderPermissionService().CreateDefaultPermission(
-			ctx,
-			&nobs.CreateDefaultPermissionRequest{
+			ctx, &nobs.CreateDefaultPermissionRequest{
 				ProjectId: req.GetProjectId(),
 				RoleId:    cast.ToString(roleData["guid"]),
 			},
@@ -150,9 +198,7 @@ func (s *permissionService) V2GetRoleById(ctx context.Context, req *pb.V2RolePri
 		}
 	}()
 
-	var (
-		result *pbObject.CommonMessage
-	)
+	var result *pbObject.CommonMessage
 
 	structData, err := helper.ConvertRequestToSturct(req)
 	if err != nil {

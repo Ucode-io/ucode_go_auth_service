@@ -8,25 +8,26 @@ import (
 )
 
 const (
+	// Default Configs
 	DatabaseQueryTimeLayout   string        = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
 	DatabaseTimeLayout        string        = time.RFC3339
 	AccessTokenExpiresInTime  time.Duration = 1 * 60 * 24 * time.Minute
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
-
-	// AccessTokenExpiresInTime  time.Duration = 1 * time.Minute
-	// RefreshTokenExpiresInTime time.Duration = 3 * time.Minute
 
 	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	AdminClientName       string = "ADMIN"
 	OpenFaaSPlatformID    string = "7d4a4c38-dd84-4902-b744-0488b80a4c04"
 
-	DefaultOtp           string = "208071"
+	DefaultOtp string = "208071"
+
+	// Service Configs
 	LOW_NODE_TYPE        string = "LOW"
 	HIGH_NODE_TYPE       string = "HIGH"
 	ENTER_PRICE_TYPE     string = "ENTER_PRICE"
 	ObjectBuilderService string = "BUILDER_SERVICE"
 
+	// Login Strategy
 	WithGoogle string = "google"
 	Default    string = "default"
 	WithPhone  string = "phone"
@@ -39,8 +40,13 @@ const (
 	NativeName   string = "English"
 	ShortName    string = "en"
 
+	// Errors
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
+
+	UserStatusBlocked  string = "BLOCKED"
+	UserStatusInactive string = "INACTIVE"
+	UserStatusActive   string = "ACTIVE"
 )
 
 var (

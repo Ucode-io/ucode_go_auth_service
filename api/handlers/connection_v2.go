@@ -139,8 +139,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 		resp       *obs.CommonMessage
 	)
 
-	err := c.ShouldBindJSON(&connection)
-	if err != nil {
+	if err := c.ShouldBindJSON(&connection); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -153,13 +152,12 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
 	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
+		c.Request.Context(), &pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
@@ -178,11 +176,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 
 	connection.ProjectId = resource.ResourceEnvironmentId
 
-	services, err := h.GetProjectSrvc(
-		c,
-		projectId,
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, projectId, resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -192,8 +186,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 	switch resource.ResourceType {
 	case 1:
 		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Update(
-			c.Request.Context(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: "connections",
 				ProjectId: connection.ProjectId,
 				Data:      structData,
@@ -201,15 +194,13 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 		)
 	case 3:
 		resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).Update(
-			c.Request.Context(),
-			&obs.CommonMessage{
+			c.Request.Context(), &obs.CommonMessage{
 				TableSlug: "connections",
 				ProjectId: connection.ProjectId,
 				Data:      structData,
 			},
 		)
 	}
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -233,6 +224,7 @@ func (h *Handler) V2UpdateConnection(c *gin.Context) {
 // @Param project-id query string false "project-id"
 // @Param user-id query string true "user-id"
 // @Param client_type_id query string true "client_type_id"
+// @Success 200 {object} http.Response{data=models.CommonMessage} "Connection data"
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetConnectionList(c *gin.Context) {
@@ -247,19 +239,21 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+
 	projectId := c.Query("project-id")
 	if !util.IsValidUUID(projectId) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
+
 	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
+		c.Request.Context(), &pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
@@ -271,11 +265,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	}
 
 	// this is get list connection list from object builder
-	services, err := h.GetProjectSrvc(
-		c,
-		projectId,
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, projectId, resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -433,7 +423,7 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
@@ -450,19 +440,13 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"id": c.Param("connection_id"),
-	})
+	structData, err := helper.ConvertMapToStruct(map[string]interface{}{"id": c.Param("connection_id")})
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c,
-		projectId,
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, projectId, resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -519,10 +503,9 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2DeleteConnection(c *gin.Context) {
-	connectionId := c.Param("connection_id")
 	var (
-		// resourceEnvironment *cps.ResourceEnvironment
-		err error
+		connectionId = c.Param("connection_id")
+		err          error
 	)
 
 	if !util.IsValidUUID(connectionId) {
@@ -538,13 +521,12 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
 	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
+		c.Request.Context(), &pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
@@ -555,19 +537,13 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{
-		"id": connectionId,
-	})
+	structData, err := helper.ConvertMapToStruct(map[string]interface{}{"id": connectionId})
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
 
-	services, err := h.GetProjectSrvc(
-		c,
-		projectId,
-		resource.NodeType,
-	)
+	services, err := h.GetProjectSrvc(c, projectId, resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -650,13 +626,12 @@ func (h *Handler) GetConnectionOptions(c *gin.Context) {
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		h.handleResponse(c, http.BadRequest, "cant get environment_id")
 		return
 	}
 
 	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
+		c.Request.Context(), &pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     projectId,
 			EnvironmentId: environmentId.(string),
 			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
