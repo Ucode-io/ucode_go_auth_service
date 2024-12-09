@@ -283,6 +283,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ResourceType:          int32(resource.ResourceType),
 			NodeType:              resource.NodeType,
+			Status:                cast.ToBool(c.DefaultQuery("status", "true")),
 		},
 	)
 	if err != nil {
