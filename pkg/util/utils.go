@@ -15,7 +15,7 @@ func IfElse(condition bool, a interface{}, b interface{}) interface{} {
 
 func ValidStrongPassword(password string) error {
 	if len(password) < 6 {
-		return errors.New("password must be at least 8 characters long")
+		return errors.New("password must be at least 6 characters long")
 	}
 
 	if !regexp.MustCompile(`[A-Z]`).MatchString(password) {
