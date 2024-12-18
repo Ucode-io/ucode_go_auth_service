@@ -1250,6 +1250,9 @@ func (r *userRepo) GetUserStatus(ctx context.Context, userId, projectId string) 
 
 	err = r.db.QueryRow(ctx, query, userId, projectId).Scan(&status)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return config.UserStatusActive, nil
+		}
 		return "", err
 	}
 
