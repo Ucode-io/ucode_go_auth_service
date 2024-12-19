@@ -165,3 +165,49 @@ func (h *Handler) HasAccessSuperAdmin(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, resp)
 }
+
+func (h *Handler) GetSessionList(c *gin.Context) {
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	resp, err := h.services.SessionService().GetList(
+		c.Request.Context(),
+		&auth_service.GetSessionListRequest{
+			Limit:        int32(limit),
+			Offset:       int32(offset),
+			Search:       c.Query("search"),
+			UserId:       c.Query("user_id"),
+			ClientTypeId: c.Query("client_type_id"),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+func (h *Handler) DeleteSession(c *gin.Context) {
+	resp, err := h.services.SessionService().Delete(
+		c.Request.Context(),
+		&auth_service.SessionPrimaryKey{
+			Id: c.Param("id"),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -153,8 +152,6 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			s.log.Error("!!!AddRole.PostgresObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		fmt.Println(req)
-		fmt.Println(req.Status)
 		roleData, _ := helper.ConvertStructToResponse(result.Data)
 		_, err = services.GoObjectBuilderPermissionService().CreateDefaultPermission(
 			ctx, &nobs.CreateDefaultPermissionRequest{
