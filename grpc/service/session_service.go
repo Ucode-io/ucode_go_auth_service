@@ -277,3 +277,47 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 
 	return res, nil
 }
+
+func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAccessSuperAdminReq) (*pb.HasAccessSuperAdminRes, error) {
+	s.log.Info("---HasAccessSuperAdmin--->", logger.Any("req", req))
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!HasAccess token parse--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!HasAccess session--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserIdAuth})
+	if err != nil {
+		s.log.Error("!!!HasAccess user--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	var authTables []*pb.TableBody
+	for _, table := range tokenInfo.Tables {
+		authTable := &pb.TableBody{
+			TableSlug: table.TableSlug,
+			ObjectId:  table.ObjectID,
+		}
+		authTables = append(authTables, authTable)
+	}
+	return &pb.HasAccessSuperAdminRes{
+		Id:           session.Id,
+		ProjectId:    session.ProjectId,
+		UserId:       session.UserId,
+		Ip:           session.Ip,
+		Data:         session.Data,
+		ExpiresAt:    session.ExpiresAt,
+		CreatedAt:    session.CreatedAt,
+		UpdatedAt:    session.UpdatedAt,
+		Tables:       authTables,
+		EnvId:        session.EnvId,
+		ClientTypeId: session.ClientTypeId,
+		RoleId:       session.RoleId,
+	}, nil
+}
