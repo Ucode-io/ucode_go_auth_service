@@ -643,7 +643,7 @@ pwd:
 		goto pwd
 	}
 
-	if user.Id != "" {
+	if user.GetId() != "" {
 		userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, req.Data["project_id"])
 		if err != nil {
 			s.log.Error("!!!V2Login--->GetUserStatus", logger.Error(err))
