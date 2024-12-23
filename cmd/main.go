@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"net"
 
 	"ucode/ucode_go_auth_service/api"
@@ -39,10 +37,6 @@ func main() {
 	default:
 		loggerLevel = logger.LevelInfo
 		gin.SetMode(gin.ReleaseMode)
-	}
-
-	if bytes, err := json.MarshalIndent(baseCfg, "", " "); err == nil {
-		fmt.Println("--config--", string(bytes))
 	}
 
 	jaegerCfg := &jaeger_config.Configuration{
@@ -100,9 +94,6 @@ func main() {
 
 	// connection with shared services
 	uConf := config.Load()
-	if bytes, err := json.MarshalIndent(uConf, "", " "); err == nil {
-		fmt.Println("--uconf config--", string(bytes))
-	}
 	grpcSvcs, err := client.NewSharedGrpcClients(ctx, uConf)
 	if err != nil {
 		log.Error("Error adding grpc client with base config. NewGrpcClients", logger.Error(err))

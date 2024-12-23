@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
+	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -153,16 +154,30 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	return res, nil
 }
 
-func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*emptypb.Empty, error) {
-	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+func (s *sessionService) GetList(ctx context.Context, req *pb.GetSessionListRequest) (*pb.GetSessionListResponse, error) {
+	s.log.Info("!!!SessionGetList--->", logger.Any("req", req))
+
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session.SessionGetList", req)
+	defer dbSpan.Finish()
+
+	resp, err := s.strg.Session().GetList(ctx, req)
 	if err != nil {
-		s.log.Error("!!!Logout--->", logger.Error(err))
+		s.log.Error("!!!GetList--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err = s.strg.Session().Delete(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	return resp, nil
+}
+
+func (s *sessionService) Delete(ctx context.Context, req *pb.SessionPrimaryKey) (*emptypb.Empty, error) {
+	s.log.Info("!!!SessionDelete--->", logger.Any("req", req))
+
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session.Delete", req)
+	defer dbSpan.Finish()
+
+	_, err := s.strg.Session().Delete(ctx, req)
 	if err != nil {
-		s.log.Error("!!!Logout--->", logger.Error(err))
+		s.log.Error("!!!Delete--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -261,50 +276,6 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 	}
 
 	return res, nil
-}
-
-func (s *sessionService) HasAccess(ctx context.Context, req *pb.HasAccessRequest) (*pb.HasAccessResponse, error) {
-
-	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
-	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	_, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.UserId})
-	if err != nil {
-		s.log.Error("!!!HasAccess--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	var authTables []*pb.TableBody
-	for _, table := range tokenInfo.Tables {
-		authTable := &pb.TableBody{
-			TableSlug: table.TableSlug,
-			ObjectId:  table.ObjectID,
-		}
-		authTables = append(authTables, authTable)
-	}
-	return &pb.HasAccessResponse{
-		Id:               session.Id,
-		ProjectId:        session.ProjectId,
-		ClientPlatformId: session.ClientPlatformId,
-		ClientTypeId:     session.ClientTypeId,
-		UserId:           session.UserId,
-		RoleId:           session.RoleId,
-		Ip:               session.Ip,
-		Data:             session.Data,
-		ExpiresAt:        session.ExpiresAt,
-		CreatedAt:        session.CreatedAt,
-		UpdatedAt:        session.UpdatedAt,
-		Tables:           authTables,
-	}, nil
 }
 
 func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAccessSuperAdminReq) (*pb.HasAccessSuperAdminRes, error) {

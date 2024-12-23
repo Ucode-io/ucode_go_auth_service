@@ -1077,19 +1077,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	return input.LoginData, nil
 }
 
-func (s *sessionService) UpdateSessionsByRoleId(ctx context.Context, input *pb.UpdateSessionByRoleIdRequest) (*emptypb.Empty, error) {
-	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.UpdateSessionsByRoleId", input)
-	defer dbSpan.Finish()
-
-	_, err := s.strg.Session().UpdateByRoleId(ctx, input)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	return &emptypb.Empty{}, nil
-}
-
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
 	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
 

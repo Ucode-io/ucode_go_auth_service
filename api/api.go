@@ -112,6 +112,13 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 			apiKeys.GET("/:project-id/tokens", h.ListClientTokens)
 		}
 
+		//session
+		session := v2.Group("/session")
+		{
+			session.GET("", h.GetSessionList)
+			session.DELETE("/:id", h.DeleteSession)
+		}
+
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
 

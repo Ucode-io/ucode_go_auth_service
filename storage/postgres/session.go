@@ -152,18 +152,21 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 	return res, nil
 }
 
-func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionListRequest) (res *pb.GetSessionListResponse, err error) {
+func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionListRequest) (*pb.GetSessionListResponse, error) {
+	// Start tracing span
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetList")
 	defer dbSpan.Finish()
 
-	// @TODO refactor
-	res = &pb.GetSessionListResponse{}
-	params := make(map[string]interface{})
-	var arr []interface{}
-	query := `SELECT
+	var (
+		res   = &pb.GetSessionListResponse{}
+		args  []interface{}
+		argID = 1
+	)
+
+	// Base query components
+	baseQuery := `SELECT
 		id,
 		project_id,
-		client_platform_id,
 		client_type_id,
 		user_id,
 		role_id,
@@ -173,67 +176,80 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
 		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
 		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
-	FROM
-		"session"`
+	FROM "session"`
+
 	filter := " WHERE 1=1"
-	order := " ORDER BY created_at"
-	arrangement := " DESC"
-	offset := " OFFSET 0"
-	limit := " LIMIT 10"
 
+	// Filtering conditions
 	if len(queryParam.Search) > 0 {
-		params["search"] = queryParam.Search
-		filter += " AND ((ip) ILIKE ('%' || :search || '%'))"
+		filter += " AND ip ILIKE $" + strconv.Itoa(argID)
+		args = append(args, "%"+queryParam.Search+"%")
+		argID++
 	}
 
-	if queryParam.Offset > 0 {
-		params["offset"] = queryParam.Offset
-		offset = " OFFSET :offset"
+	if len(queryParam.UserId) > 0 {
+		filter += " AND user_id = $" + strconv.Itoa(argID)
+		args = append(args, queryParam.UserId)
+		argID++
 	}
 
-	if queryParam.Limit > 0 {
-		params["limit"] = queryParam.Limit
-		limit = " LIMIT :limit"
+	if len(queryParam.ClientTypeId) > 0 {
+		filter += " AND client_type_id = $" + strconv.Itoa(argID)
+		args = append(args, queryParam.ClientTypeId)
+		argID++
 	}
 
-	cQ := `SELECT count(1) FROM "session"` + filter
-	cQ, arr = helper.ReplaceQueryParams(cQ, params)
-	err = r.db.QueryRow(ctx, cQ, arr...).Scan(
-		&res.Count,
-	)
+	// Count query
+	countQuery := `SELECT count(1) FROM "session" ` + filter
+	err := r.db.QueryRow(ctx, countQuery, args...).Scan(&res.Count)
 	if err != nil {
 		return res, err
 	}
 
-	q := query + filter + order + arrangement + offset + limit
-	q, arr = helper.ReplaceQueryParams(q, params)
-	rows, err := r.db.Query(ctx, q, arr...)
+	// Pagination and ordering
+	order := " ORDER BY created_at DESC"
+	offset := " OFFSET 0"
+	limit := " LIMIT 10"
+
+	if queryParam.Offset > 0 {
+		offset = " OFFSET $" + strconv.Itoa(argID)
+		args = append(args, queryParam.Offset)
+		argID++
+	}
+
+	if queryParam.Limit > 0 {
+		limit = " LIMIT $" + strconv.Itoa(argID)
+		args = append(args, queryParam.Limit)
+		argID++
+	}
+
+	// Final query
+	finalQuery := baseQuery + filter + order + offset + limit
+	rows, err := r.db.Query(ctx, finalQuery, args...)
 	if err != nil {
 		return res, err
 	}
 	defer rows.Close()
 
+	// Process rows
 	for rows.Next() {
 		obj := &pb.Session{}
 		err = rows.Scan(
 			&obj.Id,
 			&obj.ProjectId,
-			&obj.ClientPlatformId,
 			&obj.ClientTypeId,
 			&obj.UserId,
 			&obj.RoleId,
 			&obj.Ip,
 			&obj.Data,
+			&obj.IsChanged,
 			&obj.ExpiresAt,
 			&obj.CreatedAt,
 			&obj.UpdatedAt,
-			&obj.IsChanged,
 		)
-
 		if err != nil {
 			return res, err
 		}
-
 		res.Sessions = append(res.Sessions, obj)
 	}
 
@@ -326,29 +342,12 @@ func (r *sessionRepo) DeleteExpiredUserSessions(ctx context.Context, userID stri
 	return rowsAffected, err
 }
 
-func (r *sessionRepo) DeleteExpiredIntegrationSessions(ctx context.Context, integrationId string) (rowsAffected int64, err error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.DeleteExpiredIntegrationSessions")
-	defer dbSpan.Finish()
-
-	query := `DELETE FROM "session" WHERE integration_id = $1 AND expires_at < $2`
-
-	result, err := r.db.Exec(ctx, query, integrationId, time.Now().Format("2006-01-02 15:04:05"))
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected = result.RowsAffected()
-
-	return rowsAffected, err
-}
-
 func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetSessionListByUserID")
 	defer dbSpan.Finish()
 
 	res = &pb.GetSessionListResponse{}
 
-	//coalesce(client_platform_id::text, ''),
 	query := `SELECT
 		id,
 		coalesce(project_id::text, ''),
@@ -396,81 +395,6 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 	}
 
 	return res, nil
-}
-func (r *sessionRepo) GetSessionListByIntegrationID(ctx context.Context, integrationId string) (res *pb.GetSessionListResponse, err error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetSessionListByIntegrationID")
-	defer dbSpan.Finish()
-
-	res = &pb.GetSessionListResponse{}
-
-	query := `SELECT
-		id,
-		project_id,
-		client_platform_id,
-		client_type_id,
-		integration_id,
-		role_id,
-		TEXT(ip) AS ip,
-		data,
-		is_changed,
-		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
-		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
-	FROM
-		"session"
-	WHERE integration_id = $1`
-
-	rows, err := r.db.Query(ctx, query, integrationId)
-	if err != nil {
-		return res, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		obj := &pb.Session{}
-		err = rows.Scan(
-			&obj.Id,
-			&obj.ProjectId,
-			&obj.ClientPlatformId,
-			&obj.ClientTypeId,
-			&obj.IntegrationId,
-			&obj.RoleId,
-			&obj.Ip,
-			&obj.Data,
-			&obj.IsChanged,
-			&obj.ExpiresAt,
-			&obj.CreatedAt,
-			&obj.UpdatedAt,
-		)
-
-		if err != nil {
-			return res, err
-		}
-
-		res.Sessions = append(res.Sessions, obj)
-	}
-
-	return res, nil
-}
-
-func (r *sessionRepo) UpdateByRoleId(ctx context.Context, entity *pb.UpdateSessionByRoleIdRequest) (rowsAffected int64, err error) {
-	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.UpdateByRoleId")
-	defer dbSpan.Finish()
-
-	// @TODO remove if not used
-	query := `UPDATE "session" SET
-		is_changed = $2
-	WHERE
-		role_id = $1`
-
-	result, err := r.db.Exec(ctx, query, entity.RoleId, entity.IsChanged)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected = result.RowsAffected()
-
-	return rowsAffected, err
 }
 
 func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error) {
