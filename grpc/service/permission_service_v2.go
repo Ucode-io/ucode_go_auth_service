@@ -247,14 +247,27 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 		}
 	}()
 
-	var result *pbObject.CommonMessage
+	var (
+		result     *pbObject.CommonMessage
+		structData *structpb.Struct
+		err        error
+	)
 
-	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"client_type_id": req.GetClientTypeId(),
-	})
-	if err != nil {
-		s.log.Error("!!!GetRolesList--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if req.FromPermission {
+		structData, err = helper.ConvertRequestToSturct(map[string]any{"client_type_id": req.GetClientTypeId()})
+		if err != nil {
+			s.log.Error("!!!GetRolesList--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	} else {
+		structData, err = helper.ConvertRequestToSturct(map[string]any{
+			"status":         req.GetStatus(),
+			"client_type_id": req.GetClientTypeId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRolesList--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
