@@ -1459,9 +1459,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				return nil, status.Error(codes.NotFound, errGetProjects.Error())
 			}
 
-			asdfasdf, _ := json.Marshal(projectInfo)
-			fmt.Println("project indo", string(asdfasdf))
-
 			resProject := &pb.Project2{
 				Id:        projectInfo.GetProjectId(),
 				CompanyId: projectInfo.GetCompanyId(),
