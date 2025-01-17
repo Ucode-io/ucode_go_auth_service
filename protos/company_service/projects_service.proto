@@ -217,6 +217,7 @@ message Project {
     Currency currency = 8;
     Timezone timezone = 9;
     string fare_id = 10;
+    repeated Currency currencies = 11;
 }
 
 message CreateProjectRequest {

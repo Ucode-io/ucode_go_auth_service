@@ -44,9 +44,13 @@ const (
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
 
+	// User Status
 	UserStatusBlocked  string = "BLOCKED"
 	UserStatusInactive string = "INACTIVE"
 	UserStatusActive   string = "ACTIVE"
+
+	// Commit Types
+	COMMIT_TYPE_TABLE string = "TABLE"
 )
 
 var (
