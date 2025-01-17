@@ -17,6 +17,7 @@ require (
 	github.com/opentracing-contrib/go-grpc v0.0.0-20240724223109-9dec25a38fa8
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
 	github.com/spf13/cast v1.5.0
@@ -43,7 +44,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	golang.org/x/arch v0.3.0 // indirect
@@ -88,7 +88,7 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/net v0.28.0
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/term v0.23.0
 	golang.org/x/text v0.17.0 // indirect

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"runtime"
@@ -1463,6 +1464,20 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				CompanyId: projectInfo.GetCompanyId(),
 				Name:      projectInfo.GetTitle(),
 				Domain:    projectInfo.GetK8SNamespace(),
+			}
+
+			currencienJson, err := json.Marshal(projectInfo.GetCurrencies())
+			if err != nil {
+				errGetProjects := errors.New("cant get currencies")
+				s.log.Error("!!!MultiCompanyLogin--->Currencies", logger.Error(err))
+				return nil, status.Error(codes.NotFound, errGetProjects.Error())
+			}
+
+			err = json.Unmarshal(currencienJson, &resProject.Currencies)
+			if err != nil {
+				errGetProjects := errors.New("cant get currencies")
+				s.log.Error("!!!MultiCompanyLogin--->Currencies", logger.Error(err))
+				return nil, status.Error(codes.NotFound, errGetProjects.Error())
 			}
 
 			environments, err := s.services.EnvironmentService().GetList(ctx,
