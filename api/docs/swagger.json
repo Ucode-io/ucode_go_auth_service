@@ -11626,6 +11626,9 @@
                 },
                 "resource_type": {
                     "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
                 }
             }
         },
@@ -12121,8 +12124,17 @@
                 "company_id": {
                     "type": "string"
                 },
+                "currencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Currency"
+                    }
+                },
                 "currency": {
                     "$ref": "#/definitions/company_service.Currency"
+                },
+                "fare_id": {
+                    "type": "string"
                 },
                 "k8s_namespace": {
                     "type": "string"
@@ -12138,6 +12150,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "request_per_second": {
+                    "type": "integer"
                 },
                 "resources": {
                     "type": "array",

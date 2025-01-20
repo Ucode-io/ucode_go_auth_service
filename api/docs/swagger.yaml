@@ -1156,6 +1156,8 @@ definitions:
         type: string
       resource_type:
         type: integer
+      status:
+        type: boolean
     type: object
   auth_service.V2CreateClientTypeRequest:
     properties:
@@ -1479,8 +1481,14 @@ definitions:
     properties:
       company_id:
         type: string
+      currencies:
+        items:
+          $ref: '#/definitions/company_service.Currency'
+        type: array
       currency:
         $ref: '#/definitions/company_service.Currency'
+      fare_id:
+        type: string
       k8s_namespace:
         type: string
       language:
@@ -1491,6 +1499,8 @@ definitions:
         type: string
       project_id:
         type: string
+      request_per_second:
+        type: integer
       resources:
         items:
           $ref: '#/definitions/company_service.ResourceWithoutPassword'

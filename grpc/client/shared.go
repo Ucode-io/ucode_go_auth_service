@@ -7,7 +7,6 @@ import (
 	"ucode/ucode_go_auth_service/genproto/object_builder_service"
 
 	"ucode/ucode_go_auth_service/genproto/sms_service"
-	"ucode/ucode_go_auth_service/genproto/web_page_service"
 
 	otgrpc "github.com/opentracing-contrib/go-grpc"
 	"github.com/opentracing/opentracing-go"
@@ -61,8 +60,7 @@ type sharedGrpcClients struct {
 	highBuilderPermissionService object_builder_service.PermissionServiceClient
 	highTableService             object_builder_service.TableServiceClient
 
-	webPageAppService web_page_service.AppServiceClient
-	smsService        sms_service.SmsServiceClient
+	smsService sms_service.SmsServiceClient
 }
 
 func NewSharedGrpcClients(ctx context.Context, cfg config.Config) (SharedServiceManagerI, error) {
@@ -80,11 +78,6 @@ func NewSharedGrpcClients(ctx context.Context, cfg config.Config) (SharedService
 
 	connSmsService, _ := grpc.Dial(
 		cfg.SmsServiceHost+cfg.SmsGRPCPort,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-
-	connWebPageService, _ := grpc.Dial(
-		cfg.WebPageServiceHost+cfg.WebPageServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
@@ -111,8 +104,7 @@ func NewSharedGrpcClients(ctx context.Context, cfg config.Config) (SharedService
 		highBuilderPermissionService: object_builder_service.NewPermissionServiceClient(connHighObjectBuilderService),
 		highTableService:             object_builder_service.NewTableServiceClient(connHighObjectBuilderService),
 
-		webPageAppService: web_page_service.NewAppServiceClient(connWebPageService),
-		smsService:        sms_service.NewSmsServiceClient(connSmsService),
+		smsService: sms_service.NewSmsServiceClient(connSmsService),
 
 		goLoginService:                   new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
 		goObjectBuilderService:           new_object_builder_service.NewObjectBuilderServiceClient(connGoObjectBuilderService),
@@ -189,10 +181,6 @@ func (g *sharedGrpcClients) HighLoginService() object_builder_service.LoginServi
 
 func (g *sharedGrpcClients) HighBuilderPermissionService() object_builder_service.PermissionServiceClient {
 	return g.highBuilderPermissionService
-}
-
-func (g *sharedGrpcClients) WebPageAppService() web_page_service.AppServiceClient {
-	return g.webPageAppService
 }
 
 func (g *sharedGrpcClients) LoginService() object_builder_service.LoginServiceClient {
