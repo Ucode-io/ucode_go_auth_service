@@ -2,12 +2,17 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"runtime"
+	"strings"
+	"time"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
+	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc/codes"
@@ -44,12 +49,6 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		TableSlug:    req.GetTableSlug(),
 	}
 
-	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
-	if err != nil {
-		s.log.Error("!!!CreateClientType--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
@@ -57,8 +56,50 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 
 	switch req.ResourceType {
 	case 1:
-		result, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx,
-			&pbObject.CommonMessage{
+		if len(req.GetTableSlug()) == 0 {
+			tableAttributes, err := helper.ConvertMapToStruct(map[string]any{
+				"auth_info": map[string]any{"login_strategy": []string{"phone", "email", "login"}},
+				"label":     "",
+				"label_en":  fmt.Sprintf("%s Users", req.Name),
+			})
+			if err != nil {
+				s.log.Error("!!!CreateClientType.ObjectBuilderService.MapToStruct--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			_, err = services.GetTableServiceByType(req.NodeType).Create(ctx, &pbObject.CreateTableRequest{
+				Label:        fmt.Sprintf("%s Users", req.Name),
+				Slug:         fmt.Sprintf("%s_users", strings.ToLower(req.Name)),
+				Description:  fmt.Sprintf("This is created login table by client_type %s", req.Name),
+				ShowInMenu:   true,
+				Icon:         "",
+				IncrementId:  &pbObject.IncrementID{},
+				Fields:       []*pbObject.CreateFieldsRequest{},
+				Layouts:      []*pbObject.LayoutRequest{},
+				CommitType:   config.COMMIT_TYPE_TABLE,
+				Name:         fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
+				ViewId:       uuid.NewString(),
+				LayoutId:     uuid.NewString(),
+				ProjectId:    req.ResourceEnvrironmentId,
+				Attributes:   tableAttributes,
+				IsLoginTable: true,
+			})
+			if err != nil {
+				s.log.Error("!!!CreateClientType.ObjectBuilderService.Table.Create--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			requestToObjBuilderService.TableSlug = fmt.Sprintf("%s_users", strings.ToLower(req.Name))
+		}
+
+		structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
+		if err != nil {
+			s.log.Error("!!!CreateClientType--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		result, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
+			ctx, &pbObject.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
 				ProjectId: req.ResourceEnvrironmentId,
@@ -69,12 +110,19 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
-		result, err := services.GoItemService().Create(ctx,
-			&nobs.CommonMessage{
+		structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
+		if err != nil {
+			s.log.Error("!!!CreateClientType--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		result, err := services.GoItemService().Create(
+			ctx, &nobs.CommonMessage{
 				TableSlug: "client_type",
 				Data:      structData,
 				ProjectId: req.GetResourceEnvrironmentId(),
-			})
+			},
+		)
 		if err != nil {
 			s.log.Error("!!!CreateClientType.PostgresObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
