@@ -9,7 +9,7 @@ import (
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/grpc/client"
 	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
@@ -96,7 +96,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	userId := user.GetId()
 
 	project, err := sus.services.ProjectServiceClient().GetById(
-		ctx, &pbCompany.GetProjectByIdRequest{
+		ctx, &pbc.GetProjectByIdRequest{
 			ProjectId: req.GetProjectId(),
 		},
 	)
@@ -233,7 +233,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 	}()
 
 	project, err := sus.services.ProjectServiceClient().GetById(ctx,
-		&pbCompany.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+		&pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
 	if err != nil {
 		sus.log.Error("!!!UpdateSyncUser-->ProjectGetById", logger.Error(err))
 		return nil, err
@@ -335,7 +335,7 @@ func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteMa
 		}
 	}()
 
-	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
+	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbc.GetProjectByIdRequest{
 		ProjectId: req.GetProjectId(),
 	})
 	if err != nil {
@@ -399,7 +399,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 
 		userId := user.GetId()
 		project, err := sus.services.ProjectServiceClient().GetById(
-			ctx, &pbCompany.GetProjectByIdRequest{
+			ctx, &pbc.GetProjectByIdRequest{
 				ProjectId: req.GetProjectId(),
 			},
 		)
