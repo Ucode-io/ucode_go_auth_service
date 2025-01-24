@@ -5,10 +5,11 @@ import (
 	"errors"
 	"regexp"
 	"runtime"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
-	"ucode/ucode_go_auth_service/genproto/company_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -16,6 +17,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/pkg/util"
 
+	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/spf13/cast"
@@ -417,39 +419,133 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		s.log.Error("!!!V2CreateUser--->HashPassword", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	if len(req.GetClientTypeId()) == 0 || len(req.GetRoleId()) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "client_type_id and role_id required")
+	}
+
+	var (
+		emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		email      = emailRegex.MatchString(req.Email)
+		password   = req.Password
+		userId     string
+	)
+
 	req.Password = hashedPassword
 
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	email := emailRegex.MatchString(req.Email)
 	if !email && req.Email != "" {
 		err = config.ErrInvalidEmail
 		s.log.Error("!!!V2CreateUser--->EmailRegex", logger.Error(err))
 		return nil, err
 	}
 
-	pKey, err := s.strg.User().Create(ctx, req)
+	if len(req.GetLogin()) != 0 {
+		user, err := s.strg.User().GetByUsername(ctx, req.GetLogin())
+		if err != nil {
+			return nil, err
+		}
+
+		userId = user.GetId()
+	}
+
+	if len(req.GetPhone()) != 0 && len(req.GetLogin()) == 0 {
+		user, err := s.strg.User().GetByUsername(ctx, req.GetPhone())
+		if err != nil {
+			return nil, err
+		}
+
+		userId = user.GetId()
+	}
+
+	if len(req.GetEmail()) != 0 && len(req.GetLogin()) == 0 {
+		user, err := s.strg.User().GetByUsername(ctx, req.GetEmail())
+		if err != nil {
+			return nil, err
+		}
+
+		userId = user.GetId()
+	}
+
+	project, err := s.services.ProjectServiceClient().GetById(ctx, &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
 	if err != nil {
-		s.log.Error("!!!V2CreateUser--->UserCreate", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		s.log.Error("!!!CreateUser-->ProjectGetById", logger.Error(err))
+		return nil, err
+	}
+
+	if len(userId) == 0 {
+		user, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
+			Login:     req.GetLogin(),
+			Email:     req.GetEmail(),
+			Phone:     req.GetPhone(),
+			Password:  req.GetPassword(),
+			CompanyId: project.GetCompanyId(),
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		userId = user.GetId()
+
+		_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+			UserId:       userId,
+			RoleId:       req.GetRoleId(),
+			ProjectId:    req.GetProjectId(),
+			ClientTypeId: req.GetClientTypeId(),
+			CompanyId:    project.GetCompanyId(),
+			EnvId:        req.GetEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->AddUserToProject", logger.Error(err))
+			return nil, err
+		}
+	} else {
+		exists, err := s.strg.User().GetUserProjectByAllFields(ctx, models.GetUserProjectByAllFieldsReq{
+			UserId:       userId,
+			RoleId:       req.GetRoleId(),
+			ProjectId:    req.GetProjectId(),
+			ClientTypeId: req.GetClientTypeId(),
+			CompanyId:    project.GetCompanyId(),
+			EnvId:        req.GetEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!CreateUser--->GetUserProjectByAllFields", logger.Error(err))
+			return nil, err
+		}
+
+		if !exists {
+			_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+				UserId:       userId,
+				RoleId:       req.GetRoleId(),
+				ProjectId:    req.GetProjectId(),
+				ClientTypeId: req.GetClientTypeId(),
+				EnvId:        req.GetEnvironmentId(),
+				CompanyId:    project.GetCompanyId(),
+			})
+			if err != nil {
+				s.log.Error("!!!CreateUser--->AddUserToProjectExists", logger.Error(err))
+				return nil, err
+			}
+		}
 	}
 
 	// objectBuilder -> auth service
 	structData, err := helper.ConvertRequestToSturct(map[string]any{
-		"guid":               pKey.GetId(),
+		"guid":               uuid.New().String(),
+		"name":               req.GetName(),
+		"login":              req.GetLogin(),
+		"email":              req.GetEmail(),
+		"phone":              req.GetPhone(),
+		"password":           password,
 		"project_id":         req.GetProjectId(),
 		"role_id":            req.GetRoleId(),
 		"client_type_id":     req.GetClientTypeId(),
-		"client_platform_id": req.GetClientPlatformId(),
-		"active":             req.GetActive(),
-		"expires_at":         req.GetExpiresAt(),
-		"name":               req.GetName(),
-		"email":              req.GetEmail(),
 		"photo":              req.GetPhotoUrl(),
-		"password":           req.GetPassword(),
-		"login":              req.GetLogin(),
 		"birth_day":          req.GetYearOfBirth(),
-		"phone":              req.GetPhone(),
+		"active":             req.GetActive(),
+		"user_id_auth":       userId,
 		"from_auth_service":  true,
+		"expires_at":         req.GetExpiresAt(),
+		"client_platform_id": req.GetClientPlatformId(),
 	})
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->ConvertReq", logger.Error(err))
@@ -464,20 +560,17 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	switch req.ResourceType {
-	case 1:
+	case int32(pbc.ResourceType_MONGODB):
 		clientType, err := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(ctx, &pbObject.CommonMessage{
 			TableSlug: "client_type",
-			Data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"id": structpb.NewStringValue(req.GetClientTypeId()),
-				},
-			},
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->GetSingle", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
 		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
 		if ok {
 			clientTypeTableSlug, ok := response["table_slug"].(string)
@@ -485,33 +578,47 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				tableSlug = clientTypeTableSlug
 			}
 		}
+
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(ctx, &pbObject.CommonMessage{
 			TableSlug: tableSlug,
 			Data:      structData,
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
+		if err != nil {
+			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case int32(pbc.ResourceType_POSTGRESQL):
+		clientType, err := services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
+			TableSlug: "client_type",
+			Data:      &structpb.Struct{Fields: map[string]*structpb.Value{"id": structpb.NewStringValue(req.GetClientTypeId())}},
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2CreateUser--->GetSingle", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
+		if ok {
+			clientTypeTableSlug, ok := response["table_slug"].(string)
+			if ok && clientTypeTableSlug != "" {
+				tableSlug = clientTypeTableSlug
+			}
+		}
+
+		_, err = services.GoItemService().Create(ctx, &nb.CommonMessage{
+			TableSlug: tableSlug,
+			Data:      structData,
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
 
-	_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
-		UserId:       pKey.Id,
-		ProjectId:    req.GetProjectId(),
-		CompanyId:    req.GetCompanyId(),
-		ClientTypeId: req.GetClientTypeId(),
-		RoleId:       req.GetRoleId(),
-		EnvId:        req.GetEnvironmentId(),
-	})
-
-	if err != nil {
-		s.log.Error("!!!V2CreateUser--->AddUserToProject", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return s.strg.User().GetByPK(ctx, pKey)
+	return s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: userId})
 }
 
 func (s *userService) V2GetUserByID(ctx context.Context, req *pb.UserPrimaryKey) (*pb.User, error) {
@@ -1240,10 +1347,10 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 		}
 
 		if req.GetClientTypeId() != "" && req.GetEnvironmentId() != "" && req.GetProjectId() != "" {
-			resource, err := s.services.ServiceResource().GetSingle(ctx, &company_service.GetSingleServiceResourceReq{
+			resource, err := s.services.ServiceResource().GetSingle(ctx, &pbc.GetSingleServiceResourceReq{
 				ProjectId:     req.GetProjectId(),
 				EnvironmentId: req.GetEnvironmentId(),
-				ServiceType:   company_service.ServiceType_BUILDER_SERVICE,
+				ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
 			})
 			if err != nil {
 				err = errors.New("password updated in auth but not found resource in this project")

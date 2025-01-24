@@ -12132,8 +12132,14 @@ const docTemplate = `{
         "company_service.Project": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "company_id": {
                     "type": "string"
+                },
+                "credit_limit": {
+                    "type": "number"
                 },
                 "currencies": {
                     "type": "array",

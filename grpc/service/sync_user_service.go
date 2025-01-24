@@ -95,11 +95,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 
 	userId := user.GetId()
 
-	project, err := sus.services.ProjectServiceClient().GetById(
-		ctx, &pbc.GetProjectByIdRequest{
-			ProjectId: req.GetProjectId(),
-		},
-	)
+	project, err := sus.services.ProjectServiceClient().GetById(ctx, &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
 	if err != nil {
 		sus.log.Error("!!!CreateUser-->ProjectGetById", logger.Error(err))
 		return nil, err

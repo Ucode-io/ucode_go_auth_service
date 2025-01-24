@@ -549,6 +549,8 @@ func (a *apiKeysRepo) ListClientToken(ctx context.Context, req *pb.ListClientTok
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var (
 			row       pb.ClientIdToken

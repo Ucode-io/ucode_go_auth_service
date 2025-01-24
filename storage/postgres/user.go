@@ -36,31 +36,13 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.create")
 	defer dbSpan.Finish()
 
-	query := `INSERT INTO "user" (
-		id,
-		phone,
-		email,
-		login,
-		password,
-		company_id,
-		hash_type
-	) VALUES (
-		$1,
-		$2,
-		$3,
-		$4,
-		$5,
-		$6,
-		'bcrypt'
-	)`
+	query := `INSERT INTO "user" (id, phone, email, login, password, company_id, hash_type) 
+			  VALUES ($1, $2, $3, $4, $5, $6, 'bcrypt')`
 
-	id, err := uuid.NewRandom()
-	if err != nil {
-		return pKey, errors.Wrap(err, "failed to generate uuid")
-	}
+	id := uuid.New().String()
 
 	_, err = r.db.Exec(ctx, query,
-		id.String(),
+		id,
 		entity.GetPhone(),
 		entity.GetEmail(),
 		entity.GetLogin(),
@@ -71,9 +53,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		return pKey, errors.Wrap(err, "failed to create user")
 	}
 
-	pKey = &pb.UserPrimaryKey{
-		Id: id.String(),
-	}
+	pKey = &pb.UserPrimaryKey{Id: id}
 
 	return pKey, nil
 }
@@ -679,6 +659,8 @@ func (r *userRepo) GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsB
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var (
 			projectID sql.NullString
@@ -1075,8 +1057,7 @@ func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
 	defer dbSpan.Finish()
 
 	count := 0
-	query := `SELECT count(distinct project_id)
-	FROM user_project`
+	query := `SELECT count(distinct project_id) FROM user_project`
 
 	err := r.db.QueryRow(ctx, query).Scan(&count)
 	if err != nil {

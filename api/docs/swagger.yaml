@@ -1479,8 +1479,12 @@ definitions:
     type: object
   company_service.Project:
     properties:
+      balance:
+        type: number
       company_id:
         type: string
+      credit_limit:
+        type: number
       currencies:
         items:
           $ref: '#/definitions/company_service.Currency'
