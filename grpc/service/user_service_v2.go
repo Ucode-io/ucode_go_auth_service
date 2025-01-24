@@ -525,6 +525,8 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				s.log.Error("!!!CreateUser--->AddUserToProjectExists", logger.Error(err))
 				return nil, err
 			}
+		} else {
+			return nil, errors.New("user is already exist")
 		}
 	}
 
