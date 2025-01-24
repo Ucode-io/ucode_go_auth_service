@@ -67,9 +67,11 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
+			var tableSlug = fmt.Sprintf("%s_users", strings.ToLower(strings.ReplaceAll(req.GetName(), " ", "_")))
+
 			_, err = services.GetTableServiceByType(req.NodeType).Create(ctx, &pbObject.CreateTableRequest{
 				Label:        fmt.Sprintf("%s Users", req.Name),
-				Slug:         fmt.Sprintf("%s_users", strings.ToLower(req.Name)),
+				Slug:         tableSlug,
 				Description:  fmt.Sprintf("This is created login table by client_type %s", req.Name),
 				ShowInMenu:   true,
 				Icon:         "",
@@ -121,9 +123,11 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
+			var tableSlug = fmt.Sprintf("%s_users", strings.ToLower(strings.ReplaceAll(req.GetName(), " ", "_")))
+
 			_, err = services.GoTableService().Create(ctx, &nobs.CreateTableRequest{
 				Label:        fmt.Sprintf("%s Users", req.Name),
-				Slug:         fmt.Sprintf("%s_users", strings.ToLower(req.Name)),
+				Slug:         tableSlug,
 				Description:  fmt.Sprintf("This is created login table by client_type %s", req.Name),
 				ShowInMenu:   true,
 				Icon:         "",
