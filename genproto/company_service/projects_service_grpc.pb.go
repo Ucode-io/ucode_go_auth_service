@@ -61,7 +61,7 @@ type ProjectServiceClient interface {
 	GetProjectConfigList(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListPorjectConfig, error)
 	UpsertRecord(ctx context.Context, in *Record, opts ...grpc.CallOption) (*EmptyProto, error)
 	ListRecord(ctx context.Context, in *ListRecordRequest, opts ...grpc.CallOption) (*EmptyProto, error)
-	ListProjectsRPS(ctx context.Context, in *GetProjectListRequest, opts ...grpc.CallOption) (*GetProjectListResponse, error)
+	ListProjectsRPS(ctx context.Context, in *GetProjectListRequest, opts ...grpc.CallOption) (*ListProjectsRPSResponse, error)
 }
 
 type projectServiceClient struct {
@@ -242,9 +242,9 @@ func (c *projectServiceClient) ListRecord(ctx context.Context, in *ListRecordReq
 	return out, nil
 }
 
-func (c *projectServiceClient) ListProjectsRPS(ctx context.Context, in *GetProjectListRequest, opts ...grpc.CallOption) (*GetProjectListResponse, error) {
+func (c *projectServiceClient) ListProjectsRPS(ctx context.Context, in *GetProjectListRequest, opts ...grpc.CallOption) (*ListProjectsRPSResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetProjectListResponse)
+	out := new(ListProjectsRPSResponse)
 	err := c.cc.Invoke(ctx, ProjectService_ListProjectsRPS_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -273,7 +273,7 @@ type ProjectServiceServer interface {
 	GetProjectConfigList(context.Context, *empty.Empty) (*ListPorjectConfig, error)
 	UpsertRecord(context.Context, *Record) (*EmptyProto, error)
 	ListRecord(context.Context, *ListRecordRequest) (*EmptyProto, error)
-	ListProjectsRPS(context.Context, *GetProjectListRequest) (*GetProjectListResponse, error)
+	ListProjectsRPS(context.Context, *GetProjectListRequest) (*ListProjectsRPSResponse, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -335,7 +335,7 @@ func (UnimplementedProjectServiceServer) UpsertRecord(context.Context, *Record) 
 func (UnimplementedProjectServiceServer) ListRecord(context.Context, *ListRecordRequest) (*EmptyProto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRecord not implemented")
 }
-func (UnimplementedProjectServiceServer) ListProjectsRPS(context.Context, *GetProjectListRequest) (*GetProjectListResponse, error) {
+func (UnimplementedProjectServiceServer) ListProjectsRPS(context.Context, *GetProjectListRequest) (*ListProjectsRPSResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProjectsRPS not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}

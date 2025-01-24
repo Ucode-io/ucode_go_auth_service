@@ -110,6 +110,42 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	case 3:
+		if len(req.GetTableSlug()) == 0 {
+			tableAttributes, err := helper.ConvertMapToStruct(map[string]any{
+				"auth_info": map[string]any{"login_strategy": []string{"phone", "email", "login"}},
+				"label":     "",
+				"label_en":  fmt.Sprintf("%s Users", req.Name),
+			})
+			if err != nil {
+				s.log.Error("!!!CreateClientType.ObjectBuilderService.MapToStruct--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			_, err = services.GoTableService().Create(ctx, &nobs.CreateTableRequest{
+				Label:        fmt.Sprintf("%s Users", req.Name),
+				Slug:         fmt.Sprintf("%s_users", strings.ToLower(req.Name)),
+				Description:  fmt.Sprintf("This is created login table by client_type %s", req.Name),
+				ShowInMenu:   true,
+				Icon:         "",
+				IncrementId:  &nobs.IncrementID{},
+				Fields:       []*nobs.CreateFieldsRequest{},
+				Layouts:      []*nobs.LayoutRequest{},
+				CommitType:   config.COMMIT_TYPE_TABLE,
+				Name:         fmt.Sprintf("Auto Created Commit Create table - %s", time.Now().Format(time.RFC1123)),
+				ViewId:       uuid.NewString(),
+				LayoutId:     uuid.NewString(),
+				ProjectId:    req.ResourceEnvrironmentId,
+				Attributes:   tableAttributes,
+				IsLoginTable: true,
+			})
+			if err != nil {
+				s.log.Error("!!!CreateClientType.ObjectBuilderService.Table.Create--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+
+			requestToObjBuilderService.TableSlug = fmt.Sprintf("%s_users", strings.ToLower(req.Name))
+		}
+
 		structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
 		if err != nil {
 			s.log.Error("!!!CreateClientType--->", logger.Error(err))

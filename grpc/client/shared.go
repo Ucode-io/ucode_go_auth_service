@@ -27,6 +27,7 @@ type SharedServiceManagerI interface {
 	GoItemService() new_object_builder_service.ItemsServiceClient
 	GoObjectBuilderPermissionService() new_object_builder_service.PermissionServiceClient
 	GoObjectBuilderLoginService() new_object_builder_service.LoginServiceClient
+	GoTableService() new_object_builder_service.TableServiceClient
 
 	HighObjectBuilderService() object_builder_service.ObjectBuilderServiceClient
 	HighLoginService() object_builder_service.LoginServiceClient
@@ -54,6 +55,7 @@ type sharedGrpcClients struct {
 	goObjectBuilderPermissionService new_object_builder_service.PermissionServiceClient
 	goItemService                    new_object_builder_service.ItemsServiceClient
 	goObjectBuilderLoginService      new_object_builder_service.LoginServiceClient
+	goTableService                   new_object_builder_service.TableServiceClient
 
 	highObjectBuilderService     object_builder_service.ObjectBuilderServiceClient
 	highLoginService             object_builder_service.LoginServiceClient
@@ -112,6 +114,7 @@ func NewSharedGrpcClients(ctx context.Context, cfg config.Config) (SharedService
 		goObjectBuilderPermissionService: new_object_builder_service.NewPermissionServiceClient(connGoObjectBuilderService),
 		goItemService:                    new_object_builder_service.NewItemsServiceClient(connGoObjectBuilderService),
 		goObjectBuilderLoginService:      new_object_builder_service.NewLoginServiceClient(connGoObjectBuilderService),
+		goTableService:                   new_object_builder_service.NewTableServiceClient(connGoObjectBuilderService),
 	}, nil
 }
 
@@ -209,6 +212,10 @@ func (g *sharedGrpcClients) GoItemService() new_object_builder_service.ItemsServ
 
 func (g *sharedGrpcClients) GoObjectBuilderLoginService() new_object_builder_service.LoginServiceClient {
 	return g.goLoginService
+}
+
+func (g *sharedGrpcClients) GoTableService() new_object_builder_service.TableServiceClient {
+	return g.goTableService
 }
 
 func (g *sharedGrpcClients) TableService() object_builder_service.TableServiceClient {

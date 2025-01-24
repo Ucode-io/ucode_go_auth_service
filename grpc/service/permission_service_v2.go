@@ -153,7 +153,9 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			s.log.Error("!!!AddRole.PostgresObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
 		roleData, _ := helper.ConvertStructToResponse(result.Data)
+
 		_, err = services.GoObjectBuilderPermissionService().CreateDefaultPermission(
 			ctx, &nobs.CreateDefaultPermissionRequest{
 				ProjectId: req.GetProjectId(),
