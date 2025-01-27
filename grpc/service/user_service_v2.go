@@ -932,9 +932,7 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 
 	usersData, ok := usersResp.Data.AsMap()["response"].([]any)
 	if !ok {
-		err := errors.New("usersData is nil")
-		s.log.Error("!!!GetUserList.ObjectBuilderService.GetList--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		return &pb.GetUserListResponse{}, nil
 	}
 
 	resp.Users = make([]*pb.User, 0, int(userCount))

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 
 	"ucode/ucode_go_auth_service/config"
@@ -298,7 +297,6 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			fmt.Println(err.Error())
 			s.log.Error("!!!GetRolesList.GoObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
