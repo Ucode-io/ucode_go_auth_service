@@ -121,6 +121,12 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Invalid Argument"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2GetUserList(c *gin.Context) {
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -151,7 +157,7 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 
 	resp, err := h.services.UserService().V2GetUserList(
 		c.Request.Context(), &auth_service.GetUserListRequest{
-			Limit:                 10,
+			Limit:                 int32(limit),
 			Offset:                int32(offset),
 			Search:                c.Query("search"),
 			ClientPlatformId:      c.Query("client-platform-id"),

@@ -479,6 +479,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			Phone:     req.GetPhone(),
 			Password:  req.GetPassword(),
 			CompanyId: project.GetCompanyId(),
+			Name:      req.GetName(),
 		})
 		if err != nil {
 			s.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
@@ -833,8 +834,10 @@ func (s *userService) V2GetUserList(ctx context.Context, req *pb.GetUserListRequ
 	}
 
 	structReq := map[string]any{
-		"user_id_auth": map[string]any{"$in": userIds},
-		"limit":        10,
+		"offset":         req.GetOffset(),
+		"limit":          req.GetLimit(),
+		"with_relations": false,
+		"user_id_auth":   map[string]any{"$in": userIds},
 	}
 
 	if util.IsValidUUID(req.ClientTypeId) {
