@@ -109,11 +109,11 @@ func (s *clientService) GetClientTypeList(ctx context.Context, req *pb.GetClient
 	if err != nil {
 		return nil, err
 	}
-
+	
 	for i, el := range res.ClientTypes {
 
 		for e, table := range el.Tables {
-			var message = make(map[string]interface{})
+			var message = make(map[string]any)
 			message["table_slug"] = table.Slug
 
 			structData, err := helper.ConvertMapToStruct(message)

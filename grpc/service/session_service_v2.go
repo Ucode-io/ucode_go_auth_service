@@ -912,7 +912,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	}
 
 	// TODO - wrap in a function
-	m := map[string]interface{}{
+	m := map[string]any{
 		"id":                 session.Id,
 		"ip":                 session.Data,
 		"data":               session.Data,
@@ -1767,7 +1767,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	}
 
 	// TODO - wrap in a function
-	m := map[string]interface{}{
+	m := map[string]any{
 		"id":                 session.Id,
 		"ip":                 session.Data,
 		"data":               session.Data,

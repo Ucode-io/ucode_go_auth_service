@@ -200,7 +200,7 @@ func (h *Handler) V2RegisterProvider(c *gin.Context) {
 	}
 
 	if body.Data["addational_table"] != nil {
-		if body.Data["addational_table"].(map[string]interface{})["table_slug"] == nil {
+		if body.Data["addational_table"].(map[string]any)["table_slug"] == nil {
 			h.log.Error("Addational user create >>>> ")
 			h.handleResponse(c, status.BadRequest, "If addional table have, table slug is required")
 			return
@@ -575,6 +575,6 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		Sessions:  resp.GetSessions(),
 		UserData:  resp.GetUserData(),
 	}
-	
+
 	h.handleResponse(c, status.Created, res)
 }

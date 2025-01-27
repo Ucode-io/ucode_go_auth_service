@@ -97,7 +97,7 @@ func (r *clientTypeRepo) GetByPK(ctx context.Context, pKey *pb.ClientTypePrimary
 func (r *clientTypeRepo) GetList(ctx context.Context, queryParam *pb.GetClientTypeListRequest) (res *pb.GetClientTypeListResponse, err error) {
 
 	res = &pb.GetClientTypeListResponse{}
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	query := `SELECT
 		id,
 		project_id,
@@ -119,7 +119,7 @@ func (r *clientTypeRepo) GetList(ctx context.Context, queryParam *pb.GetClientTy
 	}
 
 	cQ := `SELECT count(1) FROM "client_type"` + filter
-	var arr []interface{}
+	var arr []any
 
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
 	err = r.db.QueryRow(ctx, cQ, arr...).Scan(
@@ -171,7 +171,7 @@ func (r *clientTypeRepo) Update(ctx context.Context, entity *pb.UpdateClientType
 	WHERE
 		id = :id`
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"id":            entity.Id,
 		"name":          entity.Name,
 		"confirm_by":    entity.ConfirmBy.String(),

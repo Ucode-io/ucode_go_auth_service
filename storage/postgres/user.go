@@ -160,8 +160,8 @@ func (r *userRepo) GetList(ctx context.Context, queryParam *pb.GetUserListReques
 	defer dbSpan.Finish()
 
 	res = &pb.GetUserListResponse{}
-	params := make(map[string]interface{})
-	var arr []interface{}
+	params := make(map[string]any)
+	var arr []any
 	query := `SELECT
 		id,
 		company_id,
@@ -253,7 +253,7 @@ func (r *userRepo) Update(ctx context.Context, entity *pb.UpdateUserRequest) (ro
 	WHERE
 		id = $5`
 
-	params := []interface{}{
+	params := []any{
 		entity.GetCompanyId(),
 		entity.GetPhone(),
 		entity.GetEmail(),
@@ -381,7 +381,7 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.resetpassword")
 	defer dbSpan.Finish()
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"id": user.UserId,
 	}
 
@@ -714,7 +714,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 				id
 			from "user" WHERE `
 	var filter string
-	params := map[string]interface{}{}
+	params := map[string]any{}
 	if req.Email != "" {
 		filter = "email = :email"
 		params["email"] = req.Email
@@ -756,11 +756,11 @@ func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingRe
 	var (
 		res models.ListLanguage
 	)
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
-	var arr []interface{}
+	var arr []any
 	query := `SELECT
 			id,
 			name,
@@ -834,11 +834,11 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 	var (
 		res models.ListTimezone
 	)
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
-	var arr []interface{}
+	var arr []any
 	query := `SELECT
 			id,
 			"name",
@@ -907,7 +907,7 @@ func (r *userRepo) V2ResetPassword(ctx context.Context, req *pb.V2ResetPasswordR
 	defer dbSpan.Finish()
 
 	var (
-		params                      = make(map[string]interface{})
+		params                      = make(map[string]any)
 		subQueryEmail, subQueryPass string
 	)
 	if req.GetPassword() != "" {
@@ -976,7 +976,7 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.DeleteUserFromProject")
 	defer dbSpan.Finish()
 
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 
 	query := `DELETE FROM "user_project" 
 	WHERE  
@@ -1014,7 +1014,7 @@ func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteMan
 					company_id = :company_id AND
 					env_id = :env_id`
 	for _, user := range req.GetUsers() {
-		params := map[string]interface{}{}
+		params := map[string]any{}
 		params["project_id"] = req.GetProjectId()
 		params["company_id"] = req.GetCompanyId()
 		params["env_id"] = req.GetEnvironmentId()
@@ -1170,7 +1170,7 @@ func (r *userRepo) UpdatePassword(ctx context.Context, userId, password string) 
 	WHERE
 		id = :id`
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"id":        userId,
 		"hash_type": "bcrypt",
 		"password":  password,

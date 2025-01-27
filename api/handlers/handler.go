@@ -54,7 +54,7 @@ func (h *Handler) GetProjectSrvc(c *gin.Context, projectId string, nodeType stri
 	}
 }
 
-func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interface{}) {
+func (h *Handler) handleResponse(c *gin.Context, status http.Status, data any) {
 	switch code := status.Code; {
 	case code < 300:
 	case code < 400:
@@ -94,10 +94,10 @@ func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
 
 func (h *Handler) versionHistory(req *models.CreateVersionHistoryRequest) error {
 	var (
-		current  = map[string]interface{}{"data": req.Current}
-		previous = map[string]interface{}{"data": req.Previous}
-		request  = map[string]interface{}{"data": req.Request}
-		response = map[string]interface{}{"data": req.Response}
+		current  = map[string]any{"data": req.Current}
+		previous = map[string]any{"data": req.Previous}
+		request  = map[string]any{"data": req.Request}
+		response = map[string]any{"data": req.Response}
 		user     = req.UserInfo
 	)
 
@@ -107,16 +107,16 @@ func (h *Handler) versionHistory(req *models.CreateVersionHistoryRequest) error 
 	}
 
 	if req.Current == nil {
-		current["data"] = make(map[string]interface{})
+		current["data"] = make(map[string]any)
 	}
 	if req.Previous == nil {
-		previous["data"] = make(map[string]interface{})
+		previous["data"] = make(map[string]any)
 	}
 	if req.Request == nil {
-		request["data"] = make(map[string]interface{})
+		request["data"] = make(map[string]any)
 	}
 	if req.Response == nil {
-		response["data"] = make(map[string]interface{})
+		response["data"] = make(map[string]any)
 	}
 
 	if util.IsValidUUID(req.UserInfo) {
@@ -156,7 +156,7 @@ func (h *Handler) versionHistory(req *models.CreateVersionHistoryRequest) error 
 	return nil
 }
 
-func fromMapToString(req map[string]interface{}) string {
+func fromMapToString(req map[string]any) string {
 	reqString, err := json.Marshal(req)
 	if err != nil {
 		return ""

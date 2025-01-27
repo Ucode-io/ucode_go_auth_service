@@ -2,7 +2,7 @@ package models
 
 // StructBody is alternative for structpb.Struct
 type StructBody struct {
-	Body map[string]interface{}
+	Body map[string]any
 }
 
 // Table ...

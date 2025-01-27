@@ -184,7 +184,7 @@ func (s *userService) SendMessageToEmail(ctx context.Context, req *pb.SendMessag
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	m := map[string]interface{}{
+	m := map[string]any{
 		"id": user.Id,
 	}
 

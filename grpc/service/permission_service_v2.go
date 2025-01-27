@@ -250,10 +250,15 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 	}()
 
 	var (
-		result     *pbObject.CommonMessage
-		structData *structpb.Struct
-		err        error
+		result *pbObject.CommonMessage
+		err    error
 	)
+
+	structData, err := helper.ConvertRequestToSturct(map[string]any{})
+	if err != nil {
+		s.log.Error("!!!GetRolesList--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	if req.FromPermission {
 		if len(req.GetClientTypeId()) != 0 {

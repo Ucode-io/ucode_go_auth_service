@@ -343,7 +343,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	if value, ok := body.Data["addational_table"]; ok {
-		if value.(map[string]interface{})["table_slug"] == nil {
+		if value.(map[string]any)["table_slug"] == nil {
 			h.handleResponse(c, http.BadRequest, "If addional table have, table slug is required")
 			return
 		}

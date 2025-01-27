@@ -535,7 +535,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	var userDataToMap = make(map[string]interface{})
+	var userDataToMap = make(map[string]any)
 	userDataToMap["guid"] = req.UserId
 	userDataToMap["active"] = req.Active
 	userDataToMap["project_id"] = req.ProjectId

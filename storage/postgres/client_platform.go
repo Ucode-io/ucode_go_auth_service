@@ -78,8 +78,8 @@ func (r *clientPlatformRepo) GetByPK(ctx context.Context, pKey *pb.ClientPlatfor
 
 func (r *clientPlatformRepo) GetList(ctx context.Context, queryParam *pb.GetClientPlatformListRequest) (res *pb.GetClientPlatformListResponse, err error) {
 	res = &pb.GetClientPlatformListResponse{}
-	var arr []interface{}
-	params := make(map[string]interface{})
+	var arr []any
+	params := make(map[string]any)
 	query := `SELECT
 		id,
 		name,

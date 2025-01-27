@@ -187,7 +187,7 @@ func (s *apiKeysService) GenerateApiToken(ctx context.Context, req *pb.GenerateA
 		return nil, status.Error(codes.InvalidArgument, errComparePass.Error())
 	}
 
-	m := map[string]interface{}{
+	m := map[string]any{
 		"environment_id": apiKey.GetEnvironmentId(),
 		"role_id":        apiKey.GetRoleId(),
 		"app_id":         apiKey.GetAppId(),

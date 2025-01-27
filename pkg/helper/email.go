@@ -34,7 +34,7 @@ type SendMessageToEmailRequest struct {
 	ClientTypeId  string
 }
 
-func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
+func GetGoogleUserInfo(accessToken string) (map[string]any, error) {
 	resp, err := net_http.Get("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func GetGoogleUserInfo(accessToken string) (map[string]interface{}, error) {
 
 	defer resp.Body.Close()
 
-	userInfo := make(map[string]interface{})
+	userInfo := make(map[string]any)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

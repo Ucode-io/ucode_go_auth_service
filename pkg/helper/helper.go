@@ -22,10 +22,10 @@ var (
 		digits
 )
 
-func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (string, []interface{}) {
+func ReplaceQueryParams(namedQuery string, params map[string]any) (string, []any) {
 	var (
 		i    = 1
-		args []interface{}
+		args []any
 	)
 
 	for k, v := range params {
@@ -47,7 +47,7 @@ func ReplaceSQL(old, searchPattern string) string {
 	return old
 }
 
-func ConvertMapToStruct(inputMap map[string]interface{}) (*structpb.Struct, error) {
+func ConvertMapToStruct(inputMap map[string]any) (*structpb.Struct, error) {
 	marshledInputMap, err := json.Marshal(inputMap)
 	outputStruct := &structpb.Struct{}
 	if err != nil {
@@ -58,7 +58,7 @@ func ConvertMapToStruct(inputMap map[string]interface{}) (*structpb.Struct, erro
 	return outputStruct, err
 }
 
-func ConvertRequestToSturct(inputRequest interface{}) (*structpb.Struct, error) {
+func ConvertRequestToSturct(inputRequest any) (*structpb.Struct, error) {
 	marshelledInputInterface, err := json.Marshal(inputRequest)
 	outputStruct := &structpb.Struct{}
 	if err != nil {
@@ -68,9 +68,9 @@ func ConvertRequestToSturct(inputRequest interface{}) (*structpb.Struct, error) 
 	return outputStruct, err
 }
 
-func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]interface{}, error) {
+func ConvertStructToResponse(inputStruct *structpb.Struct) (map[string]any, error) {
 	marshelledInputStruct, err := protojson.Marshal(inputStruct)
-	outputMap := make(map[string]interface{}, 0)
+	outputMap := make(map[string]any, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func GetURLWithTableSlug(c *gin.Context) string {
 	return url
 }
 
-func MarshalToStruct(data interface{}, resp interface{}) error {
+func MarshalToStruct(data any, resp any) error {
 	js, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -163,7 +163,7 @@ func EmailValidation(email string) bool {
 	return checkEmail
 }
 
-func GetStringFromMap(body map[string]interface{}, key string) string {
+func GetStringFromMap(body map[string]any, key string) string {
 	if value, ok := body[key]; ok {
 		if str, ok := value.(string); ok {
 			return str

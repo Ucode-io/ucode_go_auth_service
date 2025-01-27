@@ -282,10 +282,9 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 	if req.Limit == 0 {
 		req.Limit = 1000
 	}
-	structReq := map[string]interface{}{
+	structReq := map[string]any{
 		"limit":  req.GetLimit(),
 		"offset": req.GetOffset(),
-		//"search": req.GetSearch(),
 	}
 
 	if req.Guids != nil {
@@ -363,7 +362,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 	var (
 		result *pbObject.CommonMessage
 	)
-	requestToObjBuilderService := map[string]interface{}{
+	requestToObjBuilderService := map[string]any{
 		"name":          req.Name,
 		"confirm_by":    req.ConfirmBy.String(),
 		"self_register": req.SelfRegister,
