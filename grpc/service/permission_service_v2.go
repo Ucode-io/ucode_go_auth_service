@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 
 	"ucode/ucode_go_auth_service/config"
@@ -256,10 +257,12 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 	)
 
 	if req.FromPermission {
-		structData, err = helper.ConvertRequestToSturct(map[string]any{"client_type_id": req.GetClientTypeId()})
-		if err != nil {
-			s.log.Error("!!!GetRolesList--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+		if len(req.GetClientTypeId()) != 0 {
+			structData, err = helper.ConvertRequestToSturct(map[string]any{"client_type_id": req.GetClientTypeId()})
+			if err != nil {
+				s.log.Error("!!!GetRolesList--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 		}
 	} else {
 		structData, err = helper.ConvertRequestToSturct(map[string]any{
@@ -295,6 +298,7 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
+			fmt.Println(err.Error())
 			s.log.Error("!!!GetRolesList.GoObjectBuilderService.GetList--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
