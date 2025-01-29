@@ -56,9 +56,6 @@ type Config struct {
 	WebPageServiceHost string
 	WebPageServicePort string
 
-	PostgresObjectBuidlerServiceHost string
-	PostgresObjectBuidlerServicePort string
-
 	GoObjectBuilderServiceHost string
 	GoObjectBuilderServicePort string
 
@@ -129,7 +126,6 @@ func BaseLoad() BaseConfig {
 
 	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", ""))
 	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 0))
-	// config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", ""))
 	config.PostgresUser = "auth_service"
 	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", ""))
 	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", ""))
@@ -186,20 +182,15 @@ func Load() Config {
 	config.WebPageServiceHost = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_SERVICE_HOST", ""))
 	config.WebPageServicePort = cast.ToString(getOrReturnDefaultValue("WEB_PAGE_GRPC_PORT", ""))
 
-	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
-	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
-
 	config.GoObjectBuilderServiceHost = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_HOST", ""))
 	config.GoObjectBuilderServicePort = cast.ToString(getOrReturnDefaultValue("GO_OBJECT_BUILDER_SERVICE_GRPC_PORT", ""))
 
-	config.PostgresObjectBuidlerServiceHost = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_HOST", ""))
-	config.PostgresObjectBuidlerServicePort = cast.ToString(getOrReturnDefaultValue("NODE_POSTGRES_SERVICE_PORT", ""))
 	config.UcodeAppBaseUrl = cast.ToString(getOrReturnDefaultValue("UCODE_APP_BASE_URL", ""))
 
 	return config
 }
 
-func getOrReturnDefaultValue(key string, defaultValue interface{}) interface{} {
+func getOrReturnDefaultValue(key string, defaultValue any) any {
 	val, exists := os.LookupEnv(key)
 
 	if exists {

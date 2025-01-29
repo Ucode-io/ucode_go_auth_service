@@ -79,12 +79,9 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 			ProjectId:    resource.ResourceEnvironmentId,
 			ActionSource: c.Request.URL.String(),
 			ActionType:   "CREATE CLIENT TYPE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &clientType,
-			TableSlug: "CLIENT_TYPE",
+			UserInfo:     cast.ToString(userId),
+			Request:      &clientType,
+			TableSlug:    "CLIENT_TYPE",
 		}
 	)
 
@@ -98,8 +95,7 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 	}()
 
 	resp, err = h.services.ClientService().V2CreateClientType(
-		c.Request.Context(),
-		&clientType,
+		c.Request.Context(), &clientType,
 	)
 
 	if err != nil {

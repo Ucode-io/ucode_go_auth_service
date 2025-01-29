@@ -112,8 +112,8 @@ func (r *projectRepo) GetList(ctx context.Context, queryParam *pb.GetProjectList
 	defer dbSpan.Finish()
 
 	res = &pb.GetProjectListResponse{}
-	params := make(map[string]interface{})
-	var arr []interface{}
+	params := make(map[string]any)
+	var arr []any
 	query := `SELECT
 		id,
 		company_id,
@@ -198,7 +198,7 @@ func (r *projectRepo) Update(ctx context.Context, entity *pb.UpdateProjectReques
 	WHERE
 		id = :id`
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"id":     entity.Id,
 		"name":   entity.Name,
 		"domain": entity.Domain,

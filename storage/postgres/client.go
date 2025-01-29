@@ -88,7 +88,7 @@ func (r *clientRepo) Update(ctx context.Context, entity *pb.UpdateClientRequest)
 	WHERE
 		client_platform_id = :client_platform_id AND client_type_id = :client_type_id`
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"client_platform_id": entity.ClientPlatformId,
 		"client_type_id":     entity.ClientTypeId,
 		"login_strategy":     entity.LoginStrategy.String(),
@@ -126,8 +126,8 @@ func (r *clientRepo) GetList(ctx context.Context, queryParam *pb.GetClientListRe
 	defer dbSpan.Finish()
 
 	res = &pb.GetClientListResponse{}
-	params := make(map[string]interface{})
-	var arr []interface{}
+	params := make(map[string]any)
+	var arr []any
 	query := `SELECT
 		project_id,
 		client_platform_id,

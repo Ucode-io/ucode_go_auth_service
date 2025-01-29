@@ -50,7 +50,7 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		return pKey, err
 	}
 
-	args := []interface{}{
+	args := []any{
 		random.String(),   // $1 - id
 		entity.UserId,     // $2 - user_id
 		entity.Ip,         // $3 - ip
@@ -159,7 +159,7 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 
 	var (
 		res   = &pb.GetSessionListResponse{}
-		args  []interface{}
+		args  []any
 		argID = 1
 	)
 
@@ -260,7 +260,7 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Update")
 	defer dbSpan.Finish()
 
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	queryInitial := `UPDATE "session" SET
         ip = :ip,
 		expires_at = :expires_at,

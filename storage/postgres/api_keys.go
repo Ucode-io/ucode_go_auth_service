@@ -127,7 +127,7 @@ func (r *apiKeysRepo) GetList(ctx context.Context, req *pb.GetListReq) (*pb.GetL
 			    ak.client_platform_id = cp.id`
 
 	filter := ` WHERE ak.project_id = :project_id`
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	offset := " OFFSET 0"
 	limit := " LIMIT 10"
 	order := " ORDER BY ak.created_at"
@@ -514,7 +514,7 @@ func (a *apiKeysRepo) ListClientToken(ctx context.Context, req *pb.ListClientTok
 			    client_tokens`
 
 	filter := ` WHERE client_id = :client_id`
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	offset := " OFFSET 0"
 	limit := " LIMIT 10"
 	order := " ORDER BY given_time"
@@ -548,6 +548,8 @@ func (a *apiKeysRepo) ListClientToken(ctx context.Context, req *pb.ListClientTok
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		var (

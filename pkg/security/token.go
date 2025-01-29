@@ -9,7 +9,7 @@ import (
 )
 
 // GenerateJWT ...
-func GenerateJWT(m map[string]interface{}, tokenExpireTime time.Duration, tokenSecretKey string) (tokenString string, err error) {
+func GenerateJWT(m map[string]any, tokenExpireTime time.Duration, tokenSecretKey string) (tokenString string, err error) {
 	var token *jwt.Token = jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -36,7 +36,7 @@ func ExtractClaims(tokenString string, tokenSecretKey string) (jwt.MapClaims, er
 		err   error
 	)
 
-	token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err = jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return []byte(tokenSecretKey), nil
 	})
 
@@ -90,12 +90,12 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 		return result, err
 	}
 	if claims["tables"] != nil {
-		for _, item := range claims["tables"].([]interface{}) {
+		for _, item := range claims["tables"].([]any) {
 			var table Table
 			if item != nil {
-				if item.(map[string]interface{})["object_id"] != nil && item.(map[string]interface{})["table_slug"] != nil {
-					table.ObjectID = item.(map[string]interface{})["object_id"].(string)
-					table.TableSlug = item.(map[string]interface{})["table_slug"].(string)
+				if item.(map[string]any)["object_id"] != nil && item.(map[string]any)["table_slug"] != nil {
+					table.ObjectID = item.(map[string]any)["object_id"].(string)
+					table.TableSlug = item.(map[string]any)["table_slug"].(string)
 					result.Tables = append(result.Tables, table)
 				}
 			}

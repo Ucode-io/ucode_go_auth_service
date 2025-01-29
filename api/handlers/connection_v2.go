@@ -274,7 +274,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	resp := &obs.CommonMessage{}
 	switch resource.ResourceType {
 	case 1:
-		structData, err := helper.ConvertMapToStruct(map[string]interface{}{
+		structData, err := helper.ConvertMapToStruct(map[string]any{
 			"limit":          limit,
 			"offset":         offset,
 			"client_type_id": c.DefaultQuery("client_type_id", ""),
@@ -298,7 +298,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			return
 		}
 	case 3:
-		structData, err := helper.ConvertMapToStruct(map[string]interface{}{
+		structData, err := helper.ConvertMapToStruct(map[string]any{
 			"limit":                     limit,
 			"offset":                    offset,
 			"client_type_id_from_token": c.DefaultQuery("client_type_id", ""),
@@ -323,13 +323,13 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		resp.Data = result2.Data
 	}
 
-	response, ok := resp.Data.AsMap()["response"].([]interface{})
-	responseWithOptions := make([]interface{}, 0, len(response))
+	response, ok := resp.Data.AsMap()["response"].([]any)
+	responseWithOptions := make([]any, 0, len(response))
 	if ok && c.Query("user-id") != "" {
 		switch resource.ResourceType {
 		case pbCompany.ResourceType_MONGODB:
 			for _, v := range response {
-				if res, ok := v.(map[string]interface{}); ok {
+				if res, ok := v.(map[string]any); ok {
 					if guid, ok := res["guid"].(string); ok {
 						options, err := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(
 							c.Request.Context(),
@@ -350,7 +350,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 			}
 		case pbCompany.ResourceType_POSTGRESQL:
 			for _, v := range response {
-				if res, ok := v.(map[string]interface{}); ok {
+				if res, ok := v.(map[string]any); ok {
 					if guid, ok := res["guid"].(string); ok {
 						options, err := services.GoLoginService().GetConnetionOptions(
 							c.Request.Context(),
@@ -374,14 +374,14 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 	}
 
 	if len(responseWithOptions) <= 0 {
-		if res, ok := resp.Data.AsMap()["response"].([]interface{}); ok {
+		if res, ok := resp.Data.AsMap()["response"].([]any); ok {
 			responseWithOptions = res
 		} else {
-			responseWithOptions = []interface{}{}
+			responseWithOptions = []any{}
 		}
 	}
-	h.handleResponse(c, http.OK, map[string]interface{}{
-		"data": map[string]interface{}{
+	h.handleResponse(c, http.OK, map[string]any{
+		"data": map[string]any{
 			"response": responseWithOptions,
 			"count":    resp.Data.AsMap()["count"],
 		},
@@ -440,7 +440,7 @@ func (h *Handler) V2GetConnectionByID(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{"id": c.Param("connection_id")})
+	structData, err := helper.ConvertMapToStruct(map[string]any{"id": c.Param("connection_id")})
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
@@ -537,7 +537,7 @@ func (h *Handler) V2DeleteConnection(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(map[string]interface{}{"id": connectionId})
+	structData, err := helper.ConvertMapToStruct(map[string]any{"id": connectionId})
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return

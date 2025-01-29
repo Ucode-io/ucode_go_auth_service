@@ -902,5 +902,5 @@ func (h *Handler) ExpireSessions(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.OK, map[string]interface{}{"message": "success"})
+	h.handleResponse(c, http.OK, map[string]any{"message": "success"})
 }

@@ -61,7 +61,7 @@ func (r *companyRepo) Update(ctx context.Context, entity *pb.UpdateCompanyReques
 	WHERE
 		id = :id`
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"id":   entity.Id,
 		"name": entity.Name,
 	}
@@ -98,8 +98,8 @@ func (r *companyRepo) GetList(ctx context.Context, queryParam *pb.GetComapnyList
 	defer dbSpan.Finish()
 
 	res := &pb.GetListCompanyResponse{}
-	params := make(map[string]interface{})
-	var arr []interface{}
+	params := make(map[string]any)
+	var arr []any
 	query := `SELECT
 		id, 
 		name,
@@ -216,7 +216,7 @@ func (r *companyRepo) TransferOwnership(ctx context.Context, companyID, ownerID 
 	WHERE
 		id = :id`
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"id":       companyID,
 		"owner_id": ownerID,
 	}

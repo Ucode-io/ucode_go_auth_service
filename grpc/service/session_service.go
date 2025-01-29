@@ -242,7 +242,7 @@ func (s *sessionService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 	}
 
 	// TODO - wrap in a function
-	m := map[string]interface{}{
+	m := map[string]any{
 		"id":                 session.Id,
 		"project_id":         session.ProjectId,
 		"client_platform_id": session.ClientPlatformId,

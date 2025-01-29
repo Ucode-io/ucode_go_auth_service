@@ -153,7 +153,9 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			s.log.Error("!!!AddRole.PostgresObjectBuilderService.Create--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
 		roleData, _ := helper.ConvertStructToResponse(result.Data)
+
 		_, err = services.GoObjectBuilderPermissionService().CreateDefaultPermission(
 			ctx, &nobs.CreateDefaultPermissionRequest{
 				ProjectId: req.GetProjectId(),
@@ -247,14 +249,34 @@ func (s *permissionService) V2GetRolesList(ctx context.Context, req *pb.V2GetRol
 		}
 	}()
 
-	var result *pbObject.CommonMessage
+	var (
+		result *pbObject.CommonMessage
+		err    error
+	)
 
-	structData, err := helper.ConvertRequestToSturct(map[string]interface{}{
-		"client_type_id": req.GetClientTypeId(),
-	})
+	structData, err := helper.ConvertRequestToSturct(map[string]any{})
 	if err != nil {
 		s.log.Error("!!!GetRolesList--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if req.FromPermission {
+		if len(req.GetClientTypeId()) != 0 {
+			structData, err = helper.ConvertRequestToSturct(map[string]any{"client_type_id": req.GetClientTypeId()})
+			if err != nil {
+				s.log.Error("!!!GetRolesList--->", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+	} else {
+		structData, err = helper.ConvertRequestToSturct(map[string]any{
+			"status":         req.GetStatus(),
+			"client_type_id": req.GetClientTypeId(),
+		})
+		if err != nil {
+			s.log.Error("!!!GetRolesList--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)

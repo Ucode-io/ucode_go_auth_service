@@ -11626,6 +11626,9 @@
                 },
                 "resource_type": {
                     "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
                 }
             }
         },
@@ -12118,11 +12121,26 @@
         "company_service.Project": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "company_id": {
                     "type": "string"
                 },
+                "credit_limit": {
+                    "type": "number"
+                },
+                "currencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.Currency"
+                    }
+                },
                 "currency": {
                     "$ref": "#/definitions/company_service.Currency"
+                },
+                "fare_id": {
+                    "type": "string"
                 },
                 "k8s_namespace": {
                     "type": "string"
@@ -12138,6 +12156,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "request_per_second": {
+                    "type": "integer"
                 },
                 "resources": {
                     "type": "array",

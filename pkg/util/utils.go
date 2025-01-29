@@ -6,7 +6,7 @@ import (
 )
 
 // IfElse evaluates a condition, if true returns the first parameter otherwise the second
-func IfElse(condition bool, a interface{}, b interface{}) interface{} {
+func IfElse(condition bool, a any, b any) any {
 	if condition {
 		return a
 	}

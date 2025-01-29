@@ -284,6 +284,7 @@ func (h *Handler) V2GetRolesList(c *gin.Context) {
 			ResourceType:          int32(resource.ResourceType),
 			NodeType:              resource.NodeType,
 			Status:                cast.ToBool(c.DefaultQuery("status", "true")),
+			FromPermission:        cast.ToBool(c.DefaultQuery("from_permission", "true")),
 		},
 	)
 	if err != nil {
