@@ -628,8 +628,21 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		hostPort := ":587"
 
 		to := req.GetEmail()
-		subject := "Invitation"
-		body := "You are invited"
+		login := req.GetLogin()
+		password := req.GetPassword()
+
+		subject := "You're Invited – Access Your Account"
+		body := fmt.Sprintf(
+			"You are invited to join our platform!\r\n\r\n"+
+				"Click the link below to access your account:\r\n"+
+				"https://app.ucode.run\r\n\r\n"+
+				"Your login credentials:\r\n"+
+				"Username: %s\r\n"+
+				"Password: %s\r\n\r\n"+
+				"For security reasons, please change your password after logging in.\r\n\r\n"+
+				"Welcome aboard! 🚀",
+			login, password,
+		)
 
 		msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\n\r\n%s", to, subject, body)
 		auth := smtp.PlainAuth("", s.cfg.Email, s.cfg.EmailPassword, host)
