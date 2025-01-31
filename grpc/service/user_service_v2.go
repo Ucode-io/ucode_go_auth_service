@@ -416,6 +416,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		}
 	}()
 
+	originalPassword := req.GetPassword()
 	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->HashPassword", logger.Error(err))
@@ -629,7 +630,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 
 		to := req.GetEmail()
 		login := req.GetLogin()
-		password := req.GetPassword()
+		password := originalPassword
 
 		subject := "You're Invited – Access Your Account"
 		body := fmt.Sprintf(
@@ -637,9 +638,8 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				"Click the link below to access your account:\r\n"+
 				"https://app.ucode.run\r\n\r\n"+
 				"Your login credentials:\r\n"+
-				"Username: %s\r\n"+
+				"Login: %s\r\n"+
 				"Password: %s\r\n\r\n"+
-				"For security reasons, please change your password after logging in.\r\n\r\n"+
 				"Welcome aboard! 🚀",
 			login, password,
 		)
