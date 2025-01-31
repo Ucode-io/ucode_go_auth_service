@@ -1352,7 +1352,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				return nil, err
 			}
 		} else {
-			err := errors.New("invalid hash type")
+			err := config.ErrUserNotFound
 			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -1464,6 +1464,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				CompanyId: projectInfo.GetCompanyId(),
 				Name:      projectInfo.GetTitle(),
 				Domain:    projectInfo.GetK8SNamespace(),
+				NewDesign: projectInfo.GetNewDesign(),
 			}
 
 			currencienJson, err := json.Marshal(projectInfo.GetCurrencies())
