@@ -71,7 +71,7 @@ type BaseConfig struct {
 	HTTPScheme string
 
 	Email    string
-	Password string
+	EmailPassword string
 
 	PostgresHost     string
 	PostgresPort     int
@@ -122,7 +122,7 @@ func BaseLoad() BaseConfig {
 	config.HTTPPort = cast.ToString(getOrReturnDefaultValue("HTTP_PORT", ""))
 	config.HTTPScheme = cast.ToString(getOrReturnDefaultValue("HTTP_SCHEME", ""))
 	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", "asadbekbakhodirov2@gmail.com"))
-	config.Password = cast.ToString(getOrReturnDefaultValue("PASSWORD", "nmpfnhvxecxrzrlh"))
+	config.EmailPassword = cast.ToString(getOrReturnDefaultValue("EMAIL_PASSWORD", "nmpfnhvxecxrzrlh"))
 
 	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", ""))
 	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 0))
