@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/smtp"
 	"regexp"
 	"runtime"
 	"ucode/ucode_go_auth_service/api/models"
@@ -414,6 +416,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		}
 	}()
 
+	originalPassword := req.GetPassword()
 	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->HashPassword", logger.Error(err))
@@ -618,6 +621,34 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+
+	if req.GetEmail() != "" {
+		host := "smtp.gmail.com"
+		hostPort := ":587"
+
+		to := req.GetEmail()
+		login := req.GetLogin()
+		password := originalPassword
+
+		subject := "You're Invited – Access Your Account"
+		body := fmt.Sprintf(
+			"You are invited to join our platform!\r\n\r\n"+
+				"Click the link below to access your account:\r\n"+
+				"https://app.ucode.run\r\n\r\n"+
+				"Your login credentials:\r\n"+
+				"Login: %s\r\n"+
+				"Password: %s\r\n\r\n"+
+				"Welcome aboard! 🚀",
+			login, password,
+		)
+
+		msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\n\r\n%s", to, subject, body)
+		auth := smtp.PlainAuth("", s.cfg.Email, s.cfg.EmailPassword, host)
+		err := smtp.SendMail(host+hostPort, auth, s.cfg.Email, []string{to}, []byte(msg))
+		if err != nil {
+			return nil, err
 		}
 	}
 
