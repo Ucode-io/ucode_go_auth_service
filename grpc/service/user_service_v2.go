@@ -1235,18 +1235,55 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		_, err = s.strg.User().Delete(ctx, req)
+	case 3:
+		clientType, err := services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
+			TableSlug: "client_type",
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"id": structpb.NewStringValue(req.GetClientTypeId()),
+				},
+			},
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
+		if ok {
+			clientTypeTableSlug := cast.ToString(response["table_slug"])
+			if clientTypeTableSlug != "" {
+				tableSlug = clientTypeTableSlug
+			}
+		}
+		responseFromDeleteUser, err := services.GoItemService().Delete(ctx, &nb.CommonMessage{
+			TableSlug: tableSlug,
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"id":                structpb.NewStringValue(req.Id),
+					"from_auth_service": structpb.NewBoolValue(true),
+				},
+			},
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+			UserId:       req.GetId(),
+			ProjectId:    req.GetProjectId(),
+			CompanyId:    req.GetCompanyId(),
+			ClientTypeId: req.GetClientTypeId(),
+			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
 
-	_, err = s.strg.User().Delete(ctx, req)
-	if err != nil {
-		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	s.strg.User().Delete(ctx, req)
 
 	return res, nil
 }
