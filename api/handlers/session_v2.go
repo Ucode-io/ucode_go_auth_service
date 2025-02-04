@@ -904,3 +904,21 @@ func (h *Handler) ExpireSessions(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, map[string]any{"message": "success"})
 }
+
+func (h *Handler) DeleteByParams(c *gin.Context) {
+	var req pba.DeleteByParamsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	res, err := h.services.SessionService().DeleteByParams(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	h.handleResponse(c, http.NoContent, res)
+}

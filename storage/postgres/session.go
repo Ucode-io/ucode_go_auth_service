@@ -414,3 +414,27 @@ func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessi
 
 	return nil
 }
+
+func (r *sessionRepo) DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.ExpireSessions")
+	defer dbSpan.Finish()
+
+	if entity.UserId == "" || entity.ProjectId == "" || entity.ClientTypeId == "" {
+		return errors.New("user_id, project_id and client_type_id are required")
+	}
+
+	query := `
+		DELETE FROM session
+		WHERE client_type_id = $1 AND user_id = $2 AND project_id = $3
+	`
+	result, err := r.db.Exec(ctx, query, entity.ClientTypeId, entity.UserId, entity.ProjectId)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+
+	return nil
+}
