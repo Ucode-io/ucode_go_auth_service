@@ -514,4 +514,5 @@ message DeleteByParamsRequest {
     string project_id = 1;
     string user_id = 2;
     string client_type_id = 3;
+    string session_id = 4;
 }

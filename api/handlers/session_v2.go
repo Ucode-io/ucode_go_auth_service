@@ -912,6 +912,14 @@ func (h *Handler) DeleteByParams(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok && !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.BadRequest, "project_id is required")
+		return
+	}
+
+	req.ProjectId = cast.ToString(projectId)
+
 	res, err := h.services.SessionService().DeleteByParams(
 		c.Request.Context(),
 		&req,

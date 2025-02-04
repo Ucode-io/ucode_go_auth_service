@@ -419,15 +419,15 @@ func (r *sessionRepo) DeleteByParams(ctx context.Context, entity *pb.DeleteByPar
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.ExpireSessions")
 	defer dbSpan.Finish()
 
-	if entity.UserId == "" || entity.ProjectId == "" || entity.ClientTypeId == "" {
-		return errors.New("user_id, project_id and client_type_id are required")
+	if entity.UserId == "" || entity.ProjectId == "" || entity.ClientTypeId == "" || entity.SessionId == "" {
+		return errors.New("user_id, project_id, session_id and client_type_id are required")
 	}
 
 	query := `
 		DELETE FROM session
-		WHERE client_type_id = $1 AND user_id = $2 AND project_id = $3
+		WHERE client_type_id = $1 AND user_id = $2 AND project_id = $3 AND id != $4
 	`
-	result, err := r.db.Exec(ctx, query, entity.ClientTypeId, entity.UserId, entity.ProjectId)
+	result, err := r.db.Exec(ctx, query, entity.ClientTypeId, entity.UserId, entity.ProjectId, entity.SessionId)
 	if err != nil {
 		return err
 	}
