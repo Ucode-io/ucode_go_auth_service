@@ -904,3 +904,29 @@ func (h *Handler) ExpireSessions(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, map[string]any{"message": "success"})
 }
+
+func (h *Handler) DeleteByParams(c *gin.Context) {
+	var req pba.DeleteByParamsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok && !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.BadRequest, "project_id is required")
+		return
+	}
+
+	req.ProjectId = cast.ToString(projectId)
+
+	res, err := h.services.SessionService().DeleteByParams(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+	h.handleResponse(c, http.NoContent, res)
+}

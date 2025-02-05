@@ -435,7 +435,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		&auth_service.UserPrimaryKey{
 			Id:                    userID,
 			ProjectId:             projectID,
-			ResourceType:          1,
+			ResourceType:          int32(resource.ResourceType),
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ClientTypeId:          clientTypeID,
 			CompanyId:             project.CompanyId,

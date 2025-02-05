@@ -94,6 +94,7 @@ type SessionRepoI interface {
 	DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error)
 	GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error)
+	DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (err error)
 }
 
 type CompanyRepoI interface {

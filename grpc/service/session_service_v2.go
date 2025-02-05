@@ -1822,3 +1822,18 @@ func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessi
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *sessionService) DeleteByParams(ctx context.Context, req *pb.DeleteByParamsRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.ExpireSessions", req)
+	defer dbSpan.Finish()
+
+	s.log.Info("---DeleteByParams--->>>", logger.Any("req", req))
+
+	err := s.strg.Session().DeleteByParams(ctx, req)
+	if err != nil {
+		s.log.Error("!!!DeleteByParams--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
+}
