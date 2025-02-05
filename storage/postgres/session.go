@@ -38,7 +38,6 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 		return nil, err
 	}
 
-	entity.SessionLimit = 2
 	if sessionCount >= entity.SessionLimit {
 		sessionsToDelete := sessionCount - entity.SessionLimit + 1
 		deleteQuery := `
