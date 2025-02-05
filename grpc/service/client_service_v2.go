@@ -47,6 +47,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		SelfRecover:  req.SelfRecover,
 		ProjectId:    req.DbProjectId,
 		TableSlug:    req.GetTableSlug(),
+		SessionLimit: req.SessionLimit,
 	}
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
