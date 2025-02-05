@@ -243,6 +243,7 @@ message CreateSessionRequest {
     string env_id = 11;
     string user_id_auth = 12;
     string client_id = 13;
+    int32 session_limit = 14;
 }
 
 message UpdateSessionRequest {
