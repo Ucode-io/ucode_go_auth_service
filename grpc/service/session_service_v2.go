@@ -1009,6 +1009,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		UserIdAuth:       input.GetLoginData().GetUserIdAuth(),
 		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
 		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
+		SessionLimit:     input.GetLoginData().GetClientType().GetSessionLimit(),
 	})
 	if err != nil {
 		s.log.Error("!!!Create--->", logger.Error(err))

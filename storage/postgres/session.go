@@ -31,6 +31,32 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Create")
 	defer dbSpan.Finish()
 
+	countQuery := `SELECT COUNT(*) FROM "session" WHERE client_type_id = $1`
+	var sessionCount int32
+	err = r.db.QueryRow(ctx, countQuery, entity.ClientTypeId).Scan(&sessionCount)
+	if err != nil {
+		return nil, err
+	}
+
+	entity.SessionLimit = 2
+	if sessionCount >= entity.SessionLimit {
+		sessionsToDelete := sessionCount - entity.SessionLimit + 1
+		deleteQuery := `
+				DELETE FROM "session"
+				WHERE client_type_id = $1
+				AND id IN (
+					SELECT id
+					FROM "session"
+					WHERE client_type_id = $1
+					ORDER BY created_at ASC
+					LIMIT $2
+				)`
+		_, err = r.db.Exec(ctx, deleteQuery, entity.ClientTypeId, sessionsToDelete)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	queryInitial := `INSERT INTO "session" (
 		id,
 		user_id,
