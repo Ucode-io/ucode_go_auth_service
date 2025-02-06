@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -31,28 +32,42 @@ func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionReques
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Create")
 	defer dbSpan.Finish()
 
-	countQuery := `SELECT COUNT(*) FROM "session" WHERE client_type_id = $1`
+	var envID *string
+	if entity.EnvId != "" {
+		envID = &entity.EnvId
+	} else {
+		envID = nil
+	}
+
+	countQuery := `
+		SELECT COUNT(*) 
+		FROM "session" 
+		WHERE client_type_id = $1 
+		  AND user_id_auth = $2 
+		  AND env_id IS NOT DISTINCT FROM $3
+	`
 	var sessionCount int32
-	err = r.db.QueryRow(ctx, countQuery, entity.ClientTypeId).Scan(&sessionCount)
+	err = r.db.QueryRow(ctx, countQuery, entity.ClientTypeId, entity.UserIdAuth, envID).Scan(&sessionCount)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to count sessions: %w", err)
 	}
 
 	if sessionCount >= entity.SessionLimit {
 		sessionsToDelete := sessionCount - entity.SessionLimit + 1
 		deleteQuery := `
-				DELETE FROM "session"
-				WHERE client_type_id = $1
-				AND id IN (
-					SELECT id
-					FROM "session"
-					WHERE client_type_id = $1
-					ORDER BY created_at ASC
-					LIMIT $2
-				)`
-		_, err = r.db.Exec(ctx, deleteQuery, entity.ClientTypeId, sessionsToDelete)
+			DELETE FROM "session"
+			WHERE id IN (
+				SELECT id
+				FROM "session"
+				WHERE client_type_id = $1 
+				  AND user_id_auth = $2 
+				  AND env_id IS NOT DISTINCT FROM $3
+				ORDER BY created_at ASC
+				LIMIT $4
+			)`
+		_, err = r.db.Exec(ctx, deleteQuery, entity.ClientTypeId, entity.UserIdAuth, envID, sessionsToDelete)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to delete sessions: %w", err)
 		}
 	}
 
