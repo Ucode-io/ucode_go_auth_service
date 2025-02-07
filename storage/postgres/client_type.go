@@ -167,6 +167,7 @@ func (r *clientTypeRepo) Update(ctx context.Context, entity *pb.UpdateClientType
 		confirm_by = :confirm_by,
 		self_register = :self_register,
 		self_recover = :self_recover,
+		session_limit = :session_limit,
 		updated_at = now()
 	WHERE
 		id = :id`
@@ -178,6 +179,7 @@ func (r *clientTypeRepo) Update(ctx context.Context, entity *pb.UpdateClientType
 		"self_register": entity.SelfRegister,
 		"self_recover":  entity.SelfRecover,
 		"tables":        entity.Tables,
+		"session_limit": entity.SessionLimit,
 	}
 
 	q, arr := helper.ReplaceQueryParams(query, params)
