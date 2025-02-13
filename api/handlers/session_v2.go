@@ -165,7 +165,7 @@ func (h *Handler) V2Login(c *gin.Context) {
 		case "user not found":
 			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
 			return
-		case "user has been expired":
+		case "session has been expired":
 			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
 		case "invalid username":
@@ -346,7 +346,7 @@ func (h *Handler) V2LoginWithOption(c *gin.Context) {
 		case "user verified but not found":
 			h.handleResponse(c, http.OK, "Пользователь проверен, но не найден")
 			return
-		case "user has been expired":
+		case "session has been expired":
 			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
 		case "invalid username":
@@ -404,7 +404,7 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 		if httpErrorStr == "user not found" {
 			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
 			return
-		} else if httpErrorStr == "user has been expired" {
+		} else if httpErrorStr == "session has been expired" {
 			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
 		} else if httpErrorStr == "invalid username" {
@@ -449,7 +449,7 @@ func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 		if httpErrorStr == "user not found" {
 			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
 			return
-		} else if httpErrorStr == "user has been expired" {
+		} else if httpErrorStr == "session has been expired" {
 			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
 		} else if httpErrorStr == "invalid username" {
@@ -549,25 +549,8 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 		c.Request.Context(), &login,
 	)
 	if err != nil {
-		httpErrorStr := strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
-		httpErrorStr = strings.ToLower(httpErrorStr)
-
-		if httpErrorStr == "user not found" {
-			h.handleResponse(c, http.NotFound, "Пользователь не найден")
-			return
-		} else if httpErrorStr == "user has been expired" {
-			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
-			return
-		} else if httpErrorStr == "invalid username" {
-			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
-			return
-		} else if httpErrorStr == "invalid password" {
-			h.handleResponse(c, http.InvalidArgument, "неверный пароль")
-			return
-		} else {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
-		}
+		h.handleError(c, http.InvalidArgument, err)
+		return
 	}
 
 	h.handleResponse(c, http.Created, resp)

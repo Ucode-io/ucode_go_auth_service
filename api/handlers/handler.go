@@ -3,9 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"strconv"
 	"time"
-	"ucode/ucode_go_auth_service/api/http"
+	status_http "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"google.golang.org/grpc/status"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,7 +57,7 @@ func (h *Handler) GetProjectSrvc(c *gin.Context, projectId string, nodeType stri
 	}
 }
 
-func (h *Handler) handleResponse(c *gin.Context, status http.Status, data any) {
+func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data any) {
 	switch code := status.Code; {
 	case code < 300:
 	case code < 400:
@@ -75,11 +78,35 @@ func (h *Handler) handleResponse(c *gin.Context, status http.Status, data any) {
 		)
 	}
 
-	c.JSON(status.Code, http.Response{
+	c.JSON(status.Code, status_http.Response{
 		Status:      status.Status,
 		Description: status.Description,
 		Data:        data,
 	})
+}
+
+func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
+	st, _ := status.FromError(err)
+	fmt.Println("Cide->", st.Code())
+	if statusHttp.Status == status_http.BadRequest.Status {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        "Invalid JSON",
+		})
+	} else if statusHttp.Status == status_http.InvalidArgument.Status {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        "Incorrect login or password",
+		})
+	} else if st.Err() != nil {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        st.Message(),
+		})
+	}
 }
 
 func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {

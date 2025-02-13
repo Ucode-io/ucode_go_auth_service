@@ -157,7 +157,7 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return nil, false
 		}
-		errr = status.Error(codes.InvalidArgument, "User has been expired")
+		errr = status.Error(codes.InvalidArgument, "Session has been expired")
 		if errr.Error() == err.Error() {
 			h.log.Error("---ERR->HasAccess->User Expired-->")
 			h.handleResponse(c, http.Forbidden, err.Error())

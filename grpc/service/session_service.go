@@ -120,7 +120,7 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	}
 
 	if expiresAt.Unix() < time.Now().Unix() {
-		err := errors.New("user has been expired")
+		err := errors.New("session has been expired")
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}

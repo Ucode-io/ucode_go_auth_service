@@ -1136,7 +1136,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	if expiresAt.Unix() < time.Now().Add(5*time.Hour).Unix() {
-		err := errors.New("user has been expired")
+		err := errors.New("session has been expired")
 		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}

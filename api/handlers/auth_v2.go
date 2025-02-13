@@ -549,7 +549,7 @@ func (h *Handler) V2LoginProvider(c *gin.Context) {
 		case "user not found":
 			h.handleResponse(c, status.NotFound, "Пользователь не найдено")
 			return
-		case "user has been expired":
+		case "session has been expired":
 			h.handleResponse(c, status.InvalidArgument, "срок действия пользователя истек")
 			return
 		case "invalid username":
