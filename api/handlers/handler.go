@@ -17,6 +17,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/logger"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/gin-gonic/gin"
@@ -85,7 +86,15 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 }
 
 func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
-	st, _ := status.FromError(err)
+	st, ok := status.FromError(err)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        "Something went wrong",
+		})
+	}
+
 	if statusHttp.Status == status_http.BadRequest.Status {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
@@ -106,6 +115,12 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 				Data:        "Incorrect login or password",
 			})
 		}
+	} else if st.Code() == codes.Unimplemented {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        "Temporarily out of work",
+		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
