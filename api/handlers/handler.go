@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -87,7 +86,6 @@ func (h *Handler) handleResponse(c *gin.Context, status status_http.Status, data
 
 func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err error) {
 	st, _ := status.FromError(err)
-	fmt.Println("Cide->", st.Code())
 	if statusHttp.Status == status_http.BadRequest.Status {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
@@ -95,11 +93,19 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 			Data:        "Invalid JSON",
 		})
 	} else if statusHttp.Status == status_http.InvalidArgument.Status {
-		c.JSON(http.StatusInternalServerError, status_http.Response{
-			Status:      statusHttp.Status,
-			Description: st.String(),
-			Data:        "Incorrect login or password",
-		})
+		if st.Message() == "user not found with this email" {
+			c.JSON(http.StatusInternalServerError, status_http.Response{
+				Status:      statusHttp.Status,
+				Description: st.String(),
+				Data:        "User not found with this email",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, status_http.Response{
+				Status:      statusHttp.Status,
+				Description: st.String(),
+				Data:        "Incorrect login or password",
+			})
+		}
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,

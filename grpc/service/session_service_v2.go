@@ -1418,7 +1418,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		if user.Id == "" {
 			err = errors.New("user not found with this email")
 			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-			return nil, status.Error(codes.NotFound, err.Error())
+			return nil, err
 		}
 	}
 
