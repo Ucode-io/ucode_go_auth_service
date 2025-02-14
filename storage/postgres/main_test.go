@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/storage"
 	"ucode/ucode_go_auth_service/storage/postgres"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"github.com/manveru/faker"
@@ -35,14 +37,35 @@ func CreateRandomId(t *testing.T) string {
 }
 
 func TestMain(m *testing.M) {
-	cfg = config.BaseLoad()
+	var (
+		loggerLevel string
+		cfg         = config.BaseLoad()
+	)
+
+	switch cfg.Environment {
+	case config.DebugMode:
+		loggerLevel = logger.LevelDebug
+		gin.SetMode(gin.DebugMode)
+	case config.TestMode:
+		loggerLevel = logger.LevelDebug
+		gin.SetMode(gin.TestMode)
+	default:
+		loggerLevel = logger.LevelInfo
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	log := logger.NewLogger(cfg.ServiceName, loggerLevel)
+	defer func() {
+		_ = logger.Cleanup(log)
+	}()
+
 	cfg.PostgresPassword = "Iegfrte45eatr7ieso"
 	cfg.PostgresHost = "65.109.239.69"
 	cfg.PostgresPort = 5432
 	cfg.PostgresDatabase = "auth_service"
 	cfg.PostgresUser = "auth_service"
 
-	strg, err = postgres.NewPostgres(context.Background(), cfg)
+	strg, err = postgres.NewPostgres(context.Background(), cfg, log)
 
 	fakeData, _ = faker.New("en")
 

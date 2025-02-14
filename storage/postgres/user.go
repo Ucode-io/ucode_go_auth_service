@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -23,12 +24,14 @@ import (
 )
 
 type userRepo struct {
-	db *Pool
+	logger logger.LoggerI
+	db     *Pool
 }
 
-func NewUserRepo(db *Pool) storage.UserRepoI {
+func NewUserRepo(db *Pool, logger logger.LoggerI) storage.UserRepoI {
 	return &userRepo{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
@@ -50,7 +53,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.GetCompanyId(),
 	)
 	if err != nil {
-		return pKey, errors.Wrap(err, "failed to create user")
+		return pKey, helper.HandleDatabaseError(err, r.logger, "Create user: failed to create")
 	}
 
 	pKey = &pb.UserPrimaryKey{Id: id}
@@ -361,17 +364,17 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.HashType,
 		)
 		if err == pgx.ErrNoRows {
-			return res, nil
+			return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: no rows 1")
 		}
-		return res, nil
+		return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: failed to scan")
 	}
 
 	if err == pgx.ErrNoRows {
-		return res, nil
+		return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: no rows 2")
 	}
 
 	if err != nil {
-		return res, errors.Wrap(err, "failed to get user by username")
+		return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: failed to get user")
 	}
 
 	return res, nil

@@ -78,7 +78,7 @@ func main() {
 		log.Panic("Error creating rate limiter", logger.Error(err))
 	}
 
-	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg)
+	pgStore, err := postgres.NewPostgres(context.Background(), baseCfg, log)
 	if err != nil {
 		log.Panic("postgres.NewPostgres", logger.Error(err))
 	}

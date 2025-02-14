@@ -91,7 +91,7 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        "Something went wrong",
+			Data:        config.ErrWrong,
 		})
 	}
 
@@ -99,27 +99,19 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        "Invalid JSON",
+			Data:        config.ErrInvalidJSON,
 		})
-	} else if statusHttp.Status == status_http.InvalidArgument.Status {
-		if st.Message() == "user not found with this email" {
-			c.JSON(http.StatusInternalServerError, status_http.Response{
-				Status:      statusHttp.Status,
-				Description: st.String(),
-				Data:        "User not found with this email",
-			})
-		} else {
-			c.JSON(http.StatusInternalServerError, status_http.Response{
-				Status:      statusHttp.Status,
-				Description: st.String(),
-				Data:        "Incorrect login or password",
-			})
-		}
+	} else if st.Code() == codes.InvalidArgument {
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        st.Message(),
+		})
 	} else if st.Code() == codes.Unimplemented {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        "Temporarily out of work",
+			Data:        config.ErrOutOfWork,
 		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{

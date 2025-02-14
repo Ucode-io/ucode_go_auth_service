@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
@@ -586,7 +585,6 @@ func (h *Handler) ForgotPassword(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		fmt.Println("Error is here")
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}

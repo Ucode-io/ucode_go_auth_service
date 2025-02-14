@@ -1301,13 +1301,13 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		if len(req.Username) < 6 {
 			err := errors.New("invalid username")
 			s.log.Error("!!!MultiCompanyLogin--->InvalidUsername", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.InvalidArgument, config.ErrIncorrectLoginOrPassword)
 		}
 
 		if len(req.Password) < 6 {
 			err := errors.New("invalid password")
 			s.log.Error("!!!MultiCompanyLogin--->InvalidPassword", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.InvalidArgument, config.ErrIncorrectLoginOrPassword)
 		}
 
 		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
