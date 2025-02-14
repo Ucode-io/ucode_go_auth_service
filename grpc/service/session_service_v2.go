@@ -1223,7 +1223,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 
 		if resource.GetProjectStatus() == config.InactiveStatus && methodField != config.READ {
-			err := status.Error(codes.PermissionDenied, "Project is an inactive")
+			err := status.Error(codes.PermissionDenied, "Permission")
 			return nil, err
 		}
 
@@ -1248,7 +1248,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			}
 
 			if !resp.IsHavePermission {
-				err := status.Error(codes.PermissionDenied, "Permission denied")
+				err := status.Error(codes.PermissionDenied, config.PermissionDenied)
 				return nil, err
 			}
 		case pbCompany.ResourceType_POSTGRESQL:
@@ -1266,7 +1266,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			}
 
 			if !resp.IsHavePermission {
-				err := status.Error(codes.PermissionDenied, "Permission denied")
+				err := status.Error(codes.PermissionDenied, config.PermissionDenied)
 				return nil, err
 			}
 		}
