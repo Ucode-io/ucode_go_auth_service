@@ -18,6 +18,11 @@ const (
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	AdminClientName       string = "ADMIN"
 	OpenFaaSPlatformID    string = "7d4a4c38-dd84-4902-b744-0488b80a4c04"
+	READ                  string = "read"
+	WRITE                 string = "write"
+	UPDATE                string = "update"
+	DELETE                string = "delete"
+	InactiveStatus        string = "inactive"
 
 	DefaultOtp string = "208071"
 
@@ -106,7 +111,7 @@ var (
 	Path = map[string]bool{
 		"object":      true,
 		"object-slim": true,
-		// "items":       true,
+		"items":       true,
 	}
 
 	RateLimitCfg = []*ratelimiter.LeakyBucket{
