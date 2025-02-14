@@ -364,13 +364,13 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.HashType,
 		)
 		if err == pgx.ErrNoRows {
-			return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: no rows 1")
+			return res, nil
 		}
 		return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: failed to scan")
 	}
 
 	if err == pgx.ErrNoRows {
-		return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: no rows 2")
+		return res, nil
 	}
 
 	if err != nil {

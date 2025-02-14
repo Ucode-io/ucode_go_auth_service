@@ -1355,7 +1355,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		} else {
 			err := config.ErrUserNotFound
 			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 		}
 	case config.WithPhone:
 		if config.DefaultOtp != req.Otp {
@@ -1416,12 +1416,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		}
 
 		if user.Id == "" {
-			err = errors.New("user not found with this email")
+			err = errors.New(config.ErrGoogle)
 			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
 			return nil, err
 		}
 	}
-
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")

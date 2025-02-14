@@ -24,4 +24,5 @@ var (
 	ErrInvalidJSON              = "Invalid JSON."
 	ErrWrong                    = "Something went wrong."
 	ErrOutOfWork                = "Temporarily out of work."
+	ErrGoogle                   = "This Google account is not registered."
 )
