@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 	status_http "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -132,7 +133,7 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        st.Message(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
 		})
 	}
 }

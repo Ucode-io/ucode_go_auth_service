@@ -1268,7 +1268,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, err
 		}
 		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
 			UserId:       req.GetId(),
