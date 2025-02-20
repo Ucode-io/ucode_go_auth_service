@@ -25,4 +25,9 @@ var (
 	ErrWrong                    = "Something went wrong."
 	ErrOutOfWork                = "Temporarily out of work."
 	ErrGoogle                   = "This Google account is not registered."
+	ErrEmailExists              = "This email already exists."
+)
+
+var (
+	EmailConstrant = "user_unq_email"
 )

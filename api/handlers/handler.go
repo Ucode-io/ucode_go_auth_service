@@ -101,6 +101,17 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 			Description: st.String(),
 			Data:        config.ErrInvalidJSON,
 		})
+	} else if st.Code() == codes.AlreadyExists {
+		var data string
+		if st.Message() == config.EmailConstrant {
+			data = config.ErrEmailExists
+		}
+
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        data,
+		})
 	} else if st.Code() == codes.InvalidArgument {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
