@@ -19,6 +19,8 @@ const (
 	AdminClientName       string = "ADMIN"
 	OpenFaaSPlatformID    string = "7d4a4c38-dd84-4902-b744-0488b80a4c04"
 
+	InactiveStatus string = "inactive"
+
 	DefaultOtp string = "208071"
 
 	// Service Configs
@@ -26,6 +28,11 @@ const (
 	HIGH_NODE_TYPE       string = "HIGH"
 	ENTER_PRICE_TYPE     string = "ENTER_PRICE"
 	ObjectBuilderService string = "BUILDER_SERVICE"
+
+	READ   string = "read"
+	WRITE  string = "write"
+	UPDATE string = "update"
+	DELETE string = "delete"
 
 	// Login Strategy
 	WithGoogle string = "google"
@@ -43,6 +50,7 @@ const (
 	// Errors
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
+	PermissionDenied       string = "Permission denied"
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"
@@ -106,7 +114,7 @@ var (
 	Path = map[string]bool{
 		"object":      true,
 		"object-slim": true,
-		// "items":       true,
+		"items":       true,
 	}
 
 	RateLimitCfg = []*ratelimiter.LeakyBucket{

@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"runtime"
 	"strings"
 	"time"
-	"ucode/ucode_go_auth_service/api/http"
+
+	status_http "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -857,7 +859,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->SessionGetByPK", logger.Error(err))
-		return nil, status.Error(codes.Code(http.Unauthorized.Code), err.Error())
+		return nil, status.Error(codes.Code(status_http.Unauthorized.Code), err.Error())
 	}
 	if req.ClientTypeId != "" {
 		session.ClientTypeId = req.ClientTypeId
@@ -1142,21 +1144,21 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	switch req.Method {
-	case "GET":
-		methodField = "read"
-	case "POST":
-		methodField = "write"
-	case "PUT":
-		methodField = "update"
-	case "DELETE":
-		methodField = "delete"
+	case http.MethodGet:
+		methodField = config.READ
+	case http.MethodPost:
+		methodField = config.WRITE
+	case http.MethodPut:
+		methodField = config.UPDATE
+	case http.MethodDelete:
+		methodField = config.DELETE
 	}
 	// this condition need our object/get-list api because this api's method is post we change it to get
 	// this condition need our object/get-list-group-by and object/get-group-by-field api because this api's method is post we change it to get
 	if ((strings.Contains(req.GetPath(), "object/get-list")) ||
 		(strings.Contains(req.GetPath(), "object/get-list-group-by")) ||
-		(strings.Contains(req.GetPath(), "object/get-group-by-field"))) && req.GetMethod() != "GET" {
-		methodField = "read"
+		(strings.Contains(req.GetPath(), "object/get-group-by-field"))) && req.GetMethod() != http.MethodGet {
+		methodField = config.READ
 	}
 
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
@@ -1196,7 +1198,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 	for _, path := range arr_path {
 		if exist := config.Path[path]; exist {
-			checkPermission = exist
+			checkPermission = true
 		}
 	}
 
@@ -1220,13 +1222,18 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			return nil, err
 		}
 
+		if resource.GetProjectStatus() == config.InactiveStatus && methodField != config.READ {
+			err := status.Error(codes.PermissionDenied, config.PermissionDenied)
+			return nil, err
+		}
+
+		services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
+		if err != nil {
+			return nil, err
+		}
+
 		switch resource.ResourceType {
 		case pbCompany.ResourceType_MONGODB:
-			services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
-			if err != nil {
-				return nil, err
-			}
-
 			resp, err := services.GetBuilderPermissionServiceByType(resource.NodeType).GetTablePermission(ctx,
 				&pbObject.GetTablePermissionRequest{
 					TableSlug:             tableSlug,
@@ -1241,10 +1248,27 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			}
 
 			if !resp.IsHavePermission {
-				err := status.Error(codes.PermissionDenied, "Permission denied")
+				err := status.Error(codes.PermissionDenied, config.PermissionDenied)
 				return nil, err
 			}
 		case pbCompany.ResourceType_POSTGRESQL:
+			resp, err := services.GoObjectBuilderPermissionService().GetTablePermission(ctx,
+				&nb.GetTablePermissionRequest{
+					TableSlug:             tableSlug,
+					RoleId:                session.RoleId,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Method:                methodField,
+				},
+			)
+			if err != nil {
+				s.log.Error("!!!V2HasAccessUser->GetTablePermission--->", logger.Error(err))
+				return nil, err
+			}
+
+			if !resp.IsHavePermission {
+				err := status.Error(codes.PermissionDenied, config.PermissionDenied)
+				return nil, err
+			}
 		}
 	}
 

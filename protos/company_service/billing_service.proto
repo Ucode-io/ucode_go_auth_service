@@ -37,6 +37,9 @@ service BillingService {
     rpc GetVerifyCode(GetVerifyCodeRequest) returns (GetVerifyCodeResponse);
     rpc Verify(VerifyRequest) returns (ProjectCard);
     rpc UpdateProjectCard(ProjectCard) returns (ProjectCard);
+    rpc ListProjectCards(ListRequest) returns (ListProjectCardsResponse);
+    rpc ReceiptPay(ReceiptPayRequest) returns (ReceiptPayResponse);
+    rpc DeleteProjectCard(PrimaryKey) returns (google.protobuf.Empty);
 }
 
 message CompareFunctionRequest {
@@ -101,6 +104,7 @@ message Transaction {
     string accepted_at = 13;
     Currency currency = 14;
     string receipt_file = 15;
+    int64 order_id = 16;
 }
 
 // Requests and Responses
@@ -160,6 +164,7 @@ message CreateTransactionRequest {
     string acceptor_id = 9;
     string fare_id = 10;
     string receipt_file = 11;
+    int64 order_id = 12;
 }
 
 message ListTransactionsResponse {
@@ -207,4 +212,23 @@ message VerifyRequest {
     string project_card_id = 1;
     string code = 2;
     string project_id = 3;
+}
+
+message ListProjectCardsResponse {
+    repeated ProjectCard project_cards = 1;
+    int32 count = 2;
+}
+
+message ReceiptPayRequest {
+    string project_card_id = 1;
+    double amount = 2;
+    string project_id = 3;
+    string user_id = 4;
+}
+
+message ReceiptPayResponse {
+    string pan = 1;
+    double amount = 2;
+    string status = 3;
+    string organization = 4;
 }
