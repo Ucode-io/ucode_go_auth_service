@@ -26,8 +26,10 @@ var (
 	ErrOutOfWork                = "Temporarily out of work."
 	ErrGoogle                   = "This Google account is not registered."
 	ErrEmailExists              = "This email already exists."
+	ErrPhoneExists              = "This phone already exists."
 )
 
 var (
-	EmailConstrant = "user_unq_email"
+	EmailConstraint = "user_unq_email"
+	PhoneConstraint = "user_unq_phone"
 )

@@ -103,8 +103,12 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 		})
 	} else if st.Code() == codes.AlreadyExists {
 		var data string
-		if st.Message() == config.EmailConstrant {
+		if st.Message() == config.EmailConstraint {
 			data = config.ErrEmailExists
+		} else if st.Message() == config.PhoneConstraint {
+			data = config.ErrPhoneExists
+		} else {
+			data = st.Message()
 		}
 
 		c.JSON(http.StatusInternalServerError, status_http.Response{
