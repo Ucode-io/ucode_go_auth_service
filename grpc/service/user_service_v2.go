@@ -620,7 +620,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		})
 		if err != nil {
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, err
 		}
 	}
 
