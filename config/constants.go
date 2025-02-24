@@ -43,6 +43,7 @@ const (
 	// Errors
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
+	SMS_TEXT                  string = "Code: "
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"

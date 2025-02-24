@@ -7,6 +7,7 @@ import (
 
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/config"
 	cfg "ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbc "ucode/ucode_go_auth_service/genproto/company_service"
@@ -165,8 +166,9 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	}
 
 	body := &pbSms.Sms{
-		Id:        id.String(),
-		Text:      request.Text,
+		Id: id.String(),
+		// Text:      request.Text,
+		Text:      config.SMS_TEXT,
 		Otp:       code,
 		Recipient: request.Recipient,
 		ExpiresAt: expire.String()[:19],
