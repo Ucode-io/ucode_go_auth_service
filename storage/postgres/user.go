@@ -495,6 +495,45 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	return &res, nil
 }
 
+func (r *userRepo) GetUserProjects2(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjects")
+	defer dbSpan.Finish()
+
+	res := pb.GetUserProjectsRes{}
+
+	query := `SELECT company_id,
+       			array_agg(DISTINCT project_id) AS project_ids
+				FROM user_project
+				WHERE user_id = $1
+				AND env_id = $2
+				GROUP BY company_id`
+
+	rows, err := r.db.Query(ctx, query, userId, envId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			projectIDs = make([]string, 0)
+			company    string
+		)
+
+		err = rows.Scan(&company, &projectIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		res.Companies = append(res.Companies, &pb.UserCompany{
+			Id:         company,
+			ProjectIds: projectIDs,
+		})
+	}
+
+	return &res, nil
+}
+
 func (r *userRepo) AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.AddUserToProject")
 	defer dbSpan.Finish()
