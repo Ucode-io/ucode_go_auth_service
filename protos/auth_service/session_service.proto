@@ -224,6 +224,7 @@ message HasAccessSuperAdminRes {
     string env_id = 13;
     string client_type_id = 14;
     string role_id = 15;
+    string user_id_auth = 16;
 }
 
 message TableBody {

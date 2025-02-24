@@ -28,7 +28,7 @@ func HandleDatabaseError(err error, log logger.LoggerI, message string) error {
 		switch pgErr.Code {
 		case "23505":
 			// Unique violation
-			return status.Error(codes.AlreadyExists, err.Error())
+			return status.Error(codes.AlreadyExists, pgErr.ConstraintName)
 		case "23503":
 			// Foreign key violation
 			return status.Error(codes.FailedPrecondition, fmt.Sprintf("foreign key violation: %v", pgErr.Message))

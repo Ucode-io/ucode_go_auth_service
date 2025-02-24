@@ -319,5 +319,6 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		EnvId:        session.EnvId,
 		ClientTypeId: session.ClientTypeId,
 		RoleId:       session.RoleId,
+		UserIdAuth:   session.UserIdAuth,
 	}, nil
 }

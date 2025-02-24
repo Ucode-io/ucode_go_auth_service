@@ -443,7 +443,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleError(c, http.InternalServerError, err)
 		return
 	}
 

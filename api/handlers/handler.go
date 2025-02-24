@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 	status_http "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
@@ -101,6 +102,21 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 			Description: st.String(),
 			Data:        config.ErrInvalidJSON,
 		})
+	} else if st.Code() == codes.AlreadyExists {
+		var data string
+		if st.Message() == config.EmailConstraint {
+			data = config.ErrEmailExists
+		} else if st.Message() == config.PhoneConstraint {
+			data = config.ErrPhoneExists
+		} else {
+			data = st.Message()
+		}
+
+		c.JSON(http.StatusInternalServerError, status_http.Response{
+			Status:      statusHttp.Status,
+			Description: st.String(),
+			Data:        data,
+		})
 	} else if st.Code() == codes.InvalidArgument {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
@@ -117,7 +133,7 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        st.Message(),
+			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
 		})
 	}
 }

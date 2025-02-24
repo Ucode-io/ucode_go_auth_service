@@ -1369,12 +1369,12 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
 			if err != nil {
 				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
-				return nil, err
+				return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 			}
 			if !match {
 				err := errors.New("username or password is wrong")
 				s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-				return nil, err
+				return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 			}
 		} else {
 			err := config.ErrUserNotFound
