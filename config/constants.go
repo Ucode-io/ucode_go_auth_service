@@ -50,7 +50,7 @@ const (
 	// Errors
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
-	PermissionDenied       string = "Permission denied"
+	PermissionDenied          string = "Permission denied"
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"
@@ -114,7 +114,7 @@ var (
 	Path = map[string]bool{
 		"object":      true,
 		"object-slim": true,
-		"items":       true,
+		// "items":       true,
 	}
 
 	RateLimitCfg = []*ratelimiter.LeakyBucket{
