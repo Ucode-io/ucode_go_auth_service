@@ -117,6 +117,8 @@ var (
 		"items":       true,
 	}
 
+	ITEMS string = "items"
+
 	RateLimitCfg = []*ratelimiter.LeakyBucket{
 		{
 			Method:         "POST",
