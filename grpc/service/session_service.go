@@ -322,3 +322,19 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		UserIdAuth:   session.UserIdAuth,
 	}, nil
 }
+
+func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*emptypb.Empty, error) {
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!Logout--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	_, err = s.strg.Session().Delete(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!Logout--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
+}
