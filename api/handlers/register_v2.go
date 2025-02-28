@@ -10,12 +10,15 @@ import (
 	cfg "ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbc "ucode/ucode_go_auth_service/genproto/company_service"
+	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
+	os "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
 )
 
 // V2SendCodeApp godoc
@@ -139,6 +142,12 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.BadRequest, "cant get project_id")
+		return
+	}
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.handleResponse(c, http.BadRequest, "cant get environment_id")
@@ -164,9 +173,72 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pbc.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	structData, err := helper.ConvertMapToStruct(map[string]any{"id": request.SmsTemplateId})
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c, resourceEnvironment.ProjectId, resourceEnvironment.NodeType)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	var text string
+	switch resource.ResourceType {
+	case 1:
+		smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingle(
+			c.Request.Context(),
+			&os.CommonMessage{
+				TableSlug: "sms_template",
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		response, ok := smsTemplateResp.Data.AsMap()["response"].(map[string]any)
+		if ok {
+			text = cast.ToString(response["text"])
+		}
+	case 3:
+		smsTemplateResp, err := services.GoItemService().GetSingle(
+			c.Request.Context(),
+			&nobs.CommonMessage{
+				TableSlug: "sms_template",
+				ProjectId: resource.ResourceEnvironmentId,
+				Data:      structData,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+		response, ok := smsTemplateResp.Data.AsMap()["response"].(map[string]any)
+		if ok {
+			text = cast.ToString(response["text"])
+		}
+	}
+
 	body := &pbSms.Sms{
 		Id:        id.String(),
-		Text:      request.Text,
+		Text:      text,
 		Otp:       code,
 		Recipient: request.Recipient,
 		ExpiresAt: expire.String()[:19],
@@ -235,12 +307,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetEmail()
 			body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetPassword()
 		}
-	}
-
-	services, err := h.GetProjectSrvc(c, resourceEnvironment.ProjectId, resourceEnvironment.NodeType)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
 	}
 
 	resp, err := services.SmsService().Send(
