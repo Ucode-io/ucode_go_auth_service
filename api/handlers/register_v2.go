@@ -7,6 +7,7 @@ import (
 
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/config"
 	cfg "ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbc "ucode/ucode_go_auth_service/genproto/company_service"
@@ -18,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/spf13/cast"
+	"github.com/mitchellh/mapstructure"
 )
 
 // V2SendCodeApp godoc
@@ -61,7 +62,7 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 
 	body := &pbSms.Sms{
 		Id:        id.String(),
-		Text:      request.Text,
+		Text:      config.SMS_TEXT,
 		Otp:       code,
 		Recipient: request.Recipient,
 		ExpiresAt: expire.String()[:19],
@@ -136,12 +137,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, "cant get resource_id")
-		return
-	}
-
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.BadRequest, "cant get project_id")
@@ -154,18 +149,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
-	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
-
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(), &pbc.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	expire := time.Now().Add(time.Minute * 2) // todo dont write expire time here
 
 	code, err := util.GenerateCode(4)
 	if err != nil {
@@ -186,54 +170,65 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
-	structData, err := helper.ConvertMapToStruct(map[string]any{"id": request.SmsTemplateId})
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
-
-	services, err := h.GetProjectSrvc(c, resourceEnvironment.ProjectId, resourceEnvironment.NodeType)
+	services, err := h.GetProjectSrvc(c, resource.ProjectId, resource.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 	var text string
-	switch resource.ResourceType {
-	case 1:
-		smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingle(
-			c.Request.Context(),
-			&os.CommonMessage{
-				TableSlug: "sms_template",
-				ProjectId: resource.ResourceEnvironmentId,
-				Data:      structData,
-			},
-		)
+	if request.SmsTemplateId != "" {
+		structData, err := helper.ConvertMapToStruct(map[string]any{"id": request.SmsTemplateId})
 		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
+			h.handleResponse(c, http.InvalidArgument, err.Error())
 			return
 		}
-		response, ok := smsTemplateResp.Data.AsMap()["response"].(map[string]any)
-		if ok {
-			text = cast.ToString(response["text"])
+
+		type SmsTemplateResponse struct {
+			Response struct {
+				Text string `json:"text" mapstructure:"text"`
+			} `json:"response" mapstructure:"response"`
 		}
-	case 3:
-		smsTemplateResp, err := services.GoItemService().GetSingle(
-			c.Request.Context(),
-			&nobs.CommonMessage{
-				TableSlug: "sms_template",
-				ProjectId: resource.ResourceEnvironmentId,
-				Data:      structData,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
-			return
+		switch resource.ResourceType {
+		case 1:
+			smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingle(
+				c.Request.Context(),
+				&os.CommonMessage{
+					TableSlug: "sms_template",
+					ProjectId: resource.ResourceEnvironmentId,
+					Data:      structData,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+			var smsTemplateRespData SmsTemplateResponse
+			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
+				text = smsTemplateRespData.Response.Text
+			}
+		case 3:
+			smsTemplateResp, err := services.GoItemService().GetSingle(
+				c.Request.Context(),
+				&nobs.CommonMessage{
+					TableSlug: "sms_template",
+					ProjectId: resource.ResourceEnvironmentId,
+					Data:      structData,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+			var smsTemplateRespData SmsTemplateResponse
+			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
+				text = smsTemplateRespData.Response.Text
+			}
 		}
-		response, ok := smsTemplateResp.Data.AsMap()["response"].(map[string]any)
-		if ok {
-			text = cast.ToString(response["text"])
-		}
+	}
+
+	if text == "" {
+		text = config.SMS_TEXT
 	}
 
 	body := &pbSms.Sms{
@@ -253,7 +248,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
 			c.Request.Context(), &pbc.GetProjectResourceListRequest{
-				ProjectId:     resourceEnvironment.ProjectId,
+				ProjectId:     resource.ProjectId,
 				EnvironmentId: environmentId.(string),
 				Type:          pbc.ResourceType_SMS,
 			})
@@ -282,7 +277,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 
 		emailSettings, err := h.services.ResourceService().GetProjectResourceList(
 			c.Request.Context(), &pbc.GetProjectResourceListRequest{
-				ProjectId:     resourceEnvironment.ProjectId,
+				ProjectId:     resource.ProjectId,
 				EnvironmentId: environmentId.(string),
 				Type:          pbc.ResourceType_SMTP,
 			})
@@ -510,7 +505,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 
 	body := &pbSms.Sms{
 		Id:        id.String(),
-		Text:      request.Text,
+		Text:      config.SMS_TEXT,
 		Otp:       "",
 		Recipient: request.Recipient,
 		ExpiresAt: expire.String()[:19],

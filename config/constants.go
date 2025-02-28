@@ -59,6 +59,8 @@ const (
 
 	// Commit Types
 	COMMIT_TYPE_TABLE string = "TABLE"
+
+	SMS_TEXT = "Code"
 )
 
 var (
