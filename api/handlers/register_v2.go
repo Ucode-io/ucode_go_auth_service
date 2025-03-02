@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"text/template"
 	"time"
 
 	"ucode/ucode_go_auth_service/api/http"
@@ -20,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/cast"
 )
 
 // V2SendCodeApp godoc
@@ -185,13 +188,12 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 
 		type SmsTemplateResponse struct {
-			Response struct {
-				Text string `json:"text" mapstructure:"text"`
-			} `json:"response" mapstructure:"response"`
+			Response map[string]any `json:"response" mapstructure:"response"`
 		}
+
 		switch resource.ResourceType {
 		case 1:
-			smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingle(
+			smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingleSlim(
 				c.Request.Context(),
 				&os.CommonMessage{
 					TableSlug: "sms_template",
@@ -203,12 +205,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+
 			var smsTemplateRespData SmsTemplateResponse
 			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
-				text = smsTemplateRespData.Response.Text
+				text = cast.ToString(smsTemplateRespData.Response[request.FieldSlug])
 			}
 		case 3:
-			smsTemplateResp, err := services.GoItemService().GetSingle(
+			smsTemplateResp, err := services.GoObjectBuilderService().GetSingleSlim(
 				c.Request.Context(),
 				&nobs.CommonMessage{
 					TableSlug: "sms_template",
@@ -220,15 +223,12 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 				h.handleResponse(c, http.GRPCError, err.Error())
 				return
 			}
+
 			var smsTemplateRespData SmsTemplateResponse
 			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
-				text = smsTemplateRespData.Response.Text
+				text = cast.ToString(smsTemplateRespData.Response[request.FieldSlug])
 			}
 		}
-	}
-
-	if text == "" {
-		text = config.SMS_TEXT
 	}
 
 	body := &pbSms.Sms{
@@ -304,6 +304,25 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 	}
 
+	if text == "" {
+		text = fmt.Sprintf("%s: %s", config.SMS_TEXT, body.Otp)
+	} else {
+		request.Variables["code"] = body.Otp
+		t, err := template.New("sms").Parse(text)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+		var buf bytes.Buffer
+		err = t.Execute(&buf, request.Variables)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+		text = buf.String()
+	}
+
+	body.Text = text
 	resp, err := services.SmsService().Send(
 		c.Request.Context(), body,
 	)
