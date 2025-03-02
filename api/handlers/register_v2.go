@@ -121,12 +121,14 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2SendCode(c *gin.Context) {
+	fmt.Println("V2SendCode")
 	var request models.V2SendCodeRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	fmt.Println("Request->", request)
 
 	id, err := uuid.NewRandom()
 	if err != nil {
@@ -177,6 +179,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+	fmt.Println("SMS Template ID->", request.SmsTemplateId)
 
 	var text string
 	if request.SmsTemplateId != "" {
