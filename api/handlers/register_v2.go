@@ -121,14 +121,12 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2SendCode(c *gin.Context) {
-	fmt.Println("V2SendCode")
 	var request models.V2SendCodeRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println("Request->", request)
 
 	id, err := uuid.NewRandom()
 	if err != nil {
@@ -137,19 +135,19 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	}
 
 	if !util.ValidRecipients[request.Type] {
-		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
+		h.handleResponse(c, http.BadRequest, cfg.InvalidRecipientError)
 		return
 	}
 
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get project_id")
+		h.handleResponse(c, http.BadRequest, cfg.ProjectIdError)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get environment_id")
+		h.handleResponse(c, http.BadRequest, cfg.EnvironmentIdError)
 		return
 	}
 
@@ -179,7 +177,6 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
-	fmt.Println("SMS Template ID->", request.SmsTemplateId)
 
 	var text string
 	if request.SmsTemplateId != "" {
@@ -194,7 +191,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 
 		switch resource.ResourceType {
-		case 1:
+		case pbc.ResourceType_MONGODB:
 			smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingleSlim(
 				c.Request.Context(),
 				&os.CommonMessage{
@@ -211,8 +208,11 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			var smsTemplateRespData SmsTemplateResponse
 			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
 				text = cast.ToString(smsTemplateRespData.Response[request.FieldSlug])
+				if text == "" {
+					text = cast.ToString(smsTemplateRespData.Response["text"])
+				}
 			}
-		case 3:
+		case pbc.ResourceType_POSTGRESQL:
 			smsTemplateResp, err := services.GoObjectBuilderService().GetSingleSlim(
 				c.Request.Context(),
 				&nobs.CommonMessage{
@@ -229,11 +229,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			var smsTemplateRespData SmsTemplateResponse
 			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
 				text = cast.ToString(smsTemplateRespData.Response[request.FieldSlug])
+				if text == "" {
+					text = cast.ToString(smsTemplateRespData.Response["text"])
+				}
 			}
 		}
 	}
 
-	fmt.Println("Text->", text)
 	body := &pbSms.Sms{
 		Id:        id.String(),
 		Text:      text,
@@ -246,7 +248,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	switch request.Type {
 	case "PHONE":
 		if !util.IsValidPhone(request.Recipient) {
-			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
+			h.handleResponse(c, http.BadRequest, cfg.InvalidPhoneError)
 			return
 		}
 		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
@@ -263,7 +265,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
 				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
 				if err != nil {
-					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+					h.handleResponse(c, http.InvalidArgument, cfg.InvalidOTPError)
 					return
 				}
 				body.Otp = code
@@ -274,7 +276,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 	case "EMAIL":
 		if !util.IsValidEmail(request.Recipient) {
-			h.handleResponse(c, http.BadRequest, "Email is not valid")
+			h.handleResponse(c, http.BadRequest, cfg.InvalidEmailError)
 			return
 		}
 
@@ -290,14 +292,14 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 
 		if len(emailSettings.GetResources()) < 1 {
-			h.handleResponse(c, http.InvalidArgument, "email settings not found")
+			h.handleResponse(c, http.InvalidArgument, cfg.EmailSettingsError)
 			return
 		}
 
 		if len(emailSettings.GetResources()) > 0 {
 			code, err := util.GenerateCode(int(emailSettings.GetResources()[0].GetSettings().GetSmtp().GetNumberOfOtp()))
 			if err != nil {
-				h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+				h.handleResponse(c, http.InvalidArgument, cfg.InvalidOTPError)
 				return
 			}
 			body.Otp = code
