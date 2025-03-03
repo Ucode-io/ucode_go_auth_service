@@ -591,7 +591,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
 				Id:        userId,
 				ProjectId: req.GetResourceEnvironmentId(),
 				IsTest:    true,
@@ -624,7 +624,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
 				Id:        userId,
 				ProjectId: req.GetResourceEnvironmentId(),
 				IsTest:    true,
@@ -1293,7 +1293,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		}
 	}
 
-	s.strg.User().Delete(ctx, req)
+	_, _ = s.strg.User().Delete(ctx, req)
 
 	return res, nil
 }

@@ -15,7 +15,7 @@ var (
 	ErrEnvironmentIdValid = errors.New("environment id is not valid")
 )
 
-var (
+const (
 	ErrPasswordHash             = "Failed to hash password. Please ensure the password is valid."
 	ErrClientTypeRoleIDRequired = "Client Type ID and Role ID are required fields."
 	ErrInvalidUserEmail         = "Email is not valid."
