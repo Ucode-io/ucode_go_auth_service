@@ -51,6 +51,13 @@ const (
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
 	PermissionDenied          string = "Permission denied"
+	InvalidPhoneError         string = "Неверный номер телефона, он должен содержать двенадцать цифр и +"
+	InvalidOTPError           string = "invalid number of otp"
+	InvalidRecipientError     string = "Invalid recipient type"
+	ProjectIdError            string = "cant get project_id"
+	EnvironmentIdError        string = "cant get environment_id"
+	InvalidEmailError         string = "Email is not valid"
+	EmailSettingsError        string = "email settings not found"
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"
