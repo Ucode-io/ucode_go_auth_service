@@ -38,18 +38,18 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	)
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleError(c, http.BadRequest, err)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get environment_id")
+		h.handleError(c, http.BadRequest, config.ErrEnvironmentIdValid)
 		return
 	}
 
 	if !util.IsValidUUID(user.ProjectId) {
-		h.handleResponse(c, http.BadRequest, "cant get project_id")
+		h.handleError(c, http.BadRequest, config.ErrProjectIdValid)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, http.GRPCError, err)
 		return
 	}
 
@@ -94,7 +94,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		c.Request.Context(), &user,
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleError(c, http.InternalServerError, err)
 		return
 	}
 
@@ -443,7 +443,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleError(c, http.InternalServerError, err)
 		return
 	}
 

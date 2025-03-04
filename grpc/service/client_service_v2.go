@@ -47,6 +47,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		SelfRecover:  req.SelfRecover,
 		ProjectId:    req.DbProjectId,
 		TableSlug:    req.GetTableSlug(),
+		SessionLimit: req.SessionLimit,
 	}
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
@@ -298,10 +299,7 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -373,6 +371,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		"table_slug":      req.TableSlug,
 		"id":              req.Guid,
 		"default_page":    req.DefaultPage,
+		"session_limit":   req.SessionLimit,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)

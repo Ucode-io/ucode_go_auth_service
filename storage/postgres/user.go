@@ -10,6 +10,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/pkg/util"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -23,12 +24,14 @@ import (
 )
 
 type userRepo struct {
-	db *Pool
+	logger logger.LoggerI
+	db     *Pool
 }
 
-func NewUserRepo(db *Pool) storage.UserRepoI {
+func NewUserRepo(db *Pool, logger logger.LoggerI) storage.UserRepoI {
 	return &userRepo{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
@@ -50,7 +53,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.GetCompanyId(),
 	)
 	if err != nil {
-		return pKey, errors.Wrap(err, "failed to create user")
+		return pKey, helper.HandleDatabaseError(err, r.logger, "Create user: failed to create")
 	}
 
 	pKey = &pb.UserPrimaryKey{Id: id}
@@ -363,7 +366,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		if err == pgx.ErrNoRows {
 			return res, nil
 		}
-		return res, nil
+		return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: failed to scan")
 	}
 
 	if err == pgx.ErrNoRows {
@@ -371,7 +374,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	}
 
 	if err != nil {
-		return res, errors.Wrap(err, "failed to get user by username")
+		return res, helper.HandleDatabaseError(err, r.logger, "GetByUsername: failed to get user")
 	}
 
 	return res, nil
@@ -467,6 +470,45 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 				GROUP BY company_id`
 
 	rows, err := r.db.Query(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			projectIDs = make([]string, 0)
+			company    string
+		)
+
+		err = rows.Scan(&company, &projectIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		res.Companies = append(res.Companies, &pb.UserCompany{
+			Id:         company,
+			ProjectIds: projectIDs,
+		})
+	}
+
+	return &res, nil
+}
+
+func (r *userRepo) GetUserProjects2(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjects")
+	defer dbSpan.Finish()
+
+	res := pb.GetUserProjectsRes{}
+
+	query := `SELECT company_id,
+       			array_agg(DISTINCT project_id) AS project_ids
+				FROM user_project
+				WHERE user_id = $1
+				AND env_id = $2
+				GROUP BY company_id`
+
+	rows, err := r.db.Query(ctx, query, userId, envId)
 	if err != nil {
 		return nil, err
 	}

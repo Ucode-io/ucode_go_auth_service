@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"ucode/ucode_go_auth_service/config"
+	"ucode/ucode_go_auth_service/pkg/logger"
 	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/jackc/pgx/v5"
@@ -15,6 +16,7 @@ import (
 
 type Store struct {
 	db             *Pool
+	logger         logger.LoggerI
 	clientPlatform storage.ClientPlatformRepoI
 	clientType     storage.ClientTypeRepoI
 	client         storage.ClientRepoI
@@ -85,7 +87,7 @@ func (b *Pool) SendBatch(ctx context.Context, batch *pgx.Batch) pgx.BatchResults
 	return b.db.SendBatch(ctx, batch)
 }
 
-func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, error) {
+func NewPostgres(ctx context.Context, cfg config.BaseConfig, logger logger.LoggerI) (storage.StorageI, error) {
 	config, err := pgxpool.ParseConfig(fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		cfg.PostgresUser,
@@ -110,7 +112,8 @@ func NewPostgres(ctx context.Context, cfg config.BaseConfig) (storage.StorageI, 
 	}
 
 	return &Store{
-		db: dbPool,
+		db:     dbPool,
+		logger: logger,
 	}, err
 }
 
@@ -144,7 +147,7 @@ func (s *Store) Client() storage.ClientRepoI {
 
 func (s *Store) User() storage.UserRepoI {
 	if s.user == nil {
-		s.user = NewUserRepo(s.db)
+		s.user = NewUserRepo(s.db, s.logger)
 	}
 
 	return s.user

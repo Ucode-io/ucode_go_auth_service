@@ -53,9 +53,11 @@ type EmailSettingsRequest struct {
 }
 
 type V2SendCodeRequest struct {
-	Text      string `json:"text"`
-	Recipient string `json:"recipient"`
-	Type      string `json:"type"`
+	Recipient     string         `json:"recipient"`
+	Type          string         `json:"type"`
+	SmsTemplateId string         `json:"sms_template_id"`
+	FieldSlug     string         `json:"field_slug"`
+	Variables     map[string]any `json:"variables"`
 }
 
 type V2SendCodeResponse struct {

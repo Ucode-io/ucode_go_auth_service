@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"time"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/grpc/client"
-	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
@@ -175,29 +173,4 @@ func (s *userService) DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*
 	}
 
 	return res, nil
-}
-
-func (s *userService) SendMessageToEmail(ctx context.Context, req *pb.SendMessageToEmailRequest) (*emptypb.Empty, error) {
-	user, err := s.strg.User().GetByUsername(ctx, req.GetEmail())
-	if err != nil {
-		s.log.Error("error while getting user by email", logger.Error(err), logger.Any("req", req))
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-
-	m := map[string]any{
-		"id": user.Id,
-	}
-
-	token, err := security.GenerateJWT(m, time.Hour*2, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("error while getting generating token", logger.Error(err), logger.Any("req", req))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	err = helper.SendEmail("Update Password", req.GetEmail(), req.GetBaseUrl(), token)
-	if err != nil {
-		s.log.Error("!!!SendUpdatePasswordUrlToEmail--->", logger.Error(err), logger.Any("req", req))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-	return &emptypb.Empty{}, nil
 }

@@ -420,11 +420,11 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->HashPassword", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.InvalidArgument, config.ErrPasswordHash)
 	}
 
 	if len(req.GetClientTypeId()) == 0 || len(req.GetRoleId()) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "client_type_id and role_id required")
+		return nil, status.Error(codes.InvalidArgument, config.ErrClientTypeRoleIDRequired)
 	}
 
 	var (
@@ -437,9 +437,9 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	req.Password = hashedPassword
 
 	if !email && req.Email != "" {
-		err = config.ErrInvalidEmail
+		err = errors.New(config.ErrInvalidUserEmail)
 		s.log.Error("!!!V2CreateUser--->EmailRegex", logger.Error(err))
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, config.ErrInvalidUserEmail)
 	}
 
 	if len(req.GetLogin()) != 0 {
@@ -486,7 +486,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		})
 		if err != nil {
 			s.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, err
 		}
 		userId = user.GetId()
 
@@ -530,7 +530,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				return nil, err
 			}
 		} else {
-			return nil, errors.New("user is already exist")
+			return nil, errors.New(config.ErrUserExists)
 		}
 	}
 
@@ -591,6 +591,11 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
+			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+				Id:        userId,
+				ProjectId: req.GetResourceEnvironmentId(),
+				IsTest:    true,
+			})
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -619,8 +624,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
+			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+				Id:        userId,
+				ProjectId: req.GetResourceEnvironmentId(),
+				IsTest:    true,
+			})
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, err
 		}
 	}
 
@@ -1268,7 +1278,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, err
 		}
 		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
 			UserId:       req.GetId(),
@@ -1283,7 +1293,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 		}
 	}
 
-	s.strg.User().Delete(ctx, req)
+	_, _ = s.strg.User().Delete(ctx, req)
 
 	return res, nil
 }

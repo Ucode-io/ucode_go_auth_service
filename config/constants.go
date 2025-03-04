@@ -19,6 +19,8 @@ const (
 	AdminClientName       string = "ADMIN"
 	OpenFaaSPlatformID    string = "7d4a4c38-dd84-4902-b744-0488b80a4c04"
 
+	InactiveStatus string = "inactive"
+
 	DefaultOtp string = "208071"
 
 	// Service Configs
@@ -26,6 +28,11 @@ const (
 	HIGH_NODE_TYPE       string = "HIGH"
 	ENTER_PRICE_TYPE     string = "ENTER_PRICE"
 	ObjectBuilderService string = "BUILDER_SERVICE"
+
+	READ   string = "read"
+	WRITE  string = "write"
+	UPDATE string = "update"
+	DELETE string = "delete"
 
 	// Login Strategy
 	WithGoogle string = "google"
@@ -43,7 +50,14 @@ const (
 	// Errors
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
-	SMS_TEXT                  string = "Code: "
+	PermissionDenied          string = "Permission denied"
+	InvalidPhoneError         string = "Неверный номер телефона, он должен содержать двенадцать цифр и +"
+	InvalidOTPError           string = "invalid number of otp"
+	InvalidRecipientError     string = "Invalid recipient type"
+	ProjectIdError            string = "cant get project_id"
+	EnvironmentIdError        string = "cant get environment_id"
+	InvalidEmailError         string = "Email is not valid"
+	EmailSettingsError        string = "email settings not found"
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"
@@ -52,6 +66,8 @@ const (
 
 	// Commit Types
 	COMMIT_TYPE_TABLE string = "TABLE"
+
+	SMS_TEXT = "Code"
 )
 
 var (
@@ -107,8 +123,10 @@ var (
 	Path = map[string]bool{
 		"object":      true,
 		"object-slim": true,
-		// "items":       true,
+		"items":       true,
 	}
+
+	ITEMS string = "items"
 
 	RateLimitCfg = []*ratelimiter.LeakyBucket{
 		{

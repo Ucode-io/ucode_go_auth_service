@@ -120,7 +120,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		})
 		if err != nil {
 			sus.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, err
 		}
 		userId = user.GetId()
 
