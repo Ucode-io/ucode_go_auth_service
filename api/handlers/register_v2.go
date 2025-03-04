@@ -139,9 +139,9 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.BadRequest, cfg.ProjectIdError)
+	resourceId, ok := c.Get("resource_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "cant get resource_id")
 		return
 	}
 
@@ -159,12 +159,10 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.services.ServiceResource().GetSingle(
-		c.Request.Context(),
-		&pbc.GetSingleServiceResourceReq{
-			ProjectId:     projectId.(string),
+	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
+		c.Request.Context(), &pbc.GetResourceEnvironmentReq{
 			EnvironmentId: environmentId.(string),
-			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
+			ResourceId:    resourceId.(string),
 		},
 	)
 	if err != nil {
@@ -172,7 +170,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
-	services, err := h.GetProjectSrvc(c, resource.ProjectId, resource.NodeType)
+	services, err := h.GetProjectSrvc(c, resourceEnvironment.ProjectId, resourceEnvironment.NodeType)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -190,13 +188,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			Response map[string]any `json:"response" mapstructure:"response"`
 		}
 
-		switch resource.ResourceType {
-		case pbc.ResourceType_MONGODB:
-			smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingleSlim(
+		switch resourceEnvironment.ResourceType {
+		case 1:
+			smsTemplateResp, err := services.GetObjectBuilderServiceByType(resourceEnvironment.NodeType).GetSingleSlim(
 				c.Request.Context(),
 				&os.CommonMessage{
 					TableSlug: "sms_template",
-					ProjectId: resource.ResourceEnvironmentId,
+					ProjectId: resourceEnvironment.ProjectId,
 					Data:      structData,
 				},
 			)
@@ -212,12 +210,12 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 					text = cast.ToString(smsTemplateRespData.Response["text"])
 				}
 			}
-		case pbc.ResourceType_POSTGRESQL:
+		case 3:
 			smsTemplateResp, err := services.GoObjectBuilderService().GetSingleSlim(
 				c.Request.Context(),
 				&nobs.CommonMessage{
 					TableSlug: "sms_template",
-					ProjectId: resource.ResourceEnvironmentId,
+					ProjectId: resourceEnvironment.ProjectId,
 					Data:      structData,
 				},
 			)
@@ -253,7 +251,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
 			c.Request.Context(), &pbc.GetProjectResourceListRequest{
-				ProjectId:     resource.ProjectId,
+				ProjectId:     resourceEnvironment.ProjectId,
 				EnvironmentId: environmentId.(string),
 				Type:          pbc.ResourceType_SMS,
 			})
@@ -282,7 +280,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 
 		emailSettings, err := h.services.ResourceService().GetProjectResourceList(
 			c.Request.Context(), &pbc.GetProjectResourceListRequest{
-				ProjectId:     resource.ProjectId,
+				ProjectId:     resourceEnvironment.ProjectId,
 				EnvironmentId: environmentId.(string),
 				Type:          pbc.ResourceType_SMTP,
 			})
