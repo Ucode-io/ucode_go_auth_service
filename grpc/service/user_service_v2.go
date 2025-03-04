@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/smtp"
 	"regexp"
 	"runtime"
 	"ucode/ucode_go_auth_service/api/models"
@@ -414,14 +416,15 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		}
 	}()
 
+	originalPassword := req.GetPassword()
 	hashedPassword, err := security.HashPasswordBcrypt(req.Password)
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->HashPassword", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.InvalidArgument, config.ErrPasswordHash)
 	}
 
 	if len(req.GetClientTypeId()) == 0 || len(req.GetRoleId()) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "client_type_id and role_id required")
+		return nil, status.Error(codes.InvalidArgument, config.ErrClientTypeRoleIDRequired)
 	}
 
 	var (
@@ -434,9 +437,9 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	req.Password = hashedPassword
 
 	if !email && req.Email != "" {
-		err = config.ErrInvalidEmail
+		err = errors.New(config.ErrInvalidUserEmail)
 		s.log.Error("!!!V2CreateUser--->EmailRegex", logger.Error(err))
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, config.ErrInvalidUserEmail)
 	}
 
 	if len(req.GetLogin()) != 0 {
@@ -483,7 +486,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		})
 		if err != nil {
 			s.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, err
 		}
 		userId = user.GetId()
 
@@ -527,7 +530,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 				return nil, err
 			}
 		} else {
-			return nil, errors.New("user is already exist")
+			return nil, errors.New(config.ErrUserExists)
 		}
 	}
 
@@ -588,6 +591,11 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
+			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+				Id:        userId,
+				ProjectId: req.GetResourceEnvironmentId(),
+				IsTest:    true,
+			})
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -616,8 +624,41 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
+			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+				Id:        userId,
+				ProjectId: req.GetResourceEnvironmentId(),
+				IsTest:    true,
+			})
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, err
+		}
+	}
+
+	if req.GetEmail() != "" {
+		host := "smtp.gmail.com"
+		hostPort := ":587"
+
+		to := req.GetEmail()
+		login := req.GetLogin()
+		password := originalPassword
+
+		subject := "You're Invited – Access Your Account"
+		body := fmt.Sprintf(
+			"You are invited to join our platform!\r\n\r\n"+
+				"Click the link below to access your account:\r\n"+
+				"https://app.ucode.run\r\n\r\n"+
+				"Your login credentials:\r\n"+
+				"Login: %s\r\n"+
+				"Password: %s\r\n\r\n"+
+				"Welcome aboard! 🚀",
+			login, password,
+		)
+
+		msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\n\r\n%s", to, subject, body)
+		auth := smtp.PlainAuth("", s.cfg.Email, s.cfg.EmailPassword, host)
+		err := smtp.SendMail(host+hostPort, auth, s.cfg.Email, []string{to}, []byte(msg))
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -1204,18 +1245,55 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		_, err = s.strg.User().Delete(ctx, req)
+	case 3:
+		clientType, err := services.GoItemService().GetSingle(ctx, &nb.CommonMessage{
+			TableSlug: "client_type",
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"id": structpb.NewStringValue(req.GetClientTypeId()),
+				},
+			},
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		response, ok := clientType.Data.AsMap()["response"].(map[string]any)
+		if ok {
+			clientTypeTableSlug := cast.ToString(response["table_slug"])
+			if clientTypeTableSlug != "" {
+				tableSlug = clientTypeTableSlug
+			}
+		}
+		responseFromDeleteUser, err := services.GoItemService().Delete(ctx, &nb.CommonMessage{
+			TableSlug: tableSlug,
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"id":                structpb.NewStringValue(req.Id),
+					"from_auth_service": structpb.NewBoolValue(true),
+				},
+			},
+			ProjectId: req.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
+			return nil, err
+		}
+		_, err = s.strg.User().DeleteUserFromProject(context.Background(), &pb.DeleteSyncUserRequest{
+			UserId:       req.GetId(),
+			ProjectId:    req.GetProjectId(),
+			CompanyId:    req.GetCompanyId(),
+			ClientTypeId: req.GetClientTypeId(),
+			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
 
-	_, err = s.strg.User().Delete(ctx, req)
-	if err != nil {
-		s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	_, _ = s.strg.User().Delete(ctx, req)
 
 	return res, nil
 }

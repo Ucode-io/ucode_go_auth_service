@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -30,6 +31,45 @@ func NewSessionRepo(db *Pool) storage.SessionRepoI {
 func (r *sessionRepo) Create(ctx context.Context, entity *pb.CreateSessionRequest) (pKey *pb.SessionPrimaryKey, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.Create")
 	defer dbSpan.Finish()
+
+	var envID *string
+	if entity.EnvId != "" {
+		envID = &entity.EnvId
+	} else {
+		envID = nil
+	}
+
+	countQuery := `
+		SELECT COUNT(*) 
+		FROM "session" 
+		WHERE client_type_id = $1 
+		  AND user_id_auth = $2 
+		  AND env_id IS NOT DISTINCT FROM $3
+	`
+	var sessionCount int32
+	err = r.db.QueryRow(ctx, countQuery, entity.ClientTypeId, entity.UserIdAuth, envID).Scan(&sessionCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count sessions: %w", err)
+	}
+
+	if sessionCount >= entity.SessionLimit {
+		sessionsToDelete := sessionCount - entity.SessionLimit + 1
+		deleteQuery := `
+			DELETE FROM "session"
+			WHERE id IN (
+				SELECT id
+				FROM "session"
+				WHERE client_type_id = $1 
+				  AND user_id_auth = $2 
+				  AND env_id IS NOT DISTINCT FROM $3
+				ORDER BY created_at ASC
+				LIMIT $4
+			)`
+		_, err = r.db.Exec(ctx, deleteQuery, entity.ClientTypeId, entity.UserIdAuth, envID, sessionsToDelete)
+		if err != nil {
+			return nil, fmt.Errorf("failed to delete sessions: %w", err)
+		}
+	}
 
 	queryInitial := `INSERT INTO "session" (
 		id,
@@ -404,6 +444,30 @@ func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessi
 	queryInitial := `DELETE FROM "session" WHERE id::varchar = ANY($1)`
 
 	result, err := r.db.Exec(ctx, queryInitial, entity.SessionIds)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+
+	return nil
+}
+
+func (r *sessionRepo) DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.ExpireSessions")
+	defer dbSpan.Finish()
+
+	if entity.UserId == "" || entity.ProjectId == "" || entity.ClientTypeId == "" || entity.SessionId == "" {
+		return errors.New("user_id, project_id, session_id and client_type_id are required")
+	}
+
+	query := `
+		DELETE FROM session
+		WHERE client_type_id = $1 AND user_id = $2 AND project_id = $3 AND id != $4
+	`
+	result, err := r.db.Exec(ctx, query, entity.ClientTypeId, entity.UserId, entity.ProjectId, entity.SessionId)
 	if err != nil {
 		return err
 	}

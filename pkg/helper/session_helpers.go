@@ -75,6 +75,7 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 			ProjectId:    data.GetClientType().GetProjectId(),
 			Tables:       tables,
 			DefaultPage:  data.GetClientType().GetDefaultPage(),
+			SessionLimit: data.GetClientType().SessionLimit,
 		},
 		ClientPlatform: &pb.ClientPlatform{
 			Id:        data.GetClientPlatform().GetGuid(),

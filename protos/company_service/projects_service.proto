@@ -6,6 +6,7 @@ option go_package="genproto/company_service";
 import "company.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/empty.proto";
+import "billing_service.proto";
 
 service ProjectService {
     rpc Create(CreateProjectRequest) returns (CreateProjectResponse) {}
@@ -17,6 +18,8 @@ service ProjectService {
     rpc GetProjectsByCompanyId(GetProjectsByCompanyIdReq) returns (GetProjectsByCompanyIdRes) {}
     rpc UpdateProjectUserData (UpdateProjectUserDataReq) returns (UpdateProjectUserDataRes) {}
     rpc GetListSetting(GetListSettingReq) returns (Setting) {};
+    rpc AttachFare(AttachFareRequest) returns (Project) {};
+
 
     rpc CreateProjectLoginMicroFront(ProjectLoginMicroFrontend) returns (ProjectLoginMicroFrontend) {};
     rpc GetProjectLoginMicroFront(GetProjectLoginMicroFrontRequest) returns (ProjectLoginMicroFrontend) {};
@@ -227,6 +230,9 @@ message Project {
     int32 request_per_second = 12;
     double balance = 13;
     double credit_limit = 14;
+    Fare fare = 15;
+    string status = 16;
+    bool new_design = 17;
 }
 
 message CreateProjectRequest {
@@ -410,4 +416,10 @@ message Record {
 
 message ListRecordRequest {
 
+}
+
+message AttachFareRequest {
+    string project_id = 1;
+    string fare_id = 2;
+    string discount_id = 3;
 }

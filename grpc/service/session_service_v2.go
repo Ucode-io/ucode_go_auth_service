@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"runtime"
 	"strings"
 	"time"
-	"ucode/ucode_go_auth_service/api/http"
+
+	status_http "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -857,7 +859,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
 	if err != nil {
 		s.log.Error("!!!RefreshToken--->SessionGetByPK", logger.Error(err))
-		return nil, status.Error(codes.Code(http.Unauthorized.Code), err.Error())
+		return nil, status.Error(codes.Code(status_http.Unauthorized.Code), err.Error())
 	}
 	if req.ClientTypeId != "" {
 		session.ClientTypeId = req.ClientTypeId
@@ -1009,6 +1011,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		UserIdAuth:       input.GetLoginData().GetUserIdAuth(),
 		ClientTypeId:     input.GetLoginData().GetClientType().GetId(),
 		ClientPlatformId: input.GetLoginData().GetClientPlatform().GetId(),
+		SessionLimit:     input.GetLoginData().GetClientType().GetSessionLimit(),
 	})
 	if err != nil {
 		s.log.Error("!!!Create--->", logger.Error(err))
@@ -1090,6 +1093,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField            string
 		exist, checkPermission bool
 		authTables             []*pb.TableBody
+		requestPath            string
 	)
 	runtime.ReadMemStats(&before)
 
@@ -1135,27 +1139,27 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	if expiresAt.Unix() < time.Now().Add(5*time.Hour).Unix() {
-		err := errors.New("user has been expired")
+		err := errors.New("session has been expired")
 		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	switch req.Method {
-	case "GET":
-		methodField = "read"
-	case "POST":
-		methodField = "write"
-	case "PUT":
-		methodField = "update"
-	case "DELETE":
-		methodField = "delete"
+	case http.MethodGet:
+		methodField = config.READ
+	case http.MethodPost:
+		methodField = config.WRITE
+	case http.MethodPut:
+		methodField = config.UPDATE
+	case http.MethodDelete:
+		methodField = config.DELETE
 	}
 	// this condition need our object/get-list api because this api's method is post we change it to get
 	// this condition need our object/get-list-group-by and object/get-group-by-field api because this api's method is post we change it to get
 	if ((strings.Contains(req.GetPath(), "object/get-list")) ||
 		(strings.Contains(req.GetPath(), "object/get-list-group-by")) ||
-		(strings.Contains(req.GetPath(), "object/get-group-by-field"))) && req.GetMethod() != "GET" {
-		methodField = "read"
+		(strings.Contains(req.GetPath(), "object/get-group-by-field"))) && req.GetMethod() != http.MethodGet {
+		methodField = config.READ
 	}
 
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
@@ -1195,7 +1199,9 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 	for _, path := range arr_path {
 		if exist := config.Path[path]; exist {
-			checkPermission = exist
+			checkPermission = true
+			requestPath = path
+			break
 		}
 	}
 
@@ -1203,6 +1209,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		var tableSlug string
 		if strings.Contains(arr_path[len(arr_path)-1], ":") {
 			tableSlug = arr_path[len(arr_path)-2]
+		} else if requestPath == config.ITEMS && len(arr_path) > 3 {
+			tableSlug = arr_path[3]
 		} else {
 			tableSlug = arr_path[len(arr_path)-1]
 		}
@@ -1219,13 +1227,18 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			return nil, err
 		}
 
+		if resource.GetProjectStatus() == config.InactiveStatus && methodField != config.READ {
+			err := status.Error(codes.PermissionDenied, config.PermissionDenied)
+			return nil, err
+		}
+
+		services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
+		if err != nil {
+			return nil, err
+		}
+
 		switch resource.ResourceType {
 		case pbCompany.ResourceType_MONGODB:
-			services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
-			if err != nil {
-				return nil, err
-			}
-
 			resp, err := services.GetBuilderPermissionServiceByType(resource.NodeType).GetTablePermission(ctx,
 				&pbObject.GetTablePermissionRequest{
 					TableSlug:             tableSlug,
@@ -1240,10 +1253,27 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			}
 
 			if !resp.IsHavePermission {
-				err := status.Error(codes.PermissionDenied, "Permission denied")
+				err := status.Error(codes.PermissionDenied, config.PermissionDenied)
 				return nil, err
 			}
 		case pbCompany.ResourceType_POSTGRESQL:
+			resp, err := services.GoObjectBuilderPermissionService().GetTablePermission(ctx,
+				&nb.GetTablePermissionRequest{
+					TableSlug:             tableSlug,
+					RoleId:                session.RoleId,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					Method:                methodField,
+				},
+			)
+			if err != nil {
+				s.log.Error("!!!V2HasAccessUser->GetTablePermission--->", logger.Error(err))
+				return nil, err
+			}
+
+			if !resp.IsHavePermission {
+				err := status.Error(codes.PermissionDenied, config.PermissionDenied)
+				return nil, err
+			}
 		}
 	}
 
@@ -1300,13 +1330,13 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		if len(req.Username) < 6 {
 			err := errors.New("invalid username")
 			s.log.Error("!!!MultiCompanyLogin--->InvalidUsername", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.InvalidArgument, config.ErrIncorrectLoginOrPassword)
 		}
 
 		if len(req.Password) < 6 {
 			err := errors.New("invalid password")
 			s.log.Error("!!!MultiCompanyLogin--->InvalidPassword", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.InvalidArgument, config.ErrIncorrectLoginOrPassword)
 		}
 
 		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
@@ -1344,17 +1374,17 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
 			if err != nil {
 				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
-				return nil, err
+				return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 			}
 			if !match {
 				err := errors.New("username or password is wrong")
 				s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-				return nil, err
+				return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 			}
 		} else {
-			err := errors.New("invalid hash type")
+			err := config.ErrUserNotFound
 			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 		}
 	case config.WithPhone:
 		if config.DefaultOtp != req.Otp {
@@ -1415,12 +1445,11 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		}
 
 		if user.Id == "" {
-			err = errors.New("user not found with this email")
+			err = errors.New(config.ErrGoogle)
 			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-			return nil, status.Error(codes.NotFound, err.Error())
+			return nil, err
 		}
 	}
-
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		errGetProjects := errors.New("cant get user projects")
@@ -1464,6 +1493,8 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				CompanyId: projectInfo.GetCompanyId(),
 				Name:      projectInfo.GetTitle(),
 				Domain:    projectInfo.GetK8SNamespace(),
+				NewDesign: projectInfo.GetNewDesign(),
+				Status:    projectInfo.GetStatus(),
 			}
 
 			currencienJson, err := json.Marshal(projectInfo.GetCurrencies())
@@ -1816,6 +1847,21 @@ func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessi
 	err := s.strg.Session().ExpireSessions(ctx, req)
 	if err != nil {
 		s.log.Error("!!!ExpireSessiona--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *sessionService) DeleteByParams(ctx context.Context, req *pb.DeleteByParamsRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.ExpireSessions", req)
+	defer dbSpan.Finish()
+
+	s.log.Info("---DeleteByParams--->>>", logger.Any("req", req))
+
+	err := s.strg.Session().DeleteByParams(ctx, req)
+	if err != nil {
+		s.log.Error("!!!DeleteByParams--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

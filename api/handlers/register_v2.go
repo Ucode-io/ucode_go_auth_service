@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"text/template"
 	"time"
 
 	"ucode/ucode_go_auth_service/api/http"
@@ -10,12 +12,16 @@ import (
 	cfg "ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbc "ucode/ucode_go_auth_service/genproto/company_service"
+	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
+	os "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/cast"
 )
 
 // V2SendCodeApp godoc
@@ -58,7 +64,7 @@ func (h *Handler) V2SendCodeApp(c *gin.Context) {
 
 	body := &pbSms.Sms{
 		Id:        id.String(),
-		Text:      request.Text,
+		Text:      cfg.SMS_TEXT,
 		Otp:       code,
 		Recipient: request.Recipient,
 		ExpiresAt: expire.String()[:19],
@@ -129,34 +135,23 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	}
 
 	if !util.ValidRecipients[request.Type] {
-		h.handleResponse(c, http.BadRequest, "Invalid recipient type")
+		h.handleResponse(c, http.BadRequest, cfg.InvalidRecipientError)
 		return
 	}
 
-	resourceId, ok := c.Get("resource_id")
-	if !ok {
-		h.handleResponse(c, http.BadRequest, "cant get resource_id")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.BadRequest, cfg.ProjectIdError)
 		return
 	}
 
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get environment_id")
+		h.handleResponse(c, http.BadRequest, cfg.EnvironmentIdError)
 		return
 	}
 
-	expire := time.Now().Add(time.Minute * 5) // todo dont write expire time here
-
-	resourceEnvironment, err := h.services.ResourceService().GetResourceEnvironment(
-		c.Request.Context(), &pbc.GetResourceEnvironmentReq{
-			EnvironmentId: environmentId.(string),
-			ResourceId:    resourceId.(string),
-		},
-	)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
-	}
+	expire := time.Now().Add(time.Minute * 2) // todo dont write expire time here
 
 	code, err := util.GenerateCode(4)
 	if err != nil {
@@ -164,9 +159,86 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pbc.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c, resource.ProjectId, resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	var text string
+	if request.SmsTemplateId != "" {
+		structData, err := helper.ConvertMapToStruct(map[string]any{"id": request.SmsTemplateId})
+		if err != nil {
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+			return
+		}
+
+		type SmsTemplateResponse struct {
+			Response map[string]any `json:"response" mapstructure:"response"`
+		}
+
+		switch resource.ResourceType {
+		case pbc.ResourceType_MONGODB:
+			smsTemplateResp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetSingleSlim(
+				c.Request.Context(),
+				&os.CommonMessage{
+					TableSlug: "sms_template",
+					ProjectId: resource.ResourceEnvironmentId,
+					Data:      structData,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+
+			var smsTemplateRespData SmsTemplateResponse
+			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
+				text = cast.ToString(smsTemplateRespData.Response[request.FieldSlug])
+				if text == "" {
+					text = cast.ToString(smsTemplateRespData.Response["text"])
+				}
+			}
+		case pbc.ResourceType_POSTGRESQL:
+			smsTemplateResp, err := services.GoObjectBuilderService().GetSingleSlim(
+				c.Request.Context(),
+				&nobs.CommonMessage{
+					TableSlug: "sms_template",
+					ProjectId: resource.ResourceEnvironmentId,
+					Data:      structData,
+				},
+			)
+			if err != nil {
+				h.handleResponse(c, http.GRPCError, err.Error())
+				return
+			}
+
+			var smsTemplateRespData SmsTemplateResponse
+			if err := mapstructure.Decode(smsTemplateResp.Data.AsMap(), &smsTemplateRespData); err == nil {
+				text = cast.ToString(smsTemplateRespData.Response[request.FieldSlug])
+				if text == "" {
+					text = cast.ToString(smsTemplateRespData.Response["text"])
+				}
+			}
+		}
+	}
+
 	body := &pbSms.Sms{
 		Id:        id.String(),
-		Text:      request.Text,
+		Text:      text,
 		Otp:       code,
 		Recipient: request.Recipient,
 		ExpiresAt: expire.String()[:19],
@@ -176,12 +248,12 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 	switch request.Type {
 	case "PHONE":
 		if !util.IsValidPhone(request.Recipient) {
-			h.handleResponse(c, http.BadRequest, "Неверный номер телефона, он должен содержать двенадцать цифр и +")
+			h.handleResponse(c, http.BadRequest, cfg.InvalidPhoneError)
 			return
 		}
 		smsOtpSettings, err := h.services.ResourceService().GetProjectResourceList(
 			c.Request.Context(), &pbc.GetProjectResourceListRequest{
-				ProjectId:     resourceEnvironment.ProjectId,
+				ProjectId:     resource.ProjectId,
 				EnvironmentId: environmentId.(string),
 				Type:          pbc.ResourceType_SMS,
 			})
@@ -193,7 +265,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			if smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp() != 0 {
 				code, err := util.GenerateCode(int(smsOtpSettings.GetResources()[0].GetSettings().GetSms().GetNumberOfOtp()))
 				if err != nil {
-					h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+					h.handleResponse(c, http.InvalidArgument, cfg.InvalidOTPError)
 					return
 				}
 				body.Otp = code
@@ -204,13 +276,13 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 	case "EMAIL":
 		if !util.IsValidEmail(request.Recipient) {
-			h.handleResponse(c, http.BadRequest, "Email is not valid")
+			h.handleResponse(c, http.BadRequest, cfg.InvalidEmailError)
 			return
 		}
 
 		emailSettings, err := h.services.ResourceService().GetProjectResourceList(
 			c.Request.Context(), &pbc.GetProjectResourceListRequest{
-				ProjectId:     resourceEnvironment.ProjectId,
+				ProjectId:     resource.ProjectId,
 				EnvironmentId: environmentId.(string),
 				Type:          pbc.ResourceType_SMTP,
 			})
@@ -220,14 +292,14 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 
 		if len(emailSettings.GetResources()) < 1 {
-			h.handleResponse(c, http.InvalidArgument, "email settings not found")
+			h.handleResponse(c, http.InvalidArgument, cfg.EmailSettingsError)
 			return
 		}
 
 		if len(emailSettings.GetResources()) > 0 {
 			code, err := util.GenerateCode(int(emailSettings.GetResources()[0].GetSettings().GetSmtp().GetNumberOfOtp()))
 			if err != nil {
-				h.handleResponse(c, http.InvalidArgument, "invalid number of otp")
+				h.handleResponse(c, http.InvalidArgument, cfg.InvalidOTPError)
 				return
 			}
 			body.Otp = code
@@ -237,12 +309,25 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		}
 	}
 
-	services, err := h.GetProjectSrvc(c, resourceEnvironment.ProjectId, resourceEnvironment.NodeType)
-	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
-		return
+	if text == "" {
+		text = fmt.Sprintf("%s: %s", cfg.SMS_TEXT, body.Otp)
+	} else {
+		request.Variables["code"] = body.Otp
+		t, err := template.New("sms").Parse(text)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+		var buf bytes.Buffer
+		err = t.Execute(&buf, request.Variables)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+		text = buf.String()
 	}
 
+	body.Text = text
 	resp, err := services.SmsService().Send(
 		c.Request.Context(), body,
 	)
@@ -444,7 +529,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 
 	body := &pbSms.Sms{
 		Id:        id.String(),
-		Text:      request.Text,
+		Text:      cfg.SMS_TEXT,
 		Otp:       "",
 		Recipient: request.Recipient,
 		ExpiresAt: expire.String()[:19],

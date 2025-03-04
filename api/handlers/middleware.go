@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
-	"ucode/ucode_go_auth_service/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
@@ -48,7 +48,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 
 		strArr := strings.Split(bearerToken, " ")
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
-			h.log.Error("---ERR->Unexpected token format")
 			_ = c.AbortWithError(nethttp.StatusForbidden, errors.New("token error: wrong format"))
 			return
 		}
@@ -57,7 +56,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		case "Bearer":
 			res, ok := h.hasAccess(c)
 			if !ok {
-				h.log.Error("---ERR->AuthMiddleware->hasNotAccess-->")
 				c.Abort()
 				return
 			}
@@ -106,12 +104,9 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
 				err := errors.New("error invalid authorization method")
-				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				h.handleResponse(c, http.BadRequest, err.Error())
 				c.Abort()
 			} else {
-				err := errors.New("error invalid authorization method")
-				h.log.Error("--AuthMiddleware--", logger.Error(err))
 				c.JSON(401, struct {
 					Code    int    `json:"code"`
 					Message string `json:"message"`
@@ -151,19 +146,16 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 		},
 	)
 	if err != nil {
-		errr := status.Error(codes.PermissionDenied, "Permission denied")
+		errr := status.Error(codes.PermissionDenied, config.PermissionDenied)
 		if errr.Error() == err.Error() {
-			h.log.Error("---ERR->HasAccess->Permission--->", logger.Error(err))
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return nil, false
 		}
-		errr = status.Error(codes.InvalidArgument, "User has been expired")
+		errr = status.Error(codes.InvalidArgument, "Session has been expired")
 		if errr.Error() == err.Error() {
-			h.log.Error("---ERR->HasAccess->User Expired-->")
 			h.handleResponse(c, http.Forbidden, err.Error())
 			return nil, false
 		}
-		h.log.Error("---ERR->HasAccess->Session->V2HasAccessUser--->", logger.Error(err))
 		h.handleResponse(c, http.Unauthorized, err.Error())
 		return nil, false
 	}
