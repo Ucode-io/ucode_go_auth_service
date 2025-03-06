@@ -128,6 +128,10 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 		return
 	}
 
+	if request.Variables == nil {
+		request.Variables = make(map[string]any)
+	}
+
 	id, err := uuid.NewRandom()
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
