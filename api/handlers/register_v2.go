@@ -194,7 +194,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 				c.Request.Context(),
 				&os.CommonMessage{
 					TableSlug: "sms_template",
-					ProjectId: resourceEnvironment.ProjectId,
+					ProjectId: resourceEnvironment.Id,
 					Data:      structData,
 				},
 			)
@@ -215,7 +215,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 				c.Request.Context(),
 				&nobs.CommonMessage{
 					TableSlug: "sms_template",
-					ProjectId: resourceEnvironment.ProjectId,
+					ProjectId: resourceEnvironment.Id,
 					Data:      structData,
 				},
 			)
