@@ -1239,7 +1239,7 @@ func (s *userService) V2DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) 
 			ProjectId:    req.GetProjectId(),
 			CompanyId:    req.GetCompanyId(),
 			ClientTypeId: req.GetClientTypeId(),
-			RoleId:       responseFromDeleteUser.Data.AsMap()["role_id"].(string),
+			RoleId:       cast.ToString(responseFromDeleteUser.GetData().AsMap()["role_id"]),
 		})
 		if err != nil {
 			s.log.Error("!!!V2DeleteUser--->", logger.Error(err))
