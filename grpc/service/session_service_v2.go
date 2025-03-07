@@ -1489,12 +1489,13 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			}
 
 			resProject := &pb.Project2{
-				Id:        projectInfo.GetProjectId(),
-				CompanyId: projectInfo.GetCompanyId(),
-				Name:      projectInfo.GetTitle(),
-				Domain:    projectInfo.GetK8SNamespace(),
-				NewDesign: projectInfo.GetNewDesign(),
-				Status:    projectInfo.GetStatus(),
+				Id:         projectInfo.GetProjectId(),
+				CompanyId:  projectInfo.GetCompanyId(),
+				Name:       projectInfo.GetTitle(),
+				Domain:     projectInfo.GetK8SNamespace(),
+				NewDesign:  projectInfo.GetNewDesign(),
+				Status:     projectInfo.GetStatus(),
+				ExpireDate: projectInfo.GetExpireDate(),
 			}
 
 			currencienJson, err := json.Marshal(projectInfo.GetCurrencies())
