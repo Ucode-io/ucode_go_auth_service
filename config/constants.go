@@ -51,6 +51,7 @@ const (
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
 	PermissionDenied          string = "Permission denied"
+	ProjectInactiveError      string = "Your project is inactive"
 	InvalidPhoneError         string = "Неверный номер телефона, он должен содержать двенадцать цифр и +"
 	InvalidOTPError           string = "invalid number of otp"
 	InvalidRecipientError     string = "Invalid recipient type"
