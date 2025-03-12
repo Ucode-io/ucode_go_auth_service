@@ -14,6 +14,9 @@ const (
 	AccessTokenExpiresInTime  time.Duration = 1 * 60 * 24 * time.Minute
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
+	// AccessTokenExpiresInTime  time.Duration = 90 * time.Second
+	// RefreshTokenExpiresInTime time.Duration = 150 * time.Second
+
 	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	AdminClientName       string = "ADMIN"

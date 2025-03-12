@@ -39,6 +39,8 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.GET("/connection", h.V2GetConnectionList)
 		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
 		v2.POST("/login", h.V2Login)
+		v2.POST("/auth/logout", h.V2Logout)
+
 	}
 
 	v2.Use(h.AuthMiddleware())
@@ -134,7 +136,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		auth.POST("/login/:provider", h.V2LoginProvider)
 		auth.POST("/refresh", h.V2RefreshToken)
 		auth.POST("/send-code", h.V2SendCode)
-		auth.POST("/logout", h.V2Logout)
 		auth.POST("/password/reset", h.V2UserResetPassword)
 	}
 
