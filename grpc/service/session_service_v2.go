@@ -880,10 +880,10 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if time.Now().After(expiresAt) {
-		err := errors.New("token expired")
-		s.log.Error("!!!RefreshToken--->TokenExpired", logger.Error(err))
-		return nil, status.Error(codes.Code(status_http.Unauthorized.Code), err.Error())
+	if expiresAt.Unix() < time.Now().Add(5*time.Hour).Unix() {
+		err := errors.New("session has been expired")
+		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	_, err = s.strg.User().CHeckUserProject(ctx, session.GetUserIdAuth(), session.GetProjectId())
