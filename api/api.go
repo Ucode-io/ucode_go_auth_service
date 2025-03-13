@@ -146,16 +146,22 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	}
 
 	//COMPANY
-	r.POST("/company", h.RegisterCompany)
-	r.PUT("/company", h.UpdateCompany)
-	r.DELETE("/company/:company-id", h.RemoveCompany)
+	company := r.Group("company")
+	{
+		company.POST("", h.RegisterCompany)
+		company.PUT("", h.UpdateCompany)
+		company.DELETE("/:company-id", h.RemoveCompany)
+	}
 
 	//PROJECT
-	r.POST("/project", h.CreateProject)
-	r.PUT("/project", h.UpdateProject)
-	r.PUT("/project/:project-id/user-update", h.UpdateProjectUserData)
-	r.GET("project/:project-id", h.GetProjectByID)
-	r.DELETE("/project/:project-id", h.DeleteProject)
+	project := r.Group("project")
+	{
+		project.POST("", h.CreateProject)
+		project.PUT("", h.UpdateProject)
+		project.PUT("/:project-id/user-update", h.UpdateProjectUserData)
+		project.GET("/:project-id", h.GetProjectByID)
+		project.DELETE("/:project-id", h.DeleteProject)
+	}
 
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
