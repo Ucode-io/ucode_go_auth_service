@@ -1240,7 +1240,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 
 		if resource.GetProjectStatus() == config.InactiveStatus && methodField != config.READ {
-			err := status.Error(codes.PermissionDenied, config.ProjectInactiveError)
+			err := status.Error(codes.PermissionDenied, config.PermissionDenied)
 			return nil, err
 		}
 
