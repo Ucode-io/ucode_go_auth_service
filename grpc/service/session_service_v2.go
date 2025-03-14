@@ -1122,7 +1122,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
 	if tokenInfo.ClientID != "" {
