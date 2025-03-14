@@ -62,6 +62,7 @@ const (
 	EnvironmentIdError        string = "cant get environment_id"
 	InvalidEmailError         string = "Email is not valid"
 	EmailSettingsError        string = "email settings not found"
+	SessionExpired            string = "Session has been expired"
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"

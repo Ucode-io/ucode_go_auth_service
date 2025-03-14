@@ -133,13 +133,13 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 		c.JSON(http.StatusUnauthorized, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+			Data:        config.SessionExpired,
 		})
 	} else if statusHttp.Status == status_http.Forbidden.Status {
 		c.JSON(http.StatusForbidden, status_http.Response{
 			Status:      statusHttp.Status,
 			Description: st.String(),
-			Data:        strings.ToUpper(st.Message()[:1]) + st.Message()[1:],
+			Data:        config.SessionExpired,
 		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
