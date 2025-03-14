@@ -1508,6 +1508,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				NewDesign:  projectInfo.GetNewDesign(),
 				Status:     projectInfo.GetStatus(),
 				ExpireDate: projectInfo.GetExpireDate(),
+				NewLayout:  projectInfo.GetNewLayout(),
 			}
 
 			currencienJson, err := json.Marshal(projectInfo.GetCurrencies())
