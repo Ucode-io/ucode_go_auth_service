@@ -928,7 +928,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.Id,
-		"ip":                 session.Data,
+		"ip":                 session.Ip,
 		"data":               session.Data,
 		"tables":             authTables,
 		"user_id":            session.UserId,
@@ -1051,7 +1051,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.GetId(),
-		"ip":                 session.GetData(),
+		"ip":                 session.GetIp(),
 		"data":               session.GetData(),
 		"tables":             input.GetTables(),
 		"user_id":            session.GetUserId(),
