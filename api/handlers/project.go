@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 
+	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/util"
+	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
 )
@@ -215,4 +218,39 @@ func (h *Handler) UpdateProjectUserData(c *gin.Context) {
 	var updateProjectUserDataReq company_service.UpdateProjectUserDataReq
 
 	h.handleResponse(c, http.OK, &updateProjectUserDataReq)
+}
+
+func (h *Handler) Emqx(c *gin.Context) {
+	project := make(map[string]any)
+
+	if err := c.ShouldBindJSON(&project); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	clientId := cast.ToString(project["client_id"])
+	if _, err := uuid.Parse(clientId); err != nil {
+		c.JSON(400, map[string]any{"result": "deny"})
+		return
+	}
+
+	resp, err := h.services.ProjectServiceClient().GetById(
+		c.Request.Context(),
+		&company_service.GetProjectByIdRequest{
+			ProjectId: clientId,
+		},
+	)
+	if err != nil {
+		c.JSON(500, map[string]any{"result": "deny"})
+		return
+	}
+
+	if resp.Status == config.InactiveStatus {
+		c.JSON(500, map[string]any{"result": "deny"})
+		return
+	}
+
+	c.JSON(200, map[string]any{
+		"result": "allow", // "allow" | "deny" | "ignore"
+	})
 }

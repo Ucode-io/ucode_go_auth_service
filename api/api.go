@@ -163,6 +163,8 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		project.DELETE("/:project-id", h.DeleteProject)
 	}
 
+	r.POST("/emqx", h.Emqx)
+
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
 
