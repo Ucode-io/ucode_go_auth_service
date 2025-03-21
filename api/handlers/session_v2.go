@@ -230,7 +230,7 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 			&user,
 		)
 		if err != nil {
-			h.handleResponse(c, http.GRPCError, err.Error())
+			h.handleError(c, http.GRPCError, err)
 			return
 		}
 	}

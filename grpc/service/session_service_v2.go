@@ -874,6 +874,18 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		session.EnvId = req.EnvId
 	}
 
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->ParseExpiresAt", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if expiresAt.Unix() < time.Now().Unix() {
+		err := errors.New("session has been expired")
+		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	_, err = s.strg.User().CHeckUserProject(ctx, session.GetUserIdAuth(), session.GetProjectId())
 	if err != nil {
 		s.log.Error("!!!V2Login--->CHeckUserProject", logger.Error(err))
@@ -893,7 +905,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		RoleId:           session.RoleId,
 		ProjectId:        session.ProjectId,
 		IsChanged:        session.IsChanged,
-		ExpiresAt:        time.Now().Add(24 * time.Hour).Format(config.DatabaseTimeLayout),
+		ExpiresAt:        time.Now().Add(config.AccessTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 		ClientTypeId:     session.ClientTypeId,
 		ClientPlatformId: session.ClientPlatformId,
 	})
@@ -916,7 +928,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.Id,
-		"ip":                 session.Data,
+		"ip":                 session.Ip,
 		"data":               session.Data,
 		"tables":             authTables,
 		"user_id":            session.UserId,
@@ -1039,7 +1051,7 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.GetId(),
-		"ip":                 session.GetData(),
+		"ip":                 session.GetIp(),
 		"data":               session.GetData(),
 		"tables":             input.GetTables(),
 		"user_id":            session.GetUserId(),
@@ -1110,7 +1122,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
 	if err != nil {
 		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
 	if tokenInfo.ClientID != "" {
@@ -1138,7 +1150,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if expiresAt.Unix() < time.Now().Add(5*time.Hour).Unix() {
+	if expiresAt.Unix() < time.Now().Unix() {
 		err := errors.New("session has been expired")
 		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -1228,7 +1240,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 
 		if resource.GetProjectStatus() == config.InactiveStatus && methodField != config.READ {
-			err := status.Error(codes.PermissionDenied, config.ProjectInactiveError)
+			err := status.Error(codes.PermissionDenied, config.InactiveStatus)
 			return nil, err
 		}
 
@@ -1496,6 +1508,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 				NewDesign:  projectInfo.GetNewDesign(),
 				Status:     projectInfo.GetStatus(),
 				ExpireDate: projectInfo.GetExpireDate(),
+				NewLayout:  projectInfo.GetNewLayout(),
 			}
 
 			currencienJson, err := json.Marshal(projectInfo.GetCurrencies())

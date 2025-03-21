@@ -145,17 +145,20 @@ func (h *Handler) hasAccess(c *gin.Context) (*auth_service.V2HasAccessUserRes, b
 		},
 	)
 	if err != nil {
-		errr := status.Error(codes.PermissionDenied, config.PermissionDenied)
-		if errr.Error() == err.Error() {
+		permissionErrors := map[string]struct{}{
+			status.Error(codes.PermissionDenied, config.PermissionDenied).Error(): {},
+			status.Error(codes.PermissionDenied, config.InactiveStatus).Error():   {},
+		}
+		if _, exists := permissionErrors[err.Error()]; exists {
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return nil, false
 		}
-		errr = status.Error(codes.InvalidArgument, "Session has been expired")
+		errr := status.Error(codes.InvalidArgument, "Session has been expired")
 		if errr.Error() == err.Error() {
-			h.handleResponse(c, http.Forbidden, err.Error())
+			h.handleError(c, http.Forbidden, err)
 			return nil, false
 		}
-		h.handleResponse(c, http.Unauthorized, err.Error())
+		h.handleError(c, http.Unauthorized, err)
 		return nil, false
 	}
 

@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"maps"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -14,9 +16,7 @@ func GenerateJWT(m map[string]any, tokenExpireTime time.Duration, tokenSecretKey
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	for key, value := range m {
-		claims[key] = value
-	}
+	maps.Copy(claims, m)
 
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(tokenExpireTime).Unix()
