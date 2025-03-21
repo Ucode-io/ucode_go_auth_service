@@ -339,12 +339,12 @@ func (r *apiKeysRepo) Update(ctx context.Context, req *pb.UpdateReq) (rowsAffect
 
 	query := `UPDATE "api_keys" SET
 				status = $1,
-				name = $2
+				name = $2,
 				role_id = $3,
 				client_type_id = $4,
 				updated_at = now()
 			WHERE
-			    id  $5`
+			    id = $5`
 
 	res, err := r.db.Exec(
 		ctx,
