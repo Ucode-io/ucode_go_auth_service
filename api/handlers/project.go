@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
@@ -248,6 +250,26 @@ func (h *Handler) Emqx(c *gin.Context) {
 	if resp.Status == config.InactiveStatus {
 		c.JSON(500, map[string]any{"result": "deny"})
 		return
+	}
+
+	c.JSON(200, map[string]any{
+		"result": "allow", // "allow" | "deny" | "ignore"
+	})
+}
+
+func (h *Handler) Custom(c *gin.Context) {
+	project := make(map[string]any)
+
+	if err := c.ShouldBindJSON(&project); err != nil {
+		h.handleResponse(c, http.Unauthorized, err.Error())
+		return
+	}
+
+	safdasdf, _ := json.Marshal(project)
+	fmt.Println("Custom", string(safdasdf))
+
+	for key, values := range c.Request.Header {
+		fmt.Printf("%s: %v\n", key, values)
 	}
 
 	c.JSON(200, map[string]any{
