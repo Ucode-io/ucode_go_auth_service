@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"runtime"
 
 	"time"
@@ -508,12 +507,6 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 		s.log.Error("!!!MultiCompanyLogin--->GetUserEnvProjects", logger.Error(err))
 		return nil, status.Error(codes.NotFound, errGetEnvProjects.Error())
 	}
-
-	safdasf, _ := json.Marshal(userProjects)
-	fmt.Println("userProjects", string(safdasf))
-
-	asfasdfld, _ := json.Marshal(userEnvProject)
-	fmt.Println("userEnvProject", string(asfasdfld))
 
 	for _, item := range userProjects.Companies {
 		projects := make([]*pb.Project2, 0, 20)
