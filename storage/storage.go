@@ -62,7 +62,7 @@ type UserRepoI interface {
 	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
 	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest, tx pgx.Tx) (rowsAffected int64, err error)
 	GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error)
-	GetUserProjects2(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error)
+	GetUserProjectsEnv(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error)
 
 	GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (*models.UserProjectClientTypeResponse, error)
 	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
@@ -79,6 +79,7 @@ type UserRepoI interface {
 	GetAllUserProjects(ctx context.Context) ([]string, error)
 	UpdateUserProjects(ctx context.Context, envId, projectId string) (*emptypb.Empty, error)
 	GetUserEnvProjects(ctx context.Context, userId string) (*models.GetUserEnvProjectRes, error)
+	GetUserEnvProjectsV2(ctx context.Context, userId, envId string) (*models.GetUserEnvProjectRes, error)
 	CHeckUserProject(ctx context.Context, id, projectId string) (res *pb.User, err error)
 	UpdatePassword(ctx context.Context, userId, password string) error
 	V2GetByUsername(ctx context.Context, username, strategy string) (res *pb.User, err error)

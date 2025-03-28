@@ -495,7 +495,7 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	return &res, nil
 }
 
-func (r *userRepo) GetUserProjects2(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error) {
+func (r *userRepo) GetUserProjectsEnv(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjects")
 	defer dbSpan.Finish()
 
@@ -1161,6 +1161,44 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 				GROUP BY project_id				`
 
 	rows, err := r.db.Query(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			envIds    = make([]string, 0)
+			projectId string
+		)
+
+		err = rows.Scan(&projectId, &envIds)
+		if err != nil {
+			return nil, err
+		}
+
+		res.EnvProjects[projectId] = envIds
+	}
+
+	return &res, nil
+}
+
+func (r *userRepo) GetUserEnvProjectsV2(ctx context.Context, userId, envId string) (*models.GetUserEnvProjectRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserEnvProjects")
+	defer dbSpan.Finish()
+
+	res := models.GetUserEnvProjectRes{
+		EnvProjects: map[string][]string{},
+	}
+
+	query := `SELECT project_id,
+       			array_agg(DISTINCT env_id)
+				FROM user_project
+				WHERE user_id = $1
+				AND env_id = $2
+				GROUP BY project_id				`
+
+	rows, err := r.db.Query(ctx, query, userId, envId)
 	if err != nil {
 		return nil, err
 	}

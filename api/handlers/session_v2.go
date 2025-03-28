@@ -434,31 +434,86 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
 	var login pba.V2MultiCompanyLoginReq
 
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, "error getting environment id | not valid")
+		return
+	}
+
 	if err := c.ShouldBindJSON(&login); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
+	if login.Type == "" {
+		login.Type = config.Default
+	}
+
+	switch login.Type {
+	case config.Default:
+		if login.Username == "" {
+			err := errors.New("username is required")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+
+		if login.Password == "" {
+			err := errors.New("password is required")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	case config.WithPhone:
+		if login.SmsId == "" {
+			err := errors.New("SmsId is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+
+		if login.Otp == "" {
+			err := errors.New("otp is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+
+		if login.Phone == "" {
+			err := errors.New("phone is required when type is phone")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	case config.WithEmail:
+		if login.SmsId == "" {
+			err := errors.New("SmsId is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+
+		if login.Otp == "" {
+			err := errors.New("otp is required when type is not default")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+
+		if login.Email == "" {
+			err := errors.New("email is required when type is email")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	case config.WithGoogle:
+		if login.GoogleToken == "" {
+			err := errors.New("google token is required when type is google")
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	}
+
+	login.EnvId = environmentId.(string)
+
 	resp, err := h.services.SessionService().V2MultiCompanyLogin(
 		c.Request.Context(), &login,
 	)
 	if err != nil {
-		var httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
-		httpErrorStr = strings.ToLower(httpErrorStr)
-
-		if httpErrorStr == "user not found" {
-			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
-			return
-		} else if httpErrorStr == "session has been expired" {
-			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
-			return
-		} else if httpErrorStr == "invalid username" {
-			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
-			return
-		} else if httpErrorStr == "invalid password" {
-			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
-			return
-		}
+		h.handleError(c, http.InvalidArgument, err)
+		return
 	}
 
 	h.handleResponse(c, http.Created, resp)
