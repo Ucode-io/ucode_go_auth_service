@@ -273,6 +273,7 @@ func (h *Handler) Custom(c *gin.Context) {
 	}
 
 	c.JSON(200, map[string]any{
-		"result": "allow", // "allow" | "deny" | "ignore"
+		"X-Hasura-User-Id": "bba3dddc-5f20-449c-8ec8-37bef283c766",
+		"X-Hasura-Role":    "admin",
 	})
 }
