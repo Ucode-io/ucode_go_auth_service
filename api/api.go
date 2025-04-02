@@ -164,6 +164,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	}
 
 	r.POST("/emqx", h.Emqx)
+	r.POST("/custom", h.Custom)
 
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)

@@ -254,3 +254,17 @@ func (h *Handler) Emqx(c *gin.Context) {
 		"result": "allow", // "allow" | "deny" | "ignore"
 	})
 }
+
+func (h *Handler) Custom(c *gin.Context) {
+	project := make(map[string]any)
+
+	if err := c.ShouldBindJSON(&project); err != nil {
+		h.handleResponse(c, http.Unauthorized, err.Error())
+		return
+	}
+
+	c.JSON(200, map[string]any{
+		"X-Hasura-User-Id": "bba3dddc-5f20-449c-8ec8-37bef283c766",
+		"X-Hasura-Role":    "admin",
+	})
+}
