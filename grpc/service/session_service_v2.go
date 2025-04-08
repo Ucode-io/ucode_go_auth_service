@@ -1213,7 +1213,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		if val, exist := config.Path[path]; exist {
 			checkPermission = val
 			requestPath = path
-			break
+			// break
 		}
 	}
 
