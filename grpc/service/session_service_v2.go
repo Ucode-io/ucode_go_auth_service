@@ -1210,8 +1210,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	}
 
 	for _, path := range arr_path {
-		if exist := config.Path[path]; exist {
-			checkPermission = true
+		if val, exist := config.Path[path]; exist {
+			checkPermission = val
 			requestPath = path
 			break
 		}
