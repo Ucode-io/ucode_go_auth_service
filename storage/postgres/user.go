@@ -759,7 +759,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	params := map[string]any{}
 	if req.Email != "" {
 		filter = "email = :email"
-		params["email"] = req.Email
+		params["email"] = strings.ToLower(req.Email)
 	}
 	if req.Login != "" {
 		if filter != "" {

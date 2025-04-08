@@ -126,9 +126,10 @@ var (
 	}
 
 	Path = map[string]bool{
-		"object":      true,
-		"object-slim": true,
-		"items":       true,
+		"object":       true,
+		"object-slim":  true,
+		"items":        true,
+		"many-to-many": false,
 	}
 
 	ITEMS string = "items"
