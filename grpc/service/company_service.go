@@ -138,6 +138,8 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			NativeName: config.NativeName,
 			ShortName:  config.ShortName,
 		}},
+		NewDesign: true,
+		NewLayout: true,
 	})
 
 	environment, err := s.services.EnvironmentService().Create(ctx,
