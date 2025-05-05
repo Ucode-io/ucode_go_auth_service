@@ -45,10 +45,10 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 }
 
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
+	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_register.RegisterUser", data)
 	defer dbSpan.Finish()
-
-	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -77,17 +77,23 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		phone    = helper.GetStringFromMap(body, "phone")
 	)
 
-	switch strings.ToUpper(data.Type) {
-	case "EMAIL":
+	switch strings.ToLower(data.Type) {
+	case config.WithEmail:
 		foundUser, err = rs.strg.User().GetByUsername(ctx, email)
 		if err != nil {
 			rs.log.Error("!RegisterUserError--->EmailGetByUsername", logger.Error(err))
 			return nil, err
 		}
-	case "PHONE":
+	case config.WithPhone:
 		foundUser, err = rs.strg.User().GetByUsername(ctx, phone)
 		if err != nil {
 			rs.log.Error("!RegisterUserError--->PhoneGetByUsernames", logger.Error(err))
+			return nil, err
+		}
+	case config.WithLogin:
+		foundUser, err = rs.strg.User().GetByUsername(ctx, login)
+		if err != nil {
+			rs.log.Error("!RegisterUserError--->LoginGetByUsername", logger.Error(err))
 			return nil, err
 		}
 	}
@@ -135,7 +141,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 	services, err := rs.serviceNode.GetByNodeType(data.ProjectId, data.NodeType)
 	if err != nil {
-		rs.log.Error("!!!CreateUser--->GetByNodeType", logger.Error(err))
+		rs.log.Error("!!!CreateUser-->GetByNodeType", logger.Error(err))
 		return nil, err
 	}
 

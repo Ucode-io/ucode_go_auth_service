@@ -424,6 +424,11 @@ func (h *Handler) V2Register(c *gin.Context) {
 			h.handleResponse(c, http.BadRequest, "Поле phone не заполнено")
 			return
 		}
+	case cfg.WithLogin:
+		if _, ok := body.Data[cfg.WithLogin]; ok {
+			h.handleResponse(c, http.BadRequest, "неверный формат email")
+			return
+		}
 	default:
 		h.handleResponse(c, http.BadRequest, "register with google and apple not implemented")
 		return
