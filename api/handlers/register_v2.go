@@ -425,7 +425,7 @@ func (h *Handler) V2Register(c *gin.Context) {
 			return
 		}
 	case cfg.WithLogin:
-		if _, ok := body.Data[cfg.WithLogin]; ok {
+		if _, ok := body.Data[cfg.WithLogin]; !ok {
 			h.handleResponse(c, http.BadRequest, "неверный формат email")
 			return
 		}
