@@ -1105,7 +1105,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField            string
 		exist, checkPermission bool
 		authTables             []*pb.TableBody
-		requestPath            string
+		tableSlug              string = req.GetTableSlug()
 	)
 	runtime.ReadMemStats(&before)
 
@@ -1212,21 +1212,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 	for _, path := range arr_path {
 		if val, exist := config.Path[path]; exist {
 			checkPermission = val
-			requestPath = path
-			// break
 		}
 	}
 
 	if checkPermission {
-		var tableSlug string
-		if strings.Contains(arr_path[len(arr_path)-1], ":") {
-			tableSlug = arr_path[len(arr_path)-2]
-		} else if requestPath == config.ITEMS && len(arr_path) > 3 {
-			tableSlug = arr_path[3]
-		} else {
-			tableSlug = arr_path[len(arr_path)-1]
-		}
-
 		resource, err := s.services.ServiceResource().GetSingle(ctx,
 			&pbCompany.GetSingleServiceResourceReq{
 				ProjectId:     session.ProjectId,
