@@ -34,7 +34,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	v2 := r.Group("/v2")
 	v2.PUT("/refresh", h.V2RefreshToken)
 
-	v2.Use(h.LoginMiddleware()) 
+	v2.Use(h.LoginMiddleware())
 	{
 		v2.GET("/connection", h.V2GetConnectionList)
 		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
@@ -158,7 +158,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	{
 		project.POST("", h.CreateProject)
 		project.PUT("", h.UpdateProject)
-		project.PUT("/:project-id/user-update", h.UpdateProjectUserData)
 		project.GET("/:project-id", h.GetProjectByID)
 		project.DELETE("/:project-id", h.DeleteProject)
 	}
