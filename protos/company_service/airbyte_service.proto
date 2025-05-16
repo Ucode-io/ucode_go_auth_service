@@ -62,4 +62,6 @@ message Airbyte {
     string username = 13;
     string database = 14;
     string password = 15;
+    string superset_username = 16;
+    string superset_password = 17;
 }
