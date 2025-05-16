@@ -9,13 +9,13 @@ import (
 
 const (
 	// Default Configs
-	DatabaseQueryTimeLayout   string        = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
-	DatabaseTimeLayout        string        = time.RFC3339
-	AccessTokenExpiresInTime  time.Duration = 1 * 60 * 24 * time.Minute
-	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
+	DatabaseQueryTimeLayout string = `'YYYY-MM-DD"T"HH24:MI:SS"."MS"Z"TZ'`
+	DatabaseTimeLayout      string = time.RFC3339
+	// AccessTokenExpiresInTime  time.Duration = 1 * 60 * 24 * time.Minute
+	// RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
-	// AccessTokenExpiresInTime  time.Duration = 90 * time.Second
-	// RefreshTokenExpiresInTime time.Duration = 150 * time.Second
+	AccessTokenExpiresInTime  time.Duration = 2 * time.Minute
+	RefreshTokenExpiresInTime time.Duration = 4 * time.Minute
 
 	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
@@ -87,37 +87,6 @@ var (
 		"phone":   true,
 		"apple":   true,
 		"email":   true,
-	}
-
-	ObjectBuilderTableSlugs = map[string]bool{
-		"field":               true,
-		"view":                true,
-		"table":               true,
-		"relation":            true,
-		"section":             true,
-		"view_relation":       true,
-		"html-template":       true,
-		"variable":            true,
-		"dashboard":           true,
-		"panel":               true,
-		"html-to-pdf":         true,
-		"document":            true,
-		"template-to-html":    true,
-		"many-to-many":        true,
-		"upload":              true,
-		"upload-file":         true,
-		"close-cashbox":       true,
-		"open-cashbox":        true,
-		"cashbox_transaction": true,
-		"query":               true,
-		"event":               true,
-		"event-log":           true,
-		"permission-upsert":   true,
-		"custom-event":        true,
-		"excel":               true,
-		"field-permission":    true,
-		"function":            true,
-		"invoke_function":     true,
 	}
 
 	HashTypes = map[string]int{
