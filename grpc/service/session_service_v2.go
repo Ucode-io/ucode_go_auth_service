@@ -1751,9 +1751,27 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
+	case 3:
+		postData, err := services.GoLoginService().LoginData(ctx, &nb.LoginDataReq{
+			UserId:                user.GetId(),
+			ClientType:            session.GetClientTypeId(),
+			ProjectId:             session.GetProjectId(),
+			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			errGetUserProjectData := errors.New("invalid user project data")
+			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+		}
+
+		err = helper.MarshalToStruct(&postData, &data)
+		if err != nil {
+			s.log.Error("!!!Login--->", logger.Error(err))
+			return nil, status.Error(400, err.Error())
+		}
 	}
 
-	if !data.UserFound {
+	if !data.GetUserFound() {
 		customError := fmt.Errorf("user not found with env_id %s, user_id %s, client_type_id %s", req.GetEnvId(), user.Id, session.ClientTypeId)
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
