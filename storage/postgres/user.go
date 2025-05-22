@@ -652,9 +652,9 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 			return nil, err
 		}
 
-		if roleIdBeforeUpdate == req.RoleId {
-			req.Status = config.UserStatusBlocked
-		}
+		// if roleIdBeforeUpdate == req.RoleId {
+		// 	req.Status = config.UserStatusBlocked
+		// }
 	}
 
 	query = `UPDATE "user_project" 
