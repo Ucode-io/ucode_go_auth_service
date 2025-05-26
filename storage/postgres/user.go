@@ -321,14 +321,17 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		"user"
 	WHERE`
 
-	lowercasedUsername := strings.ToLower(username)
+	lowercasedUsername := ""
 
 	if util.IsValidEmailNew(username) {
 		query = query + ` LOWER(email) = $1`
+		lowercasedUsername = strings.ToLower(username)
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
+		lowercasedUsername = username
 	} else {
-		query = query + ` LOWER(login) = $1`
+		query = query + ` login = $1`
+		lowercasedUsername = username
 	}
 
 	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
