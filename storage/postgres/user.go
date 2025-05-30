@@ -617,6 +617,15 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		clientTypeId, roleId, envId pgtype.UUID
 	)
 
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
 	if req.GetClientTypeId() != "" {
 		err := clientTypeId.Set(req.GetClientTypeId())
 		if err != nil {
@@ -644,28 +653,44 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		envId.Status = pgtype.Null
 	}
 
-	if req.Status == config.UserStatusInactive {
-		var (
-			roleIdBeforeUpdate string
-			query              = `SELECT role_id FROM "user_project" WHERE user_id = $1 AND project_id = $2 AND env_id = $3`
-		)
+	if req.Status == config.UserStatusBlocked {
+		query = `DELETE FROM session WHERE 
+			user_id = $1 AND
+			project_id = $2 AND 
+			env_id = $3 AND
+			role_id = $4 AND 
+			client_type_id = $5`
 
-		err := r.db.QueryRow(ctx, query, req.UserId, req.ProjectId, envId).Scan(&roleIdBeforeUpdate)
+		_, err = tx.Exec(ctx, query, req.UserId, req.ProjectId, envId, roleId, clientTypeId)
 		if err != nil {
 			return nil, err
 		}
-
-		// if roleIdBeforeUpdate == req.RoleId {
-		// 	req.Status = config.UserStatusBlocked
-		// }
 	}
+
+	/*
+		if req.Status == config.UserStatusInactive {
+			var (
+				roleIdBeforeUpdate string
+				query              = `SELECT role_id FROM "user_project" WHERE user_id = $1 AND project_id = $2 AND env_id = $3`
+			)
+
+			err := r.db.QueryRow(ctx, query, req.UserId, req.ProjectId, envId).Scan(&roleIdBeforeUpdate)
+			if err != nil {
+				return nil, err
+			}
+
+			if roleIdBeforeUpdate == req.RoleId {
+				req.Status = config.UserStatusBlocked
+			}
+		}
+	*/
 
 	query = `UPDATE "user_project" 
 			  SET client_type_id = $4, role_id = $5, status = $6
 			  WHERE user_id = $1 AND project_id = $2 AND env_id = $3
 			  RETURNING user_id, company_id, project_id, client_type_id, role_id, env_id, status`
 
-	err := r.db.QueryRow(ctx, query,
+	err = tx.QueryRow(ctx, query,
 		req.UserId, req.ProjectId, envId, clientTypeId, roleId, req.Status,
 	).Scan(
 		&res.UserId, &res.CompanyId, &res.ProjectId,
