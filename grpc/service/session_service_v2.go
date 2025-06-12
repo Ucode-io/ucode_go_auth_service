@@ -905,7 +905,7 @@ func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshToke
 		RoleId:           session.RoleId,
 		ProjectId:        session.ProjectId,
 		IsChanged:        session.IsChanged,
-		ExpiresAt:        time.Now().Add(config.AccessTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
 		ClientTypeId:     session.ClientTypeId,
 		ClientPlatformId: session.ClientPlatformId,
 	})
@@ -1094,8 +1094,6 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 }
 
 func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
-	s.log.Info("!!!V2HasAccessUser--->", logger.Any("req", req))
-
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2HasAccessUser", req)
 	defer dbSpan.Finish()
 
@@ -1152,7 +1150,7 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 
 	if expiresAt.Add(5*time.Hour).Unix() < time.Now().Unix() {
 		err := errors.New("session has been expired")
-		s.log.Error("!!!V2HasAccessUser->CHeckExpiredToken--->", logger.Error(err))
+		s.log.Error("!!!V2HasAccessUser->CheckExpiredToken--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
