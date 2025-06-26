@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/genproto/company_service"
 
+	"github.com/google/uuid"
 	"github.com/saidamir98/udevs_pkg/util"
+	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
 )
@@ -199,20 +202,51 @@ func (h *Handler) DeleteProject(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
-// UpdateProjectUserData godoc
-// @ID update_user_in_project
-// @Router /project/{project-id}/user-update [PUT]
-// @Summary Update Project
-// @Description Update Project
-// @Tags Project
-// @Accept json
-// @Produce json
-// @Param project body company_service.UpdateProjectUserDataReq true "UpdateProjectUserDataReqBody"
-// @Success 200 {object} http.Response{data=company_service.UpdateProjectUserDataRes} "Project data"
-// @Response 400 {object} http.Response{data=string} "Bad Request"
-// @Failure 500 {object} http.Response{data=string} "Server Error"
-func (h *Handler) UpdateProjectUserData(c *gin.Context) {
-	var updateProjectUserDataReq company_service.UpdateProjectUserDataReq
+func (h *Handler) Emqx(c *gin.Context) {
+	project := make(map[string]any)
 
-	h.handleResponse(c, http.OK, &updateProjectUserDataReq)
+	if err := c.ShouldBindJSON(&project); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	clientId := cast.ToString(project["client_id"])
+	if _, err := uuid.Parse(clientId); err != nil {
+		c.JSON(400, map[string]any{"result": "deny"})
+		return
+	}
+
+	resp, err := h.services.ProjectServiceClient().GetById(
+		c.Request.Context(),
+		&company_service.GetProjectByIdRequest{
+			ProjectId: clientId,
+		},
+	)
+	if err != nil {
+		c.JSON(500, map[string]any{"result": "deny"})
+		return
+	}
+
+	if resp.Status == config.InactiveStatus {
+		c.JSON(500, map[string]any{"result": "deny"})
+		return
+	}
+
+	c.JSON(200, map[string]any{
+		"result": "allow", // "allow" | "deny" | "ignore"
+	})
+}
+
+func (h *Handler) Custom(c *gin.Context) {
+	project := make(map[string]any)
+
+	if err := c.ShouldBindJSON(&project); err != nil {
+		h.handleResponse(c, http.Unauthorized, err.Error())
+		return
+	}
+
+	c.JSON(200, map[string]any{
+		"X-Hasura-User-Id": "bba3dddc-5f20-449c-8ec8-37bef283c766",
+		"X-Hasura-Role":    "admin",
+	})
 }

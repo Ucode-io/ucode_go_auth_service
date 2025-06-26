@@ -120,6 +120,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		CompanyId:    companyPKey.GetId(),
 		K8SNamespace: config.K8SNamespace,
 		Title:        req.GetName(),
+		FareId:       req.GetFareId(),
 	})
 	if err != nil {
 		s.log.Error("---RegisterCompany--->CreateProject", logger.Error(err))
@@ -137,6 +138,8 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			NativeName: config.NativeName,
 			ShortName:  config.ShortName,
 		}},
+		NewDesign: true,
+		NewLayout: true,
 	})
 
 	environment, err := s.services.EnvironmentService().Create(ctx,

@@ -23,6 +23,7 @@ service TableService {
 
     rpc GetTablesByLabel(GetTablesByLabelReq) returns (GetAllTablesResponse) {}
     rpc GetFieldsByTable(GetFieldsByTableReq) returns (GetFieldsByTableRes) {}
+    rpc GetChart(ChartPrimaryKey) returns (GetChartResponse) {}
 }
 
 message InsertVersionsToCommitRequest {
@@ -91,6 +92,7 @@ message CreateTableRequest {
     string view_id = 26;
     string layout_id = 27;
     bool is_login_table = 29;
+    string menu_id = 30;
 }
 
 message IncrementID {
@@ -240,4 +242,13 @@ message GetFieldsByTableReq {
 message GetFieldsByTableRes {
     Table table = 1;
     repeated Field fields = 2;
+}
+
+message ChartPrimaryKey {
+    string id = 1;
+    string project_id = 2;
+}
+
+message GetChartResponse {
+    string dbml = 1;
 }

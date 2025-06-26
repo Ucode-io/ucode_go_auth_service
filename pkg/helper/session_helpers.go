@@ -109,6 +109,9 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 			EnvironmentButton:     data.GetGlobalPermission().GetEnvironmentButton(),
 			ProjectButton:         data.GetGlobalPermission().GetProjectButton(),
 			SmsButton:             data.GetGlobalPermission().GetSmsButton(),
+			GitbookButton:         data.GetGlobalPermission().GetGitbookButton(),
+			ChatwootButton:        data.GetGlobalPermission().GetChatwootButton(),
+			GptButton:             data.GetGlobalPermission().GetGptButton(),
 		},
 	}
 

@@ -29,6 +29,7 @@ enum ResourceType {
     GITLAB = 8;
     GIT = 9;
     BITBUCKET = 10;
+    SUPERSET = 11;
 }
 
 enum SettingType {
@@ -53,6 +54,7 @@ message Resource {
     string vault_path = 6;
     string project_id = 7;
     string node_type = 8;
+    repeated Environment environments = 9;
 }
 
 message Environment {
@@ -63,6 +65,10 @@ message Environment {
     string description = 5;
     google.protobuf.Struct data = 6;
     string access_type = 7;
+    string resource_environment_id = 8;
+    bool is_configured = 9;
+    bool default = 10;
+    string node_type = 11;
 }
 
 message EnvironmentWithResources {

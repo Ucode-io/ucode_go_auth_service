@@ -321,14 +321,17 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		"user"
 	WHERE`
 
-	lowercasedUsername := strings.ToLower(username)
+	lowercasedUsername := ""
 
 	if util.IsValidEmailNew(username) {
 		query = query + ` LOWER(email) = $1`
+		lowercasedUsername = strings.ToLower(username)
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
+		lowercasedUsername = username
 	} else {
-		query = query + ` LOWER(login) = $1`
+		query = query + ` login = $1`
+		lowercasedUsername = username
 	}
 
 	err = r.db.QueryRow(ctx, query, lowercasedUsername).Scan(
@@ -495,7 +498,7 @@ func (r *userRepo) GetUserProjects(ctx context.Context, userId string) (*pb.GetU
 	return &res, nil
 }
 
-func (r *userRepo) GetUserProjects2(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error) {
+func (r *userRepo) GetUserProjectsEnv(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjects")
 	defer dbSpan.Finish()
 
@@ -614,6 +617,15 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		clientTypeId, roleId, envId pgtype.UUID
 	)
 
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
 	if req.GetClientTypeId() != "" {
 		err := clientTypeId.Set(req.GetClientTypeId())
 		if err != nil {
@@ -641,28 +653,44 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		envId.Status = pgtype.Null
 	}
 
-	if req.Status == config.UserStatusInactive {
-		var (
-			roleIdBeforeUpdate string
-			query              = `SELECT role_id FROM "user_project" WHERE user_id = $1 AND project_id = $2 AND env_id = $3`
-		)
+	if req.Status == config.UserStatusBlocked {
+		query = `DELETE FROM session WHERE 
+			user_id = $1 AND
+			project_id = $2 AND 
+			env_id = $3 AND
+			role_id = $4 AND 
+			client_type_id = $5`
 
-		err := r.db.QueryRow(ctx, query, req.UserId, req.ProjectId, envId).Scan(&roleIdBeforeUpdate)
+		_, err = tx.Exec(ctx, query, req.UserId, req.ProjectId, envId, roleId, clientTypeId)
 		if err != nil {
 			return nil, err
 		}
-
-		if roleIdBeforeUpdate == req.RoleId {
-			req.Status = config.UserStatusBlocked
-		}
 	}
+
+	/*
+		if req.Status == config.UserStatusInactive {
+			var (
+				roleIdBeforeUpdate string
+				query              = `SELECT role_id FROM "user_project" WHERE user_id = $1 AND project_id = $2 AND env_id = $3`
+			)
+
+			err := r.db.QueryRow(ctx, query, req.UserId, req.ProjectId, envId).Scan(&roleIdBeforeUpdate)
+			if err != nil {
+				return nil, err
+			}
+
+			if roleIdBeforeUpdate == req.RoleId {
+				req.Status = config.UserStatusBlocked
+			}
+		}
+	*/
 
 	query = `UPDATE "user_project" 
 			  SET client_type_id = $4, role_id = $5, status = $6
 			  WHERE user_id = $1 AND project_id = $2 AND env_id = $3
 			  RETURNING user_id, company_id, project_id, client_type_id, role_id, env_id, status`
 
-	err := r.db.QueryRow(ctx, query,
+	err = tx.QueryRow(ctx, query,
 		req.UserId, req.ProjectId, envId, clientTypeId, roleId, req.Status,
 	).Scan(
 		&res.UserId, &res.CompanyId, &res.ProjectId,
@@ -759,7 +787,7 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	params := map[string]any{}
 	if req.Email != "" {
 		filter = "email = :email"
-		params["email"] = req.Email
+		params["email"] = strings.ToLower(req.Email)
 	}
 	if req.Login != "" {
 		if filter != "" {
@@ -1161,6 +1189,44 @@ func (r *userRepo) GetUserEnvProjects(ctx context.Context, userId string) (*mode
 				GROUP BY project_id				`
 
 	rows, err := r.db.Query(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			envIds    = make([]string, 0)
+			projectId string
+		)
+
+		err = rows.Scan(&projectId, &envIds)
+		if err != nil {
+			return nil, err
+		}
+
+		res.EnvProjects[projectId] = envIds
+	}
+
+	return &res, nil
+}
+
+func (r *userRepo) GetUserEnvProjectsV2(ctx context.Context, userId, envId string) (*models.GetUserEnvProjectRes, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserEnvProjects")
+	defer dbSpan.Finish()
+
+	res := models.GetUserEnvProjectRes{
+		EnvProjects: map[string][]string{},
+	}
+
+	query := `SELECT project_id,
+       			array_agg(DISTINCT env_id)
+				FROM user_project
+				WHERE user_id = $1
+				AND env_id = $2
+				GROUP BY project_id				`
+
+	rows, err := r.db.Query(ctx, query, userId, envId)
 	if err != nil {
 		return nil, err
 	}

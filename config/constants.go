@@ -14,6 +14,9 @@ const (
 	AccessTokenExpiresInTime  time.Duration = 1 * 60 * 24 * time.Minute
 	RefreshTokenExpiresInTime time.Duration = 30 * 24 * 60 * time.Minute
 
+	// AccessTokenExpiresInTime  time.Duration = 2 * time.Minute
+	// RefreshTokenExpiresInTime time.Duration = 4 * time.Minute
+
 	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	AdminClientName       string = "ADMIN"
@@ -51,6 +54,7 @@ const (
 	UserProjectIdConstraint   string = "user_project_idx_unique"
 	DuplicateUserProjectError string = "user with this client_type already exists in the project"
 	PermissionDenied          string = "Permission denied"
+	ProjectInactiveError      string = "Your project is inactive"
 	InvalidPhoneError         string = "Неверный номер телефона, он должен содержать двенадцать цифр и +"
 	InvalidOTPError           string = "invalid number of otp"
 	InvalidRecipientError     string = "Invalid recipient type"
@@ -58,6 +62,7 @@ const (
 	EnvironmentIdError        string = "cant get environment_id"
 	InvalidEmailError         string = "Email is not valid"
 	EmailSettingsError        string = "email settings not found"
+	SessionExpired            string = "Session has been expired"
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"
@@ -84,46 +89,16 @@ var (
 		"email":   true,
 	}
 
-	ObjectBuilderTableSlugs = map[string]bool{
-		"field":               true,
-		"view":                true,
-		"table":               true,
-		"relation":            true,
-		"section":             true,
-		"view_relation":       true,
-		"html-template":       true,
-		"variable":            true,
-		"dashboard":           true,
-		"panel":               true,
-		"html-to-pdf":         true,
-		"document":            true,
-		"template-to-html":    true,
-		"many-to-many":        true,
-		"upload":              true,
-		"upload-file":         true,
-		"close-cashbox":       true,
-		"open-cashbox":        true,
-		"cashbox_transaction": true,
-		"query":               true,
-		"event":               true,
-		"event-log":           true,
-		"permission-upsert":   true,
-		"custom-event":        true,
-		"excel":               true,
-		"field-permission":    true,
-		"function":            true,
-		"invoke_function":     true,
-	}
-
 	HashTypes = map[string]int{
 		"argon":  1,
 		"bcrypt": 2,
 	}
 
 	Path = map[string]bool{
-		"object":      true,
-		"object-slim": true,
-		"items":       true,
+		"object":       true,
+		"object-slim":  true,
+		"items":        true,
+		"many-to-many": false,
 	}
 
 	ITEMS string = "items"

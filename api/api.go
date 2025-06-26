@@ -39,6 +39,8 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.GET("/connection", h.V2GetConnectionList)
 		v2.POST("/multi-company/one-login", h.V2MultiCompanyOneLogin)
 		v2.POST("/login", h.V2Login)
+		v2.POST("/auth/logout", h.V2Logout)
+
 	}
 
 	v2.Use(h.AuthMiddleware())
@@ -134,7 +136,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		auth.POST("/login/:provider", h.V2LoginProvider)
 		auth.POST("/refresh", h.V2RefreshToken)
 		auth.POST("/send-code", h.V2SendCode)
-		auth.POST("/logout", h.V2Logout)
 		auth.POST("/password/reset", h.V2UserResetPassword)
 	}
 
@@ -145,16 +146,24 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	}
 
 	//COMPANY
-	r.POST("/company", h.RegisterCompany)
-	r.PUT("/company", h.UpdateCompany)
-	r.DELETE("/company/:company-id", h.RemoveCompany)
+	company := r.Group("company")
+	{
+		company.POST("", h.RegisterCompany)
+		company.PUT("", h.UpdateCompany)
+		company.DELETE("/:company-id", h.RemoveCompany)
+	}
 
 	//PROJECT
-	r.POST("/project", h.CreateProject)
-	r.PUT("/project", h.UpdateProject)
-	r.PUT("/project/:project-id/user-update", h.UpdateProjectUserData)
-	r.GET("project/:project-id", h.GetProjectByID)
-	r.DELETE("/project/:project-id", h.DeleteProject)
+	project := r.Group("project")
+	{
+		project.POST("", h.CreateProject)
+		project.PUT("", h.UpdateProject)
+		project.GET("/:project-id", h.GetProjectByID)
+		project.DELETE("/:project-id", h.DeleteProject)
+	}
+
+	r.POST("/emqx", h.Emqx)
+	r.POST("/custom", h.Custom)
 
 	// With API-KEY authentication
 	v2.POST("/send-message", h.SendMessageToEmail)
