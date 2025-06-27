@@ -322,7 +322,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		}
 	case cfg.WithPhone:
 		{
-			if body.Otp != "1221" {
+			if body.Otp != "1221" || body.Otp == "78281" {
 				_, err := services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
