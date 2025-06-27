@@ -7,6 +7,7 @@ import (
 
 	status "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/config"
 	cfg "ucode/ucode_go_auth_service/config"
 	pba "ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
@@ -322,7 +323,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		}
 	case cfg.WithPhone:
 		{
-			if body.Otp != "1221" || body.Otp == "78281" {
+			if !config.DEFAULT_OTPS[body.Otp] {
 				_, err := services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
