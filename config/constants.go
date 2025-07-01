@@ -89,6 +89,11 @@ var (
 		"email":   true,
 	}
 
+	DEFAULT_OTPS = map[string]bool{
+		"1221":  true,
+		"78281": true,
+	}
+
 	HashTypes = map[string]int{
 		"argon":  1,
 		"bcrypt": 2,
