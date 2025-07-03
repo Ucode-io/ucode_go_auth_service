@@ -615,19 +615,23 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		res                         = pb.AddUserToProjectRes{}
 		status, query               string
 		clientTypeId, roleId, envId pgtype.UUID
+		err                         error
+		tx                          pgx.Tx
 	)
 
-	tx, err := r.db.Begin(ctx)
+	tx, err = r.db.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	defer func() {
-		_ = tx.Rollback(ctx)
+		if err != nil {
+			_ = tx.Rollback(ctx)
+		}
 	}()
 
 	if req.GetClientTypeId() != "" {
-		err := clientTypeId.Set(req.GetClientTypeId())
+		err = clientTypeId.Set(req.GetClientTypeId())
 		if err != nil {
 			return nil, err
 		}
@@ -636,7 +640,7 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 	}
 
 	if req.GetRoleId() != "" {
-		err := roleId.Set(req.GetRoleId())
+		err = roleId.Set(req.GetRoleId())
 		if err != nil {
 			return nil, err
 		}
@@ -645,7 +649,7 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 	}
 
 	if req.GetEnvId() != "" {
-		err := envId.Set(req.GetEnvId())
+		err = envId.Set(req.GetEnvId())
 		if err != nil {
 			return nil, err
 		}
@@ -700,6 +704,10 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 		if err.Error() != "no rows in result set" {
 			return nil, err
 		}
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return nil, err
 	}
 
 	if roleId.Status != pgtype.Null {

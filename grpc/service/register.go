@@ -195,6 +195,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
+			_, _ = rs.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
+				UserId:        userId,
+				RoleId:        data.RoleId,
+				CompanyId:     data.CompanyId,
+				ProjectId:     data.ProjectId,
+				ClientTypeId:  data.ClientTypeId,
+				EnvironmentId: data.EnvironmentId,
+			})
 			rs.log.Error("!!!CreateUser--->NodeType Create", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
@@ -226,6 +234,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
+			_, _ = rs.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
+				UserId:        userId,
+				RoleId:        data.RoleId,
+				CompanyId:     data.CompanyId,
+				ProjectId:     data.ProjectId,
+				ClientTypeId:  data.ClientTypeId,
+				EnvironmentId: data.EnvironmentId,
+			})
 			rs.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
