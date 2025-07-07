@@ -121,7 +121,12 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case config.WithPhone:
-		if config.DefaultOtp != req.Otp {
+		if req.ServiceType == "firebase" {
+			err := firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
+			if err != nil {
+				return nil, err
+			}
+		} else if config.DefaultOtp != req.Otp {
 			_, err := s.services.SmsService().ConfirmOtp(
 				ctx,
 				&sms_service.ConfirmOtpRequest{
@@ -1388,7 +1393,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		}
 	case config.WithPhone:
 		if req.ServiceType == "firebase" {
-			err := firebase.VerifyPhoneCode(s.cfg, req.SessionInfo, req.Otp)
+			err := firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
 			if err != nil {
 				return nil, err
 			}

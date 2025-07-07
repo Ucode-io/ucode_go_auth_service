@@ -70,9 +70,11 @@ func (h *Handler) V2Login(c *gin.Context) {
 			return
 		}
 	case config.WithPhone:
-		if login.SmsId == "" {
-			h.handleResponse(c, http.BadRequest, "SmsId is required when type is not default")
-			return
+		if login.ServiceType != "firebase" {
+			if login.SmsId == "" {
+				h.handleResponse(c, http.BadRequest, "SmsId is required when type is not default")
+				return
+			}
 		}
 
 		if login.Otp == "" {
