@@ -82,6 +82,9 @@ type BaseConfig struct {
 
 	GetRequestRedisHost string
 	GetRequestRedisPort string
+
+	FirebaseAPIKey  string
+	FirebaseBaseUrl string
 }
 
 func BaseLoad() BaseConfig {
@@ -130,6 +133,9 @@ func BaseLoad() BaseConfig {
 
 	config.GetRequestRedisHost = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
+
+	config.FirebaseAPIKey = cast.ToString(getOrReturnDefaultValue("FIREBASE_API_KEY", "AIzaSyAI2P6BcpeVdkt7G_xRe3mYiQ4Ek0cU2pM"))
+	config.FirebaseBaseUrl = cast.ToString(getOrReturnDefaultValue("FIREBASE_BASE_URL", "https://identitytoolkit.googleapis.com"))
 
 	return config
 }

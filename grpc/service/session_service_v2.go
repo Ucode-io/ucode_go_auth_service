@@ -19,6 +19,7 @@ import (
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
+	"ucode/ucode_go_auth_service/pkg/firebase"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	span "ucode/ucode_go_auth_service/pkg/jaeger"
 	"ucode/ucode_go_auth_service/pkg/security"
@@ -1386,7 +1387,12 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 		}
 	case config.WithPhone:
-		if config.DefaultOtp != req.Otp {
+		if req.ServiceType == "firebase" {
+			err := firebase.VerifyPhoneCode(s.cfg, req.SessionInfo, req.Otp)
+			if err != nil {
+				return nil, err
+			}
+		} else if config.DefaultOtp != req.Otp {
 			_, err := s.services.SmsService().ConfirmOtp(ctx, &sms_service.ConfirmOtpRequest{
 				SmsId: req.GetSmsId(),
 				Otp:   req.GetOtp(),
