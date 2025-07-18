@@ -140,6 +140,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		}},
 		NewDesign: true,
 		NewLayout: true,
+		NewRouter: true,
 	})
 
 	environment, err := s.services.EnvironmentService().Create(ctx,
