@@ -63,6 +63,7 @@ const (
 	InvalidEmailError         string = "Email is not valid"
 	EmailSettingsError        string = "email settings not found"
 	SessionExpired            string = "Session has been expired"
+	InvalidUsername           string = "invalid username"
 
 	// User Status
 	UserStatusBlocked  string = "BLOCKED"
@@ -80,6 +81,7 @@ var (
 	ErrEmailRequired    = errors.New("email required for register company")
 	ErrUserAlradyMember = errors.New("user is already member")
 	ErrInactiveClientId = errors.New("client id is an inactive")
+	ErrInvalidUsername  = errors.New("invalid username")
 
 	RegisterTypes = map[string]bool{
 		"google":  true,

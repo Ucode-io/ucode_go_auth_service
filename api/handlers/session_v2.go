@@ -70,9 +70,11 @@ func (h *Handler) V2Login(c *gin.Context) {
 			return
 		}
 	case config.WithPhone:
-		if login.SmsId == "" {
-			h.handleResponse(c, http.BadRequest, "SmsId is required when type is not default")
-			return
+		if login.ServiceType != "firebase" {
+			if login.SmsId == "" {
+				h.handleResponse(c, http.BadRequest, "SmsId is required when type is not default")
+				return
+			}
 		}
 
 		if login.Otp == "" {
@@ -557,12 +559,6 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 			return
 		}
 	case config.WithPhone:
-		if login.SmsId == "" {
-			err := errors.New("SmsId is required when type is not default")
-			h.handleResponse(c, http.BadRequest, err.Error())
-			return
-		}
-
 		if login.Otp == "" {
 			err := errors.New("otp is required when type is not default")
 			h.handleResponse(c, http.BadRequest, err.Error())
@@ -573,6 +569,20 @@ func (h *Handler) V2MultiCompanyOneLogin(c *gin.Context) {
 			err := errors.New("phone is required when type is phone")
 			h.handleResponse(c, http.BadRequest, err.Error())
 			return
+		}
+
+		if login.ServiceType == "firebase" {
+			if login.SessionInfo == "" {
+				err := errors.New("session info is required when service type is firebase")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+		} else {
+			if login.SmsId == "" {
+				err := errors.New("SmsId is required when type is not default")
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
 		}
 	case config.WithEmail:
 		if login.SmsId == "" {

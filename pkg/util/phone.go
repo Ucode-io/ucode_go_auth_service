@@ -4,6 +4,6 @@ import "regexp"
 
 // IsValidPhone ...
 func IsValidPhone(phone string) bool {
-	r := regexp.MustCompile(`^\+998[0-9]{2}[0-9]{7}$`)
+	r := regexp.MustCompile(`^\+[0-9]{7,15}$`)
 	return r.MatchString(phone)
 }

@@ -81,7 +81,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	case config.WithEmail:
 		foundUser, err = rs.strg.User().GetByUsername(ctx, email)
 		if err != nil {
-			rs.log.Error("!RegisterUserError--->EmailGetByUsername", logger.Error(err))
+			rs.log.Error("!!!RegisterUserError-->EmailGetByUsername", logger.Error(err))
 			return nil, err
 		}
 	case config.WithPhone:
@@ -91,6 +91,12 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			return nil, err
 		}
 	case config.WithLogin:
+		if len(login) < 6 {
+			err := config.ErrInvalidUsername
+			rs.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
 		foundUser, err = rs.strg.User().GetByUsername(ctx, login)
 		if err != nil {
 			rs.log.Error("!RegisterUserError--->LoginGetByUsername", logger.Error(err))
