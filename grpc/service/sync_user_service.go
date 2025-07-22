@@ -71,7 +71,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 
 		if loginStrategy == "login" {
 			username = req.GetLogin()
-			skip = true
 		} else if loginStrategy == "email" {
 			username = req.GetEmail()
 		} else if loginStrategy == "phone" {
