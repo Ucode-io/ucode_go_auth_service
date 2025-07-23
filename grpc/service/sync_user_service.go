@@ -67,13 +67,12 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 	}()
 
 	for _, loginStrategy := range req.GetLoginStrategy() {
-		skip := false
-
-		if loginStrategy == "login" {
+		switch loginStrategy {
+		case "login":
 			username = req.GetLogin()
-		} else if loginStrategy == "email" {
+		case "email":
 			username = req.GetEmail()
-		} else if loginStrategy == "phone" {
+		case "phone":
 			username = req.GetPhone()
 		}
 		if username != "" {
@@ -81,13 +80,6 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			if err != nil {
 				sus.log.Error("!!!CreateUser-->UserGetByUsername", logger.Error(err))
 				return nil, err
-			}
-
-			if skip {
-				if len(user.GetId()) > 0 {
-					sus.log.Error("!!!CreateSyncUser-->LoginCheck", logger.Error(err))
-					return nil, status.Error(codes.InvalidArgument, "user with this login already exists")
-				}
 			}
 		}
 	}
