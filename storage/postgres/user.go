@@ -39,8 +39,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.create")
 	defer dbSpan.Finish()
 
-	query := `INSERT INTO "user" (id, phone, email, login, password, company_id, hash_type) 
-			  VALUES ($1, $2, $3, $4, $5, $6, 'bcrypt')`
+	query := `INSERT INTO "user" (id, phone, email, login, password, company_id, hash_type, tin) 
+			  VALUES ($1, $2, $3, $4, $5, $6, 'bcrypt', $7)`
 
 	id := uuid.New().String()
 
@@ -51,6 +51,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.GetLogin(),
 		entity.GetPassword(),
 		entity.GetCompanyId(),
+		entity.GetTin(),
 	)
 	if err != nil {
 		return pKey, helper.HandleDatabaseError(err, r.logger, "Create user: failed to create")
@@ -316,7 +317,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		email,
 		login,
 		password,
-		hash_type
+		hash_type,
+		tin
 	FROM
 		"user"
 	WHERE`
@@ -329,6 +331,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
 		lowercasedUsername = username
+	} else if util.IsValidTin(username) {
+		query = query + ` tin = $1`
 	} else {
 		query = query + ` login = $1`
 		lowercasedUsername = username
@@ -350,7 +354,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 						email,
 						login,
 						password,
-						hash_type
+						hash_type,
+						tin
 					FROM
 						"user"
 					WHERE
@@ -413,6 +418,11 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	if len(user.GetPassword()) > 0 {
 		query += `, password = :password`
 		params["password"] = user.Password
+	}
+
+	if len(user.GetTin()) > 0 {
+		query += `, tin = :tin`
+		params["tin"] = user.Tin
 	}
 
 	query += ` WHERE id = :id`

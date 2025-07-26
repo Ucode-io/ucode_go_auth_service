@@ -74,6 +74,8 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			username = req.GetEmail()
 		case "phone":
 			username = req.GetPhone()
+		case "e-imzo":
+			username = req.GetTin()
 		}
 		if username != "" {
 			user, err = sus.strg.User().GetByUsername(ctx, username)
@@ -108,6 +110,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 			Email:     req.GetEmail(),
 			Phone:     req.GetPhone(),
 			CompanyId: project.GetCompanyId(),
+			Tin:       req.GetTin(),
 		})
 		if err != nil {
 			sus.log.Error("!!!CreateUser--->UserCreate", logger.Error(err))
@@ -286,6 +289,16 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 		hasLoginStrategy = true
 	}
 
+	if req.GetIsChangedTin() {
+		syncUser, err = sus.strg.User().UpdateSyncUser(ctx, req, "tin")
+		if err != nil {
+			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserTin", logger.Error(err))
+			return nil, err
+		}
+
+		hasLoginStrategy = true
+	}
+
 	if !hasLoginStrategy {
 		_, err = sus.strg.User().ResetPassword(ctx, &pb.ResetPasswordRequest{
 			UserId:   req.GetGuid(),
@@ -293,6 +306,7 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 			Login:    req.GetLogin(),
 			Email:    req.GetEmail(),
 			Phone:    req.GetPhone(),
+			Tin:      req.GetTin(),
 		}, nil)
 		if err != nil {
 			sus.log.Error("!!!UpdateSyncUser--->UpdateSyncUserPassword", logger.Error(err))
@@ -368,11 +382,12 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			username string
 		)
 		for _, loginStrategy := range req.GetLoginStrategy() {
-			if loginStrategy == "login" {
+			switch loginStrategy {
+			case "login":
 				username = req.GetLogin()
-			} else if loginStrategy == "email" {
+			case "email":
 				username = req.GetEmail()
-			} else if loginStrategy == "phone" {
+			case "phone":
 				username = req.GetPhone()
 			}
 			if username != "" {
