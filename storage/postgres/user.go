@@ -345,6 +345,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		&res.Login,
 		&res.Password,
 		&res.HashType,
+		&res.Tin,
 	)
 	if err == pgx.ErrNoRows && util.IsValidEmailNew(username) {
 		queryIf := `
@@ -370,6 +371,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.Login,
 			&res.Password,
 			&res.HashType,
+			&res.Tin,
 		)
 		if err == pgx.ErrNoRows {
 			return res, nil
