@@ -647,6 +647,22 @@ pwd:
 	case "APPLE_AUTH":
 		err := errors.New("not implemented")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
+	case "E-IMZO":
+		tin, ok := req.GetData()["tin"]
+		if !ok {
+			err := errors.New("tin is empty")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		userIdRes, err := s.strg.User().GetByUsername(ctx, tin)
+		if err != nil {
+			fmt.Println("This is where error")
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		userId = userIdRes.GetId()
 	default:
 		req.LoginStrategy = "LOGIN_PWD"
 		goto pwd

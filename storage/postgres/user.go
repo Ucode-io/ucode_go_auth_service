@@ -333,6 +333,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		lowercasedUsername = username
 	} else if util.IsValidTin(username) {
 		query = query + ` tin = $1`
+		lowercasedUsername = username
 	} else {
 		query = query + ` login = $1`
 		lowercasedUsername = username
