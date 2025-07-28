@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"runtime"
 
 	"time"
@@ -385,7 +384,6 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 			return nil, status.Error(codes.InvalidArgument, config.ErrIncorrectLoginOrPassword)
 		}
 
-		fmt.Println("V2")
 		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
 		if err != nil {
 			s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
