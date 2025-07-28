@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net"
-	"time"
 
 	"ucode/ucode_go_auth_service/api"
 	"ucode/ucode_go_auth_service/api/handlers"
@@ -93,8 +91,6 @@ func main() {
 	}
 
 	serviceNodes := service.NewServiceNodes()
-
-	fmt.Println("TIME---->", time.Now())
 
 	// connection with shared services
 	uConf := config.Load()

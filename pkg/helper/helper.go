@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"ucode/ucode_go_auth_service/config"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -157,7 +158,7 @@ func MarshalToStruct(data any, resp any) error {
 }
 
 func EmailValidation(email string) bool {
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	emailRegex := regexp.MustCompile(config.EMAIL_REGEX)
 	checkEmail := emailRegex.MatchString(email)
 
 	return checkEmail

@@ -72,28 +72,6 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 	clientType.ResourceType = int32(resource.ResourceType)
 	clientType.NodeType = resource.NodeType
 
-	userId, _ := c.Get("user_id")
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType:     resource.NodeType,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE CLIENT TYPE",
-			UserInfo:     cast.ToString(userId),
-			Request:      &clientType,
-			TableSlug:    "CLIENT_TYPE",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-		} else {
-			logReq.Response = resp
-		}
-		go func() { _ = h.versionHistory(logReq) }()
-	}()
-
 	resp, err = h.services.ClientService().V2CreateClientType(
 		c.Request.Context(), &clientType,
 	)
@@ -305,36 +283,10 @@ func (h *Handler) V2UpdateClientType(c *gin.Context) {
 	clientType.ResourceType = int32(resource.ResourceType)
 	clientType.NodeType = resource.NodeType
 
-	userId, _ := c.Get("user_id")
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType:     resource.NodeType,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "UPDATE CLIENT TYPE",
-			UsedEnvironments: map[string]bool{
-				cast.ToString(environmentId): true,
-			},
-			UserInfo:  cast.ToString(userId),
-			Request:   &clientType,
-			TableSlug: "CLIENT_TYPE",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-		} else {
-			logReq.Response = resp
-		}
-		go func() { _ = h.versionHistory(logReq) }()
-	}()
-
 	resp, err = h.services.ClientService().V2UpdateClientType(
 		c.Request.Context(),
 		&clientType,
 	)
-
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return

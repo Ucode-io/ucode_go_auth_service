@@ -85,6 +85,11 @@ type BaseConfig struct {
 
 	FirebaseAPIKey  string
 	FirebaseBaseUrl string
+
+	EImzoBaseUrl  string
+	EImzoHost     string
+	EImzoUsername string
+	EImzoPassword string
 }
 
 func BaseLoad() BaseConfig {
@@ -136,6 +141,11 @@ func BaseLoad() BaseConfig {
 
 	config.FirebaseAPIKey = cast.ToString(getOrReturnDefaultValue("FIREBASE_API_KEY", "AIzaSyAI2P6BcpeVdkt7G_xRe3mYiQ4Ek0cU2pM"))
 	config.FirebaseBaseUrl = cast.ToString(getOrReturnDefaultValue("FIREBASE_BASE_URL", "https://identitytoolkit.googleapis.com"))
+
+	config.EImzoBaseUrl = cast.ToString(getOrReturnDefaultValue("EIMZO_BASE_URL", "https://eimzo-integration.e-dokument.uz"))
+	config.EImzoHost = cast.ToString(getOrReturnDefaultValue("EIMZO_BASE_URL", "eimzo-integration.e-dokument.uz"))
+	config.EImzoUsername = cast.ToString(getOrReturnDefaultValue("EIMZO_USERNAME", "eimzo-user"))
+	config.EImzoPassword = cast.ToString(getOrReturnDefaultValue("EIMZO_PASSWORD", "iwRMCfj3DwreqSR4WRAzO1y5UflAZrDQ"))
 
 	return config
 }

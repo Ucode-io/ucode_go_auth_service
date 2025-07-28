@@ -39,8 +39,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.create")
 	defer dbSpan.Finish()
 
-	query := `INSERT INTO "user" (id, phone, email, login, password, company_id, hash_type) 
-			  VALUES ($1, $2, $3, $4, $5, $6, 'bcrypt')`
+	query := `INSERT INTO "user" (id, phone, email, login, password, company_id, hash_type, tin) 
+			  VALUES ($1, $2, $3, $4, $5, $6, 'bcrypt', $7)`
 
 	id := uuid.New().String()
 
@@ -51,6 +51,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.GetLogin(),
 		entity.GetPassword(),
 		entity.GetCompanyId(),
+		entity.GetTin(),
 	)
 	if err != nil {
 		return pKey, helper.HandleDatabaseError(err, r.logger, "Create user: failed to create")
@@ -316,7 +317,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		email,
 		login,
 		password,
-		hash_type
+		hash_type,
+		tin
 	FROM
 		"user"
 	WHERE`
@@ -328,6 +330,9 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		lowercasedUsername = strings.ToLower(username)
 	} else if util.IsValidPhone(username) {
 		query = query + ` phone = $1`
+		lowercasedUsername = username
+	} else if util.IsValidTin(username) {
+		query = query + ` tin = $1`
 		lowercasedUsername = username
 	} else {
 		query = query + ` login = $1`
@@ -341,6 +346,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		&res.Login,
 		&res.Password,
 		&res.HashType,
+		&res.Tin,
 	)
 	if err == pgx.ErrNoRows && util.IsValidEmailNew(username) {
 		queryIf := `
@@ -350,7 +356,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 						email,
 						login,
 						password,
-						hash_type
+						hash_type,
+						tin
 					FROM
 						"user"
 					WHERE
@@ -365,6 +372,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.Login,
 			&res.Password,
 			&res.HashType,
+			&res.Tin,
 		)
 		if err == pgx.ErrNoRows {
 			return res, nil
@@ -413,6 +421,11 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	if len(user.GetPassword()) > 0 {
 		query += `, password = :password`
 		params["password"] = user.Password
+	}
+
+	if len(user.GetTin()) > 0 {
+		query += `, tin = :tin`
+		params["tin"] = user.Tin
 	}
 
 	query += ` WHERE id = :id`
@@ -787,12 +800,14 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserByLoginType")
 	defer dbSpan.Finish()
+	var (
+		userId, filter string
+		params         = map[string]any{}
+	)
 
 	query := `SELECT
 				id
 			from "user" WHERE `
-	var filter string
-	params := map[string]any{}
 	if req.Email != "" {
 		filter = "email = :email"
 		params["email"] = strings.ToLower(req.Email)
@@ -815,7 +830,6 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	}
 
 	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
-	var userId string
 	err := r.db.QueryRow(ctx, lastQuery, args...).Scan(&userId)
 	if err == pgx.ErrNoRows {
 		return nil, errors.New("not found")
@@ -832,13 +846,13 @@ func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingRe
 	defer dbSpan.Finish()
 
 	var (
-		res models.ListLanguage
+		res    models.ListLanguage
+		arr    []any
+		params = make(map[string]any)
 	)
-	params := make(map[string]any)
 	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
-	var arr []any
 	query := `SELECT
 			id,
 			name,
@@ -910,13 +924,14 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 	defer dbSpan.Finish()
 
 	var (
-		res models.ListTimezone
+		res    models.ListTimezone
+		arr    []any
+		params = make(map[string]any)
 	)
-	params := make(map[string]any)
+
 	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
-	var arr []any
 	query := `SELECT
 			id,
 			"name",
@@ -945,9 +960,7 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 
 	cQ := `SELECT count(1) FROM "timezone"` + filter
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
-	err := c.db.QueryRow(ctx, cQ, arr...).Scan(
-		&res.Count,
-	)
+	err := c.db.QueryRow(ctx, cQ, arr...).Scan(&res.Count)
 	if err != nil {
 		return &res, err
 	}
@@ -969,7 +982,6 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 			&obj.Name,
 			&obj.Text,
 		)
-
 		if err != nil {
 			return &res, err
 		}
@@ -1152,9 +1164,7 @@ func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var (
-			project string
-		)
+		var project string
 
 		err = rows.Scan(&project)
 		if err != nil {
