@@ -67,7 +67,8 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	}
 
 	hashType := user.GetHashType()
-	if config.HashTypes[hashType] == 1 {
+	switch config.HashTypes[hashType] {
+	case 1:
 		match, err := security.ComparePassword(user.GetPassword(), req.Password)
 		if err != nil {
 			s.log.Error("!!!Login-->ComparePasswordArgon", logger.Error(err))
@@ -91,7 +92,7 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 				return
 			}
 		}()
-	} else if config.HashTypes[hashType] == 2 {
+	case 2:
 		match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
 		if err != nil {
 			s.log.Error("!!!Login-->ComparePasswordBcrypt", logger.Error(err))
@@ -102,7 +103,7 @@ func (s *sessionService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 			s.log.Error("!!!Login--->", logger.Error(err))
 			return nil, err
 		}
-	} else {
+	default:
 		err := errors.New("hash type is not supported")
 		s.log.Error("!!!Login--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -390,7 +391,8 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 		}
 
 		hashType := user.GetHashType()
-		if config.HashTypes[hashType] == 1 {
+		switch config.HashTypes[hashType] {
+		case 1:
 			match, err := security.ComparePassword(user.GetPassword(), req.Password)
 			if err != nil {
 				s.log.Error("!!!MultiCompanyLogin-->ComparePasswordArgon", logger.Error(err))
@@ -414,7 +416,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 					return
 				}
 			}()
-		} else if config.HashTypes[hashType] == 2 {
+		case 2:
 			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
 			if err != nil {
 				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
@@ -425,7 +427,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 				s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
 				return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)
 			}
-		} else {
+		default:
 			err := config.ErrUserNotFound
 			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
 			return nil, status.Error(codes.Internal, config.ErrIncorrectLoginOrPassword)

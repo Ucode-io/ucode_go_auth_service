@@ -124,9 +124,6 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		// environment
 		v2.GET("/resource-environment", h.GetAllResourceEnvironments)
-
-		// objects
-		v2.POST("/object/get-list/:table_slug", h.V2GetListObjects)
 	}
 
 	auth := v2.Group("/auth")
@@ -162,16 +159,9 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		project.DELETE("/:project-id", h.DeleteProject)
 	}
 
+	// Integration
 	r.POST("/emqx", h.Emqx)
 	r.POST("/custom", h.Custom)
-
-	// With API-KEY authentication
-	v2.POST("/send-message", h.SendMessageToEmail)
-
-	v2.POST("/email-settings", h.CreateEmailSettings)
-	v2.PUT("/email-settings", h.UpdateEmailSettings)
-	v2.GET("/email-settings", h.GetEmailSettings)
-	v2.DELETE("/email-settings/:id", h.DeleteEmailSettings)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return

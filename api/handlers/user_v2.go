@@ -6,10 +6,12 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
+	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 	"github.com/spf13/cast"
@@ -62,29 +64,6 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err)
 		return
 	}
-
-	userId, _ := c.Get("user_id")
-	var (
-		logReq = &models.CreateVersionHistoryRequest{
-			NodeType:     user.NodeType,
-			ProjectId:    resource.ResourceEnvironmentId,
-			ActionSource: c.Request.URL.String(),
-			ActionType:   "CREATE USER",
-			UserInfo:     cast.ToString(userId),
-			Request:      &user,
-			TableSlug:    "USER",
-		}
-	)
-
-	defer func() {
-		if err != nil {
-			logReq.Response = err.Error()
-		} else {
-			logReq.Response = resp
-		}
-
-		go func() { _ = h.versionHistory(logReq) }()
-	}()
 
 	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
 	user.ResourceType = int32(resource.GetResourceType())
@@ -465,12 +444,15 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
-	var req = auth_service.AddUserToProjectReq{}
+	var (
+		req           auth_service.AddUserToProjectReq
+		userDataToMap = make(map[string]any)
+		tableSlug     = "user"
+	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errCantParseReq := errors.New("cant parse json")
 		h.log.Error("!!!AddUserToProject -> cant parse json")
-		h.handleResponse(c, http.BadRequest, errCantParseReq.Error())
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -535,13 +517,12 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	var userDataToMap = make(map[string]any)
+	userDataToMap["guid"] = uuid.NewString()
+	userDataToMap["user_id_auth"] = req.UserId
 	userDataToMap["guid"] = req.UserId
-	userDataToMap["active"] = req.Active
 	userDataToMap["project_id"] = req.ProjectId
 	userDataToMap["role_id"] = req.RoleId
 	userDataToMap["client_type_id"] = user.ClientTypeId
-	userDataToMap["client_platform_id"] = user.ClientPlatformId
 	userDataToMap["from_auth_service"] = true
 
 	structData, err := helper.ConvertMapToStruct(userDataToMap)
@@ -556,7 +537,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	var tableSlug = "user"
 	switch int32(resource.ResourceType.Number()) {
 	case 1:
 		clientType, _ := services.GetObjectBuilderServiceByType(req.NodeType).GetSingle(
@@ -577,6 +557,35 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
 			c.Request.Context(),
 			&obs.CommonMessage{
+				TableSlug: tableSlug,
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+	case 3:
+		clientType, _ := services.GoItemService().GetSingle(
+			c.Request.Context(),
+			&nobs.CommonMessage{
+				TableSlug: "client_type",
+				Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"id": structpb.NewStringValue(req.ClientTypeId),
+					},
+				},
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
+			tableSlug = clientTypeTableSlug
+		}
+
+		_, err = services.GoItemService().Create(
+			c.Request.Context(),
+			&nobs.CommonMessage{
 				TableSlug: tableSlug,
 				Data:      structData,
 				ProjectId: resource.ResourceEnvironmentId,

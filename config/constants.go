@@ -74,6 +74,8 @@ const (
 	COMMIT_TYPE_TABLE string = "TABLE"
 
 	SMS_TEXT = "Code"
+
+	EMAIL_REGEX string = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 )
 
 var (
