@@ -20,7 +20,7 @@ message GetChallengeResponse {
 }
 
 message ExtractUserFromPKCS7Request {
-  string tin = 1;
+  string pkcs7 = 1;
 }
 
 message ExtractUserFromPKCS7Response {
