@@ -398,10 +398,10 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2CreateUser", req)
 	defer dbSpan.Finish()
-
-	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)

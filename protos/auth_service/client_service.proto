@@ -274,7 +274,7 @@ message CreateClientTypeRequestToObjService {
     repeated string client_platform_ids = 7;
     string table_slug = 8;
     int32 session_limit = 9;
-    repeated string columns = 10;
+    google.protobuf.Struct columns = 10;
 }
 
 message UpdateClientTypeRequestToObjService {
@@ -302,7 +302,7 @@ message V2CreateClientTypeRequest {
     string node_type = 12;
     string resource_envrironment_id = 13;
     int32 session_limit = 14;
-    repeated string columns = 15;
+    google.protobuf.Struct columns = 15;
 }
 
 message V2GetClientTypeListRequest {
@@ -331,7 +331,7 @@ message V2UpdateClientTypeRequest {
     string node_type = 13;
     string resource_envrironment_id = 14;
     int32 session_limit = 15;
-    repeated string columns = 16;
+    google.protobuf.Struct columns = 16;
 }
 
 message V2ClientTypePrimaryKey {
