@@ -46,7 +46,7 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 		}
 	}()
 
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	emailRegex := regexp.MustCompile(config.EMAIL_REGEX)
 	email := emailRegex.MatchString(req.Email)
 	if !email {
 		err = config.ErrInvalidEmail
@@ -228,7 +228,7 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	}
 	req.Password = hashedPassword
 
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	emailRegex := regexp.MustCompile(config.EMAIL_REGEX)
 	email := emailRegex.MatchString(req.Email)
 	if !email {
 		err = config.ErrInvalidEmail
@@ -398,10 +398,10 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 }
 
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
+
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2CreateUser", req)
 	defer dbSpan.Finish()
-
-	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
 
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -428,17 +428,18 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	var (
-		emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-		email      = emailRegex.MatchString(req.Email)
-		password   = req.Password
-		userId     string
+		emailRegex  = regexp.MustCompile(config.EMAIL_REGEX)
+		email       = emailRegex.MatchString(req.Email)
+		password    = req.Password
+		userId      string
+		tableSlug   = "user"
+		userCreated bool
 	)
 
 	req.Password = hashedPassword
 
 	if !email && req.Email != "" {
-		err = errors.New(config.ErrInvalidUserEmail)
-		s.log.Error("!!!V2CreateUser--->EmailRegex", logger.Error(err))
+		s.log.Error("!!!V2CreateUser--->EmailRegex", logger.Any("error", config.ErrInvalidUserEmail))
 		return nil, status.Error(codes.InvalidArgument, config.ErrInvalidUserEmail)
 	}
 
@@ -489,6 +490,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			return nil, err
 		}
 		userId = user.GetId()
+		userCreated = true
 
 		_, err = s.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 			UserId:       userId,
@@ -557,7 +559,6 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		s.log.Error("!!!V2CreateUser--->ConvertReq", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	var tableSlug = "user"
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
@@ -591,11 +592,12 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
-				Id:        userId,
-				ProjectId: req.GetResourceEnvironmentId(),
-				IsTest:    true,
-			})
+			if userCreated {
+				_, _ = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+					Id:        userId,
+					ProjectId: req.GetResourceEnvironmentId(),
+				})
+			}
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -624,11 +626,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			ProjectId: req.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			_, err = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
-				Id:        userId,
-				ProjectId: req.GetResourceEnvironmentId(),
-				IsTest:    true,
-			})
+			if userCreated {
+				_, _ = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+					Id:        userId,
+					ProjectId: req.GetResourceEnvironmentId(),
+				})
+			}
+
 			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
 			return nil, err
 		}
@@ -1464,7 +1468,8 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 			}
 
 			hashType := user.GetHashType()
-			if config.HashTypes[hashType] == 1 {
+			switch config.HashTypes[hashType] {
+			case 1:
 				match, err := security.ComparePassword(user.GetPassword(), req.OldPassword)
 				if err != nil {
 					s.log.Error("!!!V2UserResetPassword-->ComparePasswordArgon", logger.Error(err))
@@ -1475,7 +1480,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 					s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
 					return nil, err
 				}
-			} else if config.HashTypes[hashType] == 2 {
+			case 2:
 				match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.OldPassword)
 				if err != nil {
 					s.log.Error("!!!V2UserResetPassword-->ComparePasswordBcrypt", logger.Error(err))
@@ -1486,7 +1491,7 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 					s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
 					return nil, err
 				}
-			} else {
+			default:
 				err := errors.New("hash type not found")
 				s.log.Error("!!!V2ResetPassword--->", logger.Error(err))
 				return nil, err

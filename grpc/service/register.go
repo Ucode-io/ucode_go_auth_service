@@ -291,16 +291,14 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 		err = helper.MarshalToStruct(&pgUserData, &userData)
 		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
 			rs.log.Error("!!!Login--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			return nil, status.Error(codes.Internal, "invalid user project data")
 		}
 	}
 
 	if !userData.UserFound {
-		customError := errors.New("user not found")
-		rs.log.Error("!!!Login--->", logger.Error(customError))
-		return nil, status.Error(codes.NotFound, customError.Error())
+		rs.log.Error("!!!Login--->", logger.Error(config.ErrUserNotFound))
+		return nil, status.Error(codes.NotFound, config.ErrUserNotFound.Error())
 	}
 
 	res := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
@@ -324,9 +322,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		UserAgent:     data.UserAgent,
 	})
 	if res == nil {
-		err := errors.New("user not found")
-		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))
-		return nil, status.Error(codes.NotFound, err.Error())
+		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(config.ErrUserNotFound))
+		return nil, status.Error(codes.NotFound, config.ErrUserNotFound.Error())
 	}
 	if err != nil {
 		rs.log.Error("!!!Login--->SessionAndTokenGenerator", logger.Error(err))

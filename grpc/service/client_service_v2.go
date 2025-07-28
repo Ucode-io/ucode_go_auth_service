@@ -48,6 +48,7 @@ func (s *clientService) V2CreateClientType(ctx context.Context, req *pb.V2Create
 		ProjectId:    req.DbProjectId,
 		TableSlug:    req.GetTableSlug(),
 		SessionLimit: req.SessionLimit,
+		Columns:      req.Columns,
 	}
 
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
@@ -361,17 +362,17 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		result *pbObject.CommonMessage
 	)
 	requestToObjBuilderService := map[string]any{
-		"name":          req.Name,
-		"confirm_by":    req.ConfirmBy.String(),
-		"self_register": req.SelfRegister,
-		"self_recorder": req.SelfRecover,
-		// "project_id":      req.DbProjectId,
+		"name":            req.Name,
+		"confirm_by":      req.ConfirmBy.String(),
+		"self_register":   req.SelfRegister,
+		"self_recorder":   req.SelfRecover,
 		"guid":            req.Guid,
 		"client_type_ids": req.ClientPlatformIds,
 		"table_slug":      req.TableSlug,
 		"id":              req.Guid,
 		"default_page":    req.DefaultPage,
 		"session_limit":   req.SessionLimit,
+		"columns":         req.Columns,
 	}
 
 	structData, err := helper.ConvertRequestToSturct(requestToObjBuilderService)
@@ -380,10 +381,7 @@ func (s *clientService) V2UpdateClientType(ctx context.Context, req *pb.V2Update
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	services, err := s.serviceNode.GetByNodeType(
-		req.ProjectId,
-		req.NodeType,
-	)
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
 		return nil, err
 	}

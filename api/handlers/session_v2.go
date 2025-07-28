@@ -403,16 +403,17 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 		httpErrorStr := strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
 		httpErrorStr = strings.ToLower(httpErrorStr)
 
-		if httpErrorStr == "user not found" {
+		switch httpErrorStr {
+		case "user not found":
 			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
 			return
-		} else if httpErrorStr == "session has been expired" {
+		case "session has been expired":
 			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
 			return
-		} else if httpErrorStr == "invalid username" {
+		case "invalid username":
 			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
 			return
-		} else if httpErrorStr == "invalid password" {
+		case "invalid password":
 			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
 			return
 		}

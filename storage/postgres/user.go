@@ -800,12 +800,14 @@ func (r *userRepo) GetUserIds(ctx context.Context, req *pb.GetUserListRequest) (
 func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLoginTypesRequest) (*pb.GetUserByLoginTypesResponse, error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserByLoginType")
 	defer dbSpan.Finish()
+	var (
+		userId, filter string
+		params         = map[string]any{}
+	)
 
 	query := `SELECT
 				id
 			from "user" WHERE `
-	var filter string
-	params := map[string]any{}
 	if req.Email != "" {
 		filter = "email = :email"
 		params["email"] = strings.ToLower(req.Email)
@@ -828,7 +830,6 @@ func (r *userRepo) GetUserByLoginType(ctx context.Context, req *pb.GetUserByLogi
 	}
 
 	lastQuery, args := helper.ReplaceQueryParams(query+filter, params)
-	var userId string
 	err := r.db.QueryRow(ctx, lastQuery, args...).Scan(&userId)
 	if err == pgx.ErrNoRows {
 		return nil, errors.New("not found")
@@ -845,13 +846,13 @@ func (c *userRepo) GetListLanguage(cntx context.Context, in *pb.GetListSettingRe
 	defer dbSpan.Finish()
 
 	var (
-		res models.ListLanguage
+		res    models.ListLanguage
+		arr    []any
+		params = make(map[string]any)
 	)
-	params := make(map[string]any)
 	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
-	var arr []any
 	query := `SELECT
 			id,
 			name,
@@ -923,13 +924,14 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 	defer dbSpan.Finish()
 
 	var (
-		res models.ListTimezone
+		res    models.ListTimezone
+		arr    []any
+		params = make(map[string]any)
 	)
-	params := make(map[string]any)
+
 	ctx, cancel := context.WithCancel(cntx)
 	defer cancel()
 
-	var arr []any
 	query := `SELECT
 			id,
 			"name",
@@ -958,9 +960,7 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 
 	cQ := `SELECT count(1) FROM "timezone"` + filter
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
-	err := c.db.QueryRow(ctx, cQ, arr...).Scan(
-		&res.Count,
-	)
+	err := c.db.QueryRow(ctx, cQ, arr...).Scan(&res.Count)
 	if err != nil {
 		return &res, err
 	}
@@ -982,7 +982,6 @@ func (c *userRepo) GetListTimezone(cntx context.Context, in *pb.GetListSettingRe
 			&obj.Name,
 			&obj.Text,
 		)
-
 		if err != nil {
 			return &res, err
 		}
@@ -1165,9 +1164,7 @@ func (r *userRepo) GetAllUserProjects(ctx context.Context) ([]string, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var (
-			project string
-		)
+		var project string
 
 		err = rows.Scan(&project)
 		if err != nil {

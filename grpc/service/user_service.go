@@ -57,7 +57,7 @@ func (s *userService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	}
 	req.Password = hashedPassword
 
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	emailRegex := regexp.MustCompile(config.EMAIL_REGEX)
 	email := emailRegex.MatchString(req.Email)
 	if !email {
 		err = config.ErrInvalidEmail
@@ -135,7 +135,7 @@ func (s *userService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	emailRegex := regexp.MustCompile(config.EMAIL_REGEX)
 	email := emailRegex.MatchString(req.Email)
 	if !email {
 		err = config.ErrInvalidEmail
