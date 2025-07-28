@@ -58,6 +58,13 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 			UserId:   req.GetGuid(),
 			Password: req.GetPassword(),
 		}
+	case "tin":
+		query = query + ` tin = $1`
+		loginValue = req.GetTin()
+		resetPasswordReq = &pb.ResetPasswordRequest{
+			Tin:    req.GetTin(),
+			UserId: req.GetGuid(),
+		}
 	}
 
 	err = tx.QueryRow(ctx, query, loginValue).Scan(&userId)
@@ -142,6 +149,7 @@ func (r *userRepo) UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUs
 			Email:     req.GetEmail(),
 			Phone:     req.GetPhone(),
 			CompanyId: req.GetCompanyId(),
+			Tin:       req.GetTin(),
 		}, tx)
 		if err != nil {
 			return "", errors.Wrap(err, "failed to create user")
@@ -203,6 +211,7 @@ func (r *userRepo) UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUs
 			Email:     req.GetEmail(),
 			Phone:     req.GetPhone(),
 			CompanyId: req.GetCompanyId(),
+			Tin:       req.GetTin(),
 		}, tx)
 		if err != nil {
 			return "", errors.Wrap(err, "failed to create user")
