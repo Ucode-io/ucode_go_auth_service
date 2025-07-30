@@ -1707,7 +1707,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	var (
 		res        = &pb.V2LoginResponse{}
 		before     runtime.MemStats
-		data       *pbObject.LoginDataRes
+		data       = &pbObject.LoginDataRes{}
 		roleId     string
 		authTables = []*pb.TableBody{}
 	)
@@ -1753,7 +1753,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
 		if err == sql.ErrNoRows {
-			errNoRows := errors.New("no user found")
+			errNoRows := config.ErrUserNotFound
 			return nil, status.Error(codes.Internal, errNoRows.Error())
 		}
 		return nil, status.Error(codes.Internal, err.Error())
@@ -1787,14 +1787,30 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	case 1:
 		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(ctx, reqLoginData)
 		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case 3:
+		loginData, err := services.GoObjectBuilderLoginService().LoginData(ctx, &nb.LoginDataReq{
+			UserId:                user.GetId(),
+			ClientType:            session.GetClientTypeId(),
+			ProjectId:             session.GetProjectId(),
+			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+		})
+		if err != nil {
+			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		err = helper.MarshalToStruct(&loginData, &data)
+		if err != nil {
+			s.log.Error("!!!V2RefreshTokenForEnv-->", logger.Error(err))
+			return nil, status.Error(400, err.Error())
 		}
 	}
 
 	if !data.UserFound {
-		customError := fmt.Errorf("user not found with env_id %s, user_id %s, client_type_id %s", req.GetEnvId(), user.Id, session.ClientTypeId)
+		customError := config.ErrUserNotFound
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
