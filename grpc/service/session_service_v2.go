@@ -19,6 +19,7 @@ import (
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
+	"ucode/ucode_go_auth_service/pkg/eimzo"
 	"ucode/ucode_go_auth_service/pkg/firebase"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	span "ucode/ucode_go_auth_service/pkg/jaeger"
@@ -649,16 +650,27 @@ pwd:
 		err := errors.New("not implemented")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	case "E-IMZO":
-		tin, ok := req.GetData()["tin"]
+		pkcs7, ok := req.GetData()["pkcs7"]
 		if !ok {
-			err := errors.New("tin is empty")
+			err := errors.New("pkcs7 is empty")
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
+		extractResp, err := eimzo.ExtractUserFromPKCS7(s.cfg, pkcs7, req.ClientIp)
+		if err != nil {
+			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		if extractResp.Status != 1 {
+			break
+		}
+
+		tin := extractResp.SubjectCertificateInfo.SubjectName.TIN
+
 		userIdRes, err := s.strg.User().GetByUsername(ctx, tin)
 		if err != nil {
-			fmt.Println("This is where error")
 			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}

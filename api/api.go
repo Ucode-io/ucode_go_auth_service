@@ -57,6 +57,9 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.PUT("set-email/send-code", h.EmailEnter)
 		v2.PUT("/expire-sessions", h.ExpireSessions)
 
+		v2.GET("/e-imzo/challenge", h.GetChallenge)
+		v2.POST("/e-imzo/verify/user", h.VerifyUser)
+
 		v2.PUT("/refresh-superadmin", h.V2RefreshTokenSuperAdmin)
 		v2.POST("/multi-company/login", h.V2MultiCompanyLogin)
 
