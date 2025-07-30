@@ -1747,18 +1747,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		session.EnvId = req.EnvId
 	}
 
-	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
-		Id: session.GetUserId(),
-	})
-	if err != nil {
-		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
-		if err == sql.ErrNoRows {
-			errNoRows := config.ErrUserNotFound
-			return nil, status.Error(codes.Internal, errNoRows.Error())
-		}
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
 	resource, err := s.services.ServiceResource().GetSingle(ctx,
 		&pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     session.ProjectId,
@@ -1777,7 +1765,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	}
 
 	reqLoginData := &pbObject.LoginDataReq{
-		UserId:                user.GetId(),
+		UserId:                session.GetUserId(),
 		ClientType:            session.GetClientTypeId(),
 		ProjectId:             session.GetProjectId(),
 		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
@@ -1792,7 +1780,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		}
 	case 3:
 		loginData, err := services.GoObjectBuilderLoginService().LoginData(ctx, &nb.LoginDataReq{
-			UserId:                user.GetId(),
+			UserId:                session.GetUserId(),
 			ClientType:            session.GetClientTypeId(),
 			ProjectId:             session.GetProjectId(),
 			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
