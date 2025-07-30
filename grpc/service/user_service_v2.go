@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"net/smtp"
 	"regexp"
 	"runtime"
@@ -397,6 +399,20 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	}
 }
 
+func ConvertStructToMap(s *structpb.Struct) (map[string]any, error) {
+	newMap := make(map[string]any)
+
+	body, err := json.Marshal(s)
+	if err != nil {
+		return map[string]any{}, err
+	}
+	if err := json.Unmarshal(body, &newMap); err != nil {
+		return map[string]any{}, err
+	}
+
+	return newMap, nil
+}
+
 func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
 	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
 
@@ -428,12 +444,13 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	var (
-		emailRegex  = regexp.MustCompile(config.EMAIL_REGEX)
-		email       = emailRegex.MatchString(req.Email)
-		password    = req.Password
-		userId      string
-		tableSlug   = "user"
-		userCreated bool
+		emailRegex                 = regexp.MustCompile(config.EMAIL_REGEX)
+		email                      = emailRegex.MatchString(req.Email)
+		password                   = req.Password
+		userId                     string
+		tableSlug                  = "user"
+		userCreated, alreadyHashed bool
+		user                       *pb.User
 	)
 
 	req.Password = hashedPassword
@@ -444,7 +461,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	if len(req.GetLogin()) != 0 {
-		user, err := s.strg.User().GetByUsername(ctx, req.GetLogin())
+		user, err = s.strg.User().GetByUsername(ctx, req.GetLogin())
 		if err != nil {
 			return nil, err
 		}
@@ -453,7 +470,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	if len(req.GetPhone()) != 0 && len(req.GetLogin()) == 0 {
-		user, err := s.strg.User().GetByUsername(ctx, req.GetPhone())
+		user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
 		if err != nil {
 			return nil, err
 		}
@@ -462,7 +479,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	}
 
 	if len(req.GetEmail()) != 0 && len(req.GetLogin()) == 0 {
-		user, err := s.strg.User().GetByUsername(ctx, req.GetEmail())
+		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
 		if err != nil {
 			return nil, err
 		}
@@ -505,6 +522,9 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			return nil, err
 		}
 	} else {
+		alreadyHashed = true
+		password = user.GetPassword()
+
 		exists, err := s.strg.User().GetUserProjectByAllFields(ctx, models.GetUserProjectByAllFieldsReq{
 			UserId:       userId,
 			RoleId:       req.GetRoleId(),
@@ -536,8 +556,7 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		}
 	}
 
-	// objectBuilder -> auth service
-	structData, err := helper.ConvertRequestToSturct(map[string]any{
+	requestData := map[string]any{
 		"guid":               uuid.New().String(),
 		"name":               req.GetName(),
 		"login":              req.GetLogin(),
@@ -554,7 +573,19 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		"from_auth_service":  true,
 		"expires_at":         req.GetExpiresAt(),
 		"client_platform_id": req.GetClientPlatformId(),
-	})
+		"already_hashed":     alreadyHashed,
+	}
+
+	additionalData, err := ConvertStructToMap(req.AdditionalData)
+	if err != nil {
+		s.log.Error("!!!CreateUser-->ConvertStructToMap", logger.Error(err))
+		return nil, err
+	}
+
+	maps.Copy(requestData, additionalData)
+
+	// objectBuilder -> auth service
+	structData, err := helper.ConvertRequestToSturct(requestData)
 	if err != nil {
 		s.log.Error("!!!V2CreateUser--->ConvertReq", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())

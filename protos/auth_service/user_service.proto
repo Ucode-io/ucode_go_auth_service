@@ -166,6 +166,7 @@ message CreateUserRequest {
     string environment_id = 19;
     string node_type = 20;
     string tin = 21;
+    google.protobuf.Struct additional_data = 22;
 }
 
 message UserPrimaryKey {

@@ -1361,7 +1361,6 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			return nil, status.Error(codes.InvalidArgument, config.ErrIncorrectLoginOrPassword)
 		}
 
-		fmt.Println("V1->", req.GetUsername())
 		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
 		if err != nil {
 			s.log.Error("!!!MultiCompanyLogin--->UserGetByUsername", logger.Error(err))
