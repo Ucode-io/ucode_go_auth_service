@@ -1767,7 +1767,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	clientTypeId, err := s.strg.User().GetUserProjectByUserIdProjectIdEnvId(ctx, session.GetUserIdAuth(), req.GetProjectId(), req.GetEnvId())
 
 	reqLoginData := &pbObject.LoginDataReq{
-		UserId:                session.GetUserId(),
+		UserId:                session.GetUserIdAuth(),
 		ClientType:            clientTypeId,
 		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
@@ -1782,7 +1782,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		}
 	case 3:
 		loginData, err := services.GoObjectBuilderLoginService().LoginData(ctx, &nb.LoginDataReq{
-			UserId:                session.GetUserId(),
+			UserId:                session.GetUserIdAuth(),
 			ClientType:            clientTypeId,
 			ProjectId:             req.GetProjectId(),
 			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
