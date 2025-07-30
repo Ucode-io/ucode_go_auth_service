@@ -1363,3 +1363,27 @@ func (r *userRepo) GetUserStatus(ctx context.Context, userId, projectId string) 
 
 	return
 }
+
+func (r *userRepo) GetUserProjectByUserIdProjectIdEnvId(ctx context.Context, userId, projectId, envId string) (string, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjectByUserIdProjectIdEnvId")
+	defer dbSpan.Finish()
+
+	query := `SELECT
+		client_type_id
+	FROM
+		user_project
+	WHERE user_id = $1 AND project_id = $2 AND env_id = $3`
+
+	var (
+		clientType sql.NullString
+	)
+
+	err := r.db.QueryRow(ctx, query, userId, projectId, envId).Scan(
+		&clientType,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	return clientType.String, nil
+}

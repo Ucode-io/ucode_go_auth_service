@@ -1764,10 +1764,12 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, err
 	}
 
+	clientTypeId, err := s.strg.User().GetUserProjectByUserIdProjectIdEnvId(ctx, session.GetUserIdAuth(), req.GetProjectId(), req.GetEnvId())
+
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                session.GetUserId(),
-		ClientType:            session.GetClientTypeId(),
-		ProjectId:             session.GetProjectId(),
+		ClientType:            clientTypeId,
+		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
 	}
 
@@ -1781,8 +1783,8 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	case 3:
 		loginData, err := services.GoObjectBuilderLoginService().LoginData(ctx, &nb.LoginDataReq{
 			UserId:                session.GetUserId(),
-			ClientType:            session.GetClientTypeId(),
-			ProjectId:             session.GetProjectId(),
+			ClientType:            clientTypeId,
+			ProjectId:             req.GetProjectId(),
 			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
 		})
 		if err != nil {
@@ -1822,10 +1824,10 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
-		ProjectId:        session.ProjectId,
-		ClientPlatformId: session.ClientPlatformId,
-		ClientTypeId:     session.ClientTypeId,
-		UserId:           session.UserId,
+		ProjectId:        req.ProjectId,
+		ClientPlatformId: data.ClientPlatform.Guid,
+		ClientTypeId:     data.ClientType.Guid,
+		UserId:           data.UserId,
 		RoleId:           roleId,
 		Ip:               session.Ip,
 		Data:             session.Data,
@@ -1847,16 +1849,16 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.Id,
-		"ip":                 session.Data,
+		"ip":                 session.Ip,
 		"data":               session.Data,
 		"tables":             authTables,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
-		"project_id":         session.ProjectId,
+		"user_id":            data.UserId,
+		"role_id":            roleId,
+		"project_id":         req.ProjectId,
 		"user_id_auth":       session.GetUserIdAuth(),
-		"client_type_id":     session.ClientTypeId,
+		"client_type_id":     clientTypeId,
 		"login_table_slug":   tokenInfo.LoginTableSlug,
-		"client_platform_id": session.ClientPlatformId,
+		"client_platform_id": data.ClientPlatform.Guid,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
