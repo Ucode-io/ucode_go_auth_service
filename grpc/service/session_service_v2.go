@@ -1705,11 +1705,10 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	defer dbSpan.Finish()
 
 	var (
-		res        = &pb.V2LoginResponse{}
-		before     runtime.MemStats
-		data       = &pbObject.LoginDataRes{}
-		roleId     string
-		authTables = []*pb.TableBody{}
+		res    = &pb.V2LoginResponse{}
+		before runtime.MemStats
+		data   = &pbObject.LoginDataRes{}
+		roleId string
 	)
 	runtime.ReadMemStats(&before)
 
@@ -1840,18 +1839,12 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if tokenInfo.Tables != nil {
-		for _, table := range tokenInfo.Tables {
-			authTables = append(authTables, &pb.TableBody{TableSlug: table.TableSlug, ObjectId: table.ObjectID})
-		}
-	}
-
 	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.Id,
 		"ip":                 session.Ip,
 		"data":               session.Data,
-		"tables":             authTables,
+		"tables":             req.GetTables(),
 		"user_id":            data.UserId,
 		"role_id":            roleId,
 		"project_id":         req.ProjectId,
