@@ -1517,7 +1517,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 		for _, projectId := range item.ProjectIds {
 			clientType, _ := s.strg.User().GetUserProjectClientTypes(ctx,
-				&models.UserProjectClientTypeRequest{UserId: user.GetId(), ProjectId: projectId})
+				&pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: projectId})
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
 				ProjectId: projectId, CompanyId: item.Id,
@@ -1760,10 +1760,15 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
 	if err != nil {
-		return nil, err
+		s.log.Error("!!!V2RefreshTokenForEnv.ServiceNode", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	clientTypeId, err := s.strg.User().GetUserProjectByUserIdProjectIdEnvId(ctx, session.GetUserIdAuth(), req.GetProjectId(), req.GetEnvId())
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv.ClientType", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                session.GetUserIdAuth(),

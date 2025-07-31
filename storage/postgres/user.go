@@ -449,11 +449,11 @@ func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequ
 	return rowsAffected, nil
 }
 
-func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (res *models.UserProjectClientTypeResponse, err error) {
+func (r *userRepo) GetUserProjectClientTypes(ctx context.Context, req *pb.UserInfoPrimaryKey) (res *pb.GetUserProjectClientTypesResponse, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetUserProjectClientTypes")
 	defer dbSpan.Finish()
 
-	res = &models.UserProjectClientTypeResponse{}
+	res = &pb.GetUserProjectClientTypesResponse{}
 
 	query := `SELECT 
 				array_agg(client_type_id) as client_type_ids
@@ -638,9 +638,7 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 	}
 
 	defer func() {
-		if err != nil {
-			_ = tx.Rollback(ctx)
-		}
+		_ = tx.Rollback(ctx)
 	}()
 
 	if req.GetClientTypeId() != "" {
@@ -683,24 +681,6 @@ func (r *userRepo) UpdateUserToProject(ctx context.Context, req *pb.AddUserToPro
 			return nil, err
 		}
 	}
-
-	/*
-		if req.Status == config.UserStatusInactive {
-			var (
-				roleIdBeforeUpdate string
-				query              = `SELECT role_id FROM "user_project" WHERE user_id = $1 AND project_id = $2 AND env_id = $3`
-			)
-
-			err := r.db.QueryRow(ctx, query, req.UserId, req.ProjectId, envId).Scan(&roleIdBeforeUpdate)
-			if err != nil {
-				return nil, err
-			}
-
-			if roleIdBeforeUpdate == req.RoleId {
-				req.Status = config.UserStatusBlocked
-			}
-		}
-	*/
 
 	query = `UPDATE "user_project" 
 			  SET client_type_id = $4, role_id = $5, status = $6

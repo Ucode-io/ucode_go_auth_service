@@ -1554,3 +1554,15 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 	}
 	return user, nil
 }
+
+func (s *userService) GetUserProjectClientTypes(ctx context.Context, req *pb.UserInfoPrimaryKey) (*pb.GetUserProjectClientTypesResponse, error) {
+	s.log.Info("GetUserProjectClientTypes", logger.Any("req", req))
+
+	clientTypes, err := s.strg.User().GetUserProjectClientTypes(ctx, req)
+	if err != nil {
+		s.log.Error("!!!GetUserProjectClientTypes--->", logger.Error(err))
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+
+	return clientTypes, nil
+}

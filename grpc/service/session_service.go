@@ -7,7 +7,6 @@ import (
 	"runtime"
 
 	"time"
-	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
 	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
@@ -523,7 +522,7 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 
 		for _, projectId := range item.ProjectIds {
 			clientType, _ := s.strg.User().GetUserProjectClientTypes(ctx,
-				&models.UserProjectClientTypeRequest{UserId: user.GetId(), ProjectId: projectId})
+				&pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: projectId})
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
 				ProjectId: projectId, CompanyId: item.Id,

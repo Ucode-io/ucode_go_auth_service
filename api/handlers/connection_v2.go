@@ -277,7 +277,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		structData, err := helper.ConvertMapToStruct(map[string]any{
 			"limit":          limit,
 			"offset":         offset,
-			"client_type_id": c.DefaultQuery("client_type_id", ""),
+			"client_type_id": c.Query("client_type_id"),
 		})
 		if err != nil {
 			h.handleResponse(c, http.InvalidArgument, err.Error())
@@ -301,7 +301,7 @@ func (h *Handler) V2GetConnectionList(c *gin.Context) {
 		structData, err := helper.ConvertMapToStruct(map[string]any{
 			"limit":                     limit,
 			"offset":                    offset,
-			"client_type_id_from_token": c.DefaultQuery("client_type_id", ""),
+			"client_type_id_from_token": c.Query("client_type_id"),
 		})
 		if err != nil {
 			h.handleResponse(c, http.InvalidArgument, err.Error())
