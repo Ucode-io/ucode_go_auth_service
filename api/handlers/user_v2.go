@@ -187,9 +187,9 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		return
 	}
 
-	projectID := c.Query("project-id")
-	if !util.IsValidUUID(projectID) {
-		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get project id"))
 		return
 	}
 
@@ -200,7 +200,7 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 	}
 
 	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
-		ProjectId:     projectID,
+		ProjectId:     projectId.(string),
 		EnvironmentId: environmentId.(string),
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
