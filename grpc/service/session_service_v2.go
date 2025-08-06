@@ -1826,17 +1826,16 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	}
 
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
-		Id:               session.Id,
-		ProjectId:        req.ProjectId,
-		ClientPlatformId: data.ClientPlatform.Guid,
-		ClientTypeId:     data.ClientType.Guid,
-		UserId:           data.UserId,
-		RoleId:           roleId,
-		Ip:               session.Ip,
-		Data:             session.Data,
-		ExpiresAt:        session.ExpiresAt,
-		IsChanged:        session.IsChanged,
-		EnvId:            req.EnvId,
+		Id:           session.Id,
+		ProjectId:    req.ProjectId,
+		ClientTypeId: data.GetClientType().GetGuid(),
+		UserId:       data.UserId,
+		RoleId:       roleId,
+		Ip:           session.Ip,
+		Data:         session.Data,
+		ExpiresAt:    session.ExpiresAt,
+		IsChanged:    session.IsChanged,
+		EnvId:        req.EnvId,
 	})
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
