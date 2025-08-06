@@ -1705,7 +1705,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	defer dbSpan.Finish()
 
 	var (
-		res    = &pb.V2LoginResponse{}
 		before runtime.MemStats
 		data   = &pbObject.LoginDataRes{}
 		roleId string
@@ -1809,7 +1808,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
 
-	userResp := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+	resp := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
 		ClientPlatform:   data.GetClientPlatform(),
 		ClientType:       data.GetClientType(),
 		UserFound:        data.GetUserFound(),
@@ -1822,22 +1821,21 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		UserData:         data.GetUserData(),
 	})
 
-	if userRole, ok := userResp.UserData.Fields["role_id"].GetKind().(*structpb.Value_StringValue); ok {
+	if userRole, ok := resp.UserData.Fields["role_id"].GetKind().(*structpb.Value_StringValue); ok {
 		roleId = userRole.StringValue
 	}
 
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
-		Id:               session.Id,
-		ProjectId:        req.ProjectId,
-		ClientPlatformId: data.ClientPlatform.Guid,
-		ClientTypeId:     data.ClientType.Guid,
-		UserId:           data.UserId,
-		RoleId:           roleId,
-		Ip:               session.Ip,
-		Data:             session.Data,
-		ExpiresAt:        session.ExpiresAt,
-		IsChanged:        session.IsChanged,
-		EnvId:            req.EnvId,
+		Id:           session.Id,
+		ProjectId:    req.ProjectId,
+		ClientTypeId: data.GetClientType().GetGuid(),
+		UserId:       data.UserId,
+		RoleId:       roleId,
+		Ip:           session.Ip,
+		Data:         session.Data,
+		ExpiresAt:    session.ExpiresAt,
+		IsChanged:    session.IsChanged,
+		EnvId:        req.EnvId,
 	})
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
@@ -1880,9 +1878,9 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
 	}
 
-	res.Token = token
+	resp.Token = token
 
-	return res, nil
+	return resp, nil
 }
 
 func (s *sessionService) ExpireSessions(ctx context.Context, req *pb.ExpireSessionsRequest) (*emptypb.Empty, error) {
