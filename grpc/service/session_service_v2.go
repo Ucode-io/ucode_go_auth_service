@@ -1517,7 +1517,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 
 		for _, projectId := range item.ProjectIds {
 			clientType, _ := s.strg.User().GetUserProjectClientTypes(ctx,
-				&models.UserProjectClientTypeRequest{UserId: user.GetId(), ProjectId: projectId})
+				&pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: projectId})
 
 			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
 				ProjectId: projectId, CompanyId: item.Id,
@@ -1705,11 +1705,10 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	defer dbSpan.Finish()
 
 	var (
-		res        = &pb.V2LoginResponse{}
-		before     runtime.MemStats
-		data       *pbObject.LoginDataRes
-		roleId     string
-		authTables = []*pb.TableBody{}
+		res    = &pb.V2LoginResponse{}
+		before runtime.MemStats
+		data   = &pbObject.LoginDataRes{}
+		roleId string
 	)
 	runtime.ReadMemStats(&before)
 
@@ -1747,18 +1746,6 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		session.EnvId = req.EnvId
 	}
 
-	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
-		Id: session.GetUserId(),
-	})
-	if err != nil {
-		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
-		if err == sql.ErrNoRows {
-			errNoRows := errors.New("no user found")
-			return nil, status.Error(codes.Internal, errNoRows.Error())
-		}
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
 	resource, err := s.services.ServiceResource().GetSingle(ctx,
 		&pbCompany.GetSingleServiceResourceReq{
 			ProjectId:     session.ProjectId,
@@ -1773,13 +1760,20 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
 	if err != nil {
-		return nil, err
+		s.log.Error("!!!V2RefreshTokenForEnv.ServiceNode", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	clientTypeId, err := s.strg.User().GetUserProjectByUserIdProjectIdEnvId(ctx, session.GetUserIdAuth(), req.GetProjectId(), req.GetEnvId())
+	if err != nil {
+		s.log.Error("!!!V2RefreshTokenForEnv.ClientType", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	reqLoginData := &pbObject.LoginDataReq{
-		UserId:                user.GetId(),
-		ClientType:            session.GetClientTypeId(),
-		ProjectId:             session.GetProjectId(),
+		UserId:                session.GetUserIdAuth(),
+		ClientType:            clientTypeId,
+		ProjectId:             req.GetProjectId(),
 		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
 	}
 
@@ -1787,32 +1781,30 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 	case 1:
 		data, err = services.GetLoginServiceByType(resource.NodeType).LoginData(ctx, reqLoginData)
 		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			return nil, status.Error(codes.Internal, err.Error())
 		}
 	case 3:
-		postData, err := services.GoLoginService().LoginData(ctx, &nb.LoginDataReq{
-			UserId:                user.GetId(),
-			ClientType:            session.GetClientTypeId(),
-			ProjectId:             session.GetProjectId(),
+		loginData, err := services.GoObjectBuilderLoginService().LoginData(ctx, &nb.LoginDataReq{
+			UserId:                session.GetUserIdAuth(),
+			ClientType:            clientTypeId,
+			ProjectId:             req.GetProjectId(),
 			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
 		})
 		if err != nil {
-			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
+			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		err = helper.MarshalToStruct(&postData, &data)
+		err = helper.MarshalToStruct(&loginData, &data)
 		if err != nil {
-			s.log.Error("!!!Login--->", logger.Error(err))
+			s.log.Error("!!!V2RefreshTokenForEnv-->", logger.Error(err))
 			return nil, status.Error(400, err.Error())
 		}
 	}
 
-	if !data.GetUserFound() {
-		customError := fmt.Errorf("user not found with env_id %s, user_id %s, client_type_id %s", req.GetEnvId(), user.Id, session.ClientTypeId)
+	if !data.UserFound {
+		customError := config.ErrUserNotFound
 		s.log.Error("!!!V2RefreshTokenForEnv--->", logger.Error(customError))
 		return nil, status.Error(codes.NotFound, customError.Error())
 	}
@@ -1836,10 +1828,10 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
 		Id:               session.Id,
-		ProjectId:        session.ProjectId,
-		ClientPlatformId: session.ClientPlatformId,
-		ClientTypeId:     session.ClientTypeId,
-		UserId:           session.UserId,
+		ProjectId:        req.ProjectId,
+		ClientPlatformId: data.ClientPlatform.Guid,
+		ClientTypeId:     data.ClientType.Guid,
+		UserId:           data.UserId,
 		RoleId:           roleId,
 		Ip:               session.Ip,
 		Data:             session.Data,
@@ -1852,25 +1844,19 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if tokenInfo.Tables != nil {
-		for _, table := range tokenInfo.Tables {
-			authTables = append(authTables, &pb.TableBody{TableSlug: table.TableSlug, ObjectId: table.ObjectID})
-		}
-	}
-
 	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.Id,
-		"ip":                 session.Data,
+		"ip":                 session.Ip,
 		"data":               session.Data,
-		"tables":             authTables,
-		"user_id":            session.UserId,
-		"role_id":            session.RoleId,
-		"project_id":         session.ProjectId,
+		"tables":             req.GetTables(),
+		"user_id":            data.UserId,
+		"role_id":            roleId,
+		"project_id":         req.ProjectId,
 		"user_id_auth":       session.GetUserIdAuth(),
-		"client_type_id":     session.ClientTypeId,
+		"client_type_id":     clientTypeId,
 		"login_table_slug":   tokenInfo.LoginTableSlug,
-		"client_platform_id": session.ClientPlatformId,
+		"client_platform_id": data.ClientPlatform.Guid,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)

@@ -63,8 +63,9 @@ type UserRepoI interface {
 	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest, tx pgx.Tx) (rowsAffected int64, err error)
 	GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error)
 	GetUserProjectsEnv(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error)
+	GetUserProjectByUserIdProjectIdEnvId(ctx context.Context, userId, projectId, envId string) (string, error)
 
-	GetUserProjectClientTypes(ctx context.Context, req *models.UserProjectClientTypeRequest) (*models.UserProjectClientTypeResponse, error)
+	GetUserProjectClientTypes(ctx context.Context, req *pb.UserInfoPrimaryKey) (*pb.GetUserProjectClientTypesResponse, error)
 	AddUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
 	UpdateUserToProject(ctx context.Context, req *pb.AddUserToProjectReq) (*pb.AddUserToProjectRes, error)
 	GetProjectsByUserId(ctx context.Context, req *pb.GetProjectsByUserIdReq) (*pb.GetProjectsByUserIdRes, error)

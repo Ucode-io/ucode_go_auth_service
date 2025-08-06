@@ -280,10 +280,6 @@ func (s *clientService) V2GetClientTypeList(ctx context.Context, req *pb.V2GetCl
 		req.Limit = 1000
 	}
 
-	// @TODO limit offset error should fix
-	if req.Limit == 0 {
-		req.Limit = 1000
-	}
 	structReq := map[string]any{
 		"limit":  req.GetLimit(),
 		"offset": req.GetOffset(),
