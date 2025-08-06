@@ -1763,7 +1763,7 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	clientTypeId, roleId, err := s.strg.User().GetUserProjectByUserIdProjectIdEnvId(ctx, session.GetUserIdAuth(), req.GetProjectId(), req.GetEnvId())
+	clientTypeId, err := s.strg.User().GetUserProjectByUserIdProjectIdEnvId(ctx, session.GetUserIdAuth(), req.GetProjectId(), req.GetEnvId())
 	if err != nil {
 		s.log.Error("!!!V2RefreshTokenForEnv.ClientType", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
