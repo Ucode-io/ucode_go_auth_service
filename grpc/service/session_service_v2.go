@@ -1844,17 +1844,16 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 
 	// TODO - wrap in a function
 	m := map[string]any{
-		"id":                 session.Id,
-		"ip":                 session.Ip,
-		"data":               session.Data,
-		"tables":             req.GetTables(),
-		"user_id":            data.UserId,
-		"role_id":            roleId,
-		"project_id":         req.ProjectId,
-		"user_id_auth":       session.GetUserIdAuth(),
-		"client_type_id":     clientTypeId,
-		"login_table_slug":   tokenInfo.LoginTableSlug,
-		"client_platform_id": data.ClientPlatform.Guid,
+		"id":               session.Id,
+		"ip":               session.Ip,
+		"data":             session.Data,
+		"tables":           req.GetTables(),
+		"user_id":          data.UserId,
+		"role_id":          roleId,
+		"project_id":       req.ProjectId,
+		"user_id_auth":     session.GetUserIdAuth(),
+		"client_type_id":   clientTypeId,
+		"login_table_slug": tokenInfo.LoginTableSlug,
 	}
 
 	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
