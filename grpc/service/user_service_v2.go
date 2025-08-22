@@ -658,13 +658,15 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		})
 		if err != nil {
 			if userCreated {
-				_, _ = s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
+				_, err := s.strg.User().Delete(ctx, &pb.UserPrimaryKey{
 					Id:        userId,
 					ProjectId: req.GetResourceEnvironmentId(),
+					IsTest:    true,
 				})
+				s.log.Error("!!!V2CreateUser->DeleteUser", logger.Error(err))
 			}
 
-			s.log.Error("!!!V2CreateUser--->CreateObj", logger.Error(err))
+			s.log.Error("!!!V2CreateUser->CreateObj", logger.Error(err))
 			return nil, err
 		}
 	}

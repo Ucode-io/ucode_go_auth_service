@@ -191,7 +191,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		clientType, ok := response.Data.AsMap()["response"]
 		if ok && clientType != nil {
 			if clientTypeTableSlug, ok := clientType.(map[string]any)["table_slug"]; ok {
-				tableSlug = clientTypeTableSlug.(string)
+				tableSlug = cast.ToString(clientTypeTableSlug)
 			}
 		}
 
@@ -230,7 +230,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 
 		if clientType, ok := response.Data.AsMap()["response"]; ok {
 			if clientTypeTableSlug, ok := clientType.(map[string]any)["table_slug"]; ok {
-				tableSlug = clientTypeTableSlug.(string)
+				tableSlug = cast.ToString(clientTypeTableSlug)
 			}
 		}
 
