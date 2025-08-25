@@ -6,6 +6,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -447,7 +448,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	var (
 		req           auth_service.AddUserToProjectReq
 		userDataToMap = make(map[string]any)
-		tableSlug     = "user"
+		tableSlug     = "users"
 	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -478,16 +479,25 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     projectId.(string),
-	})
+	project, err := h.services.ProjectServiceClient().GetById(c.Request.Context(), &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			EnvironmentId: environmentId.(string),
+			ProjectId:     projectId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
 	req.EnvId = environmentId.(string)
+	req.CompanyId = project.CompanyId
 
 	res, err := h.services.UserService().AddUserToProject(
 		c.Request.Context(), &req,
@@ -583,18 +593,18 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			tableSlug = clientTypeTableSlug
 		}
 
-		_, err = services.GoItemService().Create(
-			c.Request.Context(),
-			&nobs.CommonMessage{
-				TableSlug: tableSlug,
-				Data:      structData,
-				ProjectId: resource.ResourceEnvironmentId,
-			},
-		)
-		if err != nil {
-			h.handleResponse(c, http.InternalServerError, err.Error())
-			return
-		}
+		// _, err = services.GoItemService().Create(
+		// 	c.Request.Context(),
+		// 	&nobs.CommonMessage{
+		// 		TableSlug: tableSlug,
+		// 		Data:      structData,
+		// 		ProjectId: resource.ResourceEnvironmentId,
+		// 	},
+		// )
+		// if err != nil {
+		// 	h.handleResponse(c, http.InternalServerError, err.Error())
+		// 	return
+		// }
 	}
 
 	h.handleResponse(c, http.Created, res)
