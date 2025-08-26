@@ -1764,8 +1764,12 @@ func (s *sessionService) V2RefreshTokenForEnv(ctx context.Context, req *pb.Refre
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	fmt.Println("User id->", session.GetUserIdAuth())
+	fmt.Println("Project id=>", req.ProjectId)
+	fmt.Println("env id->", req.EnvId)
 	clientTypeId, err := s.strg.User().GetUserProjectByUserIdProjectIdEnvId(ctx, session.GetUserIdAuth(), req.GetProjectId(), req.GetEnvId())
 	if err != nil {
+		fmt.Println("Error is here")
 		s.log.Error("!!!V2RefreshTokenForEnv.ClientType", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}

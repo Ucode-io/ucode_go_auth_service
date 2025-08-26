@@ -496,7 +496,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	req.EnvId = environmentId.(string)
+	// req.EnvId = environmentId.(string)
 	req.CompanyId = project.CompanyId
 
 	res, err := h.services.UserService().AddUserToProject(
