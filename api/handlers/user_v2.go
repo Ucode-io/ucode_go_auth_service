@@ -485,8 +485,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	userId, _ := c.Get("user_id")
-
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
 			EnvironmentId: environmentId.(string),
@@ -511,7 +509,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 
 	user, err := h.services.UserService().V2GetUserByID(
 		c.Request.Context(), &auth_service.UserPrimaryKey{
-			Id:                    cast.ToString(userId),
+			Id:                    req.UserId,
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ProjectId:             resource.GetProjectId(),
 			ClientTypeId:          req.ClientTypeId,
@@ -530,8 +528,8 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	}
 
 	userDataToMap["guid"] = uuid.NewString()
-	userDataToMap["user_id_auth"] = userId
-	userDataToMap["guid"] = userId
+	userDataToMap["user_id_auth"] = req.UserId
+	userDataToMap["guid"] = req.UserId
 	userDataToMap["project_id"] = req.ProjectId
 	userDataToMap["role_id"] = req.RoleId
 	userDataToMap["client_type_id"] = user.ClientTypeId
@@ -608,6 +606,9 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		// 	return
 		// }
 	}
+
+	res.EnvId = req.EnvId
+	res.ProjectId = req.ProjectId
 
 	h.handleResponse(c, http.Created, res)
 }
