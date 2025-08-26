@@ -467,17 +467,17 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get environment_id")
-		return
-	}
+	// environmentId, ok := c.Get("environment_id")
+	// if !ok || !util.IsValidUUID(environmentId.(string)) {
+	// 	h.handleResponse(c, http.BadRequest, "cant get environment_id")
+	// 	return
+	// }
 
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
-		return
-	}
+	// projectId, ok := c.Get("project_id")
+	// if !ok || !util.IsValidUUID(projectId.(string)) {
+	// 	h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
+	// 	return
+	// }
 
 	project, err := h.services.ProjectServiceClient().GetById(c.Request.Context(), &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
 	if err != nil {
@@ -487,8 +487,8 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(), &pb.GetSingleServiceResourceReq{
-			EnvironmentId: environmentId.(string),
-			ProjectId:     projectId.(string),
+			EnvironmentId: req.EnvId,
+			ProjectId:     req.ProjectId,
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		})
 	if err != nil {
@@ -507,32 +507,32 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.UserService().V2GetUserByID(
-		c.Request.Context(), &auth_service.UserPrimaryKey{
-			Id:                    req.UserId,
-			ResourceEnvironmentId: resource.ResourceEnvironmentId,
-			ProjectId:             resource.GetProjectId(),
-			ClientTypeId:          req.ClientTypeId,
-			ResourceType:          int32(resource.ResourceType.Number()),
-			NodeType:              resource.NodeType,
-		},
-	)
-	if err != nil {
-		if errors.Is(err, config.ErrUserAlradyMember) {
-			h.handleResponse(c, http.BadEnvironment, "already member!")
-			return
-		}
+	// user, err := h.services.UserService().V2GetUserByID(
+	// 	c.Request.Context(), &auth_service.UserPrimaryKey{
+	// 		Id:                    req.UserId,
+	// 		ResourceEnvironmentId: resource.ResourceEnvironmentId,
+	// 		ProjectId:             resource.GetProjectId(),
+	// 		ClientTypeId:          req.ClientTypeId,
+	// 		ResourceType:          int32(resource.ResourceType.Number()),
+	// 		NodeType:              resource.NodeType,
+	// 	},
+	// )
+	// if err != nil {
+	// 	if errors.Is(err, config.ErrUserAlradyMember) {
+	// 		h.handleResponse(c, http.BadEnvironment, "already member!")
+	// 		return
+	// 	}
 
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
+	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
+	// 	return
+	// }
 
 	userDataToMap["guid"] = uuid.NewString()
 	userDataToMap["user_id_auth"] = req.UserId
 	userDataToMap["guid"] = req.UserId
 	userDataToMap["project_id"] = req.ProjectId
 	userDataToMap["role_id"] = req.RoleId
-	userDataToMap["client_type_id"] = user.ClientTypeId
+	userDataToMap["client_type_id"] = req.ClientTypeId
 	userDataToMap["from_auth_service"] = true
 
 	structData, err := helper.ConvertMapToStruct(userDataToMap)
@@ -593,18 +593,18 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			tableSlug = clientTypeTableSlug
 		}
 
-		// _, err = services.GoItemService().Create(
-		// 	c.Request.Context(),
-		// 	&nobs.CommonMessage{
-		// 		TableSlug: tableSlug,
-		// 		Data:      structData,
-		// 		ProjectId: resource.ResourceEnvironmentId,
-		// 	},
-		// )
-		// if err != nil {
-		// 	h.handleResponse(c, http.InternalServerError, err.Error())
-		// 	return
-		// }
+		_, err = services.GoItemService().Create(
+			c.Request.Context(),
+			&nobs.CommonMessage{
+				TableSlug: tableSlug,
+				Data:      structData,
+				ProjectId: resource.ResourceEnvironmentId,
+			},
+		)
+		if err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
 	}
 
 	res.EnvId = req.EnvId
