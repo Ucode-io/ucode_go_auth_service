@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"maps"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -446,7 +447,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
 	var (
-		req           auth_service.AddUserToProjectReq
+		req           models.AddUserToProjectReq
 		userDataToMap = make(map[string]any)
 		tableSlug     = "users"
 	)
@@ -457,7 +458,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(req.GetProjectId()) {
+	if !util.IsValidUUID(req.ProjectId) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
@@ -479,7 +480,10 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	// 	return
 	// }
 
-	project, err := h.services.ProjectServiceClient().GetById(c.Request.Context(), &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+	project, err := h.services.ProjectServiceClient().GetById(
+		c.Request.Context(),
+		&pbc.GetProjectByIdRequest{ProjectId: req.ProjectId},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
@@ -500,7 +504,19 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	req.CompanyId = project.CompanyId
 
 	res, err := h.services.UserService().AddUserToProject(
-		c.Request.Context(), &req,
+		c.Request.Context(), &auth_service.AddUserToProjectReq{
+			UserId:       req.UserId,
+			ProjectId:    req.ProjectId,
+			RoleId:       req.RoleId,
+			Active:       req.Active,
+			CompanyId:    req.CompanyId,
+			ResourceType: req.ResourceType,
+			ClientTypeId: req.ClientTypeId,
+			TableSlug:    req.TableSlug,
+			EnvId:        req.EnvId,
+			NodeType:     req.NodeType,
+			Status:       req.Status,
+		},
 	)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
@@ -534,6 +550,8 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	userDataToMap["role_id"] = req.RoleId
 	userDataToMap["client_type_id"] = req.ClientTypeId
 	userDataToMap["from_auth_service"] = true
+
+	maps.Copy(userDataToMap, req.AdditionalData)
 
 	structData, err := helper.ConvertMapToStruct(userDataToMap)
 	if err != nil {
