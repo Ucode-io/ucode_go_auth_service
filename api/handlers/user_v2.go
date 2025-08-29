@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"maps"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -445,9 +447,9 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) AddUserToProject(c *gin.Context) {
 	var (
-		req           auth_service.AddUserToProjectReq
+		req           models.AddUserToProjectReq
 		userDataToMap = make(map[string]any)
-		tableSlug     = "user"
+		tableSlug     = "users"
 	)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -456,7 +458,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(req.GetProjectId()) {
+	if !util.IsValidUUID(req.ProjectId) {
 		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
 		return
 	}
@@ -466,54 +468,45 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	environmentId, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get environment_id")
-		return
-	}
-
-	projectId, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectId.(string)) {
-		h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
-		return
-	}
-
-	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
-		EnvironmentId: environmentId.(string),
-		ProjectId:     projectId.(string),
-	})
+	project, err := h.services.ProjectServiceClient().GetById(
+		c.Request.Context(),
+		&pbc.GetProjectByIdRequest{ProjectId: req.ProjectId},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
-	req.EnvId = environmentId.(string)
-
-	res, err := h.services.UserService().AddUserToProject(
-		c.Request.Context(), &req,
-	)
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			EnvironmentId: req.EnvId,
+			ProjectId:     req.ProjectId,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		})
 	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
+		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
 
-	user, err := h.services.UserService().V2GetUserByID(
-		c.Request.Context(), &auth_service.UserPrimaryKey{
-			Id:                    req.UserId,
-			ResourceEnvironmentId: resource.ResourceEnvironmentId,
-			ProjectId:             resource.GetProjectId(),
-			ClientTypeId:          req.ClientTypeId,
-			ResourceType:          int32(resource.ResourceType.Number()),
-			NodeType:              resource.NodeType,
+	req.CompanyId = project.CompanyId
+
+	res, err := h.services.UserService().AddUserToProject(
+		c.Request.Context(), &auth_service.AddUserToProjectReq{
+			UserId:       req.UserId,
+			ProjectId:    req.ProjectId,
+			RoleId:       req.RoleId,
+			Active:       req.Active,
+			CompanyId:    req.CompanyId,
+			ResourceType: req.ResourceType,
+			ClientTypeId: req.ClientTypeId,
+			TableSlug:    req.TableSlug,
+			EnvId:        req.EnvId,
+			NodeType:     req.NodeType,
+			Status:       req.Status,
 		},
 	)
 	if err != nil {
-		if errors.Is(err, config.ErrUserAlradyMember) {
-			h.handleResponse(c, http.BadEnvironment, "already member!")
-			return
-		}
-
-		h.handleResponse(c, http.InvalidArgument, err.Error())
+		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
 
@@ -522,8 +515,10 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 	userDataToMap["guid"] = req.UserId
 	userDataToMap["project_id"] = req.ProjectId
 	userDataToMap["role_id"] = req.RoleId
-	userDataToMap["client_type_id"] = user.ClientTypeId
+	userDataToMap["client_type_id"] = req.ClientTypeId
 	userDataToMap["from_auth_service"] = true
+
+	maps.Copy(userDataToMap, req.AdditionalData)
 
 	structData, err := helper.ConvertMapToStruct(userDataToMap)
 	if err != nil {
@@ -596,6 +591,9 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 			return
 		}
 	}
+
+	res.EnvId = req.EnvId
+	res.ProjectId = req.ProjectId
 
 	h.handleResponse(c, http.Created, res)
 }
