@@ -75,7 +75,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	roleId := uuid.NewString()
 
 	if googleToken != "" {
-		userInfo, err := helper.GetGoogleUserInfo(googleToken)
+		userInfo, err := helper.DecodeGoogleIDToken(googleToken)
 		if err != nil {
 			err = errors.New("invalid arguments google auth")
 			s.log.Error("!!!RegisterCompany--->", logger.Error(err))

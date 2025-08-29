@@ -1,11 +1,13 @@
 package helper
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	net_http "net/http"
 	"net/smtp"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -46,6 +48,32 @@ func GetGoogleUserInfo(accessToken string) (map[string]any, error) {
 	}
 
 	err = json.Unmarshal(body, &userInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return userInfo, nil
+}
+
+func DecodeGoogleIDToken(idToken string) (map[string]any, error) {
+	parts := strings.Split(idToken, ".")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid JWT token format")
+	}
+
+	payload := parts[1]
+
+	if len(payload)%4 != 0 {
+		payload += strings.Repeat("=", 4-len(payload)%4)
+	}
+
+	decoded, err := base64.URLEncoding.DecodeString(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	userInfo := make(map[string]any)
+	err = json.Unmarshal(decoded, &userInfo)
 	if err != nil {
 		return nil, err
 	}
