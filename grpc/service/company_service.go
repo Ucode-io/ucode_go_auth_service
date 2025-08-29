@@ -75,7 +75,7 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 	roleId := uuid.NewString()
 
 	if googleToken != "" {
-		userInfo, err := helper.GetGoogleUserInfo(googleToken)
+		userInfo, err := helper.DecodeGoogleIDToken(googleToken)
 		if err != nil {
 			err = errors.New("invalid arguments google auth")
 			s.log.Error("!!!RegisterCompany--->", logger.Error(err))
@@ -87,12 +87,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		email = cast.ToString(userInfo["email"])
-	}
-
-	if email == "" {
-		err = config.ErrEmailRequired
-		s.log.Error("!!!RegisterCompany-->EmailRequired", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	if len(login) < 6 {

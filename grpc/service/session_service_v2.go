@@ -168,7 +168,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	case config.WithGoogle:
 		var email string
 		if req.GetGoogleToken() != "" {
-			userInfo, err := helper.GetGoogleUserInfo(req.GetGoogleToken())
+			userInfo, err := helper.DecodeGoogleIDToken(req.GetGoogleToken())
 			if err != nil {
 				err = errors.New("invalid arguments google auth")
 				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
@@ -1462,7 +1462,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 	case config.WithGoogle:
 		var email string
 		if req.GetGoogleToken() != "" {
-			userInfo, err := helper.GetGoogleUserInfo(req.GoogleToken)
+			userInfo, err := helper.DecodeGoogleIDToken(req.GoogleToken)
 			if err != nil {
 				err = errors.New("invalid arguments google auth")
 				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
