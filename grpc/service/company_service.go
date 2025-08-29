@@ -89,12 +89,6 @@ func (s *companyService) Register(ctx context.Context, req *pb.RegisterCompanyRe
 		email = cast.ToString(userInfo["email"])
 	}
 
-	if email == "" {
-		err = config.ErrEmailRequired
-		s.log.Error("!!!RegisterCompany-->EmailRequired", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	if len(login) < 6 {
 		err = errors.New("invalid username")
 		s.log.Error("!!!RegisterCompany-->InvalidUsername", logger.Error(err))
