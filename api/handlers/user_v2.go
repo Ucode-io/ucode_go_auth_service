@@ -468,18 +468,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	// environmentId, ok := c.Get("environment_id")
-	// if !ok || !util.IsValidUUID(environmentId.(string)) {
-	// 	h.handleResponse(c, http.BadRequest, "cant get environment_id")
-	// 	return
-	// }
-
-	// projectId, ok := c.Get("project_id")
-	// if !ok || !util.IsValidUUID(projectId.(string)) {
-	// 	h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
-	// 	return
-	// }
-
 	project, err := h.services.ProjectServiceClient().GetById(
 		c.Request.Context(),
 		&pbc.GetProjectByIdRequest{ProjectId: req.ProjectId},
@@ -500,7 +488,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	// req.EnvId = environmentId.(string)
 	req.CompanyId = project.CompanyId
 
 	res, err := h.services.UserService().AddUserToProject(
@@ -522,26 +509,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
-
-	// user, err := h.services.UserService().V2GetUserByID(
-	// 	c.Request.Context(), &auth_service.UserPrimaryKey{
-	// 		Id:                    req.UserId,
-	// 		ResourceEnvironmentId: resource.ResourceEnvironmentId,
-	// 		ProjectId:             resource.GetProjectId(),
-	// 		ClientTypeId:          req.ClientTypeId,
-	// 		ResourceType:          int32(resource.ResourceType.Number()),
-	// 		NodeType:              resource.NodeType,
-	// 	},
-	// )
-	// if err != nil {
-	// 	if errors.Is(err, config.ErrUserAlradyMember) {
-	// 		h.handleResponse(c, http.BadEnvironment, "already member!")
-	// 		return
-	// 	}
-
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
 
 	userDataToMap["guid"] = uuid.NewString()
 	userDataToMap["user_id_auth"] = req.UserId
