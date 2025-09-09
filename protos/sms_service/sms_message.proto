@@ -17,7 +17,6 @@ message Sms {
   string dev_email_password = 10;
   string originator = 11;
   string service_type = 12;
-  string mailchimp_key = 13;
 }
 
 message GenerateOtp {

@@ -340,7 +340,7 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			body.Otp = code
 
 			body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetMailchimp().GetFromEmail()
-			body.MailchimpKey = emailSettings.GetResources()[0].GetSettings().GetMailchimp().GetApiKey()
+			body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetMailchimp().GetApiKey()
 		}
 	}
 
