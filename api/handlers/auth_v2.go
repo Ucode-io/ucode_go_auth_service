@@ -305,18 +305,15 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	case "email", cfg.Default:
 		{
 			if c.Param("otp") != "121212" {
-				resp, err := h.services.EmailService().GetEmailByID(
+				_, err := h.services.SmsService().ConfirmOtp(
 					c.Request.Context(),
-					&pba.EmailOtpPrimaryKey{
-						Id: c.Param("verify_id"),
+					&pbSms.ConfirmOtpRequest{
+						SmsId: c.Param("verify_id"),
+						Otp:   body.Otp,
 					},
 				)
 				if err != nil {
 					h.handleResponse(c, status.GRPCError, err.Error())
-					return
-				}
-				if resp.Otp != body.Otp {
-					h.handleResponse(c, status.InvalidArgument, "Неверный код подверждения")
 					return
 				}
 			}
