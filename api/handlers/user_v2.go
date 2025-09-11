@@ -468,18 +468,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	// environmentId, ok := c.Get("environment_id")
-	// if !ok || !util.IsValidUUID(environmentId.(string)) {
-	// 	h.handleResponse(c, http.BadRequest, "cant get environment_id")
-	// 	return
-	// }
-
-	// projectId, ok := c.Get("project_id")
-	// if !ok || !util.IsValidUUID(projectId.(string)) {
-	// 	h.handleResponse(c, http.BadRequest, "cant get project-id in query param")
-	// 	return
-	// }
-
 	project, err := h.services.ProjectServiceClient().GetById(
 		c.Request.Context(),
 		&pbc.GetProjectByIdRequest{ProjectId: req.ProjectId},
@@ -522,26 +510,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
-
-	// user, err := h.services.UserService().V2GetUserByID(
-	// 	c.Request.Context(), &auth_service.UserPrimaryKey{
-	// 		Id:                    req.UserId,
-	// 		ResourceEnvironmentId: resource.ResourceEnvironmentId,
-	// 		ProjectId:             resource.GetProjectId(),
-	// 		ClientTypeId:          req.ClientTypeId,
-	// 		ResourceType:          int32(resource.ResourceType.Number()),
-	// 		NodeType:              resource.NodeType,
-	// 	},
-	// )
-	// if err != nil {
-	// 	if errors.Is(err, config.ErrUserAlradyMember) {
-	// 		h.handleResponse(c, http.BadEnvironment, "already member!")
-	// 		return
-	// 	}
-
-	// 	h.handleResponse(c, http.InvalidArgument, err.Error())
-	// 	return
-	// }
 
 	userDataToMap["guid"] = uuid.NewString()
 	userDataToMap["user_id_auth"] = req.UserId
@@ -696,4 +664,53 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, user)
+}
+
+func (h *Handler) SyncUser(c *gin.Context) {
+	var (
+		user auth_service.CreateSyncUserRequest
+		resp *auth_service.SyncUserResponse
+	)
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		h.handleError(c, http.BadRequest, err)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleError(c, http.BadRequest, config.ErrEnvironmentIdValid)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleError(c, http.BadRequest, config.ErrProjectIdValid)
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			EnvironmentId: environmentId.(string),
+			ProjectId:     projectId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err)
+		return
+	}
+
+	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
+	user.EnvironmentId = resource.EnvironmentId
+	user.ProjectId = resource.ProjectId
+
+	resp, err = h.services.SyncUserService().CreateUser(
+		c.Request.Context(), &user,
+	)
+	if err != nil {
+		h.handleError(c, http.InternalServerError, err)
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
 }

@@ -318,7 +318,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		login,
 		password,
 		hash_type,
-		tin
+		COALESCE(tin, '') as tin
 	FROM
 		"user"
 	WHERE`
