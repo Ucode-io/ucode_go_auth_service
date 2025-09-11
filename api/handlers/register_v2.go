@@ -309,6 +309,39 @@ func (h *Handler) V2SendCode(c *gin.Context) {
 			body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetEmail()
 			body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetSmtp().GetPassword()
 		}
+	case "MAILCHIMP":
+		if !util.IsValidEmail(request.Recipient) {
+			h.handleResponse(c, http.BadRequest, cfg.InvalidEmailError)
+			return
+		}
+
+		emailSettings, err := h.services.ResourceService().GetProjectResourceList(
+			c.Request.Context(), &pbc.GetProjectResourceListRequest{
+				ProjectId:     resourceEnvironment.ProjectId,
+				EnvironmentId: environmentId.(string),
+				Type:          pbc.ResourceType_MAILCHIMP,
+			})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+
+		if len(emailSettings.GetResources()) < 1 {
+			h.handleResponse(c, http.InvalidArgument, cfg.EmailSettingsError)
+			return
+		}
+
+		if len(emailSettings.GetResources()) > 0 {
+			code, err := util.GenerateCode(int(emailSettings.GetResources()[0].GetSettings().GetMailchimp().GetNumberOfOtp()))
+			if err != nil {
+				h.handleResponse(c, http.InvalidArgument, cfg.InvalidOTPError)
+				return
+			}
+			body.Otp = code
+
+			body.DevEmail = emailSettings.GetResources()[0].GetSettings().GetMailchimp().GetFromEmail()
+			body.DevEmailPassword = emailSettings.GetResources()[0].GetSettings().GetMailchimp().GetApiKey()
+		}
 	}
 
 	if text == "" {

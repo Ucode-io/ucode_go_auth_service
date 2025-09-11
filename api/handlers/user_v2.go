@@ -488,7 +488,6 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		return
 	}
 
-	// req.EnvId = environmentId.(string)
 	req.CompanyId = project.CompanyId
 
 	res, err := h.services.UserService().AddUserToProject(
@@ -547,7 +546,9 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
+
+		clientTypeResponse := cast.ToStringMap(clientType.Data.AsMap()["response"])
+		if clientTypeTableSlug, ok := clientTypeResponse["table_slug"].(string); ok {
 			tableSlug = clientTypeTableSlug
 		}
 		_, err = services.GetObjectBuilderServiceByType(req.NodeType).Create(
@@ -575,7 +576,9 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 				ProjectId: resource.ResourceEnvironmentId,
 			},
 		)
-		if clientTypeTableSlug, ok := clientType.Data.AsMap()["table_slug"].(string); ok {
+
+		clientTypeResponse := cast.ToStringMap(clientType.Data.AsMap()["response"])
+		if clientTypeTableSlug, ok := clientTypeResponse["table_slug"].(string); ok {
 			tableSlug = clientTypeTableSlug
 		}
 
