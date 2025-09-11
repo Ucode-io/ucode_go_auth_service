@@ -96,6 +96,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		// user
 		v2.POST("/user", h.V2CreateUser)
+		v2.POST("/user/sync", h.SyncUser)
 		v2.GET("/user", h.V2GetUserList)
 		v2.GET("/user/:user-id", h.V2GetUserByID)
 		v2.PUT("/user", h.V2UpdateUser)

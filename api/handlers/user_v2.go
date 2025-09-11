@@ -668,3 +668,52 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, user)
 }
+
+func (h *Handler) SyncUser(c *gin.Context) {
+	var (
+		user auth_service.CreateSyncUserRequest
+		resp *auth_service.SyncUserResponse
+	)
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		h.handleError(c, http.BadRequest, err)
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleError(c, http.BadRequest, config.ErrEnvironmentIdValid)
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleError(c, http.BadRequest, config.ErrProjectIdValid)
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(), &pb.GetSingleServiceResourceReq{
+			EnvironmentId: environmentId.(string),
+			ProjectId:     projectId.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err)
+		return
+	}
+
+	user.ResourceEnvironmentId = resource.ResourceEnvironmentId
+	user.EnvironmentId = resource.EnvironmentId
+	user.ProjectId = resource.ProjectId
+
+	resp, err = h.services.SyncUserService().CreateUser(
+		c.Request.Context(), &user,
+	)
+	if err != nil {
+		h.handleError(c, http.InternalServerError, err)
+		return
+	}
+
+	h.handleResponse(c, http.Created, resp)
+}

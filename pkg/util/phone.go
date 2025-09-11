@@ -9,6 +9,6 @@ func IsValidPhone(phone string) bool {
 }
 
 func IsValidTin(tin string) bool {
-	r := regexp.MustCompile(`^[0-9]+$`)
+	r := regexp.MustCompile(`^[0-9]+$`) // only digits
 	return r.MatchString(tin)
 }
