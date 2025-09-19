@@ -96,6 +96,7 @@ var (
 	DEFAULT_OTPS = map[string]bool{
 		"1221":  true,
 		"78281": true,
+		"4231":  true,
 	}
 
 	HashTypes = map[string]int{

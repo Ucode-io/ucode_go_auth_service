@@ -304,7 +304,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	switch strings.ToLower(body.Provider) {
 	case "email", cfg.Default:
 		{
-			if c.Param("otp") != "121212" {
+			if !config.DEFAULT_OTPS[body.Otp] {
 				_, err := h.services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
