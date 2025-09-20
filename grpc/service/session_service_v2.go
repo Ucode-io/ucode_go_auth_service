@@ -1443,6 +1443,12 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 			s.log.Error("!!!MultiCompanyLogin Phone--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
+
+		if user.Id == "" {
+			err = config.ErrUserNotFound
+			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
+			return nil, err
+		}
 	case config.WithEmail:
 		if config.DefaultOtp != req.Otp {
 			_, err := s.services.SmsService().ConfirmOtp(ctx, &sms_service.ConfirmOtpRequest{
