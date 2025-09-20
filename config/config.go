@@ -139,7 +139,7 @@ func BaseLoad() BaseConfig {
 	config.GetRequestRedisHost = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
 	config.GetRequestRedisPort = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
 
-	config.FirebaseAPIKey = cast.ToString(getOrReturnDefaultValue("FIREBASE_API_KEY", "AIzaSyAI2P6BcpeVdkt7G_xRe3mYiQ4Ek0cU2pM"))
+	config.FirebaseAPIKey = cast.ToString(getOrReturnDefaultValue("FIREBASE_API_KEY", "AIzaSyAU7RhLUsuqoOpi4CO0rPMnV6qlpOz8VDs"))
 	config.FirebaseBaseUrl = cast.ToString(getOrReturnDefaultValue("FIREBASE_BASE_URL", "https://identitytoolkit.googleapis.com"))
 
 	config.EImzoBaseUrl = cast.ToString(getOrReturnDefaultValue("EIMZO_BASE_URL", "https://eimzo-integration.e-dokument.uz"))
