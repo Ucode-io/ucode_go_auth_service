@@ -5,8 +5,13 @@ include:
 
   - project: 'ucode/ops/ci-cd'
     ref: master
+    file: 'migrate/migrate-auth.gitlab-ci.yml'
+
+  - project: 'ucode/ops/ci-cd'
+    ref: master
     file: 'microservices/cd.gitlab-ci.yml'
 
 stages:
   - build
+  - migrate
   - deploy
