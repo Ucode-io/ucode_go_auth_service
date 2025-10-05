@@ -176,13 +176,13 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 			}
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
 				err = errors.New("invalid arguments google auth")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				s.log.Error("!!!V2LoginWithOption--->failed to verify google user info", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			email = cast.ToString(userInfo["email"])
 		} else {
 			err := errors.New("google token is required when login type is google auth")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			s.log.Error("!!!V2LoginWithOption--->no google token--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
