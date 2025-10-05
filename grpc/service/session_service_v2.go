@@ -170,8 +170,8 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		if req.GetGoogleToken() != "" {
 			userInfo, err := helper.DecodeGoogleIDToken(req.GetGoogleToken())
 			if err != nil {
+				s.log.Error("!!!V2LoginWithOption--->failed to decode google id token", logger.Error(err))
 				err = errors.New("invalid arguments google auth")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
