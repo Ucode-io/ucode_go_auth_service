@@ -622,8 +622,8 @@ pwd:
 		if gooleToken, ok := req.GetData()["google_token"]; ok {
 			userInfo, err := helper.GetGoogleUserInfo(gooleToken)
 			if err != nil {
+				s.log.Error("!!!V2LoginWithOption--->failed to get google user info---->", logger.Error(err))
 				err = errors.New("invalid arguments google auth")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
