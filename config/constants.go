@@ -38,12 +38,13 @@ const (
 	DELETE string = "delete"
 
 	// Login Strategy
-	WithGoogle string = "google"
-	Default    string = "default"
-	WithPhone  string = "phone"
-	WithApple  string = "apple"
-	WithEmail  string = "email"
-	WithLogin  string = "login"
+	WithGoogle   string = "google"
+	Default      string = "default"
+	WithPhone    string = "phone"
+	WithApple    string = "apple"
+	WithEmail    string = "email"
+	WithLogin    string = "login"
+	WithFirebase string = "firebase"
 
 	K8SNamespace string = "cp-region-type-id"
 	LanguageId   string = "e2d68f08-8587-4136-8cd4-c26bf1b9cda1"
