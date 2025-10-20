@@ -668,6 +668,10 @@ pwd:
 		}
 
 		tin := extractResp.SubjectCertificateInfo.SubjectName.TIN
+		tinValue := eimzo.ExtractFromX500(extractResp.SubjectCertificateInfo.X500Name, "1.2.860.3.16.1.1")
+		if tinValue != "" {
+			tin = tinValue
+		}
 
 		userIdRes, err := s.strg.User().GetByUsername(ctx, tin)
 		if err != nil {
