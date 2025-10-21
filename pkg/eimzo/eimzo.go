@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
@@ -65,4 +67,14 @@ func doRequest[T any](cfg config.BaseConfig, url, method string, payload []byte,
 	}
 
 	return &response, nil
+}
+
+func ExtractFromX500(x500name, key string) string {
+	pattern := fmt.Sprintf(`%s=([^,]+)`, regexp.QuoteMeta(key))
+	re := regexp.MustCompile(pattern)
+	matches := re.FindStringSubmatch(x500name)
+	if len(matches) > 1 {
+		return strings.TrimSpace(matches[1])
+	}
+	return ""
 }

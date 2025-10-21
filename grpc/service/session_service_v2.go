@@ -170,19 +170,19 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		if req.GetGoogleToken() != "" {
 			userInfo, err := helper.GetGoogleUserInfo(req.GetGoogleToken())
 			if err != nil {
+				s.log.Error("!!!V2LoginWithOption--->failed to decode google id token", logger.Error(err))
 				err = errors.New("invalid arguments google auth")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
 				err = errors.New("invalid arguments google auth")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+				s.log.Error("!!!V2LoginWithOption--->failed to verify google user info", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			email = cast.ToString(userInfo["email"])
 		} else {
 			err := errors.New("google token is required when login type is google auth")
-			s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
+			s.log.Error("!!!V2LoginWithOption--->no google token--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
@@ -622,8 +622,8 @@ pwd:
 		if gooleToken, ok := req.GetData()["google_token"]; ok {
 			userInfo, err := helper.GetGoogleUserInfo(gooleToken)
 			if err != nil {
+				s.log.Error("!!!V2LoginWithOption--->failed to get google user info---->", logger.Error(err))
 				err = errors.New("invalid arguments google auth")
-				s.log.Error("!!!V2LoginWithOption--->", logger.Error(err))
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
@@ -668,6 +668,10 @@ pwd:
 		}
 
 		tin := extractResp.SubjectCertificateInfo.SubjectName.TIN
+		tinValue := eimzo.ExtractFromX500(extractResp.SubjectCertificateInfo.X500Name, "1.2.860.3.16.1.1")
+		if tinValue != "" {
+			tin = tinValue
+		}
 
 		userIdRes, err := s.strg.User().GetByUsername(ctx, tin)
 		if err != nil {
