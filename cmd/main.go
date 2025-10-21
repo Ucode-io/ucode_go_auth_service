@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"ucode/ucode_go_auth_service/api"
@@ -14,11 +15,12 @@ import (
 	"ucode/ucode_go_auth_service/storage/postgres"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golanguzb70/ratelimiter"
 	"github.com/opentracing/opentracing-go"
+	"github.com/redis/go-redis/v9"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/uber/jaeger-client-go"
 	jaeger_config "github.com/uber/jaeger-client-go/config"
+	"github.com/ucode-io/ratelimiter"
 )
 
 func main() {
@@ -66,11 +68,18 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", baseCfg.GetRequestRedisHost, baseCfg.GetRequestRedisPort),
+		DB:       baseCfg.GetRequestRedisDatabase,
+		Password: baseCfg.GetRequestRedisPassword,
+	})
+
+	fmt.Println("asdfasfadf", redisClient)
+
 	cfg := &ratelimiter.Config{
-		RedisHost:    baseCfg.GetRequestRedisHost,
-		RedisPort:    baseCfg.GetRequestRedisPort,
 		JwtSignInKey: "jwt_sign_in_key",
 		LeakyBuckets: config.RateLimitCfg,
+		RedisClient:  redisClient,
 	}
 
 	limiter, err := ratelimiter.NewRateLimiter(cfg)
@@ -124,7 +133,7 @@ func main() {
 	mapProjectConfs[baseCfg.UcodeNamespace] = uConf
 	projectServiceNodes.SetConfigs(mapProjectConfs)
 
-	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes)
+	grpcServer := grpc.SetUpServer(baseCfg, log, pgStore, baseSvcs, projectServiceNodes, redisClient)
 	go func() {
 		_ = cronjob.New(uConf, log, pgStore).RunJobs(context.Background())
 	}()

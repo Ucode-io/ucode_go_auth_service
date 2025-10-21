@@ -9,12 +9,13 @@ import (
 
 	otgrpc "github.com/opentracing-contrib/go-grpc"
 	"github.com/opentracing/opentracing-go"
+	"github.com/redis/go-redis/v9"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-func SetUpServer(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes service.ServiceNodesI) (grpcServer *grpc.Server) {
+func SetUpServer(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes service.ServiceNodesI, redisClient *redis.Client) (grpcServer *grpc.Server) {
 	grpcServer = grpc.NewServer(
 		grpc.UnaryInterceptor(otgrpc.OpenTracingServerInterceptor(opentracing.GlobalTracer())),
 		grpc.StreamInterceptor(otgrpc.OpenTracingStreamServerInterceptor(opentracing.GlobalTracer())),
@@ -23,7 +24,7 @@ func SetUpServer(cfg config.BaseConfig, log logger.LoggerI, strg storage.Storage
 	auth_service.RegisterClientServiceServer(grpcServer, service.NewClientService(cfg, log, strg, svcs, projectServiceNodes))
 	auth_service.RegisterPermissionServiceServer(grpcServer, service.NewPermissionService(cfg, log, strg, svcs, projectServiceNodes))
 	auth_service.RegisterUserServiceServer(grpcServer, service.NewUserService(cfg, log, strg, svcs, projectServiceNodes))
-	auth_service.RegisterSessionServiceServer(grpcServer, service.NewSessionService(cfg, log, strg, svcs, projectServiceNodes))
+	auth_service.RegisterSessionServiceServer(grpcServer, service.NewSessionService(cfg, log, strg, svcs, projectServiceNodes, redisClient))
 	auth_service.RegisterCompanyServiceServer(grpcServer, service.NewCompanyService(cfg, log, strg, svcs, projectServiceNodes))
 	auth_service.RegisterProjectServiceServer(grpcServer, service.NewProjectService(cfg, log, strg, svcs, projectServiceNodes))
 	auth_service.RegisterApiKeysServer(grpcServer, service.NewApiKeysService(cfg, log, strg, svcs, projectServiceNodes))

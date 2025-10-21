@@ -80,8 +80,10 @@ type BaseConfig struct {
 
 	JaegerHostPort string
 
-	GetRequestRedisHost string
-	GetRequestRedisPort string
+	GetRequestRedisHost     string
+	GetRequestRedisPort     string
+	GetRequestRedisDatabase int
+	GetRequestRedisPassword string
 
 	FirebaseAPIKey  string
 	FirebaseBaseUrl string
@@ -136,8 +138,10 @@ func BaseLoad() BaseConfig {
 
 	config.JaegerHostPort = cast.ToString(getOrReturnDefaultValue("JAEGER_URL", ""))
 
-	config.GetRequestRedisHost = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", ""))
-	config.GetRequestRedisPort = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", ""))
+	config.GetRequestRedisHost = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_HOST", "localhost"))
+	config.GetRequestRedisPort = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_PORT", "6379"))
+	config.GetRequestRedisDatabase = cast.ToInt(getOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
+	config.GetRequestRedisPassword = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", ""))
 
 	config.FirebaseAPIKey = cast.ToString(getOrReturnDefaultValue("FIREBASE_API_KEY", "AIzaSyAU7RhLUsuqoOpi4CO0rPMnV6qlpOz8VDs"))
 	config.FirebaseBaseUrl = cast.ToString(getOrReturnDefaultValue("FIREBASE_BASE_URL", "https://identitytoolkit.googleapis.com"))

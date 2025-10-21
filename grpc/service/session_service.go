@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"runtime"
 
 	"time"
@@ -17,6 +18,7 @@ import (
 	"ucode/ucode_go_auth_service/pkg/security"
 	"ucode/ucode_go_auth_service/storage"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/saidamir98/udevs_pkg/logger"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
@@ -30,15 +32,17 @@ type sessionService struct {
 	strg        storage.StorageI
 	services    client.ServiceManagerI
 	serviceNode ServiceNodesI
+	redisClient *redis.Client
 	pb.UnimplementedSessionServiceServer
 }
 
-func NewSessionService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI) *sessionService {
+func NewSessionService(cfg config.BaseConfig, log logger.LoggerI, strg storage.StorageI, svcs client.ServiceManagerI, projectServiceNodes ServiceNodesI, redisClient *redis.Client) *sessionService {
 	return &sessionService{
 		cfg:         cfg,
 		log:         log,
 		strg:        strg,
 		services:    svcs,
+		redisClient: redisClient,
 		serviceNode: projectServiceNodes,
 	}
 }
@@ -655,4 +659,103 @@ func (s *sessionService) V2MultiCompanyLogin(ctx context.Context, req *pb.V2Mult
 	resp.UserId = user.Id
 
 	return &resp, nil
+}
+
+func (s *sessionService) HasAccessUser(ctx context.Context, req *pb.V2HasAccessUserReq) (*pb.V2HasAccessUserRes, error) {
+	var (
+		exist bool
+	)
+
+	tokenInfo, err := security.ParseClaims(req.AccessToken, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!V2HasAccessUser->ParseClaims--->", logger.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	// Build cache key based on session ID and optional environment context
+	cacheKey := fmt.Sprintf("has_access_user:%s", tokenInfo.ID)
+
+	// Try to fetch from cache first
+	if cachedStr, cacheErr := s.redisClient.Get(ctx, cacheKey).Result(); cacheErr == nil && cachedStr != "" {
+		fmt.Println("GETTING FROM REDIS")
+		var cachedRes pb.V2HasAccessUserRes
+		if unmarshalErr := json.Unmarshal([]byte(cachedStr), &cachedRes); unmarshalErr == nil {
+			return &cachedRes, nil
+		}
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!V2HasAccessUser->GetByPK--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
+	if err != nil {
+		s.log.Error("!!!V2HasAccessUser->TimeParse--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if expiresAt.Unix() < time.Now().Unix() {
+		err := errors.New("session has been expired")
+		s.log.Error("!!!V2HasAccessUser->CheckExpiredToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
+		UserId: session.GetUserIdAuth(),
+	})
+	if err != nil {
+		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
+		return nil, err
+	}
+	for _, item := range projects.GetUserProjects() {
+		if item.ProjectId == session.GetProjectId() {
+			exist = true
+			break
+		}
+	}
+	if !exist {
+		err = errors.New("user not access project")
+		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if req.EnvironmentId != "" {
+		exist = false
+		for _, item := range projects.GetUserProjects() {
+			if item.EnvId == req.EnvironmentId {
+				exist = true
+				break
+			}
+		}
+
+		if !exist {
+			err = errors.New("user not access environment")
+			s.log.Error("---V2HasAccessUser--->AccessNotEnvironment--->", logger.Error(err))
+			return nil, status.Error(codes.Unavailable, err.Error())
+		}
+	}
+
+	// Build response
+	res := &pb.V2HasAccessUserRes{
+		Id:               session.Id,
+		EnvId:            session.EnvId,
+		UserId:           session.UserId,
+		RoleId:           session.RoleId,
+		ProjectId:        session.ProjectId,
+		ExpiresAt:        session.ExpiresAt,
+		CreatedAt:        session.CreatedAt,
+		UpdatedAt:        session.UpdatedAt,
+		UserIdAuth:       session.UserIdAuth,
+		ClientTypeId:     session.ClientTypeId,
+		ClientPlatformId: session.ClientPlatformId,
+	}
+
+	// Store in cache
+	if bytes, marshalErr := json.Marshal(res); marshalErr == nil {
+		_ = s.redisClient.Set(ctx, cacheKey, bytes, config.REDIS_EXPIRY_TIME).Err()
+	}
+
+	return res, nil
 }

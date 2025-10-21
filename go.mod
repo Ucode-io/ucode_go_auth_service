@@ -6,7 +6,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang/protobuf v1.5.4
-	github.com/golanguzb70/ratelimiter v1.1.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgtype v1.14.3
 	github.com/jackc/pgx/v5 v5.6.0
@@ -18,6 +17,7 @@ require (
 	github.com/opentracing-contrib/go-grpc v0.0.0-20240724223109-9dec25a38fa8
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
 	github.com/spf13/cast v1.5.0
@@ -25,6 +25,7 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.8.9
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	github.com/ucode-io/ratelimiter v1.0.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.26.0
 	google.golang.org/grpc v1.65.0
@@ -44,7 +45,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	golang.org/x/arch v0.3.0 // indirect

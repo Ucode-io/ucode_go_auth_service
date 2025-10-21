@@ -6,11 +6,11 @@ import (
 	"ucode/ucode_go_auth_service/config"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golanguzb70/ratelimiter"
 	"github.com/opentracing-contrib/go-gin/ginhttp"
 	"github.com/opentracing/opentracing-go"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"github.com/ucode-io/ratelimiter"
 )
 
 // SetUpRouter godoc
