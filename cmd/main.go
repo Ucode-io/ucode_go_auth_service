@@ -74,8 +74,6 @@ func main() {
 		Password: baseCfg.GetRequestRedisPassword,
 	})
 
-	fmt.Println("asdfasfadf", redisClient)
-
 	cfg := &ratelimiter.Config{
 		JwtSignInKey: "jwt_sign_in_key",
 		LeakyBuckets: config.RateLimitCfg,

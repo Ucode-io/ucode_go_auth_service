@@ -677,7 +677,6 @@ func (s *sessionService) HasAccessUser(ctx context.Context, req *pb.V2HasAccessU
 
 	// Try to fetch from cache first
 	if cachedStr, cacheErr := s.redisClient.Get(ctx, cacheKey).Result(); cacheErr == nil && cachedStr != "" {
-		fmt.Println("GETTING FROM REDIS")
 		var cachedRes pb.V2HasAccessUserRes
 		if unmarshalErr := json.Unmarshal([]byte(cachedStr), &cachedRes); unmarshalErr == nil {
 			return &cachedRes, nil
