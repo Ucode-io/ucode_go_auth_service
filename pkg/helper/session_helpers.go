@@ -112,6 +112,7 @@ func ConvertPbToAnotherPb(data *pbObject.V2LoginResponse) *pb.V2LoginResponse {
 			GitbookButton:         data.GetGlobalPermission().GetGitbookButton(),
 			ChatwootButton:        data.GetGlobalPermission().GetChatwootButton(),
 			GptButton:             data.GetGlobalPermission().GetGptButton(),
+			Billing:               data.GetGlobalPermission().GetBilling(),
 		},
 	}
 
