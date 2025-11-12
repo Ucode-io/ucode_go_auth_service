@@ -1436,7 +1436,6 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 	s.log.Info("GetProjectsByUserId", logger.Any("req", req))
 
 	var (
-		before           runtime.MemStats
 		user             = &pb.User{}
 		unHashedPassword = req.GetPassword()
 		userIdAuth       string
@@ -1445,115 +1444,118 @@ func (s *userService) V2ResetPassword(ctx context.Context, req *pb.V2UserResetPa
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "grpc_userv2.V2ResetPassword")
 	defer dbSpan.Finish()
 
-	runtime.ReadMemStats(&before)
-
-	defer func() {
-		var after runtime.MemStats
-		runtime.ReadMemStats(&after)
-		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
-		s.log.Info("Memory used by the V2ResetPassword", logger.Any("memoryUsed", memoryUsed))
-		if memoryUsed > 300 {
-			s.log.Info("Memory used over 300 mb", logger.Any("V2ResetPassword", memoryUsed))
-		}
-	}()
-
-	if len(req.GetPassword()) > 6 {
-		services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
-		if err != nil {
-			s.log.Error("!!!V2UserResetPassword--->GetByNodeType", logger.Error(err))
-			return nil, err
-		}
-
-		if req.GetClientTypeId() != "" && req.GetEnvironmentId() != "" && req.GetProjectId() != "" {
-			resource, err := s.services.ServiceResource().GetSingle(ctx, &pbc.GetSingleServiceResourceReq{
-				ProjectId:     req.GetProjectId(),
-				EnvironmentId: req.GetEnvironmentId(),
-				ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
-			})
-			if err != nil {
-				err = errors.New("password updated in auth but not found resource in this project")
-				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
-				return nil, err
-			}
-			switch resource.ResourceType {
-			case 1:
-				updateUserResp, err := services.GetLoginServiceByType(resource.NodeType).UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
-					Guid:                  req.UserId,
-					ResourceEnvironmentId: resource.ResourceEnvironmentId,
-					Password:              unHashedPassword,
-					ClientTypeId:          req.ClientTypeId,
-				})
-				if err != nil {
-					err = config.ErrFailedUpdate
-					s.log.Error("!!!V2UserResetPassword.GetLoginServiceByUpdateUserPassword--->", logger.Error(err))
-					return nil, err
-				}
-
-				userIdAuth = updateUserResp.GetUserIdAuth()
-			}
-
-			user, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
-				Id: userIdAuth,
-			})
-			if err != nil {
-				s.log.Error("!!!V2UserResetPassword-->UserGetByPK", logger.Error(err))
-				return nil, err
-			}
-
-			hashType := user.GetHashType()
-			switch config.HashTypes[hashType] {
-			case 1:
-				match, err := security.ComparePassword(user.GetPassword(), req.OldPassword)
-				if err != nil {
-					s.log.Error("!!!V2UserResetPassword-->ComparePasswordArgon", logger.Error(err))
-					return nil, err
-				}
-				if !match {
-					err := errors.New("wrong old password")
-					s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
-					return nil, err
-				}
-			case 2:
-				match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.OldPassword)
-				if err != nil {
-					s.log.Error("!!!V2UserResetPassword-->ComparePasswordBcrypt", logger.Error(err))
-					return nil, err
-				}
-				if !match {
-					err := errors.New("wrong old password")
-					s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
-					return nil, err
-				}
-			default:
-				err := errors.New("hash type not found")
-				s.log.Error("!!!V2ResetPassword--->", logger.Error(err))
-				return nil, err
-			}
-
-			hashedPassword, err := security.HashPasswordBcrypt(req.Password)
-			if err != nil {
-				s.log.Error("!!!V2UserResetPassword--->HashPasswordBcrypt", logger.Error(err))
-				return nil, err
-			}
-			req.Password = hashedPassword
-			rowsAffected, err := s.strg.User().V2ResetPassword(ctx, &pb.V2ResetPasswordRequest{
-				UserId:   userIdAuth,
-				Password: req.Password,
-			})
-			if err != nil {
-				s.log.Error("!!!V2UserResetPassword--->V2ResetPassword", logger.Error(err))
-				return nil, err
-			}
-			if rowsAffected <= 0 {
-				return nil, status.Error(codes.InvalidArgument, "no rows were affected")
-			}
-			user.Password = hashedPassword
-		}
-	} else {
+	if len(req.GetOldPassword()) < 6 {
 		err := config.ErrPasswordLength
 		s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
 		return nil, err
 	}
+
+	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
+	if err != nil {
+		s.log.Error("!!!V2UserResetPassword--->GetByNodeType", logger.Error(err))
+		return nil, err
+	}
+
+	if req.GetClientTypeId() != "" {
+		resource, err := s.services.ServiceResource().GetSingle(ctx, &pbc.GetSingleServiceResourceReq{
+			ProjectId:     req.GetProjectId(),
+			EnvironmentId: req.GetEnvironmentId(),
+			ServiceType:   pbc.ServiceType_BUILDER_SERVICE,
+		})
+		if err != nil {
+			err = errors.New("password updated in auth but not found resource in this project")
+			s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+			return nil, err
+		}
+		switch req.ResourceType {
+		case 1:
+			updateUserResp, err := services.GetLoginServiceByType(resource.NodeType).UpdateUserPassword(ctx, &pbObject.UpdateUserPasswordRequest{
+				Guid:                  req.UserId,
+				ResourceEnvironmentId: resource.ResourceEnvironmentId,
+				Password:              unHashedPassword,
+				ClientTypeId:          req.ClientTypeId,
+			})
+			if err != nil {
+				err = config.ErrFailedUpdate
+				s.log.Error("!!!V2UserResetPassword.GetLoginServiceByUpdateUserPassword--->", logger.Error(err))
+				return nil, err
+			}
+
+			userIdAuth = updateUserResp.GetUserIdAuth()
+		case 3:
+			updateUserResp, err := services.GoLoginService().UpdateUserPassword(ctx, &nb.UpdateUserPasswordRequest{
+				Guid:                  req.UserId,
+				ResourceEnvironmentId: resource.ResourceEnvironmentId,
+				Password:              unHashedPassword,
+				ClientTypeId:          req.ClientTypeId,
+			})
+			if err != nil {
+				err = config.ErrFailedUpdate
+				s.log.Error("!!!V2UserResetPassword.GoLoginService.UpdateUserPassword--->", logger.Error(err))
+				return nil, err
+			}
+			userIdAuth = updateUserResp.GetUserIdAuth()
+		}
+
+		user, err = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+			Id: userIdAuth,
+		})
+		if err != nil {
+			s.log.Error("!!!V2UserResetPassword-->UserGetByPK", logger.Error(err))
+			return nil, err
+		}
+
+		hashType := user.GetHashType()
+		switch config.HashTypes[hashType] {
+		case 1:
+			match, err := security.ComparePassword(user.GetPassword(), req.OldPassword)
+			if err != nil {
+				s.log.Error("!!!V2UserResetPassword-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("wrong old password")
+				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+				return nil, err
+			}
+		case 2:
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.OldPassword)
+			if err != nil {
+				s.log.Error("!!!V2UserResetPassword-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("wrong old password")
+				s.log.Error("!!!V2UserResetPassword--->", logger.Error(err))
+				return nil, err
+			}
+		default:
+			err := errors.New("hash type not found")
+			s.log.Error("!!!V2ResetPassword--->", logger.Error(err))
+			return nil, err
+		}
+
+		hashedPassword, err := security.HashPasswordBcrypt(req.Password)
+		if err != nil {
+			s.log.Error("!!!V2UserResetPassword--->HashPasswordBcrypt", logger.Error(err))
+			return nil, err
+		}
+
+		req.Password = hashedPassword
+		rowsAffected, err := s.strg.User().V2ResetPassword(ctx, &pb.V2ResetPasswordRequest{
+			UserId:   userIdAuth,
+			Password: req.Password,
+		})
+		if err != nil {
+			s.log.Error("!!!V2UserResetPassword--->V2ResetPassword", logger.Error(err))
+			return nil, err
+		}
+		if rowsAffected <= 0 {
+			return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+		}
+		user.Password = hashedPassword
+	}
+
 	return user, nil
 }
 

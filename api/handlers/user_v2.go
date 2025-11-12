@@ -7,6 +7,7 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
+	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
 	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
@@ -659,6 +660,37 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err)
 		return
 	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(projectId.(string)) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(environmentId.(string)) {
+		h.handleResponse(c, http.BadRequest, errors.New("cant get environment_id"))
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(
+		c.Request.Context(),
+		&pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     projectId.(string),
+			EnvironmentId: environmentId.(string),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	userPassword.EnvironmentId = environmentId.(string)
+	userPassword.ProjectId = projectId.(string)
+	userPassword.NodeType = resource.NodeType
+	userPassword.ResourceEnvironmentId = resource.ResourceEnvironmentId
+	userPassword.ResourceType = int32(resource.GetResourceType())
 
 	user, err := h.services.UserService().V2ResetPassword(c.Request.Context(), userPassword)
 	if err != nil {
