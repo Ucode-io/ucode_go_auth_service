@@ -114,7 +114,7 @@ func BaseLoad() BaseConfig {
 	config.HTTPPort = cast.ToString(getOrReturnDefaultValue("HTTP_PORT", ""))
 	config.HTTPScheme = cast.ToString(getOrReturnDefaultValue("HTTP_SCHEME", ""))
 	config.Email = cast.ToString(getOrReturnDefaultValue("EMAIL", "asadbekbakhodirov2@gmail.com"))
-	config.EmailPassword = cast.ToString(getOrReturnDefaultValue("EMAIL_PASSWORD", "nmpfnhvxecxrzrlh"))
+	config.EmailPassword = cast.ToString(getOrReturnDefaultValue("EMAIL_PASSWORD", ""))
 
 	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", ""))
 	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 0))
@@ -143,13 +143,13 @@ func BaseLoad() BaseConfig {
 	config.GetRequestRedisDatabase = cast.ToInt(getOrReturnDefaultValue("GET_REQUEST_REDIS_DATABASE", 0))
 	config.GetRequestRedisPassword = cast.ToString(getOrReturnDefaultValue("GET_REQUEST_REDIS_PASSWORD", ""))
 
-	config.FirebaseAPIKey = cast.ToString(getOrReturnDefaultValue("FIREBASE_API_KEY", "AIzaSyAU7RhLUsuqoOpi4CO0rPMnV6qlpOz8VDs"))
-	config.FirebaseBaseUrl = cast.ToString(getOrReturnDefaultValue("FIREBASE_BASE_URL", "https://identitytoolkit.googleapis.com"))
+	config.FirebaseAPIKey = cast.ToString(getOrReturnDefaultValue("FIREBASE_API_KEY", ""))
+	config.FirebaseBaseUrl = cast.ToString(getOrReturnDefaultValue("FIREBASE_BASE_URL", ""))
 
-	config.EImzoBaseUrl = cast.ToString(getOrReturnDefaultValue("EIMZO_BASE_URL", "https://eimzo-integration.e-dokument.uz"))
-	config.EImzoHost = cast.ToString(getOrReturnDefaultValue("EIMZO_BASE_URL", "eimzo-integration.e-dokument.uz"))
-	config.EImzoUsername = cast.ToString(getOrReturnDefaultValue("EIMZO_USERNAME", "eimzo-user"))
-	config.EImzoPassword = cast.ToString(getOrReturnDefaultValue("EIMZO_PASSWORD", "iwRMCfj3DwreqSR4WRAzO1y5UflAZrDQ"))
+	config.EImzoBaseUrl = cast.ToString(getOrReturnDefaultValue("EIMZO_BASE_URL", ""))
+	config.EImzoHost = cast.ToString(getOrReturnDefaultValue("EIMZO_HOST", ""))
+	config.EImzoUsername = cast.ToString(getOrReturnDefaultValue("EIMZO_USERNAME", ""))
+	config.EImzoPassword = cast.ToString(getOrReturnDefaultValue("EIMZO_PASSWORD", ""))
 
 	return config
 }
