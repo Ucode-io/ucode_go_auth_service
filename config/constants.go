@@ -16,9 +16,6 @@ const (
 
 	REDIS_EXPIRY_TIME time.Duration = 3 * time.Minute
 
-	// AccessTokenExpiresInTime  time.Duration = 2 * time.Minute
-	// RefreshTokenExpiresInTime time.Duration = 4 * time.Minute
-
 	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	AdminClientName       string = "ADMIN"
@@ -75,10 +72,8 @@ const (
 
 	// Commit Types
 	COMMIT_TYPE_TABLE string = "TABLE"
-
-	SMS_TEXT = "Code"
-
-	EMAIL_REGEX string = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+	SMS_TEXT          string = "Code"
+	EMAIL_REGEX       string = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 )
 
 var (
@@ -114,8 +109,6 @@ var (
 		"items":        true,
 		"many-to-many": false,
 	}
-
-	ITEMS string = "items"
 
 	RateLimitCfg = []*ratelimiter.LeakyBucket{
 		{
