@@ -1253,6 +1253,10 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		}
 	}
 
+	if config.SystemTableSlugs[tableSlug] {
+		checkPermission = false
+	}
+
 	if checkPermission {
 		resource, err := s.services.ServiceResource().GetSingle(ctx,
 			&pbCompany.GetSingleServiceResourceReq{
