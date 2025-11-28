@@ -123,4 +123,8 @@ var (
 			NotAllowCode:   "TOO_MANY_REQUESTS",
 		},
 	}
+
+	SystemTableSlugs = map[string]bool{
+		"connections": true,
+	}
 )
