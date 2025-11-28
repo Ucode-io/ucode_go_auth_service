@@ -38,14 +38,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			projectId     = c.Query("project-id")
 		)
 
-		if len(bearerToken) == 0 {
-			c.Set("resource_id", resourceId)
-			c.Set("environment_id", environmentId)
-			c.Set("project_id", projectId)
-			c.Next()
-			return
-		}
-
 		strArr := strings.Split(bearerToken, " ")
 		if len(strArr) < 1 && (strArr[0] != "Bearer" && strArr[0] != "API-KEY") {
 			_ = c.AbortWithError(nethttp.StatusForbidden, errors.New("token error: wrong format"))
