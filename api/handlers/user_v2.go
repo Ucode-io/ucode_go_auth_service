@@ -7,8 +7,6 @@ import (
 	"ucode/ucode_go_auth_service/config"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
-	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
-	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -471,7 +469,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 
 	project, err := h.services.ProjectServiceClient().GetById(
 		c.Request.Context(),
-		&pbc.GetProjectByIdRequest{ProjectId: req.ProjectId},
+		&pb.GetProjectByIdRequest{ProjectId: req.ProjectId},
 	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -675,10 +673,10 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 
 	resource, err := h.services.ServiceResource().GetSingle(
 		c.Request.Context(),
-		&pbCompany.GetSingleServiceResourceReq{
+		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
-			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {

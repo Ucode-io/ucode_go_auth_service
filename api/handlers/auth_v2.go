@@ -7,7 +7,6 @@ import (
 
 	status "ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
-	"ucode/ucode_go_auth_service/config"
 	cfg "ucode/ucode_go_auth_service/config"
 	pba "ucode/ucode_go_auth_service/genproto/auth_service"
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
@@ -305,7 +304,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	switch strings.ToLower(body.Provider) {
 	case "email", cfg.Default:
 		{
-			if !config.DEFAULT_OTPS[body.Otp] {
+			if !cfg.DEFAULT_OTPS[body.Otp] {
 				_, err := h.services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
@@ -321,7 +320,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		}
 	case cfg.WithPhone:
 		{
-			if !config.DEFAULT_OTPS[body.Otp] {
+			if !cfg.DEFAULT_OTPS[body.Otp] {
 				_, err := services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
@@ -337,7 +336,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		}
 	case cfg.WithFirebase:
 		{
-			if !config.DEFAULT_OTPS[body.Otp] {
+			if !cfg.DEFAULT_OTPS[body.Otp] {
 				err := firebase.VerifyPhoneCode(h.cfg, body.SessionInfo, body.Otp)
 				if err != nil {
 					h.handleResponse(c, status.GRPCError, err.Error())
