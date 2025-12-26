@@ -44,7 +44,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	}
 
 	v2.Use(h.AuthMiddleware())
-	{
+	{ 
 		// register
 		v2.POST("/register", h.V2Register)
 
