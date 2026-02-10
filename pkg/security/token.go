@@ -65,6 +65,7 @@ type TokenInfo struct {
 	ID             string
 	Tables         []Table
 	LoginTableSlug string
+	UserId         string
 	RoleID         string
 	ProjectID      string
 	ClientID       string
@@ -85,6 +86,7 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 	}
 	result.ID, ok = claims["id"].(string)
 	result.RoleID = claims["role_id"].(string)
+	result.UserId = claims["user_id"].(string)
 	if !ok {
 		err = errors.New("cannot parse 'id' field")
 		return result, err

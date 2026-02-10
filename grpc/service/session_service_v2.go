@@ -1193,6 +1193,16 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	// User activity
+	go func() {
+		var userActivityReq = &nb.UserActivityReqeust{
+			LoginTable: tokenInfo.LoginTableSlug,
+			UserId:     tokenInfo.UserId,
+		}
+
+		s.UserActivity(session, userActivityReq)
+	}()
+
 	switch req.Method {
 	case http.MethodGet:
 		methodField = config.READ
