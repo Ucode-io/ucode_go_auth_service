@@ -430,6 +430,51 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
+// @Security ApiKeyAuth
+// V2DeleteFromAuthTable godoc
+// @ID delete_user_v2
+// @Param Resource-Id header string false "Resource-Id"
+// @Param Environment-Id header string true "Environment-Id"
+// @Router /v2/auth-table/{user-id} [DELETE]
+// @Summary Delete From Auth service
+// @Description Delete from auth table
+// @Tags V2_User
+// @Accept json
+// @Produce json
+// @Param user-id path string true "user-id"
+// @Param project-id query string true "project-id"
+// @Param client-type-id query string true "client-type-id"
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
+func (h *Handler) V2DeleteFromAuthTable(c *gin.Context) {
+	var (
+		userID       = c.Param("user-id")
+		clientTypeID = c.Query("client-type-id")
+	)
+
+	if !util.IsValidUUID(userID) {
+		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+		return
+	}
+
+	if !util.IsValidUUID(clientTypeID) {
+		h.handleResponse(c, http.InvalidArgument, "client type id is an invalid uuid")
+		return
+	}
+
+	_, err := h.services.SyncUserService().DeleteUser(c.Request.Context(), &auth_service.DeleteSyncUserRequest{
+		UserId:       userID,
+		ClientTypeId: clientTypeID,
+	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.NoContent, nil)
+}
+
 // AddUserToProject godoc
 // @ID add user to project
 // @Param Resource-Id header string false "Resource-Id"

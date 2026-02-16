@@ -101,6 +101,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 		v2.GET("/user/:user-id", h.V2GetUserByID)
 		v2.PUT("/user", h.V2UpdateUser)
 		v2.DELETE("/user/:user-id", h.V2DeleteUser)
+		v2.DELETE("/auth-table/:user-id", h.V2DeleteFromAuthTable)
 		v2.PUT("/user/reset-password", h.V2UserResetPassword)
 		v2.POST("/user/invite", h.AddUserToProject)
 		v2.POST("/user/check", h.V2GetUserByLoginType)
