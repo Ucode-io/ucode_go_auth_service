@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
+	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 
 	"time"
 	"ucode/ucode_go_auth_service/config"
@@ -308,6 +309,16 @@ func (s *sessionService) HasAccessSuperAdmin(ctx context.Context, req *pb.HasAcc
 		s.log.Error("!!!HasAccess user--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	// User activity
+	go func() {
+		var userActivityReq = &nb.UserActivityReqeust{
+			LoginTable: tokenInfo.LoginTableSlug,
+			UserId:     tokenInfo.UserId,
+		}
+
+		s.UserActivity(session, userActivityReq)
+	}()
 
 	var authTables []*pb.TableBody
 	for _, table := range tokenInfo.Tables {
@@ -757,4 +768,38 @@ func (s *sessionService) HasAccessUser(ctx context.Context, req *pb.V2HasAccessU
 	}
 
 	return res, nil
+}
+
+// User activity
+func (s *sessionService) UserActivity(session *pb.Session, req *nb.UserActivityReqeust) {
+	var ctx = context.Background()
+
+	resource, err := s.services.ServiceResource().GetSingle(ctx,
+		&pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     session.ProjectId,
+			EnvironmentId: session.EnvId,
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!UserActivity->GetSingleServiceResource--->", logger.Error(err))
+		return
+	}
+
+	if resource.ResourceType != pbCompany.ResourceType_POSTGRESQL {
+		s.log.Info("!!!UserActivity->UserActivity not implemented for this resource type --->", logger.Error(err))
+		return
+	}
+
+	services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
+	if err != nil {
+		return
+	}
+
+	req.ResourceEnvId = resource.ResourceEnvironmentId
+	_, err = services.GoObjectBuilderService().UserActivity(ctx, req)
+	if err != nil {
+		s.log.Error("!!!UserActivity->UserActivity--->", logger.Error(err))
+		return
+	}
 }
