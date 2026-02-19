@@ -4,12 +4,16 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 	"ucode/ucode_go_auth_service/api/http"
 	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/config"
 	pba "ucode/ucode_go_auth_service/genproto/auth_service"
 	pb "ucode/ucode_go_auth_service/genproto/company_service"
+	pbCompany "ucode/ucode_go_auth_service/genproto/company_service"
+	nobs "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
+	obs "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 	"ucode/ucode_go_auth_service/pkg/util"
 
@@ -17,6 +21,251 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
 )
+
+func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
+	var (
+		login  pba.UserDefaultProjectReq
+		limit  = 100
+		offset = 0
+
+		ctx = c.Request.Context()
+	)
+
+	if err := c.ShouldBindJSON(&login); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if login.Type == "" {
+		login.Type = config.Default
+	}
+
+	switch login.Type {
+	case config.Default:
+		if login.Username == "" || login.Password == "" {
+			h.handleResponse(c, http.BadRequest, "username and password are required")
+			return
+		}
+	case config.WithPhone:
+		if login.Phone == "" || login.Otp == "" {
+			h.handleResponse(c, http.BadRequest, "phone and otp are required")
+			return
+		}
+		if login.ServiceType == "firebase" && login.SessionInfo == "" {
+			h.handleResponse(c, http.BadRequest, "session info is required for firebase")
+			return
+		} else if login.ServiceType != "firebase" && login.SmsId == "" {
+			h.handleResponse(c, http.BadRequest, "SmsId is required")
+			return
+		}
+	case config.WithEmail:
+		if login.Email == "" || login.Otp == "" || login.SmsId == "" {
+			h.handleResponse(c, http.BadRequest, "email, otp, and SmsId are required")
+			return
+		}
+	case config.WithGoogle:
+		if login.GoogleToken == "" {
+			h.handleResponse(c, http.BadRequest, "google token is required")
+			return
+		}
+	}
+
+	userProject, err := h.services.SessionService().UserDefaultProject(ctx, &login)
+	if err != nil {
+		h.handleError(c, http.BadRequest, err)
+		return
+	}
+
+	resource, err := h.services.ServiceResource().GetSingle(ctx, &pbCompany.GetSingleServiceResourceReq{
+		ProjectId:     userProject.GetProjectId(),
+		EnvironmentId: userProject.GetEnvironmentId(),
+		ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+	})
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	services, err := h.GetProjectSrvc(c, userProject.GetProjectId(), resource.NodeType)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	var rawResponse []any
+
+	switch resource.ResourceType {
+	case 1:
+		structData, _ := helper.ConvertMapToStruct(map[string]any{
+			"limit":          limit,
+			"offset":         offset,
+			"client_type_id": userProject.GetClientTypeId(),
+		})
+
+		resp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetList(ctx, &obs.CommonMessage{
+			TableSlug: "connections",
+			ProjectId: resource.ResourceEnvironmentId,
+			Data:      structData,
+		})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+
+		rawResponse, _ = resp.Data.AsMap()["response"].([]any)
+
+	case 3:
+		structData, _ := helper.ConvertMapToStruct(map[string]any{
+			"limit":                     limit,
+			"offset":                    offset,
+			"client_type_id_from_token": userProject.GetClientTypeId(),
+		})
+
+		resp, err := services.GoObjectBuilderService().GetList(ctx, &nobs.CommonMessage{
+			TableSlug: "connections",
+			ProjectId: resource.ResourceEnvironmentId,
+			Data:      structData,
+		})
+		if err != nil {
+			h.handleResponse(c, http.GRPCError, err.Error())
+			return
+		}
+
+		rawResponse, _ = resp.Data.AsMap()["response"].([]any)
+	}
+
+	var (
+		finalConnections = make([]map[string]any, len(rawResponse))
+		wg               sync.WaitGroup
+	)
+
+	for i, v := range rawResponse {
+		connMap, ok := v.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		finalConnections[i] = connMap
+		guid, ok := connMap["guid"].(string)
+		if !ok {
+			continue
+		}
+
+		wg.Add(1)
+		go func(index int, connectionId string, cMap map[string]any) {
+			defer wg.Done()
+			var optionsData any
+
+			if resource.ResourceType == pbCompany.ResourceType_MONGODB {
+				optResp, err := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(ctx, &obs.GetConnetionOptionsRequest{
+					ConnectionId:          connectionId,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					UserId:                userProject.GetUserId(),
+				})
+				if err == nil && optResp.Data != nil {
+					optionsData = optResp.Data.AsMap()["response"]
+				}
+			} else if resource.ResourceType == pbCompany.ResourceType_POSTGRESQL {
+				optResp, err := services.GoLoginService().GetConnetionOptions(ctx, &nobs.GetConnetionOptionsRequest{
+					ConnectionId:          connectionId,
+					ResourceEnvironmentId: resource.ResourceEnvironmentId,
+					UserId:                userProject.GetUserId(),
+					ProjectId:             resource.ProjectId,
+				})
+
+				if err == nil && optResp.Data != nil {
+					optionsData = optResp.Data.AsMap()["response"]
+				}
+			}
+
+			if optionsData != nil {
+				cMap["options"] = optionsData
+			} else {
+				cMap["options"] = make([]any, 0)
+			}
+			finalConnections[index] = cMap
+		}(i, guid, connMap)
+	}
+	wg.Wait()
+
+	var (
+		shouldAutoLogin = false
+		tables          []*pba.Object
+	)
+
+	if len(finalConnections) == 0 {
+		shouldAutoLogin = true
+
+	}
+
+	if len(finalConnections) == 1 {
+
+		conn := finalConnections[0]
+		options, ok := conn["options"].([]any)
+
+		if !ok || len(options) == 0 {
+			shouldAutoLogin = true
+
+		} else if len(options) == 1 {
+
+			shouldAutoLogin = true
+			opt, okOpt := options[0].(map[string]any)
+			tableSlug, okSlug := conn["table_slug"].(string)
+
+			if okOpt && okSlug {
+				if objectId, okObj := opt["guid"].(string); okObj {
+					tables = []*pba.Object{
+						{
+							TableSlug: tableSlug,
+							ObjectId:  objectId,
+						},
+					}
+				}
+			}
+		}
+	}
+
+	if shouldAutoLogin {
+		v2Req := &pba.V2LoginRequest{
+			Type:                  login.GetType(),
+			Username:              login.GetUsername(),
+			Password:              login.GetPassword(),
+			Phone:                 login.GetPhone(),
+			Email:                 login.GetEmail(),
+			Otp:                   login.GetOtp(),
+			SmsId:                 login.GetSmsId(),
+			SessionInfo:           login.GetSessionInfo(),
+			ServiceType:           login.GetServiceType(),
+			GoogleToken:           login.GetGoogleToken(),
+			ProjectId:             userProject.GetProjectId(),
+			EnvironmentId:         userProject.GetEnvironmentId(),
+			ClientType:            userProject.GetClientTypeId(),
+			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+			NodeType:              resource.GetNodeType(),
+			ResourceType:          int32(resource.GetResourceType()),
+			Tables:                tables,
+			ClientIp:              login.GetClientIp(),
+			UserAgent:             login.GetUserAgent(),
+		}
+
+		v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
+		if err != nil {
+			h.handleError(c, http.GRPCError, err)
+			return
+		}
+
+		h.handleResponse(c, http.OK, v2Resp)
+		return
+	}
+
+	h.handleResponse(c, http.OK, map[string]any{
+		"response":    finalConnections,
+		"client_type": userProject.GetClientTypeId(),
+		"environment": userProject.GetEnvironmentId(),
+		"project":     userProject.GetProjectId(),
+		"user_id":     userProject.GetUserId(),
+	})
+}
 
 // @Security ApiKeyAuth
 // V2Login godoc
