@@ -244,8 +244,8 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 			NodeType:              resource.GetNodeType(),
 			ResourceType:          int32(resource.GetResourceType()),
 			Tables:                tables,
-			ClientIp:              login.GetClientIp(),
-			UserAgent:             login.GetUserAgent(),
+			ClientIp:              c.RemoteIP(),
+			UserAgent:             c.Request.UserAgent(),
 		}
 
 		v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
