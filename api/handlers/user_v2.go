@@ -355,9 +355,9 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		return
 	}
 
-	projectID := c.Query("project-id")
-	if !util.IsValidUUID(projectID) {
-		h.handleResponse(c, http.InvalidArgument, "project-id is an invalid uuid")
+	projectID, ok := c.Get("project_id")
+	if ok && !util.IsValidUUID(projectID.(string)) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
 		return
 	}
 
@@ -368,7 +368,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 	}
 
 	project, err := h.services.ProjectServiceClient().GetById(c.Request.Context(), &pb.GetProjectByIdRequest{
-		ProjectId: projectID,
+		ProjectId: projectID.(string),
 	})
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
@@ -377,7 +377,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 
 	resource, err := h.services.ServiceResource().GetSingle(c.Request.Context(), &pb.GetSingleServiceResourceReq{
 		EnvironmentId: environmentId.(string),
-		ProjectId:     projectID,
+		ProjectId:     projectID.(string),
 		ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 	})
 	if err != nil {
@@ -414,7 +414,7 @@ func (h *Handler) V2DeleteUser(c *gin.Context) {
 		c.Request.Context(),
 		&auth_service.UserPrimaryKey{
 			Id:                    userID,
-			ProjectId:             projectID,
+			ProjectId:             projectID.(string),
 			ResourceType:          int32(resource.ResourceType),
 			ResourceEnvironmentId: resource.ResourceEnvironmentId,
 			ClientTypeId:          clientTypeID,

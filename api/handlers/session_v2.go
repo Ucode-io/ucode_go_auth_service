@@ -250,9 +250,35 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 
 		v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
 		if err != nil {
-			h.handleError(c, http.GRPCError, err)
-			return
+			var httpErrorStr = ""
+
+			httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+			httpErrorStr = strings.ToLower(httpErrorStr)
+
+			switch httpErrorStr {
+			case "user not found":
+				h.handleResponse(c, http.NotFound, "Пользователь не найдено")
+				return
+			case "session has been expired":
+				h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
+				return
+			case "invalid username":
+				h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
+				return
+			case "invalid password":
+				h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+				return
+			case "user blocked":
+				h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
+				return
+			default:
+				h.handleResponse(c, http.InvalidArgument, err.Error())
+				return
+			}
 		}
+
+		v2Resp.EnvironmentId = resource.GetEnvironmentId()
+		v2Resp.ResourceId = resource.GetResourceId()
 
 		h.handleResponse(c, http.OK, v2Resp)
 		return
