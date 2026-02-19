@@ -94,10 +94,30 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 				continue
 			}
 
+			var projectInfoMap map[string]any
+			projectInfoByte, err := json.Marshal(projectInfo)
+			if err != nil {
+				s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects, marshaling env", logger.Error(err))
+				return nil, status.Error(codes.Internal, "error in marshaling resource env")
+			}
+
+			err = json.Unmarshal(projectInfoByte, &projectInfoMap)
+			if err != nil {
+				s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects, unmarshal resource env", logger.Error(err))
+				return nil, status.Error(codes.Internal, "error in unmarshal resource env")
+			}
+
+			resourceEnvStruck, err := helper.ConvertMapToStruct(projectInfoMap)
+			if err != nil {
+				s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects, converting resource env", logger.Error(err))
+				return nil, status.Error(codes.Internal, "error in converting resource env")
+			}
+
 			return &pb.UserDefaultProjectResp{
 				ProjectId:     projectInfo.ProjectId,
 				ClientTypeId:  clientType.ClientTypeIds[0],
 				EnvironmentId: environments.Environments[0].Id,
+				ProjectData:   resourceEnvStruck,
 				UserId:        user.GetId(),
 			}, nil
 		}

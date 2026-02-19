@@ -59,6 +59,8 @@ message UserDefaultProjectResp {
   string client_type_id = 2;
   string project_id = 3;
   string environment_id = 4;
+  google.protobuf.Struct project_data = 5;
+
 }
 
 message V2ResetPasswordRequest {

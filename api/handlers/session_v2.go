@@ -280,16 +280,20 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 		v2Resp.EnvironmentId = resource.GetEnvironmentId()
 		v2Resp.ResourceId = resource.GetResourceId()
 
-		h.handleResponse(c, http.OK, v2Resp)
+		h.handleResponse(c, http.OK, map[string]any{
+			"response":     v2Resp,
+			"project_data": userProject.GetProjectData(),
+		})
 		return
 	}
 
 	h.handleResponse(c, http.OK, map[string]any{
-		"response":    finalConnections,
-		"client_type": userProject.GetClientTypeId(),
-		"environment": userProject.GetEnvironmentId(),
-		"project":     userProject.GetProjectId(),
-		"user_id":     userProject.GetUserId(),
+		"response":     finalConnections,
+		"client_type":  userProject.GetClientTypeId(),
+		"environment":  userProject.GetEnvironmentId(),
+		"project":      userProject.GetProjectId(),
+		"user_id":      userProject.GetUserId(),
+		"project_data": userProject.GetProjectData(),
 	})
 }
 
