@@ -34,6 +34,79 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDefaultProjectReq) (*pb.UserDefaultProjectResp, error) {
+	s.log.Info("UserDefaultProject --> ", logger.Any("request: ", req))
+
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.UserDefaultProject", req)
+	defer dbSpan.Finish()
+
+	user, err := s.authenticateUser(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, status.Error(codes.NotFound, "Cannot get user")
+	}
+
+	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
+	if err != nil {
+		s.log.Error("!!!UserDefaultProject--->GetUserProjects", logger.Error(err))
+		return nil, status.Error(codes.NotFound, "cant get user projects")
+	}
+
+	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
+	if err != nil {
+		s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects", logger.Error(err))
+		return nil, status.Error(codes.NotFound, "cant get user env projects")
+	}
+
+	for _, item := range userProjects.Companies {
+		company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{Id: item.Id})
+		if err != nil || len(company.Company.Id) == 0 {
+			continue
+		}
+
+		for _, projectId := range item.ProjectIds {
+			clientType, err := s.strg.User().GetUserProjectClientTypes(ctx, &pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: projectId})
+			if err != nil || len(clientType.ClientTypeIds) == 0 {
+				continue
+			}
+
+			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
+				ProjectId: projectId, CompanyId: item.Id,
+			})
+			if err != nil || len(projectInfo.ProjectId) == 0 {
+				continue
+			}
+
+			environments, err := s.services.EnvironmentService().GetList(ctx, &pbCompany.GetEnvironmentListRequest{
+				Ids:       userEnvProject.EnvProjects[projectId],
+				Limit:     1,
+				ProjectId: projectId,
+			})
+			if err != nil || len(environments.Environments) == 0 {
+				continue
+			}
+
+			userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, projectId)
+			if err != nil || userStatus == config.UserStatusBlocked {
+				continue
+			}
+
+			return &pb.UserDefaultProjectResp{
+				ProjectId:     projectInfo.ProjectId,
+				ClientTypeId:  clientType.ClientTypeIds[0],
+				EnvironmentId: environments.Environments[0].Id,
+				UserId:        user.GetId(),
+			}, nil
+		}
+	}
+
+	s.log.Error("!!!UserDefaultProject--->NoValidProjectFound")
+	return nil, status.Error(codes.NotFound, "user project not found")
+}
+
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
 	s.log.Info("V2Login --> ", logger.Any("request: ", req))
 
@@ -59,138 +132,13 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		}
 	}()
 
-	switch req.Type {
-	case config.Default:
-		if len(req.Username) < 6 {
-			err := errors.New("invalid username")
-			s.log.Error("!!!V2Login--->InvalidUsername", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
+	user, err = s.authenticateUser(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 
-		if len(req.Password) < 6 {
-			err := errors.New("invalid password")
-			s.log.Error("!!!V2Login--->InvalidPassword", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-
-		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
-		if err != nil {
-			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		hashType := user.GetHashType()
-		switch config.HashTypes[hashType] {
-		case 1:
-			match, err := security.ComparePassword(user.GetPassword(), req.Password)
-			if err != nil {
-				s.log.Error("!!!MultiCompanyLogin-->ComparePasswordArgon", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyOneLogin-->Wrong", logger.Error(err))
-				return nil, err
-			}
-
-			go func() {
-				hashedPassword, err := security.HashPasswordBcrypt(req.Password)
-				if err != nil {
-					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
-					return
-				}
-
-				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
-				if err != nil {
-					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
-					return
-				}
-			}()
-		case 2:
-			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.Password)
-			if err != nil {
-				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
-				return nil, err
-			}
-			if !match {
-				err := errors.New("username or password is wrong")
-				s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-				return nil, err
-			}
-		default:
-			err := errors.New("invalid hash type")
-			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-	case config.WithPhone:
-		if req.ServiceType == "firebase" {
-			err := firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
-			if err != nil {
-				return nil, err
-			}
-		} else if config.DefaultOtp != req.Otp {
-			_, err := s.services.SmsService().ConfirmOtp(
-				ctx,
-				&sms_service.ConfirmOtpRequest{
-					SmsId: req.GetSmsId(),
-					Otp:   req.GetOtp(),
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
-		if err != nil {
-			s.log.Error("!!!MultiCompanyLogin Phone--->GetByUsername", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-	case config.WithEmail:
-		if config.DefaultOtp != req.Otp {
-			_, err := s.services.SmsService().ConfirmOtp(
-				ctx,
-				&sms_service.ConfirmOtpRequest{
-					SmsId: req.GetSmsId(),
-					Otp:   req.GetOtp(),
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
-		if err != nil {
-			s.log.Error("!!!V2Login Email--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-	case config.WithGoogle:
-		var email string
-		if req.GetGoogleToken() != "" {
-			userInfo, err := helper.GetGoogleUserInfo(req.GetGoogleToken())
-			if err != nil {
-				s.log.Error("!!!V2LoginWithOption--->failed to decode google id token", logger.Error(err))
-				err = errors.New("invalid arguments google auth")
-				return nil, status.Error(codes.InvalidArgument, err.Error())
-			}
-			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
-				err = errors.New("invalid arguments google auth")
-				s.log.Error("!!!V2LoginWithOption--->failed to verify google user info", logger.Error(err))
-				return nil, status.Error(codes.InvalidArgument, err.Error())
-			}
-			email = cast.ToString(userInfo["email"])
-		} else {
-			err := errors.New("google token is required when login type is google auth")
-			s.log.Error("!!!V2LoginWithOption--->no google token--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-
-		user, err = s.strg.User().GetByUsername(ctx, email)
-		if err != nil {
-			s.log.Error("!!!V2Login Email--->", logger.Error(err))
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
+	if user == nil {
+		return nil, status.Error(codes.NotFound, "user not found")
 	}
 
 	userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, req.GetProjectId())
@@ -1929,4 +1877,160 @@ func (s *sessionService) DeleteByParams(ctx context.Context, req *pb.DeleteByPar
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+type authParams interface {
+	GetUsername() string
+	GetPassword() string
+	GetType() string
+	GetSmsId() string
+	GetOtp() string
+	GetPhone() string
+	GetEmail() string
+	GetGoogleToken() string
+	GetSessionInfo() string
+	GetServiceType() string
+}
+
+func (s *sessionService) authenticateUser(ctx context.Context, req authParams) (*pb.User, error) {
+	var (
+		user *pb.User
+		err  error
+	)
+
+	switch req.GetType() {
+	case config.Default:
+		if len(req.GetUsername()) < 6 {
+			err := errors.New("invalid username")
+			s.log.Error("!!!V2Login--->InvalidUsername", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		if len(req.GetUsername()) < 6 {
+			err := errors.New("invalid password")
+			s.log.Error("!!!V2Login--->InvalidPassword", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		if err != nil {
+			s.log.Error("!!!V2Login--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		hashType := user.GetHashType()
+		switch config.HashTypes[hashType] {
+		case 1:
+			match, err := security.ComparePassword(user.GetPassword(), req.GetPassword())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyLogin-->ComparePasswordArgon", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyOneLogin-->Wrong", logger.Error(err))
+				return nil, err
+			}
+
+			go func() {
+				hashedPassword, err := security.HashPasswordBcrypt(req.GetPassword())
+				if err != nil {
+					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+
+				err = s.strg.User().UpdatePassword(context.Background(), user.Id, hashedPassword)
+				if err != nil {
+					s.log.Error("!!!MultiCompanyOneLogin--->HashPasswordBcryptGo", logger.Error(err))
+					return
+				}
+			}()
+		case 2:
+			match, err := security.ComparePasswordBcrypt(user.GetPassword(), req.GetPassword())
+			if err != nil {
+				s.log.Error("!!!MultiCompanyOneLogin-->ComparePasswordBcrypt", logger.Error(err))
+				return nil, err
+			}
+			if !match {
+				err := errors.New("username or password is wrong")
+				s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
+				return nil, err
+			}
+		default:
+			err := errors.New("invalid hash type")
+			s.log.Error("!!!MultiCompanyOneLogin--->", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case config.WithPhone:
+		if req.GetServiceType() == "firebase" {
+			err := firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
+			if err != nil {
+				return nil, err
+			}
+		} else if config.DefaultOtp != req.GetOtp() {
+			_, err := s.services.SmsService().ConfirmOtp(
+				ctx,
+				&sms_service.ConfirmOtpRequest{
+					SmsId: req.GetSmsId(),
+					Otp:   req.GetOtp(),
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+		if err != nil {
+			s.log.Error("!!!MultiCompanyLogin Phone--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case config.WithEmail:
+		if config.DefaultOtp != req.GetOtp() {
+			_, err := s.services.SmsService().ConfirmOtp(
+				ctx,
+				&sms_service.ConfirmOtpRequest{
+					SmsId: req.GetSmsId(),
+					Otp:   req.GetOtp(),
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+		if err != nil {
+			s.log.Error("!!!V2Login Email--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case config.WithGoogle:
+		var email string
+		if req.GetGoogleToken() != "" {
+			userInfo, err := helper.GetGoogleUserInfo(req.GetGoogleToken())
+			if err != nil {
+				s.log.Error("!!!V2LoginWithOption--->failed to decode google id token", logger.Error(err))
+				err = errors.New("invalid arguments google auth")
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			if userInfo["error"] != nil || !(userInfo["email_verified"].(bool)) {
+				err = errors.New("invalid arguments google auth")
+				s.log.Error("!!!V2LoginWithOption--->failed to verify google user info", logger.Error(err))
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			email = cast.ToString(userInfo["email"])
+		} else {
+			err := errors.New("google token is required when login type is google auth")
+			s.log.Error("!!!V2LoginWithOption--->no google token--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
+		user, err = s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!V2Login Email--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+
+	return user, nil
 }
