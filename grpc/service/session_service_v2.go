@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	status_http "ucode/ucode_go_auth_service/api/http"
@@ -49,82 +50,155 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 		return nil, status.Error(codes.NotFound, "Cannot get user")
 	}
 
-	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
-	if err != nil {
-		s.log.Error("!!!UserDefaultProject--->GetUserProjects", logger.Error(err))
+	var (
+		userProjects   *pb.GetUserProjectsRes
+		userEnvProject *models.GetUserEnvProjectRes
+		projectsErr    error
+		envProjectsErr error
+		dbWg           sync.WaitGroup
+	)
+
+	dbWg.Add(2)
+	go func() {
+		defer dbWg.Done()
+		userProjects, projectsErr = s.strg.User().GetUserProjects(ctx, user.GetId())
+	}()
+	go func() {
+		defer dbWg.Done()
+		userEnvProject, envProjectsErr = s.strg.User().GetUserEnvProjects(ctx, user.GetId())
+	}()
+	dbWg.Wait()
+
+	if projectsErr != nil {
+		s.log.Error("!!!UserDefaultProject--->GetUserProjects", logger.Error(projectsErr))
 		return nil, status.Error(codes.NotFound, "cant get user projects")
 	}
 
-	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
-	if err != nil {
-		s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects", logger.Error(err))
+	if envProjectsErr != nil {
+		s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects", logger.Error(envProjectsErr))
 		return nil, status.Error(codes.NotFound, "cant get user env projects")
 	}
 
+	type projectResult struct {
+		resp *pb.UserDefaultProjectResp
+	}
+
+	parallelCtx, cancelParallel := context.WithCancel(ctx)
+	defer cancelParallel()
+
+	var (
+		resultCh = make(chan projectResult, 1)
+		wg       sync.WaitGroup
+	)
+
 	for _, item := range userProjects.Companies {
-		company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{Id: item.Id})
-		if err != nil || len(company.Company.Id) == 0 {
-			continue
-		}
+		companyId := item.Id
+		projectIds := item.ProjectIds
 
-		for _, projectId := range item.ProjectIds {
-			clientType, err := s.strg.User().GetUserProjectClientTypes(ctx, &pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: projectId})
-			if err != nil || len(clientType.ClientTypeIds) == 0 {
-				continue
-			}
+		for _, projId := range projectIds {
+			wg.Add(1)
+			go func(cId, pId string) {
+				defer wg.Done()
 
-			projectInfo, err := s.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
-				ProjectId: projectId, CompanyId: item.Id,
-			})
-			if err != nil || len(projectInfo.ProjectId) == 0 {
-				continue
-			}
+				if parallelCtx.Err() != nil {
+					return
+				}
 
-			environments, err := s.services.EnvironmentService().GetList(ctx, &pbCompany.GetEnvironmentListRequest{
-				Ids:       userEnvProject.EnvProjects[projectId],
-				Limit:     1,
-				ProjectId: projectId,
-			})
-			if err != nil || len(environments.Environments) == 0 {
-				continue
-			}
+				company, err := s.services.CompanyServiceClient().GetById(parallelCtx, &pbCompany.GetCompanyByIdRequest{Id: cId})
+				if err != nil || company == nil || company.Company == nil || len(company.Company.Id) == 0 {
+					return
+				}
 
-			userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, projectId)
-			if err != nil || userStatus == config.UserStatusBlocked {
-				continue
-			}
+				if parallelCtx.Err() != nil {
+					return
+				}
 
-			var projectInfoMap map[string]any
-			projectInfoByte, err := json.Marshal(projectInfo)
-			if err != nil {
-				s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects, marshaling env", logger.Error(err))
-				return nil, status.Error(codes.Internal, "error in marshaling resource env")
-			}
+				clientType, err := s.strg.User().GetUserProjectClientTypes(parallelCtx, &pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: pId})
+				if err != nil || len(clientType.ClientTypeIds) == 0 {
+					return
+				}
 
-			err = json.Unmarshal(projectInfoByte, &projectInfoMap)
-			if err != nil {
-				s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects, unmarshal resource env", logger.Error(err))
-				return nil, status.Error(codes.Internal, "error in unmarshal resource env")
-			}
+				if parallelCtx.Err() != nil {
+					return
+				}
 
-			resourceEnvStruck, err := helper.ConvertMapToStruct(projectInfoMap)
-			if err != nil {
-				s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects, converting resource env", logger.Error(err))
-				return nil, status.Error(codes.Internal, "error in converting resource env")
-			}
+				projectInfo, err := s.services.ProjectServiceClient().GetById(parallelCtx, &pbCompany.GetProjectByIdRequest{
+					ProjectId: pId, CompanyId: cId,
+				})
+				if err != nil || len(projectInfo.ProjectId) == 0 {
+					return
+				}
 
-			return &pb.UserDefaultProjectResp{
-				ProjectId:     projectInfo.ProjectId,
-				ClientTypeId:  clientType.ClientTypeIds[0],
-				EnvironmentId: environments.Environments[0].Id,
-				ProjectData:   resourceEnvStruck,
-				UserId:        user.GetId(),
-			}, nil
+				if parallelCtx.Err() != nil {
+					return
+				}
+
+				environments, err := s.services.EnvironmentService().GetList(parallelCtx, &pbCompany.GetEnvironmentListRequest{
+					Ids:       userEnvProject.EnvProjects[pId],
+					Limit:     1,
+					ProjectId: pId,
+				})
+				if err != nil || len(environments.Environments) == 0 {
+					return
+				}
+
+				if parallelCtx.Err() != nil {
+					return
+				}
+
+				userStatus, err := s.strg.User().GetUserStatus(parallelCtx, user.Id, pId)
+				if err != nil || userStatus == config.UserStatusBlocked {
+					return
+				}
+
+				var projectInfoMap map[string]any
+				projectInfoByte, err := json.Marshal(projectInfo)
+				if err != nil {
+					s.log.Error("!!!UserDefaultProject--->marshaling env", logger.Error(err))
+					return
+				}
+
+				err = json.Unmarshal(projectInfoByte, &projectInfoMap)
+				if err != nil {
+					s.log.Error("!!!UserDefaultProject--->unmarshal resource env", logger.Error(err))
+					return
+				}
+
+				resourceEnvStruct, err := helper.ConvertMapToStruct(projectInfoMap)
+				if err != nil {
+					s.log.Error("!!!UserDefaultProject--->converting resource env", logger.Error(err))
+					return
+				}
+
+				select {
+				case resultCh <- projectResult{
+					resp: &pb.UserDefaultProjectResp{
+						ProjectId:     projectInfo.ProjectId,
+						ClientTypeId:  clientType.ClientTypeIds[0],
+						EnvironmentId: environments.Environments[0].Id,
+						ProjectData:   resourceEnvStruct,
+						UserId:        user.GetId(),
+					},
+				}:
+					cancelParallel()
+				default:
+				}
+			}(companyId, projId)
 		}
 	}
 
-	s.log.Error("!!!UserDefaultProject--->NoValidProjectFound")
-	return nil, status.Error(codes.NotFound, "user project not found")
+	go func() {
+		wg.Wait()
+		close(resultCh)
+	}()
+
+	result, ok := <-resultCh
+	if !ok {
+		s.log.Error("!!!UserDefaultProject--->NoValidProjectFound")
+		return nil, status.Error(codes.NotFound, "user project not found")
+	}
+
+	return result.resp, nil
 }
 
 func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*pb.V2LoginResponse, error) {
