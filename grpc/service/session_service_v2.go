@@ -41,7 +41,7 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.UserDefaultProject", req)
 	defer dbSpan.Finish()
 
-	user, err := s.authenticateUser(ctx, req)
+	user, err := s.lookupUser(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -104,50 +104,62 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 					return
 				}
 
-				company, err := s.services.CompanyServiceClient().GetById(parallelCtx, &pbCompany.GetCompanyByIdRequest{Id: cId})
-				if err != nil || company == nil || company.Company == nil || len(company.Company.Id) == 0 {
+				var (
+					company      *pbCompany.GetCompanyByIdResponse
+					clientType   *pb.GetUserProjectClientTypesResponse
+					projectInfo  *pbCompany.Project
+					environments *pbCompany.GetEnvironmentListResponse
+					userSt       string
+					companyErr   error
+					clientErr    error
+					projectErr   error
+					envErr       error
+					statusErr    error
+					innerWg      sync.WaitGroup
+				)
+
+				innerWg.Add(5)
+				go func() {
+					defer innerWg.Done()
+					company, companyErr = s.services.CompanyServiceClient().GetById(parallelCtx, &pbCompany.GetCompanyByIdRequest{Id: cId})
+				}()
+				go func() {
+					defer innerWg.Done()
+					clientType, clientErr = s.strg.User().GetUserProjectClientTypes(parallelCtx, &pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: pId})
+				}()
+				go func() {
+					defer innerWg.Done()
+					projectInfo, projectErr = s.services.ProjectServiceClient().GetById(parallelCtx, &pbCompany.GetProjectByIdRequest{
+						ProjectId: pId, CompanyId: cId,
+					})
+				}()
+				go func() {
+					defer innerWg.Done()
+					environments, envErr = s.services.EnvironmentService().GetList(parallelCtx, &pbCompany.GetEnvironmentListRequest{
+						Ids:       userEnvProject.EnvProjects[pId],
+						Limit:     1,
+						ProjectId: pId,
+					})
+				}()
+				go func() {
+					defer innerWg.Done()
+					userSt, statusErr = s.strg.User().GetUserStatus(parallelCtx, user.Id, pId)
+				}()
+				innerWg.Wait()
+
+				if companyErr != nil || company == nil || company.Company == nil || len(company.Company.Id) == 0 {
 					return
 				}
-
-				if parallelCtx.Err() != nil {
+				if clientErr != nil || len(clientType.ClientTypeIds) == 0 {
 					return
 				}
-
-				clientType, err := s.strg.User().GetUserProjectClientTypes(parallelCtx, &pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: pId})
-				if err != nil || len(clientType.ClientTypeIds) == 0 {
+				if projectErr != nil || len(projectInfo.ProjectId) == 0 {
 					return
 				}
-
-				if parallelCtx.Err() != nil {
+				if envErr != nil || len(environments.Environments) == 0 {
 					return
 				}
-
-				projectInfo, err := s.services.ProjectServiceClient().GetById(parallelCtx, &pbCompany.GetProjectByIdRequest{
-					ProjectId: pId, CompanyId: cId,
-				})
-				if err != nil || len(projectInfo.ProjectId) == 0 {
-					return
-				}
-
-				if parallelCtx.Err() != nil {
-					return
-				}
-
-				environments, err := s.services.EnvironmentService().GetList(parallelCtx, &pbCompany.GetEnvironmentListRequest{
-					Ids:       userEnvProject.EnvProjects[pId],
-					Limit:     1,
-					ProjectId: pId,
-				})
-				if err != nil || len(environments.Environments) == 0 {
-					return
-				}
-
-				if parallelCtx.Err() != nil {
-					return
-				}
-
-				userStatus, err := s.strg.User().GetUserStatus(parallelCtx, user.Id, pId)
-				if err != nil || userStatus == config.UserStatusBlocked {
+				if statusErr != nil || userSt == config.UserStatusBlocked {
 					return
 				}
 
@@ -208,23 +220,10 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	defer dbSpan.Finish()
 
 	var (
-		user   = &pb.User{}
-		err    error
-		data   *pbObject.LoginDataRes
-		before runtime.MemStats
+		user = &pb.User{}
+		err  error
+		data *pbObject.LoginDataRes
 	)
-
-	runtime.ReadMemStats(&before)
-
-	defer func() {
-		var after runtime.MemStats
-		runtime.ReadMemStats(&after)
-		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
-		s.log.Info("Memory used by the V2Login", logger.Any("memoryUsed", memoryUsed))
-		if memoryUsed > 300 {
-			s.log.Info("Memory used over 300 mb", logger.Any("V2Login", memoryUsed))
-		}
-	}()
 
 	user, err = s.authenticateUser(ctx, req)
 	if err != nil {
@@ -235,18 +234,6 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
 
-	userStatus, err := s.strg.User().GetUserStatus(ctx, user.Id, req.GetProjectId())
-	if err != nil {
-		s.log.Error("!!!V2Login--->GetUserStatus", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if userStatus == config.UserStatusBlocked {
-		err := errors.New("user blocked")
-		s.log.Error("!!!V2Login--->UserBlocked", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	reqLoginData := &pbObject.LoginDataReq{
 		UserId:                user.GetId(),
 		ClientType:            req.GetClientType(),
@@ -254,8 +241,21 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		ResourceEnvironmentId: req.GetResourceEnvironmentId(),
 	}
 
+	var (
+		userStatus string
+		statusErr  error
+		loginWg    sync.WaitGroup
+	)
+
+	loginWg.Add(1)
+	go func() {
+		defer loginWg.Done()
+		userStatus, statusErr = s.strg.User().GetUserStatus(ctx, user.Id, req.GetProjectId())
+	}()
+
 	services, err := s.serviceNode.GetByNodeType(req.ProjectId, req.NodeType)
 	if err != nil {
+		loginWg.Wait()
 		return nil, err
 	}
 
@@ -265,6 +265,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!Login--->", logger.Error(err))
+			loginWg.Wait()
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 	case 3:
@@ -273,6 +274,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		err = helper.MarshalToStruct(&reqLoginData, &newReq)
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
+			loginWg.Wait()
 			return nil, status.Error(400, err.Error())
 		}
 
@@ -282,14 +284,29 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		if err != nil {
 			errGetUserProjectData := errors.New("invalid user project data")
 			s.log.Error("!!!PostgresBuilder.Login--->", logger.Error(err))
+			loginWg.Wait()
 			return nil, status.Error(codes.Internal, errGetUserProjectData.Error())
 		}
 
 		err = helper.MarshalToStruct(&newData, &data)
 		if err != nil {
 			s.log.Error("!!!Login--->", logger.Error(err))
+			loginWg.Wait()
 			return nil, status.Error(400, err.Error())
 		}
+	}
+
+	loginWg.Wait()
+
+	if statusErr != nil {
+		s.log.Error("!!!V2Login--->GetUserStatus", logger.Error(statusErr))
+		return nil, status.Error(codes.Internal, statusErr.Error())
+	}
+
+	if userStatus == config.UserStatusBlocked {
+		err := errors.New("user blocked")
+		s.log.Error("!!!V2Login--->UserBlocked", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	if !data.UserFound {
@@ -1051,26 +1068,12 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.SessionAndTokenGenerator", input)
 	defer dbSpan.Finish()
 
-	var before runtime.MemStats
-	runtime.ReadMemStats(&before)
-
-	defer func() {
-		var after runtime.MemStats
-		runtime.ReadMemStats(&after)
-		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
-		s.log.Info("Memory used by the SessionAndTokenGenerator", logger.Any("memoryUsed", memoryUsed))
-		if memoryUsed > 300 {
-			s.log.Info("Memory used over 300 mb", logger.Any("SessionAndTokenGenerator", memoryUsed))
-		}
-	}()
-
 	if _, err := uuid.Parse(input.GetLoginData().GetUserIdAuth()); err != nil {
 		err := errors.New("INVALID USER_ID(UUID)" + err.Error())
 		s.log.Error("!!!TokenGenerator->UserIdAuthExist-->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// TODO - Delete all old sessions & refresh token has this function too
 	_, err := s.strg.Session().DeleteExpiredUserSessions(ctx, input.GetLoginData().GetUserIdAuth())
 	if err != nil {
 		s.log.Error("!!!Login--->", logger.Error(err))
@@ -1111,25 +1114,42 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	session, err := s.strg.Session().GetByPK(ctx, sessionPKey)
-	if err != nil {
-		s.log.Error("!!!GetByPK--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	// Session.GetByPK and User.GetByPK are independent — run in parallel
+	var (
+		session    *pb.Session
+		userData   *pb.User
+		sessionErr error
+		userErr    error
+		pWg        sync.WaitGroup
+	)
+
+	pWg.Add(2)
+	go func() {
+		defer pWg.Done()
+		session, sessionErr = s.strg.Session().GetByPK(ctx, sessionPKey)
+	}()
+	go func() {
+		defer pWg.Done()
+		userData, userErr = s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
+			ProjectId: input.GetProjectId(),
+			Id:        input.GetLoginData().GetUserIdAuth(),
+		})
+	}()
+	pWg.Wait()
+
+	if sessionErr != nil {
+		s.log.Error("!!!GetByPK--->", logger.Error(sessionErr))
+		return nil, status.Error(codes.Internal, sessionErr.Error())
 	}
+	if userErr != nil {
+		s.log.Error("!!!Login->GetByPK--->", logger.Error(userErr))
+		return nil, status.Error(codes.Internal, userErr.Error())
+	}
+
 	if input.Tables == nil {
 		input.Tables = []*pb.Object{}
 	}
 
-	userData, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{
-		ProjectId: input.GetProjectId(),
-		Id:        input.GetLoginData().GetUserIdAuth(),
-	})
-	if err != nil {
-		s.log.Error("!!!Login->GetByPK--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// TODO - wrap in a function
 	m := map[string]any{
 		"id":                 session.GetId(),
 		"ip":                 session.GetIp(),
@@ -1145,16 +1165,33 @@ func (s *sessionService) SessionAndTokenGenerator(ctx context.Context, input *pb
 		"client_platform_id": session.GetClientPlatformId(),
 	}
 
-	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	// Generate access and refresh tokens in parallel
+	var (
+		accessToken  string
+		refreshToken string
+		accessErr    error
+		refreshErr   error
+		jwtWg        sync.WaitGroup
+	)
 
-	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
-	if err != nil {
-		s.log.Error("!!!Login--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+	jwtWg.Add(2)
+	go func() {
+		defer jwtWg.Done()
+		accessToken, accessErr = security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
+	}()
+	go func() {
+		defer jwtWg.Done()
+		refreshToken, refreshErr = security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
+	}()
+	jwtWg.Wait()
+
+	if accessErr != nil {
+		s.log.Error("!!!Login--->", logger.Error(accessErr))
+		return nil, status.Error(codes.Internal, accessErr.Error())
+	}
+	if refreshErr != nil {
+		s.log.Error("!!!Login--->", logger.Error(refreshErr))
+		return nil, status.Error(codes.Internal, refreshErr.Error())
 	}
 
 	go func() {
@@ -2122,6 +2159,51 @@ func (s *sessionService) authenticateUser(ctx context.Context, req authParams) (
 		user, err = s.strg.User().GetByUsername(ctx, email)
 		if err != nil {
 			s.log.Error("!!!V2Login Email--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+
+	return user, nil
+}
+
+func (s *sessionService) lookupUser(ctx context.Context, req authParams) (*pb.User, error) {
+	var (
+		user *pb.User
+		err  error
+	)
+
+	switch req.GetType() {
+	case config.Default:
+		user, err = s.strg.User().GetByUsername(ctx, req.GetUsername())
+		if err != nil {
+			s.log.Error("!!!lookupUser--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	case config.WithPhone:
+		user, err = s.strg.User().GetByUsername(ctx, req.GetPhone())
+		if err != nil {
+			s.log.Error("!!!lookupUser Phone--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case config.WithEmail:
+		user, err = s.strg.User().GetByUsername(ctx, req.GetEmail())
+		if err != nil {
+			s.log.Error("!!!lookupUser Email--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	case config.WithGoogle:
+		if req.GetGoogleToken() == "" {
+			return nil, status.Error(codes.InvalidArgument, "google token is required")
+		}
+		userInfo, err := helper.GetGoogleUserInfo(req.GetGoogleToken())
+		if err != nil {
+			s.log.Error("!!!lookupUser--->GetGoogleUserInfo", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, "invalid google auth")
+		}
+		email := cast.ToString(userInfo["email"])
+		user, err = s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!lookupUser Google--->GetByUsername", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
