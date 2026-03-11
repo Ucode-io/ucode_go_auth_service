@@ -129,6 +129,10 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 			session.GET("", h.GetSessionList)
 			session.DELETE("/:id", h.DeleteSession)
 			session.DELETE("", h.DeleteByParams)
+
+			session.GET("/devices", h.GetSessionDevices)
+			session.DELETE("/by-device", h.DeleteSessionsByDevice)
+			session.DELETE("/except-current", h.DeleteSessionsExceptCurrent)
 		}
 
 		// environment

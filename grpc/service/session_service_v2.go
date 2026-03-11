@@ -2210,3 +2210,48 @@ func (s *sessionService) lookupUser(ctx context.Context, req authParams) (*pb.Us
 
 	return user, nil
 }
+
+func (s *sessionService) GetSessionDevices(ctx context.Context, req *pb.GetSessionDevicesRequest) (*pb.GetSessionDevicesResponse, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.GetSessionDevices", req)
+	defer dbSpan.Finish()
+
+	s.log.Info("---GetSessionDevices--->>>", logger.Any("req", req))
+
+	resp, err := s.strg.Session().GetSessionDevices(ctx, req)
+	if err != nil {
+		s.log.Error("!!!GetSessionDevices--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return resp, nil
+}
+
+func (s *sessionService) DeleteSessionsByDevice(ctx context.Context, req *pb.DeleteSessionsByDeviceRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.DeleteSessionsByDevice", req)
+	defer dbSpan.Finish()
+
+	s.log.Info("---DeleteSessionsByDevice--->>>", logger.Any("req", req))
+
+	err := s.strg.Session().DeleteSessionsByDevice(ctx, req)
+	if err != nil {
+		s.log.Error("!!!DeleteSessionsByDevice--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *sessionService) DeleteSessionsExceptCurrent(ctx context.Context, req *pb.DeleteSessionsExceptCurrentRequest) (*emptypb.Empty, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.DeleteSessionsExceptCurrent", req)
+	defer dbSpan.Finish()
+
+	s.log.Info("---DeleteSessionsExceptCurrent--->>>", logger.Any("req", req))
+
+	err := s.strg.Session().DeleteSessionsExceptCurrent(ctx, req)
+	if err != nil {
+		s.log.Error("!!!DeleteSessionsExceptCurrent--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
+}
