@@ -12,6 +12,7 @@ import (
 	obs "ucode/ucode_go_auth_service/genproto/company_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	pbSms "ucode/ucode_go_auth_service/genproto/sms_service"
+	"ucode/ucode_go_auth_service/pkg/firebase"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/gin-gonic/gin"
@@ -335,13 +336,13 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		}
 	case cfg.WithFirebase:
 		{
-			// if !cfg.DEFAULT_OTPS[body.Otp] {
-			// 	err := firebase.VerifyPhoneCode(h.cfg, body.SessionInfo, body.Otp)
-			// 	if err != nil {
-			// 		h.handleResponse(c, status.GRPCError, err.Error())
-			// 		return
-			// 	}
-			// }
+			if !cfg.DEFAULT_OTPS[body.Otp] {
+				err := firebase.VerifyPhoneCode(h.cfg, body.SessionInfo, body.Otp)
+				if err != nil {
+					h.handleResponse(c, status.GRPCError, err.Error())
+					return
+				}
+			}
 		}
 	case cfg.WithGoogle:
 		{
