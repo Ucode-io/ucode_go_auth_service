@@ -230,7 +230,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 		return nil, err
 	}
 
-	if user == nil {
+	if user == nil || len(user.GetId()) == 0 {
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
 
@@ -1521,7 +1521,7 @@ func (s *sessionService) V2MultiCompanyOneLogin(ctx context.Context, req *pb.V2M
 		}
 	case config.WithPhone:
 		if req.ServiceType == "firebase" {
-			err := firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
+			err = firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
 			if err != nil {
 				return nil, err
 			}
@@ -2094,7 +2094,7 @@ func (s *sessionService) authenticateUser(ctx context.Context, req authParams) (
 		}
 	case config.WithPhone:
 		if req.GetServiceType() == "firebase" {
-			err := firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
+			err = firebase.VerifyPhoneCode(s.cfg, req.GetSessionInfo(), req.GetOtp())
 			if err != nil {
 				return nil, err
 			}
