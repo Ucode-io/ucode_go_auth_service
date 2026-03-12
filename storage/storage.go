@@ -99,6 +99,9 @@ type SessionRepoI interface {
 	GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error)
 	DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (err error)
+	GetSessionDevices(ctx context.Context, req *pb.GetSessionDevicesRequest) (*pb.GetSessionDevicesResponse, error)
+	DeleteSessionsByDevice(ctx context.Context, req *pb.DeleteSessionsByDeviceRequest) error
+	DeleteSessionsExceptCurrent(ctx context.Context, req *pb.DeleteSessionsExceptCurrentRequest) error
 }
 
 type CompanyRepoI interface {

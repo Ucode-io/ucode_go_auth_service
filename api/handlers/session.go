@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"ucode/ucode_go_auth_service/api/http"
 
 	"ucode/ucode_go_auth_service/genproto/auth_service"
@@ -210,4 +211,118 @@ func (h *Handler) DeleteSession(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, resp)
+}
+
+func (h *Handler) GetSessionDevices(c *gin.Context) {
+	userIdAuth, err := h.getFromHeaderOrQuery(c, "user_id")
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "project_id is required")
+		return
+	}
+
+	resp, err := h.services.SessionService().GetSessionDevices(
+		c.Request.Context(),
+		&auth_service.GetSessionDevicesRequest{
+			UserIdAuth: userIdAuth,
+			ProjectId:  projectId.(string),
+		},
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, resp)
+}
+
+func (h *Handler) DeleteSessionsByDevice(c *gin.Context) {
+	var req auth_service.DeleteSessionsByDeviceRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	userIdAuth, err := h.getFromHeaderOrQuery(c, "user_id")
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "project_id is required")
+		return
+	}
+
+	req.ProjectId = projectId.(string)
+	req.UserIdAuth = userIdAuth
+
+	resp, err := h.services.SessionService().DeleteSessionsByDevice(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.NoContent, resp)
+}
+
+func (h *Handler) DeleteSessionsExceptCurrent(c *gin.Context) {
+	userIdAuth, err := h.getFromHeaderOrQuery(c, "user_id")
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	sessionId, err := h.getFromHeaderOrQuery(c, "session_id")
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "project_id is required")
+		return
+	}
+
+	var req = auth_service.DeleteSessionsExceptCurrentRequest{
+		UserIdAuth: userIdAuth,
+		ProjectId:  projectId.(string),
+		SessionId:  sessionId,
+	}
+
+	resp, err := h.services.SessionService().DeleteSessionsExceptCurrent(
+		c.Request.Context(),
+		&req,
+	)
+	if err != nil {
+		h.handleResponse(c, http.GRPCError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.NoContent, resp)
+}
+
+func (h *Handler) getFromHeaderOrQuery(c *gin.Context, key string) (string, error) {
+	value := c.Query(key)
+	if value == "" {
+		id, ok := c.Get(key)
+		if !ok {
+			return "", errors.New("user_id not found")
+		}
+
+		value = id.(string)
+	}
+
+	return value, nil
 }

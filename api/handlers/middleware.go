@@ -72,6 +72,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			}
 
 			c.Set("user_id", res.UserIdAuth)
+			c.Set("session_id", res.Id)
 		case "API-KEY":
 			app_id := c.GetHeader("X-API-KEY")
 			apikeys, err := h.services.ApiKeysService().GetEnvID(

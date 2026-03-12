@@ -494,3 +494,104 @@ func (r *sessionRepo) DeleteByParams(ctx context.Context, entity *pb.DeleteByPar
 
 	return nil
 }
+
+func (r *sessionRepo) GetSessionDevices(ctx context.Context, req *pb.GetSessionDevicesRequest) (*pb.GetSessionDevicesResponse, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.GetSessionDevices")
+	defer dbSpan.Finish()
+
+	var (
+		res = &pb.GetSessionDevicesResponse{}
+
+		query = `SELECT DISTINCT ON (data)
+    		id,
+    		COALESCE(project_id::text, ''),
+    		COALESCE(client_type_id::text, ''),
+    		user_id,
+    		COALESCE(role_id::text, ''),
+    		TEXT(ip) AS ip,
+    		data,
+    		COALESCE(is_changed, FALSE),
+    		COALESCE(user_id_auth::text, ''),
+    		COALESCE(env_id::text, ''),
+    		COALESCE(client_id, ''),
+    		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
+    		COALESCE(TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS created_at,
+    		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at
+		FROM "session"
+		WHERE user_id_auth = $1 AND project_id = $2
+		ORDER BY data, created_at DESC
+`
+	)
+
+	rows, err := r.db.Query(ctx, query, req.UserIdAuth, req.ProjectId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session devices: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		obj := &pb.Session{}
+		err = rows.Scan(
+			&obj.Id,
+			&obj.ProjectId,
+			&obj.ClientTypeId,
+			&obj.UserId,
+			&obj.RoleId,
+			&obj.Ip,
+			&obj.Data,
+			&obj.IsChanged,
+			&obj.UserIdAuth,
+			&obj.EnvId,
+			&obj.ClientId,
+			&obj.ExpiresAt,
+			&obj.CreatedAt,
+			&obj.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan session device: %w", err)
+		}
+		res.Sessions = append(res.Sessions, obj)
+	}
+
+	return res, nil
+}
+
+func (r *sessionRepo) DeleteSessionsByDevice(ctx context.Context, req *pb.DeleteSessionsByDeviceRequest) error {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.DeleteSessionsByDevice")
+	defer dbSpan.Finish()
+
+	var query = `DELETE FROM "session"
+		WHERE data = $1 AND project_id = $2
+			AND client_type_id = $3 AND user_id_auth = $4`
+
+	result, err := r.db.Exec(ctx, query, req.Data, req.ProjectId, req.ClientTypeId, req.UserIdAuth)
+	if err != nil {
+		return fmt.Errorf("failed to delete sessions by filter: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+
+	return nil
+}
+
+func (r *sessionRepo) DeleteSessionsExceptCurrent(ctx context.Context, req *pb.DeleteSessionsExceptCurrentRequest) error {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.DeleteSessionsExceptCurrent")
+	defer dbSpan.Finish()
+
+	var query = `DELETE FROM "session"
+		WHERE project_id = $1 AND user_id_auth = $2
+		AND id != $3`
+
+	result, err := r.db.Exec(ctx, query, req.ProjectId, req.UserIdAuth, req.SessionId)
+	if err != nil {
+		return fmt.Errorf("failed to delete sessions except current: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+
+	return nil
+}
