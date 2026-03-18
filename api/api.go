@@ -44,11 +44,14 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	}
 
 	v3 := r.Group("/v3")
-	v3.Use(h.LoginMiddleware())
-	v3.POST("/multicompany/default-login", h.V3MultiCompanyLogin)
+	{
+		v3.POST("/multicompany/default-login", h.V3MultiCompanyLogin)
 
+		v3.POST("/ugen/register", h.UgenRegister)
+		v3.POST("/ugen/login", h.UgenLogin)
+	}
 	v2.Use(h.AuthMiddleware())
-	{ 
+	{
 		// register
 		v2.POST("/register", h.V2Register)
 
