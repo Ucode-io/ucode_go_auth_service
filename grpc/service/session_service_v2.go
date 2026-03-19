@@ -117,7 +117,6 @@ func (s *sessionService) UgenLogin(ctx context.Context, req *pb.UgenLoginReq) (*
 			}
 
 			if !ugenStatus.IsUgen {
-				log.Println("AUTHO ASSING GA KIRDIIII")
 				_, err = s.services.ProjectServiceClient().UpdateProjectUgenAccess(ctx,
 					&pbCompany.UpdateProjectUgenAccessRequest{CompanyId: company.Company.Id, ProjectId: projId})
 				if err != nil {
