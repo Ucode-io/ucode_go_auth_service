@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"runtime"
 	"strings"
@@ -116,13 +117,11 @@ func (s *sessionService) UgenLogin(ctx context.Context, req *pb.UgenLoginReq) (*
 			}
 
 			if !ugenStatus.IsUgen {
-				assigned, err := s.services.ProjectServiceClient().AutoAssignUgenIfSingle(ctx,
-					&pbCompany.AutoAssignUgenIfSingleRequest{CompanyId: company.Company.Id})
+				log.Println("AUTHO ASSING GA KIRDIIII")
+				_, err = s.services.ProjectServiceClient().UpdateProjectUgenAccess(ctx,
+					&pbCompany.UpdateProjectUgenAccessRequest{CompanyId: company.Company.Id, ProjectId: projId})
 				if err != nil {
 					s.log.Warn("!!!UgenLogin--->AutoAssignUgen skipped", logger.Error(err))
-					continue
-				}
-				if !assigned.Assigned {
 					continue
 				}
 			}
