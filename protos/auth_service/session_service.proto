@@ -40,6 +40,20 @@ service SessionService {
   rpc DeleteSessionsExceptCurrent(DeleteSessionsExceptCurrentRequest) returns (google.protobuf.Empty) {}
 
   rpc UserDefaultProject(UserDefaultProjectReq) returns (UserDefaultProjectResp) {}
+
+  rpc UgenLogin(UgenLoginReq) returns (UgenLoginResp) {}
+}
+
+message UgenLoginReq {
+  string login = 1;
+  string password = 2;
+  string client_ip = 3;
+  string user_agent = 4;
+}
+
+message UgenLoginResp {
+  V2LoginResponse response = 1;
+  google.protobuf.Struct project_data = 2;
 }
 
 message UserDefaultProjectReq {
@@ -431,6 +445,7 @@ message V2LoginRequest {
   string client_ip = 19;
   string service_type = 20;
   string session_info = 21;
+  string user_id = 22;
 }
 
 message V2LoginWithOptionRequest {

@@ -35,6 +35,283 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+var (
+	errUserNotFound   = status.Error(codes.NotFound, "user not found")
+	errNoValidProject = status.Error(codes.NotFound, "user project not found")
+	errUnableGenToken = status.Error(codes.Internal, "unable to generate token")
+)
+
+func (s *sessionService) UgenLogin(ctx context.Context, req *pb.UgenLoginReq) (*pb.UgenLoginResp, error) {
+	s.log.Info("UgenLogin -->", logger.Any("request", req))
+
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.UgenLogin", req)
+	defer dbSpan.Finish()
+
+	user, err := s.strg.User().GetByUsername(ctx, req.GetLogin())
+	if err != nil {
+		s.log.Error("!!!UgenLogin--->GetByUsername", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if len(user.GetId()) == 0 {
+		return nil, errUserNotFound
+	}
+
+	if err = s.verifyAndMigratePassword(user, req.GetPassword()); err != nil {
+		s.log.Error("!!!UgenLogin--->verifyPassword", logger.Error(err))
+		return nil, err
+	}
+
+	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
+	if err != nil {
+		s.log.Error("!!!UgenLogin--->GetUserProjects", logger.Error(err))
+		return nil, status.Error(codes.NotFound, "cant get user projects")
+	}
+
+	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
+	if err != nil {
+		s.log.Error("!!!UgenLogin--->GetUserEnvProjects", logger.Error(err))
+		return nil, status.Error(codes.NotFound, "cant get user env projects")
+	}
+
+	for _, item := range userProjects.Companies {
+		company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{Id: item.Id})
+		if err != nil {
+			s.log.Error("!!!UgenLogin--->GetCompanyById", logger.Error(err))
+			continue
+		}
+
+		for _, projId := range item.ProjectIds {
+			projectInfo, err := s.services.ProjectServiceClient().GetById(
+				ctx, &pbCompany.GetProjectByIdRequest{
+					ProjectId: projId,
+					CompanyId: company.Company.Id,
+				},
+			)
+			if err != nil {
+				s.log.Error("!!!UgenLogin--->GetProjectById", logger.Error(err))
+				continue
+			}
+
+			clientType, err := s.strg.User().GetUserProjectClientTypes(
+				ctx, &pb.UserInfoPrimaryKey{
+					UserId:    user.GetId(),
+					ProjectId: projId,
+				},
+			)
+			if err != nil {
+				s.log.Error("!!!UgenLogin--->GetUserProjectClientTypes", logger.Error(err))
+				continue
+			}
+
+			ugenStatus, err := s.services.ProjectServiceClient().GetProjectUgenStatus(
+				ctx, &pbCompany.GetProjectUgenStatusRequest{
+					ProjectId: projId,
+					CompanyId: company.Company.Id,
+				},
+			)
+			if err != nil {
+				s.log.Warn("!!!UgenLogin--->GetProjectUgenStatus skipped", logger.Error(err))
+				continue
+			}
+
+			if !ugenStatus.IsUgen {
+				_, err = s.services.ProjectServiceClient().UpdateProjectUgenAccess(ctx,
+					&pbCompany.UpdateProjectUgenAccessRequest{CompanyId: company.Company.Id, ProjectId: projId})
+				if err != nil {
+					s.log.Warn("!!!UgenLogin--->AutoAssignUgen skipped", logger.Error(err))
+					continue
+				}
+			}
+
+			userStatus, err := s.strg.User().GetUserStatus(ctx, user.GetId(), projId)
+			if err != nil {
+				s.log.Warn("!!!UgenLogin--->GetUserStatus skipped", logger.Error(err))
+				continue
+			}
+			if userStatus == config.UserStatusBlocked {
+				continue
+			}
+
+			var (
+				prodEnvId      string
+				projectInfoMap map[string]any
+				data           *pbObject.LoginDataRes
+			)
+
+			environments, err := s.services.EnvironmentService().GetList(
+				ctx, &pbCompany.GetEnvironmentListRequest{
+					Ids:       userEnvProject.EnvProjects[projId],
+					Limit:     100,
+					ProjectId: projId,
+					Search:    "Production",
+				},
+			)
+			if err != nil {
+				s.log.Warn("!!!UgenLogin--->GetEnvironmentList skipped", logger.Error(err))
+				continue
+			}
+			for _, env := range environments.Environments {
+				if env.Name == "Production" {
+					prodEnvId = env.Id
+					break
+				}
+			}
+
+			if prodEnvId == "" {
+				s.log.Warn("!!!UgenLogin--->no Production env found", logger.String("projectId", projId))
+				continue
+			}
+
+			resource, err := s.services.ServiceResource().GetSingle(
+				ctx, &pbCompany.GetSingleServiceResourceReq{
+					ProjectId:     projId,
+					EnvironmentId: prodEnvId,
+					ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+				},
+			)
+			if err != nil {
+				s.log.Warn("!!!UgenLogin--->GetSingleServiceResource skipped", logger.Error(err))
+				continue
+			}
+
+			if resource.ResourceType != 3 {
+				s.log.Warn("!!!UgenLogin--->unsupported resource type", logger.Int("type", int(resource.ResourceType)))
+				continue
+			}
+
+			svc, err := s.serviceNode.GetByNodeType(projId, resource.NodeType)
+			if err != nil {
+				s.log.Warn("!!!UgenLogin--->GetByNodeType skipped", logger.Error(err))
+				continue
+			}
+
+			loginData, err := svc.GoLoginService().LoginData(
+				ctx, &nb.LoginDataReq{
+					UserId:                user.GetId(),
+					ClientType:            clientType.ClientTypeIds[0],
+					ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+				},
+			)
+			if err != nil {
+				s.log.Error("!!!UgenLogin--->LoginData", logger.Error(err))
+				return nil, status.Error(codes.Internal, "invalid user project data")
+			}
+
+			if err = helper.MarshalToStruct(&loginData, &data); err != nil {
+				s.log.Error("!!!UgenLogin--->MarshalToStruct", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			if !data.GetUserFound() {
+				return nil, errUserNotFound
+			}
+
+			userData, err := helper.ConvertStructToResponse(data.UserData)
+			if err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			delete(userData, "password")
+
+			if data.UserData, err = helper.ConvertMapToStruct(userData); err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			loginRes := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+				Role:           data.GetRole(),
+				UserId:         data.GetUserId(),
+				UserData:       data.GetUserData(),
+				UserFound:      data.GetUserFound(),
+				ClientType:     data.GetClientType(),
+				UserIdAuth:     data.GetUserIdAuth(),
+				LoginTableSlug: data.GetLoginTableSlug(),
+			})
+
+			resp, err := s.SessionAndTokenGenerator(
+				ctx, &pb.SessionAndTokenRequest{
+					LoginData:     loginRes,
+					ProjectId:     projId,
+					EnvironmentId: prodEnvId,
+					ClientId:      user.GetClientTypeId(),
+					ClientIp:      req.GetClientIp(),
+					UserAgent:     req.GetUserAgent(),
+				},
+			)
+			if err != nil {
+				s.log.Error("!!!UgenLogin--->SessionAndTokenGenerator", logger.Error(err))
+				return nil, errUnableGenToken
+			}
+			if resp == nil {
+				return nil, errUnableGenToken
+			}
+
+			projectInfoByte, err := json.Marshal(projectInfo)
+			if err != nil {
+				s.log.Error("!!!UserDefaultProject--->marshaling project info", logger.Error(err))
+				continue
+			}
+
+			if err := json.Unmarshal(projectInfoByte, &projectInfoMap); err != nil {
+				s.log.Error("!!!UserDefaultProject--->unmarshal project info", logger.Error(err))
+				continue
+			}
+
+			projectInfoStruct, err := helper.ConvertMapToStruct(projectInfoMap)
+			if err != nil {
+				s.log.Error("!!!UserDefaultProject--->converting project info to struct", logger.Error(err))
+				continue
+			}
+
+			return &pb.UgenLoginResp{
+				Response:    resp,
+				ProjectData: projectInfoStruct,
+			}, nil
+		}
+	}
+
+	s.log.Error("!!!UgenLogin--->NoValidProjectFound")
+	return nil, errNoValidProject
+}
+
+func (s *sessionService) verifyAndMigratePassword(user *pb.User, password string) error {
+	switch config.HashTypes[user.GetHashType()] {
+	case 1:
+		match, err := security.ComparePassword(user.GetPassword(), password)
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+		if !match {
+			return status.Error(codes.Unauthenticated, "username or password is wrong")
+		}
+		go func() {
+			migrateCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			hashed, err := security.HashPasswordBcrypt(password)
+			if err != nil {
+				s.log.Error("!!!migratePassword--->HashBcrypt", logger.Error(err))
+				return
+			}
+			if err = s.strg.User().UpdatePassword(migrateCtx, user.GetId(), hashed); err != nil {
+				s.log.Error("!!!migratePassword--->UpdatePassword", logger.Error(err))
+			}
+		}()
+
+	case 2:
+		match, err := security.ComparePasswordBcrypt(user.GetPassword(), password)
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+		if !match {
+			return status.Error(codes.Unauthenticated, "username or password is wrong")
+		}
+
+	default:
+		return status.Error(codes.Internal, "invalid hash type")
+	}
+	return nil
+}
+
 func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDefaultProjectReq) (*pb.UserDefaultProjectResp, error) {
 	s.log.Info("UserDefaultProject --> ", logger.Any("request: ", req))
 
@@ -46,19 +323,35 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 		return nil, err
 	}
 
-	if user == nil {
-		return nil, status.Error(codes.NotFound, "Cannot get user")
+	if user == nil || user.Id == "" {
+		return nil, status.Error(codes.NotFound, "cannot get user")
 	}
 
-	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
-	if err != nil {
-		s.log.Error("!!!UserDefaultProject--->GetUserProjects", logger.Error(err))
+	var (
+		userProjects   *pb.GetUserProjectsRes
+		userEnvProject *models.GetUserEnvProjectRes
+		projectsErr    error
+		envProjectsErr error
+		initWg         sync.WaitGroup
+	)
+
+	initWg.Add(2)
+	go func() {
+		defer initWg.Done()
+		userProjects, projectsErr = s.strg.User().GetUserProjects(ctx, user.GetId())
+	}()
+	go func() {
+		defer initWg.Done()
+		userEnvProject, envProjectsErr = s.strg.User().GetUserEnvProjects(ctx, user.GetId())
+	}()
+	initWg.Wait()
+
+	if projectsErr != nil {
+		s.log.Error("!!!UserDefaultProject--->GetUserProjects", logger.Error(projectsErr))
 		return nil, status.Error(codes.NotFound, "cant get user projects")
 	}
-
-	userEnvProject, err := s.strg.User().GetUserEnvProjects(ctx, user.GetId())
-	if err != nil {
-		s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects", logger.Error(err))
+	if envProjectsErr != nil {
+		s.log.Error("!!!UserDefaultProject--->GetUserEnvProjects", logger.Error(envProjectsErr))
 		return nil, status.Error(codes.NotFound, "cant get user env projects")
 	}
 
@@ -72,54 +365,67 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 				projectInfo  *pbCompany.Project
 				environments *pbCompany.GetEnvironmentListResponse
 				userSt       string
-				companyErr   error
-				clientErr    error
-				projectErr   error
-				envErr       error
-				statusErr    error
-				innerWg      sync.WaitGroup
+
+				companyErr error
+				clientErr  error
+				projectErr error
+				envErr     error
+				statusErr  error
+
+				innerWg sync.WaitGroup
 			)
 
 			innerWg.Add(5)
+
 			go func() {
 				defer innerWg.Done()
-				company, companyErr = s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{Id: companyId})
+				company, companyErr = s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{
+					Id: companyId,
+				})
 			}()
+
 			go func() {
 				defer innerWg.Done()
-				clientType, clientErr = s.strg.User().GetUserProjectClientTypes(ctx, &pb.UserInfoPrimaryKey{UserId: user.GetId(), ProjectId: projId})
+				clientType, clientErr = s.strg.User().GetUserProjectClientTypes(ctx, &pb.UserInfoPrimaryKey{
+					UserId:    user.GetId(),
+					ProjectId: projId,
+				})
 			}()
+
 			go func() {
 				defer innerWg.Done()
 				projectInfo, projectErr = s.services.ProjectServiceClient().GetById(ctx, &pbCompany.GetProjectByIdRequest{
-					ProjectId: projId, CompanyId: companyId,
+					ProjectId: projId,
+					CompanyId: companyId,
 				})
 			}()
+
 			go func() {
 				defer innerWg.Done()
 				environments, envErr = s.services.EnvironmentService().GetList(ctx, &pbCompany.GetEnvironmentListRequest{
 					Ids:       userEnvProject.EnvProjects[projId],
 					Limit:     100,
 					ProjectId: projId,
-					Search:    "Production",
 				})
 			}()
+
 			go func() {
 				defer innerWg.Done()
 				userSt, statusErr = s.strg.User().GetUserStatus(ctx, user.Id, projId)
 			}()
+
 			innerWg.Wait()
 
-			if companyErr != nil || company == nil || company.Company == nil || len(company.Company.Id) == 0 {
+			if companyErr != nil || company.GetCompany().GetId() == "" {
 				continue
 			}
-			if clientErr != nil || len(clientType.ClientTypeIds) == 0 {
+			if clientErr != nil || len(clientType.GetClientTypeIds()) == 0 {
 				continue
 			}
-			if projectErr != nil || len(projectInfo.ProjectId) == 0 {
+			if projectErr != nil || projectInfo.GetProjectId() == "" {
 				continue
 			}
-			if envErr != nil || len(environments.Environments) == 0 {
+			if envErr != nil || len(environments.GetEnvironments()) == 0 {
 				continue
 			}
 			if statusErr != nil || userSt == config.UserStatusBlocked {
@@ -143,18 +449,18 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 
 			projectInfoByte, err := json.Marshal(projectInfo)
 			if err != nil {
-				s.log.Error("!!!UserDefaultProject--->marshaling project info", logger.Error(err))
+				s.log.Error("!!!UserDefaultProject--->marshal projectInfo", logger.Error(err))
 				continue
 			}
 
 			if err := json.Unmarshal(projectInfoByte, &projectInfoMap); err != nil {
-				s.log.Error("!!!UserDefaultProject--->unmarshal project info", logger.Error(err))
+				s.log.Error("!!!UserDefaultProject--->unmarshal projectInfo", logger.Error(err))
 				continue
 			}
 
 			resourceEnvStruct, err := helper.ConvertMapToStruct(projectInfoMap)
 			if err != nil {
-				s.log.Error("!!!UserDefaultProject--->converting project info to struct", logger.Error(err))
+				s.log.Error("!!!UserDefaultProject--->ConvertMapToStruct", logger.Error(err))
 				continue
 			}
 
@@ -168,7 +474,7 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 		}
 	}
 
-	s.log.Error("!!!UserDefaultProject--->NoValidProjectFound")
+	s.log.Error("!!!UserDefaultProject--->NoValidProjectFound", logger.Any("userId", user.GetId()))
 	return nil, status.Error(codes.NotFound, "user project not found")
 }
 
@@ -190,7 +496,7 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	}
 
 	if user == nil || len(user.GetId()) == 0 {
-		return nil, status.Error(codes.NotFound, "user not found")
+		return nil, errUserNotFound
 	}
 
 	reqLoginData := &pbObject.LoginDataReq{
@@ -269,9 +575,8 @@ func (s *sessionService) V2Login(ctx context.Context, req *pb.V2LoginRequest) (*
 	}
 
 	if !data.UserFound {
-		customError := errors.New("user not found")
-		s.log.Error("!!!Login--->", logger.Error(customError))
-		return nil, status.Error(codes.NotFound, customError.Error())
+		s.log.Error("!!!Login--->", logger.Error(errUserNotFound))
+		return nil, status.Error(codes.NotFound, errUserNotFound.Error())
 	}
 
 	userData, err := helper.ConvertStructToResponse(data.UserData)
@@ -822,9 +1127,8 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		}
 
 		if !data.UserFound {
-			customError := errors.New("user not found")
-			s.log.Error("!!!LoginMiddleware--->", logger.Error(customError))
-			return nil, status.Error(codes.NotFound, customError.Error())
+			s.log.Error("!!!LoginMiddleware--->", logger.Error(errUserNotFound))
+			return nil, status.Error(codes.NotFound, errUserNotFound.Error())
 		}
 
 		if !data.ComparePassword {

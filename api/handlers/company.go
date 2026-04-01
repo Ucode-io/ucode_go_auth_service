@@ -30,6 +30,8 @@ func (h *Handler) RegisterCompany(c *gin.Context) {
 		return
 	}
 
+	company.IsUgen = false
+
 	resp, err := h.services.CompanyService().Register(
 		c.Request.Context(), &company,
 	)
