@@ -2548,7 +2548,8 @@ func (s *sessionService) GetUserInfoByToken(ctx context.Context, req *pb.GetUser
 		UserId:         tokenInfo.UserId,
 		RoleId:         tokenInfo.RoleID,
 		ProjectId:      tokenInfo.ProjectID,
-		ClientId:       tokenInfo.ClientID,
+		ClientTypeId:   tokenInfo.ClientTypeId,
+		UserIdAuth:     tokenInfo.UserIdAuth,
 		LoginTableSlug: tokenInfo.LoginTableSlug,
 	}, nil
 }
