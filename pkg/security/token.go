@@ -89,7 +89,7 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 	result.ID, ok = claims["id"].(string)
 	result.RoleID = claims["role_id"].(string)
 	result.UserId = claims["user_id"].(string)
-	result.ClientTypeId = claims["client_id"].(string)
+	result.ClientTypeId = claims["client_type_id"].(string)
 	result.UserIdAuth = claims["user_id_auth"].(string)
 	if !ok {
 		err = errors.New("cannot parse 'id' field")
