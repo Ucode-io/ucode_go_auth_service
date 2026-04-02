@@ -2533,3 +2533,22 @@ func (s *sessionService) DeleteSessionsExceptCurrent(ctx context.Context, req *p
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *userService) GetUserInfoByToken(ctx context.Context, req *pb.GetUserInfoByTokenReq) (*pb.GetUserInfoByTokenResp, error) {
+	s.log.Info("GetUserInfoByToken", logger.Any("req", req))
+
+	tokenInfo, err := security.ParseClaims(req.Token, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!GetUserInfoByToken->ParseClaims--->", logger.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	return &pb.GetUserInfoByTokenResp{
+		SessionId:      tokenInfo.ID,
+		UserId:         tokenInfo.UserId,
+		RoleId:         tokenInfo.RoleID,
+		ProjectId:      tokenInfo.ProjectID,
+		ClientId:       tokenInfo.ClientID,
+		LoginTableSlug: tokenInfo.LoginTableSlug,
+	}, nil
+}
