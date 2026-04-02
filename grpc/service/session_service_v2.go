@@ -2534,7 +2534,7 @@ func (s *sessionService) DeleteSessionsExceptCurrent(ctx context.Context, req *p
 	return &emptypb.Empty{}, nil
 }
 
-func (s *userService) GetUserInfoByToken(ctx context.Context, req *pb.GetUserInfoByTokenReq) (*pb.GetUserInfoByTokenResp, error) {
+func (s *sessionService) GetUserInfoByToken(ctx context.Context, req *pb.GetUserInfoByTokenReq) (*pb.GetUserInfoByTokenResp, error) {
 	s.log.Info("GetUserInfoByToken", logger.Any("req", req))
 
 	tokenInfo, err := security.ParseClaims(req.Token, s.cfg.SecretKey)
