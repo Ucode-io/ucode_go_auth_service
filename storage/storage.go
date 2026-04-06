@@ -87,6 +87,7 @@ type UserRepoI interface {
 	UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserRequest, loginType string) (*pb.SyncUserResponse, error)
 	UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error)
 	GetUserStatus(ctx context.Context, userId, projectId string) (status string, err error)
+	GetProjectUsersCount(ctx context.Context, projectId string) (int32, error)
 }
 
 type SessionRepoI interface {

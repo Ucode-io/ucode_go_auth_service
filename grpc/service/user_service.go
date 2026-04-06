@@ -174,3 +174,17 @@ func (s *userService) DeleteUser(ctx context.Context, req *pb.UserPrimaryKey) (*
 
 	return res, nil
 }
+
+func (s *userService) GetProjectUsersCount(ctx context.Context, req *pb.GetProjectUsersCountRequest) (*pb.GetProjectUsersCountResponse, error) {
+	s.log.Info("---GetProjectUsersCount--->", logger.Any("req", req))
+
+	count, err := s.strg.User().GetProjectUsersCount(ctx, req.GetProjectId())
+	if err != nil {
+		s.log.Error("!!!GetProjectUsersCount--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.GetProjectUsersCountResponse{
+		Count: count,
+	}, nil
+}
