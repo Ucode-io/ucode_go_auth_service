@@ -22,6 +22,7 @@ require (
 	github.com/saidamir98/udevs_pkg v0.0.0-20220413125729-5342e90c08a3
 	github.com/spf13/cast v1.5.0
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
+	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.8.9
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
