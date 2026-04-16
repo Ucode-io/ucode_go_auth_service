@@ -405,12 +405,21 @@ func (h *Handler) V2Register(c *gin.Context) {
 	}
 
 	var (
-		registerType  = body.Data["type"].(string)
-		clientTypeId  = body.Data["client_type_id"].(string)
-		roleId        = body.Data["role_id"].(string)
-		projectId     = helper.AnyToString(c.Get("project_id"))
-		environmentId = helper.AnyToString(c.Get("environment_id"))
+		registerType = body.Data["type"].(string)
+		clientTypeId = body.Data["client_type_id"].(string)
+		roleId       = body.Data["role_id"].(string)
+
+		projectId     = body.Data["project_id"].(string)
+		environmentId = body.Data["environment_id"].(string)
 	)
+
+	if len(projectId) == 0 {
+		projectId = helper.AnyToString(c.Get("project_id"))
+	}
+
+	if len(environmentId) == 0 {
+		environmentId = helper.AnyToString(c.Get("environment_id"))
+	}
 
 	for _, id := range []string{clientTypeId, roleId, projectId, environmentId} {
 		if !util.IsValidUUID(id) {
