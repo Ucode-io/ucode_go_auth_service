@@ -516,7 +516,28 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 		}
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	var isUgen bool
+	if user.ProjectId != "" {
+		project, err := h.services.ProjectServiceClient().GetById(
+			c.Request.Context(), &pb.GetProjectByIdRequest{ProjectId: user.ProjectId},
+		)
+		if err == nil {
+			ugenStatus, err := h.services.ProjectServiceClient().GetProjectUgenStatus(
+				c.Request.Context(), &pb.GetProjectUgenStatusRequest{
+					ProjectId: user.ProjectId,
+					CompanyId: project.GetCompanyId(),
+				},
+			)
+			if err == nil {
+				isUgen = ugenStatus.GetIsUgen()
+			}
+		}
+	}
+
+	h.handleResponse(c, http.OK, struct {
+		*pba.V2LoginResponse
+		IsUgen bool `json:"is_ugen"`
+	}{resp, isUgen})
 }
 
 // V2RefreshTokenSuperAdmin godoc
