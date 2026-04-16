@@ -1051,11 +1051,14 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	query := `DELETE FROM "user_project" 
 	WHERE  
 	user_id = :user_id and 
-	client_type_id = :client_type_id
+	client_type_id = :client_type_id and
+	project_id = :project_id
+
 	`
 
 	params["user_id"] = req.UserId
 	params["client_type_id"] = req.ClientTypeId
+	params["project_id"] = req.ProjectId
 
 	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx, q, args...)
