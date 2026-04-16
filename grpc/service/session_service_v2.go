@@ -314,6 +314,8 @@ func (s *sessionService) ugenLoginForProject(ctx context.Context, user *pb.User,
 		return nil, nil
 	}
 
+	projectInfoMap["environment_id"] = prodEnvId
+
 	projectInfoStruct, err := helper.ConvertMapToStruct(projectInfoMap)
 	if err != nil {
 		s.log.Error("!!!UgenLogin--->converting project info to struct", logger.Error(err))
