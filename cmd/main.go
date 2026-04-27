@@ -99,7 +99,7 @@ func main() {
 
 	serviceNodes := service.NewServiceNodes()
 
-	// connection with shared services
+	/// connection with shared services
 	uConf := config.Load()
 	grpcSvcs, err := client.NewSharedGrpcClients(ctx, uConf)
 	if err != nil {
