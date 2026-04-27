@@ -501,6 +501,21 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 				prodEnvId = environments.Environments[0].Id
 			}
 
+
+			// FIXED TEMPORARY
+			if _, srErr := s.services.ServiceResource().GetSingle(ctx, &pbCompany.GetSingleServiceResourceReq{
+				ProjectId:     projectInfo.ProjectId,
+				EnvironmentId: prodEnvId,
+				ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+			}); srErr != nil {
+				s.log.Warn("!!!UserDefaultProject--->skip project: no BUILDER_SERVICE",
+					logger.String("project_id", projectInfo.ProjectId),
+					logger.String("environment_id", prodEnvId),
+					logger.Error(srErr),
+				)
+				continue
+			}
+
 			projectInfoByte, err := json.Marshal(projectInfo)
 			if err != nil {
 				s.log.Error("!!!UserDefaultProject--->marshal projectInfo", logger.Error(err))
