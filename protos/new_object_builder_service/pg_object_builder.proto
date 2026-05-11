@@ -33,6 +33,7 @@ service ObjectBuilderService {
     rpc ExecuteSQL(ExecuteSQLRequest) returns (ExecuteSQLResponse);
 
     rpc GetResourceUsage(GetResourceUsageRequest) returns (GetResourceUsageResponse);
+    rpc GetTableSchema(CommonMessage) returns (CommonMessage);
 }
 
 message GetResourceUsageRequest {
@@ -58,6 +59,7 @@ message ExecuteSQLResponse {
   repeated google.protobuf.Struct rows = 1;
   int64 rows_affected                  = 2;
   string error                         = 3;
+  map<string, string> types            = 4;
 }
 
 message UserActivityReqeust {
