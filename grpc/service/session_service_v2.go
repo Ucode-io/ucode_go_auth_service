@@ -20,6 +20,7 @@ import (
 	nb "ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 	"ucode/ucode_go_auth_service/genproto/sms_service"
+	"ucode/ucode_go_auth_service/grpc/client"
 	"ucode/ucode_go_auth_service/pkg/eimzo"
 	"ucode/ucode_go_auth_service/pkg/firebase"
 	"ucode/ucode_go_auth_service/pkg/helper"
@@ -1149,6 +1150,23 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 			LoginTableSlug: data.GetLoginTableSlug(),
 		})
 
+		// Opt-in: when the caller sets `is_connections=true`, resolve the user's
+		// connections for this client_type and seed `Tables` so the JWT carries
+		// {table_slug, object_id} pairs used by the connection-based row filter
+		// (see object_builder_service/pkg/helper/automaticFilter.go).
+		if req.Data["is_connections"] == "true" {
+			connTables, connErr := s.resolveConnectionTables(
+				ctx, services, serviceResource,
+				req.Data["client_type_id"],
+				req.Data["user_id"],
+				req.Data["connection_options"],
+			)
+			if connErr != nil {
+				s.log.Error("!!!LoginMiddleware--->resolveConnectionTables", logger.Error(connErr))
+				return nil, connErr
+			}
+			req.Tables = append(req.Tables, connTables...)
+		}
 	}
 	if req.Tables == nil {
 		req.Tables = []*pb.Object{}
@@ -1192,6 +1210,189 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 		LoginTableSlug:  resp.GetLoginTableSlug(),
 		AddationalTable: resp.GetAddationalTable(),
 	}, nil
+}
+
+// resolveConnectionTables loads the user's connections for the given client_type,
+// fetches the matching options for each, and returns the {table_slug, object_id}
+// pairs to embed in the JWT's `tables` claim.
+//
+// - 0 options for a connection → skipped (nothing to filter on).
+// - 1 option → auto-picked.
+// - >1 options → caller must supply `connection_options` (JSON object
+//   {table_slug: object_id}) to pick; otherwise FailedPrecondition with the
+//   list of unresolved connections + their option ids.
+func (s *sessionService) resolveConnectionTables(
+	ctx context.Context,
+	services client.SharedServiceManagerI,
+	serviceResource *pbCompany.ServiceResourceModel,
+	clientTypeId string,
+	userId string,
+	connectionOptionsRaw string,
+) ([]*pb.Object, error) {
+	choice := map[string]string{}
+	if connectionOptionsRaw != "" {
+		if err := json.Unmarshal([]byte(connectionOptionsRaw), &choice); err != nil {
+			return nil, status.Error(codes.InvalidArgument,
+				"connection_options must be a JSON object of {table_slug: object_id}")
+		}
+	}
+
+	var rawConnections []any
+	switch serviceResource.ResourceType {
+	case pbCompany.ResourceType_MONGODB:
+		structData, err := helper.ConvertMapToStruct(map[string]any{
+			"limit":          100,
+			"offset":         0,
+			"client_type_id": clientTypeId,
+		})
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		listResp, err := services.GetObjectBuilderServiceByType(serviceResource.GetNodeType()).GetList(ctx, &pbObject.CommonMessage{
+			TableSlug: "connections",
+			ProjectId: serviceResource.GetResourceEnvironmentId(),
+			Data:      structData,
+		})
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		rawConnections, _ = listResp.GetData().AsMap()["response"].([]any)
+	case pbCompany.ResourceType_POSTGRESQL:
+		structData, err := helper.ConvertMapToStruct(map[string]any{
+			"limit":                     100,
+			"offset":                    0,
+			"client_type_id_from_token": clientTypeId,
+		})
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		listResp, err := services.GoObjectBuilderService().GetList(ctx, &nb.CommonMessage{
+			TableSlug: "connections",
+			ProjectId: serviceResource.GetResourceEnvironmentId(),
+			Data:      structData,
+		})
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		rawConnections, _ = listResp.GetData().AsMap()["response"].([]any)
+	}
+
+	type ambig struct {
+		TableSlug string   `json:"table_slug"`
+		Options   []string `json:"options"`
+	}
+
+	var (
+		tables    []*pb.Object
+		ambiguous []ambig
+		fetchErr  error
+		mu        sync.Mutex
+		wg        sync.WaitGroup
+	)
+
+	for _, raw := range rawConnections {
+		connMap, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		guid, _ := connMap["guid"].(string)
+		tableSlug, _ := connMap["table_slug"].(string)
+		if guid == "" || tableSlug == "" {
+			continue
+		}
+
+		wg.Add(1)
+		go func(connectionId, slug string) {
+			defer wg.Done()
+
+			var optionsData any
+			switch serviceResource.ResourceType {
+			case pbCompany.ResourceType_MONGODB:
+				optResp, err := services.GetLoginServiceByType(serviceResource.GetNodeType()).GetConnetionOptions(ctx, &pbObject.GetConnetionOptionsRequest{
+					ConnectionId:          connectionId,
+					ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
+					UserId:                userId,
+				})
+				if err != nil {
+					mu.Lock()
+					if fetchErr == nil {
+						fetchErr = err
+					}
+					mu.Unlock()
+					return
+				}
+				if optResp.GetData() != nil {
+					optionsData = optResp.GetData().AsMap()["response"]
+				}
+			case pbCompany.ResourceType_POSTGRESQL:
+				optResp, err := services.GoLoginService().GetConnetionOptions(ctx, &nb.GetConnetionOptionsRequest{
+					ConnectionId:          connectionId,
+					ResourceEnvironmentId: serviceResource.GetResourceEnvironmentId(),
+					UserId:                userId,
+					ProjectId:             serviceResource.GetProjectId(),
+				})
+				if err != nil {
+					mu.Lock()
+					if fetchErr == nil {
+						fetchErr = err
+					}
+					mu.Unlock()
+					return
+				}
+				if optResp.GetData() != nil {
+					optionsData = optResp.GetData().AsMap()["response"]
+				}
+			}
+
+			options, _ := optionsData.([]any)
+			optIds := make([]string, 0, len(options))
+			for _, o := range options {
+				if om, _ := o.(map[string]any); om != nil {
+					if id, _ := om["guid"].(string); id != "" {
+						optIds = append(optIds, id)
+					}
+				}
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+
+			switch len(optIds) {
+			case 0:
+				// nothing matches for this user — skip
+			case 1:
+				tables = append(tables, &pb.Object{
+					TableSlug: slug,
+					ObjectId:  optIds[0],
+				})
+			default:
+				if chosen := choice[slug]; chosen != "" {
+					for _, id := range optIds {
+						if id == chosen {
+							tables = append(tables, &pb.Object{
+								TableSlug: slug,
+								ObjectId:  chosen,
+							})
+							return
+						}
+					}
+				}
+				ambiguous = append(ambiguous, ambig{TableSlug: slug, Options: optIds})
+			}
+		}(guid, tableSlug)
+	}
+	wg.Wait()
+
+	if fetchErr != nil {
+		return nil, status.Error(codes.Internal, fetchErr.Error())
+	}
+	if len(ambiguous) > 0 {
+		payload, _ := json.Marshal(ambiguous)
+		return nil, status.Errorf(codes.FailedPrecondition,
+			"connection_options required for ambiguous connections: %s", string(payload))
+	}
+
+	return tables, nil
 }
 
 func (s *sessionService) V2RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
