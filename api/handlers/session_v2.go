@@ -94,6 +94,23 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 
 	var rawResponse []any
 
+
+	// FIXED TEMPORARY
+	reconnectIfPoolMissing := func(err error) bool {
+		if err == nil || !strings.Contains(err.Error(), "connection not found") {
+			return false
+		}
+		_, recErr := h.services.ResourceService().ReconnectResource(ctx, &pbCompany.ReconnectResourceRequest{
+			Id:        resource.GetResourceId(),
+			ProjectId: resource.GetProjectId(),
+		})
+		if recErr != nil {
+			h.log.Error("V3MultiCompanyLogin: ReconnectResource failed: " + recErr.Error())
+			return false
+		}
+		return true
+	}
+
 	switch resource.ResourceType {
 	case 1:
 		structData, _ := helper.ConvertMapToStruct(map[string]any{
@@ -102,11 +119,15 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 			"client_type_id": userProject.GetClientTypeId(),
 		})
 
-		resp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetList(ctx, &obs.CommonMessage{
+		req := &obs.CommonMessage{
 			TableSlug: "connections",
 			ProjectId: resource.ResourceEnvironmentId,
 			Data:      structData,
-		})
+		}
+		resp, err := services.GetObjectBuilderServiceByType(resource.NodeType).GetList(ctx, req)
+		if err != nil && reconnectIfPoolMissing(err) {
+			resp, err = services.GetObjectBuilderServiceByType(resource.NodeType).GetList(ctx, req)
+		}
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -121,11 +142,15 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 			"client_type_id_from_token": userProject.GetClientTypeId(),
 		})
 
-		resp, err := services.GoObjectBuilderService().GetList(ctx, &nobs.CommonMessage{
+		req := &nobs.CommonMessage{
 			TableSlug: "connections",
 			ProjectId: resource.ResourceEnvironmentId,
 			Data:      structData,
-		})
+		}
+		resp, err := services.GoObjectBuilderService().GetList(ctx, req)
+		if err != nil && reconnectIfPoolMissing(err) {
+			resp, err = services.GoObjectBuilderService().GetList(ctx, req)
+		}
 		if err != nil {
 			h.handleResponse(c, http.GRPCError, err.Error())
 			return
@@ -516,7 +541,30 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 		}
 	}
 
-	h.handleResponse(c, http.OK, resp)
+	var isUgen bool
+	if user.ProjectId != "" {
+		project, err := h.services.ProjectServiceClient().GetById(
+			c.Request.Context(), &pb.GetProjectByIdRequest{ProjectId: user.ProjectId},
+		)
+		if err == nil {
+			ugenStatus, err := h.services.ProjectServiceClient().GetProjectUgenStatus(
+				c.Request.Context(), &pb.GetProjectUgenStatusRequest{
+					ProjectId: user.ProjectId,
+					CompanyId: project.GetCompanyId(),
+				},
+			)
+			if err == nil {
+				isUgen = ugenStatus.GetIsUgen()
+			}
+		}
+	}
+
+	h.handleResponse(c, http.OK,
+		struct {
+			*pba.V2LoginResponse
+			IsUgen bool `json:"is_ugen"`
+		}{resp, isUgen},
+	)
 }
 
 // V2RefreshTokenSuperAdmin godoc

@@ -290,3 +290,19 @@ func (s *apiKeysService) ListClientToken(ctx context.Context, req *pb.ListClient
 
 	return resp, nil
 }
+func (s *apiKeysService) GetProjectApiKeysCount(ctx context.Context, req *pb.GetProjectApiKeysCountRequest) (*pb.GetProjectApiKeysCountResponse, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_apikey_v2.GetProjectApiKeysCount", req)
+	defer dbSpan.Finish()
+
+	s.log.Info("---GetProjectApiKeysCount--->>>>", logger.Any("req", req))
+
+	count, err := s.strg.ApiKeys().GetProjectApiKeysCount(ctx, req.GetProjectId())
+	if err != nil {
+		s.log.Error("---GetProjectApiKeysCount->Error--->>>", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.GetProjectApiKeysCountResponse{
+		Count: count,
+	}, nil
+}

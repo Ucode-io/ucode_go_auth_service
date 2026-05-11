@@ -125,154 +125,218 @@ func (s *sessionService) UgenLogin(ctx context.Context, req *pb.UgenLoginReq) (*
 				}
 			}
 
-			userStatus, err := s.strg.User().GetUserStatus(ctx, user.GetId(), projId)
+			resp, err := s.ugenLoginForProject(ctx, user, req, projId, clientType, projectInfo, userEnvProject)
 			if err != nil {
-				s.log.Warn("!!!UgenLogin--->GetUserStatus skipped", logger.Error(err))
-				continue
+				return nil, err
 			}
-			if userStatus == config.UserStatusBlocked {
-				continue
+			if resp != nil {
+				return resp, nil
 			}
+		}
+	}
 
-			var (
-				prodEnvId      string
-				projectInfoMap map[string]any
-				data           *pbObject.LoginDataRes
-			)
+	// Fallback: no ugen project found — log in to any project the user has access to.
+	s.log.Warn("!!!UgenLogin--->NoUgenProjectFound, falling back to any accessible project")
+	for _, item := range userProjects.Companies {
+		company, err := s.services.CompanyServiceClient().GetById(ctx, &pbCompany.GetCompanyByIdRequest{Id: item.Id})
+		if err != nil {
+			s.log.Error("!!!UgenLogin--->Fallback-GetCompanyById", logger.Error(err))
+			continue
+		}
 
-			environments, err := s.services.EnvironmentService().GetList(
-				ctx, &pbCompany.GetEnvironmentListRequest{
-					Ids:       userEnvProject.EnvProjects[projId],
-					Limit:     100,
+		for _, projId := range item.ProjectIds {
+			projectInfo, err := s.services.ProjectServiceClient().GetById(
+				ctx, &pbCompany.GetProjectByIdRequest{
 					ProjectId: projId,
-					Search:    "Production",
+					CompanyId: company.Company.Id,
 				},
 			)
 			if err != nil {
-				s.log.Warn("!!!UgenLogin--->GetEnvironmentList skipped", logger.Error(err))
-				continue
-			}
-			for _, env := range environments.Environments {
-				if env.Name == "Production" {
-					prodEnvId = env.Id
-					break
-				}
-			}
-
-			if prodEnvId == "" {
-				s.log.Warn("!!!UgenLogin--->no Production env found", logger.String("projectId", projId))
+				s.log.Error("!!!UgenLogin--->Fallback-GetProjectById", logger.Error(err))
 				continue
 			}
 
-			resource, err := s.services.ServiceResource().GetSingle(
-				ctx, &pbCompany.GetSingleServiceResourceReq{
-					ProjectId:     projId,
-					EnvironmentId: prodEnvId,
-					ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+			clientType, err := s.strg.User().GetUserProjectClientTypes(
+				ctx, &pb.UserInfoPrimaryKey{
+					UserId:    user.GetId(),
+					ProjectId: projId,
 				},
 			)
 			if err != nil {
-				s.log.Warn("!!!UgenLogin--->GetSingleServiceResource skipped", logger.Error(err))
+				s.log.Error("!!!UgenLogin--->Fallback-GetUserProjectClientTypes", logger.Error(err))
 				continue
 			}
 
-			if resource.ResourceType != 3 {
-				s.log.Warn("!!!UgenLogin--->unsupported resource type", logger.Int("type", int(resource.ResourceType)))
-				continue
-			}
-
-			svc, err := s.serviceNode.GetByNodeType(projId, resource.NodeType)
+			resp, err := s.ugenLoginForProject(ctx, user, req, projId, clientType, projectInfo, userEnvProject)
 			if err != nil {
-				s.log.Warn("!!!UgenLogin--->GetByNodeType skipped", logger.Error(err))
-				continue
+				return nil, err
 			}
-
-			loginData, err := svc.GoLoginService().LoginData(
-				ctx, &nb.LoginDataReq{
-					UserId:                user.GetId(),
-					ClientType:            clientType.ClientTypeIds[0],
-					ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
-				},
-			)
-			if err != nil {
-				s.log.Error("!!!UgenLogin--->LoginData", logger.Error(err))
-				return nil, status.Error(codes.Internal, "invalid user project data")
+			if resp != nil {
+				return resp, nil
 			}
-
-			if err = helper.MarshalToStruct(&loginData, &data); err != nil {
-				s.log.Error("!!!UgenLogin--->MarshalToStruct", logger.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-
-			if !data.GetUserFound() {
-				return nil, errUserNotFound
-			}
-
-			userData, err := helper.ConvertStructToResponse(data.UserData)
-			if err != nil {
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-
-			delete(userData, "password")
-
-			if data.UserData, err = helper.ConvertMapToStruct(userData); err != nil {
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-
-			loginRes := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
-				Role:           data.GetRole(),
-				UserId:         data.GetUserId(),
-				UserData:       data.GetUserData(),
-				UserFound:      data.GetUserFound(),
-				ClientType:     data.GetClientType(),
-				UserIdAuth:     data.GetUserIdAuth(),
-				LoginTableSlug: data.GetLoginTableSlug(),
-			})
-
-			resp, err := s.SessionAndTokenGenerator(
-				ctx, &pb.SessionAndTokenRequest{
-					LoginData:     loginRes,
-					ProjectId:     projId,
-					EnvironmentId: prodEnvId,
-					ClientId:      user.GetClientTypeId(),
-					ClientIp:      req.GetClientIp(),
-					UserAgent:     req.GetUserAgent(),
-				},
-			)
-			if err != nil {
-				s.log.Error("!!!UgenLogin--->SessionAndTokenGenerator", logger.Error(err))
-				return nil, errUnableGenToken
-			}
-			if resp == nil {
-				return nil, errUnableGenToken
-			}
-
-			projectInfoByte, err := json.Marshal(projectInfo)
-			if err != nil {
-				s.log.Error("!!!UserDefaultProject--->marshaling project info", logger.Error(err))
-				continue
-			}
-
-			if err := json.Unmarshal(projectInfoByte, &projectInfoMap); err != nil {
-				s.log.Error("!!!UserDefaultProject--->unmarshal project info", logger.Error(err))
-				continue
-			}
-
-			projectInfoStruct, err := helper.ConvertMapToStruct(projectInfoMap)
-			if err != nil {
-				s.log.Error("!!!UserDefaultProject--->converting project info to struct", logger.Error(err))
-				continue
-			}
-
-			return &pb.UgenLoginResp{
-				Response:    resp,
-				ProjectData: projectInfoStruct,
-			}, nil
 		}
 	}
 
 	s.log.Error("!!!UgenLogin--->NoValidProjectFound")
 	return nil, errNoValidProject
+}
+
+func (s *sessionService) ugenLoginForProject(ctx context.Context, user *pb.User, req *pb.UgenLoginReq, projId string, clientType *pb.GetUserProjectClientTypesResponse, projectInfo *pbCompany.Project, userEnvProject *models.GetUserEnvProjectRes) (*pb.UgenLoginResp, error) {
+	userStatus, err := s.strg.User().GetUserStatus(ctx, user.GetId(), projId)
+	if err != nil {
+		s.log.Warn("!!!UgenLogin--->GetUserStatus skipped", logger.Error(err))
+		return nil, nil
+	}
+	if userStatus == config.UserStatusBlocked {
+		return nil, nil
+	}
+
+	var (
+		prodEnvId      string
+		projectInfoMap map[string]any
+		data           *pbObject.LoginDataRes
+	)
+
+	environments, err := s.services.EnvironmentService().GetList(
+		ctx, &pbCompany.GetEnvironmentListRequest{
+			Ids:       userEnvProject.EnvProjects[projId],
+			Limit:     100,
+			ProjectId: projId,
+			Search:    "Production",
+		},
+	)
+	if err != nil {
+		s.log.Warn("!!!UgenLogin--->GetEnvironmentList skipped", logger.Error(err))
+		return nil, nil
+	}
+	for _, env := range environments.Environments {
+		if env.Name == "Production" {
+			prodEnvId = env.Id
+			break
+		}
+	}
+
+	if prodEnvId == "" {
+		s.log.Warn("!!!UgenLogin--->no Production env found", logger.String("projectId", projId))
+		return nil, nil
+	}
+
+	resource, err := s.services.ServiceResource().GetSingle(
+		ctx, &pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     projId,
+			EnvironmentId: prodEnvId,
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		s.log.Warn("!!!UgenLogin--->GetSingleServiceResource skipped", logger.Error(err))
+		return nil, nil
+	}
+
+	if resource.ResourceType != 3 {
+		s.log.Warn("!!!UgenLogin--->unsupported resource type", logger.Int("type", int(resource.ResourceType)))
+		return nil, nil
+	}
+
+	svc, err := s.serviceNode.GetByNodeType(projId, resource.NodeType)
+	if err != nil {
+		s.log.Warn("!!!UgenLogin--->GetByNodeType skipped", logger.Error(err))
+		return nil, nil
+	}
+
+	// 
+	loginDataReq := &nb.LoginDataReq{
+		UserId:                user.GetId(),
+		ClientType:            clientType.ClientTypeIds[0],
+		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+	}
+	loginData, err := svc.GoLoginService().LoginData(ctx, loginDataReq)
+	if err != nil && strings.Contains(err.Error(), "connection not found") {
+		if _, recErr := s.services.ResourceService().ReconnectResource(ctx, &pbCompany.ReconnectResourceRequest{
+			Id:        resource.GetResourceId(),
+			ProjectId: resource.GetProjectId(),
+		}); recErr == nil {
+			loginData, err = svc.GoLoginService().LoginData(ctx, loginDataReq)
+		} else {
+			s.log.Warn("!!!UgenLogin--->ReconnectResource failed", logger.Error(recErr))
+		}
+	}
+	if err != nil {
+		s.log.Warn("!!!UgenLogin--->LoginData skipped", logger.Error(err), logger.String("projectId", projId))
+		return nil, nil
+	}
+
+	if err = helper.MarshalToStruct(&loginData, &data); err != nil {
+		s.log.Error("!!!UgenLogin--->MarshalToStruct", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !data.GetUserFound() {
+		return nil, errUserNotFound
+	}
+
+	userData, err := helper.ConvertStructToResponse(data.UserData)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	delete(userData, "password")
+
+	if data.UserData, err = helper.ConvertMapToStruct(userData); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	loginRes := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+		Role:           data.GetRole(),
+		UserId:         data.GetUserId(),
+		UserData:       data.GetUserData(),
+		UserFound:      data.GetUserFound(),
+		ClientType:     data.GetClientType(),
+		UserIdAuth:     data.GetUserIdAuth(),
+		LoginTableSlug: data.GetLoginTableSlug(),
+	})
+
+	resp, err := s.SessionAndTokenGenerator(
+		ctx, &pb.SessionAndTokenRequest{
+			LoginData:     loginRes,
+			ProjectId:     projId,
+			EnvironmentId: prodEnvId,
+			ClientId:      user.GetClientTypeId(),
+			ClientIp:      req.GetClientIp(),
+			UserAgent:     req.GetUserAgent(),
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!UgenLogin--->SessionAndTokenGenerator", logger.Error(err))
+		return nil, errUnableGenToken
+	}
+	if resp == nil {
+		return nil, errUnableGenToken
+	}
+
+	projectInfoByte, err := json.Marshal(projectInfo)
+	if err != nil {
+		s.log.Error("!!!UgenLogin--->marshaling project info", logger.Error(err))
+		return nil, nil
+	}
+
+	if err := json.Unmarshal(projectInfoByte, &projectInfoMap); err != nil {
+		s.log.Error("!!!UgenLogin--->unmarshal project info", logger.Error(err))
+		return nil, nil
+	}
+
+	projectInfoMap["environment_id"] = prodEnvId
+
+	projectInfoStruct, err := helper.ConvertMapToStruct(projectInfoMap)
+	if err != nil {
+		s.log.Error("!!!UgenLogin--->converting project info to struct", logger.Error(err))
+		return nil, nil
+	}
+
+	return &pb.UgenLoginResp{
+		Response:    resp,
+		ProjectData: projectInfoStruct,
+	}, nil
 }
 
 func (s *sessionService) verifyAndMigratePassword(user *pb.User, password string) error {
@@ -446,6 +510,21 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 			}
 			if prodEnvId == "" {
 				prodEnvId = environments.Environments[0].Id
+			}
+
+
+			// FIXED TEMPORARY
+			if _, srErr := s.services.ServiceResource().GetSingle(ctx, &pbCompany.GetSingleServiceResourceReq{
+				ProjectId:     projectInfo.ProjectId,
+				EnvironmentId: prodEnvId,
+				ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+			}); srErr != nil {
+				s.log.Warn("!!!UserDefaultProject--->skip project: no BUILDER_SERVICE",
+					logger.String("project_id", projectInfo.ProjectId),
+					logger.String("environment_id", prodEnvId),
+					logger.Error(srErr),
+				)
+				continue
 			}
 
 			projectInfoByte, err := json.Marshal(projectInfo)
@@ -2733,4 +2812,24 @@ func (s *sessionService) DeleteSessionsExceptCurrent(ctx context.Context, req *p
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *sessionService) GetUserInfoByToken(ctx context.Context, req *pb.GetUserInfoByTokenReq) (*pb.GetUserInfoByTokenResp, error) {
+	s.log.Info("GetUserInfoByToken", logger.Any("req", req))
+
+	tokenInfo, err := security.ParseClaims(req.Token, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!GetUserInfoByToken->ParseClaims--->", logger.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	return &pb.GetUserInfoByTokenResp{
+		SessionId:      tokenInfo.ID,
+		UserId:         tokenInfo.UserId,
+		RoleId:         tokenInfo.RoleID,
+		ProjectId:      tokenInfo.ProjectID,
+		ClientTypeId:   tokenInfo.ClientTypeId,
+		UserIdAuth:     tokenInfo.UserIdAuth,
+		LoginTableSlug: tokenInfo.LoginTableSlug,
+	}, nil
 }

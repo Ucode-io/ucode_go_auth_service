@@ -626,3 +626,17 @@ func (r *apiKeysRepo) CheckClientIdStatus(ctx context.Context, clientId string) 
 
 	return status, nil
 }
+func (r *apiKeysRepo) GetProjectApiKeysCount(ctx context.Context, projectId string) (int32, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "api_keys.GetProjectApiKeysCount")
+	defer dbSpan.Finish()
+
+	var count int32
+	query := `SELECT count(*) FROM api_keys WHERE project_id = $1`
+
+	err := r.db.QueryRow(ctx, query, projectId).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}

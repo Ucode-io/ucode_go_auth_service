@@ -1051,11 +1051,14 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	query := `DELETE FROM "user_project" 
 	WHERE  
 	user_id = :user_id and 
-	client_type_id = :client_type_id
+	client_type_id = :client_type_id and
+	project_id = :project_id
+
 	`
 
 	params["user_id"] = req.UserId
 	params["client_type_id"] = req.ClientTypeId
+	params["project_id"] = req.ProjectId
 
 	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx, q, args...)
@@ -1366,4 +1369,19 @@ func (r *userRepo) GetUserProjectByUserIdProjectIdEnvId(ctx context.Context, use
 	}
 
 	return clientType.String, nil
+}
+
+func (r *userRepo) GetProjectUsersCount(ctx context.Context, projectId string) (int32, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetProjectUsersCount")
+	defer dbSpan.Finish()
+
+	var count int32
+	query := `SELECT count(user_id) FROM user_project WHERE project_id = $1`
+
+	err := r.db.QueryRow(ctx, query, projectId).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }

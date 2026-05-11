@@ -87,6 +87,7 @@ type UserRepoI interface {
 	UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserRequest, loginType string) (*pb.SyncUserResponse, error)
 	UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error)
 	GetUserStatus(ctx context.Context, userId, projectId string) (status string, err error)
+	GetProjectUsersCount(ctx context.Context, projectId string) (int32, error)
 }
 
 type SessionRepoI interface {
@@ -133,6 +134,7 @@ type ApiKeysRepoI interface {
 	ListClientToken(ctx context.Context, req *pb.ListClientTokenRequest) (res *pb.ListClientTokenResponse, err error)
 	CreateClientToken(ctx context.Context, clientId string, info map[string]any) error
 	CheckClientIdStatus(ctx context.Context, clientId string) (bool, error)
+	GetProjectApiKeysCount(ctx context.Context, projectId string) (int32, error)
 }
 
 type AppleSettingsI interface {

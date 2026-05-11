@@ -463,10 +463,19 @@ func (h *Handler) V2DeleteFromAuthTable(c *gin.Context) {
 		return
 	}
 
-	_, err := h.services.SyncUserService().DeleteUser(c.Request.Context(), &auth_service.DeleteSyncUserRequest{
-		UserId:       userID,
-		ClientTypeId: clientTypeID,
-	})
+	projectID, ok := c.Get("project_id")
+	if ok && !util.IsValidUUID(projectID.(string)) {
+		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
+		return
+	}
+
+	_, err := h.services.SyncUserService().DeleteUser(
+		c.Request.Context(), &auth_service.DeleteSyncUserRequest{
+			UserId:       userID,
+			ClientTypeId: clientTypeID,
+			ProjectId:    projectID.(string),
+		},
+	)
 	if err != nil {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
