@@ -534,10 +534,12 @@ func (h *Handler) V2RefreshToken(c *gin.Context) {
 		}
 	}
 
-	h.handleResponse(c, http.OK, struct {
-		*pba.V2LoginResponse
-		IsUgen bool `json:"is_ugen"`
-	}{resp, isUgen})
+	h.handleResponse(c, http.OK,
+		struct {
+			*pba.V2LoginResponse
+			IsUgen bool `json:"is_ugen"`
+		}{resp, isUgen},
+	)
 }
 
 // V2RefreshTokenSuperAdmin godoc
