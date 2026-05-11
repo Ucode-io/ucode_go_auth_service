@@ -243,16 +243,26 @@ func (s *sessionService) ugenLoginForProject(ctx context.Context, user *pb.User,
 		return nil, nil
 	}
 
-	loginData, err := svc.GoLoginService().LoginData(
-		ctx, &nb.LoginDataReq{
-			UserId:                user.GetId(),
-			ClientType:            clientType.ClientTypeIds[0],
-			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
-		},
-	)
+	// 
+	loginDataReq := &nb.LoginDataReq{
+		UserId:                user.GetId(),
+		ClientType:            clientType.ClientTypeIds[0],
+		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+	}
+	loginData, err := svc.GoLoginService().LoginData(ctx, loginDataReq)
+	if err != nil && strings.Contains(err.Error(), "connection not found") {
+		if _, recErr := s.services.ResourceService().ReconnectResource(ctx, &pbCompany.ReconnectResourceRequest{
+			Id:        resource.GetResourceId(),
+			ProjectId: resource.GetProjectId(),
+		}); recErr == nil {
+			loginData, err = svc.GoLoginService().LoginData(ctx, loginDataReq)
+		} else {
+			s.log.Warn("!!!UgenLogin--->ReconnectResource failed", logger.Error(recErr))
+		}
+	}
 	if err != nil {
-		s.log.Error("!!!UgenLogin--->LoginData", logger.Error(err))
-		return nil, status.Error(codes.Internal, "invalid user project data")
+		s.log.Warn("!!!UgenLogin--->LoginData skipped", logger.Error(err), logger.String("projectId", projId))
+		return nil, nil
 	}
 
 	if err = helper.MarshalToStruct(&loginData, &data); err != nil {
@@ -499,6 +509,21 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 			}
 			if prodEnvId == "" {
 				prodEnvId = environments.Environments[0].Id
+			}
+
+
+			// FIXED TEMPORARY
+			if _, srErr := s.services.ServiceResource().GetSingle(ctx, &pbCompany.GetSingleServiceResourceReq{
+				ProjectId:     projectInfo.ProjectId,
+				EnvironmentId: prodEnvId,
+				ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+			}); srErr != nil {
+				s.log.Warn("!!!UserDefaultProject--->skip project: no BUILDER_SERVICE",
+					logger.String("project_id", projectInfo.ProjectId),
+					logger.String("environment_id", prodEnvId),
+					logger.Error(srErr),
+				)
+				continue
 			}
 
 			projectInfoByte, err := json.Marshal(projectInfo)
