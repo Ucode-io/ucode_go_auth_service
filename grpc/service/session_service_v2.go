@@ -62,6 +62,15 @@ func (s *sessionService) UgenLogin(ctx context.Context, req *pb.UgenLoginReq) (*
 		return nil, err
 	}
 
+	return s.ugenLoginForAuthenticatedUser(ctx, user, req.GetClientIp(), req.GetUserAgent())
+}
+
+func (s *sessionService) ugenLoginForAuthenticatedUser(ctx context.Context, user *pb.User, clientIP, userAgent string) (*pb.UgenLoginResp, error) {
+	req := &pb.UgenLoginReq{
+		ClientIp:  clientIP,
+		UserAgent: userAgent,
+	}
+
 	userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
 	if err != nil {
 		s.log.Error("!!!UgenLogin--->GetUserProjects", logger.Error(err))
@@ -243,7 +252,7 @@ func (s *sessionService) ugenLoginForProject(ctx context.Context, user *pb.User,
 		return nil, nil
 	}
 
-	// 
+	//
 	loginDataReq := &nb.LoginDataReq{
 		UserId:                user.GetId(),
 		ClientType:            clientType.ClientTypeIds[0],
@@ -336,6 +345,243 @@ func (s *sessionService) ugenLoginForProject(ctx context.Context, user *pb.User,
 		Response:    resp,
 		ProjectData: projectInfoStruct,
 	}, nil
+}
+
+func (s *sessionService) UgenGoogleLogin(ctx context.Context, req *pb.UgenGoogleLoginReq) (*pb.UgenLoginResp, error) {
+	s.log.Info("UgenGoogleLogin -->", logger.Any("email", req.GetEmail()))
+
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.UgenGoogleLogin", req)
+	defer dbSpan.Finish()
+
+	googleID := strings.TrimSpace(req.GetGoogleId())
+	email := strings.ToLower(strings.TrimSpace(req.GetEmail()))
+	if googleID == "" || email == "" {
+		return nil, status.Error(codes.InvalidArgument, "google id and email are required")
+	}
+
+	user, err := s.strg.User().GetByGoogleID(ctx, googleID)
+	if err != nil {
+		s.log.Error("!!!UgenGoogleLogin--->GetByGoogleID", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if user.GetId() == "" {
+		user, err = s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!UgenGoogleLogin--->GetByUsername", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if user.GetId() != "" {
+			if user.GetGoogleId() != "" && user.GetGoogleId() != googleID {
+				return nil, status.Error(codes.PermissionDenied, "email is already linked to another google account")
+			}
+			if err = s.strg.User().UpdateGoogleID(ctx, user.GetId(), googleID); err != nil {
+				s.log.Error("!!!UgenGoogleLogin--->UpdateGoogleID", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			user.GoogleId = googleID
+		}
+	}
+
+	if user.GetId() == "" {
+		if err = s.registerUgenGoogleUser(ctx, req); err != nil {
+			return nil, err
+		}
+		user, err = s.strg.User().GetByUsername(ctx, email)
+		if err != nil {
+			s.log.Error("!!!UgenGoogleLogin--->GetRegisteredUser", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if user.GetId() == "" {
+			return nil, status.Error(codes.Internal, "registered google user not found")
+		}
+		if err = s.strg.User().UpdateGoogleID(ctx, user.GetId(), googleID); err != nil {
+			s.log.Error("!!!UgenGoogleLogin--->UpdateRegisteredGoogleID", logger.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		user.GoogleId = googleID
+	}
+
+	return s.ugenLoginForAuthenticatedUser(ctx, user, req.GetClientIp(), req.GetUserAgent())
+}
+
+func (s *sessionService) UgenAuthSession(ctx context.Context, req *pb.UgenAuthSessionReq) (*pb.UgenLoginResp, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.UgenAuthSession", req)
+	defer dbSpan.Finish()
+
+	if req.GetAccessToken() == "" || req.GetRefreshToken() == "" {
+		return nil, status.Error(codes.Unauthenticated, "auth cookies are required")
+	}
+
+	tokenInfo, err := security.ParseClaims(req.GetAccessToken(), s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->ParseClaims", logger.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->GetSession", logger.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.GetExpiresAt())
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->ParseSessionTime", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if expiresAt.Before(time.Now()) {
+		return nil, status.Error(codes.Unauthenticated, "session has been expired")
+	}
+
+	user, err := s.strg.User().GetByPK(ctx, &pb.UserPrimaryKey{Id: session.GetUserIdAuth()})
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->GetUser", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resource, err := s.services.ServiceResource().GetSingle(
+		ctx, &pbCompany.GetSingleServiceResourceReq{
+			ProjectId:     session.GetProjectId(),
+			EnvironmentId: session.GetEnvId(),
+			ServiceType:   pbCompany.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->GetSingleServiceResource", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if resource.GetResourceType() != 3 {
+		return nil, status.Error(codes.InvalidArgument, "unsupported resource type")
+	}
+
+	svc, err := s.serviceNode.GetByNodeType(session.GetProjectId(), resource.GetNodeType())
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->GetByNodeType", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	loginDataReq := &nb.LoginDataReq{
+		UserId:                user.GetId(),
+		ClientType:            session.GetClientTypeId(),
+		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+	}
+	loginData, err := svc.GoLoginService().LoginData(ctx, loginDataReq)
+	if err != nil && strings.Contains(err.Error(), "connection not found") {
+		if _, recErr := s.services.ResourceService().ReconnectResource(ctx, &pbCompany.ReconnectResourceRequest{
+			Id:        resource.GetResourceId(),
+			ProjectId: resource.GetProjectId(),
+		}); recErr == nil {
+			loginData, err = svc.GoLoginService().LoginData(ctx, loginDataReq)
+		} else {
+			s.log.Warn("!!!UgenAuthSession--->ReconnectResource failed", logger.Error(recErr))
+		}
+	}
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->LoginData", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	data := &pbObject.LoginDataRes{}
+	if err = helper.MarshalToStruct(&loginData, data); err != nil {
+		s.log.Error("!!!UgenAuthSession--->MarshalLoginData", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if !data.GetUserFound() {
+		return nil, errUserNotFound
+	}
+
+	userData, err := helper.ConvertStructToResponse(data.UserData)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	delete(userData, "password")
+	data.UserData, err = helper.ConvertMapToStruct(userData)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	loginRes := helper.ConvertPbToAnotherPb(&pbObject.V2LoginResponse{
+		Role:           data.GetRole(),
+		UserId:         data.GetUserId(),
+		UserData:       data.GetUserData(),
+		UserFound:      data.GetUserFound(),
+		ClientType:     data.GetClientType(),
+		UserIdAuth:     data.GetUserIdAuth(),
+		LoginTableSlug: data.GetLoginTableSlug(),
+	})
+	loginRes.Token = &pb.Token{
+		AccessToken:      req.GetAccessToken(),
+		RefreshToken:     req.GetRefreshToken(),
+		CreatedAt:        session.GetCreatedAt(),
+		UpdatedAt:        session.GetUpdatedAt(),
+		ExpiresAt:        session.GetExpiresAt(),
+		RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+	}
+	loginRes.User = user
+	loginRes.EnvironmentId = session.GetEnvId()
+
+	projectInfo, err := s.services.ProjectServiceClient().GetById(
+		ctx, &pbCompany.GetProjectByIdRequest{ProjectId: session.GetProjectId()},
+	)
+	if err != nil {
+		s.log.Error("!!!UgenAuthSession--->GetProjectById", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	projectInfoByte, err := json.Marshal(projectInfo)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	projectInfoMap := map[string]any{}
+	if err = json.Unmarshal(projectInfoByte, &projectInfoMap); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	projectInfoMap["environment_id"] = session.GetEnvId()
+
+	projectInfoStruct, err := helper.ConvertMapToStruct(projectInfoMap)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.UgenLoginResp{
+		Response:    loginRes,
+		ProjectData: projectInfoStruct,
+	}, nil
+}
+
+func (s *sessionService) registerUgenGoogleUser(ctx context.Context, req *pb.UgenGoogleLoginReq) error {
+	password, err := security.GenerateRandomString(24)
+	if err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+	password = "Aa1" + password
+
+	email := strings.ToLower(strings.TrimSpace(req.GetEmail()))
+	companyName := strings.TrimSpace(req.GetName())
+	if companyName == "" {
+		companyName = strings.TrimSpace(strings.Split(email, "@")[0])
+	}
+	if companyName == "" {
+		companyName = "Ugen Workspace"
+	}
+
+	_, err = s.services.CompanyService().Register(ctx, &pb.RegisterCompanyRequest{
+		Name:   companyName,
+		FareId: "",
+		IsUgen: true,
+		UserInfo: &pb.RegisterCompanyRequest_RegisterUserInfo{
+			Email:    email,
+			Login:    email,
+			Password: password,
+		},
+	})
+	if err != nil {
+		s.log.Error("!!!UgenGoogleLogin--->Register", logger.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 func (s *sessionService) verifyAndMigratePassword(user *pb.User, password string) error {
@@ -510,7 +756,6 @@ func (s *sessionService) UserDefaultProject(ctx context.Context, req *pb.UserDef
 			if prodEnvId == "" {
 				prodEnvId = environments.Environments[0].Id
 			}
-
 
 			// FIXED TEMPORARY
 			if _, srErr := s.services.ServiceResource().GetSingle(ctx, &pbCompany.GetSingleServiceResourceReq{

@@ -39,8 +39,8 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.create")
 	defer dbSpan.Finish()
 
-	query := `INSERT INTO "user" (id, phone, email, login, password, company_id, hash_type, tin) 
-			  VALUES ($1, $2, $3, $4, $5, $6, 'bcrypt', $7)`
+	query := `INSERT INTO "user" (id, phone, email, login, password, company_id, hash_type, tin, google_id)
+			  VALUES ($1, $2, $3, $4, $5, $6, 'bcrypt', $7, $8)`
 
 	id := uuid.New().String()
 
@@ -52,6 +52,7 @@ func (r *userRepo) Create(ctx context.Context, entity *pb.CreateUserRequest) (pK
 		entity.GetPassword(),
 		entity.GetCompanyId(),
 		entity.GetTin(),
+		entity.GetGoogleId(),
 	)
 	if err != nil {
 		return pKey, helper.HandleDatabaseError(err, r.logger, "Create user: failed to create")
@@ -78,7 +79,8 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		u.login,
 		u.company_id,
 		u.password,
-		u.hash_type
+		u.hash_type,
+		COALESCE(u.google_id, '') AS google_id
 	FROM
 		"user" u
 	WHERE
@@ -91,6 +93,7 @@ func (r *userRepo) GetByPK(ctx context.Context, pKey *pb.UserPrimaryKey) (res *p
 		&res.CompanyId,
 		&res.Password,
 		&res.HashType,
+		&res.GoogleId,
 	)
 	if err != nil {
 		return res, err
@@ -318,7 +321,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		login,
 		password,
 		hash_type,
-		COALESCE(tin, '') as tin
+		COALESCE(tin, '') as tin,
+		COALESCE(google_id, '') as google_id
 	FROM
 		"user"
 	WHERE`
@@ -347,6 +351,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 		&res.Password,
 		&res.HashType,
 		&res.Tin,
+		&res.GoogleId,
 	)
 	if err == pgx.ErrNoRows && util.IsValidEmailNew(username) {
 		queryIf := `
@@ -357,7 +362,8 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 						login,
 						password,
 						hash_type,
-						tin
+						COALESCE(tin, '') as tin,
+						COALESCE(google_id, '') as google_id
 					FROM
 						"user"
 					WHERE
@@ -373,6 +379,7 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 			&res.Password,
 			&res.HashType,
 			&res.Tin,
+			&res.GoogleId,
 		)
 		if err == pgx.ErrNoRows {
 			return res, nil
@@ -389,6 +396,67 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (res *pb.
 	}
 
 	return res, nil
+}
+
+func (r *userRepo) GetByGoogleID(ctx context.Context, googleID string) (res *pb.User, err error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetByGoogleID")
+	defer dbSpan.Finish()
+
+	res = &pb.User{}
+	if strings.TrimSpace(googleID) == "" {
+		return res, nil
+	}
+
+	query := `SELECT
+		id,
+		phone,
+		email,
+		login,
+		password,
+		hash_type,
+		COALESCE(tin, '') as tin,
+		COALESCE(company_id::text, '') as company_id,
+		COALESCE(google_id, '') as google_id
+	FROM
+		"user"
+	WHERE
+		google_id = $1`
+
+	err = r.db.QueryRow(ctx, query, googleID).Scan(
+		&res.Id,
+		&res.Phone,
+		&res.Email,
+		&res.Login,
+		&res.Password,
+		&res.HashType,
+		&res.Tin,
+		&res.CompanyId,
+		&res.GoogleId,
+	)
+	if err == pgx.ErrNoRows {
+		return res, nil
+	}
+	if err != nil {
+		return res, helper.HandleDatabaseError(err, r.logger, "GetByGoogleID: failed to get user")
+	}
+
+	return res, nil
+}
+
+func (r *userRepo) UpdateGoogleID(ctx context.Context, userID, googleID string) error {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.UpdateGoogleID")
+	defer dbSpan.Finish()
+
+	if strings.TrimSpace(userID) == "" || strings.TrimSpace(googleID) == "" {
+		return errors.New("user id and google id are required")
+	}
+
+	_, err := r.db.Exec(ctx, `UPDATE "user" SET google_id = $1, updated_at = now() WHERE id = $2`, googleID, userID)
+	if err != nil {
+		return helper.HandleDatabaseError(err, r.logger, "UpdateGoogleID: failed to update user")
+	}
+
+	return nil
 }
 
 func (r *userRepo) ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest, tx pgx.Tx) (rowsAffected int64, err error) {

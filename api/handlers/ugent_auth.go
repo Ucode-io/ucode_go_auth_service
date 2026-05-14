@@ -1,8 +1,16 @@
 package handlers
 
 import (
-	"ucode/ucode_go_auth_service/api/http"
+	"context"
+	nethttp "net/http"
+	"net/url"
+	"strings"
+	"time"
+
+	status_http "ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/config"
 	pba "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +31,7 @@ func (h *Handler) UgenRegister(c *gin.Context) {
 	var company pba.RegisterCompanyRequest
 
 	if err := c.ShouldBindJSON(&company); err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -33,18 +41,18 @@ func (h *Handler) UgenRegister(c *gin.Context) {
 		c.Request.Context(), &company,
 	)
 	if err != nil {
-		h.handleResponse(c, http.GRPCError, err.Error())
+		h.handleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, resp)
+	h.handleResponse(c, status_http.Created, resp)
 }
 
 func (h *Handler) UgenLogin(c *gin.Context) {
 	var login pba.UgenLoginReq
 
 	if err := c.ShouldBindJSON(&login); err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
 
@@ -53,9 +61,158 @@ func (h *Handler) UgenLogin(c *gin.Context) {
 
 	response, err := h.services.SessionService().UgenLogin(c.Request.Context(), &login)
 	if err != nil {
-		h.handleError(c, http.BadRequest, err)
+		h.handleError(c, status_http.BadRequest, err)
 		return
 	}
 
-	h.handleResponse(c, http.Created, response)
+	h.handleResponse(c, status_http.Created, response)
+}
+
+func (h *Handler) UgenGoogleAuth(c *gin.Context) {
+	oauthCfg := h.googleOAuthConfig()
+	state, nonce, err := helper.NewGoogleOAuthState(h.cfg.SecretKey, 5*time.Minute)
+	if err != nil {
+		h.redirectUgenAuthCallback(c, "error", "state_failed")
+		return
+	}
+
+	redirectURL, err := helper.GoogleAuthRedirectURL(oauthCfg, state)
+	if err != nil {
+		h.redirectUgenAuthCallback(c, "error", "config_missing")
+		return
+	}
+
+	h.setCookie(c, helper.GoogleOAuthStateCookie, nonce, int((5 * time.Minute).Seconds()), true)
+	c.Redirect(nethttp.StatusFound, redirectURL)
+}
+
+func (h *Handler) UgenGoogleCallback(c *gin.Context) {
+	if errText := c.Query("error"); errText != "" {
+		h.clearCookie(c, helper.GoogleOAuthStateCookie)
+		h.redirectUgenAuthCallback(c, "error", "google_denied")
+		return
+	}
+
+	stateCookie, err := c.Cookie(helper.GoogleOAuthStateCookie)
+	if err != nil {
+		h.redirectUgenAuthCallback(c, "error", "state_missing")
+		return
+	}
+	h.clearCookie(c, helper.GoogleOAuthStateCookie)
+
+	if err = helper.ValidateGoogleOAuthState(c.Query("state"), stateCookie, h.cfg.SecretKey); err != nil {
+		h.redirectUgenAuthCallback(c, "error", "state_invalid")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 15*time.Second)
+	defer cancel()
+
+	httpClient := &nethttp.Client{Timeout: 15 * time.Second}
+	tokenResp, err := helper.ExchangeGoogleCode(ctx, httpClient, h.googleOAuthConfig(), c.Query("code"))
+	if err != nil {
+		h.redirectUgenAuthCallback(c, "error", "token_exchange_failed")
+		return
+	}
+
+	profile, err := helper.FetchGoogleProfile(ctx, httpClient, tokenResp.AccessToken)
+	if err != nil {
+		h.redirectUgenAuthCallback(c, "error", "profile_failed")
+		return
+	}
+
+	loginResp, err := h.services.SessionService().UgenGoogleLogin(
+		c.Request.Context(),
+		&pba.UgenGoogleLoginReq{
+			GoogleId:  profile.ID,
+			Email:     profile.Email,
+			Name:      profile.Name,
+			Picture:   profile.Picture,
+			ClientIp:  c.ClientIP(),
+			UserAgent: c.Request.UserAgent(),
+		},
+	)
+	if err != nil {
+		h.redirectUgenAuthCallback(c, "error", "login_failed")
+		return
+	}
+
+	token := loginResp.GetResponse().GetToken()
+	if token == nil || token.GetAccessToken() == "" || token.GetRefreshToken() == "" {
+		h.redirectUgenAuthCallback(c, "error", "token_missing")
+		return
+	}
+
+	h.setCookie(c, helper.GoogleAccessCookie, token.GetAccessToken(), int(config.AccessTokenExpiresInTime.Seconds()), true)
+	h.setCookie(c, helper.GoogleRefreshCookie, token.GetRefreshToken(), int(config.RefreshTokenExpiresInTime.Seconds()), true)
+	h.redirectUgenAuthCallback(c, "success", "")
+}
+
+func (h *Handler) UgenAuthSession(c *gin.Context) {
+	accessToken, err := c.Cookie(helper.GoogleAccessCookie)
+	if err != nil {
+		h.handleResponse(c, status_http.Unauthorized, "access token cookie is required")
+		return
+	}
+	refreshToken, err := c.Cookie(helper.GoogleRefreshCookie)
+	if err != nil {
+		h.handleResponse(c, status_http.Unauthorized, "refresh token cookie is required")
+		return
+	}
+
+	response, err := h.services.SessionService().UgenAuthSession(
+		c.Request.Context(),
+		&pba.UgenAuthSessionReq{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+	)
+	if err != nil {
+		h.handleError(c, status_http.Unauthorized, err)
+		return
+	}
+
+	h.handleResponse(c, status_http.OK, response)
+}
+
+func (h *Handler) googleOAuthConfig() helper.GoogleOAuthConfig {
+	return helper.GoogleOAuthConfig{
+		ClientID:     h.cfg.GoogleClientID,
+		ClientSecret: h.cfg.GoogleClientSecret,
+		CallbackURL:  h.cfg.GoogleCallbackURL,
+		Secret:       h.cfg.SecretKey,
+	}
+}
+
+func (h *Handler) redirectUgenAuthCallback(c *gin.Context, status, message string) {
+	frontendURL := strings.TrimRight(h.cfg.FrontendURL, "/")
+	if frontendURL == "" {
+		frontendURL = "/"
+	}
+
+	values := url.Values{}
+	values.Set("provider", "google")
+	values.Set("status", status)
+	if message != "" {
+		values.Set("message", message)
+	}
+
+	if frontendURL == "/" {
+		c.Redirect(nethttp.StatusFound, "/auth-callback?"+values.Encode())
+		return
+	}
+	c.Redirect(nethttp.StatusFound, frontendURL+"/auth-callback?"+values.Encode())
+}
+
+func (h *Handler) setCookie(c *gin.Context, name, value string, maxAge int, httpOnly bool) {
+	c.SetSameSite(nethttp.SameSiteLaxMode)
+	c.SetCookie(name, value, maxAge, "/", h.cfg.CookieDomain, h.secureCookies(), httpOnly)
+}
+
+func (h *Handler) clearCookie(c *gin.Context, name string) {
+	h.setCookie(c, name, "", -1, true)
+}
+
+func (h *Handler) secureCookies() bool {
+	return h.cfg.Environment != config.DebugMode && h.cfg.Environment != config.TestMode
 }

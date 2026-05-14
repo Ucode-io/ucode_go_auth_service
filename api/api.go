@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strings"
+
 	"ucode/ucode_go_auth_service/api/docs"
 	"ucode/ucode_go_auth_service/api/handlers"
 	"ucode/ucode_go_auth_service/config"
@@ -29,7 +31,7 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
 	// @name Authorization
-	r.Use(customCORSMiddleware())
+	r.Use(customCORSMiddleware(cfg))
 
 	v2 := r.Group("/v2")
 	v2.PUT("/refresh", h.V2RefreshToken)
@@ -49,6 +51,9 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 
 		v3.POST("/ugen/register", h.UgenRegister)
 		v3.POST("/ugen/login", h.UgenLogin)
+		v3.GET("/ugen/auth/google", h.UgenGoogleAuth)
+		v3.GET("/ugen/auth/google/callback", h.UgenGoogleCallback)
+		v3.GET("/ugen/auth/session", h.UgenAuthSession)
 	}
 	v2.Use(h.AuthMiddleware())
 	{
@@ -183,9 +188,25 @@ func SetUpRouter(h handlers.Handler, cfg config.BaseConfig, tracer opentracing.T
 	return
 }
 
-func customCORSMiddleware() gin.HandlerFunc {
+func customCORSMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
+	allowedOrigins := map[string]bool{}
+	for _, origin := range strings.Split(cfg.AuthAllowedOrigins, ",") {
+		origin = strings.TrimSpace(origin)
+		if origin != "" {
+			allowedOrigins[origin] = true
+		}
+	}
+
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
+		origin := c.GetHeader("Origin")
+		if origin != "" {
+			if len(allowedOrigins) == 0 || allowedOrigins[origin] {
+				c.Header("Access-Control-Allow-Origin", origin)
+				c.Header("Vary", "Origin")
+			}
+		} else {
+			c.Header("Access-Control-Allow-Origin", "*")
+		}
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, Resource-Id, Environment-Id, X-API-KEY, Platform-Type")

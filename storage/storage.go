@@ -60,6 +60,8 @@ type UserRepoI interface {
 	Update(ctx context.Context, entity *pb.UpdateUserRequest) (rowsAffected int64, err error)
 	Delete(ctx context.Context, pKey *pb.UserPrimaryKey) (rowsAffected int64, err error)
 	GetByUsername(ctx context.Context, username string) (res *pb.User, err error)
+	GetByGoogleID(ctx context.Context, googleID string) (res *pb.User, err error)
+	UpdateGoogleID(ctx context.Context, userID, googleID string) error
 	ResetPassword(ctx context.Context, user *pb.ResetPasswordRequest, tx pgx.Tx) (rowsAffected int64, err error)
 	GetUserProjects(ctx context.Context, userId string) (*pb.GetUserProjectsRes, error)
 	GetUserProjectsEnv(ctx context.Context, userId, envId string) (*pb.GetUserProjectsRes, error)

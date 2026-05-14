@@ -92,6 +92,13 @@ type BaseConfig struct {
 	EImzoHost     string
 	EImzoUsername string
 	EImzoPassword string
+
+	GoogleClientID     string
+	GoogleClientSecret string
+	GoogleCallbackURL  string
+	FrontendURL        string
+	CookieDomain       string
+	AuthAllowedOrigins string
 }
 
 func BaseLoad() BaseConfig {
@@ -150,6 +157,13 @@ func BaseLoad() BaseConfig {
 	config.EImzoHost = cast.ToString(getOrReturnDefaultValue("EIMZO_HOST", ""))
 	config.EImzoUsername = cast.ToString(getOrReturnDefaultValue("EIMZO_USERNAME", ""))
 	config.EImzoPassword = cast.ToString(getOrReturnDefaultValue("EIMZO_PASSWORD", ""))
+
+	config.GoogleClientID = cast.ToString(getOrReturnDefaultValue("GOOGLE_CLIENT_ID", ""))
+	config.GoogleClientSecret = cast.ToString(getOrReturnDefaultValue("GOOGLE_CLIENT_SECRET", ""))
+	config.GoogleCallbackURL = cast.ToString(getOrReturnDefaultValue("GOOGLE_CALLBACK_URL", ""))
+	config.FrontendURL = cast.ToString(getOrReturnDefaultValue("FRONTEND_URL", ""))
+	config.CookieDomain = cast.ToString(getOrReturnDefaultValue("COOKIE_DOMAIN", ""))
+	config.AuthAllowedOrigins = cast.ToString(getOrReturnDefaultValue("AUTH_ALLOWED_ORIGINS", ""))
 
 	return config
 }
