@@ -82,7 +82,7 @@ func (h *Handler) UgenGoogleAuth(c *gin.Context) {
 		return
 	}
 
-	h.setCookie(c, helper.GoogleOAuthStateCookie, nonce, int((5 * time.Minute).Seconds()), true)
+	h.setStateCookie(c, helper.GoogleOAuthStateCookie, nonce, int((5 * time.Minute).Seconds()))
 	c.Redirect(nethttp.StatusFound, redirectURL)
 }
 
@@ -143,8 +143,8 @@ func (h *Handler) UgenGoogleCallback(c *gin.Context) {
 		return
 	}
 
-	h.setCookie(c, helper.GoogleAccessCookie, token.GetAccessToken(), int(config.AccessTokenExpiresInTime.Seconds()), true)
-	h.setCookie(c, helper.GoogleRefreshCookie, token.GetRefreshToken(), int(config.RefreshTokenExpiresInTime.Seconds()), true)
+	h.setSessionCookie(c, helper.GoogleAccessCookie, token.GetAccessToken(), int(config.AccessTokenExpiresInTime.Seconds()))
+	h.setSessionCookie(c, helper.GoogleRefreshCookie, token.GetRefreshToken(), int(config.RefreshTokenExpiresInTime.Seconds()))
 	h.redirectUgenAuthCallback(c, "success", "")
 }
 
@@ -204,13 +204,21 @@ func (h *Handler) redirectUgenAuthCallback(c *gin.Context, status, message strin
 	c.Redirect(nethttp.StatusFound, frontendURL+"/auth-callback?"+values.Encode())
 }
 
-func (h *Handler) setCookie(c *gin.Context, name, value string, maxAge int, httpOnly bool) {
+// setSessionCookie writes a cross-site session cookie (SameSite=None requires Secure).
+// Used for access/refresh tokens that the frontend reads via cross-origin XHR with credentials.
+func (h *Handler) setSessionCookie(c *gin.Context, name, value string, maxAge int) {
+	c.SetSameSite(nethttp.SameSiteNoneMode)
+	c.SetCookie(name, value, maxAge, "/", h.cfg.CookieDomain, true, true)
+}
+
+// setStateCookie writes a same-site cookie used during OAuth top-level redirects.
+func (h *Handler) setStateCookie(c *gin.Context, name, value string, maxAge int) {
 	c.SetSameSite(nethttp.SameSiteLaxMode)
-	c.SetCookie(name, value, maxAge, "/", h.cfg.CookieDomain, h.secureCookies(), httpOnly)
+	c.SetCookie(name, value, maxAge, "/", h.cfg.CookieDomain, h.secureCookies(), true)
 }
 
 func (h *Handler) clearCookie(c *gin.Context, name string) {
-	h.setCookie(c, name, "", -1, true)
+	h.setStateCookie(c, name, "", -1)
 }
 
 func (h *Handler) secureCookies() bool {
