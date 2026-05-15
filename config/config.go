@@ -168,7 +168,7 @@ func BaseLoad() BaseConfig {
 	return config
 }
 
-// Load ....
+// Load .....
 func Load() Config {
 	if err := godotenv.Load("/app/.env"); err != nil {
 		if err := godotenv.Load(".env"); err != nil {
