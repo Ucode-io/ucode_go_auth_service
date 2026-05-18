@@ -94,7 +94,6 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 
 	var rawResponse []any
 
-
 	// FIXED TEMPORARY
 	reconnectIfPoolMissing := func(err error) bool {
 		if err == nil || !strings.Contains(err.Error(), "connection not found") {
@@ -758,7 +757,7 @@ func (h *Handler) MultiCompanyLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param login body auth_service.V2MultiCompanyLoginReq true "LoginRequestBody"
-// @Success 201 {object} http.Response{data=auth_service.V2MultiCompanyLoginRes} "User data"
+// @Success 201 {object} http.Response{data=models.V2MultiCompanyOneLoginRes} "User data"
 // @Response 400 {object} http.Response{data=string} "Bad Request"
 // @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) V2MultiCompanyLogin(c *gin.Context) {
@@ -1281,6 +1280,22 @@ func (h *Handler) ExpireSessions(c *gin.Context) {
 	h.handleResponse(c, http.OK, map[string]any{"message": "success"})
 }
 
+// DeleteByParams godoc
+// @Security ApiKeyAuth
+// @ID v2_delete_sessions_by_params
+// @Router /v2/session [DELETE]
+// @Summary Delete sessions by params
+// @Description Delete sessions by user, client type, or session id in the current project.
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer access token or API-KEY"
+// @Param X-API-KEY header string false "API key when Authorization is API-KEY"
+// @Param project-id query string false "Project id"
+// @Param request body auth_service.DeleteByParamsRequest true "Delete sessions by params request"
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteByParams(c *gin.Context) {
 	var req pba.DeleteByParamsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

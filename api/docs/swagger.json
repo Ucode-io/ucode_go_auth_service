@@ -1725,89 +1725,6 @@
                 }
             }
         },
-        "/project/{project-id}/user-update": {
-            "put": {
-                "description": "Update Project",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "Update Project",
-                "operationId": "update_user_in_project",
-                "parameters": [
-                    {
-                        "description": "UpdateProjectUserDataReqBody",
-                        "name": "project",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/company_service.UpdateProjectUserDataReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Project data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/company_service.UpdateProjectUserDataRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/refresh": {
             "put": {
                 "description": "Refresh Token",
@@ -3463,77 +3380,6 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Get User",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Delete User",
-                "operationId": "delete_user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user-id",
-                        "name": "user-id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
             }
         },
         "/v2/add-user-to-project": {
@@ -4649,6 +4495,104 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/auth-table/{user-id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete from auth table",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_User"
+                ],
+                "summary": "Delete From Auth service",
+                "operationId": "delete_user_v2",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Resource-Id",
+                        "name": "Resource-Id",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment-Id",
+                        "name": "Environment-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user-id",
+                        "name": "user-id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project-id",
+                        "name": "project-id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "client-type-id",
+                        "name": "client-type-id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -6074,321 +6018,6 @@
                 }
             }
         },
-        "/v2/email-settings": {
-            "get": {
-                "description": "GetListEmailSettings",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "GetListEmailSettings",
-                "operationId": "getListEmailSettings",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "project_id",
-                        "name": "project_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/auth_service.UpdateEmailSettingsResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "UpdateEmailSettings",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "UpdateEmailSettings",
-                "operationId": "updateEmailSettings",
-                "parameters": [
-                    {
-                        "description": "register_body",
-                        "name": "registerBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth_service.UpdateEmailSettingsRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/auth_service.EmailSettings"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "CreateEmailSettings",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "CreateEmailSettings",
-                "operationId": "createEmailSettings",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "X-API-KEY",
-                        "name": "X-API-KEY",
-                        "in": "header"
-                    },
-                    {
-                        "description": "register_body",
-                        "name": "registerBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth_service.EmailSettings"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User data",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/auth_service.EmailSettings"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v2/email-settings/{id}": {
-            "delete": {
-                "description": "DeleteEmailSettings",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Email"
-                ],
-                "summary": "DeleteEmailSettings",
-                "operationId": "deleteEmailSettings",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/v2/forgot-password": {
             "post": {
                 "description": "Forgot Password",
@@ -7216,115 +6845,6 @@
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/v2/object/get-list/{table_slug}": {
-            "post": {
-                "description": "Get object list",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V2_Object"
-                ],
-                "summary": "Get object list",
-                "operationId": "get_list_object",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Resource-Id",
-                        "name": "Resource-Id",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Environment-Id",
-                        "name": "Environment-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "project-id",
-                        "name": "project-id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "table_slug",
-                        "name": "table_slug",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CommonMessage"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "GetObjectListResponseBody",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.CommonMessage"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Argument",
                         "schema": {
                             "allOf": [
                                 {
@@ -8993,6 +8513,620 @@
                 }
             }
         },
+        "/v2/session": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get paginated sessions for the current project, optionally filtered by user, client type, or search text.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "Get session list",
+                "operationId": "v2_get_session_list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer access token or API-KEY",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API key when Authorization is API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User id",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client type id",
+                        "name": "client_type_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Session list",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.GetSessionListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete sessions by user, client type, or session id in the current project.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "Delete sessions by params",
+                "operationId": "v2_delete_sessions_by_params",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer access token or API-KEY",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API key when Authorization is API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Delete sessions by params request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.DeleteByParamsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/session/by-device": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete sessions for the current user/project by device information.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "Delete sessions by device",
+                "operationId": "v2_delete_sessions_by_device",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer access token or API-KEY",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API key when Authorization is API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User id. If omitted, token user is used.",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Delete sessions by device request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.DeleteSessionsByDeviceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/session/devices": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get devices with active sessions for a user in the current project.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "Get session devices",
+                "operationId": "v2_get_session_devices",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer access token or API-KEY",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API key when Authorization is API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User id. If omitted, token user is used.",
+                        "name": "user_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Session devices",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.GetSessionDevicesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/session/except-current": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete all sessions for the current user/project except the current session.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "Delete sessions except current",
+                "operationId": "v2_delete_sessions_except_current",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer access token or API-KEY",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API key when Authorization is API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "project-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User id. If omitted, token user is used.",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Current session id. If omitted, token session is used.",
+                        "name": "session_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/session/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete one session by id.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V2_Session"
+                ],
+                "summary": "Delete session",
+                "operationId": "v2_delete_session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer access token or API-KEY",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API key when Authorization is API-KEY",
+                        "name": "X-API-KEY",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Session id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted session",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.SessionPrimaryKey"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v2/set-email/send-code": {
             "put": {
                 "description": "Set Email",
@@ -9805,7 +9939,90 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes"
+                                            "$ref": "#/definitions/models.V2MultiCompanyOneLoginRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v3/ugen-register": {
+            "post": {
+                "description": "Register User",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Ugen"
+                ],
+                "summary": "Register User",
+                "operationId": "create_company",
+                "parameters": [
+                    {
+                        "description": "RegisterCompanyRequestBody",
+                        "name": "company",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_service.RegisterCompanyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Company data",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_service.CompanyPrimaryKey"
                                         }
                                     }
                                 }
@@ -10220,66 +10437,21 @@
             }
         },
         "auth_service.CreateUserRequest": {
+            "type": "object"
+        },
+        "auth_service.DeleteByParamsRequest": {
             "type": "object",
             "properties": {
-                "active": {
-                    "type": "integer"
-                },
-                "base_url": {
-                    "type": "string"
-                },
-                "client_platform_id": {
-                    "type": "string"
-                },
                 "client_type_id": {
-                    "type": "string"
-                },
-                "company_id": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "environment_id": {
-                    "type": "string"
-                },
-                "expires_at": {
-                    "type": "string"
-                },
-                "invite": {
-                    "type": "boolean"
-                },
-                "login": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "node_type": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "photo_url": {
                     "type": "string"
                 },
                 "project_id": {
                     "type": "string"
                 },
-                "resource_environment_id": {
+                "session_id": {
                     "type": "string"
                 },
-                "resource_type": {
-                    "type": "integer"
-                },
-                "role_id": {
-                    "type": "string"
-                },
-                "year_of_birth": {
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -10326,19 +10498,19 @@
                 }
             }
         },
-        "auth_service.EmailSettings": {
+        "auth_service.DeleteSessionsByDeviceRequest": {
             "type": "object",
             "properties": {
-                "email": {
+                "client_type_id": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
-                },
-                "password": {
+                "data": {
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "string"
+                },
+                "user_id_auth": {
                     "type": "string"
                 }
             }
@@ -10538,6 +10710,31 @@
                 }
             }
         },
+        "auth_service.GetSessionDevicesResponse": {
+            "type": "object",
+            "properties": {
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Session"
+                    }
+                }
+            }
+        },
+        "auth_service.GetSessionListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.Session"
+                    }
+                }
+            }
+        },
         "auth_service.GetUserByLoginTypesRequest": {
             "type": "object",
             "properties": {
@@ -10589,13 +10786,25 @@
                 "api_keys_button": {
                     "type": "boolean"
                 },
+                "billing": {
+                    "type": "boolean"
+                },
                 "chat": {
+                    "type": "boolean"
+                },
+                "chatwoot_button": {
                     "type": "boolean"
                 },
                 "environment_button": {
                     "type": "boolean"
                 },
                 "environments_button": {
+                    "type": "boolean"
+                },
+                "gitbook_button": {
+                    "type": "boolean"
+                },
+                "gpt_button": {
                     "type": "boolean"
                 },
                 "id": {
@@ -10720,6 +10929,9 @@
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "table_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -10763,6 +10975,9 @@
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                },
+                "user_id_auth": {
                     "type": "string"
                 }
             }
@@ -11053,6 +11268,12 @@
                 },
                 "role_id": {
                     "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth_service.TableBody"
+                    }
                 }
             }
         },
@@ -11067,8 +11288,14 @@
         "auth_service.RegisterCompanyRequest": {
             "type": "object",
             "properties": {
+                "fare_id": {
+                    "type": "string"
+                },
                 "googleToken": {
                     "$ref": "#/definitions/auth_service.RegisterCompanyRequest_GoogleToken"
+                },
+                "is_ugen": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -11128,6 +11355,9 @@
                     "type": "string"
                 },
                 "phone": {
+                    "type": "string"
+                },
+                "tin": {
                     "type": "string"
                 },
                 "token": {
@@ -11270,6 +11500,14 @@
                 }
             }
         },
+        "auth_service.SessionPrimaryKey": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "auth_service.TableBody": {
             "type": "object",
             "properties": {
@@ -11326,31 +11564,6 @@
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "auth_service.UpdateEmailSettingsRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.UpdateEmailSettingsResponse": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.EmailSettings"
-                    }
                 }
             }
         },
@@ -11537,6 +11750,9 @@
                 "expires_at": {
                     "type": "string"
                 },
+                "google_id": {
+                    "type": "string"
+                },
                 "hash_type": {
                     "type": "string"
                 },
@@ -11572,6 +11788,9 @@
                 },
                 "timezone": {
                     "$ref": "#/definitions/auth_service.Timezone"
+                },
+                "tin": {
+                    "type": "string"
                 }
             }
         },
@@ -11641,6 +11860,12 @@
                         "type": "string"
                     }
                 },
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "confirm_by": {
                     "$ref": "#/definitions/auth_service.ConfirmStrategies"
                 },
@@ -11670,6 +11895,9 @@
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "session_limit": {
+                    "type": "integer"
                 },
                 "table_slug": {
                     "type": "string"
@@ -11721,6 +11949,12 @@
                 "resource_type": {
                     "type": "integer"
                 },
+                "service_type": {
+                    "type": "string"
+                },
+                "session_info": {
+                    "type": "string"
+                },
                 "sms_id": {
                     "type": "string"
                 },
@@ -11734,6 +11968,9 @@
                     "type": "string"
                 },
                 "user_agent": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 },
                 "username": {
@@ -11776,6 +12013,9 @@
                 "email": {
                     "type": "string"
                 },
+                "env_id": {
+                    "type": "string"
+                },
                 "google_token": {
                     "type": "string"
                 },
@@ -11788,6 +12028,12 @@
                 "phone": {
                     "type": "string"
                 },
+                "service_type": {
+                    "type": "string"
+                },
+                "session_info": {
+                    "type": "string"
+                },
                 "sms_id": {
                     "type": "string"
                 },
@@ -11795,75 +12041,6 @@
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.V2MultiCompanyLoginRes": {
-            "type": "object",
-            "properties": {
-                "companies": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes_Company"
-                    }
-                }
-            }
-        },
-        "auth_service.V2MultiCompanyLoginRes_Company": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "logo": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "type": "string"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth_service.V2MultiCompanyLoginRes_Company_Project"
-                    }
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth_service.V2MultiCompanyLoginRes_Company_Project": {
-            "type": "object",
-            "properties": {
-                "company_id": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "domain": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updated_at": {
                     "type": "string"
                 }
             }
@@ -11880,6 +12057,12 @@
             "type": "object",
             "properties": {
                 "client_platform_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "columns": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -11917,6 +12100,9 @@
                 },
                 "self_register": {
                     "type": "boolean"
+                },
+                "session_limit": {
+                    "type": "integer"
                 },
                 "table_slug": {
                     "type": "string"
@@ -11979,30 +12165,19 @@
                 "project_id": {
                     "type": "string"
                 },
+                "resource_environment_id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "type": "integer"
+                },
                 "user_id": {
                     "type": "string"
                 }
             }
         },
         "company_service.CreateProjectRequest": {
-            "type": "object",
-            "properties": {
-                "company_id": {
-                    "type": "string"
-                },
-                "k8s_namespace": {
-                    "type": "string"
-                },
-                "resources": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/company_service.Resource"
-                    }
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "company_service.CreateProjectResponse": {
             "type": "object",
@@ -12037,6 +12212,99 @@
                     "type": "string"
                 },
                 "symbol_native": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.Fare": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "$ref": "#/definitions/company_service.Currency"
+                },
+                "currency_id": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "disactivate_day": {
+                    "type": "integer"
+                },
+                "fare_item_prices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/company_service.FareItemPrice"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "subscription": {
+                    "$ref": "#/definitions/company_service.Subscription"
+                },
+                "trial_days": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.FareItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "info": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.FareItemPrice": {
+            "type": "object",
+            "properties": {
+                "fare_id": {
+                    "type": "string"
+                },
+                "fare_item": {
+                    "$ref": "#/definitions/company_service.FareItem"
+                },
+                "fare_item_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "over_limit_price": {
+                    "type": "number"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "value": {
                     "type": "string"
                 }
             }
@@ -12124,6 +12392,9 @@
                 "balance": {
                     "type": "number"
                 },
+                "balance_set": {
+                    "type": "boolean"
+                },
                 "company_id": {
                     "type": "string"
                 },
@@ -12139,8 +12410,26 @@
                 "currency": {
                     "$ref": "#/definitions/company_service.Currency"
                 },
+                "customer_id": {
+                    "type": "string"
+                },
+                "expire_date": {
+                    "type": "string"
+                },
+                "fare": {
+                    "$ref": "#/definitions/company_service.Fare"
+                },
                 "fare_id": {
                     "type": "string"
+                },
+                "icon_categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_ugen": {
+                    "type": "boolean"
                 },
                 "k8s_namespace": {
                     "type": "string"
@@ -12154,6 +12443,15 @@
                 "logo": {
                     "type": "string"
                 },
+                "new_design": {
+                    "type": "boolean"
+                },
+                "new_layout": {
+                    "type": "boolean"
+                },
+                "new_router": {
+                    "type": "boolean"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -12166,39 +12464,16 @@
                         "$ref": "#/definitions/company_service.ResourceWithoutPassword"
                     }
                 },
+                "status": {
+                    "type": "string"
+                },
+                "subscription_type": {
+                    "type": "string"
+                },
                 "timezone": {
                     "$ref": "#/definitions/company_service.Timezone"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.Resource": {
-            "type": "object",
-            "properties": {
-                "credentials": {
-                    "$ref": "#/definitions/company_service.Resource_Credentials"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_configured": {
-                    "type": "boolean"
-                },
-                "node_type": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "resource_type": {
-                    "$ref": "#/definitions/company_service.ResourceType"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "vault_path": {
                     "type": "string"
                 }
             }
@@ -12213,7 +12488,14 @@
                 4,
                 5,
                 6,
-                7
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14
             ],
             "x-enum-varnames": [
                 "ResourceType_NOT_DECIDED",
@@ -12223,7 +12505,14 @@
                 "ResourceType_REST",
                 "ResourceType_GITHUB",
                 "ResourceType_SMS",
-                "ResourceType_SMTP"
+                "ResourceType_SMTP",
+                "ResourceType_GITLAB",
+                "ResourceType_GIT",
+                "ResourceType_BITBUCKET",
+                "ResourceType_SUPERSET",
+                "ResourceType_METABASE",
+                "ResourceType_TRANSCODER",
+                "ResourceType_MAILCHIMP"
             ]
         },
         "company_service.ResourceWithoutPassword": {
@@ -12321,6 +12610,38 @@
                 }
             }
         },
+        "company_service.Subscription": {
+            "type": "object",
+            "properties": {
+                "discount_id": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "fare_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "renewal_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "company_service.Timezone": {
             "type": "object",
             "properties": {
@@ -12334,29 +12655,6 @@
                     "type": "string"
                 }
             }
-        },
-        "company_service.UpdateProjectUserDataReq": {
-            "type": "object",
-            "properties": {
-                "client_platform_id": {
-                    "type": "string"
-                },
-                "client_type_id": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "role_id": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "company_service.UpdateProjectUserDataRes": {
-            "type": "object"
         },
         "http.Response": {
             "type": "object",
@@ -12488,29 +12786,6 @@
                     "type": "string"
                 },
                 "view_slug": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Email": {
-            "type": "object",
-            "properties": {
-                "client_type": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "google_token": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "register_type": {
-                    "type": "string"
-                },
-                "text": {
                     "type": "string"
                 }
             }
@@ -12694,7 +12969,7 @@
             "properties": {
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
@@ -12969,20 +13244,6 @@
                 }
             }
         },
-        "models.SendCodeResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/object_builder_service.V2LoginResponse"
-                },
-                "google_acces": {
-                    "type": "boolean"
-                },
-                "sms_id": {
-                    "type": "string"
-                }
-            }
-        },
         "models.SetEmail": {
             "type": "object",
             "properties": {
@@ -12999,7 +13260,7 @@
             "properties": {
                 "body": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
@@ -13213,14 +13474,21 @@
         "models.V2SendCodeRequest": {
             "type": "object",
             "properties": {
+                "field_slug": {
+                    "type": "string"
+                },
                 "recipient": {
                     "type": "string"
                 },
-                "text": {
+                "sms_template_id": {
                     "type": "string"
                 },
                 "type": {
                     "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {}
                 }
             }
         },
@@ -13423,9 +13691,6 @@
             "type": "object"
         },
         "object_builder_service.UpdateRoleAppTablePermissionsRequest": {
-            "type": "object"
-        },
-        "object_builder_service.V2LoginResponse": {
             "type": "object"
         }
     },

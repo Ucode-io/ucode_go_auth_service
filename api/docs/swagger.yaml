@@ -240,46 +240,16 @@ definitions:
         type: string
     type: object
   auth_service.CreateUserRequest:
+    type: object
+  auth_service.DeleteByParamsRequest:
     properties:
-      active:
-        type: integer
-      base_url:
-        type: string
-      client_platform_id:
-        type: string
       client_type_id:
-        type: string
-      company_id:
-        type: string
-      email:
-        type: string
-      environment_id:
-        type: string
-      expires_at:
-        type: string
-      invite:
-        type: boolean
-      login:
-        type: string
-      name:
-        type: string
-      node_type:
-        type: string
-      password:
-        type: string
-      phone:
-        type: string
-      photo_url:
         type: string
       project_id:
         type: string
-      resource_environment_id:
+      session_id:
         type: string
-      resource_type:
-        type: integer
-      role_id:
-        type: string
-      year_of_birth:
+      user_id:
         type: string
     type: object
   auth_service.DeleteManyUserRequest:
@@ -309,15 +279,15 @@ definitions:
       row_effected:
         type: integer
     type: object
-  auth_service.EmailSettings:
+  auth_service.DeleteSessionsByDeviceRequest:
     properties:
-      email:
+      client_type_id:
         type: string
-      id:
-        type: string
-      password:
+      data:
         type: string
       project_id:
+        type: string
+      user_id_auth:
         type: string
     type: object
   auth_service.ExpireSessionsRequest:
@@ -446,6 +416,22 @@ definitions:
           $ref: '#/definitions/auth_service.Scope'
         type: array
     type: object
+  auth_service.GetSessionDevicesResponse:
+    properties:
+      sessions:
+        items:
+          $ref: '#/definitions/auth_service.Session'
+        type: array
+    type: object
+  auth_service.GetSessionListResponse:
+    properties:
+      count:
+        type: integer
+      sessions:
+        items:
+          $ref: '#/definitions/auth_service.Session'
+        type: array
+    type: object
   auth_service.GetUserByLoginTypesRequest:
     properties:
       email:
@@ -479,11 +465,19 @@ definitions:
     properties:
       api_keys_button:
         type: boolean
+      billing:
+        type: boolean
       chat:
+        type: boolean
+      chatwoot_button:
         type: boolean
       environment_button:
         type: boolean
       environments_button:
+        type: boolean
+      gitbook_button:
+        type: boolean
+      gpt_button:
         type: boolean
       id:
         type: string
@@ -566,6 +560,8 @@ definitions:
         type: string
       project_id:
         type: string
+      table_slug:
+        type: string
     type: object
   auth_service.HasAccessSuperAdminRes:
     properties:
@@ -594,6 +590,8 @@ definitions:
       updated_at:
         type: string
       user_id:
+        type: string
+      user_id_auth:
         type: string
     type: object
   auth_service.Language:
@@ -783,6 +781,10 @@ definitions:
         type: string
       role_id:
         type: string
+      tables:
+        items:
+          $ref: '#/definitions/auth_service.TableBody'
+        type: array
     type: object
   auth_service.RefreshTokenResponse:
     properties:
@@ -791,8 +793,12 @@ definitions:
     type: object
   auth_service.RegisterCompanyRequest:
     properties:
+      fare_id:
+        type: string
       googleToken:
         $ref: '#/definitions/auth_service.RegisterCompanyRequest_GoogleToken'
+      is_ugen:
+        type: boolean
       name:
         type: string
       user_info:
@@ -831,6 +837,8 @@ definitions:
       password:
         type: string
       phone:
+        type: string
+      tin:
         type: string
       token:
         type: string
@@ -923,6 +931,11 @@ definitions:
       user_id_auth:
         type: string
     type: object
+  auth_service.SessionPrimaryKey:
+    properties:
+      id:
+        type: string
+    type: object
   auth_service.TableBody:
     properties:
       object_id:
@@ -960,22 +973,6 @@ definitions:
         type: string
       name:
         type: string
-    type: object
-  auth_service.UpdateEmailSettingsRequest:
-    properties:
-      email:
-        type: string
-      id:
-        type: string
-      password:
-        type: string
-    type: object
-  auth_service.UpdateEmailSettingsResponse:
-    properties:
-      items:
-        items:
-          $ref: '#/definitions/auth_service.EmailSettings'
-        type: array
     type: object
   auth_service.UpdatePermissionRequest:
     properties:
@@ -1097,6 +1094,8 @@ definitions:
         type: string
       expires_at:
         type: string
+      google_id:
+        type: string
       hash_type:
         type: string
       id:
@@ -1121,6 +1120,8 @@ definitions:
         type: string
       timezone:
         $ref: '#/definitions/auth_service.Timezone'
+      tin:
+        type: string
     type: object
   auth_service.UserRelation:
     properties:
@@ -1165,6 +1166,10 @@ definitions:
         items:
           type: string
         type: array
+      columns:
+        items:
+          type: string
+        type: array
       confirm_by:
         $ref: '#/definitions/auth_service.ConfirmStrategies'
       db_project_id:
@@ -1185,6 +1190,8 @@ definitions:
         type: boolean
       self_register:
         type: boolean
+      session_limit:
+        type: integer
       table_slug:
         type: string
     type: object
@@ -1218,6 +1225,10 @@ definitions:
         type: string
       resource_type:
         type: integer
+      service_type:
+        type: string
+      session_info:
+        type: string
       sms_id:
         type: string
       tables:
@@ -1227,6 +1238,8 @@ definitions:
       type:
         type: string
       user_agent:
+        type: string
+      user_id:
         type: string
       username:
         type: string
@@ -1254,6 +1267,8 @@ definitions:
     properties:
       email:
         type: string
+      env_id:
+        type: string
       google_token:
         type: string
       otp:
@@ -1262,56 +1277,15 @@ definitions:
         type: string
       phone:
         type: string
+      service_type:
+        type: string
+      session_info:
+        type: string
       sms_id:
         type: string
       type:
         type: string
       username:
-        type: string
-    type: object
-  auth_service.V2MultiCompanyLoginRes:
-    properties:
-      companies:
-        items:
-          $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes_Company'
-        type: array
-    type: object
-  auth_service.V2MultiCompanyLoginRes_Company:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      logo:
-        type: string
-      name:
-        type: string
-      owner_id:
-        type: string
-      projects:
-        items:
-          $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes_Company_Project'
-        type: array
-      updated_at:
-        type: string
-      user_id:
-        type: string
-    type: object
-  auth_service.V2MultiCompanyLoginRes_Company_Project:
-    properties:
-      company_id:
-        type: string
-      created_at:
-        type: string
-      domain:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updated_at:
         type: string
     type: object
   auth_service.V2RefreshTokenSuperAdminResponse:
@@ -1322,6 +1296,10 @@ definitions:
   auth_service.V2UpdateClientTypeRequest:
     properties:
       client_platform_ids:
+        items:
+          type: string
+        type: array
+      columns:
         items:
           type: string
         type: array
@@ -1347,6 +1325,8 @@ definitions:
         type: boolean
       self_register:
         type: boolean
+      session_limit:
+        type: integer
       table_slug:
         type: string
     type: object
@@ -1387,21 +1367,14 @@ definitions:
         type: string
       project_id:
         type: string
+      resource_environment_id:
+        type: string
+      resource_type:
+        type: integer
       user_id:
         type: string
     type: object
   company_service.CreateProjectRequest:
-    properties:
-      company_id:
-        type: string
-      k8s_namespace:
-        type: string
-      resources:
-        items:
-          $ref: '#/definitions/company_service.Resource'
-        type: array
-      title:
-        type: string
     type: object
   company_service.CreateProjectResponse:
     properties:
@@ -1425,6 +1398,67 @@ definitions:
       symbol:
         type: string
       symbol_native:
+        type: string
+    type: object
+  company_service.Fare:
+    properties:
+      created_at:
+        type: string
+      currency:
+        $ref: '#/definitions/company_service.Currency'
+      currency_id:
+        type: string
+      description:
+        type: string
+      disactivate_day:
+        type: integer
+      fare_item_prices:
+        items:
+          $ref: '#/definitions/company_service.FareItemPrice'
+        type: array
+      id:
+        type: string
+      is_public:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      subscription:
+        $ref: '#/definitions/company_service.Subscription'
+      trial_days:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  company_service.FareItem:
+    properties:
+      id:
+        type: string
+      info:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      type:
+        type: string
+    type: object
+  company_service.FareItemPrice:
+    properties:
+      fare_id:
+        type: string
+      fare_item:
+        $ref: '#/definitions/company_service.FareItem'
+      fare_item_id:
+        type: string
+      id:
+        type: string
+      over_limit_price:
+        type: number
+      price:
+        type: number
+      value:
         type: string
     type: object
   company_service.GetListConfiguredResourceEnvironmentRes:
@@ -1481,6 +1515,8 @@ definitions:
     properties:
       balance:
         type: number
+      balance_set:
+        type: boolean
       company_id:
         type: string
       credit_limit:
@@ -1491,8 +1527,20 @@ definitions:
         type: array
       currency:
         $ref: '#/definitions/company_service.Currency'
+      customer_id:
+        type: string
+      expire_date:
+        type: string
+      fare:
+        $ref: '#/definitions/company_service.Fare'
       fare_id:
         type: string
+      icon_categories:
+        items:
+          type: string
+        type: array
+      is_ugen:
+        type: boolean
       k8s_namespace:
         type: string
       language:
@@ -1501,6 +1549,12 @@ definitions:
         type: array
       logo:
         type: string
+      new_design:
+        type: boolean
+      new_layout:
+        type: boolean
+      new_router:
+        type: boolean
       project_id:
         type: string
       request_per_second:
@@ -1509,28 +1563,13 @@ definitions:
         items:
           $ref: '#/definitions/company_service.ResourceWithoutPassword'
         type: array
+      status:
+        type: string
+      subscription_type:
+        type: string
       timezone:
         $ref: '#/definitions/company_service.Timezone'
       title:
-        type: string
-    type: object
-  company_service.Resource:
-    properties:
-      credentials:
-        $ref: '#/definitions/company_service.Resource_Credentials'
-      id:
-        type: string
-      is_configured:
-        type: boolean
-      node_type:
-        type: string
-      project_id:
-        type: string
-      resource_type:
-        $ref: '#/definitions/company_service.ResourceType'
-      title:
-        type: string
-      vault_path:
         type: string
     type: object
   company_service.Resource_Credentials:
@@ -1556,6 +1595,13 @@ definitions:
     - 5
     - 6
     - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
@@ -1566,6 +1612,13 @@ definitions:
     - ResourceType_GITHUB
     - ResourceType_SMS
     - ResourceType_SMTP
+    - ResourceType_GITLAB
+    - ResourceType_GIT
+    - ResourceType_BITBUCKET
+    - ResourceType_SUPERSET
+    - ResourceType_METABASE
+    - ResourceType_TRANSCODER
+    - ResourceType_MAILCHIMP
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -1615,6 +1668,27 @@ definitions:
       resource_environment_id:
         type: string
     type: object
+  company_service.Subscription:
+    properties:
+      discount_id:
+        type: string
+      end_date:
+        type: string
+      fare_id:
+        type: string
+      id:
+        type: string
+      project_id:
+        type: string
+      renewal_date:
+        type: string
+      start_date:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
   company_service.Timezone:
     properties:
       id:
@@ -1623,21 +1697,6 @@ definitions:
         type: string
       text:
         type: string
-    type: object
-  company_service.UpdateProjectUserDataReq:
-    properties:
-      client_platform_id:
-        type: string
-      client_type_id:
-        type: string
-      project_id:
-        type: string
-      role_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  company_service.UpdateProjectUserDataRes:
     type: object
   http.Response:
     properties:
@@ -1725,21 +1784,6 @@ definitions:
       table_slug:
         type: string
       view_slug:
-        type: string
-    type: object
-  models.Email:
-    properties:
-      client_type:
-        type: string
-      email:
-        type: string
-      google_token:
-        type: string
-      phone:
-        type: string
-      register_type:
-        type: string
-      text:
         type: string
     type: object
   models.ForgotPasswordResponse:
@@ -1859,7 +1903,7 @@ definitions:
   models.RegisterOtp:
     properties:
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
     type: object
   models.ResetPassword:
@@ -2042,15 +2086,6 @@ definitions:
       view_permission:
         type: boolean
     type: object
-  models.SendCodeResponse:
-    properties:
-      data:
-        $ref: '#/definitions/object_builder_service.V2LoginResponse'
-      google_acces:
-        type: boolean
-      sms_id:
-        type: string
-    type: object
   models.SetEmail:
     properties:
       email:
@@ -2061,7 +2096,7 @@ definitions:
   models.StructBody:
     properties:
       body:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
     type: object
   models.UpdateMenuPermissionsRequest:
@@ -2204,12 +2239,17 @@ definitions:
     type: object
   models.V2SendCodeRequest:
     properties:
+      field_slug:
+        type: string
       recipient:
         type: string
-      text:
+      sms_template_id:
         type: string
       type:
         type: string
+      variables:
+        additionalProperties: {}
+        type: object
     type: object
   models.V2SendCodeResponse:
     properties:
@@ -2343,8 +2383,6 @@ definitions:
   object_builder_service.UpdateMenuPermissionsRequest:
     type: object
   object_builder_service.UpdateRoleAppTablePermissionsRequest:
-    type: object
-  object_builder_service.V2LoginResponse:
     type: object
 info:
   contact: {}
@@ -3317,52 +3355,6 @@ paths:
       summary: Get Project By ID
       tags:
       - Project
-  /project/{project-id}/user-update:
-    put:
-      consumes:
-      - application/json
-      description: Update Project
-      operationId: update_user_in_project
-      parameters:
-      - description: UpdateProjectUserDataReqBody
-        in: body
-        name: project
-        required: true
-        schema:
-          $ref: '#/definitions/company_service.UpdateProjectUserDataReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Project data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/company_service.UpdateProjectUserDataRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update Project
-      tags:
-      - Project
   /refresh:
     put:
       consumes:
@@ -4168,48 +4160,6 @@ paths:
       tags:
       - UserRelation
   /user/{user-id}:
-    delete:
-      consumes:
-      - application/json
-      description: Get User
-      operationId: delete_user
-      parameters:
-      - description: user-id
-        in: path
-        name: user-id
-        required: true
-        type: string
-      - description: project-id
-        in: path
-        name: project-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete User
-      tags:
-      - User
     get:
       consumes:
       - application/json
@@ -4993,6 +4943,65 @@ paths:
       summary: DeleteAppleIdSettings
       tags:
       - AppleId
+  /v2/auth-table/{user-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete from auth table
+      operationId: delete_user_v2
+      parameters:
+      - description: Resource-Id
+        in: header
+        name: Resource-Id
+        type: string
+      - description: Environment-Id
+        in: header
+        name: Environment-Id
+        required: true
+        type: string
+      - description: user-id
+        in: path
+        name: user-id
+        required: true
+        type: string
+      - description: project-id
+        in: query
+        name: project-id
+        required: true
+        type: string
+      - description: client-type-id
+        in: query
+        name: client-type-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete From Auth service
+      tags:
+      - V2_User
   /v2/auth/login/{provider}:
     post:
       consumes:
@@ -5810,183 +5819,6 @@ paths:
       summary: Get Connection By ID
       tags:
       - V2_Connection
-  /v2/email-settings:
-    get:
-      consumes:
-      - application/json
-      description: GetListEmailSettings
-      operationId: getListEmailSettings
-      parameters:
-      - description: project_id
-        in: query
-        name: project_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.UpdateEmailSettingsResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: GetListEmailSettings
-      tags:
-      - Email
-    post:
-      consumes:
-      - application/json
-      description: CreateEmailSettings
-      operationId: createEmailSettings
-      parameters:
-      - description: X-API-KEY
-        in: header
-        name: X-API-KEY
-        type: string
-      - description: register_body
-        in: body
-        name: registerBody
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.EmailSettings'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.EmailSettings'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: CreateEmailSettings
-      tags:
-      - Email
-    put:
-      consumes:
-      - application/json
-      description: UpdateEmailSettings
-      operationId: updateEmailSettings
-      parameters:
-      - description: register_body
-        in: body
-        name: registerBody
-        required: true
-        schema:
-          $ref: '#/definitions/auth_service.UpdateEmailSettingsRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User data
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/auth_service.EmailSettings'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: UpdateEmailSettings
-      tags:
-      - Email
-  /v2/email-settings/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: DeleteEmailSettings
-      operationId: deleteEmailSettings
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: DeleteEmailSettings
-      tags:
-      - Email
   /v2/forgot-password:
     post:
       consumes:
@@ -6486,70 +6318,6 @@ paths:
       summary: V2MultiCompanyOneLogin
       tags:
       - V2_Session
-  /v2/object/get-list/{table_slug}:
-    post:
-      consumes:
-      - application/json
-      description: Get object list
-      operationId: get_list_object
-      parameters:
-      - description: Resource-Id
-        in: header
-        name: Resource-Id
-        type: string
-      - description: Environment-Id
-        in: header
-        name: Environment-Id
-        required: true
-        type: string
-      - description: project-id
-        in: query
-        name: project-id
-        type: string
-      - description: table_slug
-        in: path
-        name: table_slug
-        required: true
-        type: string
-      - description: data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.CommonMessage'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: GetObjectListResponseBody
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.CommonMessage'
-              type: object
-        "400":
-          description: Invalid Argument
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get object list
-      tags:
-      - V2_Object
   /v2/refresh:
     put:
       consumes:
@@ -7504,6 +7272,366 @@ paths:
       summary: SendMessage
       tags:
       - v2_register
+  /v2/session:
+    delete:
+      consumes:
+      - application/json
+      description: Delete sessions by user, client type, or session id in the current
+        project.
+      operationId: v2_delete_sessions_by_params
+      parameters:
+      - description: Bearer access token or API-KEY
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: API key when Authorization is API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Project id
+        in: query
+        name: project-id
+        type: string
+      - description: Delete sessions by params request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.DeleteByParamsRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete sessions by params
+      tags:
+      - V2_Session
+    get:
+      consumes:
+      - application/json
+      description: Get paginated sessions for the current project, optionally filtered
+        by user, client type, or search text.
+      operationId: v2_get_session_list
+      parameters:
+      - description: Bearer access token or API-KEY
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: API key when Authorization is API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Project id
+        in: query
+        name: project-id
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: User id
+        in: query
+        name: user_id
+        type: string
+      - description: Client type id
+        in: query
+        name: client_type_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Session list
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.GetSessionListResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get session list
+      tags:
+      - V2_Session
+  /v2/session/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete one session by id.
+      operationId: v2_delete_session
+      parameters:
+      - description: Bearer access token or API-KEY
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: API key when Authorization is API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Session id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deleted session
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.SessionPrimaryKey'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete session
+      tags:
+      - V2_Session
+  /v2/session/by-device:
+    delete:
+      consumes:
+      - application/json
+      description: Delete sessions for the current user/project by device information.
+      operationId: v2_delete_sessions_by_device
+      parameters:
+      - description: Bearer access token or API-KEY
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: API key when Authorization is API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Project id
+        in: query
+        name: project-id
+        type: string
+      - description: User id. If omitted, token user is used.
+        in: query
+        name: user_id
+        type: string
+      - description: Delete sessions by device request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.DeleteSessionsByDeviceRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete sessions by device
+      tags:
+      - V2_Session
+  /v2/session/devices:
+    get:
+      consumes:
+      - application/json
+      description: Get devices with active sessions for a user in the current project.
+      operationId: v2_get_session_devices
+      parameters:
+      - description: Bearer access token or API-KEY
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: API key when Authorization is API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Project id
+        in: query
+        name: project-id
+        type: string
+      - description: User id. If omitted, token user is used.
+        in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Session devices
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.GetSessionDevicesResponse'
+              type: object
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get session devices
+      tags:
+      - V2_Session
+  /v2/session/except-current:
+    delete:
+      consumes:
+      - application/json
+      description: Delete all sessions for the current user/project except the current
+        session.
+      operationId: v2_delete_sessions_except_current
+      parameters:
+      - description: Bearer access token or API-KEY
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: API key when Authorization is API-KEY
+        in: header
+        name: X-API-KEY
+        type: string
+      - description: Project id
+        in: query
+        name: project-id
+        type: string
+      - description: User id. If omitted, token user is used.
+        in: query
+        name: user_id
+        type: string
+      - description: Current session id. If omitted, token session is used.
+        in: query
+        name: session_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Argument
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete sessions except current
+      tags:
+      - V2_Session
   /v2/set-email/send-code:
     put:
       consumes:
@@ -7973,7 +8101,7 @@ paths:
             - $ref: '#/definitions/http.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/auth_service.V2MultiCompanyLoginRes'
+                  $ref: '#/definitions/models.V2MultiCompanyOneLoginRes'
               type: object
         "400":
           description: Bad Request
@@ -7996,6 +8124,52 @@ paths:
       summary: MultiCompanyLogin
       tags:
       - V2_Session
+  /v3/ugen-register:
+    post:
+      consumes:
+      - application/json
+      description: Register User
+      operationId: create_company
+      parameters:
+      - description: RegisterCompanyRequestBody
+        in: body
+        name: company
+        required: true
+        schema:
+          $ref: '#/definitions/auth_service.RegisterCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Company data
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_service.CompanyPrimaryKey'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Register User
+      tags:
+      - Ugen
 securityDefinitions:
   ApiKeyAuth:
     in: header
