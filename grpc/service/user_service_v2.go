@@ -71,6 +71,16 @@ func (s *userService) RegisterWithGoogle(ctx context.Context, req *pb.RegisterWi
 	}
 
 	if foundUser.Id == "" {
+		projForLimit, err := s.services.ProjectServiceClient().GetById(ctx, &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+		if err != nil {
+			s.log.Error("!!!RegisterWithGoogle--->GetProjectById", logger.Error(err))
+			return nil, status.Error(codes.Internal, "error getting project info")
+		}
+		if limitErr := checkUserProjectLimit(ctx, s.services, s.strg, projForLimit.GetFareId(), req.GetProjectId()); limitErr != nil {
+			s.log.Error("!!!RegisterWithGoogle--->checkUserProjectLimit", logger.Error(limitErr))
+			return nil, limitErr
+		}
+
 		pKey, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:                 "",
 			Password:              "",
@@ -250,6 +260,16 @@ func (s *userService) RegisterUserViaEmail(ctx context.Context, req *pb.CreateUs
 	}
 
 	if foundUser.Id == "" {
+		projForLimit, err := s.services.ProjectServiceClient().GetById(ctx, &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+		if err != nil {
+			s.log.Error("!!!RegisterUserViaEmail--->GetProjectById", logger.Error(err))
+			return nil, status.Error(codes.Internal, "error getting project info")
+		}
+		if limitErr := checkUserProjectLimit(ctx, s.services, s.strg, projForLimit.GetFareId(), req.GetProjectId()); limitErr != nil {
+			s.log.Error("!!!RegisterUserViaEmail--->checkUserProjectLimit", logger.Error(limitErr))
+			return nil, limitErr
+		}
+
 		pKey, err := s.strg.User().Create(ctx, &pb.CreateUserRequest{
 			Login:                 req.GetLogin(),
 			Password:              req.GetPassword(),
@@ -491,6 +511,11 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 	if err != nil {
 		s.log.Error("!!!CreateUser-->ProjectGetById", logger.Error(err))
 		return nil, err
+	}
+
+	if limitErr := checkUserProjectLimit(ctx, s.services, s.strg, project.GetFareId(), req.GetProjectId()); limitErr != nil {
+		s.log.Error("!!!V2CreateUser--->checkUserProjectLimit", logger.Error(limitErr))
+		return nil, limitErr
 	}
 
 	if len(userId) == 0 {
@@ -1353,6 +1378,16 @@ func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToPro
 			s.log.Info("Memory used over 300 mb", logger.Any("AddUserToProject", memoryUsed))
 		}
 	}()
+
+	proj, err := s.services.ProjectServiceClient().GetById(ctx, &pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+	if err != nil {
+		s.log.Error("!!!AddUserToProject--->GetProjectById", logger.Error(err))
+		return nil, status.Error(codes.Internal, "error getting project info")
+	}
+	if limitErr := checkUserProjectLimit(ctx, s.services, s.strg, proj.GetFareId(), req.GetProjectId()); limitErr != nil {
+		s.log.Error("!!!AddUserToProject--->checkUserProjectLimit", logger.Error(limitErr))
+		return nil, limitErr
+	}
 
 	res, err := s.strg.User().AddUserToProject(ctx, req)
 	if err != nil {

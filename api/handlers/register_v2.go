@@ -409,8 +409,8 @@ func (h *Handler) V2Register(c *gin.Context) {
 		clientTypeId = body.Data["client_type_id"].(string)
 		roleId       = body.Data["role_id"].(string)
 
-		projectId     = body.Data["project_id"].(string)
-		environmentId = body.Data["environment_id"].(string)
+		projectId     = cast.ToString(body.Data["project_id"])
+		environmentId = cast.ToString(body.Data["environment_id"])
 	)
 
 	if len(projectId) == 0 {
