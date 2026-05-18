@@ -21,6 +21,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	pbc "ucode/ucode_go_auth_service/genproto/company_service"
 	"ucode/ucode_go_auth_service/genproto/new_object_builder_service"
 	pbObject "ucode/ucode_go_auth_service/genproto/object_builder_service"
 )
@@ -155,6 +156,16 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		resourceType = body["resource_type"].(float64)
 		tableSlug    = "user"
 	)
+
+	projForLimit, err := rs.services.ProjectServiceClient().GetById(ctx, &pbc.GetProjectByIdRequest{ProjectId: data.ProjectId})
+	if err != nil {
+		rs.log.Error("!!!RegisterUser--->GetProjectById", logger.Error(err))
+		return nil, status.Error(codes.Internal, "error getting project info")
+	}
+	if limitErr := checkUserProjectLimit(ctx, rs.services, rs.strg, projForLimit.GetFareId(), data.ProjectId); limitErr != nil {
+		rs.log.Error("!!!RegisterUser--->checkUserProjectLimit", logger.Error(limitErr))
+		return nil, limitErr
+	}
 
 	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
 		UserId:       userId,

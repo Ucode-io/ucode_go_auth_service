@@ -72,6 +72,7 @@ const (
 
 	// Fare (billing) types
 	FARE_API_KEYS string = "api_keys"
+	FARE_USERS    string = "users_count"
 
 	// Commit Types
 	COMMIT_TYPE_TABLE string = "TABLE"

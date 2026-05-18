@@ -106,6 +106,11 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		return nil, err
 	}
 
+	if limitErr := checkUserProjectLimit(ctx, sus.services, sus.strg, project.GetFareId(), req.GetProjectId()); limitErr != nil {
+		sus.log.Error("!!!CreateUser--->checkUserProjectLimit", logger.Error(limitErr))
+		return nil, limitErr
+	}
+
 	if userId == "" {
 		if req.GetPassword() != "" {
 			hashedPassword, err := security.HashPasswordBcrypt(req.GetPassword())
@@ -420,6 +425,11 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 		if err != nil {
 			sus.log.Error("!!!CreateSyncUsers--->GetProjectById", logger.Error(err))
 			return nil, err
+		}
+
+		if limitErr := checkUserProjectLimit(ctx, sus.services, sus.strg, project.GetFareId(), req.GetProjectId()); limitErr != nil {
+			sus.log.Error("!!!CreateSyncUsers--->checkUserProjectLimit", logger.Error(limitErr))
+			return nil, limitErr
 		}
 
 		if userId == "" {
