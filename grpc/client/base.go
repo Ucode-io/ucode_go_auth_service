@@ -20,6 +20,7 @@ type ServiceManagerI interface {
 	ServiceResource() company_service.MicroserviceResourceClient
 	ProjectServiceClient() company_service.ProjectServiceClient
 	MicroServiceResourceService() company_service.MicroserviceResourceClient
+	BillingServiceClient() company_service.BillingServiceClient
 
 	IntegrationService() auth_service.IntegrationServiceClient
 	ClientService() auth_service.ClientServiceClient
@@ -47,6 +48,7 @@ type grpcClients struct {
 	environmentService          company_service.EnvironmentServiceClient
 	microServiceResourceService company_service.MicroserviceResourceClient
 	serviceResource             company_service.MicroserviceResourceClient
+	billingServiceClient        company_service.BillingServiceClient
 
 	integrationService    auth_service.IntegrationServiceClient
 	clientService         auth_service.ClientServiceClient
@@ -110,6 +112,7 @@ func NewGrpcClients(ctx context.Context, cfg config.BaseConfig) (ServiceManagerI
 		environmentService:          company_service.NewEnvironmentServiceClient(connCompanyService),
 		microServiceResourceService: company_service.NewMicroserviceResourceClient(connCompanyService),
 		serviceResource:             company_service.NewMicroserviceResourceClient(connCompanyService),
+		billingServiceClient:        company_service.NewBillingServiceClient(connCompanyService),
 
 		clientService:         auth_service.NewClientServiceClient(connAuthService),
 		permissionService:     auth_service.NewPermissionServiceClient(connAuthService),
@@ -133,6 +136,10 @@ func NewGrpcClients(ctx context.Context, cfg config.BaseConfig) (ServiceManagerI
 
 func (g *grpcClients) MicroServiceResourceService() company_service.MicroserviceResourceClient {
 	return g.microServiceResourceService
+}
+
+func (g *grpcClients) BillingServiceClient() company_service.BillingServiceClient {
+	return g.billingServiceClient
 }
 
 func (g *grpcClients) ServiceResource() company_service.MicroserviceResourceClient {
