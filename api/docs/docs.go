@@ -13723,8 +13723,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "This is a api gateway",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {
