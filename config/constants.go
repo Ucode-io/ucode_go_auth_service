@@ -70,6 +70,9 @@ const (
 	UserStatusInactive string = "INACTIVE"
 	UserStatusActive   string = "ACTIVE"
 
+	// Fare (billing) types
+	FARE_API_KEYS string = "api_keys"
+
 	// Commit Types
 	COMMIT_TYPE_TABLE string = "TABLE"
 	SMS_TEXT          string = "Code"
