@@ -36,6 +36,7 @@ func (h *Handler) UgenRegister(c *gin.Context) {
 	}
 
 	company.IsUgen = true
+	company.FareId = config.UGEN_FREE_PLAN_ID
 
 	resp, err := h.services.CompanyService().Register(
 		c.Request.Context(), &company,
