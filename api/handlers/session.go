@@ -167,6 +167,26 @@ func (h *Handler) HasAccessSuperAdmin(c *gin.Context) {
 	h.handleResponse(c, http.Created, resp)
 }
 
+// GetSessionList godoc
+// @Security ApiKeyAuth
+// @ID v2_get_session_list
+// @Router /v2/session [GET]
+// @Summary Get session list
+// @Description Get paginated sessions for the current project, optionally filtered by user, client type, or search text.
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer access token or API-KEY"
+// @Param X-API-KEY header string false "API key when Authorization is API-KEY"
+// @Param project-id query string false "Project id"
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
+// @Param search query string false "Search"
+// @Param user_id query string false "User id"
+// @Param client_type_id query string false "Client type id"
+// @Success 200 {object} http.Response{data=auth_service.GetSessionListResponse} "Session list"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetSessionList(c *gin.Context) {
 	offset, err := h.getOffsetParam(c)
 	if err != nil {
@@ -198,6 +218,21 @@ func (h *Handler) GetSessionList(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// DeleteSession godoc
+// @Security ApiKeyAuth
+// @ID v2_delete_session
+// @Router /v2/session/{id} [DELETE]
+// @Summary Delete session
+// @Description Delete one session by id.
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer access token or API-KEY"
+// @Param X-API-KEY header string false "API key when Authorization is API-KEY"
+// @Param id path string true "Session id"
+// @Success 200 {object} http.Response{data=auth_service.SessionPrimaryKey} "Deleted session"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteSession(c *gin.Context) {
 	resp, err := h.services.SessionService().Delete(
 		c.Request.Context(),
@@ -213,6 +248,22 @@ func (h *Handler) DeleteSession(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// GetSessionDevices godoc
+// @Security ApiKeyAuth
+// @ID v2_get_session_devices
+// @Router /v2/session/devices [GET]
+// @Summary Get session devices
+// @Description Get devices with active sessions for a user in the current project.
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer access token or API-KEY"
+// @Param X-API-KEY header string false "API key when Authorization is API-KEY"
+// @Param project-id query string false "Project id"
+// @Param user_id query string false "User id. If omitted, token user is used."
+// @Success 200 {object} http.Response{data=auth_service.GetSessionDevicesResponse} "Session devices"
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) GetSessionDevices(c *gin.Context) {
 	userIdAuth, err := h.getFromHeaderOrQuery(c, "user_id")
 	if err != nil {
@@ -241,6 +292,23 @@ func (h *Handler) GetSessionDevices(c *gin.Context) {
 	h.handleResponse(c, http.OK, resp)
 }
 
+// DeleteSessionsByDevice godoc
+// @Security ApiKeyAuth
+// @ID v2_delete_sessions_by_device
+// @Router /v2/session/by-device [DELETE]
+// @Summary Delete sessions by device
+// @Description Delete sessions for the current user/project by device information.
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer access token or API-KEY"
+// @Param X-API-KEY header string false "API key when Authorization is API-KEY"
+// @Param project-id query string false "Project id"
+// @Param user_id query string false "User id. If omitted, token user is used."
+// @Param request body auth_service.DeleteSessionsByDeviceRequest true "Delete sessions by device request"
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteSessionsByDevice(c *gin.Context) {
 	var req auth_service.DeleteSessionsByDeviceRequest
 
@@ -276,6 +344,23 @@ func (h *Handler) DeleteSessionsByDevice(c *gin.Context) {
 	h.handleResponse(c, http.NoContent, resp)
 }
 
+// DeleteSessionsExceptCurrent godoc
+// @Security ApiKeyAuth
+// @ID v2_delete_sessions_except_current
+// @Router /v2/session/except-current [DELETE]
+// @Summary Delete sessions except current
+// @Description Delete all sessions for the current user/project except the current session.
+// @Tags V2_Session
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer access token or API-KEY"
+// @Param X-API-KEY header string false "API key when Authorization is API-KEY"
+// @Param project-id query string false "Project id"
+// @Param user_id query string false "User id. If omitted, token user is used."
+// @Param session_id query string false "Current session id. If omitted, token session is used."
+// @Success 204
+// @Response 400 {object} http.Response{data=string} "Invalid Argument"
+// @Failure 500 {object} http.Response{data=string} "Server Error"
 func (h *Handler) DeleteSessionsExceptCurrent(c *gin.Context) {
 	userIdAuth, err := h.getFromHeaderOrQuery(c, "user_id")
 	if err != nil {
