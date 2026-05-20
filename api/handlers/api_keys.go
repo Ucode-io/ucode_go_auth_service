@@ -3,9 +3,12 @@ package handlers
 import (
 	"errors"
 	status "ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/codes"
+	grpcstatus "google.golang.org/grpc/status"
 )
 
 // CreateApiKey godoc
@@ -36,6 +39,14 @@ func (h *Handler) CreateApiKey(c *gin.Context) {
 	)
 
 	if err != nil {
+		if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.ResourceExhausted {
+			h.handleResponse(c, status.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "api_key_limit",
+				Unit: "api_keys",
+			})
+			return
+		}
 		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}

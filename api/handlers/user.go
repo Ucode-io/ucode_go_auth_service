@@ -3,15 +3,14 @@ package handlers
 import (
 	"errors"
 	"ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/api/models"
+	"ucode/ucode_go_auth_service/genproto/auth_service"
 	"ucode/ucode_go_auth_service/pkg/helper"
 
-	"ucode/ucode_go_auth_service/genproto/auth_service"
-
-	"github.com/saidamir98/udevs_pkg/util"
-
-	"ucode/ucode_go_auth_service/api/models"
-
 	"github.com/gin-gonic/gin"
+	"github.com/saidamir98/udevs_pkg/util"
+	"google.golang.org/grpc/codes"
+	grpcstatus "google.golang.org/grpc/status"
 )
 
 // CreateUser godoc
@@ -44,6 +43,14 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	)
 
 	if err != nil {
+		if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.ResourceExhausted {
+			h.handleResponse(c, http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "user_limit",
+				Unit: "users",
+			})
+			return
+		}
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
