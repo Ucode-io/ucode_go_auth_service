@@ -141,6 +141,14 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 			Description: st.String(),
 			Data:        config.SessionExpired,
 		})
+	} else if st.Code() == codes.ResourceExhausted {
+		c.JSON(http.StatusPaymentRequired, status_http.Response{
+			Status:      status_http.PaymentRequired.Status,
+			Description: status_http.PaymentRequired.Description,
+			Data: models.PaymentRequiredData{
+				Type: "payment_required",
+			},
+		})
 	} else if st.Err() != nil {
 		c.JSON(http.StatusInternalServerError, status_http.Response{
 			Status:      statusHttp.Status,
