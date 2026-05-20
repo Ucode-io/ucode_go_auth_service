@@ -101,7 +101,7 @@ type SessionRepoI interface {
 	DeleteExpiredUserSessions(ctx context.Context, userID string) (rowsAffected int64, err error)
 	GetSessionListByUserID(ctx context.Context, userID string) (res *pb.GetSessionListResponse, err error)
 	ExpireSessions(ctx context.Context, entity *pb.ExpireSessionsRequest) (err error)
-	DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (err error)
+	DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (deletedIDs []string, err error)
 	GetSessionDevices(ctx context.Context, req *pb.GetSessionDevicesRequest) (*pb.GetSessionDevicesResponse, error)
 	DeleteSessionsByDevice(ctx context.Context, req *pb.DeleteSessionsByDeviceRequest) error
 	DeleteSessionsExceptCurrent(ctx context.Context, req *pb.DeleteSessionsExceptCurrentRequest) error

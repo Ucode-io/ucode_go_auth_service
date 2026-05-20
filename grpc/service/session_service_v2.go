@@ -2804,10 +2804,14 @@ func (s *sessionService) DeleteByParams(ctx context.Context, req *pb.DeleteByPar
 
 	s.log.Info("---DeleteByParams--->>>", logger.Any("req", req))
 
-	err := s.strg.Session().DeleteByParams(ctx, req)
+	deletedIDs, err := s.strg.Session().DeleteByParams(ctx, req)
 	if err != nil {
 		s.log.Error("!!!DeleteByParams--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	for _, id := range deletedIDs {
+		_ = s.redisClient.Del(ctx, fmt.Sprintf("has_access_user:%s", id)).Err()
 	}
 
 	return &emptypb.Empty{}, nil

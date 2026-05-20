@@ -193,6 +193,8 @@ func (s *sessionService) Delete(ctx context.Context, req *pb.SessionPrimaryKey) 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	_ = s.redisClient.Del(ctx, fmt.Sprintf("has_access_user:%s", req.Id)).Err()
+
 	return &emptypb.Empty{}, nil
 }
 
@@ -357,6 +359,8 @@ func (s *sessionService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 		s.log.Error("!!!Logout--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	_ = s.redisClient.Del(ctx, fmt.Sprintf("has_access_user:%s", tokenInfo.ID)).Err()
 
 	return &emptypb.Empty{}, nil
 }
@@ -764,7 +768,7 @@ func (s *sessionService) HasAccessUser(ctx context.Context, req *pb.V2HasAccessU
 
 	// Store in cache
 	if bytes, marshalErr := json.Marshal(res); marshalErr == nil {
-		_ = s.redisClient.Set(ctx, cacheKey, bytes, config.REDIS_EXPIRY_TIME).Err()
+		_ = s.redisClient.Set(ctx, cacheKey, bytes, config.HAS_ACCESS_USER_CACHE_TTL).Err()
 	}
 
 	return res, nil

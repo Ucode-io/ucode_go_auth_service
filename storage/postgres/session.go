@@ -455,12 +455,12 @@ func (r *sessionRepo) ExpireSessions(ctx context.Context, entity *pb.ExpireSessi
 	return nil
 }
 
-func (r *sessionRepo) DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (err error) {
+func (r *sessionRepo) DeleteByParams(ctx context.Context, entity *pb.DeleteByParamsRequest) (deletedIDs []string, err error) {
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.ExpireSessions")
 	defer dbSpan.Finish()
 
 	if entity.UserId == "" || entity.ProjectId == "" || entity.ClientTypeId == "" {
-		return errors.New("user_id, project_id and client_type_id are required")
+		return nil, errors.New("user_id, project_id and client_type_id are required")
 	}
 
 	// Build conditional query: if session_id provided, exclude it; otherwise delete by the rest
@@ -473,26 +473,40 @@ func (r *sessionRepo) DeleteByParams(ctx context.Context, entity *pb.DeleteByPar
 		query = `
             DELETE FROM session
             WHERE client_type_id = $1 AND user_id = $2 AND project_id = $3 AND id != $4
+            RETURNING id
         `
 		args = []any{entity.ClientTypeId, entity.UserId, entity.ProjectId, entity.SessionId}
 	} else {
 		query = `
             DELETE FROM session
             WHERE client_type_id = $1 AND user_id = $2 AND project_id = $3
+            RETURNING id
         `
 		args = []any{entity.ClientTypeId, entity.UserId, entity.ProjectId}
 	}
 
-	result, err := r.db.Exec(ctx, query, args...)
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		deletedIDs = append(deletedIDs, id)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
-	if result.RowsAffected() == 0 {
-		return pgx.ErrNoRows
+	if len(deletedIDs) == 0 {
+		return nil, pgx.ErrNoRows
 	}
 
-	return nil
+	return deletedIDs, nil
 }
 
 func (r *sessionRepo) GetSessionDevices(ctx context.Context, req *pb.GetSessionDevicesRequest) (*pb.GetSessionDevicesResponse, error) {
