@@ -3,9 +3,12 @@ package handlers
 import (
 	"errors"
 	status "ucode/ucode_go_auth_service/api/http"
+	"ucode/ucode_go_auth_service/api/models"
 	"ucode/ucode_go_auth_service/genproto/auth_service"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/codes"
+	grpcstatus "google.golang.org/grpc/status"
 )
 
 // CreateApiKey godoc
@@ -24,11 +27,26 @@ import (
 func (h *Handler) CreateApiKey(c *gin.Context) {
 	var apiKey auth_service.CreateReq
 
+	projectId, ok := c.Get("project_id")
+	if !ok {
+		h.handleResponse(c, status.InvalidArgument, errors.New("project_id is required"))
+		return
+	}
+
+	environmentId, ok := c.Get("environment_id")
+	if !ok {
+		h.handleResponse(c, status.InvalidArgument, errors.New("environment_id is required"))
+		return
+	}
+
 	err := c.ShouldBindJSON(&apiKey)
 	if err != nil {
 		h.handleResponse(c, status.BadRequest, err.Error())
 		return
 	}
+
+	apiKey.ProjectId = projectId.(string)
+	apiKey.EnvironmentId = environmentId.(string)
 
 	res, err := h.services.ApiKeysService().Create(
 		c.Request.Context(),
@@ -36,6 +54,14 @@ func (h *Handler) CreateApiKey(c *gin.Context) {
 	)
 
 	if err != nil {
+		if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.ResourceExhausted {
+			h.handleResponse(c, status.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "api_key_limit",
+				Unit: "api_keys",
+			})
+			return
+		}
 		h.handleResponse(c, status.GRPCError, err.Error())
 		return
 	}

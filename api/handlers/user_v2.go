@@ -16,6 +16,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/saidamir98/udevs_pkg/util"
 	"github.com/spf13/cast"
+	"google.golang.org/grpc/codes"
+	grpcstatus "google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -74,6 +76,14 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 		c.Request.Context(), &user,
 	)
 	if err != nil {
+		if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.ResourceExhausted {
+			h.handleResponse(c, http.PaymentRequired, models.PaymentRequiredData{
+				Type: "payment_required",
+				Code: "user_limit",
+				Unit: "users",
+			})
+			return
+		}
 		h.handleError(c, http.InternalServerError, err)
 		return
 	}

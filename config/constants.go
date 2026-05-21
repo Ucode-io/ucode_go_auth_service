@@ -75,6 +75,8 @@ const (
 	FARE_API_KEYS string = "api_keys"
 	FARE_USERS    string = "users_count"
 
+	UGEN_FREE_PLAN_ID = "07d8a364-ebb2-4291-a452-f44b335cb031"
+
 	// Commit Types
 	COMMIT_TYPE_TABLE string = "TABLE"
 	SMS_TEXT          string = "Code"
