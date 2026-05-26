@@ -69,32 +69,17 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 
 	err = tx.QueryRow(ctx, query, loginValue).Scan(&userId)
 	if err == pgx.ErrNoRows {
-		if loginType == "email" {
-			_, err = r.ResetPassword(ctx, resetPasswordReq, tx)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to update email")
-			}
-
-			resp.UserId = req.GetGuid()
-		} else {
-			pKey, err := r.UpdateLoginStrategy(ctx, req, resetPasswordReq, tx)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to reset password")
-			}
-
-			resp.UserId = pKey
+		pKey, err := r.UpdateLoginStrategy(ctx, req, resetPasswordReq, tx)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to reset password")
 		}
+
+		resp.UserId = pKey
 	} else if err == nil {
 		if loginType == "login" {
 			return nil, errors.New("login already exists")
 		}
-		if loginType == "email" {
-			if userId != req.GetGuid() {
-				return nil, errors.New("email already exists")
-			}
-
-			resp.UserId = req.GetGuid()
-		} else if _, err = uuid.Parse(userId); err == nil {
+		if _, err = uuid.Parse(userId); err == nil {
 			query = `
 				UPDATE 
 					user_project

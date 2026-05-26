@@ -1683,8 +1683,6 @@ func (s *sessionService) resolveConnectionTables(
 
 			switch len(optIds) {
 			case 0:
-				// No options for this connection — intentionally skipped.
-				// Slug must be absent from token so downstream falls back to user_id filter.
 			case 1:
 				tables = append(tables, &pb.Object{
 					TableSlug: slug,

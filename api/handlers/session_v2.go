@@ -161,7 +161,6 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 	var (
 		finalConnections = make([]map[string]any, len(rawResponse))
 		wg               sync.WaitGroup
-		mu               sync.Mutex
 	)
 
 	for i, v := range rawResponse {
@@ -197,13 +196,11 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 					UserId:                userProject.GetUserId(),
 					ProjectId:             resource.ProjectId,
 				})
+
 				if err == nil && optResp.Data != nil {
 					optionsData = optResp.Data.AsMap()["response"]
 				}
 			}
-
-			mu.Lock()
-			defer mu.Unlock()
 
 			if optionsData != nil {
 				cMap["options"] = optionsData
@@ -222,28 +219,35 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 
 	if len(finalConnections) == 0 {
 		shouldAutoLogin = true
-	} else if len(finalConnections) == 1 {
-		conn := finalConnections[0]
-		options, _ := conn["options"].([]any)
-		tableSlug, _ := conn["table_slug"].(string)
 
-		switch len(options) {
-		case 0:
-			// Connection exists but no options — auto-login, no table filter (downstream uses user_id).
+	}
+
+	if len(finalConnections) == 1 {
+
+		conn := finalConnections[0]
+		options, ok := conn["options"].([]any)
+
+		if !ok || len(options) == 0 {
 			shouldAutoLogin = true
-		case 1:
+
+		} else if len(options) == 1 {
+
 			shouldAutoLogin = true
 			opt, okOpt := options[0].(map[string]any)
-			if okOpt && tableSlug != "" {
-				if objectId, _ := opt["guid"].(string); objectId != "" {
-					tables = []*pba.Object{{TableSlug: tableSlug, ObjectId: objectId}}
+			tableSlug, okSlug := conn["table_slug"].(string)
+
+			if okOpt && okSlug {
+				if objectId, okObj := opt["guid"].(string); okObj {
+					tables = []*pba.Object{
+						{
+							TableSlug: tableSlug,
+							ObjectId:  objectId,
+						},
+					}
 				}
 			}
-		default:
-			// Multiple options — return connections list for user to pick.
 		}
 	}
-	// Multiple connections — return connections list for user to pick.
 
 	if shouldAutoLogin {
 		v2Req := &pba.V2LoginRequest{
@@ -270,22 +274,31 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 
 		v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
 		if err != nil {
-			httpErrorStr := strings.ToLower(strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:])
+			var httpErrorStr = ""
+
+			httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
+			httpErrorStr = strings.ToLower(httpErrorStr)
+
 			switch httpErrorStr {
 			case "user not found":
 				h.handleResponse(c, http.NotFound, "Пользователь не найдено")
+				return
 			case "session has been expired":
 				h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
+				return
 			case "invalid username":
 				h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
+				return
 			case "invalid password":
 				h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+				return
 			case "user blocked":
 				h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
+				return
 			default:
 				h.handleResponse(c, http.InvalidArgument, err.Error())
+				return
 			}
-			return
 		}
 
 		v2Resp.EnvironmentId = resource.GetEnvironmentId()
