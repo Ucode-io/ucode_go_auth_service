@@ -158,9 +158,17 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 		rawResponse, _ = resp.Data.AsMap()["response"].([]any)
 	}
 
+	type connResult struct {
+		tableSlug string
+		options   []any
+		err       error
+	}
+
+	results := make([]connResult, len(rawResponse))
 	var (
-		finalConnections = make([]map[string]any, len(rawResponse))
-		wg               sync.WaitGroup
+		wg       sync.WaitGroup
+		mu       sync.Mutex
+		fetchErr error
 	)
 
 	for i, v := range rawResponse {
@@ -169,154 +177,136 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 			continue
 		}
 
-		finalConnections[i] = connMap
+		tableSlug, _ := connMap["table_slug"].(string)
 		guid, ok := connMap["guid"].(string)
-		if !ok {
+		if !ok || guid == "" {
 			continue
 		}
 
-		wg.Add(1)
-		go func(index int, connectionId string, cMap map[string]any) {
-			defer wg.Done()
-			var optionsData any
+		results[i] = connResult{tableSlug: tableSlug}
 
-			if resource.ResourceType == pbCompany.ResourceType_MONGODB {
-				optResp, err := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(ctx, &obs.GetConnetionOptionsRequest{
+		wg.Add(1)
+		go func(index int, connectionId string) {
+			defer wg.Done()
+
+			var optionsData any
+			var err error
+
+			switch resource.ResourceType {
+			case pbCompany.ResourceType_MONGODB:
+				optResp, e := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(ctx, &obs.GetConnetionOptionsRequest{
 					ConnectionId:          connectionId,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					UserId:                userProject.GetUserId(),
 				})
-				if err == nil && optResp.Data != nil {
+				if e != nil {
+					err = e
+				} else if optResp.Data != nil {
 					optionsData = optResp.Data.AsMap()["response"]
 				}
-			} else if resource.ResourceType == pbCompany.ResourceType_POSTGRESQL {
-				optResp, err := services.GoLoginService().GetConnetionOptions(ctx, &nobs.GetConnetionOptionsRequest{
+			case pbCompany.ResourceType_POSTGRESQL:
+				optResp, e := services.GoLoginService().GetConnetionOptions(ctx, &nobs.GetConnetionOptionsRequest{
 					ConnectionId:          connectionId,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					UserId:                userProject.GetUserId(),
 					ProjectId:             resource.ProjectId,
 				})
-
-				if err == nil && optResp.Data != nil {
+				if e != nil {
+					err = e
+				} else if optResp.Data != nil {
 					optionsData = optResp.Data.AsMap()["response"]
 				}
 			}
 
-			if optionsData != nil {
-				cMap["options"] = optionsData
-			} else {
-				cMap["options"] = make([]any, 0)
+			if err != nil {
+				mu.Lock()
+				if fetchErr == nil {
+					fetchErr = err
+				}
+				mu.Unlock()
+				return
 			}
-			finalConnections[index] = cMap
-		}(i, guid, connMap)
+
+			opts, _ := optionsData.([]any)
+			mu.Lock()
+			results[index].options = opts
+			mu.Unlock()
+		}(i, guid)
 	}
 	wg.Wait()
 
-	var (
-		shouldAutoLogin = false
-		tables          []*pba.Object
-	)
-
-	if len(finalConnections) == 0 {
-		shouldAutoLogin = true
-
-	}
-
-	if len(finalConnections) == 1 {
-
-		conn := finalConnections[0]
-		options, ok := conn["options"].([]any)
-
-		if !ok || len(options) == 0 {
-			shouldAutoLogin = true
-
-		} else if len(options) == 1 {
-
-			shouldAutoLogin = true
-			opt, okOpt := options[0].(map[string]any)
-			tableSlug, okSlug := conn["table_slug"].(string)
-
-			if okOpt && okSlug {
-				if objectId, okObj := opt["guid"].(string); okObj {
-					tables = []*pba.Object{
-						{
-							TableSlug: tableSlug,
-							ObjectId:  objectId,
-						},
-					}
-				}
-			}
-		}
-	}
-
-	if shouldAutoLogin {
-		v2Req := &pba.V2LoginRequest{
-			Type:                  login.GetType(),
-			Username:              login.GetUsername(),
-			Password:              login.GetPassword(),
-			Phone:                 login.GetPhone(),
-			Email:                 login.GetEmail(),
-			Otp:                   login.GetOtp(),
-			SmsId:                 login.GetSmsId(),
-			SessionInfo:           login.GetSessionInfo(),
-			ServiceType:           login.GetServiceType(),
-			GoogleToken:           login.GetGoogleToken(),
-			ProjectId:             userProject.GetProjectId(),
-			EnvironmentId:         userProject.GetEnvironmentId(),
-			ClientType:            userProject.GetClientTypeId(),
-			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
-			NodeType:              resource.GetNodeType(),
-			ResourceType:          int32(resource.GetResourceType()),
-			Tables:                tables,
-			ClientIp:              c.RemoteIP(),
-			UserAgent:             c.Request.UserAgent(),
-		}
-
-		v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
-		if err != nil {
-			var httpErrorStr = ""
-
-			httpErrorStr = strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:]
-			httpErrorStr = strings.ToLower(httpErrorStr)
-
-			switch httpErrorStr {
-			case "user not found":
-				h.handleResponse(c, http.NotFound, "Пользователь не найдено")
-				return
-			case "session has been expired":
-				h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
-				return
-			case "invalid username":
-				h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
-				return
-			case "invalid password":
-				h.handleResponse(c, http.InvalidArgument, "неверное пароль")
-				return
-			case "user blocked":
-				h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
-				return
-			default:
-				h.handleResponse(c, http.InvalidArgument, err.Error())
-				return
-			}
-		}
-
-		v2Resp.EnvironmentId = resource.GetEnvironmentId()
-		v2Resp.ResourceId = resource.GetResourceId()
-
-		h.handleResponse(c, http.OK, map[string]any{
-			"response":     v2Resp,
-			"project_data": userProject.GetProjectData(),
-		})
+	if fetchErr != nil {
+		h.handleResponse(c, http.GRPCError, fetchErr.Error())
 		return
 	}
 
+	var tables []*pba.Object
+	for _, r := range results {
+		if r.tableSlug == "" {
+			continue
+		}
+		// No options → skip: downstream must fall back to user_id filter.
+		// Appending without object_id would set filter to "" which is incorrect.
+		for _, opt := range r.options {
+			optMap, ok := opt.(map[string]any)
+			if !ok {
+				continue
+			}
+			objectId, _ := optMap["guid"].(string)
+			if objectId == "" {
+				continue
+			}
+			tables = append(tables, &pba.Object{TableSlug: r.tableSlug, ObjectId: objectId})
+		}
+	}
+
+	v2Req := &pba.V2LoginRequest{
+		Type:                  login.GetType(),
+		Username:              login.GetUsername(),
+		Password:              login.GetPassword(),
+		Phone:                 login.GetPhone(),
+		Email:                 login.GetEmail(),
+		Otp:                   login.GetOtp(),
+		SmsId:                 login.GetSmsId(),
+		SessionInfo:           login.GetSessionInfo(),
+		ServiceType:           login.GetServiceType(),
+		GoogleToken:           login.GetGoogleToken(),
+		ProjectId:             userProject.GetProjectId(),
+		EnvironmentId:         userProject.GetEnvironmentId(),
+		ClientType:            userProject.GetClientTypeId(),
+		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+		NodeType:              resource.GetNodeType(),
+		ResourceType:          int32(resource.GetResourceType()),
+		Tables:                tables,
+		ClientIp:              c.RemoteIP(),
+		UserAgent:             c.Request.UserAgent(),
+	}
+
+	v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
+	if err != nil {
+		httpErrorStr := strings.ToLower(strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:])
+		switch httpErrorStr {
+		case "user not found":
+			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
+		case "session has been expired":
+			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
+		case "invalid username":
+			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
+		case "invalid password":
+			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+		case "user blocked":
+			h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
+		default:
+			h.handleResponse(c, http.InvalidArgument, err.Error())
+		}
+		return
+	}
+
+	v2Resp.EnvironmentId = resource.GetEnvironmentId()
+	v2Resp.ResourceId = resource.GetResourceId()
+
 	h.handleResponse(c, http.OK, map[string]any{
-		"response":     finalConnections,
-		"client_type":  userProject.GetClientTypeId(),
-		"environment":  userProject.GetEnvironmentId(),
-		"project":      userProject.GetProjectId(),
-		"user_id":      userProject.GetUserId(),
+		"response":     v2Resp,
 		"project_data": userProject.GetProjectData(),
 	})
 }
