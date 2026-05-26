@@ -569,7 +569,7 @@ func (s *sessionService) registerUgenGoogleUser(ctx context.Context, req *pb.Uge
 
 	_, err = s.services.CompanyService().Register(ctx, &pb.RegisterCompanyRequest{
 		Name:   companyName,
-		FareId: "",
+		FareId: config.UGEN_FREE_FARE_ID,
 		IsUgen: true,
 		UserInfo: &pb.RegisterCompanyRequest_RegisterUserInfo{
 			Email:    email,
@@ -1540,11 +1540,11 @@ func (s *sessionService) LoginMiddleware(ctx context.Context, req models.LoginMi
 // fetches the matching options for each, and returns the {table_slug, object_id}
 // pairs to embed in the JWT's `tables` claim.
 //
-// - 0 options for a connection → skipped (nothing to filter on).
-// - 1 option → auto-picked.
-// - >1 options → caller must supply `connection_options` (JSON object
-//   {table_slug: object_id}) to pick; otherwise FailedPrecondition with the
-//   list of unresolved connections + their option ids.
+//   - 0 options for a connection → skipped (nothing to filter on).
+//   - 1 option → auto-picked.
+//   - >1 options → caller must supply `connection_options` (JSON object
+//     {table_slug: object_id}) to pick; otherwise FailedPrecondition with the
+//     list of unresolved connections + their option ids.
 func (s *sessionService) resolveConnectionTables(
 	ctx context.Context,
 	services client.SharedServiceManagerI,
@@ -1683,7 +1683,6 @@ func (s *sessionService) resolveConnectionTables(
 
 			switch len(optIds) {
 			case 0:
-				// nothing matches for this user — skip
 			case 1:
 				tables = append(tables, &pb.Object{
 					TableSlug: slug,
