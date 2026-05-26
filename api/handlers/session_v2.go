@@ -158,13 +158,7 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 		rawResponse, _ = resp.Data.AsMap()["response"].([]any)
 	}
 
-	type connResult struct {
-		tableSlug string
-		options   []any
-		err       error
-	}
-
-	results := make([]connResult, len(rawResponse))
+	finalConnections := make([]map[string]any, len(rawResponse))
 	var (
 		wg       sync.WaitGroup
 		mu       sync.Mutex
@@ -177,13 +171,12 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 			continue
 		}
 
-		tableSlug, _ := connMap["table_slug"].(string)
+		finalConnections[i] = connMap
 		guid, ok := connMap["guid"].(string)
 		if !ok || guid == "" {
+			finalConnections[i]["options"] = make([]any, 0)
 			continue
 		}
-
-		results[i] = connResult{tableSlug: tableSlug}
 
 		wg.Add(1)
 		go func(index int, connectionId string) {
@@ -218,19 +211,21 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 				}
 			}
 
+			mu.Lock()
+			defer mu.Unlock()
+
 			if err != nil {
-				mu.Lock()
 				if fetchErr == nil {
 					fetchErr = err
 				}
-				mu.Unlock()
 				return
 			}
 
 			opts, _ := optionsData.([]any)
-			mu.Lock()
-			results[index].options = opts
-			mu.Unlock()
+			if opts == nil {
+				opts = make([]any, 0)
+			}
+			finalConnections[index]["options"] = opts
 		}(i, guid)
 	}
 	wg.Wait()
@@ -240,73 +235,95 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 		return
 	}
 
-	var tables []*pba.Object
-	for _, r := range results {
-		if r.tableSlug == "" {
-			continue
-		}
-		// No options → skip: downstream must fall back to user_id filter.
-		// Appending without object_id would set filter to "" which is incorrect.
-		for _, opt := range r.options {
-			optMap, ok := opt.(map[string]any)
-			if !ok {
-				continue
-			}
-			objectId, _ := optMap["guid"].(string)
-			if objectId == "" {
-				continue
-			}
-			tables = append(tables, &pba.Object{TableSlug: r.tableSlug, ObjectId: objectId})
-		}
-	}
+	var (
+		shouldAutoLogin = false
+		tables          []*pba.Object
+	)
 
-	v2Req := &pba.V2LoginRequest{
-		Type:                  login.GetType(),
-		Username:              login.GetUsername(),
-		Password:              login.GetPassword(),
-		Phone:                 login.GetPhone(),
-		Email:                 login.GetEmail(),
-		Otp:                   login.GetOtp(),
-		SmsId:                 login.GetSmsId(),
-		SessionInfo:           login.GetSessionInfo(),
-		ServiceType:           login.GetServiceType(),
-		GoogleToken:           login.GetGoogleToken(),
-		ProjectId:             userProject.GetProjectId(),
-		EnvironmentId:         userProject.GetEnvironmentId(),
-		ClientType:            userProject.GetClientTypeId(),
-		ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
-		NodeType:              resource.GetNodeType(),
-		ResourceType:          int32(resource.GetResourceType()),
-		Tables:                tables,
-		ClientIp:              c.RemoteIP(),
-		UserAgent:             c.Request.UserAgent(),
-	}
+	if len(finalConnections) == 0 {
+		shouldAutoLogin = true
+	} else if len(finalConnections) == 1 {
+		conn := finalConnections[0]
+		options, _ := conn["options"].([]any)
+		tableSlug, _ := conn["table_slug"].(string)
 
-	v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
-	if err != nil {
-		httpErrorStr := strings.ToLower(strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:])
-		switch httpErrorStr {
-		case "user not found":
-			h.handleResponse(c, http.NotFound, "Пользователь не найдено")
-		case "session has been expired":
-			h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
-		case "invalid username":
-			h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
-		case "invalid password":
-			h.handleResponse(c, http.InvalidArgument, "неверное пароль")
-		case "user blocked":
-			h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
+		switch len(options) {
+		case 0:
+			// Connection exists but no options — auto-login, no table filter (downstream uses user_id).
+			shouldAutoLogin = true
+		case 1:
+			shouldAutoLogin = true
+			opt, okOpt := options[0].(map[string]any)
+			if okOpt && tableSlug != "" {
+				if objectId, _ := opt["guid"].(string); objectId != "" {
+					tables = []*pba.Object{{TableSlug: tableSlug, ObjectId: objectId}}
+				}
+			}
 		default:
-			h.handleResponse(c, http.InvalidArgument, err.Error())
+			// Multiple options — return connections list for user to pick.
 		}
+	}
+	// Multiple connections — return connections list for user to pick.
+
+	if shouldAutoLogin {
+		v2Req := &pba.V2LoginRequest{
+			Type:                  login.GetType(),
+			Username:              login.GetUsername(),
+			Password:              login.GetPassword(),
+			Phone:                 login.GetPhone(),
+			Email:                 login.GetEmail(),
+			Otp:                   login.GetOtp(),
+			SmsId:                 login.GetSmsId(),
+			SessionInfo:           login.GetSessionInfo(),
+			ServiceType:           login.GetServiceType(),
+			GoogleToken:           login.GetGoogleToken(),
+			ProjectId:             userProject.GetProjectId(),
+			EnvironmentId:         userProject.GetEnvironmentId(),
+			ClientType:            userProject.GetClientTypeId(),
+			ResourceEnvironmentId: resource.GetResourceEnvironmentId(),
+			NodeType:              resource.GetNodeType(),
+			ResourceType:          int32(resource.GetResourceType()),
+			Tables:                tables,
+			ClientIp:              c.RemoteIP(),
+			UserAgent:             c.Request.UserAgent(),
+		}
+
+		v2Resp, err := h.services.SessionService().V2Login(ctx, v2Req)
+		if err != nil {
+			httpErrorStr := strings.ToLower(strings.Split(err.Error(), "=")[len(strings.Split(err.Error(), "="))-1][1:])
+			switch httpErrorStr {
+			case "user not found":
+				h.handleResponse(c, http.NotFound, "Пользователь не найдено")
+			case "session has been expired":
+				h.handleResponse(c, http.InvalidArgument, "срок действия пользователя истек")
+			case "invalid username":
+				h.handleResponse(c, http.InvalidArgument, "неверное имя пользователя")
+			case "invalid password":
+				h.handleResponse(c, http.InvalidArgument, "неверное пароль")
+			case "user blocked":
+				h.handleResponse(c, http.Forbidden, "Пользователь заблокирован")
+			default:
+				h.handleResponse(c, http.InvalidArgument, err.Error())
+			}
+			return
+		}
+
+		v2Resp.EnvironmentId = resource.GetEnvironmentId()
+		v2Resp.ResourceId = resource.GetResourceId()
+
+		h.handleResponse(c, http.OK, map[string]any{
+			"response":     v2Resp,
+			"project_data": userProject.GetProjectData(),
+		})
 		return
 	}
 
-	v2Resp.EnvironmentId = resource.GetEnvironmentId()
-	v2Resp.ResourceId = resource.GetResourceId()
-
 	h.handleResponse(c, http.OK, map[string]any{
-		"response":     v2Resp,
+		"response":     finalConnections,
+		"client_type":  userProject.GetClientTypeId(),
+		"environment":  userProject.GetEnvironmentId(),
+		"project":      userProject.GetProjectId(),
+		"user_id":      userProject.GetUserId(),
 		"project_data": userProject.GetProjectData(),
 	})
 }
