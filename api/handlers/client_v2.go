@@ -72,8 +72,6 @@ func (h *Handler) V2CreateClientType(c *gin.Context) {
 	clientType.ResourceType = int32(resource.ResourceType)
 	clientType.NodeType = resource.NodeType
 
-	//restart
-
 	resp, err = h.services.ClientService().V2CreateClientType(
 		c.Request.Context(), &clientType,
 	)
