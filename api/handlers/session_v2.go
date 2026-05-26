@@ -158,11 +158,10 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 		rawResponse, _ = resp.Data.AsMap()["response"].([]any)
 	}
 
-	finalConnections := make([]map[string]any, len(rawResponse))
 	var (
-		wg       sync.WaitGroup
-		mu       sync.Mutex
-		fetchErr error
+		finalConnections = make([]map[string]any, len(rawResponse))
+		wg               sync.WaitGroup
+		mu               sync.Mutex
 	)
 
 	for i, v := range rawResponse {
@@ -173,40 +172,32 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 
 		finalConnections[i] = connMap
 		guid, ok := connMap["guid"].(string)
-		if !ok || guid == "" {
-			finalConnections[i]["options"] = make([]any, 0)
+		if !ok {
 			continue
 		}
 
 		wg.Add(1)
-		go func(index int, connectionId string) {
+		go func(index int, connectionId string, cMap map[string]any) {
 			defer wg.Done()
-
 			var optionsData any
-			var err error
 
-			switch resource.ResourceType {
-			case pbCompany.ResourceType_MONGODB:
-				optResp, e := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(ctx, &obs.GetConnetionOptionsRequest{
+			if resource.ResourceType == pbCompany.ResourceType_MONGODB {
+				optResp, err := services.GetLoginServiceByType(resource.NodeType).GetConnetionOptions(ctx, &obs.GetConnetionOptionsRequest{
 					ConnectionId:          connectionId,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					UserId:                userProject.GetUserId(),
 				})
-				if e != nil {
-					err = e
-				} else if optResp.Data != nil {
+				if err == nil && optResp.Data != nil {
 					optionsData = optResp.Data.AsMap()["response"]
 				}
-			case pbCompany.ResourceType_POSTGRESQL:
-				optResp, e := services.GoLoginService().GetConnetionOptions(ctx, &nobs.GetConnetionOptionsRequest{
+			} else if resource.ResourceType == pbCompany.ResourceType_POSTGRESQL {
+				optResp, err := services.GoLoginService().GetConnetionOptions(ctx, &nobs.GetConnetionOptionsRequest{
 					ConnectionId:          connectionId,
 					ResourceEnvironmentId: resource.ResourceEnvironmentId,
 					UserId:                userProject.GetUserId(),
 					ProjectId:             resource.ProjectId,
 				})
-				if e != nil {
-					err = e
-				} else if optResp.Data != nil {
+				if err == nil && optResp.Data != nil {
 					optionsData = optResp.Data.AsMap()["response"]
 				}
 			}
@@ -214,26 +205,15 @@ func (h *Handler) V3MultiCompanyLogin(c *gin.Context) {
 			mu.Lock()
 			defer mu.Unlock()
 
-			if err != nil {
-				if fetchErr == nil {
-					fetchErr = err
-				}
-				return
+			if optionsData != nil {
+				cMap["options"] = optionsData
+			} else {
+				cMap["options"] = make([]any, 0)
 			}
-
-			opts, _ := optionsData.([]any)
-			if opts == nil {
-				opts = make([]any, 0)
-			}
-			finalConnections[index]["options"] = opts
-		}(i, guid)
+			finalConnections[index] = cMap
+		}(i, guid, connMap)
 	}
 	wg.Wait()
-
-	if fetchErr != nil {
-		h.handleResponse(c, http.GRPCError, fetchErr.Error())
-		return
-	}
 
 	var (
 		shouldAutoLogin = false
