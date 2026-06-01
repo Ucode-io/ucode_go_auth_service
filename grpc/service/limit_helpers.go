@@ -17,7 +17,7 @@ func checkUserProjectLimit(ctx context.Context, services client.ServiceManagerI,
 		return nil
 	}
 
-	count, err := strg.User().GetProjectUsersCount(ctx, projectId)
+	count, err := strg.User().GetCompanyUsersCount(ctx, projectId)
 	if err != nil {
 		return status.Error(codes.Internal, "error getting users count")
 	}
