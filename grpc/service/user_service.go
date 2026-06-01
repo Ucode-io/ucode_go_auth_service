@@ -184,7 +184,17 @@ func (s *userService) GetProjectUsersCount(ctx context.Context, req *pb.GetProje
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pb.GetProjectUsersCountResponse{
-		Count: count,
-	}, nil
+	return &pb.GetProjectUsersCountResponse{Count: count}, nil
+}
+
+func (s *userService) GetCompanyUsersCount(ctx context.Context, req *pb.GetCompanyUsersCountRequest) (*pb.GetCompanyUsersCountResponse, error) {
+	s.log.Info("---GetCompanyUsersCount--->", logger.Any("req", req))
+
+	count, err := s.strg.User().GetCompanyUsersCount(ctx, req.GetCompanyId())
+	if err != nil {
+		s.log.Error("!!!GetCompanyUsersCount--->", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.GetCompanyUsersCountResponse{Count: count}, nil
 }
