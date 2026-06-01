@@ -1444,9 +1444,20 @@ func (r *userRepo) GetProjectUsersCount(ctx context.Context, projectId string) (
 	defer dbSpan.Finish()
 
 	var count int32
-	query := `SELECT count(user_id) FROM user_project WHERE project_id = $1`
 
-	err := r.db.QueryRow(ctx, query, projectId).Scan(&count)
+	err := r.db.QueryRow(ctx, `SELECT count(user_id) FROM user_project WHERE project_id = $1`, projectId).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (r *userRepo) GetCompanyUsersCount(ctx context.Context, companyId string) (int32, error) {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.GetCompanyUsersCount")
+	defer dbSpan.Finish()
+
+	var count int32
+	err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM user_project WHERE company_id = $1`, companyId).Scan(&count)
 	if err != nil {
 		return 0, err
 	}
