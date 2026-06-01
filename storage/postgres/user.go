@@ -1457,7 +1457,7 @@ func (r *userRepo) GetCompanyUsersCount(ctx context.Context, companyId string) (
 	defer dbSpan.Finish()
 
 	var count int32
-	err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM user_project WHERE company_id = $1`, companyId).Scan(&count)
+	err := r.db.QueryRow(ctx, `SELECT COUNT(DISTINCT user_id) FROM user_project WHERE company_id = $1`, companyId).Scan(&count)
 	if err != nil {
 		return 0, err
 	}
