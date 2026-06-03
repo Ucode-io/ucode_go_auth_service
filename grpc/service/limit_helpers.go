@@ -27,7 +27,7 @@ func checkUserProjectLimit(ctx context.Context, services client.ServiceManagerI,
 		return status.Error(codes.Internal, "error getting users count")
 	}
 
-	if count == 0 {
+	if count == 1 {
 		return nil
 	}
 
