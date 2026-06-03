@@ -27,6 +27,10 @@ func checkUserProjectLimit(ctx context.Context, services client.ServiceManagerI,
 		return status.Error(codes.Internal, "error getting users count")
 	}
 
+	if count == 0 {
+		return nil
+	}
+
 	limitResp, err := services.BillingServiceClient().CompareFunction(ctx, &pbc.CompareFunctionRequest{
 		Type:   config.FARE_USERS,
 		FareId: fareId,
