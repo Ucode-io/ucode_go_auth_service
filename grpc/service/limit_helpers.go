@@ -12,6 +12,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	LimitCodeUsers    = "user_limit"
+	LimitCodeBuilders = "builders_limit"
+)
+
 func checkUserProjectLimit(ctx context.Context, services client.ServiceManagerI, strg storage.StorageI, fareId, companyId string) error {
 	if len(fareId) == 0 {
 		return nil
@@ -32,7 +37,7 @@ func checkUserProjectLimit(ctx context.Context, services client.ServiceManagerI,
 	}
 
 	if !limitResp.HasAccess {
-		return status.Error(codes.ResourceExhausted, "you have reached the user limit on your current plan. Please upgrade to add more users.")
+		return status.Error(codes.ResourceExhausted, LimitCodeUsers+": you have reached the user limit on your current plan. Please upgrade to add more users.")
 	}
 
 	return nil
@@ -58,7 +63,7 @@ func checkUgenBuildersLimit(ctx context.Context, services client.ServiceManagerI
 	}
 
 	if !limitResp.HasAccess {
-		return status.Error(codes.ResourceExhausted, "you have reached the builder user limit on your current plan. Please upgrade to add more builder users.")
+		return status.Error(codes.ResourceExhausted, LimitCodeBuilders+": you have reached the builder user limit on your current plan. Please upgrade to add more builder users.")
 	}
 
 	return nil

@@ -77,11 +77,7 @@ func (h *Handler) V2CreateUser(c *gin.Context) {
 	)
 	if err != nil {
 		if st, ok := grpcstatus.FromError(err); ok && st.Code() == codes.ResourceExhausted {
-			h.handleResponse(c, http.PaymentRequired, models.PaymentRequiredData{
-				Type: "payment_required",
-				Code: "user_limit",
-				Unit: "users",
-			})
+			h.handleResponse(c, http.PaymentRequired, paymentRequiredFromLimit(st.Message()))
 			return
 		}
 		h.handleError(c, http.InternalServerError, err)

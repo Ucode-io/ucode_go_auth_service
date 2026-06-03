@@ -158,6 +158,19 @@ func (h *Handler) handleError(c *gin.Context, statusHttp status_http.Status, err
 	}
 }
 
+func paymentRequiredFromLimit(msg string) models.PaymentRequiredData {
+	data := models.PaymentRequiredData{
+		Type: "payment_required",
+		Code: service.LimitCodeUsers,
+		Unit: "users",
+	}
+	if strings.HasPrefix(msg, service.LimitCodeBuilders+":") {
+		data.Code = service.LimitCodeBuilders
+		data.Unit = "builders"
+	}
+	return data
+}
+
 func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
 	offsetStr := c.DefaultQuery("offset", h.cfg.DefaultOffset)
 	return strconv.Atoi(offsetStr)
