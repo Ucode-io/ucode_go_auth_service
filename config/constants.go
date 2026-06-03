@@ -74,6 +74,7 @@ const (
 	// Fare (billing) types
 	FARE_API_KEYS string = "api_keys"
 	FARE_USERS    string = "users_count"
+	FARE_BUILDERS string = "builders"
 
 	UGEN_FREE_FARE_ID = "07d8a364-ebb2-4291-a452-f44b335cb031"
 

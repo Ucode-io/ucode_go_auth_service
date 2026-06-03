@@ -43,13 +43,13 @@ func checkUgenBuildersLimit(ctx context.Context, services client.ServiceManagerI
 		return nil
 	}
 
-	count, err := strg.User().GetCompanyUsersCount(ctx, projectId)
+	count, err := strg.User().GetProjectUsersCount(ctx, projectId)
 	if err != nil {
 		return status.Error(codes.Internal, "error getting users count")
 	}
 
 	limitResp, err := services.BillingServiceClient().CompareFunction(ctx, &pbc.CompareFunctionRequest{
-		Type:   config.FARE_USERS,
+		Type:   config.FARE_BUILDERS,
 		FareId: fareId,
 		Count:  count + 1,
 	})
