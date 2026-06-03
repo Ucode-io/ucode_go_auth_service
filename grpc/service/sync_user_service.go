@@ -106,7 +106,7 @@ func (sus *syncUserService) CreateUser(ctx context.Context, req *pb.CreateSyncUs
 		return nil, err
 	}
 
-	if limitErr := checkUserProjectLimit(ctx, sus.services, sus.strg, project.GetFareId(), req.GetProjectId()); limitErr != nil {
+	if limitErr := checkUserProjectLimit(ctx, sus.services, sus.strg, project.GetFareId(), project.GetCompanyId()); limitErr != nil {
 		sus.log.Error("!!!CreateUser--->checkUserProjectLimit", logger.Error(limitErr))
 		return nil, limitErr
 	}
@@ -427,7 +427,7 @@ func (sus *syncUserService) CreateUsers(ctx context.Context, in *pb.CreateSyncUs
 			return nil, err
 		}
 
-		if limitErr := checkUserProjectLimit(ctx, sus.services, sus.strg, project.GetFareId(), req.GetProjectId()); limitErr != nil {
+		if limitErr := checkUserProjectLimit(ctx, sus.services, sus.strg, project.GetFareId(), project.GetCompanyId()); limitErr != nil {
 			sus.log.Error("!!!CreateSyncUsers--->checkUserProjectLimit", logger.Error(limitErr))
 			return nil, limitErr
 		}

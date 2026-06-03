@@ -162,7 +162,8 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		rs.log.Error("!!!RegisterUser--->GetProjectById", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error getting project info")
 	}
-	if limitErr := checkUserProjectLimit(ctx, rs.services, rs.strg, projForLimit.GetFareId(), data.ProjectId); limitErr != nil {
+
+	if limitErr := checkUserProjectLimit(ctx, rs.services, rs.strg, projForLimit.GetFareId(), projForLimit.GetCompanyId()); limitErr != nil {
 		rs.log.Error("!!!RegisterUser--->checkUserProjectLimit", logger.Error(limitErr))
 		return nil, limitErr
 	}
