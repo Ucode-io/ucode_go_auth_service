@@ -3062,7 +3062,7 @@ func (s *sessionService) DeleteSessionsExceptCurrent(ctx context.Context, req *p
 	return &emptypb.Empty{}, nil
 }
 
-func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2LoginResponse, error) {
+func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenSuperAdminResponse, error) {
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshToken", req)
 	defer dbSpan.Finish()
 
@@ -3181,7 +3181,7 @@ func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.R
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	res := &pb.V2LoginResponse{
+	res := &pb.V2RefreshTokenSuperAdminResponse{
 		Token: &pb.Token{
 			AccessToken:      accessToken,
 			RefreshToken:     refreshToken,
