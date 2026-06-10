@@ -78,6 +78,8 @@ const (
 
 	UGEN_FREE_FARE_ID = "07d8a364-ebb2-4291-a452-f44b335cb031"
 
+	UgenSuperAdminUserId string = "c12c163c-38ee-4b37-8854-1dc9285fc3f8"
+
 	// Commit Types
 	COMMIT_TYPE_TABLE string = "TABLE"
 	SMS_TEXT          string = "Code"

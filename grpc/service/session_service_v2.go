@@ -2103,49 +2103,54 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField = config.READ
 	}
 
-	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
-		UserId: session.GetUserIdAuth(),
-	})
-	if err != nil {
-		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
-		return nil, err
-	}
-	for _, item := range projects.GetUserProjects() {
-		if item.ProjectId == session.GetProjectId() {
-			exist = true
-			break
-		}
-	}
-	if !exist {
-		err = errors.New("---V2HasAccessUser->Access denied")
-		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// ugen super admin — пропускаем все access-проверки (project/env/permission)
+	isSuperAdmin := session.GetUserIdAuth() == config.UgenSuperAdminUserId
 
-	if req.EnvironmentId != "" {
-		exist = false
+	if !isSuperAdmin {
+		projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
+			UserId: session.GetUserIdAuth(),
+		})
+		if err != nil {
+			s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
+			return nil, err
+		}
 		for _, item := range projects.GetUserProjects() {
-			if item.EnvId == req.EnvironmentId {
+			if item.ProjectId == session.GetProjectId() {
 				exist = true
 				break
 			}
 		}
-
 		if !exist {
-			err = errors.New("user not access environment")
-			s.log.Error("---V2HasAccessUser--->AccessNotEnvironment--->", logger.Error(err))
-			return nil, status.Error(codes.Unavailable, err.Error())
+			err = errors.New("---V2HasAccessUser->Access denied")
+			s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-	}
 
-	for _, path := range arr_path {
-		if val, exist := config.Path[path]; exist {
-			checkPermission = val
+		if req.EnvironmentId != "" {
+			exist = false
+			for _, item := range projects.GetUserProjects() {
+				if item.EnvId == req.EnvironmentId {
+					exist = true
+					break
+				}
+			}
+
+			if !exist {
+				err = errors.New("user not access environment")
+				s.log.Error("---V2HasAccessUser--->AccessNotEnvironment--->", logger.Error(err))
+				return nil, status.Error(codes.Unavailable, err.Error())
+			}
 		}
-	}
 
-	if config.SystemTableSlugs[tableSlug] {
-		checkPermission = false
+		for _, path := range arr_path {
+			if val, exist := config.Path[path]; exist {
+				checkPermission = val
+			}
+		}
+
+		if config.SystemTableSlugs[tableSlug] {
+			checkPermission = false
+		}
 	}
 
 	if checkPermission {
