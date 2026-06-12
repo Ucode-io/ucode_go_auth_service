@@ -2836,7 +2836,9 @@ func (s *sessionService) authenticateUser(ctx context.Context, req authParams) (
 	)
 
 	switch req.GetType() {
-	case config.Default:
+	// empty type means username/password login: older generated admin panels
+	// omit the field, and without this case they always got "user not found"
+	case config.Default, "":
 		if len(req.GetUsername()) < 6 {
 			err := errors.New("invalid username")
 			s.log.Error("!!!V2Login--->InvalidUsername", logger.Error(err))
