@@ -154,7 +154,10 @@ func (s *permissionService) V2AddRole(ctx context.Context, req *pb.V2AddRoleRequ
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		roleData, _ := helper.ConvertStructToResponse(result.Data)
+		roleData, err := helper.ConvertStructToResponse(result.Data)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 
 		_, err = services.GoObjectBuilderPermissionService().CreateDefaultPermission(
 			ctx, &nobs.CreateDefaultPermissionRequest{
