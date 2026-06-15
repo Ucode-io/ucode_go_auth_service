@@ -31,6 +31,7 @@ func (h *Handler) RegisterCompany(c *gin.Context) {
 	}
 
 	company.IsUgen = false
+	company.FareId = ""
 
 	resp, err := h.services.CompanyService().Register(
 		c.Request.Context(), &company,
