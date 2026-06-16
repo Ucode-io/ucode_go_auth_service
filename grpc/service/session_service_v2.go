@@ -2103,49 +2103,54 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		methodField = config.READ
 	}
 
-	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
-		UserId: session.GetUserIdAuth(),
-	})
-	if err != nil {
-		s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
-		return nil, err
-	}
-	for _, item := range projects.GetUserProjects() {
-		if item.ProjectId == session.GetProjectId() {
-			exist = true
-			break
-		}
-	}
-	if !exist {
-		err = errors.New("---V2HasAccessUser->Access denied")
-		s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
+	// ugen super admin — пропускаем все access-проверки (project/env/permission)
+	isSuperAdmin := session.GetUserIdAuth() == config.UgenSuperAdminUserId
 
-	if req.EnvironmentId != "" {
-		exist = false
+	if !isSuperAdmin {
+		projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
+			UserId: session.GetUserIdAuth(),
+		})
+		if err != nil {
+			s.log.Error("---V2HasAccessUser->GetProjectsByUserId--->", logger.Error(err))
+			return nil, err
+		}
 		for _, item := range projects.GetUserProjects() {
-			if item.EnvId == req.EnvironmentId {
+			if item.ProjectId == session.GetProjectId() {
 				exist = true
 				break
 			}
 		}
-
 		if !exist {
-			err = errors.New("user not access environment")
-			s.log.Error("---V2HasAccessUser--->AccessNotEnvironment--->", logger.Error(err))
-			return nil, status.Error(codes.Unavailable, err.Error())
+			err = errors.New("---V2HasAccessUser->Access denied")
+			s.log.Error("---V2HasAccessUser--->AccessDenied--->", logger.Error(err))
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-	}
 
-	for _, path := range arr_path {
-		if val, exist := config.Path[path]; exist {
-			checkPermission = val
+		if req.EnvironmentId != "" {
+			exist = false
+			for _, item := range projects.GetUserProjects() {
+				if item.EnvId == req.EnvironmentId {
+					exist = true
+					break
+				}
+			}
+
+			if !exist {
+				err = errors.New("user not access environment")
+				s.log.Error("---V2HasAccessUser--->AccessNotEnvironment--->", logger.Error(err))
+				return nil, status.Error(codes.Unavailable, err.Error())
+			}
 		}
-	}
 
-	if config.SystemTableSlugs[tableSlug] {
-		checkPermission = false
+		for _, path := range arr_path {
+			if val, exist := config.Path[path]; exist {
+				checkPermission = val
+			}
+		}
+
+		if config.SystemTableSlugs[tableSlug] {
+			checkPermission = false
+		}
 	}
 
 	if checkPermission {
@@ -3062,6 +3067,139 @@ func (s *sessionService) DeleteSessionsExceptCurrent(ctx context.Context, req *p
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *sessionService) V2RefreshTokenSuperAdmin(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.V2RefreshTokenSuperAdminResponse, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_session_v2.V2RefreshToken", req)
+	defer dbSpan.Finish()
+
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	defer func() {
+		var after runtime.MemStats
+		runtime.ReadMemStats(&after)
+		memoryUsed := (after.TotalAlloc - before.TotalAlloc) / (1024 * 1024)
+		s.log.Info("Memory used by the V2RefreshToken", logger.Any("memoryUsed", memoryUsed))
+		if memoryUsed > 300 {
+			s.log.Info("Memory used over 300 mb", logger.Any("V2RefreshToken", memoryUsed))
+		}
+	}()
+
+	tokenInfo, err := security.ParseClaims(req.RefreshToken, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->ParseClaims", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	session, err := s.strg.Session().GetByPK(ctx, &pb.SessionPrimaryKey{Id: tokenInfo.ID})
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->SessionGetByPK", logger.Error(err))
+		return nil, status.Error(codes.Code(status_http.Unauthorized.Code), err.Error())
+	}
+	if req.ClientTypeId != "" {
+		session.ClientTypeId = req.ClientTypeId
+	}
+	if req.ProjectId != "" {
+		session.ProjectId = req.ProjectId
+	}
+	if req.RoleId != "" {
+		session.RoleId = req.RoleId
+	}
+	if req.EnvId != "" {
+		session.EnvId = req.EnvId
+	}
+
+	expiresAt, err := time.Parse(config.DatabaseTimeLayout, session.ExpiresAt)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->ParseExpiresAt", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if expiresAt.Unix() < time.Now().Unix() {
+		err := errors.New("session has been expired")
+		s.log.Error("!!!V2HasAccessUser->CheckExpiredToken--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	//_, err = s.strg.User().CHeckUserProject(ctx, session.GetUserIdAuth(), session.GetProjectId())
+	//if err != nil {
+	//	s.log.Error("!!!V2Login--->CHeckUserProject", logger.Error(err))
+	//	if err == sql.ErrNoRows {
+	//		errNoRows := errors.New("no user found")
+	//		return nil, status.Error(codes.Internal, errNoRows.Error())
+	//	}
+	//	return nil, status.Error(codes.Internal, err.Error())
+	//}
+
+	_, err = s.strg.Session().Update(ctx, &pb.UpdateSessionRequest{
+		Id:               session.Id,
+		Ip:               session.Ip,
+		Data:             session.Data,
+		EnvId:            session.EnvId,
+		UserId:           session.UserId,
+		RoleId:           session.RoleId,
+		ProjectId:        session.ProjectId,
+		IsChanged:        session.IsChanged,
+		ExpiresAt:        time.Now().Add(config.RefreshTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+		ClientTypeId:     session.ClientTypeId,
+		ClientPlatformId: session.ClientPlatformId,
+	})
+	if err != nil {
+		s.log.Error("!!!V2RefreshToken.SessionUpdate--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	var authTables []*pb.TableBody
+
+	if tokenInfo.Tables != nil {
+		for _, table := range tokenInfo.Tables {
+			authTables = append(authTables, &pb.TableBody{
+				TableSlug: table.TableSlug,
+				ObjectId:  table.ObjectID,
+			})
+		}
+	}
+
+	// TODO - wrap in a function
+	m := map[string]any{
+		"id":                 session.Id,
+		"ip":                 session.Ip,
+		"data":               session.Data,
+		"tables":             authTables,
+		"user_id":            session.UserId,
+		"role_id":            session.RoleId,
+		"project_id":         session.ProjectId,
+		"user_id_auth":       session.UserIdAuth,
+		"client_type_id":     session.ClientTypeId,
+		"login_table_slug":   tokenInfo.LoginTableSlug,
+		"client_platform_id": session.ClientPlatformId,
+	}
+
+	accessToken, err := security.GenerateJWT(m, config.AccessTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->GenerateAccessJWT", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	refreshToken, err := security.GenerateJWT(m, config.RefreshTokenExpiresInTime, s.cfg.SecretKey)
+	if err != nil {
+		s.log.Error("!!!RefreshToken--->GenerateRefreshJWT", logger.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	res := &pb.V2RefreshTokenSuperAdminResponse{
+		Token: &pb.Token{
+			AccessToken:      accessToken,
+			RefreshToken:     refreshToken,
+			CreatedAt:        session.CreatedAt,
+			UpdatedAt:        session.UpdatedAt,
+			ExpiresAt:        time.Now().Add(config.AccessTokenExpiresInTime).Format(config.DatabaseTimeLayout),
+			RefreshInSeconds: int32(config.AccessTokenExpiresInTime.Seconds()),
+		},
+	}
+
+	return res, nil
 }
 
 func (s *sessionService) GetUserInfoByToken(ctx context.Context, req *pb.GetUserInfoByTokenReq) (*pb.GetUserInfoByTokenResp, error) {
