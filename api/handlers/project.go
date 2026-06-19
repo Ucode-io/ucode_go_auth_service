@@ -227,7 +227,7 @@ func (h *Handler) Emqx(c *gin.Context) {
 		return
 	}
 
-	if resp.Status == config.InactiveStatus {
+	if config.IsProjectStatusBlocking(resp.Status) {
 		c.JSON(500, map[string]any{"result": "deny"})
 		return
 	}
