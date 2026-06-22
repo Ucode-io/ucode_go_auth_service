@@ -2166,9 +2166,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 			return nil, err
 		}
 
-		if resource.GetProjectStatus() == config.InactiveStatus && methodField != config.READ {
-			err := status.Error(codes.PermissionDenied, config.InactiveStatus)
-			return nil, err
+		if config.IsProjectStatusBlocking(resource.GetProjectStatus()) && methodField != config.READ {
+			return nil, status.Error(codes.PermissionDenied, resource.GetProjectStatus())
 		}
 
 		services, err := s.serviceNode.GetByNodeType(resource.ProjectId, resource.NodeType)
@@ -2841,7 +2840,9 @@ func (s *sessionService) authenticateUser(ctx context.Context, req authParams) (
 	)
 
 	switch req.GetType() {
-	case config.Default:
+	// empty type means username/password login: older generated admin panels
+	// omit the field, and without this case they always got "user not found"
+	case config.Default, "":
 		if len(req.GetUsername()) < 6 {
 			err := errors.New("invalid username")
 			s.log.Error("!!!V2Login--->InvalidUsername", logger.Error(err))
