@@ -281,7 +281,8 @@ func (s *sessionService) ugenLoginForProject(ctx context.Context, user *pb.User,
 	}
 
 	if !data.GetUserFound() {
-		return nil, errUserNotFound
+		s.log.Warn("!!!UgenLogin--->user not found in project, skipping", logger.String("projectId", projId))
+		return nil, nil
 	}
 
 	userData, err := helper.ConvertStructToResponse(data.UserData)
@@ -394,7 +395,7 @@ func (s *sessionService) UgenGoogleLogin(ctx context.Context, req *pb.UgenGoogle
 		if len(userProjects.Companies) == 0 {
 			_, err = s.strg.User().Delete(
 				ctx, &pb.UserPrimaryKey{
-					ProjectId: user.GetId(),
+					Id: user.GetId(),
 				},
 			)
 			if err != nil {
