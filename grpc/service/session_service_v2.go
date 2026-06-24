@@ -384,6 +384,29 @@ func (s *sessionService) UgenGoogleLogin(ctx context.Context, req *pb.UgenGoogle
 		}
 	}
 
+	if user.GetId() != "" {
+		userProjects, err := s.strg.User().GetUserProjects(ctx, user.GetId())
+		if err != nil {
+			s.log.Error("!!!UgenGoogleLogin--->GetUserProjects", logger.Error(err))
+			return nil, status.Error(codes.NotFound, "cant get user projects")
+		}
+
+		if len(userProjects.Companies) == 0 {
+			_, err = s.strg.User().Delete(
+				ctx, &pb.UserPrimaryKey{
+					ProjectId: user.GetId(),
+				},
+			)
+			if err != nil {
+				s.log.Error("!!!UgenGoogleLogin--->Delete", logger.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			user.Id = ""
+		}
+
+	}
+
 	if user.GetId() == "" {
 		if err = s.registerUgenGoogleUser(ctx, req); err != nil {
 			return nil, err
