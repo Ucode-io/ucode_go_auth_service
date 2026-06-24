@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/ucode-io/ratelimiter"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -22,7 +24,11 @@ const (
 	AdminClientName       string = "ADMIN"
 	OpenFaaSPlatformID    string = "7d4a4c38-dd84-4902-b744-0488b80a4c04"
 
-	InactiveStatus string = "inactive"
+	// Project statuses that block write access. Reads are still allowed; writes are
+	// rejected with a clear, status-specific message.
+	InactiveStatus          string = "inactive"
+	InsufficientFundsStatus string = "insufficient_funds"
+	BlockedStatus           string = "blocked"
 
 	DefaultOtp string = "208071"
 
@@ -85,6 +91,33 @@ const (
 	SMS_TEXT          string = "Code"
 	EMAIL_REGEX       string = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 )
+
+// ProjectStatusMessages maps each blocking project status to the user-facing
+// message shown when access is refused.
+var ProjectStatusMessages = map[string]string{
+	InactiveStatus:          "Your project is inactive. Please contact support to reactivate it.",
+	InsufficientFundsStatus: "Your project is suspended due to insufficient balance. Please top up your balance to continue.",
+	BlockedStatus:           "Your project has been blocked. Please contact support.",
+}
+
+// IsProjectStatusBlocking reports whether a project status forbids write access.
+func IsProjectStatusBlocking(projectStatus string) bool {
+	_, blocking := ProjectStatusMessages[projectStatus]
+	return blocking
+}
+
+// BlockingStatusMessage translates a PermissionDenied error from the access gate
+// into its user-facing message, returning false for any other error. The gate
+// signals a blocking project status by carrying the raw status string in the
+// gRPC error message.
+func BlockingStatusMessage(err error) (string, bool) {
+	st, ok := status.FromError(err)
+	if !ok || st.Code() != codes.PermissionDenied {
+		return "", false
+	}
+	message, blocking := ProjectStatusMessages[st.Message()]
+	return message, blocking
+}
 
 var (
 	ErrUserNotFound     = errors.New("user not found")
