@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 	nethttp "net/http"
 	"net/url"
 	"strings"
@@ -134,6 +135,7 @@ func (h *Handler) UgenGoogleCallback(c *gin.Context) {
 		},
 	)
 	if err != nil {
+		log.Println("ERROR GOOGLE SIGN IN:", err.Error())
 		h.redirectUgenAuthCallback(c, "error", "login_failed")
 		return
 	}
