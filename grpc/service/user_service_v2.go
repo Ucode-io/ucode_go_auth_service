@@ -434,7 +434,7 @@ func ConvertStructToMap(s *structpb.Struct) (map[string]any, error) {
 	return newMap, nil
 }
 
-func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserRequest) (resp *pb.User, err error) {
 	s.log.Info("!!!V2CreateUser--->", logger.Any("req", req))
 
 	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_userv2.V2CreateUser", req)
@@ -514,15 +514,51 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 		return nil, err
 	}
 
-	if limitErr := checkUserProjectLimit(ctx, s.services, s.strg, project.GetFareId(), project.GetCompanyId()); limitErr != nil {
-		s.log.Error("!!!V2CreateUser--->checkUserProjectLimit", logger.Error(limitErr))
-		return nil, limitErr
-	}
+	var (
+		seatCharge    *userSeatCharge
+		seatCommitted bool
+	)
 
-	if project.GetIsUgen() {
-		if limitErr := checkUgenBuildersLimit(ctx, s.services, s.strg, project.GetFareId(), project.GetProjectId()); limitErr != nil {
-			s.log.Error("!!!V2CreateUser--->checkUgenBuildersLimit", logger.Error(limitErr))
+	if project.GetPerUserPrice() > 0 {
+		if userId != "" {
+			exists, existErr := s.strg.User().GetUserProjectByAllFields(ctx, models.GetUserProjectByAllFieldsReq{
+				UserId:       userId,
+				RoleId:       req.GetRoleId(),
+				ProjectId:    req.GetProjectId(),
+				ClientTypeId: req.GetClientTypeId(),
+				CompanyId:    project.GetCompanyId(),
+				EnvId:        req.GetEnvironmentId(),
+			})
+			if existErr != nil {
+				s.log.Error("!!!V2CreateUser--->GetUserProjectByAllFields", logger.Error(existErr))
+				return nil, existErr
+			}
+			if exists {
+				return nil, errors.New(config.ErrUserExists)
+			}
+		}
+
+		seatCharge, err = s.reserveUserSeat(ctx, project, "")
+		if err != nil {
+			return nil, err
+		}
+
+		defer func() {
+			if err != nil && !seatCommitted {
+				s.releaseUserSeat(seatCharge)
+			}
+		}()
+	} else {
+		if limitErr := checkUserProjectLimit(ctx, s.services, s.strg, project.GetFareId(), project.GetCompanyId()); limitErr != nil {
+			s.log.Error("!!!V2CreateUser--->checkUserProjectLimit", logger.Error(limitErr))
 			return nil, limitErr
+		}
+
+		if project.GetIsUgen() {
+			if limitErr := checkUgenBuildersLimit(ctx, s.services, s.strg, project.GetFareId(), project.GetProjectId()); limitErr != nil {
+				s.log.Error("!!!V2CreateUser--->checkUgenBuildersLimit", logger.Error(limitErr))
+				return nil, limitErr
+			}
 		}
 	}
 
@@ -703,6 +739,10 @@ func (s *userService) V2CreateUser(ctx context.Context, req *pb.CreateUserReques
 			return nil, err
 		}
 	}
+
+	// The user is now durably created and added to the project: the paid seat is
+	// consumed, so later failures (e.g. the invite email) must not refund it.
+	seatCommitted = true
 
 	if req.GetEmail() != "" {
 		host := "smtp.gmail.com"
@@ -1392,6 +1432,41 @@ func (s *userService) AddUserToProject(ctx context.Context, req *pb.AddUserToPro
 		s.log.Error("!!!AddUserToProject--->GetProjectById", logger.Error(err))
 		return nil, status.Error(codes.Internal, "error getting project info")
 	}
+
+	// A project imported from a priced template charges the head balance per user
+	// added instead of enforcing the fare user limit.
+	if proj.GetPerUserPrice() > 0 {
+		exists, existErr := s.strg.User().GetUserProjectByAllFields(ctx, models.GetUserProjectByAllFieldsReq{
+			UserId:       req.GetUserId(),
+			RoleId:       req.GetRoleId(),
+			ProjectId:    req.GetProjectId(),
+			ClientTypeId: req.GetClientTypeId(),
+			CompanyId:    proj.GetCompanyId(),
+			EnvId:        req.GetEnvId(),
+		})
+		if existErr != nil {
+			s.log.Error("!!!AddUserToProject--->GetUserProjectByAllFields", logger.Error(existErr))
+			return nil, status.Error(codes.Internal, existErr.Error())
+		}
+		if exists {
+			return nil, status.Error(codes.AlreadyExists, config.ErrUserAlradyMember.Error())
+		}
+
+		seatCharge, seatErr := s.reserveUserSeat(ctx, proj, "")
+		if seatErr != nil {
+			return nil, seatErr
+		}
+
+		res, err := s.strg.User().AddUserToProject(ctx, req)
+		if err != nil {
+			s.releaseUserSeat(seatCharge)
+			s.log.Error("cant add project to user", logger.Error(err))
+			return nil, status.Error(codes.Internal, config.ErrUserAlradyMember.Error())
+		}
+
+		return res, nil
+	}
+
 	if limitErr := checkUserProjectLimit(ctx, s.services, s.strg, proj.GetFareId(), proj.GetCompanyId()); limitErr != nil {
 		s.log.Error("!!!AddUserToProject--->checkUserProjectLimit", logger.Error(limitErr))
 		return nil, limitErr

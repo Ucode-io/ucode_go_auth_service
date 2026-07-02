@@ -47,6 +47,10 @@ type ProjectServiceClient interface {
 	UpdateProjectUgenAccess(ctx context.Context, in *UpdateProjectUgenAccessRequest, opts ...grpc.CallOption) (*UpdateProjectUgenAccessResponse, error)
 	AutoAssignUgenIfSingle(ctx context.Context, in *AutoAssignUgenIfSingleRequest, opts ...grpc.CallOption) (*AutoAssignUgenIfSingleResponse, error)
 	ListUgenProjects(ctx context.Context, in *ListUgenProjectsRequest, opts ...grpc.CallOption) (*ListUgenProjectsResponse, error)
+	ExportUgenProjects(ctx context.Context, in *ExportUgenProjectsRequest, opts ...grpc.CallOption) (*ExportUgenProjectsResponse, error)
+	// GetUgenProjectByCompanyId returns the company's single head (is_ugen) project,
+	// which holds the balance charged for paid template imports and paid user seats.
+	GetUgenProjectByCompanyId(ctx context.Context, in *GetUgenProjectByCompanyIdReq, opts ...grpc.CallOption) (*Project, error)
 }
 
 type projectServiceClient struct {
@@ -273,6 +277,24 @@ func (c *projectServiceClient) ListUgenProjects(ctx context.Context, in *ListUge
 	return out, nil
 }
 
+func (c *projectServiceClient) ExportUgenProjects(ctx context.Context, in *ExportUgenProjectsRequest, opts ...grpc.CallOption) (*ExportUgenProjectsResponse, error) {
+	out := new(ExportUgenProjectsResponse)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/ExportUgenProjects", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) GetUgenProjectByCompanyId(ctx context.Context, in *GetUgenProjectByCompanyIdReq, opts ...grpc.CallOption) (*Project, error) {
+	out := new(Project)
+	err := c.cc.Invoke(ctx, "/company_service.ProjectService/GetUgenProjectByCompanyId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -301,6 +323,10 @@ type ProjectServiceServer interface {
 	UpdateProjectUgenAccess(context.Context, *UpdateProjectUgenAccessRequest) (*UpdateProjectUgenAccessResponse, error)
 	AutoAssignUgenIfSingle(context.Context, *AutoAssignUgenIfSingleRequest) (*AutoAssignUgenIfSingleResponse, error)
 	ListUgenProjects(context.Context, *ListUgenProjectsRequest) (*ListUgenProjectsResponse, error)
+	ExportUgenProjects(context.Context, *ExportUgenProjectsRequest) (*ExportUgenProjectsResponse, error)
+	// GetUgenProjectByCompanyId returns the company's single head (is_ugen) project,
+	// which holds the balance charged for paid template imports and paid user seats.
+	GetUgenProjectByCompanyId(context.Context, *GetUgenProjectByCompanyIdReq) (*Project, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -379,6 +405,12 @@ func (UnimplementedProjectServiceServer) AutoAssignUgenIfSingle(context.Context,
 }
 func (UnimplementedProjectServiceServer) ListUgenProjects(context.Context, *ListUgenProjectsRequest) (*ListUgenProjectsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUgenProjects not implemented")
+}
+func (UnimplementedProjectServiceServer) ExportUgenProjects(context.Context, *ExportUgenProjectsRequest) (*ExportUgenProjectsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExportUgenProjects not implemented")
+}
+func (UnimplementedProjectServiceServer) GetUgenProjectByCompanyId(context.Context, *GetUgenProjectByCompanyIdReq) (*Project, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUgenProjectByCompanyId not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -825,6 +857,42 @@ func _ProjectService_ListUgenProjects_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_ExportUgenProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportUgenProjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).ExportUgenProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/ExportUgenProjects",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).ExportUgenProjects(ctx, req.(*ExportUgenProjectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_GetUgenProjectByCompanyId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUgenProjectByCompanyIdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetUgenProjectByCompanyId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.ProjectService/GetUgenProjectByCompanyId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetUgenProjectByCompanyId(ctx, req.(*GetUgenProjectByCompanyIdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -927,6 +995,14 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUgenProjects",
 			Handler:    _ProjectService_ListUgenProjects_Handler,
+		},
+		{
+			MethodName: "ExportUgenProjects",
+			Handler:    _ProjectService_ExportUgenProjects_Handler,
+		},
+		{
+			MethodName: "GetUgenProjectByCompanyId",
+			Handler:    _ProjectService_GetUgenProjectByCompanyId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
