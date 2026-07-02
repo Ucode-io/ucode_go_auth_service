@@ -565,7 +565,7 @@ func (h *Handler) AddUserToProject(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.handleResponse(c, http.InternalServerError, err.Error())
+		h.handleError(c, http.InternalServerError, err)
 		return
 	}
 

@@ -57,6 +57,7 @@ type BillingServiceClient interface {
 	GetSubscription(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*Subscription, error)
 	UpdateSubscription(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error)
 	CancelSubscription(ctx context.Context, in *CancelSubscriptionRequest, opts ...grpc.CallOption) (*Subscription, error)
+	GetProjectBillingStatus(ctx context.Context, in *GetProjectBillingStatusRequest, opts ...grpc.CallOption) (*GetProjectBillingStatusResponse, error)
 	// Discount
 	ListDiscounts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListDiscountsResponse, error)
 	ListBillingPeriods(ctx context.Context, in *ListBillingPeriodsRequest, opts ...grpc.CallOption) (*ListBillingPeriodsResponse, error)
@@ -66,6 +67,18 @@ type BillingServiceClient interface {
 	GetApiCallMonitoringMetrics(ctx context.Context, in *GetApiCallMonitoringMetricsRequest, opts ...grpc.CallOption) (*GetApiCallMonitoringMetricsResponse, error)
 	RecordAiTokenUsage(ctx context.Context, in *RecordAiTokenUsageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAiTokenUsageMetrics(ctx context.Context, in *GetAiTokenUsageMetricsRequest, opts ...grpc.CallOption) (*GetAiTokenUsageMetricsResponse, error)
+	// Token packs (add-on consumable AI-token balance)
+	ListTokenPacks(ctx context.Context, in *ListTokenPacksRequest, opts ...grpc.CallOption) (*ListTokenPacksResponse, error)
+	CreateTokenPack(ctx context.Context, in *CreateTokenPackRequest, opts ...grpc.CallOption) (*TokenPack, error)
+	UpdateTokenPack(ctx context.Context, in *TokenPack, opts ...grpc.CallOption) (*TokenPack, error)
+	DeleteTokenPack(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	PurchaseTokenPack(ctx context.Context, in *PurchaseTokenPackRequest, opts ...grpc.CallOption) (*PurchaseTokenPackResponse, error)
+	GetTokenPackBalance(ctx context.Context, in *GetTokenPackBalanceRequest, opts ...grpc.CallOption) (*GetTokenPackBalanceResponse, error)
+	// Generic project balance charge/refund (funds paid actions such as using a
+	// paid Ugen template). Charge is atomic and overdraft-checked against
+	// balance + credit_limit; refund is its compensating reverse.
+	ChargeProjectBalance(ctx context.Context, in *ChargeProjectBalanceRequest, opts ...grpc.CallOption) (*ChargeProjectBalanceResponse, error)
+	RefundProjectBalance(ctx context.Context, in *RefundProjectBalanceRequest, opts ...grpc.CallOption) (*RefundProjectBalanceResponse, error)
 }
 
 type billingServiceClient struct {
@@ -328,6 +341,15 @@ func (c *billingServiceClient) CancelSubscription(ctx context.Context, in *Cance
 	return out, nil
 }
 
+func (c *billingServiceClient) GetProjectBillingStatus(ctx context.Context, in *GetProjectBillingStatusRequest, opts ...grpc.CallOption) (*GetProjectBillingStatusResponse, error) {
+	out := new(GetProjectBillingStatusResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/GetProjectBillingStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *billingServiceClient) ListDiscounts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListDiscountsResponse, error) {
 	out := new(ListDiscountsResponse)
 	err := c.cc.Invoke(ctx, "/company_service.BillingService/ListDiscounts", in, out, opts...)
@@ -400,6 +422,78 @@ func (c *billingServiceClient) GetAiTokenUsageMetrics(ctx context.Context, in *G
 	return out, nil
 }
 
+func (c *billingServiceClient) ListTokenPacks(ctx context.Context, in *ListTokenPacksRequest, opts ...grpc.CallOption) (*ListTokenPacksResponse, error) {
+	out := new(ListTokenPacksResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/ListTokenPacks", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) CreateTokenPack(ctx context.Context, in *CreateTokenPackRequest, opts ...grpc.CallOption) (*TokenPack, error) {
+	out := new(TokenPack)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/CreateTokenPack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) UpdateTokenPack(ctx context.Context, in *TokenPack, opts ...grpc.CallOption) (*TokenPack, error) {
+	out := new(TokenPack)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/UpdateTokenPack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) DeleteTokenPack(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/DeleteTokenPack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) PurchaseTokenPack(ctx context.Context, in *PurchaseTokenPackRequest, opts ...grpc.CallOption) (*PurchaseTokenPackResponse, error) {
+	out := new(PurchaseTokenPackResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/PurchaseTokenPack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) GetTokenPackBalance(ctx context.Context, in *GetTokenPackBalanceRequest, opts ...grpc.CallOption) (*GetTokenPackBalanceResponse, error) {
+	out := new(GetTokenPackBalanceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/GetTokenPackBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) ChargeProjectBalance(ctx context.Context, in *ChargeProjectBalanceRequest, opts ...grpc.CallOption) (*ChargeProjectBalanceResponse, error) {
+	out := new(ChargeProjectBalanceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/ChargeProjectBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) RefundProjectBalance(ctx context.Context, in *RefundProjectBalanceRequest, opts ...grpc.CallOption) (*RefundProjectBalanceResponse, error) {
+	out := new(RefundProjectBalanceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/RefundProjectBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility
@@ -438,6 +532,7 @@ type BillingServiceServer interface {
 	GetSubscription(context.Context, *PrimaryKey) (*Subscription, error)
 	UpdateSubscription(context.Context, *Subscription) (*Subscription, error)
 	CancelSubscription(context.Context, *CancelSubscriptionRequest) (*Subscription, error)
+	GetProjectBillingStatus(context.Context, *GetProjectBillingStatusRequest) (*GetProjectBillingStatusResponse, error)
 	// Discount
 	ListDiscounts(context.Context, *ListRequest) (*ListDiscountsResponse, error)
 	ListBillingPeriods(context.Context, *ListBillingPeriodsRequest) (*ListBillingPeriodsResponse, error)
@@ -447,6 +542,18 @@ type BillingServiceServer interface {
 	GetApiCallMonitoringMetrics(context.Context, *GetApiCallMonitoringMetricsRequest) (*GetApiCallMonitoringMetricsResponse, error)
 	RecordAiTokenUsage(context.Context, *RecordAiTokenUsageRequest) (*emptypb.Empty, error)
 	GetAiTokenUsageMetrics(context.Context, *GetAiTokenUsageMetricsRequest) (*GetAiTokenUsageMetricsResponse, error)
+	// Token packs (add-on consumable AI-token balance)
+	ListTokenPacks(context.Context, *ListTokenPacksRequest) (*ListTokenPacksResponse, error)
+	CreateTokenPack(context.Context, *CreateTokenPackRequest) (*TokenPack, error)
+	UpdateTokenPack(context.Context, *TokenPack) (*TokenPack, error)
+	DeleteTokenPack(context.Context, *PrimaryKey) (*emptypb.Empty, error)
+	PurchaseTokenPack(context.Context, *PurchaseTokenPackRequest) (*PurchaseTokenPackResponse, error)
+	GetTokenPackBalance(context.Context, *GetTokenPackBalanceRequest) (*GetTokenPackBalanceResponse, error)
+	// Generic project balance charge/refund (funds paid actions such as using a
+	// paid Ugen template). Charge is atomic and overdraft-checked against
+	// balance + credit_limit; refund is its compensating reverse.
+	ChargeProjectBalance(context.Context, *ChargeProjectBalanceRequest) (*ChargeProjectBalanceResponse, error)
+	RefundProjectBalance(context.Context, *RefundProjectBalanceRequest) (*RefundProjectBalanceResponse, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -538,6 +645,9 @@ func (UnimplementedBillingServiceServer) UpdateSubscription(context.Context, *Su
 func (UnimplementedBillingServiceServer) CancelSubscription(context.Context, *CancelSubscriptionRequest) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelSubscription not implemented")
 }
+func (UnimplementedBillingServiceServer) GetProjectBillingStatus(context.Context, *GetProjectBillingStatusRequest) (*GetProjectBillingStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectBillingStatus not implemented")
+}
 func (UnimplementedBillingServiceServer) ListDiscounts(context.Context, *ListRequest) (*ListDiscountsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDiscounts not implemented")
 }
@@ -561,6 +671,30 @@ func (UnimplementedBillingServiceServer) RecordAiTokenUsage(context.Context, *Re
 }
 func (UnimplementedBillingServiceServer) GetAiTokenUsageMetrics(context.Context, *GetAiTokenUsageMetricsRequest) (*GetAiTokenUsageMetricsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAiTokenUsageMetrics not implemented")
+}
+func (UnimplementedBillingServiceServer) ListTokenPacks(context.Context, *ListTokenPacksRequest) (*ListTokenPacksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTokenPacks not implemented")
+}
+func (UnimplementedBillingServiceServer) CreateTokenPack(context.Context, *CreateTokenPackRequest) (*TokenPack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTokenPack not implemented")
+}
+func (UnimplementedBillingServiceServer) UpdateTokenPack(context.Context, *TokenPack) (*TokenPack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTokenPack not implemented")
+}
+func (UnimplementedBillingServiceServer) DeleteTokenPack(context.Context, *PrimaryKey) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTokenPack not implemented")
+}
+func (UnimplementedBillingServiceServer) PurchaseTokenPack(context.Context, *PurchaseTokenPackRequest) (*PurchaseTokenPackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PurchaseTokenPack not implemented")
+}
+func (UnimplementedBillingServiceServer) GetTokenPackBalance(context.Context, *GetTokenPackBalanceRequest) (*GetTokenPackBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenPackBalance not implemented")
+}
+func (UnimplementedBillingServiceServer) ChargeProjectBalance(context.Context, *ChargeProjectBalanceRequest) (*ChargeProjectBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChargeProjectBalance not implemented")
+}
+func (UnimplementedBillingServiceServer) RefundProjectBalance(context.Context, *RefundProjectBalanceRequest) (*RefundProjectBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefundProjectBalance not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 
@@ -1079,6 +1213,24 @@ func _BillingService_CancelSubscription_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_GetProjectBillingStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectBillingStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetProjectBillingStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/GetProjectBillingStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetProjectBillingStatus(ctx, req.(*GetProjectBillingStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BillingService_ListDiscounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRequest)
 	if err := dec(in); err != nil {
@@ -1223,6 +1375,150 @@ func _BillingService_GetAiTokenUsageMetrics_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_ListTokenPacks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTokenPacksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).ListTokenPacks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/ListTokenPacks",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).ListTokenPacks(ctx, req.(*ListTokenPacksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_CreateTokenPack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTokenPackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).CreateTokenPack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/CreateTokenPack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).CreateTokenPack(ctx, req.(*CreateTokenPackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_UpdateTokenPack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenPack)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).UpdateTokenPack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/UpdateTokenPack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).UpdateTokenPack(ctx, req.(*TokenPack))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_DeleteTokenPack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrimaryKey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).DeleteTokenPack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/DeleteTokenPack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).DeleteTokenPack(ctx, req.(*PrimaryKey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_PurchaseTokenPack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PurchaseTokenPackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).PurchaseTokenPack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/PurchaseTokenPack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).PurchaseTokenPack(ctx, req.(*PurchaseTokenPackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_GetTokenPackBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTokenPackBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetTokenPackBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/GetTokenPackBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetTokenPackBalance(ctx, req.(*GetTokenPackBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_ChargeProjectBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChargeProjectBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).ChargeProjectBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/ChargeProjectBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).ChargeProjectBalance(ctx, req.(*ChargeProjectBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_RefundProjectBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefundProjectBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).RefundProjectBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/RefundProjectBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).RefundProjectBalance(ctx, req.(*RefundProjectBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1343,6 +1639,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BillingService_CancelSubscription_Handler,
 		},
 		{
+			MethodName: "GetProjectBillingStatus",
+			Handler:    _BillingService_GetProjectBillingStatus_Handler,
+		},
+		{
 			MethodName: "ListDiscounts",
 			Handler:    _BillingService_ListDiscounts_Handler,
 		},
@@ -1373,6 +1673,38 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAiTokenUsageMetrics",
 			Handler:    _BillingService_GetAiTokenUsageMetrics_Handler,
+		},
+		{
+			MethodName: "ListTokenPacks",
+			Handler:    _BillingService_ListTokenPacks_Handler,
+		},
+		{
+			MethodName: "CreateTokenPack",
+			Handler:    _BillingService_CreateTokenPack_Handler,
+		},
+		{
+			MethodName: "UpdateTokenPack",
+			Handler:    _BillingService_UpdateTokenPack_Handler,
+		},
+		{
+			MethodName: "DeleteTokenPack",
+			Handler:    _BillingService_DeleteTokenPack_Handler,
+		},
+		{
+			MethodName: "PurchaseTokenPack",
+			Handler:    _BillingService_PurchaseTokenPack_Handler,
+		},
+		{
+			MethodName: "GetTokenPackBalance",
+			Handler:    _BillingService_GetTokenPackBalance_Handler,
+		},
+		{
+			MethodName: "ChargeProjectBalance",
+			Handler:    _BillingService_ChargeProjectBalance_Handler,
+		},
+		{
+			MethodName: "RefundProjectBalance",
+			Handler:    _BillingService_RefundProjectBalance_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

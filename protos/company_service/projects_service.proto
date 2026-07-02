@@ -38,6 +38,14 @@ service ProjectService {
   rpc UpdateProjectUgenAccess(UpdateProjectUgenAccessRequest) returns (UpdateProjectUgenAccessResponse) {};
   rpc AutoAssignUgenIfSingle(AutoAssignUgenIfSingleRequest) returns (AutoAssignUgenIfSingleResponse) {};
   rpc ListUgenProjects(ListUgenProjectsRequest) returns (ListUgenProjectsResponse) {};
+  rpc ExportUgenProjects(ExportUgenProjectsRequest) returns (ExportUgenProjectsResponse) {};
+  // GetUgenProjectByCompanyId returns the company's single head (is_ugen) project,
+  // which holds the balance charged for paid template imports and paid user seats.
+  rpc GetUgenProjectByCompanyId(GetUgenProjectByCompanyIdReq) returns (Project) {};
+}
+
+message GetUgenProjectByCompanyIdReq {
+  string company_id = 1;
 }
 
 message GetPorjectConfigByProjectIdRequest {
@@ -252,6 +260,11 @@ message Project {
   repeated string icon_categories = 23;
   string customer_id = 24;
   bool is_ugen = 25;
+  // per_user_price (in per_user_currency_id) is charged to the head project's
+  // balance for every user added to this project. Copied from the source template
+  // on import; 0 for ordinary projects, which keep the fare-based user limit.
+  double per_user_price = 26;
+  string per_user_currency_id = 27;
 }
 
 message CreateProjectRequest {
@@ -261,6 +274,8 @@ message CreateProjectRequest {
   repeated Resource resources = 4;
   string fare_id = 5;
   bool is_ugen = 6;
+  double per_user_price = 7;
+  string per_user_currency_id = 8;
 }
 
 message CreateProjectResponse {
@@ -490,6 +505,17 @@ message ListUgenProjectsResponse {
   repeated UgenProjectItem projects = 2;
 }
 
+message ExportUgenProjectsRequest {
+  string search = 1;
+}
+
+message ExportUgenProjectsResponse {
+  string file_url  = 1;
+  string file_name = 2;
+  int32  count     = 3;
+  repeated UgenProjectItem projects = 4;
+}
+
 message UgenProjectItem {
   string project_id              = 1;
   string company_id              = 2;
@@ -504,4 +530,5 @@ message UgenProjectItem {
   string updated_at              = 11;
   string environment_id          = 12;
   int32  company_projects_count  = 13;
+  string last_activity_date      = 14;
 }

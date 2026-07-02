@@ -14,6 +14,10 @@ service UgenTemplateService {
     rpc SetReaction(SetUgenTemplateReactionReq) returns (UgenTemplateReaction) {}
     rpc DeleteReaction(DeleteUgenTemplateReactionReq) returns (google.protobuf.Empty) {}
     rpc ListReactions(GetUgenTemplateReactionListReq) returns (GetUgenTemplateReactionListResponse) {}
+    // SetPrice is the admin-only price control: users create templates for free
+    // (price defaults to 0) and cannot set a price via Create/Update; only this
+    // endpoint assigns/updates a template's price and currency.
+    rpc SetPrice(SetUgenTemplatePriceReq) returns (UgenTemplate) {}
 }
 
 enum UgenTemplateReactionType {
@@ -77,6 +81,15 @@ message DeleteUgenTemplateReq {
     string id = 1;
 }
 
+message SetUgenTemplatePriceReq {
+    string id = 1;
+    double price = 2;
+    string currency_id = 3;
+    // per_user_price is charged (in currency_id) to the head project's balance for
+    // every user later added to a project created from this template. 0 = free.
+    double per_user_price = 4;
+}
+
 message SetUgenTemplateReactionReq {
     string template_id = 1;
     string user_id = 2;
@@ -132,4 +145,9 @@ message UgenTemplate {
     int32 like_count = 19;
     int32 dislike_count = 20;
     UgenTemplateReactionType current_user_reaction = 21;
+    double price = 22;
+    string currency_id = 23;
+    // per_user_price (in currency_id) is charged per user added to a project
+    // provisioned from this template; copied to project.per_user_price on import.
+    double per_user_price = 24;
 }
