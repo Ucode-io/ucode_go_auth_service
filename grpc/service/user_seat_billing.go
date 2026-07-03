@@ -22,6 +22,19 @@ func (s *userService) reserveUserSeat(ctx context.Context, project *pbc.Project,
 		return nil, nil
 	}
 
+	// The first user of a project is free. When a project is provisioned from a paid
+	// template, only the one-time import price is charged; the initial (owner) user
+	// created right after import must not add a per-seat charge on top of it. Paid
+	// seats therefore start from the second user onward.
+	userCount, err := s.strg.User().GetProjectUsersCount(ctx, project.GetProjectId())
+	if err != nil {
+		s.log.Error("!!!reserveUserSeat--->GetProjectUsersCount", logger.Error(err))
+		return nil, err
+	}
+	if userCount == 0 {
+		return nil, nil
+	}
+
 	head, err := s.services.ProjectServiceClient().GetUgenProjectByCompanyId(ctx, &pbc.GetUgenProjectByCompanyIdReq{
 		CompanyId: project.GetCompanyId(),
 	})
