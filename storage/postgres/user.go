@@ -1445,7 +1445,14 @@ func (r *userRepo) GetProjectUsersCount(ctx context.Context, projectId string) (
 
 	var count int32
 
-	err := r.db.QueryRow(ctx, `SELECT count(user_id) FROM user_project WHERE project_id = $1`, projectId).Scan(&count)
+	err := r.db.QueryRow(ctx, `
+		SELECT COUNT(DISTINCT user_id)
+		FROM user_project
+		WHERE project_id = $1
+		  AND status = $2`,
+		projectId,
+		config.UserStatusActive,
+	).Scan(&count)
 	if err != nil {
 		return 0, err
 	}
