@@ -163,7 +163,8 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		COALESCE(client_id, ''),
 		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
 		COALESCE(TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS created_at,
-		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at
+		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at,
+		COALESCE(TO_CHAR(last_activity_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS last_activity
 	FROM
 		"session"
 	WHERE
@@ -184,6 +185,7 @@ func (r *sessionRepo) GetByPK(ctx context.Context, pKey *pb.SessionPrimaryKey) (
 		&res.ExpiresAt,
 		&res.CreatedAt,
 		&res.UpdatedAt,
+		&res.LastActivity,
 	)
 	if err != nil {
 		return res, errors.Wrap(err, "error while getting session by id: "+err.Error())
@@ -215,7 +217,8 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 		is_changed,
 		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
 		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
+		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at,
+		COALESCE(TO_CHAR(last_activity_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS last_activity
 	FROM "session"`
 
 	filter := " WHERE 1=1"
@@ -286,6 +289,7 @@ func (r *sessionRepo) GetList(ctx context.Context, queryParam *pb.GetSessionList
 			&obj.ExpiresAt,
 			&obj.CreatedAt,
 			&obj.UpdatedAt,
+			&obj.LastActivity,
 		)
 		if err != nil {
 			return res, err
@@ -305,7 +309,8 @@ func (r *sessionRepo) Update(ctx context.Context, entity *pb.UpdateSessionReques
         ip = :ip,
 		expires_at = :expires_at,
         is_changed = TRUE,
-		updated_at = now()`
+		updated_at = now(),
+		last_activity_at = now()`
 
 	filter := ` WHERE id = :id`
 	params["id"] = entity.Id
@@ -399,7 +404,8 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 		is_changed,
 		TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `) AS expires_at,
 		TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `) AS created_at,
-		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at
+		TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `) AS updated_at,
+		COALESCE(TO_CHAR(last_activity_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS last_activity
 	FROM
 		"session"
 	WHERE user_id = $1
@@ -425,6 +431,7 @@ func (r *sessionRepo) GetSessionListByUserID(ctx context.Context, userID string)
 			&obj.ExpiresAt,
 			&obj.CreatedAt,
 			&obj.UpdatedAt,
+			&obj.LastActivity,
 		)
 
 		if err != nil {
@@ -530,7 +537,8 @@ func (r *sessionRepo) GetSessionDevices(ctx context.Context, req *pb.GetSessionD
     		COALESCE(client_id, ''),
     		COALESCE(TO_CHAR(expires_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS expires_at,
     		COALESCE(TO_CHAR(created_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS created_at,
-    		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at
+    		COALESCE(TO_CHAR(updated_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS updated_at,
+    		COALESCE(TO_CHAR(last_activity_at, ` + config.DatabaseQueryTimeLayout + `)::TEXT, '') AS last_activity
 		FROM "session"
 		WHERE user_id_auth = $1 AND project_id = $2
 		ORDER BY data, created_at DESC
@@ -560,6 +568,7 @@ func (r *sessionRepo) GetSessionDevices(ctx context.Context, req *pb.GetSessionD
 			&obj.ExpiresAt,
 			&obj.CreatedAt,
 			&obj.UpdatedAt,
+			&obj.LastActivity,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan session device: %w", err)
@@ -585,6 +594,20 @@ func (r *sessionRepo) DeleteSessionsByDevice(ctx context.Context, req *pb.Delete
 
 	if result.RowsAffected() == 0 {
 		return pgx.ErrNoRows
+	}
+
+	return nil
+}
+
+func (r *sessionRepo) UpdateLastActivity(ctx context.Context, sessionID string) error {
+	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "session.UpdateLastActivity")
+	defer dbSpan.Finish()
+
+	query := `UPDATE "session" SET last_activity_at = now() WHERE id = $1`
+
+	_, err := r.db.Exec(ctx, query, sessionID)
+	if err != nil {
+		return fmt.Errorf("failed to update session last activity: %w", err)
 	}
 
 	return nil

@@ -483,6 +483,8 @@ definitions:
         type: string
       menu_button:
         type: boolean
+      menu_drag:
+        type: boolean
       menu_setting_button:
         type: boolean
       profile_settings_button:
@@ -920,6 +922,10 @@ definitions:
         type: string
       is_changed:
         type: boolean
+      is_current:
+        type: boolean
+      last_activity:
+        type: string
       project_id:
         type: string
       role_id:
@@ -1424,6 +1430,8 @@ definitions:
         type: string
       price:
         type: number
+      product_type:
+        type: string
       subscription:
         $ref: '#/definitions/company_service.Subscription'
       trial_days:
@@ -1433,6 +1441,8 @@ definitions:
     type: object
   company_service.FareItem:
     properties:
+      group:
+        $ref: '#/definitions/company_service.FareItemGroup'
       id:
         type: string
       info:
@@ -1442,6 +1452,13 @@ definitions:
       parent_id:
         type: string
       type:
+        type: string
+    type: object
+  company_service.FareItemGroup:
+    properties:
+      id:
+        type: string
+      name:
         type: string
     type: object
   company_service.FareItemPrice:
@@ -1555,6 +1572,14 @@ definitions:
         type: boolean
       new_router:
         type: boolean
+      per_user_currency_id:
+        type: string
+      per_user_price:
+        description: |-
+          per_user_price (in per_user_currency_id) is charged to the head project's
+          balance for every user added to this project. Copied from the source template
+          on import; 0 for ordinary projects, which keep the fare-based user limit.
+        type: number
       project_id:
         type: string
       request_per_second:
@@ -1602,6 +1627,12 @@ definitions:
     - 12
     - 13
     - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
     type: integer
     x-enum-varnames:
     - ResourceType_NOT_DECIDED
@@ -1619,6 +1650,12 @@ definitions:
     - ResourceType_METABASE
     - ResourceType_TRANSCODER
     - ResourceType_MAILCHIMP
+    - ResourceType_GOOGLE_DRIVE
+    - ResourceType_GOOGLE_CALENDAR
+    - ResourceType_TELEGRAM
+    - ResourceType_META_LEADS
+    - ResourceType_INSTAGRAM
+    - ResourceType_GOOGLE_LEADS
   company_service.ResourceWithoutPassword:
     properties:
       credentials:
@@ -1670,6 +1707,16 @@ definitions:
     type: object
   company_service.Subscription:
     properties:
+      billing_period_code:
+        type: string
+      billing_period_discount_percent:
+        type: number
+      billing_period_months:
+        type: integer
+      cancel_at_period_end:
+        type: boolean
+      canceled_at:
+        type: string
       discount_id:
         type: string
       end_date:
@@ -1677,6 +1724,8 @@ definitions:
       fare_id:
         type: string
       id:
+        type: string
+      pending_fare_id:
         type: string
       project_id:
         type: string

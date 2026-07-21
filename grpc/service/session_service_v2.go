@@ -2098,6 +2098,8 @@ func (s *sessionService) V2HasAccessUser(ctx context.Context, req *pb.V2HasAcces
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	s.touchSessionActivity(session)
+
 	// User activity
 	go func() {
 		var userActivityReq = &nb.UserActivityReqeust{

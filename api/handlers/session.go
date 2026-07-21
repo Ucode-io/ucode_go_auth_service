@@ -200,14 +200,19 @@ func (h *Handler) GetSessionList(c *gin.Context) {
 		return
 	}
 
+	// Session id of the caller's own token, set by AuthMiddleware on the
+	// Bearer path; absent for API-KEY auth, so is_current stays false.
+	currentSessionId := c.GetString("session_id")
+
 	resp, err := h.services.SessionService().GetList(
 		c.Request.Context(),
 		&auth_service.GetSessionListRequest{
-			Limit:        int32(limit),
-			Offset:       int32(offset),
-			Search:       c.Query("search"),
-			UserId:       c.Query("user_id"),
-			ClientTypeId: c.Query("client_type_id"),
+			Limit:            int32(limit),
+			Offset:           int32(offset),
+			Search:           c.Query("search"),
+			UserId:           c.Query("user_id"),
+			ClientTypeId:     c.Query("client_type_id"),
+			CurrentSessionId: currentSessionId,
 		},
 	)
 	if err != nil {

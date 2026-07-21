@@ -178,6 +178,12 @@ func (s *sessionService) GetList(ctx context.Context, req *pb.GetSessionListRequ
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	if req.GetCurrentSessionId() != "" {
+		for _, session := range resp.GetSessions() {
+			session.IsCurrent = session.GetId() == req.GetCurrentSessionId()
+		}
+	}
+
 	return resp, nil
 }
 
@@ -716,6 +722,8 @@ func (s *sessionService) HasAccessUser(ctx context.Context, req *pb.V2HasAccessU
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	s.touchSessionActivity(session)
+
 	projects, err := s.services.UserService().GetProjectsByUserId(ctx, &pb.GetProjectsByUserIdReq{
 		UserId: session.GetUserIdAuth(),
 	})
@@ -772,6 +780,22 @@ func (s *sessionService) HasAccessUser(ctx context.Context, req *pb.V2HasAccessU
 	}
 
 	return res, nil
+}
+
+// touchSessionActivity bumps session.last_activity_at asynchronously, at most
+// once per SESSION_LAST_ACTIVITY_THRESHOLD, using the last_activity value
+// already loaded on the session to avoid extra reads.
+func (s *sessionService) touchSessionActivity(session *pb.Session) {
+	lastActivity, err := time.Parse(config.DatabaseTimeLayout, session.GetLastActivity())
+	if err == nil && time.Since(lastActivity) < config.SESSION_LAST_ACTIVITY_THRESHOLD {
+		return
+	}
+
+	go func() {
+		if err := s.strg.Session().UpdateLastActivity(context.Background(), session.GetId()); err != nil {
+			s.log.Error("!!!touchSessionActivity->UpdateLastActivity--->", logger.Error(err))
+		}
+	}()
 }
 
 // User activity

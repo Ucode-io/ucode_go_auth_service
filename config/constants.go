@@ -19,6 +19,10 @@ const (
 	REDIS_EXPIRY_TIME         time.Duration = 3 * time.Minute
 	HAS_ACCESS_USER_CACHE_TTL time.Duration = 1 * time.Minute
 
+	// Minimum interval between session.last_activity_at writes per session,
+	// so per-request access checks don't turn into per-request UPDATEs.
+	SESSION_LAST_ACTIVITY_THRESHOLD time.Duration = 1 * time.Minute
+
 	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	AdminClientName       string = "ADMIN"

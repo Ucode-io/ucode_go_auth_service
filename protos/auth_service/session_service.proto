@@ -356,6 +356,7 @@ message GetSessionListRequest {
   string search = 3;
   string user_id = 4;
   string client_type_id = 5;
+  string current_session_id = 6;
 }
 
 message GetSessionListResponse {

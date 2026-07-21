@@ -164,6 +164,8 @@ message Session {
     string env_id = 14;
     string user_id_auth = 15;
     string client_id = 16;
+    bool is_current = 17;
+    string last_activity = 18;
 }
 
 message Passcode {

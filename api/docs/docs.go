@@ -10823,6 +10823,9 @@ const docTemplate = `{
                 "menu_button": {
                     "type": "boolean"
                 },
+                "menu_drag": {
+                    "type": "boolean"
+                },
                 "menu_setting_button": {
                     "type": "boolean"
                 },
@@ -11492,6 +11495,12 @@ const docTemplate = `{
                 },
                 "is_changed": {
                     "type": "boolean"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "last_activity": {
+                    "type": "string"
                 },
                 "project_id": {
                     "type": "string"
@@ -12262,6 +12271,9 @@ const docTemplate = `{
                 "price": {
                     "type": "number"
                 },
+                "product_type": {
+                    "type": "string"
+                },
                 "subscription": {
                     "$ref": "#/definitions/company_service.Subscription"
                 },
@@ -12276,6 +12288,9 @@ const docTemplate = `{
         "company_service.FareItem": {
             "type": "object",
             "properties": {
+                "group": {
+                    "$ref": "#/definitions/company_service.FareItemGroup"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -12289,6 +12304,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "company_service.FareItemGroup": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -12462,6 +12488,13 @@ const docTemplate = `{
                 "new_router": {
                     "type": "boolean"
                 },
+                "per_user_currency_id": {
+                    "type": "string"
+                },
+                "per_user_price": {
+                    "description": "per_user_price (in per_user_currency_id) is charged to the head project's\nbalance for every user added to this project. Copied from the source template\non import; 0 for ordinary projects, which keep the fare-based user limit.",
+                    "type": "number"
+                },
                 "project_id": {
                     "type": "string"
                 },
@@ -12505,7 +12538,13 @@ const docTemplate = `{
                 11,
                 12,
                 13,
-                14
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20
             ],
             "x-enum-varnames": [
                 "ResourceType_NOT_DECIDED",
@@ -12522,7 +12561,13 @@ const docTemplate = `{
                 "ResourceType_SUPERSET",
                 "ResourceType_METABASE",
                 "ResourceType_TRANSCODER",
-                "ResourceType_MAILCHIMP"
+                "ResourceType_MAILCHIMP",
+                "ResourceType_GOOGLE_DRIVE",
+                "ResourceType_GOOGLE_CALENDAR",
+                "ResourceType_TELEGRAM",
+                "ResourceType_META_LEADS",
+                "ResourceType_INSTAGRAM",
+                "ResourceType_GOOGLE_LEADS"
             ]
         },
         "company_service.ResourceWithoutPassword": {
@@ -12623,6 +12668,21 @@ const docTemplate = `{
         "company_service.Subscription": {
             "type": "object",
             "properties": {
+                "billing_period_code": {
+                    "type": "string"
+                },
+                "billing_period_discount_percent": {
+                    "type": "number"
+                },
+                "billing_period_months": {
+                    "type": "integer"
+                },
+                "cancel_at_period_end": {
+                    "type": "boolean"
+                },
+                "canceled_at": {
+                    "type": "string"
+                },
                 "discount_id": {
                     "type": "string"
                 },
@@ -12633,6 +12693,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "pending_fare_id": {
                     "type": "string"
                 },
                 "project_id": {

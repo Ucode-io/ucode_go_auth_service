@@ -106,6 +106,7 @@ type SessionRepoI interface {
 	GetSessionDevices(ctx context.Context, req *pb.GetSessionDevicesRequest) (*pb.GetSessionDevicesResponse, error)
 	DeleteSessionsByDevice(ctx context.Context, req *pb.DeleteSessionsByDeviceRequest) error
 	DeleteSessionsExceptCurrent(ctx context.Context, req *pb.DeleteSessionsExceptCurrentRequest) error
+	UpdateLastActivity(ctx context.Context, sessionID string) error
 }
 
 type CompanyRepoI interface {
