@@ -399,7 +399,7 @@ func (r *userRepo) mergeContactTx(ctx context.Context, tx pgx.Tx, current, found
 	// 3. Absorb the current user's login fields into the survivor, then delete it.
 	var email, login, password, hashType string
 	if err := tx.QueryRow(ctx, `
-		SELECT COALESCE(email, ''), COALESCE(login, ''), COALESCE(password, ''), COALESCE(hash_type, '')
+		SELECT COALESCE(email, ''), COALESCE(login, ''), COALESCE(password, ''), COALESCE(hash_type::text, '')
 		FROM "user" WHERE id = $1`, current,
 	).Scan(&email, &login, &password, &hashType); err != nil {
 		if err == pgx.ErrNoRows {
@@ -417,7 +417,7 @@ func (r *userRepo) mergeContactTx(ctx context.Context, tx pgx.Tx, current, found
 			email     = COALESCE(NULLIF($2, ''), email),
 			login     = COALESCE(NULLIF($3, ''), login),
 			password  = COALESCE(NULLIF($4, ''), password),
-			hash_type = COALESCE(NULLIF($5, ''), hash_type),
+			hash_type = COALESCE(NULLIF($5, '')::hash_type, hash_type),
 			updated_at = now()
 		WHERE id = $1`,
 		found, email, login, password, hashType,
