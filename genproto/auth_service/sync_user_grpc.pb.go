@@ -28,6 +28,14 @@ type SyncUserServiceClient interface {
 	UpdateUser(ctx context.Context, in *UpdateSyncUserRequest, opts ...grpc.CallOption) (*SyncUserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteSyncUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteManyUser(ctx context.Context, in *DeleteManyUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// MergeContact consolidates the caller's current auth user into the auth
+	// user that already owns a just-added contact (phone/email). The found user
+	// survives and absorbs the current user's login fields; the current user is
+	// deleted when it has no memberships outside this project (otherwise the
+	// call is rejected so its user_id_auth cannot dangle in other projects'
+	// builder DBs). Ownership of the contact must be verified by the CALLER
+	// (e.g. an OTP-verified add-contact flow) — this RPC trusts its inputs.
+	MergeContact(ctx context.Context, in *MergeContactRequest, opts ...grpc.CallOption) (*SyncUserResponse, error)
 }
 
 type syncUserServiceClient struct {
@@ -83,6 +91,15 @@ func (c *syncUserServiceClient) DeleteManyUser(ctx context.Context, in *DeleteMa
 	return out, nil
 }
 
+func (c *syncUserServiceClient) MergeContact(ctx context.Context, in *MergeContactRequest, opts ...grpc.CallOption) (*SyncUserResponse, error) {
+	out := new(SyncUserResponse)
+	err := c.cc.Invoke(ctx, "/auth_service.SyncUserService/MergeContact", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SyncUserServiceServer is the server API for SyncUserService service.
 // All implementations must embed UnimplementedSyncUserServiceServer
 // for forward compatibility
@@ -92,6 +109,14 @@ type SyncUserServiceServer interface {
 	UpdateUser(context.Context, *UpdateSyncUserRequest) (*SyncUserResponse, error)
 	DeleteUser(context.Context, *DeleteSyncUserRequest) (*emptypb.Empty, error)
 	DeleteManyUser(context.Context, *DeleteManyUserRequest) (*emptypb.Empty, error)
+	// MergeContact consolidates the caller's current auth user into the auth
+	// user that already owns a just-added contact (phone/email). The found user
+	// survives and absorbs the current user's login fields; the current user is
+	// deleted when it has no memberships outside this project (otherwise the
+	// call is rejected so its user_id_auth cannot dangle in other projects'
+	// builder DBs). Ownership of the contact must be verified by the CALLER
+	// (e.g. an OTP-verified add-contact flow) — this RPC trusts its inputs.
+	MergeContact(context.Context, *MergeContactRequest) (*SyncUserResponse, error)
 	mustEmbedUnimplementedSyncUserServiceServer()
 }
 
@@ -113,6 +138,9 @@ func (UnimplementedSyncUserServiceServer) DeleteUser(context.Context, *DeleteSyn
 }
 func (UnimplementedSyncUserServiceServer) DeleteManyUser(context.Context, *DeleteManyUserRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteManyUser not implemented")
+}
+func (UnimplementedSyncUserServiceServer) MergeContact(context.Context, *MergeContactRequest) (*SyncUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MergeContact not implemented")
 }
 func (UnimplementedSyncUserServiceServer) mustEmbedUnimplementedSyncUserServiceServer() {}
 
@@ -217,6 +245,24 @@ func _SyncUserService_DeleteManyUser_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SyncUserService_MergeContact_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MergeContactRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SyncUserServiceServer).MergeContact(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth_service.SyncUserService/MergeContact",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SyncUserServiceServer).MergeContact(ctx, req.(*MergeContactRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SyncUserService_ServiceDesc is the grpc.ServiceDesc for SyncUserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +289,10 @@ var SyncUserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteManyUser",
 			Handler:    _SyncUserService_DeleteManyUser_Handler,
+		},
+		{
+			MethodName: "MergeContact",
+			Handler:    _SyncUserService_MergeContact_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

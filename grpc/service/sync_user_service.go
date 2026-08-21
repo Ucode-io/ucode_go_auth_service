@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"runtime"
@@ -334,6 +335,47 @@ func (sus *syncUserService) UpdateUser(ctx context.Context, req *pb.UpdateSyncUs
 	}
 
 	return syncUser, nil
+}
+
+// MergeContact links two auth accounts that belong to the same person: it folds
+// the caller's current account into the account that already owns a just-added
+// contact (phone/email), which survives. The contact must have been ownership-
+// verified by the caller (e.g. an OTP-verified add-contact flow) — this RPC
+// trusts current_user_id / found_user_id as given.
+//
+// company_id is resolved from the project (same as UpdateUser) so the membership
+// move targets the exact user_project row regardless of what the caller sent.
+// ErrMergeAccountInUse (current account still used elsewhere) surfaces as
+// FailedPrecondition so the caller can fall back to a plain contact update.
+func (sus *syncUserService) MergeContact(ctx context.Context, req *pb.MergeContactRequest) (*pb.SyncUserResponse, error) {
+	dbSpan, ctx := span.StartSpanFromContext(ctx, "grpc_sync_user.MergeContact", req)
+	defer dbSpan.Finish()
+
+	sus.log.Info("---MergeContact--->", logger.Any("req", req))
+
+	if req.GetCurrentUserId() == "" || req.GetFoundUserId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "current_user_id and found_user_id are required")
+	}
+
+	project, err := sus.services.ProjectServiceClient().GetById(ctx,
+		&pbc.GetProjectByIdRequest{ProjectId: req.GetProjectId()})
+	if err != nil {
+		sus.log.Error("!!!MergeContact-->ProjectGetById", logger.Error(err))
+		return nil, err
+	}
+	req.CompanyId = project.GetCompanyId()
+
+	resp, err := sus.strg.User().MergeContact(ctx, req)
+	if err != nil {
+		if errors.Is(err, storage.ErrMergeAccountInUse) {
+			sus.log.Error("!!!MergeContact-->AccountInUse", logger.Error(err))
+			return nil, status.Error(codes.FailedPrecondition, err.Error())
+		}
+		sus.log.Error("!!!MergeContact-->Merge", logger.Error(err))
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 func (sus *syncUserService) DeleteManyUser(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {

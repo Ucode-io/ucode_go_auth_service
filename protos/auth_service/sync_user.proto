@@ -13,6 +13,26 @@ service SyncUserService {
     rpc UpdateUser(UpdateSyncUserRequest) returns (SyncUserResponse) {}
     rpc DeleteUser(DeleteSyncUserRequest) returns (google.protobuf.Empty) {}
     rpc DeleteManyUser(DeleteManyUserRequest) returns (google.protobuf.Empty) {}
+    // MergeContact consolidates the caller's current auth user into the auth
+    // user that already owns a just-added contact (phone/email). The found user
+    // survives and absorbs the current user's login fields; the current user is
+    // deleted when it has no memberships outside this project (otherwise the
+    // call is rejected so its user_id_auth cannot dangle in other projects'
+    // builder DBs). Ownership of the contact must be verified by the CALLER
+    // (e.g. an OTP-verified add-contact flow) — this RPC trusts its inputs.
+    rpc MergeContact(MergeContactRequest) returns (SyncUserResponse) {}
+}
+
+// MergeContactRequest carries the two auth user ids to merge and the project
+// coordinates of the current membership being moved onto the survivor.
+message MergeContactRequest {
+    string current_user_id = 1; // account the user is logged into (has email/pwd)
+    string found_user_id = 2;   // account that already owns the added phone/email (survivor)
+    string project_id = 3;
+    string company_id = 4;
+    string client_type_id = 5;
+    string role_id = 6;
+    string env_id = 7;
 }
 
 message CreateSyncUserRequest {

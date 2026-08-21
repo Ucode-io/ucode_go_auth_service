@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	pb "ucode/ucode_go_auth_service/genproto/auth_service"
+	"ucode/ucode_go_auth_service/storage"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
@@ -79,30 +80,22 @@ func (r *userRepo) UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserReq
 		if loginType == "login" {
 			return nil, errors.New("login already exists")
 		}
+		// The contact (phone/email/tin) being added already belongs to another
+		// auth user (userId). Instead of the old silent redirect — which pointed
+		// this project at a foreign identity and left two split records — fold the
+		// current account (req.Guid) into that existing user, which survives and
+		// absorbs the current account's login fields. Ownership of the contact is
+		// verified upstream by the caller (the OTP-verified add-contact flow).
 		if _, err = uuid.Parse(userId); err == nil {
-			query = `
-				UPDATE 
-					user_project
-				SET user_id = $1
-				WHERE user_id = $2
-		  		AND project_id = $3
-		  		AND client_type_id = $4
-		  		AND role_id = $5
-		  		AND env_id = $6
-				AND company_id = $7`
-
-			_, err = tx.Exec(ctx,
-				query,
-				userId,
-				req.GetGuid(),
-				req.GetProjectId(),
-				req.GetClientTypeId(),
-				req.GetRoleId(),
-				req.GetEnvId(),
-				req.GetCompanyId(),
-			)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to update user_project")
+			coords := mergeCoords{
+				projectID:    req.GetProjectId(),
+				companyID:    req.GetCompanyId(),
+				clientTypeID: req.GetClientTypeId(),
+				roleID:       req.GetRoleId(),
+				envID:        req.GetEnvId(),
+			}
+			if err = r.mergeContactTx(ctx, tx, req.GetGuid(), userId, coords); err != nil {
+				return nil, errors.Wrap(err, "failed to merge contact")
 			}
 
 			resp.UserId = userId
@@ -289,4 +282,148 @@ func (r *userRepo) CreateWithTx(ctx context.Context, entity *pb.CreateUserReques
 	}
 
 	return pKey, nil
+}
+
+// MergeContact consolidates the current auth user into the found auth user
+// (the one that already owns a just-added phone/email). The found user survives.
+//
+// Steps, in one transaction:
+//  1. Move the current user's membership in THIS project onto the survivor.
+//  2. Guard: the current user must have no memberships left anywhere else, or we
+//     cannot safely delete it (see ErrMergeAccountInUse).
+//  3. Absorb the current user's login fields (email/login/password) into the
+//     survivor, then delete the current user. The current row is deleted before
+//     the survivor is updated so a unique email/login is freed first.
+//
+// Ownership of the contact is the CALLER's responsibility (e.g. an OTP-verified
+// add-contact flow); this method trusts current/found as given. The returned
+// SyncUserResponse.UserId is the survivor, which the caller (object-builder)
+// writes back into this project's users.user_id_auth.
+func (r *userRepo) MergeContact(ctx context.Context, req *pb.MergeContactRequest) (*pb.SyncUserResponse, error) {
+	current, found := req.GetCurrentUserId(), req.GetFoundUserId()
+	if current == "" || found == "" {
+		return nil, errors.New("current_user_id and found_user_id are required")
+	}
+	// Nothing to merge: the project already points at the survivor.
+	if current == found {
+		return &pb.SyncUserResponse{UserId: found}, nil
+	}
+
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to begin transaction")
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	coords := mergeCoords{
+		projectID:    req.GetProjectId(),
+		companyID:    req.GetCompanyId(),
+		clientTypeID: req.GetClientTypeId(),
+		roleID:       req.GetRoleId(),
+		envID:        req.GetEnvId(),
+	}
+	if err = r.mergeContactTx(ctx, tx, current, found, coords); err != nil {
+		return nil, err
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return nil, errors.Wrap(err, "failed to commit transaction")
+	}
+
+	return &pb.SyncUserResponse{UserId: found}, nil
+}
+
+// mergeCoords locates the current membership row being moved onto the survivor.
+type mergeCoords struct {
+	projectID    string
+	companyID    string
+	clientTypeID string
+	roleID       string
+	envID        string
+}
+
+// mergeContactTx folds `current` into `found` (survivor) inside an existing tx.
+// It is shared by MergeContact (dedicated RPC) and UpdateSyncUser (the phone/
+// email/tin collision path that a normal contact update reaches).
+//
+//  1. Move current's membership in THIS project onto the survivor.
+//  2. Guard: current must have no memberships left anywhere else — otherwise
+//     deleting it would dangle its user_id_auth in other projects' builder DBs
+//     (which auth cannot reach). Returns storage.ErrMergeAccountInUse instead.
+//  3. Absorb current's login fields (email/login/password) into the survivor and
+//     delete current. Current is deleted before the survivor is updated so a
+//     unique email/login is freed first.
+//
+// The caller repoints this project's users.user_id_auth to `found`.
+func (r *userRepo) mergeContactTx(ctx context.Context, tx pgx.Tx, current, found string, c mergeCoords) error {
+	if current == "" || found == "" || current == found {
+		return nil
+	}
+
+	// 1. Move this project's membership from the current user to the survivor.
+	if _, err := tx.Exec(ctx, `
+		DELETE FROM user_project
+		WHERE user_id = $1
+		  AND project_id = $2
+		  AND client_type_id = $3
+		  AND role_id = $4
+		  AND env_id = $5
+		  AND company_id = $6`,
+		current, c.projectID, c.clientTypeID, c.roleID, c.envID, c.companyID,
+	); err != nil {
+		return errors.Wrap(err, "failed to drop current membership")
+	}
+
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO user_project (user_id, company_id, project_id, client_type_id, role_id, env_id, status)
+		VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE')
+		ON CONFLICT DO NOTHING`,
+		found, c.companyID, c.projectID, c.clientTypeID, c.roleID, c.envID,
+	); err != nil {
+		return errors.Wrap(err, "failed to ensure survivor membership")
+	}
+
+	// 2. The current user must be referenced nowhere else before we delete it.
+	var remaining int
+	if err := tx.QueryRow(ctx,
+		`SELECT count(*) FROM user_project WHERE user_id = $1`, current,
+	).Scan(&remaining); err != nil {
+		return errors.Wrap(err, "failed to count current memberships")
+	}
+	if remaining > 0 {
+		return storage.ErrMergeAccountInUse
+	}
+
+	// 3. Absorb the current user's login fields into the survivor, then delete it.
+	var email, login, password, hashType string
+	if err := tx.QueryRow(ctx, `
+		SELECT COALESCE(email, ''), COALESCE(login, ''), COALESCE(password, ''), COALESCE(hash_type, '')
+		FROM "user" WHERE id = $1`, current,
+	).Scan(&email, &login, &password, &hashType); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil // current auth user already gone; survivor keeps the membership
+		}
+		return errors.Wrap(err, "failed to load current user")
+	}
+
+	if _, err := tx.Exec(ctx, `DELETE FROM "user" WHERE id = $1`, current); err != nil {
+		return errors.Wrap(err, "failed to delete current user")
+	}
+
+	if _, err := tx.Exec(ctx, `
+		UPDATE "user" SET
+			email     = COALESCE(NULLIF($2, ''), email),
+			login     = COALESCE(NULLIF($3, ''), login),
+			password  = COALESCE(NULLIF($4, ''), password),
+			hash_type = COALESCE(NULLIF($5, ''), hash_type),
+			updated_at = now()
+		WHERE id = $1`,
+		found, email, login, password, hashType,
+	); err != nil {
+		return errors.Wrap(err, "failed to absorb fields into survivor")
+	}
+
+	return nil
 }

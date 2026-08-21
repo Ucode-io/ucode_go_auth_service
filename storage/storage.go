@@ -12,6 +12,12 @@ import (
 )
 
 var ErrorTheSameId = errors.New("cannot use the same uuid for 'id' and 'parent_id' fields")
+
+// ErrMergeAccountInUse is returned by MergeContact when the account being merged
+// away is still referenced by projects other than the one performing the merge.
+// Deleting it then would leave a dangling user_id_auth in those projects' builder
+// DBs (which the auth service cannot reach), breaking their logins.
+var ErrMergeAccountInUse = errors.New("current account is used in other projects")
 var ErrorProjectId = errors.New("not valid 'project_id'")
 
 type StorageI interface {
@@ -88,6 +94,7 @@ type UserRepoI interface {
 	V2GetByUsername(ctx context.Context, username, strategy string) (res *pb.User, err error)
 	UpdateSyncUser(ctx context.Context, req *pb.UpdateSyncUserRequest, loginType string) (*pb.SyncUserResponse, error)
 	UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUserRequest, user *pb.ResetPasswordRequest, tx pgx.Tx) (string, error)
+	MergeContact(ctx context.Context, req *pb.MergeContactRequest) (*pb.SyncUserResponse, error)
 	GetUserStatus(ctx context.Context, userId, projectId string) (status string, err error)
 	GetProjectUsersCount(ctx context.Context, projectId string) (int32, error)
 	GetCompanyUsersCount(ctx context.Context, companyId string) (int32, error)
