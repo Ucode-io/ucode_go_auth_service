@@ -191,51 +191,27 @@ func (r *userRepo) UpdateLoginStrategy(ctx context.Context, req *pb.UpdateSyncUs
 		if err != nil {
 			return "", errors.Wrap(err, "failed to insert user to project")
 		}
-	case count == 1:
+	case count >= 1:
+		// Add/change the login strategy (phone/email/login/tin) on the EXISTING
+		// auth user in place, keeping a single identity — even when the user
+		// belongs to more than one project.
+		//
+		// Previously count > 1 forked a brand-new auth user for this project and
+		// moved the membership onto it. Because email/login/phone are globally
+		// unique, that fork could only carry the value being changed and NOT the
+		// user's existing email — so adding a phone split the account (old user
+		// kept the email, the fork got the phone, the project's user_id_auth
+		// repointed to the fork). update_phone/update_email then produced a
+		// login-broken, two-record identity. Updating in place avoids that split.
+		//
+		// Trade-off (accepted): for an identity shared across projects/companies
+		// the change now applies to the shared auth row rather than being
+		// isolated per project.
 		_, err = r.ResetPassword(ctx, user, tx)
 		if err != nil {
 			return "", errors.Wrap(err, "failed to reset password")
 		}
 		userId = req.GetGuid()
-	case count > 1:
-		pKey, err := r.CreateWithTx(ctx, &pb.CreateUserRequest{
-			Login:     req.GetLogin(),
-			Password:  req.GetPassword(),
-			Email:     req.GetEmail(),
-			Phone:     req.GetPhone(),
-			CompanyId: req.GetCompanyId(),
-			Tin:       req.GetTin(),
-		}, tx)
-		if err != nil {
-			return "", errors.Wrap(err, "failed to create user")
-		}
-
-		userId = pKey.GetId()
-
-		query = `
-				UPDATE 
-					user_project
-				SET user_id = $1
-				WHERE user_id = $2
-		  		AND project_id = $3
-		  		AND client_type_id = $4
-		  		AND role_id = $5
-		  		AND env_id = $6
-				AND company_id = $7`
-
-		_, err = tx.Exec(ctx,
-			query,
-			userId,
-			req.GetGuid(),
-			req.GetProjectId(),
-			req.GetClientTypeId(),
-			req.GetRoleId(),
-			req.GetEnvId(),
-			req.GetCompanyId(),
-		)
-		if err != nil {
-			return "", errors.Wrap(err, "failed to update user_project")
-		}
 	}
 
 	return userId, nil
