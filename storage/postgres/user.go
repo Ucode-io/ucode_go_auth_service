@@ -1114,19 +1114,7 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	dbSpan, ctx := opentracing.StartSpanFromContext(ctx, "user.DeleteUserFromProject")
 	defer dbSpan.Finish()
 
-	params := make(map[string]any)
-
-	query := `DELETE FROM "user_project" 
-	WHERE  
-	user_id = :user_id and 
-	client_type_id = :client_type_id and
-	project_id = :project_id
-
-	`
-
-	params["user_id"] = req.UserId
-	params["client_type_id"] = req.ClientTypeId
-	params["project_id"] = req.ProjectId
+	query, params := deleteUserFromProjectQuery(req)
 
 	q, args := helper.ReplaceQueryParams(query, params)
 	_, err := r.db.Exec(ctx, q, args...)
@@ -1135,6 +1123,36 @@ func (r *userRepo) DeleteUserFromProject(ctx context.Context, req *pb.DeleteSync
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func deleteUserFromProjectQuery(req *pb.DeleteSyncUserRequest) (string, map[string]any) {
+	query := `DELETE FROM "user_project"
+	WHERE user_id = :user_id AND project_id = :project_id`
+	params := map[string]any{
+		"user_id":    req.GetUserId(),
+		"project_id": req.GetProjectId(),
+	}
+
+	optionalFilters := []struct {
+		column string
+		key    string
+		value  string
+	}{
+		{column: "company_id", key: "company_id", value: req.GetCompanyId()},
+		{column: "client_type_id", key: "client_type_id", value: req.GetClientTypeId()},
+		{column: "role_id", key: "role_id", value: req.GetRoleId()},
+		{column: "env_id", key: "env_id", value: req.GetEnvironmentId()},
+	}
+
+	for _, filter := range optionalFilters {
+		if filter.value == "" {
+			continue
+		}
+		query += " AND " + filter.column + " = :" + filter.key
+		params[filter.key] = filter.value
+	}
+
+	return query, params
 }
 
 func (r *userRepo) DeleteUsersFromProject(ctx context.Context, req *pb.DeleteManyUserRequest) (*empty.Empty, error) {

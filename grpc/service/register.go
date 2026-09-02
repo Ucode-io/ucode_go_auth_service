@@ -45,6 +45,17 @@ func NewRegisterService(cfg config.BaseConfig, log logger.LoggerI, strg storage.
 	}
 }
 
+func addUserProjectForRegistration(ctx context.Context, repo storage.UserRepoI, req *pb.AddUserToProjectReq) (bool, error) {
+	_, err := repo.AddUserToProject(ctx, req)
+	if err == nil {
+		return true, nil
+	}
+	if strings.Contains(err.Error(), config.UserProjectIdConstraint) {
+		return false, nil
+	}
+	return false, err
+}
+
 func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUserRequest) (*pb.V2LoginResponse, error) {
 	rs.log.Info("--RegisterUser invoked--", logger.Any("data", data))
 
@@ -168,7 +179,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 		return nil, limitErr
 	}
 
-	_, err = rs.strg.User().AddUserToProject(ctx, &pb.AddUserToProjectReq{
+	userProjectCreated, err := addUserProjectForRegistration(ctx, rs.strg.User(), &pb.AddUserToProjectReq{
 		UserId:       userId,
 		RoleId:       data.RoleId,
 		CompanyId:    data.CompanyId,
@@ -178,10 +189,35 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 	})
 	if err != nil {
 		rs.log.Error("!RegisterUserError--->AddUserToProject", logger.Error(err))
-		if strings.Contains(err.Error(), config.UserProjectIdConstraint) {
-			return nil, status.Error(codes.Internal, config.DuplicateUserProjectError)
-		}
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if !userProjectCreated {
+		// The auth membership can outlive a failed builder record creation (for
+		// example, when a downstream request fails after AddUserToProject). A
+		// retry must continue and create the missing project user instead of
+		// getting stuck behind the user_project unique constraint forever.
+		rs.log.Info("RegisterUser: user project membership already exists; continuing registration")
+	}
+
+	rollbackUserProject := func() {
+		if !userProjectCreated {
+			return
+		}
+
+		_, rollbackErr := rs.strg.User().DeleteUserFromProject(context.WithoutCancel(ctx), &pb.DeleteSyncUserRequest{
+			UserId:        userId,
+			RoleId:        data.RoleId,
+			CompanyId:     data.CompanyId,
+			ProjectId:     data.ProjectId,
+			ClientTypeId:  data.ClientTypeId,
+			EnvironmentId: data.EnvironmentId,
+		})
+		if rollbackErr != nil {
+			rs.log.Error("!!!RegisterUser--->RollbackUserProject", logger.Error(rollbackErr))
+			return
+		}
+
+		userProjectCreated = false
 	}
 
 	switch resourceType {
@@ -196,6 +232,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			},
 		})
 		if err != nil {
+			rollbackUserProject()
 			rs.log.Error("!!!CreateUser--->Node GetSingle", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -213,14 +250,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
-			_, _ = rs.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
-				UserId:        userId,
-				RoleId:        data.RoleId,
-				CompanyId:     data.CompanyId,
-				ProjectId:     data.ProjectId,
-				ClientTypeId:  data.ClientTypeId,
-				EnvironmentId: data.EnvironmentId,
-			})
+			rollbackUserProject()
 			rs.log.Error("!!!CreateUser--->NodeType Create", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
@@ -236,6 +266,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			},
 		})
 		if err != nil {
+			rollbackUserProject()
 			rs.log.Error("!!!CreateUser--->GetSingle", logger.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -252,14 +283,7 @@ func (rs *registerService) RegisterUser(ctx context.Context, data *pb.RegisterUs
 			ProjectId: data.ResourceEnvironmentId,
 		})
 		if err != nil {
-			_, _ = rs.strg.User().DeleteUserFromProject(ctx, &pb.DeleteSyncUserRequest{
-				UserId:        userId,
-				RoleId:        data.RoleId,
-				CompanyId:     data.CompanyId,
-				ProjectId:     data.ProjectId,
-				ClientTypeId:  data.ClientTypeId,
-				EnvironmentId: data.EnvironmentId,
-			})
+			rollbackUserProject()
 			rs.log.Error("!!!PostgresObjectBuilderService.CreateUser--->", logger.Error(err))
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
