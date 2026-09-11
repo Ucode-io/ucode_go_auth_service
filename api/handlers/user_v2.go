@@ -727,35 +727,34 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 		return
 	}
 
-	// A user may only change their own password here. Both the project user and
-	// the auth user are taken from the session, so a body pointing at somebody
-	// else is refused. Admins change other people's passwords through the login
-	// table instead.
+	// A user may only change their own password here, so the target always comes
+	// from the session and whatever the body says is advisory. Clients keep the
+	// user id from the original login in local state, and switching environment
+	// issues a session for a different project row, so a stale body value is
+	// normal and must not fail the request. Admins change other people's
+	// passwords through the login table instead.
 	sessionUserIdValue, _ := c.Get("session_user_id")
 	sessionUserIdAuthValue, _ := c.Get("user_id")
+	sessionClientTypeIdValue, _ := c.Get("session_client_type_id")
 
 	sessionUserId := cast.ToString(sessionUserIdValue)
 	sessionUserIdAuth := cast.ToString(sessionUserIdAuthValue)
+	sessionClientTypeId := cast.ToString(sessionClientTypeIdValue)
 
 	if sessionUserId == "" || sessionUserIdAuth == "" {
 		h.handleResponse(c, http.Forbidden, "password can be changed only with a user session")
 		return
 	}
 
-	if userPassword.UserId == "" {
-		userPassword.UserId = sessionUserId
+	if userPassword.UserId != "" && userPassword.UserId != sessionUserId {
+		h.log.Warn("V2UserResetPassword: ignoring user id from body, using the session one")
 	}
 
-	if userPassword.UserId != sessionUserId {
-		h.handleResponse(c, http.Forbidden, "you can change only your own password")
-		return
-	}
-
+	userPassword.UserId = sessionUserId
 	userPassword.UserIdAuth = sessionUserIdAuth
 
-	if userPassword.ClientTypeId == "" {
-		sessionClientTypeIdValue, _ := c.Get("session_client_type_id")
-		userPassword.ClientTypeId = cast.ToString(sessionClientTypeIdValue)
+	if sessionClientTypeId != "" {
+		userPassword.ClientTypeId = sessionClientTypeId
 	}
 
 	if userPassword.ClientTypeId == "" {
