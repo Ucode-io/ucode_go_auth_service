@@ -160,6 +160,10 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
+	for _, user := range resp.GetUsers() {
+		user.Password = ""
+	}
+
 	h.handleResponse(c, http.OK, resp)
 }
 
@@ -230,6 +234,10 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	// The stored hash has no use outside this service and clients echo whatever
+	// they receive back into update calls.
+	resp.Password = ""
 
 	h.handleResponse(c, http.OK, resp)
 }
@@ -719,6 +727,42 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 		return
 	}
 
+	// A user may only change their own password here. Both the project user and
+	// the auth user are taken from the session, so a body pointing at somebody
+	// else is refused. Admins change other people's passwords through the login
+	// table instead.
+	sessionUserIdValue, _ := c.Get("session_user_id")
+	sessionUserIdAuthValue, _ := c.Get("user_id")
+
+	sessionUserId := cast.ToString(sessionUserIdValue)
+	sessionUserIdAuth := cast.ToString(sessionUserIdAuthValue)
+
+	if sessionUserId == "" || sessionUserIdAuth == "" {
+		h.handleResponse(c, http.Forbidden, "password can be changed only with a user session")
+		return
+	}
+
+	if userPassword.UserId == "" {
+		userPassword.UserId = sessionUserId
+	}
+
+	if userPassword.UserId != sessionUserId {
+		h.handleResponse(c, http.Forbidden, "you can change only your own password")
+		return
+	}
+
+	userPassword.UserIdAuth = sessionUserIdAuth
+
+	if userPassword.ClientTypeId == "" {
+		sessionClientTypeIdValue, _ := c.Get("session_client_type_id")
+		userPassword.ClientTypeId = cast.ToString(sessionClientTypeIdValue)
+	}
+
+	if userPassword.ClientTypeId == "" {
+		h.handleResponse(c, http.BadRequest, "client type id is required")
+		return
+	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
@@ -755,6 +799,8 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	user.Password = ""
 
 	h.handleResponse(c, http.OK, user)
 }
