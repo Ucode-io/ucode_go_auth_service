@@ -292,6 +292,9 @@ message V2UserResetPasswordRequest {
     string node_type = 7;
     string resource_environment_id = 8;
     int32 resource_type = 9;
+    // Auth user id of the session owner. Filled by the API layer from the
+    // session, never trusted from the request body.
+    string user_id_auth = 10;
 }
 
 message GetUserProjectClientTypesResponse {

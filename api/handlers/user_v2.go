@@ -160,6 +160,10 @@ func (h *Handler) V2GetUserList(c *gin.Context) {
 		return
 	}
 
+	for _, user := range resp.GetUsers() {
+		user.Password = ""
+	}
+
 	h.handleResponse(c, http.OK, resp)
 }
 
@@ -230,6 +234,10 @@ func (h *Handler) V2GetUserByID(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	// The stored hash has no use outside this service and clients echo whatever
+	// they receive back into update calls.
+	resp.Password = ""
 
 	h.handleResponse(c, http.OK, resp)
 }
@@ -719,6 +727,41 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 		return
 	}
 
+	// A user may only change their own password here, so the target always comes
+	// from the session and whatever the body says is advisory. Clients keep the
+	// user id from the original login in local state, and switching environment
+	// issues a session for a different project row, so a stale body value is
+	// normal and must not fail the request. Admins change other people's
+	// passwords through the login table instead.
+	sessionUserIdValue, _ := c.Get("session_user_id")
+	sessionUserIdAuthValue, _ := c.Get("user_id")
+	sessionClientTypeIdValue, _ := c.Get("session_client_type_id")
+
+	sessionUserId := cast.ToString(sessionUserIdValue)
+	sessionUserIdAuth := cast.ToString(sessionUserIdAuthValue)
+	sessionClientTypeId := cast.ToString(sessionClientTypeIdValue)
+
+	if sessionUserId == "" || sessionUserIdAuth == "" {
+		h.handleResponse(c, http.Forbidden, "password can be changed only with a user session")
+		return
+	}
+
+	if userPassword.UserId != "" && userPassword.UserId != sessionUserId {
+		h.log.Warn("V2UserResetPassword: ignoring user id from body, using the session one")
+	}
+
+	userPassword.UserId = sessionUserId
+	userPassword.UserIdAuth = sessionUserIdAuth
+
+	if sessionClientTypeId != "" {
+		userPassword.ClientTypeId = sessionClientTypeId
+	}
+
+	if userPassword.ClientTypeId == "" {
+		h.handleResponse(c, http.BadRequest, "client type id is required")
+		return
+	}
+
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.handleResponse(c, http.InvalidArgument, "project id is an invalid uuid")
@@ -755,6 +798,8 @@ func (h *Handler) V2UserResetPassword(c *gin.Context) {
 		h.handleResponse(c, http.GRPCError, err.Error())
 		return
 	}
+
+	user.Password = ""
 
 	h.handleResponse(c, http.OK, user)
 }
