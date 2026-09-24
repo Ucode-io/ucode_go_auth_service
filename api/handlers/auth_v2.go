@@ -345,7 +345,15 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 	case cfg.WithFirebase:
 		{
 			if !cfg.DEFAULT_OTPS[body.Otp] {
-				err := firebase.VerifyPhoneCode(h.cfg, body.SessionInfo, body.Otp)
+				var err error
+				// Lodify's mobile app finishes the Firebase phone sign-in on the
+				// device (which redeems the code) and sends the resulting ID
+				// token as session_info, so verify that token instead.
+				if resourceEnvironment.GetProjectId() == cfg.LodifyProjectID && firebase.LooksLikeIDToken(body.SessionInfo) {
+					err = firebase.VerifyPhoneIDToken(c.Request.Context(), cfg.LodifyFirebaseProjectID, body.SessionInfo)
+				} else {
+					err = firebase.VerifyPhoneCode(h.cfg, body.SessionInfo, body.Otp)
+				}
 				if err != nil {
 					h.handleResponse(c, status.GRPCError, err.Error())
 					return
