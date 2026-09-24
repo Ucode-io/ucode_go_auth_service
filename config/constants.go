@@ -24,10 +24,14 @@ const (
 	SESSION_LAST_ACTIVITY_THRESHOLD time.Duration = 1 * time.Minute
 
 	ProjectID             string = "f5955c82-f264-4655-aeb4-86fd1c642cb6"
-	LodifyProjectID       string = "7380859b-8dac-4fe3-b7aa-1fdfcdb4f5c1"
 	AdminClientPlatformID string = "7d4a4c38-dd84-4902-b744-0488b80a4c01"
 	AdminClientName       string = "ADMIN"
 	OpenFaaSPlatformID    string = "7d4a4c38-dd84-4902-b744-0488b80a4c04"
+
+	// Lodify workarounds in V2VerifyOtp. The Firebase project is the mobile
+	// app's, not the web frontend's.
+	LodifyProjectID         string = "7380859b-8dac-4fe3-b7aa-1fdfcdb4f5c1"
+	LodifyFirebaseProjectID string = "lodify-production"
 
 	// Project statuses that block write access. Reads are still allowed; writes are
 	// rejected with a clear, status-specific message.
