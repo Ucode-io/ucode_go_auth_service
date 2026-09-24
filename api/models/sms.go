@@ -26,6 +26,7 @@ type Verify struct {
 	Otp          string                                  `json:"otp"`
 	RegisterType string                                  `json:"register_type"`
 	SessionInfo  string                                  `json:"session_info"`
+	SmsId        string                                  `json:"sms_id"`
 }
 
 type RegisterOtp struct {

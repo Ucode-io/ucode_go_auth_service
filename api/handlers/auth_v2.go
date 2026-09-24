@@ -301,6 +301,14 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 		resourceEnvironment.NodeType,
 	)
 
+	// Lodify's mobile app (registration email verify) sends a fixed id in the
+	// path and the real one in the body as sms_id. Until an app release with
+	// the fix is out, take the body's sms_id for Lodify only.
+	verifyId := c.Param("verify_id")
+	if resourceEnvironment.GetProjectId() == cfg.LodifyProjectID && body.SmsId != "" {
+		verifyId = body.SmsId
+	}
+
 	switch strings.ToLower(body.Provider) {
 	case "email", cfg.Default:
 		{
@@ -308,7 +316,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 				_, err := h.services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
-						SmsId: c.Param("verify_id"),
+						SmsId: verifyId,
 						Otp:   body.Otp,
 					},
 				)
@@ -324,7 +332,7 @@ func (h *Handler) V2VerifyOtp(c *gin.Context) {
 				_, err := services.SmsService().ConfirmOtp(
 					c.Request.Context(),
 					&pbSms.ConfirmOtpRequest{
-						SmsId: c.Param("verify_id"),
+						SmsId: verifyId,
 						Otp:   body.Otp,
 					},
 				)
